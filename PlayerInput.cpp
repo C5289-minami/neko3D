@@ -14,6 +14,5 @@ void PlayerInput::Update()
 	if (button & (BUTTON_LEFT | BUTTON_L1)) moveDir.x -= 1.0f;
 	if (button & (BUTTON_RIGHT | BUTTON_R1)) moveDir.x += 1.0f;
 
-	turn = 0.0f;
 	isMoving = (moveDir.LengthSq() > 0.0f);
 }
