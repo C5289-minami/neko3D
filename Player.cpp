@@ -2,6 +2,7 @@
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
 #include "DxConv.h"
+#include "Consts.h"
 
 Player::Player()
 	: stateMachine_(*this)
@@ -31,6 +32,7 @@ void Player::Update(float deltaTime, const Stage& stage)
 {
 	// 入力の更新
 	input_.Update();
+	TurnTowards(input_.moveDir, deltaTime);
 
 	stateMachine_.Tick(deltaTime);
 
@@ -48,32 +50,17 @@ void Player::Draw() const
 	}
 }
 
-void Player::SetMoveDirection(const Vec3& localDir, float speed)
+void Player::SetMoveDirection(const Vec3& moveDir, float speed)
 {
-	// 前方向
-	Vec3 forward{
-		std::sin(yaw_),
-		0.0f,
-		std::cos(yaw_)
-	};
-
-	// 右方向
-	Vec3 right = 
-		Vec3::Cross(Vec3(0.0f,1.0f,0.0f),forward).Normalized();
-
-	// 移動方向
-	Vec3 move =
-		forward * localDir.z +
-			right * localDir.x;
-
-	if (move .LengthSq() > 0.0f)
+	// 入力の方向に移動
+	Vec3 move{ moveDir.x, 0.0f, moveDir.z };
+	if (move.LengthSq() > 0.0f)
 	{
 		move = move.Normalized() * speed;
 	}
 
 	velocity_.x = move.x;
 	velocity_.z = move.z;
-
 }
 
 void Player::StopMove()
@@ -85,4 +72,37 @@ void Player::StopMove()
 void Player::Turn(float direction, float speed, float deltaTime)
 {
 	yaw_ += direction * speed * deltaTime;
+}
+
+// 入力方向から角度を求め、プレイヤーの向きを滑らかに
+void Player::TurnTowards(const Vec3& moveDir, float deltaTime)
+{
+	if (moveDir.x == 0.0f && moveDir.z == 0.0f) return;//キー入力なかったら
+	if (deltaTime <= 0.0f) return;
+
+	float pi = DX_PI_F;
+	float targetAngle = std::atan2(moveDir.x, moveDir.z);
+	float diff = targetAngle - yaw_;// 目標角度との差
+
+	// 近い方に回る
+	if (diff > pi) diff -= pi * 2.0f;
+	if (diff < -pi) diff += pi * 2.0f;
+
+	float speed = Const::PLAYER_TURN_RATE_90;
+	float angle = std::abs(diff);
+
+	// 90度を超えたら、角度が大きいほど速くする
+	if (angle > pi * 0.5f)
+	{
+		float t = (angle - pi * 0.5f) / (pi * 0.5f);
+		speed += (Const::PLAYER_TURN_RATE_180 - speed) * t;
+	}
+
+	float rate = speed * deltaTime;
+	if (rate > 1.0f) rate = 1.0f;
+
+	yaw_ += diff * rate;//角度を補助して回転
+
+	if (yaw_ > pi) yaw_ -= pi * 2.0f;
+	if (yaw_ < -pi) yaw_ += pi * 2.0f;
 }

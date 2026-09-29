@@ -20,11 +20,6 @@ void PlayerIdleState::Enter()
 void PlayerIdleState::Tick(float deltaTime)
 {
 	PlayerInput move = player_.GetInput();
-	if (move.turn != 0.0f)
-	{
-		player_.Turn(move.turn, Const::PLAYER_ROTATE_SPEED, deltaTime);
-	}
-
 	if(move.isMoving)
 	{
 		stateMachine_.ChangeState(PlayerStateType::Walk);
