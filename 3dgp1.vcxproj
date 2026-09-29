@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{6f3ace99-9ede-466b-8e9d-ee4078b17a66}</ProjectGuid>
+    <RootNamespace>My2dgp1</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>3dgp1</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>.\</OutDir>
+    <IntDir>.\obj\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_debug</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>.\</OutDir>
+    <IntDir>.\obj\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>.\</OutDir>
+    <IntDir>.\obj\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_debug</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>.\</OutDir>
+    <IntDir>.\obj\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>c:\DxLib\;$(ProjectDir)imgui;$(ProjectDir)imgui\backends</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>c:\DxLib\;</AdditionalLibraryDirectories>
+    </Link>
+    <Manifest>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>c:\DxLib\;$(ProjectDir)imgui;$(ProjectDir)imgui\backends</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>c:\DxLib\;</AdditionalLibraryDirectories>
+    </Link>
+    <Manifest>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>c:\DxLib\;$(ProjectDir)imgui;$(ProjectDir)SSPlayer;$(ProjectDir)imgui\backends</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>c:\DxLib\;</AdditionalLibraryDirectories>
+    </Link>
+    <Manifest>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>c:\DxLib\;$(ProjectDir)imgui;$(ProjectDir)imgui\backends</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>c:\DxLib\;</AdditionalLibraryDirectories>
+    </Link>
+    <Manifest>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="AnimationDraw.h" />
+    <ClInclude Include="Button.h" />
+    <ClInclude Include="ButtonUI.h" />
+    <ClInclude Include="Collision.h" />
+    <ClInclude Include="Consts.h" />
+    <ClInclude Include="DebugUI.h" />
+    <ClInclude Include="DxConv.h" />
+    <ClInclude Include="DxPlus\Color.h" />
+    <ClInclude Include="DxPlus\Debug.h" />
+    <ClInclude Include="DxPlus\DxPlus.h" />
+    <ClInclude Include="DxPlus\DxPlusConstants.h" />
+    <ClInclude Include="DxPlus\DxWrapper.h" />
+    <ClInclude Include="DxPlus\FadeController.h" />
+    <ClInclude Include="DxPlus\HighResolutionTimer.h" />
+    <ClInclude Include="DxPlus\Input.h" />
+    <ClInclude Include="DxPlus\InputConstants.h" />
+    <ClInclude Include="DxPlus\InputManager.h" />
+    <ClInclude Include="DxPlus\Primitive2D.h" />
+    <ClInclude Include="DxPlus\Sprite.h" />
+    <ClInclude Include="DxPlus\Text.h" />
+    <ClInclude Include="DxPlus\TextAnimator.h" />
+    <ClInclude Include="DxPlus\Utils.h" />
+    <ClInclude Include="DxPlus\Vector2.h" />
+    <ClInclude Include="GameContext.h" />
+    <ClInclude Include="GamePram.h" />
+    <ClInclude Include="GameScene.h" />
+    <ClInclude Include="Grid.h" />
+    <ClInclude Include="imgui\backends\imgui_impl_dx11.h" />
+    <ClInclude Include="imgui\backends\imgui_impl_win32.h" />
+    <ClInclude Include="imgui\imconfig.h" />
+    <ClInclude Include="imgui\imgui.h" />
+    <ClInclude Include="imgui\imgui_internal.h" />
+    <ClInclude Include="imgui\imstb_rectpack.h" />
+    <ClInclude Include="imgui\imstb_textedit.h" />
+    <ClInclude Include="imgui\imstb_truetype.h" />
+    <ClInclude Include="MathUtil.h" />
+    <ClInclude Include="OrbitCamera.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="PlayerBaseState.h" />
+    <ClInclude Include="PlayerIdleState.h" />
+    <ClInclude Include="PlayerInput.h" />
+    <ClInclude Include="PlayerStateMachine.h" />
+    <ClInclude Include="PlayerStateType.h" />
+    <ClInclude Include="PlayerWalkState.h" />
+    <ClInclude Include="Raycast.h" />
+    <ClInclude Include="ResourceKeys.h" />
+    <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="ResultScene.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="SSPlayer\common\Animator\MersenneTwister.h" />
+    <ClInclude Include="SSPlayer\common\Animator\ssplayer_cellmap.h" />
+    <ClInclude Include="SSPlayer\common\Animator\ssplayer_effect.h" />
+    <ClInclude Include="SSPlayer\common\Animator\ssplayer_effect2.h" />
+    <ClInclude Include="SSPlayer\common\Animator\ssplayer_effectfunction.h" />
+    <ClInclude Include="SSPlayer\common\Animator\ssplayer_macro.h" />
+    <ClInclude Include="SSPlayer\common\Animator\ssplayer_matrix.h" />
+    <ClInclude Include="SSPlayer\common\Animator\ssplayer_PartState.h" />
+    <ClInclude Include="SSPlayer\common\Animator\xorshift32.h" />
+    <ClInclude Include="SSPlayer\common\Helper\DebugPrint.h" />
+    <ClInclude Include="SSPlayer\common\Loader\SsEffectBehavior.h" />
+    <ClInclude Include="SSPlayer\common\Loader\SsEffectElement.h" />
+    <ClInclude Include="SSPlayer\common\Loader\ssloader.h" />
+    <ClInclude Include="SSPlayer\common\Loader\ssloader_ssee.h" />
+    <ClInclude Include="SSPlayer\common\Loader\sstypes.h" />
+    <ClInclude Include="SSPlayer\SS6Player.h" />
+    <ClInclude Include="SSPlayer\SS6PlayerData.h" />
+    <ClInclude Include="SSPlayer\SS6PlayerPlatform.h" />
+    <ClInclude Include="SSPlayer\SS6PlayerTypes.h" />
+    <ClInclude Include="Stage.h" />
+    <ClInclude Include="State.h" />
+    <ClInclude Include="StateMachine.h" />
+    <ClInclude Include="TitleScene.h" />
+    <ClInclude Include="UIBase.h" />
+    <ClInclude Include="UIFactory.h" />
+    <ClInclude Include="UIManager.h" />
+    <ClInclude Include="Vector3.h" />
+    <ClInclude Include="Volume.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AnimationDraw.cpp" />
+    <ClCompile Include="Collision.cpp" />
+    <ClCompile Include="DebugUI.cpp" />
+    <ClCompile Include="DxPlus\Debug.cpp" />
+    <ClCompile Include="DxPlus\DxPlus.cpp" />
+    <ClCompile Include="DxPlus\DxWrapper.cpp" />
+    <ClCompile Include="DxPlus\FadeController.cpp" />
+    <ClCompile Include="DxPlus\Input.cpp" />
+    <ClCompile Include="DxPlus\InputManager.cpp" />
+    <ClCompile Include="DxPlus\Primitive2D.cpp" />
+    <ClCompile Include="DxPlus\Sprite.cpp" />
+    <ClCompile Include="DxPlus\Text.cpp" />
+    <ClCompile Include="DxPlus\TextAnimator.cpp" />
+    <ClCompile Include="DxPlus\Utils.cpp" />
+    <ClCompile Include="GameContext.cpp" />
+    <ClCompile Include="GameScene.cpp" />
+    <ClCompile Include="Grid.cpp" />
+    <ClCompile Include="imgui\backends\imgui_impl_dx11.cpp" />
+    <ClCompile Include="imgui\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="imgui\imgui.cpp" />
+    <ClCompile Include="imgui\imgui_demo.cpp" />
+    <ClCompile Include="imgui\imgui_draw.cpp" />
+    <ClCompile Include="imgui\imgui_tables.cpp" />
+    <ClCompile Include="imgui\imgui_widgets.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="OrbitCamera.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="PlayerIdleState.cpp" />
+    <ClCompile Include="PlayerInput.cpp" />
+    <ClCompile Include="PlayerStateMachine.cpp" />
+    <ClCompile Include="PlayerWalkState.cpp" />
+    <ClCompile Include="Raycast.cpp" />
+    <ClCompile Include="ResourceManager.cpp" />
+    <ClCompile Include="ResultScene.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="SSPlayer\common\Animator\ssplayer_effect.cpp" />
+    <ClCompile Include="SSPlayer\common\Animator\ssplayer_effect2.cpp" />
+    <ClCompile Include="SSPlayer\common\Animator\ssplayer_effectfunction.cpp" />
+    <ClCompile Include="SSPlayer\common\Animator\ssplayer_matrix.cpp" />
+    <ClCompile Include="SSPlayer\common\Animator\ssplayer_PartState.cpp" />
+    <ClCompile Include="SSPlayer\common\Helper\DebugPrint.cpp" />
+    <ClCompile Include="SSPlayer\SS6Player.cpp" />
+    <ClCompile Include="SSPlayer\SS6PlayerPlatform.cpp" />
+    <ClCompile Include="Stage.cpp" />
+    <ClCompile Include="StateMachine.cpp" />
+    <ClCompile Include="TitleScene.cpp" />
+    <ClCompile Include="UIBase.cpp" />
+    <ClCompile Include="UIFactory.cpp" />
+    <ClCompile Include="UIManager.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\nlohmann.json.3.12.0\build\native\nlohmann.json.targets" Condition="Exists('packages\nlohmann.json.3.12.0\build\native\nlohmann.json.targets')" />
+  </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>このプロジェクトは、このコンピューター上にない NuGet パッケージを参照しています。それらのパッケージをダウンロードするには、[NuGet パッケージの復元] を使用します。詳細については、http://go.microsoft.com/fwlink/?LinkID=322105 を参照してください。見つからないファイルは {0} です。</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\nlohmann.json.3.12.0\build\native\nlohmann.json.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\nlohmann.json.3.12.0\build\native\nlohmann.json.targets'))" />
+  </Target>
+</Project>

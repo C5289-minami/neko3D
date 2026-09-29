@@ -1,0 +1,510 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="_DxPlus">
+      <UniqueIdentifier>{d4677764-36a0-4b1f-93a7-bd53ba66e1ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_DxPlus\ヘッダー ファイル">
+      <UniqueIdentifier>{4c27c443-cdd9-4baa-84ab-9bbe457307b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_DxPlus\ソース ファイル">
+      <UniqueIdentifier>{d100bef8-58f7-4da7-b0dd-63207defa94c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="00_App">
+      <UniqueIdentifier>{3f1c22d6-5c89-4fc5-ad6c-30fab90ff7f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="10_Core">
+      <UniqueIdentifier>{0542908b-661b-4d36-b54f-244be341c60d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="20_Resources">
+      <UniqueIdentifier>{65288878-bc6d-4a94-ba3f-800fd7e33a30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes">
+      <UniqueIdentifier>{16b7afe5-a011-4c6f-9678-630a23c1226a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes\Base">
+      <UniqueIdentifier>{80508bd0-35a8-4392-9851-1d2bc96c2aa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes\Title">
+      <UniqueIdentifier>{c2ed59a3-e4de-4844-bccb-1f0270c81c15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes\Game">
+      <UniqueIdentifier>{fbe44755-aa33-4a95-be7b-50f38c85741e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes\Result">
+      <UniqueIdentifier>{1d5fde6b-058d-4941-bb45-ba3cada56e36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay">
+      <UniqueIdentifier>{950c9fa9-6c0f-41f8-b048-6abfda8fcbc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="50_Map">
+      <UniqueIdentifier>{097a2319-8c8c-43ee-980a-399ea4286a92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors">
+      <UniqueIdentifier>{5d460b9f-98a3-4805-86bf-1af077d74bd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Physics">
+      <UniqueIdentifier>{8e7c07b8-112f-4b8f-8ffb-88fbeb47800e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\StageObjects">
+      <UniqueIdentifier>{7f946674-b388-4159-81f6-18346883422d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{7a11fac8-2ba5-4e20-931f-69e3d3d48502}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imgui\backends">
+      <UniqueIdentifier>{f742d88b-c279-4a79-bab2-de128b4e1d03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DebugUI">
+      <UniqueIdentifier>{857c115a-db95-4e5d-bad5-3cea1b39b9ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="10_Core\Math">
+      <UniqueIdentifier>{ea61ad95-257b-47ab-b60e-a0bdace25db7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Debug">
+      <UniqueIdentifier>{951faf5c-c46c-4ef6-9817-c4ec3b6a6b64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="10_Core\Camera">
+      <UniqueIdentifier>{f157973e-193c-4b3d-9ab1-e909182f2c9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Collision">
+      <UniqueIdentifier>{08e063f6-bae7-4d01-917f-98699b9e7170}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Effects">
+      <UniqueIdentifier>{669ce45a-ab6d-4e39-a6ae-12a192e85e19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Player">
+      <UniqueIdentifier>{2e678726-763d-426d-9f27-117e51c5a06b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\StateMachine">
+      <UniqueIdentifier>{3337dab1-827a-4bf2-bccf-474c8ea649bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Lab">
+      <UniqueIdentifier>{32cd986e-24fa-46d9-aa64-57ccad23d217}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Player\State">
+      <UniqueIdentifier>{b7812527-44c5-4edd-9d06-87861bac22d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Player\State\Idle">
+      <UniqueIdentifier>{b173a18d-7ff2-4986-8a69-bd9110aa1854}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Player\State\Walk">
+      <UniqueIdentifier>{6c0d4e4b-0114-4f9f-a8c2-d512e6eed8c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SSPlayer">
+      <UniqueIdentifier>{448f3549-980d-4c84-9e08-7e1ba277bff7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SSPlayer\common">
+      <UniqueIdentifier>{3cf355ea-b9d2-44d8-a0b3-681b5d974062}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SSPlayer\common\Animator">
+      <UniqueIdentifier>{2c2f23b6-c0ff-4a8e-9f64-776aad2aa20c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SSPlayer\common\Helper">
+      <UniqueIdentifier>{fd769da5-21f2-488c-91ec-ee4b00106035}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SSPlayer\common\Loader">
+      <UniqueIdentifier>{640d25c0-6129-4b4c-be36-62049b9659be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JSON">
+      <UniqueIdentifier>{17adfae0-c093-4593-9869-bd232bfec513}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="10_Core\Animation">
+      <UniqueIdentifier>{fcd8e5a8-e1ae-4d1c-905d-07d3cebed67a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="10_Core\UI">
+      <UniqueIdentifier>{70370f5c-f8fc-485d-8a43-56d26aab8c7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="15_System">
+      <UniqueIdentifier>{0b3b65c9-013a-4b6d-b207-dcfa0faf6f3d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DxPlus\Debug.h">
+      <Filter>_DxPlus\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DxPlus\DxPlus.h">
+      <Filter>_DxPlus\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DxPlus\DxPlusConstants.h">
+      <Filter>_DxPlus\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DxPlus\DxWrapper.h">
+      <Filter>_DxPlus\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DxPlus\HighResolutionTimer.h">
+      <Filter>_DxPlus\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DxPlus\Input.h">
+      <Filter>_DxPlus\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DxPlus\InputConstants.h">
+      <Filter>_DxPlus\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DxPlus\InputManager.h">
+      <Filter>_DxPlus\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DxPlus\Primitive2D.h">
+      <Filter>_DxPlus\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DxPlus\Sprite.h">
+      <Filter>_DxPlus\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DxPlus\Text.h">
+      <Filter>_DxPlus\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DxPlus\TextAnimator.h">
+      <Filter>_DxPlus\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DxPlus\Utils.h">
+      <Filter>_DxPlus\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DxPlus\FadeController.h">
+      <Filter>_DxPlus\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Consts.h">
+      <Filter>10_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="GameContext.h">
+      <Filter>10_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceKeys.h">
+      <Filter>20_Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>20_Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="ResultScene.h">
+      <Filter>30_Scenes\Result</Filter>
+    </ClInclude>
+    <ClInclude Include="TitleScene.h">
+      <Filter>30_Scenes\Title</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>30_Scenes\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>30_Scenes\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="GameScene.h">
+      <Filter>30_Scenes\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imconfig.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_internal.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_rectpack.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_textedit.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_truetype.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\backends\imgui_impl_dx11.h">
+      <Filter>imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\backends\imgui_impl_win32.h">
+      <Filter>imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugUI.h">
+      <Filter>DebugUI</Filter>
+    </ClInclude>
+    <ClInclude Include="DxPlus\Color.h">
+      <Filter>_DxPlus\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DxPlus\Vector2.h">
+      <Filter>_DxPlus\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector3.h">
+      <Filter>10_Core\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="DxConv.h">
+      <Filter>10_Core\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid.h">
+      <Filter>40_Gameplay\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="OrbitCamera.h">
+      <Filter>10_Core\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Stage.h">
+      <Filter>40_Gameplay\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="Raycast.h">
+      <Filter>40_Gameplay\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Collision.h">
+      <Filter>40_Gameplay\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="MathUtil.h">
+      <Filter>10_Core\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>40_Gameplay\Actors\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="StateMachine.h">
+      <Filter>40_Gameplay\StateMachine</Filter>
+    </ClInclude>
+    <ClInclude Include="State.h">
+      <Filter>40_Gameplay\StateMachine</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerBaseState.h">
+      <Filter>40_Gameplay\Actors\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerStateType.h">
+      <Filter>40_Gameplay\Actors\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerStateMachine.h">
+      <Filter>40_Gameplay\Actors\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerIdleState.h">
+      <Filter>40_Gameplay\Actors\Player\State\Idle</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerWalkState.h">
+      <Filter>40_Gameplay\Actors\Player\State\Walk</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerInput.h">
+      <Filter>40_Gameplay\Actors\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\SS6Player.h">
+      <Filter>SSPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\SS6PlayerData.h">
+      <Filter>SSPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\SS6PlayerPlatform.h">
+      <Filter>SSPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\SS6PlayerTypes.h">
+      <Filter>SSPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\common\Animator\MersenneTwister.h">
+      <Filter>SSPlayer\common\Animator</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\common\Animator\ssplayer_cellmap.h">
+      <Filter>SSPlayer\common\Animator</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\common\Animator\ssplayer_effect.h">
+      <Filter>SSPlayer\common\Animator</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\common\Animator\ssplayer_effect2.h">
+      <Filter>SSPlayer\common\Animator</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\common\Animator\ssplayer_effectfunction.h">
+      <Filter>SSPlayer\common\Animator</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\common\Animator\ssplayer_macro.h">
+      <Filter>SSPlayer\common\Animator</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\common\Animator\ssplayer_matrix.h">
+      <Filter>SSPlayer\common\Animator</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\common\Animator\ssplayer_PartState.h">
+      <Filter>SSPlayer\common\Animator</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\common\Animator\xorshift32.h">
+      <Filter>SSPlayer\common\Animator</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\common\Helper\DebugPrint.h">
+      <Filter>SSPlayer\common\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\common\Loader\SsEffectBehavior.h">
+      <Filter>SSPlayer\common\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\common\Loader\SsEffectElement.h">
+      <Filter>SSPlayer\common\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\common\Loader\ssloader.h">
+      <Filter>SSPlayer\common\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\common\Loader\ssloader_ssee.h">
+      <Filter>SSPlayer\common\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="SSPlayer\common\Loader\sstypes.h">
+      <Filter>SSPlayer\common\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePram.h">
+      <Filter>JSON</Filter>
+    </ClInclude>
+    <ClInclude Include="UIManager.h">
+      <Filter>10_Core\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ButtonUI.h">
+      <Filter>10_Core\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UIBase.h">
+      <Filter>10_Core\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UIFactory.h">
+      <Filter>10_Core\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Button.h">
+      <Filter>10_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Volume.h">
+      <Filter>10_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationDraw.h">
+      <Filter>10_Core\Animation</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DxPlus\Debug.cpp">
+      <Filter>_DxPlus\ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DxPlus\DxPlus.cpp">
+      <Filter>_DxPlus\ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DxPlus\DxWrapper.cpp">
+      <Filter>_DxPlus\ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DxPlus\Input.cpp">
+      <Filter>_DxPlus\ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DxPlus\InputManager.cpp">
+      <Filter>_DxPlus\ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DxPlus\Primitive2D.cpp">
+      <Filter>_DxPlus\ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DxPlus\Sprite.cpp">
+      <Filter>_DxPlus\ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DxPlus\Text.cpp">
+      <Filter>_DxPlus\ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DxPlus\TextAnimator.cpp">
+      <Filter>_DxPlus\ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DxPlus\Utils.cpp">
+      <Filter>_DxPlus\ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DxPlus\FadeController.cpp">
+      <Filter>_DxPlus\ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>00_App</Filter>
+    </ClCompile>
+    <ClCompile Include="GameContext.cpp">
+      <Filter>10_Core</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>20_Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="GameScene.cpp">
+      <Filter>30_Scenes\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ResultScene.cpp">
+      <Filter>30_Scenes\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="TitleScene.cpp">
+      <Filter>30_Scenes\Title</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>30_Scenes\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>30_Scenes\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_demo.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_draw.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_tables.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_widgets.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\backends\imgui_impl_dx11.cpp">
+      <Filter>imgui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\backends\imgui_impl_win32.cpp">
+      <Filter>imgui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugUI.cpp">
+      <Filter>DebugUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid.cpp">
+      <Filter>40_Gameplay\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="OrbitCamera.cpp">
+      <Filter>10_Core\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Stage.cpp">
+      <Filter>40_Gameplay\Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="Raycast.cpp">
+      <Filter>40_Gameplay\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision.cpp">
+      <Filter>40_Gameplay\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>40_Gameplay\Actors\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="StateMachine.cpp">
+      <Filter>40_Gameplay\StateMachine</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerStateMachine.cpp">
+      <Filter>40_Gameplay\Actors\Player\State</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerIdleState.cpp">
+      <Filter>40_Gameplay\Actors\Player\State\Idle</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerWalkState.cpp">
+      <Filter>40_Gameplay\Actors\Player\State\Walk</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerInput.cpp">
+      <Filter>40_Gameplay\Actors\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="SSPlayer\SS6Player.cpp">
+      <Filter>SSPlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="SSPlayer\SS6PlayerPlatform.cpp">
+      <Filter>SSPlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="SSPlayer\common\Animator\ssplayer_effect.cpp">
+      <Filter>SSPlayer\common\Animator</Filter>
+    </ClCompile>
+    <ClCompile Include="SSPlayer\common\Animator\ssplayer_effect2.cpp">
+      <Filter>SSPlayer\common\Animator</Filter>
+    </ClCompile>
+    <ClCompile Include="SSPlayer\common\Animator\ssplayer_effectfunction.cpp">
+      <Filter>SSPlayer\common\Animator</Filter>
+    </ClCompile>
+    <ClCompile Include="SSPlayer\common\Animator\ssplayer_matrix.cpp">
+      <Filter>SSPlayer\common\Animator</Filter>
+    </ClCompile>
+    <ClCompile Include="SSPlayer\common\Animator\ssplayer_PartState.cpp">
+      <Filter>SSPlayer\common\Animator</Filter>
+    </ClCompile>
+    <ClCompile Include="SSPlayer\common\Helper\DebugPrint.cpp">
+      <Filter>SSPlayer\common\Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="UIManager.cpp">
+      <Filter>10_Core\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UIBase.cpp">
+      <Filter>10_Core\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UIFactory.cpp">
+      <Filter>10_Core\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationDraw.cpp">
+      <Filter>10_Core\Animation</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
