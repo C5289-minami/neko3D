@@ -20,6 +20,7 @@ public:
 	void StopMove();
 	void Turn(float direction, float speed, float deltaTime);
 	void TurnTowards(const Vec3& moveDir, float deltaTime);
+	void JumpAction();
 private:
 	int modelHandle{ -1 };
 	Vec3 scale_{ 100.0f,100.0f,100.0f };

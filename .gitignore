@@ -427,3 +427,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Generated game executables and DxLib runtime log
+*.exe
+[Ll]og.txt
