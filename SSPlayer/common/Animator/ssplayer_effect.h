@@ -1,6 +1,9 @@
 ﻿#ifndef __SSPLAYER_EFFECT__
 #define __SSPLAYER_EFFECT__
 
+#pragma warning(push)
+#pragma warning(disable: 4099 4100 4189 4244 4267 4456 4458)
+
 #include <list>
 #include "../../SS6Player.h"
 #include "../loader/ssloader.h"
@@ -524,4 +527,5 @@ public:
 
 
 };
+#pragma warning(pop)
 #endif

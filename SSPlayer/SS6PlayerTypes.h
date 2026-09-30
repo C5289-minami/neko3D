@@ -5,6 +5,9 @@
 #ifndef SS5PlayerTypes_h
 #define SS5PlayerTypes_h
 
+#pragma warning(push)
+#pragma warning(disable: 4099 4100 4189 4244 4267 4456 4458)
+
 #include <float.h>
 #include <math.h>
 #include <assert.h>
@@ -436,5 +439,7 @@ struct TextuerData
 
 
 };	// namespace ss
+
+#pragma warning(pop)
 
 #endif

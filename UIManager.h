@@ -31,6 +31,7 @@ public:
 
 	void AddUI(std::unique_ptr<UIBase> ui)
 	{
+       if (!ui) return;
 		UIs.push_back(std::move(ui));
 	}
 	/*void AddButton(std::unique_ptr<Button> button)
