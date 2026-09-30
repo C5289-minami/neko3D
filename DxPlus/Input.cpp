@@ -15,6 +15,11 @@ namespace
     DxPlus::Vec2Int mouseDelta{};
 
     bool mouseCaptured = false;
+#ifdef _DEBUG
+    bool mouseCaptureEnabled = false;
+#else
+    bool mouseCaptureEnabled = true;
+#endif
 }
 
 namespace DxPlus::Input
@@ -57,7 +62,7 @@ namespace DxPlus::Input
         bool active =
             (GetForegroundWindow() == hwnd);
 
-        SetMouseCapture(active);
+        SetMouseCapture(mouseCaptureEnabled && active);
     }
 
     void HandleRawInput(LPARAM lParam)
@@ -155,6 +160,11 @@ namespace DxPlus::Input
 #endif
 
         mouseCaptured = true;
+    }
+
+    void SetMouseCaptureEnabled(bool enabled)
+    {
+        mouseCaptureEnabled = enabled;
     }
 
     int GetButton(int playerIndex)

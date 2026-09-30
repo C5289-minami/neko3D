@@ -54,8 +54,10 @@ int WINAPI wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
     SceneManager::RunConfig cfg{};
 #ifdef NDEBUG
     cfg.enableDebugUI = false;   // ReleaseはDebugUI完全禁止
+	DxPlus::Input::SetMouseCaptureEnabled(true); // Releaseはマウスキャプチャ強制
 #else
     cfg.enableDebugUI = true;
+	DxPlus::Input::SetMouseCaptureEnabled(false); 
 #endif
 
     // ウィンドウモード / フルスクリーンの切り替え
