@@ -62,8 +62,5 @@ private:
 
     RunConfig runConfig{};
     DebugUI debugUI;
-
-	ss::Player* ssPlayer; // SS6Player
-	ss::ResourceManager* ssResMan; // SS6Player ResourceManager
 };
 inline SceneManager& SM() { return SceneManager::GetInstance(); } // ショートカット

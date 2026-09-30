@@ -118,6 +118,9 @@
     <Filter Include="15_System">
       <UniqueIdentifier>{0b3b65c9-013a-4b6d-b207-dcfa0faf6f3d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="40_Gameplay\Actors\Base">
+      <UniqueIdentifier>{e2ef4582-bdef-4593-bc93-370d33e1f960}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -354,6 +357,16 @@
     <ClInclude Include="AnimationDraw.h">
       <Filter>10_Core\Animation</Filter>
     </ClInclude>
+    <ClInclude Include="ActorBase.h">
+      <Filter>40_Gameplay\Actors\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityBase.h">
+      <Filter>40_Gameplay\Actors\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawableObject.h" />
+    <ClInclude Include="SpriteStudioUI.h">
+      <Filter>10_Core\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -497,14 +510,18 @@
     <ClCompile Include="UIManager.cpp">
       <Filter>10_Core\UI</Filter>
     </ClCompile>
-    <ClCompile Include="UIBase.cpp">
-      <Filter>10_Core\UI</Filter>
-    </ClCompile>
     <ClCompile Include="UIFactory.cpp">
       <Filter>10_Core\UI</Filter>
     </ClCompile>
     <ClCompile Include="AnimationDraw.cpp">
       <Filter>10_Core\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawableObject.cpp" />
+    <ClCompile Include="UIBase.cpp">
+      <Filter>10_Core\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteStudioUI.cpp">
+      <Filter>10_Core\UI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

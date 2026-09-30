@@ -1,12 +1,9 @@
 #include "UIBase.h"
-#include "UIManager.h"
-#include "Time.h"
+#include "ResourceManager.h"
+#include <algorithm>
 
 void UIBase::Init() 
 {
-	DxLib::GetGraphSizeF(keyID, &center.x, &center.y);
-	center.x /= 2.0f;
-	center.y /= 2.0f;
 	progressRate = 0.0f;
 	timer = 0.0f;
 	alpha = 0;
@@ -14,6 +11,8 @@ void UIBase::Init()
 
 void UIBase::Update(float deltaTime)
 {
+    finAlpha = std::clamp(finAlpha, 0, 255);
+	if (deltaTime < 0.0f) deltaTime = 0.0f;
 	// •\Ž¦ðŒ‚ðƒ`ƒFƒbƒN
 	bool condition = displayCondition();
 	
@@ -79,12 +78,10 @@ void UIBase::Draw()
 {
 	// Falseó‘Ô‚É‘JˆÚ‚µI‚í‚Á‚½‚ç•`‰æ‚ð’âŽ~‚·‚é
 	if (state == State::False) return;
+ const auto* sprite = RM().GetSprite(key);
+	if (!sprite) return;
 	DxLib::SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
-	DxPlus::Sprite::Draw(keyID,
-		position,
-		DxPlus::Vec2(scale,scale),
-		center
-	);
+ sprite->Draw(position, DxPlus::Vec2(scale, scale));
 	DxLib::SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
 

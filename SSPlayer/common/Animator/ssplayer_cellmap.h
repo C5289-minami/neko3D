@@ -1,6 +1,9 @@
 ﻿#ifndef __SSPLAYER_CELLMAP__
 #define __SSPLAYER_CELLMAP__
 
+#pragma warning(push)
+#pragma warning(disable: 4099 4100 4189 4244 4267 4456 4458)
+
 #include "../../SS6PlayerTypes.h"
 
 namespace ss
@@ -48,4 +51,5 @@ struct SsCellValue
 };
 
 };
+#pragma warning(pop)
 #endif
