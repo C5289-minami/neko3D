@@ -118,6 +118,9 @@
     <Filter Include="15_System">
       <UniqueIdentifier>{0b3b65c9-013a-4b6d-b207-dcfa0faf6f3d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="40_Gameplay\Actors\Base">
+      <UniqueIdentifier>{e2ef4582-bdef-4593-bc93-370d33e1f960}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -353,6 +356,12 @@
     </ClInclude>
     <ClInclude Include="AnimationDraw.h">
       <Filter>10_Core\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="ActorBase.h">
+      <Filter>40_Gameplay\Actors\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityBase.h">
+      <Filter>40_Gameplay\Actors\Base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

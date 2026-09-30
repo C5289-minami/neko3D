@@ -178,6 +178,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ActorBase.h" />
     <ClInclude Include="AnimationDraw.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="ButtonUI.h" />
@@ -201,6 +202,7 @@
     <ClInclude Include="DxPlus\TextAnimator.h" />
     <ClInclude Include="DxPlus\Utils.h" />
     <ClInclude Include="DxPlus\Vector2.h" />
+    <ClInclude Include="EntityBase.h" />
     <ClInclude Include="GameContext.h" />
     <ClInclude Include="GamePram.h" />
     <ClInclude Include="GameScene.h" />
