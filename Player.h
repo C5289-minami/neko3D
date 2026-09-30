@@ -16,6 +16,7 @@ public:
 
 	// ゲッターセッター
 	const PlayerInput& GetInput() const { return input_; }
+    const Vec3& GetPosition() const { return position_; }
 	void SetMoveDirection(const Vec3& moveDir, float speed);
 	void StopMove();
 	void Turn(float direction, float speed, float deltaTime);

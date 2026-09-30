@@ -30,6 +30,7 @@ void GameContext::Reset()
 
     // カメラを初期状態に戻す
     orbitCamera.Reset();
+    Debug_camera.Initialize(eye, target);
     wasOrbitControl = false;
 
     // 各オブジェクトを初期状態に戻す
@@ -39,6 +40,10 @@ void GameContext::Reset()
 
 void GameContext::Update(float deltaTime)
 {
+    Debug_camera.Update(deltaTime, player.GetPosition());
+#ifndef NDEBUG
+    if (Debug_camera.IsSceneViewActive()) return;
+#endif
     // 背景色を反映
     DxLib::SetBackgroundColor(bgRed, bgGreen, bgBlue);
 
@@ -71,6 +76,14 @@ void GameContext::Update(float deltaTime)
 void GameContext::Draw() const
 {
     // OrbitCamera操作中かどうかでカメラ設定を切り替える
+#ifndef NDEBUG
+    if (Debug_camera.IsSceneViewActive())
+    {
+        DxLib::SetCameraPositionAndTargetAndUpVec(DxConv::ToVECTOR(Debug_camera.GetEye()), DxConv::ToVECTOR(Debug_camera.GetTarget()), DxConv::ToVECTOR(Debug_camera.GetUp()));
+		// デバッグカメラ操作中は、OrbitCameraの状態を更新しない
+    }
+    else
+#endif
     if (wasOrbitControl)
     {
         Vec3 e = orbitCamera.GetEye();

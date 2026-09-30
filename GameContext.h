@@ -2,6 +2,7 @@
 // Core/GameContext.h
 // =============================
 #pragma once
+#include "Debug_camera.h"
 
 #include "Vector3.h"
 #include "Grid.h"
@@ -32,6 +33,11 @@ public:
     // Orbit Camera
     OrbitCamera& GetOrbitCamera() { return orbitCamera; }
     const OrbitCamera& GetOrbitCamera() const { return orbitCamera; }
+    bool IsSceneViewActive() const { return Debug_camera.IsSceneViewActive(); }
+    float GetSceneCameraMoveSpeed() const { return Debug_camera.GetMoveSpeed(); }
+    void SetSceneCameraMoveSpeed(float speed) { Debug_camera.SetMoveSpeed(speed); }
+    void ResetSceneCamera() { Debug_camera.ResetView(); }
+    void FocusSceneCameraOnPlayer() { Debug_camera.FocusAt(player.GetPosition()); }
 
     // ---- lifecycle ----
     void Init();
@@ -50,6 +56,7 @@ private:
 
     // Camera
     OrbitCamera orbitCamera;
+    Debug_camera Debug_camera;
     bool wasOrbitControl{ false };
 
     Vec3 eye{ 400.0f, 400.0f, -400.0f };
