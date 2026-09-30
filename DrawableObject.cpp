@@ -58,12 +58,7 @@ void ModelObject::Draw(Vec3 masterPos) const
     const int handle = RM().GetModel(modelKey);
     if (handle < 0) return;
 
-    const Vec3 scaledCenter{
-        center.x * scale.x,
-        center.y * scale.y,
-        center.z * scale.z
-    };
-    const Vec3 modelPosition = position + masterPos - RotateXYZ(scaledCenter, rotation);
+    const Vec3 modelPosition = position + masterPos - RotateXYZ(center, rotation);
 
     MV1SetPosition(handle, DxConv::ToVECTOR(modelPosition));
     MV1SetScale(handle, DxConv::ToVECTOR(scale));
