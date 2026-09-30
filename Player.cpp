@@ -3,6 +3,7 @@
 #include "ResourceKeys.h"
 #include "DxConv.h"
 #include "Consts.h"
+#include "Raycast.h"
 
 Player::Player()
 	: stateMachine_(*this)
@@ -30,17 +31,44 @@ void Player::Reset()
 
 void Player::Update(float deltaTime, const Stage& stage)
 {
-	// 入力の更新
 	input_.Update();
 	TurnTowards(input_.moveDir, deltaTime);
+
+	if (input_.jumpPressed)
+	{
+		JumpAction();
+	}
 
 	stateMachine_.Tick(deltaTime);
 
 	position_.x += velocity_.x * deltaTime;
 	position_.z += velocity_.z * deltaTime;
-}
 
-void Player::Draw() const
+	if (!isGrounded_)
+	{
+		float oldY = position_.y;
+		velocity_.y -= Const::GRAVITY * deltaTime;
+		position_.y += velocity_.y * deltaTime;
+
+		// 落下中にStageに当たったら着地
+		if (velocity_.y <= 0.0f && stage.GetModelHandle() >= 0)
+		{
+			Physics::RayHit hit;
+			float distance = oldY - position_.y + Const::PLAYER_SKIN * 2.0f;
+			if (Physics::RaycastDown//stageのモデルに対してRaycastDownを行い、着地判定
+			(
+				stage.GetModelHandle(),
+				Vec3(position_.x, oldY + Const::PLAYER_SKIN, position_.z),
+				distance,
+				hit))
+			{
+				position_.y = hit.point.y;
+				velocity_.y = 0.0f;
+				isGrounded_ = true;
+			}
+		}
+	}
+}void Player::Draw() const
 {
 	if (modelHandle >= 0)
 	{
@@ -105,4 +133,12 @@ void Player::TurnTowards(const Vec3& moveDir, float deltaTime)
 
 	if (yaw_ > pi) yaw_ -= pi * 2.0f;
 	if (yaw_ < -pi) yaw_ += pi * 2.0f;
+}
+
+void Player::JumpAction()
+{
+	if (!isGrounded_) return;
+
+	velocity_.y = Const::PLAYER_JUMP_SPEED;
+	isGrounded_ = false;
 }
