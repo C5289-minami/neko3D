@@ -121,6 +121,9 @@
     <Filter Include="40_Gameplay\Actors\Base">
       <UniqueIdentifier>{e2ef4582-bdef-4593-bc93-370d33e1f960}</UniqueIdentifier>
     </Filter>
+    <Filter Include="10_Core\Motion">
+      <UniqueIdentifier>{ffce0e0b-3714-433b-8f27-48fcc6c0c39d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -372,6 +375,8 @@
     <ClInclude Include="DrawableObject.h">
       <Filter>20_Resources</Filter>
     </ClInclude>
+    <ClInclude Include="BossTestScene.h" />
+    <ClInclude Include="Motion.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -533,5 +538,7 @@
     <ClCompile Include="DrawableObject.cpp">
       <Filter>20_Resources</Filter>
     </ClCompile>
+    <ClCompile Include="BossTestScene.cpp" />
+    <ClCompile Include="Motion.cpp" />
   </ItemGroup>
 </Project>
