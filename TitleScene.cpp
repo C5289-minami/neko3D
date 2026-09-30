@@ -19,6 +19,15 @@ void TitleScene::Init()
 
 void TitleScene::Update(float deltaTime)
 {
+#ifndef NDEBUG
+    if (DxLib::CheckHitKey(KEY_INPUT_F1))
+    {
+        SetNextScene(SceneManager::GetInstance().GetScene(SceneID::BossTest));
+        StartFadeOut();
+        return;
+    }
+#endif
+
     using namespace DxPlus::Input;
     if (GetButtonDown(PLAYER1) & BUTTON_START)
     {
@@ -51,4 +60,10 @@ void TitleScene::Render() const
             { DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.75f },
             yellow, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 1,1 }, 0, fontHandle);
     }
+
+#ifndef NDEBUG
+    DxPlus::Text::DrawString(L"F1: Boss Test",
+        { DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.85f },
+        white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0, fontHandle);
+#endif
 }
