@@ -185,6 +185,7 @@
     <ClInclude Include="Collision.h" />
     <ClInclude Include="Consts.h" />
     <ClInclude Include="DebugUI.h" />
+    <ClInclude Include="DrawableObject.h" />
     <ClInclude Include="DxConv.h" />
     <ClInclude Include="DxPlus\Color.h" />
     <ClInclude Include="DxPlus\Debug.h" />
@@ -230,6 +231,7 @@
     <ClInclude Include="ResultScene.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="SpriteStudioUI.h" />
     <ClInclude Include="SSPlayer\common\Animator\MersenneTwister.h" />
     <ClInclude Include="SSPlayer\common\Animator\ssplayer_cellmap.h" />
     <ClInclude Include="SSPlayer\common\Animator\ssplayer_effect.h" />
@@ -263,6 +265,7 @@
     <ClCompile Include="AnimationDraw.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="DebugUI.cpp" />
+    <ClCompile Include="DrawableObject.cpp" />
     <ClCompile Include="DxPlus\Debug.cpp" />
     <ClCompile Include="DxPlus\DxPlus.cpp" />
     <ClCompile Include="DxPlus\DxWrapper.cpp" />
@@ -296,6 +299,7 @@
     <ClCompile Include="ResultScene.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="SpriteStudioUI.cpp" />
     <ClCompile Include="SSPlayer\common\Animator\ssplayer_effect.cpp" />
     <ClCompile Include="SSPlayer\common\Animator\ssplayer_effect2.cpp" />
     <ClCompile Include="SSPlayer\common\Animator\ssplayer_effectfunction.cpp" />

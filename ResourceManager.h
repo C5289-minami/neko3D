@@ -2,16 +2,22 @@
 // Resources/ResourceManager.h
 // =============================
 #pragma once
+#include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include "DxPlus/DxPlus.h"
 #include "ResourceKeys.h"
-
+#include "SSPlayer/SS6Player.h"
 class ResourceManager
 {
 public:
     static ResourceManager& GetInstance();
 
+	/// <summary>
+	/// ロード用の初期設定
+	/// </summary>
+	void Initialize();
     /// <summary>
     /// ResourceManager が管理する全てのリソースを読み込み、
     /// 使用可能な状態に初期化します。
@@ -32,6 +38,8 @@ public:
     /// <returns>指定セルのスプライト（存在しない場合は nullptr）</returns>
 
     [[nodiscard]] const DxPlus::Sprite::SpriteBase* GridAt(const std::wstring& key, int x = 0, int y = 0) const;
+    [[nodiscard]] const DxPlus::Sprite::SpriteBase* GetSprite(const std::wstring& key) const;
+    const DxPlus::Sprite::SpriteBase* LoadUISprite(const std::wstring& key, const std::wstring& path);
     /// <summary>
     /// 指定したフォント名に対応するフォントハンドルを取得します。
     /// </summary>
@@ -44,6 +52,7 @@ public:
     int GetSound(const std::wstring& key) const;
     int GetModel(const std::wstring& key) const;
     int GetEffect(const std::wstring& key) const;
+    ss::Player* GetSpriteStudioPlayer(const std::wstring& key) const;
 
 private:
     // スプライトシートを分割して登録（詳細は定義部参照）
@@ -139,6 +148,8 @@ private:
     int LoadSound(const std::wstring& key, const std::wstring& path);
     int LoadFont(const std::wstring& fontName, const std::wstring& path);
     int LoadModel(const std::wstring& key, const std::wstring& path);
+    ss::Player* LoadSpriteStudioPlayer(const std::wstring& key, const std::string& dataKey,
+        const std::string& path, const std::string& animation);
 
     void UnloadGrids();
     void UnloadFont(const std::wstring& fontName);
@@ -146,6 +157,7 @@ private:
     void UnloadMusics();
     void UnloadSounds();
     void UnloadModels();
+    void UnloadSpriteStudioPlayers();
 
     ResourceManager() = default;
     ~ResourceManager() = default;
@@ -172,6 +184,9 @@ private:
     std::unordered_map<std::wstring, int> sounds;
     std::unordered_map<std::wstring, int> models;
     std::unordered_map<std::wstring, int> effects;
+    std::unordered_map<std::wstring, std::unique_ptr<ss::Player>> spriteStudioPlayers;
+   std::unordered_set<std::string> spriteStudioDataKeys;
+    ss::ResourceManager* ssResMan{ nullptr }; // SS6Player用のリソースマネージャ
 };
 /// <summary>
 /// ResourceManager のシングルトンインスタンスを取得するショートカット

@@ -1,3 +1,5 @@
+#pragma warning(push)
+#pragma warning(disable: 4099 4100 4189 4244 4267 4456 4458)
 
 #include <stdio.h>
 #include <cstdlib>
@@ -1063,3 +1065,5 @@ int	SsEffectRenderV2::getCurrentFPS(){
 }
 
 };
+
+#pragma warning(pop)

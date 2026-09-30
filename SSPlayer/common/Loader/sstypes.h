@@ -1,6 +1,9 @@
 ﻿#ifndef __SSTYPES__
 #define __SSTYPES__
 
+#pragma warning(push)
+#pragma warning(disable: 4099 4100 4189 4244 4267 4456 4458)
+
 #include <stdlib.h>
 #include <string>
 #include <vector>
@@ -755,4 +758,5 @@ public:
 };
 };
 
+#pragma warning(pop)
 #endif

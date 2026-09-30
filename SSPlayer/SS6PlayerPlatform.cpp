@@ -1,4 +1,7 @@
-﻿// 
+﻿#pragma warning(push)
+#pragma warning(disable: 4099 4100 4189 4244 4267 4456 4458)
+
+// 
 //  SS6Platform.cpp
 //
 #define _HAS_STD_BYTE 0
@@ -507,3 +510,5 @@ namespace ss
 		return false;
 	}
 }
+
+#pragma warning(pop)
