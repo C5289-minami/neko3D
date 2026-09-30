@@ -31,6 +31,7 @@ void SceneManager::Init()
     titleScene.SetGameContext(&gameContext);
     gameScene.SetGameContext(&gameContext);
     resultScene.SetGameContext(&gameContext);
+    bossTestScene.SetGameContext(&gameContext);
 
     scene = &titleScene; // 最初のシーン
 }
@@ -62,6 +63,7 @@ Scene* SceneManager::GetScene(SceneID id)
         case SceneID::Title:    return &titleScene;
         case SceneID::Game:     return &gameScene;
         case SceneID::Result:   return &resultScene;
+        case SceneID::BossTest: return &bossTestScene;
     }
     return &titleScene;
 }

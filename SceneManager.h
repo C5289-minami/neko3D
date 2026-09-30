@@ -7,11 +7,12 @@
 #include "TitleScene.h"
 #include "GameScene.h"
 #include "ResultScene.h"
+#include "BossTestScene.h"
 #include "DebugUI.h"
 #include "Consts.h"
 #include "./SSPlayer/SS6Player.h"
 
-enum class SceneID { Title, Game, Result };
+enum class SceneID { Title, Game, Result, BossTest };
 
 class SceneManager
 {
@@ -32,6 +33,7 @@ public:
         if (scene == &titleScene) return SceneID::Title;
         if (scene == &gameScene) return SceneID::Game;
         if (scene == &resultScene) return SceneID::Result;
+        if (scene == &bossTestScene) return SceneID::BossTest;
         return SceneID::Title; // デフォルトはタイトルシーン
 	}
 
@@ -57,6 +59,7 @@ private:
     TitleScene  titleScene{ &gameContext };
     GameScene   gameScene{ &gameContext };
     ResultScene resultScene{ &gameContext };
+    BossTestScene bossTestScene{ &gameContext };
 
     Scene* scene = nullptr; // 現在のシーン
 
