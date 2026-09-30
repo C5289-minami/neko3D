@@ -148,7 +148,11 @@ namespace DxPlus::Input
         ClipCursor(&clipRect);
 
         // カーソル非表示
-        DxLib::SetMouseDispFlag(FALSE);
+#ifdef _DEBUG
+        DxLib::SetMouseDispFlag(TRUE);  // Debug: 表示
+#else
+        DxLib::SetMouseDispFlag(FALSE); // Release: 非表示
+#endif
 
         mouseCaptured = true;
     }

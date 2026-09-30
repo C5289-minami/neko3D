@@ -67,6 +67,18 @@ void DebugUI::BeginFrame()
 
 void DebugUI::Draw(GameContext& ctx)
 {
+    ImGui::Begin("Scene view camera");
+    ImGui::Text("Left Alt + Enter: toggle camera");
+    ImGui::Text("WASD: move / mouse: look / Q,E: vertical / Left Shift: fast");
+    ImGui::Text("Home: reset camera / F: focus player");
+    float cameraSpeed = ctx.GetSceneCameraMoveSpeed();
+    if (ImGui::SliderFloat("Move speed", &cameraSpeed, 100.0f, 2000.0f, "%.0f"))
+        ctx.SetSceneCameraMoveSpeed(cameraSpeed);
+    if (ImGui::Button("Reset camera")) ctx.ResetSceneCamera();
+    ImGui::SameLine();
+    if (ImGui::Button("Focus player")) ctx.FocusSceneCameraOnPlayer();
+    ImGui::End();
+
     // Option
     {
         ImGui::Begin("Option");     // "Option"ウィンドウを開始

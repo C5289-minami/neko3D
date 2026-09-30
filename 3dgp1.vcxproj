@@ -180,6 +180,7 @@
   <ItemGroup>
     <ClInclude Include="ActorBase.h" />
     <ClInclude Include="AnimationDraw.h" />
+    <ClInclude Include="Debug_camera.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="ButtonUI.h" />
     <ClInclude Include="Collision.h" />
@@ -263,6 +264,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AnimationDraw.cpp" />
+    <ClCompile Include="Debug_camera.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="DebugUI.cpp" />
     <ClCompile Include="DrawableObject.cpp" />

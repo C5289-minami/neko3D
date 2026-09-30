@@ -55,7 +55,7 @@
     <Filter Include="imgui\backends">
       <UniqueIdentifier>{f742d88b-c279-4a79-bab2-de128b4e1d03}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DebugUI">
+    <Filter Include="AboutDebug">
       <UniqueIdentifier>{857c115a-db95-4e5d-bad5-3cea1b39b9ab}</UniqueIdentifier>
     </Filter>
     <Filter Include="10_Core\Math">
@@ -216,8 +216,11 @@
     <ClInclude Include="imgui\backends\imgui_impl_win32.h">
       <Filter>imgui\backends</Filter>
     </ClInclude>
+    <ClInclude Include="Debug_camera.h">
+      <Filter>AboutDebug</Filter>
+    </ClInclude>
     <ClInclude Include="DebugUI.h">
-      <Filter>DebugUI</Filter>
+      <Filter>AboutDebug</Filter>
     </ClInclude>
     <ClInclude Include="DxPlus\Color.h">
       <Filter>_DxPlus\ヘッダー ファイル</Filter>
@@ -447,8 +450,11 @@
     <ClCompile Include="imgui\backends\imgui_impl_win32.cpp">
       <Filter>imgui\backends</Filter>
     </ClCompile>
+    <ClCompile Include="Debug_camera.cpp">
+      <Filter>AboutDebug</Filter>
+    </ClCompile>
     <ClCompile Include="DebugUI.cpp">
-      <Filter>DebugUI</Filter>
+      <Filter>AboutDebug</Filter>
     </ClCompile>
     <ClCompile Include="Grid.cpp">
       <Filter>40_Gameplay\Debug</Filter>
