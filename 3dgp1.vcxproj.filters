@@ -121,9 +121,6 @@
     <Filter Include="40_Gameplay\Actors\Base">
       <UniqueIdentifier>{e2ef4582-bdef-4593-bc93-370d33e1f960}</UniqueIdentifier>
     </Filter>
-    <Filter Include="30_Scenes\Test">
-      <UniqueIdentifier>{e7659997-97d9-40c6-9524-8dbaa4ccbcde}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -372,9 +369,6 @@
     <ClInclude Include="SpriteStudioUI.h">
       <Filter>10_Core\UI</Filter>
     </ClInclude>
-    <ClInclude Include="BossTestScene.h">
-      <Filter>30_Scenes\Test</Filter>
-    </ClInclude>
     <ClInclude Include="DrawableObject.h">
       <Filter>20_Resources</Filter>
     </ClInclude>
@@ -535,9 +529,6 @@
     </ClCompile>
     <ClCompile Include="SpriteStudioUI.cpp">
       <Filter>10_Core\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="BossTestScene.cpp">
-      <Filter>30_Scenes\Test</Filter>
     </ClCompile>
     <ClCompile Include="DrawableObject.cpp">
       <Filter>20_Resources</Filter>

@@ -27,7 +27,8 @@ void BossTestScene::Init()
     stage.modelKey = ResourceKeys::Model_Stage;
     boss.modelKey = ResourceKeys::Model_Paladin;
     boss.position = { 0.0f, 0.0f, 0.0f };
-    boss.scale = { 1.0f, 1.0f, 1.0f };
+    boss.scale = { 100.0f, 100.0f, 100.0f };
+    boss.center = { 0.0f, 50.0f, 0.0f };
     boss.rotation = { 0.0f, 0.0f, 0.0f };
     fontHandle = RM().GetFont(ResourceKeys::Font_Title);
 
