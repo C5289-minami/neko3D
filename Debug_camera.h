@@ -17,5 +17,6 @@ private:
  void RebuildTarget();
  bool active{false}, wasToggleDown{false}, wasResetDown{false}, wasFocusDown{false};
  Vec3 eye{}, target{}, homeEye{}, homeTarget{}, up{0,1,0};
- float yaw{}, pitch{}, moveSpeed{500.0f};
+ float yaw{}, pitch{};
+ float moveSpeed{500.0f};
 };

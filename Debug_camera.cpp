@@ -10,7 +10,7 @@
 namespace
 {
     // マウス1ピクセルあたりの回転角度
-    constexpr float kRotateRadiansPerPixel = DxPlus::PI * 2.0f / DxPlus::CLIENT_WIDTH;
+    constexpr float c_MouseRotationRadiansPerPixel = DxPlus::PI * 2.0f / DxPlus::CLIENT_WIDTH;
 
     // カメラが真上・真下を向いて操作しにくくなるのを防ぐ
     constexpr float kMinPitch = DxPlus::Deg2Rad * -89.0f;
@@ -93,8 +93,8 @@ void Debug_camera::Update(float deltaTime, const Vec3& focusPoint)
 
     // マウス移動量に応じてカメラの向きを変更する
     const DxPlus::Vec2Int mouseDelta = DxPlus::Input::GetMouseDelta();
-    yaw += mouseDelta.x * kRotateRadiansPerPixel;
-    pitch = std::clamp(pitch + mouseDelta.y * kRotateRadiansPerPixel, kMinPitch, kMaxPitch);
+    yaw += mouseDelta.x * c_MouseRotationRadiansPerPixel;
+    pitch = std::clamp(pitch + mouseDelta.y * c_MouseRotationRadiansPerPixel, kMinPitch, kMaxPitch);
 
     // カメラの向きから前・右方向を求める
     const float cosPitch = std::cos(pitch);
