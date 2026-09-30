@@ -219,6 +219,7 @@
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="MathUtil.h" />
+    <ClInclude Include="Motion.h" />
     <ClInclude Include="OrbitCamera.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerBaseState.h" />
@@ -292,6 +293,7 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Motion.cpp" />
     <ClCompile Include="OrbitCamera.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerIdleState.cpp" />
