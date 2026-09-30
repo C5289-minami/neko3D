@@ -32,6 +32,10 @@ public:
     // 表示・非表示モーションのイージングを設定する
 	void SetShowEasing(Motion::Easing easing) { showEasing = easing; if (state == State::Do) motion.SetEasing(easing); }
 	void SetHideEasing(Motion::Easing easing) { hideEasing = easing; if (state == State::Hide) motion.SetEasing(easing); }
+  void SetMotionDuration(float duration) { motion.SetDuration(duration); UpdateStartMotion(); }
+	float GetMotionDuration() const { return motion.GetDuration(); }
+    void SetMoveDistance(float distance) { MoveDistance = std::max(0.0f, distance); UpdateStartMotion(); }
+	float GetMoveDistance() const { return MoveDistance; }
 	// alpha
   void SetAlpha(int targetAlpha) { finAlpha = std::clamp(targetAlpha, 0, 255); }
 	int GetAlpha() const { return alpha; }
@@ -81,7 +85,7 @@ protected:
 	// 表示開始モーション関連
 	// =======================
 	DxPlus::Vec2 Direction{}; // モーションの方向
-	static constexpr float MoveDistance = 100.0f; // モーションの移動距離
+ float MoveDistance{ 100.0f }; // モーションの移動距離
 
 	int zOrder{ 0 }; // 描画順を設定（値が大きいほど手前に描画）
 };

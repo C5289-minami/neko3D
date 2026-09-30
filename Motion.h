@@ -18,6 +18,7 @@ public:
 
 	// モーションを最初から開始する
 	void Start(float from, float to, float duration, Easing easing = Easing::Linear);
+	void SetDuration(float value);
 	// to から from に向かって逆再生を開始する
 	void StartReverse();
 	// 進行率を 0 に戻す

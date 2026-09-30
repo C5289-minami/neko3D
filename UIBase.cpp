@@ -38,7 +38,7 @@ void UIBase::Update(float deltaTime)
     }
 
     if (state == State::Do || state == State::Hide) {
-        alpha = static_cast<int>(finAlpha * motion.GetProgress());
+        alpha = static_cast<int>(finAlpha * motion.GetEasedProgress());
     } else if (state == State::Normal) {
         alpha = finAlpha;
     } else {

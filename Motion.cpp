@@ -22,6 +22,19 @@ void Motion::Start(float fromValue, float toValue, float motionDuration, Motion:
     }
 }
 
+void Motion::SetDuration(float value)
+{
+    duration = std::max(0.0f, value);
+    if (duration == 0.0f)
+    {
+        progress = direction > 0 ? 1.0f : 0.0f;
+        finished = true;
+        return;
+    }
+
+    finished = direction > 0 ? progress >= 1.0f : progress <= 0.0f;
+}
+
 void Motion::StartReverse()
 {
     progress = 1.0f;
@@ -80,11 +93,11 @@ float Motion::GetEasedProgress() const
     switch (easing)
     {
     case Easing::EaseIn:
-        return t * t;
+		return t * t; // 加速するイージング
     case Easing::EaseOut:
-        return t * (2.0f - t);
+		return t * (2.0f - t); // 減速するイージング
     case Easing::EaseInOut:
-        return t * t * (3.0f - 2.0f * t);
+		return t * t * (3.0f - 2.0f * t); // 緩急をつけるイージング
     case Easing::Linear:
     default:
         return t;
