@@ -1,4 +1,7 @@
-﻿#include <stdio.h>
+﻿#pragma warning(push)
+#pragma warning(disable: 4099 4100 4189 4244 4267 4456 4458)
+
+#include <stdio.h>
 #include <cstdlib>
 
 #include "../loader/ssloader.h"
@@ -88,9 +91,6 @@ public:
 	virtual void	updateParticle(SsEffectElementBase* ele, SsEffectRenderEmitter* e, SsEffectRenderParticle* particle){}
 	virtual void	initalizeEffect(SsEffectElementBase* ele, SsEffectEmitter* emmiter) {}
 };
-
-
-
 
 //-----------------------------------------------------------------
 //
@@ -859,11 +859,6 @@ static EffectFuncBase* callTable[] =
 	&funcParticleInfiniteEmitEnabled,
 };
 
-
-
-
-
-
 ///----------------------------------------------------------------------------------------------------
 //
 ///----------------------------------------------------------------------------------------------------
@@ -913,6 +908,8 @@ void	SsEffectFunctionExecuter::initializeEffect(SsEffectBehavior* beh, SsEffectE
 }
 
 };
+
+#pragma warning(pop)
 
 
 

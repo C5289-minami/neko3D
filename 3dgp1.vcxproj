@@ -185,6 +185,7 @@
     <ClInclude Include="Collision.h" />
     <ClInclude Include="Consts.h" />
     <ClInclude Include="DebugUI.h" />
+    <ClInclude Include="DrawableObject.h" />
     <ClInclude Include="DxConv.h" />
     <ClInclude Include="DxPlus\Color.h" />
     <ClInclude Include="DxPlus\Debug.h" />
@@ -264,6 +265,7 @@
     <ClCompile Include="AnimationDraw.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="DebugUI.cpp" />
+    <ClCompile Include="DrawableObject.cpp" />
     <ClCompile Include="DxPlus\Debug.cpp" />
     <ClCompile Include="DxPlus\DxPlus.cpp" />
     <ClCompile Include="DxPlus\DxWrapper.cpp" />

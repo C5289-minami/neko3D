@@ -363,7 +363,10 @@
     <ClInclude Include="EntityBase.h">
       <Filter>40_Gameplay\Actors\Base</Filter>
     </ClInclude>
-    <ClInclude Include="SpriteStudioUI.h" />
+    <ClInclude Include="DrawableObject.h" />
+    <ClInclude Include="SpriteStudioUI.h">
+      <Filter>10_Core\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -507,15 +510,18 @@
     <ClCompile Include="UIManager.cpp">
       <Filter>10_Core\UI</Filter>
     </ClCompile>
-    <ClCompile Include="UIBase.cpp">
-      <Filter>10_Core\UI</Filter>
-    </ClCompile>
     <ClCompile Include="UIFactory.cpp">
       <Filter>10_Core\UI</Filter>
     </ClCompile>
     <ClCompile Include="AnimationDraw.cpp">
       <Filter>10_Core\Animation</Filter>
     </ClCompile>
-    <ClCompile Include="SpriteStudioUI.cpp" />
+    <ClCompile Include="DrawableObject.cpp" />
+    <ClCompile Include="UIBase.cpp">
+      <Filter>10_Core\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteStudioUI.cpp">
+      <Filter>10_Core\UI</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

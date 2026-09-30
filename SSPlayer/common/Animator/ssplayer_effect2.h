@@ -1,6 +1,8 @@
 #ifndef __SSEFFECTRENDER_V3__
 #define __SSEFFECTRENDER_V3__
 
+#pragma warning(push)
+#pragma warning(disable: 4099 4100 4189 4244 4267 4456 4458)
 
 #include "xorshift32.h"
 #include "../../SS6Player.h"
@@ -140,6 +142,7 @@ public:
 
 };
 
+#pragma warning(pop)
 #endif
 
 
