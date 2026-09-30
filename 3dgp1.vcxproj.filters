@@ -363,6 +363,7 @@
     <ClInclude Include="EntityBase.h">
       <Filter>40_Gameplay\Actors\Base</Filter>
     </ClInclude>
+    <ClInclude Include="SpriteStudioUI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -515,5 +516,6 @@
     <ClCompile Include="AnimationDraw.cpp">
       <Filter>10_Core\Animation</Filter>
     </ClCompile>
+    <ClCompile Include="SpriteStudioUI.cpp" />
   </ItemGroup>
 </Project>

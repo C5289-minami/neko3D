@@ -1,4 +1,5 @@
 #pragma once
+#pragma once
 #include "UIBase.h"
 #include "DxPlus/DxPlus.h"
 #include "Button.h"
@@ -7,19 +8,18 @@
 class ButtonUI : public UIBase
 {
 	public:
-		ButtonUI(int key, DxPlus::Vec2 pos,
+     ButtonUI(const std::wstring& key, DxPlus::Vec2 pos,
 			std::function<void()> onclick,
 			DxPlus::Vec2 dir = DxPlus::Vec2(0, 0), 
 			float motionDuration = 0.0f)
 		: UIBase(key, pos, dir, motionDuration),
-		  button(pos, key, onclick),
-		  onClick(onclick)
+          button(pos, key, std::move(onclick))
 	{
-		UIBase::Init();
 	}
 	void Update(float deltaTime) override
 	{
 		UIBase::Update(deltaTime);
+       button.SetPosition(position);
 		button.SetAlpha(this->alpha);
 		
 		if(state != State::Normal)
@@ -44,12 +44,11 @@ class ButtonUI : public UIBase
 		}
 	
 	}
-	void SetButtonHoverSprite(int s){ button.SetHoverSprite(s); }
+   void SetButtonHoverSprite(const std::wstring& key) { button.SetHoverSprite(key); }
 	void SetScale(float s)override { 
 		UIBase::SetScale(s);
 		button.SetScale(s); 
 	};
 private:
 	Button button;
-	std::function<void()> onClick;
 };

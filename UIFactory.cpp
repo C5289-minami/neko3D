@@ -3,8 +3,11 @@
 #include "ButtonUI.h"
 #include "Scene.h"
 #include "UIBase.h"
+#include <string>
 
 #include "TitleScene.h"
+#include "ResourceManager.h"
+#include "SpriteStudioUI.h"
 
 void UIFactory::CreateTitleUI(UIManager& manager)
 {
@@ -18,7 +21,7 @@ void UIFactory::CreateTitleUI(UIManager& manager)
 	//// Logo
 	//{
 	//	const DxPlus::Vec2 startButtonPos(DxPlus::CLIENT_WIDTH/2, 400);
-	//	int key = Keys::UI::Logo;
+   //	std::wstring key = ResourceKeys::UI_Logo;
 	//	auto StartButton = std::make_unique<UIBase>(key, startButtonPos, toDown, DEFAULT_SPEED);
 
 	//	manager.AddUI(std::move(StartButton));
@@ -31,7 +34,7 @@ void UIFactory::CreateTitleUI(UIManager& manager)
 	//// StartButton
 	//{
 	//	const DxPlus::Vec2 startButtonPos(startX + spaceX, baseY);
-	//	int key = Keys::UI::StartButton;
+    //	std::wstring key = ResourceKeys::UI_StartButton;
 	//	auto StartButton = std::make_unique<ButtonUI>(key, startButtonPos, []() {
 	//		SM().SceneOut(Scene::Game,true);
 	//		UIFactory::isOpenRule = true;
@@ -44,7 +47,7 @@ void UIFactory::CreateTitleUI(UIManager& manager)
 	//// Credit
 	//{
 	//	const DxPlus::Vec2 creditPos(startX + spaceX * 3.3f, baseY);
-	//	int key = Keys::UI::CreditButton;
+   //	std::wstring key = ResourceKeys::UI_CreditButton;
 	//	auto CreditButton = std::make_unique<ButtonUI>(key, creditPos, []() {
 	//		SM().titleScenePtr->ToggleCredit();
 	//		}, toUp,1.5f);
@@ -55,7 +58,7 @@ void UIFactory::CreateTitleUI(UIManager& manager)
 	//// 名前入力ボタンの作成
 	//{
 	//	const DxPlus::Vec2 nameInputPos(DxPlus::CLIENT_WIDTH / 2.0f, baseY);
-	//	int key = Keys::UI::NameInputButton; // 名前入力用ボタンの画像キー
+   //	std::wstring key = ResourceKeys::UI_NameInputButton; // 名前入力用ボタンの画像キー
 
 	//	auto nameInputUI = std::make_unique<NameInputUI>(
 	//		key,
@@ -76,8 +79,7 @@ void UIFactory::CreateTitleUI(UIManager& manager)
 	//// Collection
 	//{
 	//	const DxPlus::Vec2 collectionPos(startX + spaceX * 3, baseY);
-	//	//int key = Keys::UI::CollectionButton;
-	//	int key = -1;
+ //	std::wstring key = ResourceKeys::UI_CollectionButton;
 	//	auto CollectionButton = std::make_unique<ButtonUI>(key, collectionPos, []() {
 	//		// 図鑑処理
 	//		SM().GetGameContext().GetCollectionManager().Trigger();
@@ -89,7 +91,7 @@ void UIFactory::CreateTitleUI(UIManager& manager)
 	//// Credit
 	//{
 	//	const DxPlus::Vec2 creditPos(DxPlus::CLIENT_WIDTH/2.0f, DxPlus::CLIENT_HEIGHT/2.0f);
-	//	int key = Keys::UI::Credit;
+ //	std::wstring key = ResourceKeys::UI_Credit;
 	//	auto CreditButton = std::make_unique<UIBase>(key, creditPos, toUp, 0.5f);
 	//	CreditButton->SetDisplayCondition([]() { return SM().titleScenePtr->IsCreditShown(); });
 	//	manager.AddUI(std::move(CreditButton));
@@ -97,7 +99,7 @@ void UIFactory::CreateTitleUI(UIManager& manager)
 	//// BackToTitle
 	//{
 	//	const DxPlus::Vec2 backToTitlePos(DxPlus::CLIENT_WIDTH * 0.82f, DxPlus::CLIENT_HEIGHT * 0.84f);
-	//	int key = Keys::UI::ToBack;
+ //	std::wstring key = ResourceKeys::UI_ToBack;
 	//	auto BackToTitleButton = std::make_unique<ButtonUI>(key, backToTitlePos, []() {
 	//		// タイトルに戻る処理
 	//		SM().titleScenePtr->ToggleCredit();
@@ -106,6 +108,20 @@ void UIFactory::CreateTitleUI(UIManager& manager)
 	//	BackToTitleButton->SetScale(0.8f); // ボタンを小さくする
 	//	manager.AddUI(std::move(BackToTitleButton));
 	//}
+
+
+	// Test
+	{
+		const std::wstring key = ResourceKeys::SpriteStudio_TitleCharacter;
+		auto* player = RM().GetSpriteStudioPlayer(key);
+		if (!player) return;
+
+		const DxPlus::Vec2 testPos(DxPlus::CLIENT_WIDTH * 0.78f, DxPlus::CLIENT_HEIGHT * 0.68f);
+		const DxPlus::Vec2 fromBelow(0.0f, 1.0f);
+		auto testUI = std::make_unique<SpriteStudioUI>(key, player, testPos, fromBelow, 1.0f);
+		testUI->SetScale(0.5f);
+		manager.AddUI(std::move(testUI));
+	}
 }
 
 

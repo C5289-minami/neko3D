@@ -4,6 +4,7 @@
 #include "Button.h"
 #include "DxPlus/DxPlus.h"
 #include "UIFactory.h"
+#include <algorithm>
 
 
 void UIManager::Init()
@@ -35,6 +36,9 @@ void UIManager::Update(float deltaTime)
 
 void UIManager::Draw(int drawZOrder)
 {
+  std::stable_sort(UIs.begin(), UIs.end(), [](const auto& left, const auto& right) {
+		return left->GetZOrder() < right->GetZOrder();
+	});
 	for (auto& ui : UIs) {
 		if (drawZOrder == -1 || ui->GetZOrder() == drawZOrder) {
 			ui->Draw();

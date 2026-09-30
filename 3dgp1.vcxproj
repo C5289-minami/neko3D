@@ -230,6 +230,7 @@
     <ClInclude Include="ResultScene.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="SpriteStudioUI.h" />
     <ClInclude Include="SSPlayer\common\Animator\MersenneTwister.h" />
     <ClInclude Include="SSPlayer\common\Animator\ssplayer_cellmap.h" />
     <ClInclude Include="SSPlayer\common\Animator\ssplayer_effect.h" />
@@ -296,6 +297,7 @@
     <ClCompile Include="ResultScene.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="SpriteStudioUI.cpp" />
     <ClCompile Include="SSPlayer\common\Animator\ssplayer_effect.cpp" />
     <ClCompile Include="SSPlayer\common\Animator\ssplayer_effect2.cpp" />
     <ClCompile Include="SSPlayer\common\Animator\ssplayer_effectfunction.cpp" />
