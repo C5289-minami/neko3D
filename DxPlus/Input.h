@@ -22,6 +22,7 @@ namespace DxPlus::Input
     Vec2Int GetMouseDelta();
 
     void SetMouseCapture(bool capture);
+    void SetMouseCaptureEnabled(bool enabled);
 
     int GetButton(int playerIndex);
 

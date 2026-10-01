@@ -62,7 +62,7 @@ void Debug_camera::FocusAt(const Vec3& point, float distance)
 
 void Debug_camera::Update(float deltaTime, const Vec3& focusPoint)
 {
-#ifndef NDEBUG  
+#ifndef NDEBUG
     // デバッグビルド時のみ、Alt + Enterでカメラ操作を切り替える
     const bool toggleDown = DxLib::CheckHitKey(KEY_INPUT_LALT) != 0 &&//左Alt
         DxLib::CheckHitKey(KEY_INPUT_RETURN) != 0;                    //Enter が押されているか

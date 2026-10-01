@@ -1,4 +1,7 @@
-﻿// 
+﻿#pragma warning(push)
+#pragma warning(disable: 4099 4100 4189 4244 4267 4456 4458)
+
+// 
 //  SS5Player.cpp
 //
 #include "SS6Player.h"
@@ -118,7 +121,6 @@ private:
 	const char*	_base;
 };
 
-
 /**
  * DataArrayReader
  */
@@ -171,7 +173,6 @@ public:
 private:
 	const ss_u16*	_dataPtr;
 };
-
 
 /**
  * CellRef
@@ -3765,3 +3766,5 @@ bool CustomSprite::isFlippedY()
 
 
 };
+
+#pragma warning(pop)

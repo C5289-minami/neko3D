@@ -6,6 +6,7 @@
 #include "DxPlus/DxPlus.h"
 
 #include "DebugUI.h"
+#include "UIManager.h"
 
 void SceneManager::Init()
 {
@@ -30,35 +31,9 @@ void SceneManager::Init()
     titleScene.SetGameContext(&gameContext);
     gameScene.SetGameContext(&gameContext);
     resultScene.SetGameContext(&gameContext);
+    bossTestScene.SetGameContext(&gameContext);
 
     scene = &titleScene; // 最初のシーン
-
-
-    // リソースマネージャーの作成
-    ssResMan = ss::ResourceManager::getInstance();
-
-
-    // ssbpファイルの読み込み (例: "Resources/sample.ssbp")
-    ssResMan->addData("./Data/Images/character_template1.ssbp");
-
-    // プレイヤーの作成
-    ssPlayer = ss::Player::create();
-
-    // アニメーションデータのセット
-    ssPlayer->setData("character_template1");
-    //再生するモーションを設定
-    ssPlayer->play("character_template_3head/stance");
-
-    //表示位置を設定
-    ssPlayer->setPosition(1280 / 2, 720);
-    //スケール設定
-    ssPlayer->setScale(0.5f, 0.5f);
-    //回転を設定
-    ssPlayer->setRotation(0.0f, 0.0f, 0.0f);
-    //透明度を設定
-    ssPlayer->setAlpha(255);
-    //反転を設定
-    ssPlayer->setFlip(false, false);
 }
 
 void SceneManager::Shutdown()
@@ -88,13 +63,18 @@ Scene* SceneManager::GetScene(SceneID id)
         case SceneID::Title:    return &titleScene;
         case SceneID::Game:     return &gameScene;
         case SceneID::Result:   return &resultScene;
+        case SceneID::BossTest: return &bossTestScene;
     }
     return &titleScene;
 }
 
 void SceneManager::Run()
 {
-    if (scene) scene->Init();
+    if (scene)
+    {
+        scene->Init();
+        UIM().Init();
+    }
     while (DxPlus::GameLoop(true))
     {
         DxPlus::Input::Update();
@@ -106,9 +86,9 @@ void SceneManager::Run()
 
             float deltaTime = DxPlus::GetDeltaTime();
             scene->Drive(deltaTime);
-			ssPlayer->update(deltaTime); 
+           UIM().Update(deltaTime);
             scene->Render();
-			ssPlayer->draw(); // SS6Playerの描画
+           UIM().Draw();
 
             if (scene->IsFinished())
             {
@@ -120,6 +100,7 @@ void SceneManager::Run()
                 if (!next) { DxLib::ScreenFlip(); break; }
                 SetScene(next);
                 next->Init();
+                UIM().Init();
             }
 
             DxPlus::Debug::Draw();

@@ -178,13 +178,22 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ActorBase.h" />
     <ClInclude Include="AnimationDraw.h" />
+    <ClInclude Include="Boss.h" />
+    <ClInclude Include="BossBaseState.h" />
+    <ClInclude Include="BossIdleState.h" />
+    <ClInclude Include="BossMoveState.h" />
+    <ClInclude Include="BossStateMachine.h" />
+    <ClInclude Include="BossStateType.h" />
+    <ClInclude Include="BossTestScene.h" />
     <ClInclude Include="Debug_camera.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="ButtonUI.h" />
     <ClInclude Include="Collision.h" />
     <ClInclude Include="Consts.h" />
     <ClInclude Include="DebugUI.h" />
+    <ClInclude Include="DrawableObject.h" />
     <ClInclude Include="DxConv.h" />
     <ClInclude Include="DxPlus\Color.h" />
     <ClInclude Include="DxPlus\Debug.h" />
@@ -202,6 +211,7 @@
     <ClInclude Include="DxPlus\TextAnimator.h" />
     <ClInclude Include="DxPlus\Utils.h" />
     <ClInclude Include="DxPlus\Vector2.h" />
+    <ClInclude Include="EntityBase.h" />
     <ClInclude Include="GameContext.h" />
     <ClInclude Include="GamePram.h" />
     <ClInclude Include="GameScene.h" />
@@ -215,6 +225,7 @@
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="MathUtil.h" />
+    <ClInclude Include="Motion.h" />
     <ClInclude Include="OrbitCamera.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerBaseState.h" />
@@ -229,6 +240,7 @@
     <ClInclude Include="ResultScene.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="SpriteStudioUI.h" />
     <ClInclude Include="SSPlayer\common\Animator\MersenneTwister.h" />
     <ClInclude Include="SSPlayer\common\Animator\ssplayer_cellmap.h" />
     <ClInclude Include="SSPlayer\common\Animator\ssplayer_effect.h" />
@@ -260,9 +272,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AnimationDraw.cpp" />
+    <ClCompile Include="Boss.cpp" />
+    <ClCompile Include="BossIdleState.cpp" />
+    <ClCompile Include="BossMoveState.cpp" />
+    <ClCompile Include="BossStateMachine.cpp" />
+    <ClCompile Include="BossTestScene.cpp" />
     <ClCompile Include="Debug_camera.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="DebugUI.cpp" />
+    <ClCompile Include="DrawableObject.cpp" />
     <ClCompile Include="DxPlus\Debug.cpp" />
     <ClCompile Include="DxPlus\DxPlus.cpp" />
     <ClCompile Include="DxPlus\DxWrapper.cpp" />
@@ -285,6 +303,7 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Motion.cpp" />
     <ClCompile Include="OrbitCamera.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerIdleState.cpp" />
@@ -296,6 +315,7 @@
     <ClCompile Include="ResultScene.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="SpriteStudioUI.cpp" />
     <ClCompile Include="SSPlayer\common\Animator\ssplayer_effect.cpp" />
     <ClCompile Include="SSPlayer\common\Animator\ssplayer_effect2.cpp" />
     <ClCompile Include="SSPlayer\common\Animator\ssplayer_effectfunction.cpp" />

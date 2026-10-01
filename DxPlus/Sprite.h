@@ -126,6 +126,17 @@ namespace DxPlus::Sprite
             }
         }
 
+        void Draw(const Vec2& position,
+            const Vec2& scale,
+            const Vec2& pivot,
+            float rotationZ = 0.0f,
+            int color = DxLib::GetColor(255, 255, 255)) const
+        {
+            if (IsLoaded()) {
+                DxPlus::Sprite::Draw(id, position, scale, pivot, rotationZ, color);
+            }
+        }
+
     protected:
         int  id = -1;
         Vec2 center = { 0, 0 };

@@ -48,12 +48,16 @@ int WINAPI wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF);
     srand((unsigned int)time(NULL));
 	DxLib::SetHookWinProc(CustomWinProc);
+	DxLib::SetWindowStyleMode(7);
+	DxLib::SetWindowSizeChangeEnableFlag(TRUE,TRUE);
 
     SceneManager::RunConfig cfg{};
 #ifdef NDEBUG
     cfg.enableDebugUI = false;   // ReleaseはDebugUI完全禁止
+	DxPlus::Input::SetMouseCaptureEnabled(true); // Releaseはマウスキャプチャ強制
 #else
     cfg.enableDebugUI = true;
+	DxPlus::Input::SetMouseCaptureEnabled(false); 
 #endif
 
     // ウィンドウモード / フルスクリーンの切り替え
