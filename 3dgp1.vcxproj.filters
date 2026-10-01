@@ -377,6 +377,12 @@
     </ClInclude>
     <ClInclude Include="BossTestScene.h" />
     <ClInclude Include="Motion.h" />
+    <ClInclude Include="Boss.h" />
+    <ClInclude Include="BossIdleState.h" />
+    <ClInclude Include="BossStateType.h" />
+    <ClInclude Include="BossStateMachine.h" />
+    <ClInclude Include="BossBaseState.h" />
+    <ClInclude Include="BossMoveState.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -540,5 +546,9 @@
     </ClCompile>
     <ClCompile Include="BossTestScene.cpp" />
     <ClCompile Include="Motion.cpp" />
+    <ClCompile Include="Boss.cpp" />
+    <ClCompile Include="BossMoveState.cpp" />
+    <ClCompile Include="BossStateMachine.cpp" />
+    <ClCompile Include="BossIdleState.cpp" />
   </ItemGroup>
 </Project>
