@@ -133,6 +133,18 @@
     <Filter Include="30_Scenes\Test">
       <UniqueIdentifier>{f3daf8e3-a39d-453e-abec-344167853166}</UniqueIdentifier>
     </Filter>
+    <Filter Include="40_Gameplay\Actors\Boss\State\Idle">
+      <UniqueIdentifier>{f25d3bb9-90fc-4a4b-a72c-d136de548f87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Boss\State\Walk">
+      <UniqueIdentifier>{d1e164e5-74d0-48e9-bb6b-e33cbcaa0c46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Boss\State\Base">
+      <UniqueIdentifier>{cf080803-bdbc-4c6a-90d3-0dfff7029eae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Player\State\Base">
+      <UniqueIdentifier>{0f8c4208-8aeb-4d2a-ad53-b70ed445bfeb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -273,15 +285,6 @@
     <ClInclude Include="State.h">
       <Filter>40_Gameplay\StateMachine</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerBaseState.h">
-      <Filter>40_Gameplay\Actors\Player\State</Filter>
-    </ClInclude>
-    <ClInclude Include="PlayerStateType.h">
-      <Filter>40_Gameplay\Actors\Player\State</Filter>
-    </ClInclude>
-    <ClInclude Include="PlayerStateMachine.h">
-      <Filter>40_Gameplay\Actors\Player\State</Filter>
-    </ClInclude>
     <ClInclude Include="PlayerIdleState.h">
       <Filter>40_Gameplay\Actors\Player\State\Idle</Filter>
     </ClInclude>
@@ -384,21 +387,6 @@
     <ClInclude Include="DrawableObject.h">
       <Filter>20_Resources</Filter>
     </ClInclude>
-    <ClInclude Include="BossStateMachine.h">
-      <Filter>40_Gameplay\Actors\Boss\State</Filter>
-    </ClInclude>
-    <ClInclude Include="BossMoveState.h">
-      <Filter>40_Gameplay\Actors\Boss\State</Filter>
-    </ClInclude>
-    <ClInclude Include="BossIdleState.h">
-      <Filter>40_Gameplay\Actors\Boss\State</Filter>
-    </ClInclude>
-    <ClInclude Include="BossStateType.h">
-      <Filter>40_Gameplay\Actors\Boss\State</Filter>
-    </ClInclude>
-    <ClInclude Include="BossBaseState.h">
-      <Filter>40_Gameplay\Actors\Boss\State</Filter>
-    </ClInclude>
     <ClInclude Include="Boss.h">
       <Filter>40_Gameplay\Actors\Boss</Filter>
     </ClInclude>
@@ -407,6 +395,33 @@
     </ClInclude>
     <ClInclude Include="Motion.h">
       <Filter>10_Core\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugScene.h">
+      <Filter>30_Scenes\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="BossIdleState.h">
+      <Filter>40_Gameplay\Actors\Boss\State\Idle</Filter>
+    </ClInclude>
+    <ClInclude Include="BossWalkState.h">
+      <Filter>40_Gameplay\Actors\Boss\State\Walk</Filter>
+    </ClInclude>
+    <ClInclude Include="BossStateType.h">
+      <Filter>40_Gameplay\Actors\Boss\State\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="BossBaseState.h">
+      <Filter>40_Gameplay\Actors\Boss\State\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="BossStateMachine.h">
+      <Filter>40_Gameplay\Actors\Boss\State\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerBaseState.h">
+      <Filter>40_Gameplay\Actors\Player\State\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerStateMachine.h">
+      <Filter>40_Gameplay\Actors\Player\State\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerStateType.h">
+      <Filter>40_Gameplay\Actors\Player\State\Base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -515,9 +530,6 @@
     <ClCompile Include="StateMachine.cpp">
       <Filter>40_Gameplay\StateMachine</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerStateMachine.cpp">
-      <Filter>40_Gameplay\Actors\Player\State</Filter>
-    </ClCompile>
     <ClCompile Include="PlayerIdleState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Idle</Filter>
     </ClCompile>
@@ -569,15 +581,6 @@
     <ClCompile Include="DrawableObject.cpp">
       <Filter>20_Resources</Filter>
     </ClCompile>
-    <ClCompile Include="BossStateMachine.cpp">
-      <Filter>40_Gameplay\Actors\Boss\State</Filter>
-    </ClCompile>
-    <ClCompile Include="BossMoveState.cpp">
-      <Filter>40_Gameplay\Actors\Boss\State</Filter>
-    </ClCompile>
-    <ClCompile Include="BossIdleState.cpp">
-      <Filter>40_Gameplay\Actors\Boss\State</Filter>
-    </ClCompile>
     <ClCompile Include="Boss.cpp">
       <Filter>40_Gameplay\Actors\Boss</Filter>
     </ClCompile>
@@ -586,6 +589,21 @@
     </ClCompile>
     <ClCompile Include="Motion.cpp">
       <Filter>10_Core\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugScene.cpp">
+      <Filter>30_Scenes\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="BossIdleState.cpp">
+      <Filter>40_Gameplay\Actors\Boss\State\Idle</Filter>
+    </ClCompile>
+    <ClCompile Include="BossWalkState.cpp">
+      <Filter>40_Gameplay\Actors\Boss\State\Walk</Filter>
+    </ClCompile>
+    <ClCompile Include="BossStateMachine.cpp">
+      <Filter>40_Gameplay\Actors\Boss\State\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerStateMachine.cpp">
+      <Filter>40_Gameplay\Actors\Player\State\Base</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
