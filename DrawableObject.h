@@ -20,7 +20,7 @@ struct ModelObject
 	std::wstring modelKey;
 	Vec3 position{};
 	Vec3 scale{ 1.0f, 1.0f, 1.0f };
-	Vec3 center{ 0.0f, 0.0f, 0.0f };
+	Vec3 center{ 0.0f, 0.0f, 0.0f }; // スケールと同期はできないが回転の中心をずらすために使用する
 	Vec3 rotation{};
 
    void Draw(Vec3 masterPos = { 0.0f,0.0f,0.0f }) const;

@@ -53,7 +53,8 @@ void BossTestScene::Update(float deltaTime)
 
     const DxPlus::Vec2Int mouseDelta = DxPlus::Input::GetMouseDelta();
     yaw += mouseDelta.x * MouseRotationRadiansPerPixel;
-    pitch = std::clamp(pitch + mouseDelta.y * MouseRotationRadiansPerPixel, MinPitch, MaxPitch);
+	//boss.GetModelObject().rotation = { yaw, yaw, yaw };
+    pitch = std::clamp(pitch - mouseDelta.y * MouseRotationRadiansPerPixel, MinPitch, MaxPitch);
 
     const float cosPitch = std::cos(pitch);
     const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };

@@ -1,5 +1,6 @@
 #pragma once
 #include "BossBaseState.h"
+#include "Motion.h"
 
 class BossWalkState : public BossBaseState
 {
@@ -9,4 +10,6 @@ public:
     void Enter() override;
     void Tick(float deltaTime) override;
     void Exit() override;
+private:    
+	Motion walkMotion_;
 };

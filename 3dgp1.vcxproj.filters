@@ -145,6 +145,18 @@
     <Filter Include="40_Gameplay\Actors\Player\State\Base">
       <UniqueIdentifier>{0f8c4208-8aeb-4d2a-ad53-b70ed445bfeb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="40_Gameplay\Actors\Stage">
+      <UniqueIdentifier>{f3bf3e63-3ca4-4ccc-847b-1d7db61c5605}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Boss\State\Recover">
+      <UniqueIdentifier>{4065f36a-9def-4ab9-93d1-e647738f73ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Boss\State\Attack">
+      <UniqueIdentifier>{11bac987-318b-4cce-b014-53a425ff6d9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Boss\Attack">
+      <UniqueIdentifier>{14971b58-3b39-41bd-8717-c256f90a8fd6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -263,9 +275,6 @@
     </ClInclude>
     <ClInclude Include="OrbitCamera.h">
       <Filter>10_Core\Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="Stage.h">
-      <Filter>40_Gameplay\Actors</Filter>
     </ClInclude>
     <ClInclude Include="Raycast.h">
       <Filter>40_Gameplay\Physics</Filter>
@@ -423,6 +432,18 @@
     <ClInclude Include="PlayerStateType.h">
       <Filter>40_Gameplay\Actors\Player\State\Base</Filter>
     </ClInclude>
+    <ClInclude Include="Stage.h">
+      <Filter>40_Gameplay\Actors\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="BossRecoverState.h">
+      <Filter>40_Gameplay\Actors\Boss\State\Recover</Filter>
+    </ClInclude>
+    <ClInclude Include="BossAttackState.h">
+      <Filter>40_Gameplay\Actors\Boss\State\Attack</Filter>
+    </ClInclude>
+    <ClInclude Include="Attack.h">
+      <Filter>40_Gameplay\Actors\Boss\Attack</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -515,9 +536,6 @@
     <ClCompile Include="OrbitCamera.cpp">
       <Filter>10_Core\Camera</Filter>
     </ClCompile>
-    <ClCompile Include="Stage.cpp">
-      <Filter>40_Gameplay\Actors</Filter>
-    </ClCompile>
     <ClCompile Include="Raycast.cpp">
       <Filter>40_Gameplay\Physics</Filter>
     </ClCompile>
@@ -604,6 +622,15 @@
     </ClCompile>
     <ClCompile Include="PlayerStateMachine.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Stage.cpp">
+      <Filter>40_Gameplay\Actors\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="BossAttackState.cpp">
+      <Filter>40_Gameplay\Actors\Boss\State\Attack</Filter>
+    </ClCompile>
+    <ClCompile Include="BossRecoverState.cpp">
+      <Filter>40_Gameplay\Actors\Boss\State\Recover</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
