@@ -1,5 +1,4 @@
 #include "BossTestScene.h"
-#include "BossTestScene.h"
 #include "DxConv.h"
 #include "DxPlus/DxPlus.h"
 #include "DxLib.h"
@@ -24,9 +23,24 @@ void BossTestScene::Init()
     DxLib::SetLightDirection(VGet(-0.3f, -1.0f, -0.5f));
     DxLib::SetGlobalAmbientLight(DxLib::GetColorF(0.35f, 0.35f, 0.35f, 1.0f));
 
+<<<<<<< Updated upstream
     stage.modelKey = ResourceKeys::Model_Stage;
+<<<<<<< Updated upstream
     boss.Init();
     boss.Reset();
+=======
+    boss.modelKey = ResourceKeys::Model_Paladin;
+    boss.position = { 0.0f, 0.0f, 0.0f };
+    boss.scale = { 100.0f, 100.0f, 100.0f };
+    boss.center = { 0.0f, 50.0f, 0.0f };
+    boss.rotation = { 0.0f, 0.0f, 0.0f };
+=======
+	stage.Init();
+	stage.Reset();
+    boss.Init();
+    boss.Reset();
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
     fontHandle = RM().GetFont(ResourceKeys::Font_Title);
 
     cameraEye = { 0.0f, 250.0f, -650.0f };

@@ -15,8 +15,8 @@ public:
 		position(pos),
       basePosition(pos)
 	{
-		Init();
-      motion.Start(0.0f, 1.0f, motionDuration, showEasing);
+		//Init();
+        motion.Start(0.0f, 1.0f, motionDuration, showEasing);
 		SetToMove(dir); // モーションの方向を設定
 		state = State::Do;// モーション実行中に設定
 	}
