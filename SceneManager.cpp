@@ -32,7 +32,6 @@ void SceneManager::Init()
     gameScene.SetGameContext(&gameContext);
     resultScene.SetGameContext(&gameContext);
     bossTestScene.SetGameContext(&gameContext);
-    ssFlipTestScene.SetGameContext(&gameContext);
 
     scene = &titleScene; // 最初のシーン
 }
@@ -65,7 +64,6 @@ Scene* SceneManager::GetScene(SceneID id)
         case SceneID::Game:     return &gameScene;
         case SceneID::Result:   return &resultScene;
         case SceneID::BossTest: return &bossTestScene;
-        case SceneID::SsFlipTest: return &ssFlipTestScene;
     }
     return &titleScene;
 }
@@ -88,9 +86,9 @@ void SceneManager::Run()
 
             float deltaTime = DxPlus::GetDeltaTime();
             scene->Drive(deltaTime);
-            UIM().Update(deltaTime);
+           UIM().Update(deltaTime);
             scene->Render();
-            UIM().Draw();
+           UIM().Draw();
 
             if (scene->IsFinished())
             {

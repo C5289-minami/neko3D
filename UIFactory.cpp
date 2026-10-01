@@ -18,12 +18,11 @@ void UIFactory::CreateTitleUI(UIManager& manager)
 		if (!player) return;
 
 		const DxPlus::Vec2 testPos(DxPlus::CLIENT_WIDTH * 0.9f, DxPlus::CLIENT_HEIGHT * 0.68f);
-		const DxPlus::Vec2 fromBelow(0.8f, 0.2f);// •ûŒü
+		const DxPlus::Vec2 fromBelow(1.0f, 0.0f);// •ûŒü
 		const float motionDuration = 1.0f; // o‚Ä‚­‚é‘ŠÔ‚ğw’è
 		auto testUI = std::make_unique<SpriteStudioUI>(key, player, testPos, fromBelow, motionDuration);
 		testUI->SetShowEasing(Motion::Easing::EaseOut);
 		testUI->SetMoveDistance(1000.0f);
-		testUI->SetScale(-1.0f); // ¶‰E”½“]
 		testUI->SetScale(0.5f);
 		manager.AddUI(std::move(testUI));
 	}

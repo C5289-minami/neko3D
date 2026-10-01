@@ -237,20 +237,17 @@ namespace ss
 
 	static void CoordinateGetDiagonalIntersection(SsVector2& out, const SsVector2& LU, const SsVector2& RU, const SsVector2& LD, const SsVector2& RD)
 	{
-		// 反転時や対角線が平行な場合のフォールバック（4頂点の平均）をあらかじめ設定
-		out.x = (LU.x + RU.x + LD.x + RD.x) * 0.25f;
-		out.y = (LU.y + RU.y + LD.y + RD.y) * 0.25f;
+		out = SsVector2(0.f, 0.f);
 
 		float c1 = (LD.y - RU.y) * (LD.x - LU.x) - (LD.x - RU.x) * (LD.y - LU.y);
 		float c2 = (RD.x - LU.x) * (LD.y - LU.y) - (RD.y - LU.y) * (LD.x - LU.x);
 		float c3 = (RD.x - LU.x) * (LD.y - RU.y) - (RD.y - LU.y) * (LD.x - RU.x);
 
-		if (c3 == 0.0f) return;
+		if (c3 <= 0 && c3 >= 0) return;
 
 		float ca = c1 / c3;
 		float cb = c2 / c3;
 
-		// 線分上に交点が存在する場合のみ適用
 		if (((0.0f <= ca) && (1.0f >= ca)) && ((0.0f <= cb) && (1.0f >= cb)))
 		{
 			out.x = LU.x + ca * (RD.x - LU.x);
@@ -318,7 +315,6 @@ namespace ss
 	}
 
 	// スプライトの表示
-	// スプライトの表示
 	void SSDrawSprite(CustomSprite* sprite, State* overwrite_state)
 	{
 		if (sprite->_state.isVisibled == false) return;
@@ -339,6 +335,7 @@ namespace ss
 		quad.tr.vertices.x += cx; quad.tr.vertices.y += cy;
 		quad.bl.vertices.x += cx; quad.bl.vertices.y += cy;
 		quad.br.vertices.x += cx; quad.br.vertices.y += cy;
+
 
 		float mat[16];
 		IdentityMatrix(mat);
@@ -400,6 +397,7 @@ namespace ss
 		default:             SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255); break;
 		}
 
+
 		// 1. 各頂点（LU:左上, RU:右上, LD:左下, RD:右下）
 		SsVector2 LU(quad.tl.vertices.x, quad.tl.vertices.y);
 		SsVector2 RU(quad.tr.vertices.x, quad.tr.vertices.y);
@@ -411,7 +409,7 @@ namespace ss
 		SsVector2 LD_uv(quad.bl.texCoords.u, quad.bl.texCoords.v);
 		SsVector2 RD_uv(quad.br.texCoords.u, quad.br.texCoords.v);
 
-		// 2. 対角線の交点を求める（反転フォールバック付き）
+		// 2. 対角線の交点を求める
 		SsVector2 Center, Center_uv;
 		CoordinateGetDiagonalIntersection(Center, LU, RU, LD, RD);
 		CoordinateGetDiagonalIntersection(Center_uv, LU_uv, RU_uv, LD_uv, RD_uv);
@@ -452,10 +450,8 @@ namespace ss
 			3, 0, 4   // 左三角形
 		};
 
-		// 5. 裏返り（カリング）対策を行って描画呼び出し
-		SetUseBackCulling(FALSE);
+		// 5. 描画呼び出し
 		DrawPolygonIndexed2D(v, 5, indices, 4, texture[tex_index], TRUE);
-		SetUseBackCulling(TRUE);
 	}
 
 	// --- マスク処理の実装 ---

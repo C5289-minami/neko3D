@@ -1547,58 +1547,6 @@ void Player::releaseAnime()
 	releaseParts();
 }
 
-void Player::reset()
-{
-	if (_motionBlendPlayer)
-	{
-		delete _motionBlendPlayer;
-		_motionBlendPlayer = nullptr;
-	}
-	_blendTime = 0.0f;
-	_blendTimeMax = 0.0f;
-
-	_state.init();
-	_state.name.clear();
-	_frameSkipEnabled = true;
-	_playingFrame = 0.0f;
-	_step = 1.0f;
-	_loop = 0;
-	_loopCount = 0;
-	_isPlaying = false;
-	_isPausing = false;
-	_isPlayFirstUserdataChack = true;
-	_prevDrawFrameNo = -1;
-	_animefps = 0;
-	_col_r = 255;
-	_col_g = 255;
-	_col_b = 255;
-	_instanceOverWrite = false;
-	_instanseParam.clear();
-	_startFrameOverWrite = -1;
-	_endFrameOverWrite = -1;
-	_seedOffset = 0;
-	_draw_count = 0;
-	_userData = UserData{};
-	_maskIndexList.clear();
-	_maskFuncFlag = true;
-	_maskParentSetting = true;
-	_parentMatUse = false;
-	_exParamDraw = nullptr;
-	IdentityMatrix(_parentMat);
-
-	for (int i = 0; i < PART_VISIBLE_MAX; ++i)
-	{
-		_partVisible[i] = true;
-		_cellChange[i] = -1;
-		_partIndex[i] = -1;
-	}
-
-	if (_currentRs && _currentAnimeRef)
-	{
-		play(_currentAnimeRef->packName, _currentAnimeRef->animeName, 0, 0);
-	}
-}
-
 void Player::play(const std::string& ssaeName, const std::string& motionName, int loop, int startFrameNo)
 {
 	std::string animeName = Format("%s/%s", ssaeName.c_str(), motionName.c_str());
@@ -1715,7 +1663,7 @@ void Player::update(float dt)
 void Player::updateFrame(float dt)
 {
 	if (!_currentAnimeRef) return;
-	if (!_currentRs&&_currentRs->data) return;
+	if (!_currentRs->data) return;
 
 	int startFrame = _currentAnimeRef->animationData->startFrames;
 	int endFrame = _currentAnimeRef->animationData->endFrames;

@@ -124,11 +124,6 @@
     <Filter Include="10_Core\Motion">
       <UniqueIdentifier>{ffce0e0b-3714-433b-8f27-48fcc6c0c39d}</UniqueIdentifier>
     </Filter>
-<<<<<<< Updated upstream
-=======
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
     <Filter Include="40_Gameplay\Actors\Boss">
       <UniqueIdentifier>{2e0c2163-c7d4-461b-9df8-6d65c7e5b36d}</UniqueIdentifier>
     </Filter>
@@ -138,22 +133,6 @@
     <Filter Include="30_Scenes\Test">
       <UniqueIdentifier>{f3daf8e3-a39d-453e-abec-344167853166}</UniqueIdentifier>
     </Filter>
-<<<<<<< Updated upstream
-=======
-    <Filter Include="40_Gameplay\Actors\Player\State\Base">
-      <UniqueIdentifier>{1b541452-3088-46c0-81f4-a0b683e82c78}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="40_Gameplay\Actors\Boss\State\Base">
-      <UniqueIdentifier>{2a070aa6-8f0f-45ab-8bbe-4b08bc676959}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="40_Gameplay\Actors\Boss\State\Idle">
-      <UniqueIdentifier>{8b334c22-66c0-4b5a-a218-04c3d6b04228}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="40_Gameplay\Actors\Boss\State\Walk">
-      <UniqueIdentifier>{b1e86e44-2528-41d6-aeb9-567938fc1929}</UniqueIdentifier>
-    </Filter>
->>>>>>> Stashed changes
->>>>>>> Stashed changes
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -294,6 +273,15 @@
     <ClInclude Include="State.h">
       <Filter>40_Gameplay\StateMachine</Filter>
     </ClInclude>
+    <ClInclude Include="PlayerBaseState.h">
+      <Filter>40_Gameplay\Actors\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerStateType.h">
+      <Filter>40_Gameplay\Actors\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerStateMachine.h">
+      <Filter>40_Gameplay\Actors\Player\State</Filter>
+    </ClInclude>
     <ClInclude Include="PlayerIdleState.h">
       <Filter>40_Gameplay\Actors\Player\State\Idle</Filter>
     </ClInclude>
@@ -396,7 +384,6 @@
     <ClInclude Include="DrawableObject.h">
       <Filter>20_Resources</Filter>
     </ClInclude>
-<<<<<<< Updated upstream
     <ClInclude Include="BossStateMachine.h">
       <Filter>40_Gameplay\Actors\Boss\State</Filter>
     </ClInclude>
@@ -412,12 +399,6 @@
     <ClInclude Include="BossBaseState.h">
       <Filter>40_Gameplay\Actors\Boss\State</Filter>
     </ClInclude>
-=======
-<<<<<<< Updated upstream
-    <ClInclude Include="BossTestScene.h" />
-    <ClInclude Include="Motion.h" />
-=======
->>>>>>> Stashed changes
     <ClInclude Include="Boss.h">
       <Filter>40_Gameplay\Actors\Boss</Filter>
     </ClInclude>
@@ -427,37 +408,6 @@
     <ClInclude Include="Motion.h">
       <Filter>10_Core\Motion</Filter>
     </ClInclude>
-<<<<<<< Updated upstream
-=======
-    <ClInclude Include="PlayerBaseState.h">
-      <Filter>40_Gameplay\Actors\Player\State\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="PlayerStateMachine.h">
-      <Filter>40_Gameplay\Actors\Player\State\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="PlayerStateType.h">
-      <Filter>40_Gameplay\Actors\Player\State\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="BossStateType.h">
-      <Filter>40_Gameplay\Actors\Boss\State\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="BossStateMachine.h">
-      <Filter>40_Gameplay\Actors\Boss\State\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="BossIdleState.h">
-      <Filter>40_Gameplay\Actors\Boss\State\Idle</Filter>
-    </ClInclude>
-    <ClInclude Include="BossBaseState.h">
-      <Filter>40_Gameplay\Actors\Boss\State\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="BossWalkState.h">
-      <Filter>40_Gameplay\Actors\Boss\State</Filter>
-    </ClInclude>
-    <ClInclude Include="DebugScene.h">
-      <Filter>30_Scenes\Test</Filter>
-    </ClInclude>
->>>>>>> Stashed changes
->>>>>>> Stashed changes
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -565,6 +515,9 @@
     <ClCompile Include="StateMachine.cpp">
       <Filter>40_Gameplay\StateMachine</Filter>
     </ClCompile>
+    <ClCompile Include="PlayerStateMachine.cpp">
+      <Filter>40_Gameplay\Actors\Player\State</Filter>
+    </ClCompile>
     <ClCompile Include="PlayerIdleState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Idle</Filter>
     </ClCompile>
@@ -616,7 +569,6 @@
     <ClCompile Include="DrawableObject.cpp">
       <Filter>20_Resources</Filter>
     </ClCompile>
-<<<<<<< Updated upstream
     <ClCompile Include="BossStateMachine.cpp">
       <Filter>40_Gameplay\Actors\Boss\State</Filter>
     </ClCompile>
@@ -626,12 +578,6 @@
     <ClCompile Include="BossIdleState.cpp">
       <Filter>40_Gameplay\Actors\Boss\State</Filter>
     </ClCompile>
-=======
-<<<<<<< Updated upstream
-    <ClCompile Include="BossTestScene.cpp" />
-    <ClCompile Include="Motion.cpp" />
-=======
->>>>>>> Stashed changes
     <ClCompile Include="Boss.cpp">
       <Filter>40_Gameplay\Actors\Boss</Filter>
     </ClCompile>
@@ -641,24 +587,5 @@
     <ClCompile Include="Motion.cpp">
       <Filter>10_Core\Motion</Filter>
     </ClCompile>
-<<<<<<< Updated upstream
-=======
-    <ClCompile Include="PlayerStateMachine.cpp">
-      <Filter>40_Gameplay\Actors\Player\State\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="BossStateMachine.cpp">
-      <Filter>40_Gameplay\Actors\Boss\State\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="BossIdleState.cpp">
-      <Filter>40_Gameplay\Actors\Boss\State\Idle</Filter>
-    </ClCompile>
-    <ClCompile Include="BossWalkState.cpp">
-      <Filter>40_Gameplay\Actors\Boss\State</Filter>
-    </ClCompile>
-    <ClCompile Include="DebugScene.cpp">
-      <Filter>30_Scenes\Test</Filter>
-    </ClCompile>
->>>>>>> Stashed changes
->>>>>>> Stashed changes
   </ItemGroup>
 </Project>

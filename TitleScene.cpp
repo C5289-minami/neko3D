@@ -22,7 +22,7 @@ void TitleScene::Update(float deltaTime)
 #ifndef NDEBUG
     if (DxLib::CheckHitKey(KEY_INPUT_F1))
     {
-        SetNextScene(SceneManager::GetInstance().GetScene(SceneID::SsFlipTest));
+        SetNextScene(SceneManager::GetInstance().GetScene(SceneID::BossTest));
         StartFadeOut();
         return;
     }
@@ -62,7 +62,7 @@ void TitleScene::Render() const
     }
 
 #ifndef NDEBUG
-    DxPlus::Text::DrawString(L"F1: SS Flip Test",
+    DxPlus::Text::DrawString(L"F1: Boss Test",
         { DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.85f },
         white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0, fontHandle);
 #endif
