@@ -26,6 +26,12 @@ void TitleScene::Update(float deltaTime)
         StartFadeOut();
         return;
     }
+    else if (DxLib::CheckHitKey(KEY_INPUT_F2))
+    {
+        SetNextScene(SceneManager::GetInstance().GetScene(SceneID::BossTest));
+        StartFadeOut();
+        return;
+	}
 #endif
 
     using namespace DxPlus::Input;
