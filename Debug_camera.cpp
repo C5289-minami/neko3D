@@ -127,6 +127,6 @@ void Debug_camera::RebuildTarget()
 {
     // 現在のyaw・pitchに基づき、カメラの正面1単位先を注視点にする
     const float cosPitch = std::cos(pitch);
-    const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };
+    const Vec3 forward{ std::sin(yaw) * cosPitch, -std::sin(pitch), std::cos(yaw) * cosPitch };
     target = eye + forward;
 }
