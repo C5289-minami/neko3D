@@ -2,7 +2,11 @@
 #include "StateMachine.h"
 #include "BossStateType.h"
 #include "BossIdleState.h"
+<<<<<<< Updated upstream
 #include "BossMoveState.h"
+=======
+#include "BossWalkState.h"
+>>>>>>> Stashed changes
 
 class Boss;
 
@@ -21,5 +25,9 @@ private:
     Boss& boss_;
     BossStateType currentType_{ BossStateType::None };
     BossIdleState idleState_;
+<<<<<<< Updated upstream
     BossMoveState moveState_;
+=======
+    BossWalkState moveState_;
+>>>>>>> Stashed changes
 };

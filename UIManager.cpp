@@ -21,6 +21,9 @@ void UIManager::Init()
 	else if (type == SceneID::Result) {
 		UIFactory::CreateResultUI(*this);
 	}
+	else {
+		// ‘¼‚ÌƒV[ƒ“‚Å‚ÍUI‚ğì¬‚µ‚È‚¢
+	}
 	
 
 
