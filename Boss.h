@@ -19,6 +19,7 @@ public:
     const Vec3& GetPosition() const { return model_.position; }
     void SetPosition(const Vec3& position) { model_.position = position; }
     BossStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }
+	ModelObject& GetModelObject() { return model_; }
 
 private:
     ModelObject model_{};

@@ -4,5 +4,7 @@ enum class BossStateType
 {
     None,
     Idle,
-    Move,
+    Walk,
+	Attack,
+	Recover
 };

@@ -180,9 +180,12 @@
   <ItemGroup>
     <ClInclude Include="ActorBase.h" />
     <ClInclude Include="AnimationDraw.h" />
+    <ClInclude Include="Attack.h" />
     <ClInclude Include="Boss.h" />
+    <ClInclude Include="BossAttackState.h" />
     <ClInclude Include="BossBaseState.h" />
     <ClInclude Include="BossIdleState.h" />
+    <ClInclude Include="BossRecoverState.h" />
     <ClInclude Include="BossStateMachine.h" />
     <ClInclude Include="BossStateType.h" />
     <ClInclude Include="BossTestScene.h" />
@@ -274,7 +277,9 @@
   <ItemGroup>
     <ClCompile Include="AnimationDraw.cpp" />
     <ClCompile Include="Boss.cpp" />
+    <ClCompile Include="BossAttackState.cpp" />
     <ClCompile Include="BossIdleState.cpp" />
+    <ClCompile Include="BossRecoverState.cpp" />
     <ClCompile Include="BossStateMachine.cpp" />
     <ClCompile Include="BossTestScene.cpp" />
     <ClCompile Include="BossWalkState.cpp" />

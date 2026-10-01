@@ -3,7 +3,9 @@
 BossStateMachine::BossStateMachine(Boss& boss)
     : boss_(boss),
       idleState_(*this, boss),
-      moveState_(*this, boss)
+      moveState_(*this, boss),
+	attackState_(*this, boss),
+	recoverState_(*this, boss)
 {
 }
 
@@ -30,8 +32,12 @@ State* BossStateMachine::FindState(BossStateType type)
     {
     case BossStateType::Idle:
         return &idleState_;
-    case BossStateType::Move:
+    case BossStateType::Walk:
         return &moveState_;
+	case BossStateType::Attack:
+		return &attackState_;
+	case BossStateType::Recover:
+		return &recoverState_;
     default:
         return nullptr;
     }

@@ -3,12 +3,11 @@
 
 #include <cmath>
 
+
 Boss::Boss()
     : stateMachine_(*this)
 {
     model_.modelKey = ResourceKeys::Model_Paladin;
-    model_.scale = { 100.0f, 100.0f, 100.0f };
-    model_.center = { 0.0f, 50.0f, 0.0f };
 }
 
 void Boss::Init()
@@ -18,7 +17,9 @@ void Boss::Init()
 
 void Boss::Reset()
 {
-    model_.position = {};
+    model_.position = {0.0f,-1000.0f,0.0f};
+	float scaleFactor = 1500.0f; // スケールの倍率を指定
+	model_.scale = { scaleFactor, scaleFactor, scaleFactor };
     model_.rotation = {};
     velocity_ = {};
     stateMachine_.Initialize();
@@ -47,7 +48,7 @@ void Boss::SetMoveDirection(const Vec3& moveDirection, float speed)
     direction = direction.Normalized();
     velocity_ = direction * speed;
     model_.rotation.y = std::atan2(direction.x, direction.z);
-    stateMachine_.ChangeState(BossStateType::Move);
+    stateMachine_.ChangeState(BossStateType::Walk);
 }
 
 void Boss::StopMove()

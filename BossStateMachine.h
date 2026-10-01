@@ -4,6 +4,8 @@
 
 #include "BossIdleState.h"
 #include "BossWalkState.h"
+#include "BossAttackState.h"
+#include "BossRecoverState.h"
 
 
 class Boss;
@@ -24,4 +26,6 @@ private:
     BossStateType currentType_{ BossStateType::None };
     BossIdleState idleState_;
     BossWalkState moveState_;
+	BossAttackState attackState_;
+	BossRecoverState recoverState_;
 };
