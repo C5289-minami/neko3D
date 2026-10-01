@@ -180,13 +180,26 @@
   <ItemGroup>
     <ClInclude Include="ActorBase.h" />
     <ClInclude Include="AnimationDraw.h" />
+<<<<<<< Updated upstream
     <ClInclude Include="Boss.h" />
     <ClInclude Include="BossBaseState.h" />
     <ClInclude Include="BossIdleState.h" />
     <ClInclude Include="BossMoveState.h" />
     <ClInclude Include="BossStateMachine.h" />
     <ClInclude Include="BossStateType.h" />
+=======
+<<<<<<< Updated upstream
+=======
+    <ClInclude Include="Boss.h" />
+    <ClInclude Include="BossBaseState.h" />
+    <ClInclude Include="BossIdleState.h" />
+    <ClInclude Include="BossWalkState.h" />
+    <ClInclude Include="BossStateMachine.h" />
+    <ClInclude Include="BossStateType.h" />
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
     <ClInclude Include="BossTestScene.h" />
+    <ClInclude Include="DebugScene.h" />
     <ClInclude Include="Debug_camera.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="ButtonUI.h" />
@@ -272,11 +285,22 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AnimationDraw.cpp" />
+<<<<<<< Updated upstream
     <ClCompile Include="Boss.cpp" />
     <ClCompile Include="BossIdleState.cpp" />
     <ClCompile Include="BossMoveState.cpp" />
     <ClCompile Include="BossStateMachine.cpp" />
+=======
+<<<<<<< Updated upstream
+=======
+    <ClCompile Include="Boss.cpp" />
+    <ClCompile Include="BossIdleState.cpp" />
+    <ClCompile Include="BossWalkState.cpp" />
+    <ClCompile Include="BossStateMachine.cpp" />
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
     <ClCompile Include="BossTestScene.cpp" />
+    <ClCompile Include="DebugScene.cpp" />
     <ClCompile Include="Debug_camera.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="DebugUI.cpp" />
