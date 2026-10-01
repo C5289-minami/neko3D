@@ -89,16 +89,36 @@ void Motion::Decrease(float deltaTime)
 
 float Motion::GetEasedProgress() const
 {
+    // 今後ここを拡張して、自由にしたい。
+    
     const float t = std::clamp(progress, 0.0f, 1.0f);
     switch (easing)
     {
     case Easing::EaseIn:
-		return t * t; // 加速するイージング
+        return t * t * t; // 加速するイージング
     case Easing::EaseOut:
-		return t * (2.0f - t); // 減速するイージング
+        // 減速するイージング
+    {
+        const float remainingProgress = 1.0f - t;
+        return 1.0f - (remainingProgress * remainingProgress * remainingProgress);
+    } 
     case Easing::EaseInOut:
-		return t * t * (3.0f - 2.0f * t); // 緩急をつけるイージング
-    case Easing::Linear:
+    {
+        // 緩急をつけるイージング
+        constexpr float MidPoint = 0.5f;    // 前半(加速)と後半(減速)を切り替える中間点
+        constexpr float ScaleFactor = 4.0f; // 中間点 (t=0.5) で出力が0.5になるよう調整する倍率
+        if (t < MidPoint)
+        {
+            // 前半の区間を加速
+            return ScaleFactor * t * t * t;
+        }
+        else
+        {
+            // 後半の区間を減速
+            const float remainingProgress = 1.0f - t;
+            return 1.0f - (ScaleFactor * remainingProgress * remainingProgress * remainingProgress);
+        }
+    }
     default:
         return t;
     }
