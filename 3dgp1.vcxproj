@@ -183,10 +183,11 @@
     <ClInclude Include="Boss.h" />
     <ClInclude Include="BossBaseState.h" />
     <ClInclude Include="BossIdleState.h" />
-    <ClInclude Include="BossMoveState.h" />
     <ClInclude Include="BossStateMachine.h" />
     <ClInclude Include="BossStateType.h" />
     <ClInclude Include="BossTestScene.h" />
+    <ClInclude Include="BossWalkState.h" />
+    <ClInclude Include="DebugScene.h" />
     <ClInclude Include="Debug_camera.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="ButtonUI.h" />
@@ -274,9 +275,10 @@
     <ClCompile Include="AnimationDraw.cpp" />
     <ClCompile Include="Boss.cpp" />
     <ClCompile Include="BossIdleState.cpp" />
-    <ClCompile Include="BossMoveState.cpp" />
     <ClCompile Include="BossStateMachine.cpp" />
     <ClCompile Include="BossTestScene.cpp" />
+    <ClCompile Include="BossWalkState.cpp" />
+    <ClCompile Include="DebugScene.cpp" />
     <ClCompile Include="Debug_camera.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="DebugUI.cpp" />
