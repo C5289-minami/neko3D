@@ -1,5 +1,6 @@
 #pragma once
 #pragma once
+#include "Boss.h"
 #include "Scene.h"
 #include "DrawableObject.h"
 #include "Vector3.h"
@@ -14,7 +15,7 @@ public:
 
 private:
     ModelObject stage{};
-    ModelObject boss{};
+    Boss boss{};
     int fontHandle{ -1 };
     Vec3 cameraEye{ 0.0f, 250.0f, -650.0f };
     float yaw{};

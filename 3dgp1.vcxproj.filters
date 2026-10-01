@@ -124,6 +124,15 @@
     <Filter Include="10_Core\Motion">
       <UniqueIdentifier>{ffce0e0b-3714-433b-8f27-48fcc6c0c39d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="40_Gameplay\Actors\Boss">
+      <UniqueIdentifier>{2e0c2163-c7d4-461b-9df8-6d65c7e5b36d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Boss\State">
+      <UniqueIdentifier>{dbe9c78f-a32f-4cf0-9f76-31611ab466d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes\Test">
+      <UniqueIdentifier>{f3daf8e3-a39d-453e-abec-344167853166}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -375,8 +384,30 @@
     <ClInclude Include="DrawableObject.h">
       <Filter>20_Resources</Filter>
     </ClInclude>
-    <ClInclude Include="BossTestScene.h" />
-    <ClInclude Include="Motion.h" />
+    <ClInclude Include="BossStateMachine.h">
+      <Filter>40_Gameplay\Actors\Boss\State</Filter>
+    </ClInclude>
+    <ClInclude Include="BossMoveState.h">
+      <Filter>40_Gameplay\Actors\Boss\State</Filter>
+    </ClInclude>
+    <ClInclude Include="BossIdleState.h">
+      <Filter>40_Gameplay\Actors\Boss\State</Filter>
+    </ClInclude>
+    <ClInclude Include="BossStateType.h">
+      <Filter>40_Gameplay\Actors\Boss\State</Filter>
+    </ClInclude>
+    <ClInclude Include="BossBaseState.h">
+      <Filter>40_Gameplay\Actors\Boss\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Boss.h">
+      <Filter>40_Gameplay\Actors\Boss</Filter>
+    </ClInclude>
+    <ClInclude Include="BossTestScene.h">
+      <Filter>30_Scenes\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Motion.h">
+      <Filter>10_Core\Motion</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -538,7 +569,23 @@
     <ClCompile Include="DrawableObject.cpp">
       <Filter>20_Resources</Filter>
     </ClCompile>
-    <ClCompile Include="BossTestScene.cpp" />
-    <ClCompile Include="Motion.cpp" />
+    <ClCompile Include="BossStateMachine.cpp">
+      <Filter>40_Gameplay\Actors\Boss\State</Filter>
+    </ClCompile>
+    <ClCompile Include="BossMoveState.cpp">
+      <Filter>40_Gameplay\Actors\Boss\State</Filter>
+    </ClCompile>
+    <ClCompile Include="BossIdleState.cpp">
+      <Filter>40_Gameplay\Actors\Boss\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Boss.cpp">
+      <Filter>40_Gameplay\Actors\Boss</Filter>
+    </ClCompile>
+    <ClCompile Include="BossTestScene.cpp">
+      <Filter>30_Scenes\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="Motion.cpp">
+      <Filter>10_Core\Motion</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

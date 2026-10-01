@@ -180,6 +180,12 @@
   <ItemGroup>
     <ClInclude Include="ActorBase.h" />
     <ClInclude Include="AnimationDraw.h" />
+    <ClInclude Include="Boss.h" />
+    <ClInclude Include="BossBaseState.h" />
+    <ClInclude Include="BossIdleState.h" />
+    <ClInclude Include="BossMoveState.h" />
+    <ClInclude Include="BossStateMachine.h" />
+    <ClInclude Include="BossStateType.h" />
     <ClInclude Include="BossTestScene.h" />
     <ClInclude Include="Debug_camera.h" />
     <ClInclude Include="Button.h" />
@@ -266,6 +272,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AnimationDraw.cpp" />
+    <ClCompile Include="Boss.cpp" />
+    <ClCompile Include="BossIdleState.cpp" />
+    <ClCompile Include="BossMoveState.cpp" />
+    <ClCompile Include="BossStateMachine.cpp" />
     <ClCompile Include="BossTestScene.cpp" />
     <ClCompile Include="Debug_camera.cpp" />
     <ClCompile Include="Collision.cpp" />

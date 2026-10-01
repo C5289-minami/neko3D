@@ -25,11 +25,8 @@ void BossTestScene::Init()
     DxLib::SetGlobalAmbientLight(DxLib::GetColorF(0.35f, 0.35f, 0.35f, 1.0f));
 
     stage.modelKey = ResourceKeys::Model_Stage;
-    boss.modelKey = ResourceKeys::Model_Paladin;
-    boss.position = { 0.0f, 0.0f, 0.0f };
-    boss.scale = { 100.0f, 100.0f, 100.0f };
-    boss.center = { 0.0f, 50.0f, 0.0f };
-    boss.rotation = { 0.0f, 0.0f, 0.0f };
+    boss.Init();
+    boss.Reset();
     fontHandle = RM().GetFont(ResourceKeys::Font_Title);
 
     cameraEye = { 0.0f, 250.0f, -650.0f };
@@ -42,6 +39,7 @@ void BossTestScene::Init()
 
 void BossTestScene::Update(float deltaTime)
 {
+    boss.Update(deltaTime);
 #ifndef NDEBUG
     if (DxLib::CheckHitKey(KEY_INPUT_F1))
     {
