@@ -4,7 +4,8 @@ class Debug_camera {
 public:
  void Initialize(const Vec3& eye, const Vec3& target);
  void Begin();
- void Update(float deltaTime, const Vec3& focusPoint);
+ void Update(float deltaTime, const Vec3& focusPoint, const Vec3& viewEye, const Vec3& viewTarget);
+ void SetPosition(const Vec3& position);
  void ResetView();
  void FocusAt(const Vec3& point, float distance = 350.0f);
  bool IsSceneViewActive() const { return active; }

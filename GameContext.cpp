@@ -1,114 +1,128 @@
-﻿// =============================
+// =============================
 // Core/GameContext.cpp
 // =============================
 #include "GameContext.h"
-#include "ResourceManager.h"
-#include "ResourceKeys.h"
 #include "DxConv.h"
-#include "Consts.h"
+#include "DxPlus/DxPlus.h"
+
+const Vec3& GameContext::GetCameraPosition() const
+{
+#ifndef NDEBUG
+    if (Debug_camera.IsSceneViewActive()) return Debug_camera.GetEye();
+#endif
+    return playerCamera.GetPosition();
+}
+
+const Vec3& GameContext::GetCameraTarget() const
+{
+#ifndef NDEBUG
+    if (Debug_camera.IsSceneViewActive()) return Debug_camera.GetTarget();
+#endif
+    return playerCamera.GetTarget();
+}
+
+const Vec3& GameContext::GetCameraUp() const
+{
+#ifndef NDEBUG
+    if (Debug_camera.IsSceneViewActive()) return Debug_camera.GetUp();
+#endif
+    return playerCamera.GetUp();
+}
+
+bool GameContext::IsSceneViewActive() const
+{
+#ifndef NDEBUG
+    return Debug_camera.IsSceneViewActive();
+#else
+    return false;
+#endif
+}
+
+void GameContext::SetCameraPosition(const Vec3& position)
+{
+#ifndef NDEBUG
+    if (Debug_camera.IsSceneViewActive())
+    {
+        Debug_camera.SetPosition(position);
+        return;
+    }
+#endif
+    playerCamera.SetPosition(position);
+}
+
+void GameContext::ResetSceneCamera()
+{
+    if (IsSceneViewActive())
+    {
+        Debug_camera.ResetView();
+    }
+    else
+    {
+        playerCamera.Reset();
+        Debug_camera.Initialize(playerCamera.GetEye(), playerCamera.GetTarget());
+    }
+}
+
+void GameContext::FocusSceneCameraOnPlayer()
+{
+#ifndef NDEBUG
+    if (!Debug_camera.IsSceneViewActive())
+    {
+        Debug_camera.Initialize(playerCamera.GetEye(), playerCamera.GetTarget());
+        Debug_camera.Begin();
+    }
+    Debug_camera.FocusAt(player.GetPosition());
+#endif
+}
 
 void GameContext::Init()
 {
-    // 各オブジェクトの初期化
     stage.Init();
-	player.Init();
+    player.Init();
+
+    playerCamera.Reset();
+    Debug_camera.Initialize(playerCamera.GetEye(), playerCamera.GetTarget());
 }
 
 void GameContext::Reset()
 {
-    // 描画先をバックバッファに指定
     DxLib::SetDrawScreen(DX_SCREEN_BACK);
-
-    // 背景色を設定
     DxLib::SetBackgroundColor(bgRed, bgGreen, bgBlue);
 
-    // ライトの向きを設定
-    Vec3 lightDir{ -0.3f, -1.0f, -0.5f };
+    const Vec3 lightDir{ -0.3f, -1.0f, -0.5f };
     DxLib::SetLightDirection(DxConv::ToVECTOR(lightDir));
-	// 環境光の設定
-	DxLib::SetGlobalAmbientLight(DxLib::GetColorF(0.35f, 0.35f, 0.35f,1.0f));
+    DxLib::SetGlobalAmbientLight(DxLib::GetColorF(0.35f, 0.35f, 0.35f, 1.0f));
 
-    // カメラを初期状態に戻す
-    orbitCamera.Reset();
-    Debug_camera.Initialize(eye, target);
-    wasOrbitControl = false;
-
-    // 各オブジェクトを初期状態に戻す
     stage.Reset();
-	player.Reset();
+    player.Reset();
+    playerCamera.Reset();
+    Debug_camera.Initialize(playerCamera.GetEye(), playerCamera.GetTarget());
 }
 
 void GameContext::Update(float deltaTime)
 {
-    Debug_camera.Update(deltaTime, player.GetPosition());
-#ifndef NDEBUG
-    if (Debug_camera.IsSceneViewActive()) return;
-#endif
-    // 背景色を反映
     DxLib::SetBackgroundColor(bgRed, bgGreen, bgBlue);
 
-    using namespace DxPlus::Input;
+#ifndef NDEBUG
+    // 切り替え時は通常カメラの現在の位置・向きからデバッグ操作を開始する。
+    Debug_camera.Update(deltaTime, player.GetPosition(),
+        playerCamera.GetEye(), playerCamera.GetTarget());
+    if (Debug_camera.IsSceneViewActive()) return;
+#endif
 
-    // PLAYER2のR1ボタンを押している間はOrbitCameraを操作する
-    const bool orbitControl = (GetButton(PLAYER2) & BUTTON_R1) != 0;
-
-    // OrbitCamera操作を始めた瞬間に、現在の視点情報を渡す
-    if (orbitControl && !wasOrbitControl)
-    {
-        orbitCamera.BeginControl();
-        orbitCamera.SetFromLookAt(eye, target);
-    }
-
-    // OrbitCamera操作中はプレイヤー更新を行わない
-    if (orbitControl)
-    {
-        orbitCamera.Update(deltaTime);
-        wasOrbitControl = true;
-        return;
-    }
-
-    wasOrbitControl = false;
-
-	// プレイヤーの更新
-	player.Update(deltaTime, stage);
+    // 通常カメラは定点のまま。プレイヤーの座標・移動処理は維持する。
+    player.Update(deltaTime, stage);
 }
 
 void GameContext::Draw() const
 {
-    // OrbitCamera操作中かどうかでカメラ設定を切り替える
-#ifndef NDEBUG
-    if (Debug_camera.IsSceneViewActive())
-    {
-        DxLib::SetCameraPositionAndTargetAndUpVec(DxConv::ToVECTOR(Debug_camera.GetEye()), DxConv::ToVECTOR(Debug_camera.GetTarget()), DxConv::ToVECTOR(Debug_camera.GetUp()));
-		// デバッグカメラ操作中は、OrbitCameraの状態を更新しない
-    }
-    else
-#endif
-    if (wasOrbitControl)
-    {
-        Vec3 e = orbitCamera.GetEye();
-        Vec3 t = orbitCamera.GetTarget();
-        Vec3 u = orbitCamera.GetUp();
+    DxLib::SetCameraPositionAndTargetAndUpVec(
+        DxConv::ToVECTOR(GetCameraPosition()),
+        DxConv::ToVECTOR(GetCameraTarget()),
+        DxConv::ToVECTOR(GetCameraUp()));
 
-        DxLib::SetCameraPositionAndTargetAndUpVec(
-            DxConv::ToVECTOR(e),
-            DxConv::ToVECTOR(t),
-            DxConv::ToVECTOR(u)
-        );
-    }
-    else
-    {
-        DxLib::SetCameraPositionAndTarget_UpVecY(
-            DxConv::ToVECTOR(eye),
-            DxConv::ToVECTOR(target)
-        );
-    }
-
-    // 画面をクリア
     DxLib::ClearDrawScreen();
-
-    // 各オブジェクトを描画
     grid.Draw();
     stage.Draw();
-	player.Draw();
+    player.Draw();
 }
