@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <!-- Prefer the installed PC copy; keep the bundled copy as a fallback. -->
+    <DxLibDir Condition="'$(DxLibDir)' == '' and Exists('C:\DxLib_VC\Dxlib\DxLib.h')">C:\DxLib_VC\Dxlib</DxLibDir>
+    <DxLibDir Condition="'$(DxLibDir)' == ''">$(MSBuildThisFileDirectory)DxLib</DxLibDir>
+  </PropertyGroup>
+  <Target Name="ValidateDxLib" BeforeTargets="PrepareForBuild">
+    <Error Condition="!Exists('$(DxLibDir)\DxLib.h')" Text="DxLib.h was not found in $(DxLibDir). Set DxLibDir to the folder containing the DxLib headers and libraries." />
+  </Target>
+</Project>
