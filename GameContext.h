@@ -6,7 +6,7 @@
 
 #include "Vector3.h"
 #include "Grid.h"
-#include "OrbitCamera.h"
+#include "15_System/Player_camera.h"
 #include "Stage.h"
 #include "Player.h" 
 
@@ -30,14 +30,19 @@ public:
     Grid& GetGrid() { return grid; }
     const Grid& GetGrid() const { return grid; }
 
-    // Orbit Camera
-    OrbitCamera& GetOrbitCamera() { return orbitCamera; }
-    const OrbitCamera& GetOrbitCamera() const { return orbitCamera; }
-    bool IsSceneViewActive() const { return Debug_camera.IsSceneViewActive(); }
+    // Player Camera
+    Player_camera& GetPlayerCamera() { return playerCamera; }
+    const Player_camera& GetPlayerCamera() const { return playerCamera; }
+    const Vec3& GetPlayerPosition() const { return player.GetPosition(); }
+    const Vec3& GetCameraPosition() const;
+    const Vec3& GetCameraTarget() const;
+    const Vec3& GetCameraUp() const;
+    void SetCameraPosition(const Vec3& position);
+    bool IsSceneViewActive() const;
     float GetSceneCameraMoveSpeed() const { return Debug_camera.GetMoveSpeed(); }
     void SetSceneCameraMoveSpeed(float speed) { Debug_camera.SetMoveSpeed(speed); }
-    void ResetSceneCamera() { Debug_camera.ResetView(); }
-    void FocusSceneCameraOnPlayer() { Debug_camera.FocusAt(player.GetPosition()); }
+    void ResetSceneCamera();
+    void FocusSceneCameraOnPlayer();
 
     // ---- lifecycle ----
     void Init();
@@ -55,17 +60,8 @@ private:
     Grid grid;
 
     // Camera
-    OrbitCamera orbitCamera;
+    Player_camera playerCamera;
     Debug_camera Debug_camera;
-    bool wasOrbitControl{ false };
-
-    Vec3 eye{ 400.0f, 400.0f, -400.0f };
-    Vec3 target{};
-
-    // TPS Camera
-    float targetHeight{ 120.0f };
-    float tpsDistance{ 250.0f };
-    float tpsHeight{ 100.0f };
 
     // Stage
     Stage stage;

@@ -276,6 +276,9 @@
     <ClInclude Include="OrbitCamera.h">
       <Filter>10_Core\Camera</Filter>
     </ClInclude>
+    <ClInclude Include="15_System\Player_camera.h">
+      <Filter>15_System</Filter>
+    </ClInclude>
     <ClInclude Include="Raycast.h">
       <Filter>40_Gameplay\Physics</Filter>
     </ClInclude>
@@ -535,6 +538,9 @@
     </ClCompile>
     <ClCompile Include="OrbitCamera.cpp">
       <Filter>10_Core\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="15_System\Player_camera.cpp">
+      <Filter>15_System</Filter>
     </ClCompile>
     <ClCompile Include="Raycast.cpp">
       <Filter>40_Gameplay\Physics</Filter>

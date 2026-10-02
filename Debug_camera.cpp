@@ -42,6 +42,12 @@ void Debug_camera::Begin()
     active = true;
 }
 
+void Debug_camera::SetPosition(const Vec3& position)
+{
+    eye = position;
+    RebuildTarget();
+}
+
 void Debug_camera::ResetView()
 {
     // 初期視点に戻しつつ、デバッグカメラの有効状態は維持する
@@ -60,7 +66,7 @@ void Debug_camera::FocusAt(const Vec3& point, float distance)
     RebuildTarget();
 }
 
-void Debug_camera::Update(float deltaTime, const Vec3& focusPoint)
+void Debug_camera::Update(float deltaTime, const Vec3& focusPoint, const Vec3& viewEye, const Vec3& viewTarget)
 {
 #ifndef NDEBUG
     // デバッグビルド時のみ、Alt + Enterでカメラ操作を切り替える
@@ -71,7 +77,12 @@ void Debug_camera::Update(float deltaTime, const Vec3& focusPoint)
         if (active)
             active = false;
         else
+        {
+            Initialize(viewEye, viewTarget);
             Begin();
+            wasToggleDown = toggleDown;
+            return;
+        }
     }
     wasToggleDown = toggleDown;
 
@@ -94,7 +105,7 @@ void Debug_camera::Update(float deltaTime, const Vec3& focusPoint)
     // マウス移動量に応じてカメラの向きを変更する
     const DxPlus::Vec2Int mouseDelta = DxPlus::Input::GetMouseDelta();
     yaw += mouseDelta.x * c_MouseRotationRadiansPerPixel;
-    pitch = std::clamp(pitch + mouseDelta.y * c_MouseRotationRadiansPerPixel, kMinPitch, kMaxPitch);
+    pitch = std::clamp(pitch - mouseDelta.y * c_MouseRotationRadiansPerPixel, kMinPitch, kMaxPitch);
 
     // カメラの向きから前・右方向を求める
     const float cosPitch = std::cos(pitch);
@@ -120,6 +131,11 @@ void Debug_camera::Update(float deltaTime, const Vec3& focusPoint)
 
     // カメラ位置と向きから注視点を更新する
     RebuildTarget();
+#else
+    (void)deltaTime;
+    (void)focusPoint;
+    (void)viewEye;
+    (void)viewTarget;
 #endif
 }
 
@@ -127,6 +143,6 @@ void Debug_camera::RebuildTarget()
 {
     // 現在のyaw・pitchに基づき、カメラの正面1単位先を注視点にする
     const float cosPitch = std::cos(pitch);
-    const Vec3 forward{ std::sin(yaw) * cosPitch, -std::sin(pitch), std::cos(yaw) * cosPitch };
+    const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };
     target = eye + forward;
 }

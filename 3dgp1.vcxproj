@@ -232,6 +232,7 @@
     <ClInclude Include="MathUtil.h" />
     <ClInclude Include="Motion.h" />
     <ClInclude Include="OrbitCamera.h" />
+    <ClInclude Include="15_System\Player_camera.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerBaseState.h" />
     <ClInclude Include="PlayerIdleState.h" />
@@ -313,6 +314,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Motion.cpp" />
     <ClCompile Include="OrbitCamera.cpp" />
+    <ClCompile Include="15_System\Player_camera.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerIdleState.cpp" />
     <ClCompile Include="PlayerInput.cpp" />
