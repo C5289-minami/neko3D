@@ -1,6 +1,10 @@
 #pragma once
 
-enum class Bunit
+// =================================
+// Boss‚ÌUŒ‚í—Ş
+// =================================
+
+enum class BossAttackType
 {
 	Bang,       // —¼è‚ğ—‚Æ‚·
 	TailWhip,   // K”ö

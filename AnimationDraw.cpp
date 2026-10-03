@@ -1,229 +1,238 @@
 #include "AnimationDraw.h"
-#include "AnimationDraw.h"
 #include "DxConv.h"
 
 #include <algorithm>
 #include <cmath>
+#include <utility>
 
-// ============================================================================
-// フレーム更新の共通処理
-// ============================================================================
-void AnimationDraw::UpdateFrameInternal(float speed, int spriteCount, bool loop)
+AnimationDraw::AttachedAnimation::~AttachedAnimation()
 {
-    if (spriteCount == 0) return;
+    Reset();
+}
 
-    spriteNum = spriteCount;
-    frameInterval = speed * 60.0f;
+AnimationDraw::AttachedAnimation::AttachedAnimation(AttachedAnimation&& other) noexcept
+    : modelHandle_(std::exchange(other.modelHandle_, -1)),
+      attachIndex_(std::exchange(other.attachIndex_, -1))
+{
+}
 
-    currentInterval += 1.0f;
-
-    if (currentInterval >= frameInterval)
+AnimationDraw::AttachedAnimation& AnimationDraw::AttachedAnimation::operator=(AttachedAnimation&& other) noexcept
+{
+    if (this != &other)
     {
-        currentframe++;
-        currentInterval = 0.0f;
+        Reset();
+        modelHandle_ = std::exchange(other.modelHandle_, -1);
+        attachIndex_ = std::exchange(other.attachIndex_, -1);
+    }
+    return *this;
+}
+
+bool AnimationDraw::AttachedAnimation::Attach(int modelHandle, int animIndex)
+{
+    Reset();
+    if (modelHandle < 0 || animIndex < 0 || animIndex >= MV1GetAnimNum(modelHandle)) return false;
+
+    const int attachIndex = MV1AttachAnim(modelHandle, animIndex);
+    if (attachIndex < 0) return false;
+    modelHandle_ = modelHandle;
+    attachIndex_ = attachIndex;
+    return true;
+}
+
+void AnimationDraw::AttachedAnimation::Reset()
+{
+    if (modelHandle_ >= 0 && attachIndex_ >= 0)
+    {
+        MV1DetachAnim(modelHandle_, attachIndex_);
+    }
+    modelHandle_ = -1;
+    attachIndex_ = -1;
+}
+
+void AnimationDraw::Play2D(const std::vector<int>& sprites, bool loop, float animFps, float speedScale)
+{
+    if (mode_ != Mode::Sprite || sprites_ != sprites)
+    {
+        ResetModel();
+        sprites_ = sprites;
+        spriteElapsed_ = 0.0f;
+        currentFrame_ = 0;
+    }
+    mode_ = Mode::Sprite;
+    loop_ = loop;
+    animFps_ = animFps;
+    speedScale_ = speedScale;
+}
+
+void AnimationDraw::Play3D(int modelHandle, int animIndex, bool loop, float speedScale)
+{
+    if (mode_ != Mode::Model || modelHandle_ != modelHandle || currentAnimIndex_ != animIndex || nextAnimation_)
+    {
+        ResetModel();
+        modelHandle_ = modelHandle;
+        currentAnimIndex_ = animIndex;
+        currentAnimation_.Attach(modelHandle, animIndex);
+        currentElapsed_ = 0.0f;
+    }
+    mode_ = Mode::Model;
+    loop_ = loop;
+    speedScale_ = speedScale;
+}
+
+void AnimationDraw::PlayBlend3D(int modelHandle, int nextAnimIndex, float blendTime, bool loop, float speedScale)
+{
+    if (mode_ != Mode::Model || modelHandle_ != modelHandle || !currentAnimation_)
+    {
+        Play3D(modelHandle, nextAnimIndex, loop, speedScale);
+        return;
     }
 
+    if (currentAnimIndex_ == nextAnimIndex)
+    {
+        nextAnimation_.Reset();
+        nextAnimIndex_ = -1;
+        blendElapsed_ = 0.0f;
+        blendDuration_ = 0.0f;
+        MV1SetAttachAnimBlendRate(modelHandle_, currentAnimation_.GetAttachIndex(), 1.0f);
+        loop_ = loop;
+        speedScale_ = speedScale;
+        return;
+    }
+
+    if (!nextAnimation_ || nextAnimIndex_ != nextAnimIndex)
+    {
+        nextAnimation_.Reset();
+        nextAnimIndex_ = nextAnimIndex;
+        nextElapsed_ = 0.0f;
+        blendElapsed_ = 0.0f;
+        blendDuration_ = std::max(0.0f, blendTime);
+        nextAnimation_.Attach(modelHandle, nextAnimIndex);
+        if (nextAnimation_)
+        {
+            MV1SetAttachAnimBlendRate(modelHandle, currentAnimation_.GetAttachIndex(), 1.0f);
+            MV1SetAttachAnimBlendRate(modelHandle, nextAnimation_.GetAttachIndex(), 0.0f);
+        }
+    }
+    mode_ = Mode::Model;
+    loop_ = loop;
+    speedScale_ = speedScale;
+}
+
+void AnimationDraw::Update(float deltaTime)
+{
+    deltaTime = std::max(0.0f, deltaTime);
+    if (mode_ == Mode::Sprite)
+    {
+        if (sprites_.empty() || animFps_ <= 0.0f) return;
+        const float frameDuration = 1.0f / (animFps_ * std::max(0.001f, speedScale_));
+        spriteElapsed_ += deltaTime;
+        while (spriteElapsed_ >= frameDuration)
+        {
+            spriteElapsed_ -= frameDuration;
+            ++currentFrame_;
+        }
+        if (loop_)
+        {
+            currentFrame_ %= static_cast<int>(sprites_.size());
+        }
+        else if (currentFrame_ >= static_cast<int>(sprites_.size()))
+        {
+            currentFrame_ = static_cast<int>(sprites_.size()) - 1;
+            spriteElapsed_ = 0.0f;
+        }
+        return;
+    }
+    if (mode_ != Mode::Model) return;
+
+    AdvanceAnimation(currentAnimation_, currentElapsed_, loop_, speedScale_, deltaTime);
+    SetAnimationTime(currentAnimation_, currentElapsed_, &currentFrame_);
+    if (!nextAnimation_) return;
+
+    AdvanceAnimation(nextAnimation_, nextElapsed_, loop_, speedScale_, deltaTime);
+    SetAnimationTime(nextAnimation_, nextElapsed_);
+    blendElapsed_ += deltaTime;
+    const float blendRate = blendDuration_ > 0.0f ? std::min(1.0f, blendElapsed_ / blendDuration_) : 1.0f;
+    MV1SetAttachAnimBlendRate(modelHandle_, currentAnimation_.GetAttachIndex(), 1.0f - blendRate);
+    MV1SetAttachAnimBlendRate(modelHandle_, nextAnimation_.GetAttachIndex(), blendRate);
+
+    if (blendRate >= 1.0f)
+    {
+        currentAnimation_ = std::move(nextAnimation_);
+        currentAnimIndex_ = nextAnimIndex_;
+        currentElapsed_ = nextElapsed_;
+        nextAnimIndex_ = -1;
+        nextElapsed_ = 0.0f;
+        blendElapsed_ = 0.0f;
+        blendDuration_ = 0.0f;
+    }
+}
+
+void AnimationDraw::Draw2D(DxPlus::Vec2 pos, DxPlus::Vec2 center, DxPlus::Vec2 scale, float angle, int color) const
+{
+    if (mode_ != Mode::Sprite || sprites_.empty()) return;
+    DxPlus::Sprite::Draw(sprites_[currentFrame_], pos, scale, center, angle, color);
+}
+
+void AnimationDraw::Draw2D(DxPlus::Vec2 pos, DxPlus::Vec2 center, float scale, float angle, int color) const
+{
+    Draw2D(pos, center, DxPlus::Vec2{ scale, scale }, angle, color);
+}
+
+void AnimationDraw::Draw3D(Vec3 pos, Vec3 scale, Vec3 rotation) const
+{
+    if (mode_ != Mode::Model || modelHandle_ < 0) return;
+    MV1SetPosition(modelHandle_, DxConv::ToVECTOR(pos));
+    MV1SetScale(modelHandle_, DxConv::ToVECTOR(scale));
+    MV1SetRotationXYZ(modelHandle_, DxConv::ToVECTOR(rotation));
+    MV1DrawModel(modelHandle_);
+}
+
+void AnimationDraw::ResetModel()
+{
+    currentAnimation_.Reset();
+    nextAnimation_.Reset();
+    modelHandle_ = -1;
+    currentAnimIndex_ = -1;
+    currentElapsed_ = 0.0f;
+    nextAnimIndex_ = -1;
+    nextElapsed_ = 0.0f;
+    blendElapsed_ = 0.0f;
+    blendDuration_ = 0.0f;
+}
+
+void AnimationDraw::Reset()
+{
+    ResetModel();
+    sprites_.clear();
+    mode_ = Mode::None;
+    spriteElapsed_ = 0.0f;
+    currentFrame_ = 0;
+}
+
+void AnimationDraw::AdvanceAnimation(const AttachedAnimation& animation, float& elapsed, bool loop, float speedScale, float deltaTime)
+{
+    if (!animation) return;
+    const float totalTime = MV1GetAttachAnimTotalTime(animation.GetModelHandle(), animation.GetAttachIndex());
+    if (totalTime <= 0.0f) return;
+    elapsed += deltaTime * speedScale;
     if (loop)
     {
-        if (currentframe >= spriteNum)
-        {
-            currentframe = 0;
-        }
+        elapsed = std::fmod(elapsed, totalTime);
+        if (elapsed < 0.0f) elapsed += totalTime;
     }
     else
     {
-        if (currentframe >= spriteNum)
-        {
-            currentframe = spriteNum - 1;
-        }
+        elapsed = std::clamp(elapsed, 0.0f, totalTime);
     }
 }
 
-// ============================================================================
-// 2D描画（スプライト版・スケールが(x, y)）
-// ============================================================================
-void AnimationDraw::DrawAnim(
-    DxPlus::Vec2 pos,
-    const std::vector<int>& sprite,
-    bool loop,
-    float animSpeed,
-    DxPlus::Vec2 center,
-    DxPlus::Vec2 scale,
-    float angle,
-    int color
-)
+void AnimationDraw::SetAnimationTime(const AttachedAnimation& animation, float elapsed, int* currentFrame)
 {
-    position = pos;
-    AnimationSpeed = animSpeed;
-
-    if (sprite.empty()) return;
-
-    UpdateFrameInternal(animSpeed, static_cast<int>(sprite.size()), loop);
-
-    // スプライトを描画
-    DxPlus::Sprite::Draw(sprite[currentframe], position, scale, center, angle, color);
-}
-
-// ============================================================================
-// 2D描画（スプライト版・スケールが単一値）
-// ============================================================================
-void AnimationDraw::DrawAnim(
-    DxPlus::Vec2 pos,
-    const std::vector<int>& sprite,
-    bool loop,
-    float animSpeed,
-    DxPlus::Vec2 center,
-    float scale,
-    float angle,
-    int color
-)
-{
-    DrawAnim(pos, sprite, loop, animSpeed, center, DxPlus::Vec2{ scale, scale }, angle, color);
-}
-
-// ============================================================================
-// 3D描画（MV1モデル版）
-// ============================================================================
-void AnimationDraw::DrawAnim3D(
-    int modelHandle,
-    Vec3 pos,
-    int animIndex,
-    bool loop,
-    float animSpeed,
-    Vec3 scale,
-    Vec3 rotation
-)
-{
-    position3D = pos;
-    AnimationSpeed = animSpeed;
-
-    if (modelHandle < 0) return;
-
-    // モデルの位置を設定
-    MV1SetPosition(modelHandle, DxConv::ToVECTOR(pos));
-
-    // スケールを設定
-    MV1SetScale(modelHandle, DxConv::ToVECTOR(scale));
-
-    // 回転を設定（ラジアンで指定）
-    MV1SetRotationXYZ(modelHandle, DxConv::ToVECTOR(rotation));
-
-    if (drawAnimModelHandle != modelHandle || drawAnimIndex != animIndex)
-    {
-        if (drawAnimModelHandle >= 0 && drawAnimAttachIndex >= 0)
-        {
-            MV1DetachAnim(drawAnimModelHandle, drawAnimAttachIndex);
-        }
-
-        drawAnimModelHandle = modelHandle;
-        drawAnimIndex = animIndex;
-        drawAnimAttachIndex = -1;
-        drawAnimElapsed = 0.0f;
-
-        if (animIndex >= 0 && animIndex < MV1GetAnimNum(modelHandle))
-        {
-            drawAnimAttachIndex = MV1AttachAnim(modelHandle, animIndex);
-        }
-    }
-
-    if (drawAnimAttachIndex >= 0)
-    {
-        const float totalTime = MV1GetAttachAnimTotalTime(modelHandle, drawAnimAttachIndex);
-        if (totalTime > 0.0f)
-        {
-            drawAnimElapsed += std::max(0.0f, animSpeed) / 60.0f;
-            if (loop)
-            {
-                drawAnimElapsed = std::fmod(drawAnimElapsed, totalTime);
-            }
-            else
-            {
-                drawAnimElapsed = std::min(drawAnimElapsed, totalTime);
-            }
-
-            MV1SetAttachAnimTime(modelHandle, drawAnimAttachIndex, drawAnimElapsed);
-            currentframe = static_cast<int>(drawAnimElapsed / totalTime * 100.0f);
-        }
-    }
-
-    // モデルを描画
-    MV1DrawModel(modelHandle);
-}
-
-// ============================================================================
-// 3D描画（MV1モデル版・アニメーションブレンド対応）
-// ============================================================================
-void AnimationDraw::DrawAnimBlend3D(
-    int modelHandle,
-    Vec3 pos,
-    int currentAnimIndex,
-    int nextAnimIndex,
-    float blendTime,
-    bool loop,
-    float animSpeed,
-    Vec3 scale,
-    Vec3 rotation
-)
-{
-    position3D = pos;
-    AnimationSpeed = animSpeed;
-
-    if (modelHandle < 0) return;
-
-    // モデルの位置を設定
-    MV1SetPosition(modelHandle, DxConv::ToVECTOR(pos));
-
-    // スケールを設定
-    MV1SetScale(modelHandle, DxConv::ToVECTOR(scale));
-
-    // 回転を設定（ラジアンで指定）
-    MV1SetRotationXYZ(modelHandle, DxConv::ToVECTOR(rotation));
-
-    // フレーム更新
-    int maxFrame = 100;
-    UpdateFrameInternal(animSpeed, maxFrame, loop);
-
-    // ブレンド開始時の初期化
-    if (attachedAnim0 != currentAnimIndex || attachedAnim1 != nextAnimIndex)
-    {
-        // 新しいアニメーション組み合わせの場合、初期化
-        attachedAnim0 = currentAnimIndex;
-        attachedAnim1 = nextAnimIndex;
-        blendElapsedTime = 0.0f;
-        totalBlendTime = blendTime;
-
-        // スロット0に現在のアニメーションをアタッチ
-        MV1AttachAnim(modelHandle, 0, currentAnimIndex, loop ? TRUE : FALSE);
-        // スロット1に次のアニメーションをアタッチ
-        MV1AttachAnim(modelHandle, 1, nextAnimIndex, loop ? TRUE : FALSE);
-    }
-
-    // ブレンド時間を進める
-    blendElapsedTime += static_cast<float>(1.0 / 60.0);  // 60FPS想定
-
-    // ブレンド率を計算（0.0 → 1.0）
-    float blendRate = 0.0f;
-    if (totalBlendTime > 0.0f)
-    {
-        blendRate = std::min(1.0f, blendElapsedTime / totalBlendTime);
-    }
-
-    // スロット0のブレンド率を設定（最初は1.0、最後は0.0）
-    MV1SetAttachAnimBlendRate(modelHandle, 0, 1.0f - blendRate);
-    // スロット1のブレンド率を設定（最初は0.0、最後は1.0）
-    MV1SetAttachAnimBlendRate(modelHandle, 1, blendRate);
-
-    // ブレンドが完了したら、スロット1を新しいメインアニメーションに昇格
-    if (blendRate >= 1.0f)
-    {
-        MV1DetachAnim(modelHandle, 0);
-        MV1AttachAnim(modelHandle, 0, nextAnimIndex, loop ? TRUE : FALSE);
-        MV1DetachAnim(modelHandle, 1);
-        attachedAnim0 = nextAnimIndex;
-        attachedAnim1 = -1;
-        blendElapsedTime = 0.0f;
-    }
-
-    // モデルを描画
-    MV1DrawModel(modelHandle);
+    if (!animation) return;
+    const int modelHandle = animation.GetModelHandle();
+    const int attachIndex = animation.GetAttachIndex();
+    const float totalTime = MV1GetAttachAnimTotalTime(modelHandle, attachIndex);
+    if (totalTime <= 0.0f) return;
+    MV1SetAttachAnimTime(modelHandle, attachIndex, elapsed);
+    if (currentFrame) *currentFrame = static_cast<int>((elapsed / totalTime) * 100.0f);
 }

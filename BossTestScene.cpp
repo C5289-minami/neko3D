@@ -42,11 +42,31 @@ void BossTestScene::Init()
 void BossTestScene::Update(float deltaTime)
 {
     boss.Update(deltaTime);
-    const bool skillKeyDown = DxLib::CheckHitKey(KEY_INPUT_J) != 0;
+    int selectedSkill = 0;
+    if (DxLib::CheckHitKey(KEY_INPUT_1)) selectedSkill = 1;
+    else if (DxLib::CheckHitKey(KEY_INPUT_2)) selectedSkill = 2;
+    else if (DxLib::CheckHitKey(KEY_INPUT_3)) selectedSkill = 3;
+    else if (DxLib::CheckHitKey(KEY_INPUT_4)) selectedSkill = 4;
+    else if (DxLib::CheckHitKey(KEY_INPUT_5)) selectedSkill = 5;
+
+    const bool skillKeyDown = selectedSkill != 0;
     if (skillKeyDown && !skillKeyWasDown_ && boss.GetCurrentState() != BossStateType::Attack)
     {
-        demoSkill_.Reset();
-        boss.UseSkill(demoSkill_);
+        BossPoseSkill* skill = nullptr;
+        switch (selectedSkill)
+        {
+        case 1: skill = &bangSkill_; break;
+        case 2: skill = &tailWhipSkill_; break;
+        case 3: skill = &clapSkill_; break;
+        case 4: skill = &hairBallSkill_; break;
+        case 5: skill = &biteSkill_; break;
+        }
+
+        if (skill)
+        {
+            skill->Reset();
+            boss.UseSkill(*skill);
+        }
     }
     skillKeyWasDown_ = skillKeyDown;
 #ifndef NDEBUG
@@ -101,6 +121,8 @@ void BossTestScene::Render() const
     DxPlus::Text::DrawString(L"BOSS TEST",
         { 24.0f, 24.0f }, white, DxPlus::Text::TextAlign::TOP_LEFT, { 1, 1 }, 0, fontHandle);
 #endif
-    DxPlus::Text::DrawString(L"J: Demo Skill   Mouse: Look   WASD: Move   Q/E: Down/Up   Shift: Fast",
+    DxPlus::Text::DrawString(L"1: Bang   2: Tail Whip   3: Clap   4: HairBall   5: Bite",
         { 24.0f, 68.0f }, white, DxPlus::Text::TextAlign::TOP_LEFT, { 0.7f, 0.7f }, 0, fontHandle);
+    DxPlus::Text::DrawString(L"Mouse: Look   WASD: Move   Q/E: Down/Up   Shift: Fast",
+        { 24.0f, 100.0f }, white, DxPlus::Text::TextAlign::TOP_LEFT, { 0.7f, 0.7f }, 0, fontHandle);
 }
