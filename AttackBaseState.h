@@ -1,5 +1,4 @@
 #pragma once
-
 #include "AttackStateType.h"
 #include "State.h"
 

@@ -151,11 +151,14 @@
     <Filter Include="40_Gameplay\Actors\Boss\State\Attack">
       <UniqueIdentifier>{11bac987-318b-4cce-b014-53a425ff6d9c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="40_Gameplay\Actors\Boss\Attack">
-      <UniqueIdentifier>{14971b58-3b39-41bd-8717-c256f90a8fd6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="40_Gameplay\Actors\Base\Attack">
       <UniqueIdentifier>{16089b09-439d-4d52-a36d-bb9f57cb996e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Boss\State\Attack\Skill">
+      <UniqueIdentifier>{77ec620e-606e-4e8d-8caf-519cf4c6f96b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Boss\State\Attack\Skill\Base">
+      <UniqueIdentifier>{a50d7a11-c31f-4c05-ade5-e73f9529726e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -441,9 +444,6 @@
     <ClInclude Include="BossAttackState.h">
       <Filter>40_Gameplay\Actors\Boss\State\Attack</Filter>
     </ClInclude>
-    <ClInclude Include="BossAttackStateType.h">
-      <Filter>40_Gameplay\Actors\Boss\Attack</Filter>
-    </ClInclude>
     <ClInclude Include="AttackStateType.h">
       <Filter>40_Gameplay\Actors\Base\Attack</Filter>
     </ClInclude>
@@ -456,7 +456,28 @@
     <ClInclude Include="AttackBaseState.h">
       <Filter>40_Gameplay\Actors\Base\Attack</Filter>
     </ClInclude>
-    <ClInclude Include="BossDemoSkill.h">
+    <ClInclude Include="BossAttackStateType.h">
+      <Filter>40_Gameplay\Actors\Boss\State\Attack</Filter>
+    </ClInclude>
+    <ClInclude Include="BossHairBallSkill.h">
+      <Filter>40_Gameplay\Actors\Boss\State\Attack\Skill</Filter>
+    </ClInclude>
+    <ClInclude Include="BossBangSkill.h">
+      <Filter>40_Gameplay\Actors\Boss\State\Attack\Skill</Filter>
+    </ClInclude>
+    <ClInclude Include="BossTailWhipSkill.h">
+      <Filter>40_Gameplay\Actors\Boss\State\Attack\Skill</Filter>
+    </ClInclude>
+    <ClInclude Include="BossBiteSkill.h">
+      <Filter>40_Gameplay\Actors\Boss\State\Attack\Skill</Filter>
+    </ClInclude>
+    <ClInclude Include="BossPoseSkill.h">
+      <Filter>40_Gameplay\Actors\Boss\State\Attack\Skill\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="BossClapSkill.h">
+      <Filter>40_Gameplay\Actors\Boss\State\Attack\Skill</Filter>
+    </ClInclude>
+    <ClInclude Include="BossAnimType.h">
       <Filter>40_Gameplay\Actors\Boss</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,117 +1,71 @@
 #pragma once
+
 #include "DxPlus/DxPlus.h"
 #include "Vector3.h"
+#include <vector>
 
 class AnimationDraw {
 public:
     AnimationDraw() = default;
-    virtual ~AnimationDraw() = default;
+    ~AnimationDraw() = default;
 
-    // ========== 2D描画（スプライト版） ==========
-    virtual void DrawAnim(
-        DxPlus::Vec2 pos, 
-        const std::vector<int>& sprite, 
-        bool loop, 
-        float animSpeed,
-        DxPlus::Vec2 center = { 0.0f, 0.0f },
-        DxPlus::Vec2 scale = { 1.0f, 1.0f },
-        float angle = 0.0f,
-        int color = GetColor(255, 255, 255)
-    );
+    AnimationDraw(const AnimationDraw&) = delete;
+    AnimationDraw& operator=(const AnimationDraw&) = delete;
 
-    virtual void DrawAnim(
-        DxPlus::Vec2 pos,
-        const std::vector<int>& sprite,
-        bool loop,
-        float animSpeed,
-        DxPlus::Vec2 center,
-        float scale,
-        float angle = 0.0f,
-        int color = GetColor(255, 255, 255)
-    );
+    void Play2D(const std::vector<int>& sprites, bool loop, float animFps = 30.0f, float speedScale = 1.0f);
+    void Play3D(int modelHandle, int animIndex, bool loop, float speedScale = 1.0f);
+    void PlayBlend3D(int modelHandle, int nextAnimIndex, float blendTime, bool loop, float speedScale = 1.0f);
+    void Update(float deltaTime);
 
-    // ========== 3D描画（MV1モデル版） ==========
-    /// <summary>
-    /// 3D MV1モデルのアニメーション描画
-    /// </summary>
-    /// <param name="modelHandle">MV1モデルハンドル</param>
-    /// <param name="pos">3D世界座標</param>
-    /// <param name="animIndex">アニメーションインデックス</param>
-    /// <param name="loop">ループ再生の有無</param>
-    /// <param name="animSpeed">アニメーション速度</param>
-    /// <param name="scale">スケール（デフォルト {1,1,1}）</param>
-    /// <param name="rotation">回転角度（ラジアン、デフォルト {0,0,0}）</param>
-    virtual void DrawAnim3D(
-        int modelHandle,
-        Vec3 pos,
-        int animIndex,
-        bool loop,
-        float animSpeed,
-        Vec3 scale = { 1.0f, 1.0f, 1.0f },
-        Vec3 rotation = { 0.0f, 0.0f, 0.0f }
-    );
+    void Draw2D(DxPlus::Vec2 pos, DxPlus::Vec2 center = { 0.0f, 0.0f }, DxPlus::Vec2 scale = { 1.0f, 1.0f }, float angle = 0.0f, int color = GetColor(255, 255, 255)) const;
+    void Draw2D(DxPlus::Vec2 pos, DxPlus::Vec2 center, float scale, float angle = 0.0f, int color = GetColor(255, 255, 255)) const;
+    void Draw3D(Vec3 pos, Vec3 scale = { 1.0f, 1.0f, 1.0f }, Vec3 rotation = { 0.0f, 0.0f, 0.0f }) const;
 
-    /// <summary>
-    /// 2つのアニメーション間をブレンド（クロスフェード）して再生
-    /// 現在のアニメーションから次のアニメーションへ滑らかに遷移します
-    /// </summary>
-    /// <param name="modelHandle">MV1モデルハンドル</param>
-    /// <param name="pos">3D世界座標</param>
-    /// <param name="currentAnimIndex">現在のアニメーションインデックス</param>
-    /// <param name="nextAnimIndex">次のアニメーションインデックス</param>
-    /// <param name="blendTime">ブレンド時間（秒）</param>
-    /// <param name="loop">ループ再生の有無</param>
-    /// <param name="animSpeed">アニメーション速度</param>
-    /// <param name="scale">スケール（デフォルト {1,1,1}）</param>
-    /// <param name="rotation">回転角度（ラジアン、デフォルト {0,0,0}）</param>
-    virtual void DrawAnimBlend3D(
-        int modelHandle,
-        Vec3 pos,
-        int currentAnimIndex,
-        int nextAnimIndex,
-        float blendTime,
-        bool loop,
-        float animSpeed,
-        Vec3 scale = { 1.0f, 1.0f, 1.0f },
-        Vec3 rotation = { 0.0f, 0.0f, 0.0f }
-    );
+    int GetCurrentFrame() const { return currentFrame_; }
+    void Reset();
 
-    // ========== 取得・操作 ==========
-    int GetCurrentFrame() const { return currentframe; }
-    void Reset() { 
-        if (drawAnimModelHandle >= 0 && drawAnimAttachIndex >= 0)
-        {
-            MV1DetachAnim(drawAnimModelHandle, drawAnimAttachIndex);
-        }
-        currentframe = 0;
-        currentInterval = 0.0f;
-        spriteNum = -1;
-        frameInterval = 0.0f;
-        drawAnimModelHandle = -1;
-        drawAnimIndex = -1;
-        drawAnimAttachIndex = -1;
-        drawAnimElapsed = 0.0f;
-    }
+private:
+    class AttachedAnimation {
+    public:
+        AttachedAnimation() = default;
+        ~AttachedAnimation();
+        AttachedAnimation(const AttachedAnimation&) = delete;
+        AttachedAnimation& operator=(const AttachedAnimation&) = delete;
+        AttachedAnimation(AttachedAnimation&& other) noexcept;
+        AttachedAnimation& operator=(AttachedAnimation&& other) noexcept;
 
-protected:
-    int spriteNum = -1;
-    float currentInterval = 0.0f;
-    int currentframe = 0;
-    float frameInterval = 0.0f;
-    DxPlus::Vec2 position = { 0.0f, 0.0f };
-    Vec3 position3D = { 0.0f, 0.0f, 0.0f };
-    float AnimationSpeed = 1.0f;
+        bool Attach(int modelHandle, int animIndex);
+        void Reset();
+        explicit operator bool() const { return attachIndex_ >= 0; }
+        int GetModelHandle() const { return modelHandle_; }
+        int GetAttachIndex() const { return attachIndex_; }
 
-    // アニメーションブレンド用の状態管理
-    int attachedAnim0 = -1;  // スロット0のアニメーションインデックス
-    int attachedAnim1 = -1;  // スロット1のアニメーションインデックス
-    float blendElapsedTime = 0.0f;  // ブレンド経過時間
-    float totalBlendTime = 0.0f;    // 総ブレンド時間
-    int drawAnimModelHandle = -1;
-    int drawAnimIndex = -1;
-    int drawAnimAttachIndex = -1;
-    float drawAnimElapsed = 0.0f;
+    private:
+        int modelHandle_{ -1 };
+        int attachIndex_{ -1 };
+    };
 
-    // 内部ヘルパー関数
-    void UpdateFrameInternal(float speed, int spriteCount, bool loop);
+    enum class Mode { None, Sprite, Model };
+
+    static void AdvanceAnimation(const AttachedAnimation& animation, float& elapsed, bool loop, float speedScale, float deltaTime);
+    static void SetAnimationTime(const AttachedAnimation& animation, float elapsed, int* currentFrame = nullptr);
+    void ResetModel();
+
+    Mode mode_{ Mode::None };
+    std::vector<int> sprites_;
+    bool loop_{ true };
+    float animFps_{ 30.0f };
+    float speedScale_{ 1.0f };
+    float spriteElapsed_{ 0.0f };
+    int currentFrame_{ 0 };
+
+    int modelHandle_{ -1 };
+    int currentAnimIndex_{ -1 };
+    AttachedAnimation currentAnimation_;
+    float currentElapsed_{ 0.0f };
+    int nextAnimIndex_{ -1 };
+    AttachedAnimation nextAnimation_;
+    float nextElapsed_{ 0.0f };
+    float blendElapsed_{ 0.0f };
+    float blendDuration_{ 0.0f };
 };

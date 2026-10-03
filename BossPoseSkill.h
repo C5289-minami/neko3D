@@ -1,14 +1,15 @@
 #pragma once
 
+#include "AttackStateType.h"
 #include "Boss.h"
 #include "Motion.h"
 
 #include <cmath>
 
-class BossDemoSkill final : public IAttackSkill
+class BossPoseSkill : public IAttackSkill
 {
 public:
-    explicit BossDemoSkill(Boss& boss)
+    explicit BossPoseSkill(Boss& boss)
         : boss_(boss)
     {
     }
@@ -17,7 +18,6 @@ public:
     {
         basePosition_ = boss_.GetPosition();
         baseRotation_ = boss_.GetModelObject().rotation;
-        forward_ = { std::sin(baseRotation_.y), 0.0f, std::cos(baseRotation_.y) };
         preActionMotion_.Reset();
         aimingMotion_.Reset();
         attackMotion_.Reset();
@@ -28,34 +28,31 @@ public:
     void OnPreAction(float deltaTime) override
     {
         preActionMotion_.Update(deltaTime);
-        const float progress = preActionMotion_.GetEasedProgress();
-        ApplyPose(0.0f, -0.2f * progress, -10.0f * progress);
+        ApplyPhase(AttackStateType::PreAction, preActionMotion_.GetEasedProgress());
     }
 
     void OnAiming(float deltaTime) override
     {
         aimingMotion_.Update(deltaTime);
-        ApplyPose(0.0f, -0.2f, -10.0f);
+        ApplyPhase(AttackStateType::Aiming, 1.0f);
     }
 
     void OnAttack(float deltaTime) override
     {
         attackMotion_.Update(deltaTime);
-        const float progress = attackMotion_.GetEasedProgress();
-        ApplyPose(100.0f * progress, -0.2f + 0.9f * progress, 20.0f * progress);
+        ApplyPhase(AttackStateType::Attack, attackMotion_.GetEasedProgress());
     }
 
     void OnRecovery(float deltaTime) override
     {
         recoveryMotion_.Update(deltaTime);
-        const float remaining = 1.0f - recoveryMotion_.GetEasedProgress();
-        ApplyPose(100.0f * remaining, 0.7f * remaining, 20.0f * remaining);
+        ApplyPhase(AttackStateType::Recovery, recoveryMotion_.GetEasedProgress());
     }
 
     void OnReturn(float deltaTime) override
     {
         returnMotion_.Update(deltaTime);
-        ApplyPose(0.0f, 0.0f, 0.0f);
+        ApplyPose({}, {});
     }
 
     bool IsPreActionFinished() const override { return preActionMotion_.IsFinished(); }
@@ -64,26 +61,27 @@ public:
     bool IsRecoveryFinished() const override { return recoveryMotion_.IsFinished(); }
     bool IsReturnFinished() const override { return returnMotion_.IsFinished(); }
 
-private:
-	// 前方へのオフセット、ピッチ角度のオフセット、垂直方向のオフセットを適用してボスの位置と回転を更新する
-    void ApplyPose(float forwardOffset, float pitchOffset, float verticalOffset)
+protected:
+    virtual void ApplyPhase(AttackStateType phase, float progress) = 0;
+
+    Vec3 GetForward() const
     {
-        boss_.SetPosition(basePosition_ + forward_ * forwardOffset + Vec3{ 0.0f, verticalOffset, 0.0f });
-        boss_.GetModelObject().rotation = {
-            baseRotation_.x + pitchOffset,
-            baseRotation_.y,
-            baseRotation_.z
-        };
+        return { std::sin(baseRotation_.y), 0.0f, std::cos(baseRotation_.y) };
+    }
+
+    void ApplyPose(const Vec3& positionOffset, const Vec3& rotationOffset)
+    {
+        boss_.SetPosition(basePosition_ + positionOffset);
+        boss_.GetModelObject().rotation = baseRotation_ + rotationOffset;
     }
 
     Boss& boss_;
+private:
     Vec3 basePosition_{};
     Vec3 baseRotation_{};
-    Vec3 forward_{ 0.0f, 0.0f, 1.0f };
-
-    Motion preActionMotion_{ 0.0f, 1.0f, 0.45f, Motion::Easing::EaseOut };
+    Motion preActionMotion_{ 0.0f, 1.0f, 0.35f, Motion::Easing::EaseOut };
     Motion aimingMotion_{ 0.0f, 1.0f, 0.15f };
     Motion attackMotion_{ 0.0f, 1.0f, 0.3f, Motion::Easing::EaseInOut };
-    Motion recoveryMotion_{ 0.0f, 1.0f, 0.45f, Motion::Easing::EaseOut };
+    Motion recoveryMotion_{ 0.0f, 1.0f, 0.35f, Motion::Easing::EaseOut };
     Motion returnMotion_{ 0.0f, 1.0f, 0.1f };
 };
