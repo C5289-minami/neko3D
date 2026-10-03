@@ -8,7 +8,7 @@ void StateMachine::SwitchState(State* newState)
 
 	currentState_ = newState;
 
-	if (currentState_ == nullptr) return
+	if (!currentState_) return;
 	currentState_->Enter();
 
 }

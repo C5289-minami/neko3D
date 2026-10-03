@@ -25,6 +25,7 @@ void ResourceManager::LoadAll()
     // モデルの読み込み
     LoadModel(ResourceKeys::Model_Stage,    L"./Data/Models/Stage.mv1");
     LoadModel(ResourceKeys::Model_Paladin,    L"./Data/Models/Paladin.mv1");
+    LoadModel(ResourceKeys::Model_Boss,    L"./Data/Models/Boss.mv1");
 
     LoadSpriteStudioPlayer(ResourceKeys::SpriteStudio_TitleCharacter,
         "character_template1", "./Data/Images/character_template1.ssbp",

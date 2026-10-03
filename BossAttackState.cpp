@@ -10,21 +10,22 @@ BossAttackState::BossAttackState(BossStateMachine& stateMachine, Boss& boss)
 
 void BossAttackState::Enter()
 {
-	attackMotion_.Reset();
-	attackMotion_.SetDuration(1.0f); // 1•b‚ÅUŒ‚ƒ‚[ƒVƒ‡ƒ“‚ğŠ®—¹‚·‚é
+  attackStateMachine_.StartAttack(boss_.GetActiveSkill());
 }
 
 void BossAttackState::Tick(float deltaTime)
 {
-	attackMotion_.Update(deltaTime);
-	if (attackMotion_.IsFinished())
+    attackStateMachine_.Tick(deltaTime);
+	if (attackStateMachine_.IsFinished())
 	{
-		attackMotion_.Reset();
-		stateMachine_.ChangeState(BossStateType::Recover);
+       boss_.ClearActiveSkill();
+		stateMachine_.ChangeState(BossStateType::Idle);
 	}
 	DxPlus::Debug::SetString(L"CurrentBossState:Attack");
 }
 
 void BossAttackState::Exit()
 {
+   attackStateMachine_.Initialize();
+	boss_.ClearActiveSkill();
 }

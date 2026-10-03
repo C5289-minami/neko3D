@@ -1,6 +1,8 @@
 #pragma once
+#pragma once
+
 #include "BossBaseState.h"
-#include "Motion.h"
+#include "AttackStateMachine.h"
 
 class BossAttackState : public BossBaseState
 {
@@ -11,5 +13,5 @@ public:
 	void Tick(float deltaTime) override;
 	void Exit() override;
 private:
-	Motion attackMotion_;
+  AttackStateMachine attackStateMachine_;
 };
