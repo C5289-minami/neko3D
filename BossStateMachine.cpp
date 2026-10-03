@@ -1,11 +1,11 @@
 #include "BossStateMachine.h"
+#include "AttackStateMachine.h"
 
 BossStateMachine::BossStateMachine(Boss& boss)
     : boss_(boss),
       idleState_(*this, boss),
       moveState_(*this, boss),
-	attackState_(*this, boss),
-	recoverState_(*this, boss)
+	attackState_(*this, boss)
 {
 }
 
@@ -14,6 +14,7 @@ void BossStateMachine::Initialize()
     currentType_ = BossStateType::None;
     ChangeState(BossStateType::Idle);
 }
+
 
 void BossStateMachine::ChangeState(BossStateType type)
 {
@@ -26,6 +27,8 @@ void BossStateMachine::ChangeState(BossStateType type)
     StateMachine::SwitchState(newState);
 }
 
+
+
 State* BossStateMachine::FindState(BossStateType type)
 {
     switch (type)
@@ -36,8 +39,6 @@ State* BossStateMachine::FindState(BossStateType type)
         return &moveState_;
 	case BossStateType::Attack:
 		return &attackState_;
-	case BossStateType::Recover:
-		return &recoverState_;
     default:
         return nullptr;
     }

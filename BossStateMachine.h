@@ -5,7 +5,6 @@
 #include "BossIdleState.h"
 #include "BossWalkState.h"
 #include "BossAttackState.h"
-#include "BossRecoverState.h"
 
 
 class Boss;
@@ -27,5 +26,4 @@ private:
     BossIdleState idleState_;
     BossWalkState moveState_;
 	BossAttackState attackState_;
-	BossRecoverState recoverState_;
 };

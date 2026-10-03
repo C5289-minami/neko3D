@@ -19,6 +19,7 @@ namespace ResourceKeys
     // ===== Models =====
     inline constexpr const wchar_t* Model_Stage     = L"ModelStage";
     inline constexpr const wchar_t* Model_Paladin    = L"ModelPlayer";
+    inline constexpr const wchar_t* Model_Boss    = L"ModelBoss";
 
     // ===== SpriteStudio =====
     inline constexpr const wchar_t* SpriteStudio_TitleCharacter = L"TitleCharacter";

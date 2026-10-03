@@ -79,10 +79,18 @@ public:
     // ========== 取得・操作 ==========
     int GetCurrentFrame() const { return currentframe; }
     void Reset() { 
+        if (drawAnimModelHandle >= 0 && drawAnimAttachIndex >= 0)
+        {
+            MV1DetachAnim(drawAnimModelHandle, drawAnimAttachIndex);
+        }
         currentframe = 0;
         currentInterval = 0.0f;
         spriteNum = -1;
         frameInterval = 0.0f;
+        drawAnimModelHandle = -1;
+        drawAnimIndex = -1;
+        drawAnimAttachIndex = -1;
+        drawAnimElapsed = 0.0f;
     }
 
 protected:
@@ -99,6 +107,10 @@ protected:
     int attachedAnim1 = -1;  // スロット1のアニメーションインデックス
     float blendElapsedTime = 0.0f;  // ブレンド経過時間
     float totalBlendTime = 0.0f;    // 総ブレンド時間
+    int drawAnimModelHandle = -1;
+    int drawAnimIndex = -1;
+    int drawAnimAttachIndex = -1;
+    float drawAnimElapsed = 0.0f;
 
     // 内部ヘルパー関数
     void UpdateFrameInternal(float speed, int spriteCount, bool loop);

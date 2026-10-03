@@ -21,8 +21,13 @@ void BossIdleState::Tick(float deltaTime)
 	if(idleMotion_.IsFinished())
 	{
 		idleMotion_.Reset(); // モーションをループさせる
-		stateMachine_.ChangeState(BossStateType::Walk); // 1サイクル終了後に歩き状態に遷移
 	}
+
+    if (DxLib::CheckHitKey(KEY_INPUT_K))
+	{
+		stateMachine_.ChangeState(BossStateType::Walk);
+	}
+
 	DxPlus::Debug::SetString(L"CurrentBossState:Idle");
 }
 

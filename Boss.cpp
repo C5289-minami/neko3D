@@ -1,17 +1,21 @@
 #include "Boss.h"
+#include "Boss.h"
 #include "ResourceKeys.h"
+#include "ResourceManager.h"
 
 #include <cmath>
+#include "DxPlus/Debug.h"
 
 
 Boss::Boss()
     : stateMachine_(*this)
 {
-    model_.modelKey = ResourceKeys::Model_Paladin;
+    model_.modelKey = ResourceKeys::Model_Boss;
 }
 
 void Boss::Init()
 {
+    activeSkill_ = nullptr;
     stateMachine_.Initialize();
 }
 
@@ -22,6 +26,8 @@ void Boss::Reset()
 	model_.scale = { scaleFactor, scaleFactor, scaleFactor };
     model_.rotation = {};
     velocity_ = {};
+    activeSkill_ = nullptr;
+    animationDraw_.Reset();
     stateMachine_.Initialize();
 }
 
@@ -29,11 +35,14 @@ void Boss::Update(float deltaTime)
 {
     stateMachine_.Tick(deltaTime);
     model_.position += velocity_ * deltaTime;
+
+    DxPlus::Debug::SetString(L"K‚Å•à‚« / ƒXƒLƒ‹‚ÍBoss::UseSkill‚©‚ç”­“®");
 }
 
 void Boss::Draw() const
 {
-    model_.Draw();
+    const int modelHandle = RM().GetModel(model_.modelKey);
+    animationDraw_.DrawAnim3D(modelHandle, model_.position, 0, true, 1.0f, model_.scale, model_.rotation);
 }
 
 void Boss::SetMoveDirection(const Vec3& moveDirection, float speed)
@@ -54,5 +63,25 @@ void Boss::SetMoveDirection(const Vec3& moveDirection, float speed)
 void Boss::StopMove()
 {
     velocity_ = {};
-    stateMachine_.ChangeState(BossStateType::Idle);
+   if (stateMachine_.GetCurrentType() == BossStateType::Walk)
+    {
+        stateMachine_.ChangeState(BossStateType::Idle);
+    }
+}
+
+bool Boss::UseSkill(IAttackSkill& skill)
+{
+    if (stateMachine_.GetCurrentType() == BossStateType::Attack)
+    {
+        return false;
+    }
+
+    activeSkill_ = &skill;
+    stateMachine_.ChangeState(BossStateType::Attack);
+   if (stateMachine_.GetCurrentType() != BossStateType::Attack)
+    {
+        activeSkill_ = nullptr;
+        return false;
+    }
+    return true;
 }

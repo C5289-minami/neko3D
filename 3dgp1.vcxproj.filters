@@ -148,14 +148,14 @@
     <Filter Include="40_Gameplay\Actors\Stage">
       <UniqueIdentifier>{f3bf3e63-3ca4-4ccc-847b-1d7db61c5605}</UniqueIdentifier>
     </Filter>
-    <Filter Include="40_Gameplay\Actors\Boss\State\Recover">
-      <UniqueIdentifier>{4065f36a-9def-4ab9-93d1-e647738f73ba}</UniqueIdentifier>
-    </Filter>
     <Filter Include="40_Gameplay\Actors\Boss\State\Attack">
       <UniqueIdentifier>{11bac987-318b-4cce-b014-53a425ff6d9c}</UniqueIdentifier>
     </Filter>
     <Filter Include="40_Gameplay\Actors\Boss\Attack">
       <UniqueIdentifier>{14971b58-3b39-41bd-8717-c256f90a8fd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Base\Attack">
+      <UniqueIdentifier>{16089b09-439d-4d52-a36d-bb9f57cb996e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -438,14 +438,26 @@
     <ClInclude Include="Stage.h">
       <Filter>40_Gameplay\Actors\Stage</Filter>
     </ClInclude>
-    <ClInclude Include="BossRecoverState.h">
-      <Filter>40_Gameplay\Actors\Boss\State\Recover</Filter>
-    </ClInclude>
     <ClInclude Include="BossAttackState.h">
       <Filter>40_Gameplay\Actors\Boss\State\Attack</Filter>
     </ClInclude>
-    <ClInclude Include="Attack.h">
+    <ClInclude Include="BossAttackStateType.h">
       <Filter>40_Gameplay\Actors\Boss\Attack</Filter>
+    </ClInclude>
+    <ClInclude Include="AttackStateType.h">
+      <Filter>40_Gameplay\Actors\Base\Attack</Filter>
+    </ClInclude>
+    <ClInclude Include="IAttackSkill.h">
+      <Filter>40_Gameplay\Actors\Base\Attack</Filter>
+    </ClInclude>
+    <ClInclude Include="AttackStateMachine.h">
+      <Filter>40_Gameplay\Actors\Base\Attack</Filter>
+    </ClInclude>
+    <ClInclude Include="AttackBaseState.h">
+      <Filter>40_Gameplay\Actors\Base\Attack</Filter>
+    </ClInclude>
+    <ClInclude Include="BossDemoSkill.h">
+      <Filter>40_Gameplay\Actors\Boss</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -635,8 +647,11 @@
     <ClCompile Include="BossAttackState.cpp">
       <Filter>40_Gameplay\Actors\Boss\State\Attack</Filter>
     </ClCompile>
-    <ClCompile Include="BossRecoverState.cpp">
-      <Filter>40_Gameplay\Actors\Boss\State\Recover</Filter>
+    <ClCompile Include="AttackStateMachine.cpp">
+      <Filter>40_Gameplay\Actors\Base\Attack</Filter>
+    </ClCompile>
+    <ClCompile Include="AttackBaseState.cpp">
+      <Filter>40_Gameplay\Actors\Base\Attack</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

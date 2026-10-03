@@ -42,6 +42,13 @@ void BossTestScene::Init()
 void BossTestScene::Update(float deltaTime)
 {
     boss.Update(deltaTime);
+    const bool skillKeyDown = DxLib::CheckHitKey(KEY_INPUT_J) != 0;
+    if (skillKeyDown && !skillKeyWasDown_ && boss.GetCurrentState() != BossStateType::Attack)
+    {
+        demoSkill_.Reset();
+        boss.UseSkill(demoSkill_);
+    }
+    skillKeyWasDown_ = skillKeyDown;
 #ifndef NDEBUG
     if (DxLib::CheckHitKey(KEY_INPUT_F1))
     {
@@ -94,6 +101,6 @@ void BossTestScene::Render() const
     DxPlus::Text::DrawString(L"BOSS TEST",
         { 24.0f, 24.0f }, white, DxPlus::Text::TextAlign::TOP_LEFT, { 1, 1 }, 0, fontHandle);
 #endif
-    DxPlus::Text::DrawString(L"Mouse: Look   WASD: Move   Q/E: Down/Up   Shift: Fast",
+    DxPlus::Text::DrawString(L"J: Demo Skill   Mouse: Look   WASD: Move   Q/E: Down/Up   Shift: Fast",
         { 24.0f, 68.0f }, white, DxPlus::Text::TextAlign::TOP_LEFT, { 0.7f, 0.7f }, 0, fontHandle);
 }

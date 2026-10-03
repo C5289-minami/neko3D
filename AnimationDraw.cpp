@@ -1,5 +1,9 @@
 #include "AnimationDraw.h"
+#include "AnimationDraw.h"
 #include "DxConv.h"
+
+#include <algorithm>
+#include <cmath>
 
 // ============================================================================
 // フレーム更新の共通処理
@@ -104,9 +108,43 @@ void AnimationDraw::DrawAnim3D(
     // 回転を設定（ラジアンで指定）
     MV1SetRotationXYZ(modelHandle, DxConv::ToVECTOR(rotation));
 
-    // フレーム更新（デフォルトで100フレームと仮定）
-    int maxFrame = 100;
-    UpdateFrameInternal(animSpeed, maxFrame, loop);
+    if (drawAnimModelHandle != modelHandle || drawAnimIndex != animIndex)
+    {
+        if (drawAnimModelHandle >= 0 && drawAnimAttachIndex >= 0)
+        {
+            MV1DetachAnim(drawAnimModelHandle, drawAnimAttachIndex);
+        }
+
+        drawAnimModelHandle = modelHandle;
+        drawAnimIndex = animIndex;
+        drawAnimAttachIndex = -1;
+        drawAnimElapsed = 0.0f;
+
+        if (animIndex >= 0 && animIndex < MV1GetAnimNum(modelHandle))
+        {
+            drawAnimAttachIndex = MV1AttachAnim(modelHandle, animIndex);
+        }
+    }
+
+    if (drawAnimAttachIndex >= 0)
+    {
+        const float totalTime = MV1GetAttachAnimTotalTime(modelHandle, drawAnimAttachIndex);
+        if (totalTime > 0.0f)
+        {
+            drawAnimElapsed += std::max(0.0f, animSpeed) / 60.0f;
+            if (loop)
+            {
+                drawAnimElapsed = std::fmod(drawAnimElapsed, totalTime);
+            }
+            else
+            {
+                drawAnimElapsed = std::min(drawAnimElapsed, totalTime);
+            }
+
+            MV1SetAttachAnimTime(modelHandle, drawAnimAttachIndex, drawAnimElapsed);
+            currentframe = static_cast<int>(drawAnimElapsed / totalTime * 100.0f);
+        }
+    }
 
     // モデルを描画
     MV1DrawModel(modelHandle);
