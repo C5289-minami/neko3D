@@ -27,6 +27,6 @@ void Stage::Reset()
 void Stage::Draw() const
 {
 	if (modelHandle < 0) return;
-
+	// Œ³ƒ‚ƒfƒ‹
 	MV1DrawModel(modelHandle);
 }
