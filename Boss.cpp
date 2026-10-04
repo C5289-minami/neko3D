@@ -1,5 +1,6 @@
 #include "Boss.h"
 #include "Boss.h"
+#include "Consts.h"
 #include "ResourceKeys.h"
 #include "ResourceManager.h"
 
@@ -22,12 +23,13 @@ void Boss::Init()
 
 void Boss::Reset()
 {
-	model_.position = { 0.0f,-1000.0f,0.0f };
-	float scaleFactor = 1500.0f; // スケールの倍率を指定
+ model_.position = { 0.0f, Const::BOSS_HIDDEN_POSITION_Y, 0.0f };
+	const float scaleFactor = Const::BOSS_MODEL_SCALE;
 	model_.scale = { scaleFactor, scaleFactor, scaleFactor };
 	model_.rotation = {};
 	velocity_ = {};
 	activeSkill_ = nullptr;
+ SetAnimation(BossAnimType::Idle, true);
 	animation_.Reset();
 	stateMachine_.Initialize();
 }
@@ -38,7 +40,7 @@ void Boss::Update(float deltaTime)
 	model_.position += velocity_ * deltaTime;
 
 	const int modelHandle = RM().GetModel(model_.modelKey);
-	animation_.Play3D(modelHandle, currentAnimIndex_, true, 30.0f);
+ animation_.Play3D(modelHandle, currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
 	animation_.Update(deltaTime);
 
 	DxPlus::Debug::SetString(L"Kで歩き / スキルはBoss::UseSkillから発動");
@@ -71,6 +73,18 @@ void Boss::StopMove()
 	{
 		stateMachine_.ChangeState(BossStateType::Idle);
 	}
+}
+
+float Boss::GetAnimTotalTime(BossAnimType::Type type) const 
+{ 
+	float totalTime{};
+	float totalFlame{};
+	int index = static_cast<int>(type);
+	int modelHandle = RM().GetModel(model_.modelKey);
+
+	totalFlame = DxLib::MV1GetAnimTotalTime(modelHandle, index);
+	totalTime = totalFlame / Const::ANIM_FPS; // 秒数に変換
+	return totalTime;
 }
 
 bool Boss::UseSkill(IAttackSkill& skill)

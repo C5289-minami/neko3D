@@ -3,7 +3,7 @@
 
 void AttackStateMachine::Initialize()
 {
-  ChangeState(AttackStateType::None);
+	ChangeState(AttackStateType::None);
 }
 
 void AttackStateMachine::StartAttack(IAttackSkill* skill)
@@ -23,7 +23,7 @@ void AttackStateMachine::StartAttack(IAttackSkill* skill)
 void AttackStateMachine::ChangeState(AttackStateType type)
 {
 	// ‚à‚µNone‚É•ÏX‚·‚éê‡‚ÍAó‘Ô‚ğ‰ğœ‚µ‚ÄI—¹
-   if (type == AttackStateType::None)
+	if (type == AttackStateType::None)
 	{
 		StateMachine::SwitchState(nullptr);
 		currentType_ = AttackStateType::None;
@@ -36,7 +36,7 @@ void AttackStateMachine::ChangeState(AttackStateType type)
 	State* newState = FindState(type);
 	if (!newState) return;
 	currentType_ = type;
-  finished_ = false;
+	finished_ = false;
 	StateMachine::SwitchState(newState);
 }
 
@@ -47,15 +47,15 @@ State* AttackStateMachine::FindState(AttackStateType type)
 	case AttackStateType::None:
 		return nullptr;
 	case AttackStateType::PreAction:
-       return &preActionState_;
+		return &preActionState_;
 	case AttackStateType::Aiming:
-       return &aimingState_;
+		return &aimingState_;
 	case AttackStateType::Attack:
-       return &attackState_;
+		return &attackState_;
 	case AttackStateType::Recovery:
-       return &recoveryState_;
+		return &recoveryState_;
 	case AttackStateType::Return:
-       return &returnState_;
+		return &returnState_;
 	default:
 		return nullptr;
 	}

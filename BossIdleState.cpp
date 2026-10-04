@@ -1,5 +1,6 @@
 #include "BossIdleState.h"
 #include "Boss.h"
+#include "Consts.h"
 
 #include "DxPlus/Debug.h"
 
@@ -12,7 +13,7 @@ void BossIdleState::Enter()
 {
     boss_.StopMove();
 	idleMotion_.Reset();
-	idleMotion_.SetDuration(1.0f); // 1秒で1サイクルのモーション
+    idleMotion_.SetDuration(Const::BOSS_IDLE_MOTION_DURATION);
 }
 
 void BossIdleState::Tick(float deltaTime)
