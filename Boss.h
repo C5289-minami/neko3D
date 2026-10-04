@@ -28,7 +28,8 @@ public:
 	void SetPosition(const Vec3& position) { model_.position = position; }
 	BossStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }
 	ModelObject& GetModelObject() { return model_; }
-  void SetAnimation(BossAnimType::Type type, bool loop = true)
+	const int GetModelHandle() const;
+	void SetAnimation(BossAnimType::Type type, bool loop = true)
 	{
 		currentAnimIndex_ = static_cast<int>(type);
 		currentAnimLoop_ = loop;

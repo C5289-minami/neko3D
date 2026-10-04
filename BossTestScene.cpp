@@ -5,6 +5,7 @@
 #include "ResourceKeys.h"
 #include "ResourceManager.h"
 #include "SceneManager.h"
+#include "DrawableObject.h"
 
 #include <algorithm>
 #include <cmath>
@@ -33,6 +34,7 @@ void BossTestScene::Init()
     );
     
     boss.Init();
+
     boss.Reset();
 
     fontHandle = RM().GetFont(ResourceKeys::Font_Title);
@@ -49,6 +51,8 @@ void BossTestScene::Init()
     pixelShader = LoadPixelShader(L"./DevData/ShaderCompiler/ToonPS.pso");
 	outlinePixelShader = LoadPixelShader(L"./DevData/ShaderCompiler/OutlinePS.pso");
 	outlineVertexShader = LoadVertexShader(L"./DevData/ShaderCompiler/OutlineVS.vso");
+	modelToonPixelShader = LoadPixelShader(L"./DevData/ShaderCompiler/ModelToonPS.pso");
+	modelToonVertexShader = LoadVertexShader(L"./DevData/ShaderCompiler/SkinMesh4_DirLight_ToonVS.vso");
 
     outlineConstantBuffer_ = CreateShaderConstantBuffer(sizeof(float) * 4);
 
@@ -137,6 +141,7 @@ void BossTestScene::Update(float deltaTime)
         const float speed = CameraMoveSpeed * (DxLib::CheckHitKey(KEY_INPUT_LSHIFT) ? 3.0f : 1.0f);
         cameraEye += movement.Normalized() * (speed * deltaTime);
     }
+
 }
 
 void BossTestScene::Render() const
@@ -181,10 +186,31 @@ void BossTestScene::Render() const
         // 通常のToon
         SetUsePixelShader(pixelShader);
         SetUseVertexShader(vertexShader);
-    }
-    stage.Draw();
-    testModel_.Draw();
+        stage.Draw();
+        testModel_.Draw();
 
+		// モデル専用Toon
+     //   SetUsePixelShader(modelToonPixelShader);
+       // SetUseVertexShader(modelToonVertexShader);
+
+// モデル専用Toon
+
+
+        SetUsePixelShader(modelToonPixelShader);
+        SetUseVertexShader(modelToonVertexShader);
+
+        boss.Draw();
+
+    }
+    else
+    {
+        stage.Draw();
+        testModel_.Draw();
+        boss.Draw();
+    }
+
+
+	
 
     if (isShaderEnabled_)
     {
