@@ -16,6 +16,7 @@ Player::Player()
 
 void Player::Init()
 {
+	SetPosition({ 0.0f, 300.0f, 2300.0f });
 	modelHandle = RM().GetModel(ResourceKeys::Model_Paladin);
 	if (modelHandle < 0) return;
 
@@ -24,7 +25,7 @@ void Player::Init()
 
 void Player::Reset()
 {
-	SetPosition(Vec3(0.0f, 0.0f, 0.0f));
+	SetPosition({ 0.0f, 300.0f, 2300.0f });
 	SetYaw(0.0f);
 
 	velocity_ = Vec3(0.0f, 0.0f, 0.0f);

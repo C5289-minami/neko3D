@@ -68,26 +68,11 @@ void DebugUI::BeginFrame()
 
 void DebugUI::Draw(GameContext& ctx)
 {
-    ImGui::Begin("Scene view camera");
-    ImGui::Text("Left Alt + Enter: toggle camera");
-    ImGui::Text("WASD: move / mouse: look / Q,E: vertical / Left Shift: fast");
-    ImGui::Text("R: reset camera / F: focus player");
-    ImGui::Text("Camera: %s", ctx.IsSceneViewActive() ? "Debug" : "Fixed");
-
-    const Vec3 cameraPosition = ctx.GetCameraPosition();
-    float position[3] = { cameraPosition.x, cameraPosition.y, cameraPosition.z };
-    if (ImGui::InputFloat3("Position (X, Y, Z)", position, "%.1f"))
-        ctx.SetCameraPosition({ position[0], position[1], position[2] });
-
+    ImGui::Begin("Player debug");
     const Vec3& playerPosition = ctx.GetPlayerPosition();
-    ImGui::Text("Player position: X %.1f / Y %.1f / Z %.1f",
-        playerPosition.x, playerPosition.y, playerPosition.z);
-    float cameraSpeed = ctx.GetSceneCameraMoveSpeed();
-    if (ImGui::SliderFloat("Move speed", &cameraSpeed, 100.0f, 2000.0f, "%.0f"))
-        ctx.SetSceneCameraMoveSpeed(cameraSpeed);
-    if (ImGui::Button("Reset camera")) ctx.ResetSceneCamera();
-    ImGui::SameLine();
-    if (ImGui::Button("Focus player")) ctx.FocusSceneCameraOnPlayer();
+    float position[3] = { playerPosition.x, playerPosition.y, playerPosition.z };
+    if (ImGui::DragFloat3("Position (X, Y, Z)", position, 1.0f, 0.0f, 0.0f, "%.1f"))
+        ctx.SetPlayerPosition({ position[0], position[1], position[2] });
     ImGui::End();
 
     // Option
