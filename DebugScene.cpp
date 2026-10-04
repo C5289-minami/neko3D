@@ -13,9 +13,19 @@ void TestScene::Init()
 	if (m_ssPlayer)
 	{
 		m_ssPlayer->reset();
-		m_ssPlayer->setPosition(DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.5f);
+		m_ssPlayer->setPosition(DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.6f);
 		m_ssPlayer->setScale(0.5f, 0.5f);
 		m_ssPlayer->update(0.0f);
+	}
+	gaugeAnim = RM().GetSpriteStudioPlayer(ResourceKeys::SpriteStudio_Gauge);
+	if (gaugeAnim)
+	{
+		gaugeAnim->reset();
+		gaugeAnim->setPosition(DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.1f);
+		gaugeAnim->setScale(0.5f, 0.5f);
+		gaugeAnim->update(0.0f);
+
+		gauge.SetPlayer(*gaugeAnim); 
 	}
     StartFadeIn();
 }
@@ -50,12 +60,22 @@ void TestScene::Update(float deltaTime)
 		m_ssPlayer->setScale(-scale, -scale);
 	}
 	m_ssPlayer->update(deltaTime);
+
+	if (!gaugeAnim) return;
+	//gaugeAnim->update(deltaTime);
+	static float progress = 0.0f;
+	progress += deltaTime * 0.1f; // 進捗率を時間経過で増加させる例
+	if (progress > 1.0f) progress = 0.0f; // 進捗率が1を超えたらリセット
+	gauge.Update(deltaTime, progress); // 進捗率を0.5に設定
+   gaugeAnim->update(0.0f);
 }
 
 void TestScene::Render() const
 {
 	if (!m_ssPlayer) return;
 	m_ssPlayer->draw();
+	if (!gaugeAnim) return;
+	gaugeAnim->draw();
 
 	const wchar_t* modeText = flipTestMode == 0 ? L"1: Normal" :
 		flipTestMode == 1 ? L"2: Horizontal flip" : L"3: Horizontal + vertical flip";

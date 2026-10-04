@@ -30,6 +30,9 @@ void ResourceManager::LoadAll()
     LoadSpriteStudioPlayer(ResourceKeys::SpriteStudio_TitleCharacter,
         "character_template1", "./Data/Images/character_template1.ssbp",
         "character_template_3head/stance");
+    LoadSpriteStudioPlayer(ResourceKeys::SpriteStudio_Gauge,
+        "character_template1", "./Data/Images/character_template1.ssbp",
+        "character_template_3head/stance");
 }
 
 void ResourceManager::UnloadAll()
