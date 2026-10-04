@@ -8,7 +8,8 @@
 #include "Grid.h"
 #include "15_System/Player_camera.h"
 #include "Stage.h"
-#include "Player.h" 
+#include "Player.h"
+#include "Boss.h" 
 
 class GameContext
 {
@@ -67,4 +68,5 @@ private:
     Stage stage;
 	// Player
 	Player player;
+    Boss boss;
 };
