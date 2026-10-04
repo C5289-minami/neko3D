@@ -35,6 +35,7 @@ public:
     Player_camera& GetPlayerCamera() { return playerCamera; }
     const Player_camera& GetPlayerCamera() const { return playerCamera; }
     const Vec3& GetPlayerPosition() const { return player.GetPosition(); }
+    void SetPlayerPosition(const Vec3& position) { player.SetPosition(position); }
     const Vec3& GetCameraPosition() const;
     const Vec3& GetCameraTarget() const;
     const Vec3& GetCameraUp() const;
