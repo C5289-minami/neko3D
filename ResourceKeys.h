@@ -23,6 +23,7 @@ namespace ResourceKeys
 
     // ===== SpriteStudio =====
     inline constexpr const wchar_t* SpriteStudio_TitleCharacter = L"TitleCharacter";
+    inline constexpr const wchar_t* SpriteStudio_Gauge = L"Gauge";
 
     // ===== Effects =====
 

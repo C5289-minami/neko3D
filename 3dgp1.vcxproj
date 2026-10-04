@@ -257,6 +257,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SpriteStudioUI.h" />
+    <ClInclude Include="SSAnimation.h" />
     <ClInclude Include="SSPlayer\common\Animator\MersenneTwister.h" />
     <ClInclude Include="SSPlayer\common\Animator\ssplayer_cellmap.h" />
     <ClInclude Include="SSPlayer\common\Animator\ssplayer_effect.h" />

@@ -2,6 +2,7 @@
 #pragma once
 #include "Scene.h"
 #include "SSPlayer/SS6Player.h"
+#include "SSAnimation.h"
 
 class TestScene final : public Scene
 {
@@ -13,6 +14,8 @@ public:
 
 private:
     ss::Player* m_ssPlayer = nullptr;
+	ss::Player* gaugeAnim = nullptr;
+    SSAnimation::SSGauge gauge;
     int flipTestMode = 0;
 };
 

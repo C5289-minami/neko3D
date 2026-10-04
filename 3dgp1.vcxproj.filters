@@ -480,6 +480,9 @@
     <ClInclude Include="BossAnimType.h">
       <Filter>40_Gameplay\Actors\Boss</Filter>
     </ClInclude>
+    <ClInclude Include="SSAnimation.h">
+      <Filter>10_Core\Animation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
