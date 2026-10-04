@@ -6,6 +6,8 @@
 
 #include <cmath>
 
+// ボスの攻撃スキルを管理するための抽象クラス
+
 class BossPoseSkill : public IAttackSkill
 {
 public:
@@ -74,6 +76,30 @@ protected:
         boss_.SetPosition(basePosition_ + positionOffset);
         boss_.GetModelObject().rotation = baseRotation_ + rotationOffset;
     }
+
+    void SetMotionDuration(AttackStateType phase, float duration)
+    {
+        switch (phase)
+        {
+        case AttackStateType::PreAction:
+            preActionMotion_.SetDuration(duration);
+            break;
+        case AttackStateType::Aiming:
+            aimingMotion_.SetDuration(duration);
+            break;
+        case AttackStateType::Attack:
+            attackMotion_.SetDuration(duration);
+            break;
+        case AttackStateType::Recovery:
+            recoveryMotion_.SetDuration(duration);
+            break;
+        case AttackStateType::Return:
+            returnMotion_.SetDuration(duration);
+            break;
+        default:
+            break;
+        }
+	}
 
     Boss& boss_;
 private:

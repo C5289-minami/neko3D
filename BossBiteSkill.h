@@ -10,6 +10,8 @@ public:
 
     explicit BossBiteSkill(Boss& boss) : BossPoseSkill(boss) {}
 
+
+
 private:
     void ApplyPhase(AttackStateType phase, float progress) override
     {
@@ -21,7 +23,8 @@ private:
         case AttackStateType::Aiming:
             break;
         case AttackStateType::Attack:
-			boss_.SetAnimation(BossAnimType::PowerUp);
+			SetMotionDuration(AttackStateType::Attack, boss_.GetAnimTotalTime(BossAnimType::PowerUp));
+         boss_.SetAnimation(BossAnimType::PowerUp, false);
             break;
         case AttackStateType::Recovery:
         {

@@ -1,4 +1,5 @@
 #pragma once
+#pragma once
 
 #include "AnimationDraw.h"
 #include "BossStateMachine.h"
@@ -27,7 +28,12 @@ public:
 	void SetPosition(const Vec3& position) { model_.position = position; }
 	BossStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }
 	ModelObject& GetModelObject() { return model_; }
-	void SetAnimation(BossAnimType::Type type) { currentAnimIndex_ = static_cast<int>(type); }
+  void SetAnimation(BossAnimType::Type type, bool loop = true)
+	{
+		currentAnimIndex_ = static_cast<int>(type);
+		currentAnimLoop_ = loop;
+	}
+	float GetAnimTotalTime(BossAnimType::Type type) const;
 
 private:
 	ModelObject model_{};
@@ -38,4 +44,5 @@ private:
 	// Animation
    AnimationDraw animation_;
 	int currentAnimIndex_{ -1 };
+  bool currentAnimLoop_{ true };
 };

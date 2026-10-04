@@ -13,5 +13,5 @@ public:
 	void Tick(float deltaTime) override;
 	void Exit() override;
 private:
-  AttackStateMachine attackStateMachine_;
+	AttackStateMachine attackStateMachine_;
 };

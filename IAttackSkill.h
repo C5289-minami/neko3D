@@ -10,16 +10,18 @@ public:
     virtual ~IAttackSkill() = default;
 
     // 各フェーズの更新処理
-    virtual void OnPreAction(float dt) {}
-    virtual void OnAiming(float dt) {}
-    virtual void OnAttack(float dt) {}
-    virtual void OnRecovery(float dt) {}
-    virtual void OnReturn(float dt) {}
+    virtual void OnPreAction(float) {}
+    virtual void OnAiming(float) {}
+    virtual void OnAttack(float) {}
+    virtual void OnRecovery(float) {}
+    virtual void OnReturn(float) {}
 
-    // 各フェーズの終了判定（必要に応じて）
+    // 各フェーズの終了判定
     virtual bool IsPreActionFinished() const { return true; }
     virtual bool IsAimingFinished() const { return true; }
     virtual bool IsAttackFinished() const { return true; }
     virtual bool IsRecoveryFinished() const { return true; }
     virtual bool IsReturnFinished() const { return true; }
+
+
 };
