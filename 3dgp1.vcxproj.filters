@@ -160,6 +160,9 @@
     <Filter Include="40_Gameplay\Actors\Boss\State\Attack\Skill\Base">
       <UniqueIdentifier>{a50d7a11-c31f-4c05-ade5-e73f9529726e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{fe42c59f-7c56-4619-a154-a14d0ea68562}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -481,8 +484,12 @@
       <Filter>10_Core\Animation</Filter>
     </ClInclude>
     <ClInclude Include="ToonSettings.h">
-      <Filter>40_Gameplay\Debug</Filter>
+      <Filter>Shader</Filter>
     </ClInclude>
+    <ClInclude Include="ModelToonRenderer.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerAnimType.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -678,7 +685,10 @@
       <Filter>40_Gameplay\Actors\Base\Attack</Filter>
     </ClCompile>
     <ClCompile Include="ToonSettings.cpp">
-      <Filter>40_Gameplay\Debug</Filter>
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelToonRenderer.cpp">
+      <Filter>Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

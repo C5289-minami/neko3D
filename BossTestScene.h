@@ -11,6 +11,7 @@
 #include "Vector3.h"
 #include "Stage.h"
 #include "Player.h"
+#include "ModelToonRenderer.h"
 
 class BossTestScene final : public Scene
 {
@@ -49,14 +50,12 @@ private:
 	int vertexShader{};
     int outlinePixelShader{};
     int outlineVertexShader{};
-	int modelToonPixelShader = -1;
     bool isShaderEnabled_ = true;     // シェーダーのON/OFFフラグ
     bool shaderKeyWasDown_ = false;    // F2キーの入力判定用
 	ModelObject testModel_{ };
     int outlineConstantBuffer_ = -1;
 	int toonConstantBuffer_ = -1;
     Player test;
-    int modelToonVertexShader_4Frame;
-    int modelToonVertexShader_NMap4Frame;
+    ModelToonRenderer modelToonRenderer_{};
 };
 
