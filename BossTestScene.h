@@ -41,5 +41,18 @@ private:
     float yaw{};
     float pitch{};
     bool skillKeyWasDown_{};
+
+
+    // シェーダー
+    int pixelShader{};
+	int vertexShader{};
+    int outlinePixelShader{};
+    int outlineVertexShader{};
+	int modelToonPixelShader = -1;
+    int modelToonVertexShader = -1;
+    bool isShaderEnabled_ = true;     // シェーダーのON/OFFフラグ
+    bool shaderKeyWasDown_ = false;    // F2キーの入力判定用
+	ModelObject testModel_{ };
+    int outlineConstantBuffer_ = -1;
 };
 

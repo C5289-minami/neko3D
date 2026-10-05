@@ -75,6 +75,8 @@ void Boss::StopMove()
 	}
 }
 
+const int Boss::GetModelHandle() const { return RM().GetModel(model_.modelKey); }
+
 float Boss::GetAnimTotalTime(BossAnimType::Type type) const 
 { 
 	float totalTime{};
