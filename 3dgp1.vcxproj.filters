@@ -483,6 +483,9 @@
     <ClInclude Include="SSAnimation.h">
       <Filter>10_Core\Animation</Filter>
     </ClInclude>
+    <ClInclude Include="ToonSettings.h">
+      <Filter>40_Gameplay\Debug</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
