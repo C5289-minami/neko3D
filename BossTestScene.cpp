@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <Windows.h>
 
 namespace
 {
@@ -36,6 +37,18 @@ void BossTestScene::Init()
     boss.Init();
 
     boss.Reset();
+    const int bossModel = boss.GetModelHandle();
+
+    const int triangleListNum = MV1GetTriangleListNum(bossModel);
+
+    for (int i = 0; i < triangleListNum; ++i)
+    {
+        const int type = MV1GetTriangleListVertexType(bossModel, i);
+
+        char buffer[128];
+        sprintf_s(buffer, "Boss TriangleList=%d VertexType=%d\n", i, type);
+        OutputDebugStringA(buffer);
+    }
 
     fontHandle = RM().GetFont(ResourceKeys::Font_Title);
 
@@ -52,7 +65,7 @@ void BossTestScene::Init()
 	outlinePixelShader = LoadPixelShader(L"./DevData/ShaderCompiler/OutlinePS.pso");
 	outlineVertexShader = LoadVertexShader(L"./DevData/ShaderCompiler/OutlineVS.vso");
 	modelToonPixelShader = LoadPixelShader(L"./DevData/ShaderCompiler/ModelToonPS.pso");
-	modelToonVertexShader = LoadVertexShader(L"./DevData/ShaderCompiler/SkinMesh4_DirLight_ToonVS.vso");
+	modelToonVertexShader = LoadVertexShader(L"./DevData/ShaderCompiler/ModelToonVS.vso");
 
     outlineConstantBuffer_ = CreateShaderConstantBuffer(sizeof(float) * 4);
 
@@ -198,7 +211,6 @@ void BossTestScene::Render() const
 
         SetUsePixelShader(modelToonPixelShader);
         SetUseVertexShader(modelToonVertexShader);
-
         boss.Draw();
 
     }
