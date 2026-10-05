@@ -433,3 +433,8 @@ FodyWeavers.xsd
 # Generated game executables and DxLib runtime log
 *.exe
 [Ll]og.txt
+/OrbitCamera.cpp
+/.gitignore
+/.gitignore
+/OrbitCamera.h
+/.gitignore

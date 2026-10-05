@@ -82,6 +82,9 @@ void DebugUI::Draw(GameContext& ctx)
     float position[3] = { playerPosition.x, playerPosition.y, playerPosition.z };
     if (ImGui::DragFloat3("Position (X, Y, Z)", position, 1.0f, 0.0f, 0.0f, "%.1f"))
         ctx.SetPlayerPosition({ position[0], position[1], position[2] });
+    bool gravityDisabled = !ctx.IsPlayerGravityEnabled();
+    if (ImGui::Checkbox(u8"重力を無効化", &gravityDisabled))
+        ctx.SetPlayerGravityEnabled(!gravityDisabled);
     ImGui::End();
 
     // Option
