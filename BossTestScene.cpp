@@ -10,14 +10,36 @@
 
 #include <algorithm>
 #include <cmath>
-#include <Windows.h>
+
+#include "Player.h"
 
 namespace
 {
-    constexpr float MouseRotationRadiansPerPixel = DxPlus::PI * 2.0f / DxPlus::CLIENT_WIDTH;
+    constexpr float MouseRotationRadiansPerPixel =
+        DxPlus::PI * 2.0f / DxPlus::CLIENT_WIDTH;
+
     constexpr float MinPitch = DxPlus::Deg2Rad * -89.0f;
     constexpr float MaxPitch = DxPlus::Deg2Rad * 89.0f;
     constexpr float CameraMoveSpeed = 500.0f;
+
+    constexpr int ToonSettingsSlot = 5;
+    constexpr int OutlineConstantBufferSlot = 4;
+
+    void SetModelCulling(int modelHandle, int culling)
+    {
+        if (modelHandle < 0)
+        {
+            return;
+        }
+
+        for (int i = 0; i < MV1GetMeshNum(modelHandle); ++i)
+        {
+            if (MV1GetMeshBackCulling(modelHandle, i) != DX_CULLING_NONE)
+            {
+                MV1SetMeshBackCulling(modelHandle, i, culling);
+            }
+        }
+    }
 }
 
 void BossTestScene::Init()
@@ -38,18 +60,7 @@ void BossTestScene::Init()
     boss.Init();
 
     boss.Reset();
-    const int bossModel = boss.GetModelHandle();
-
-    const int triangleListNum = MV1GetTriangleListNum(bossModel);
-
-    for (int i = 0; i < triangleListNum; ++i)
-    {
-        const int type = MV1GetTriangleListVertexType(bossModel, i);
-
-        char buffer[128];
-        sprintf_s(buffer, "Boss TriangleList=%d VertexType=%d\n", i, type);
-        OutputDebugStringA(buffer);
-    }
+ 
 
     fontHandle = RM().GetFont(ResourceKeys::Font_Title);
 
@@ -66,7 +77,8 @@ void BossTestScene::Init()
 	outlinePixelShader = LoadPixelShader(L"./DevData/ShaderCompiler/OutlinePS.pso");
 	outlineVertexShader = LoadVertexShader(L"./DevData/ShaderCompiler/OutlineVS.vso");
 	modelToonPixelShader = LoadPixelShader(L"./DevData/ShaderCompiler/ModelToonPS.pso");
-	modelToonVertexShader = LoadVertexShader(L"./DevData/ShaderCompiler/ModelToonVS.vso");
+    modelToonVertexShader_4Frame = LoadVertexShader( L"./DevData/ShaderCompiler/ModelToonVS_4Frame.vso"  );
+    modelToonVertexShader_NMap4Frame =  LoadVertexShader(   L"./DevData/ShaderCompiler/ModelToonVS_NMap4Frame.vso");
 
     outlineConstantBuffer_ = CreateShaderConstantBuffer(sizeof(float) * 4);
 
@@ -82,8 +94,6 @@ void BossTestScene::Init()
 
     *settings = g_toonSettings;
 
-    UpdateShaderConstantBuffer(toonConstantBuffer_);
-
     outlineSize[0] = 5.0f;                    // 横3px
     outlineSize[1] = 5.0f;                    // 縦3px
     outlineSize[2] = DxPlus::CLIENT_WIDTH;
@@ -94,6 +104,11 @@ void BossTestScene::Init()
     UpdateShaderConstantBuffer(outlineConstantBuffer_);
 
     StartFadeIn();
+
+
+    //player
+	test.Init();
+	test.Reset();
 }
 
 void BossTestScene::Update(float deltaTime)
@@ -171,7 +186,7 @@ void BossTestScene::Update(float deltaTime)
             cameraEye += movement.Normalized() * (speed * deltaTime);
         }
     }
-
+	//test.Update(deltaTime, stage);
 }
 
 void BossTestScene::Render() const
@@ -186,17 +201,6 @@ void BossTestScene::Render() const
     {
         MV1SetUseOrigShader(TRUE);
 
-        auto SetCulling = [](int modelHandle, int culling)
-            {
-                for (int i = 0; i < MV1GetMeshNum(modelHandle); i++)
-                {
-                    if (MV1GetMeshBackCulling(modelHandle, i) != DX_CULLING_NONE)
-                    {
-                        MV1SetMeshBackCulling(modelHandle, i, culling);
-                    }
-                }
-            };
-
         ToonSettings* settings =
             static_cast<ToonSettings*>(
                 GetBufferShaderConstantBuffer(toonConstantBuffer_)
@@ -209,54 +213,70 @@ void BossTestScene::Render() const
         SetShaderConstantBuffer(
             toonConstantBuffer_,
             DX_SHADERTYPE_PIXEL,
-            5
+            ToonSettingsSlot
         );
 
         SetShaderConstantBuffer(
             outlineConstantBuffer_,
             DX_SHADERTYPE_VERTEX,
-            4
+            OutlineConstantBufferSlot
         );
 
+        const int stageModelHandle = stage.GetModelHandle();
+        const int testModelHandle = RM().GetModel(testModel_.modelKey);
 
+        // ========================================
+        // Outline
+        // ========================================
 
         SetUsePixelShader(outlinePixelShader);
         SetUseVertexShader(outlineVertexShader);
-        SetCulling(stage.GetModelHandle(), DX_CULLING_RIGHT);
+
+        SetModelCulling(stageModelHandle, DX_CULLING_RIGHT);
+        SetModelCulling(testModelHandle, DX_CULLING_RIGHT);
+
         stage.Draw();
-        SetCulling(RM().GetModel(testModel_.modelKey), DX_CULLING_RIGHT);
         testModel_.Draw();
 
-        SetCulling(stage.GetModelHandle(), DX_CULLING_LEFT);
-        SetCulling(RM().GetModel(testModel_.modelKey), DX_CULLING_LEFT);
-		
-        // 通常のToon
+        // ========================================
+        // 通常Toon
+        // ========================================
+
+        SetModelCulling(stageModelHandle, DX_CULLING_LEFT);
+        SetModelCulling(testModelHandle, DX_CULLING_LEFT);
+
         SetUsePixelShader(pixelShader);
         SetUseVertexShader(vertexShader);
+
         stage.Draw();
         testModel_.Draw();
 
-		// モデル専用Toon
-     //   SetUsePixelShader(modelToonPixelShader);
-       // SetUseVertexShader(modelToonVertexShader);
-
-// モデル専用Toon
-
+        // ========================================
+        // 旧Boss
+        // VertexType = 5
+        // ========================================
 
         SetUsePixelShader(modelToonPixelShader);
-        SetUseVertexShader(modelToonVertexShader);
-        boss.Draw();
+        SetUseVertexShader(modelToonVertexShader_NMap4Frame);
 
+        test.Draw();
+
+        // ========================================
+        // 新Boss
+        // VertexType = 4
+        // ========================================
+
+        SetUseVertexShader(modelToonVertexShader_4Frame);
+
+        boss.Draw();
     }
     else
     {
         stage.Draw();
         testModel_.Draw();
         boss.Draw();
+        test.Draw();
     }
-
-
-	
 
     if (isShaderEnabled_)
     {
