@@ -366,9 +366,6 @@
     <ClInclude Include="SSPlayer\common\Loader\sstypes.h">
       <Filter>SSPlayer\common\Loader</Filter>
     </ClInclude>
-    <ClInclude Include="GamePram.h">
-      <Filter>JSON</Filter>
-    </ClInclude>
     <ClInclude Include="UIManager.h">
       <Filter>10_Core\UI</Filter>
     </ClInclude>
@@ -680,5 +677,13 @@
     <ClCompile Include="AttackBaseState.cpp">
       <Filter>40_Gameplay\Actors\Base\Attack</Filter>
     </ClCompile>
+    <ClCompile Include="ToonSettings.cpp">
+      <Filter>40_Gameplay\Debug</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\Config\toon.json">
+      <Filter>JSON</Filter>
+    </None>
   </ItemGroup>
 </Project>

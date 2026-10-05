@@ -226,7 +226,6 @@
     <ClInclude Include="DxPlus\Vector2.h" />
     <ClInclude Include="EntityBase.h" />
     <ClInclude Include="GameContext.h" />
-    <ClInclude Include="GamePram.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="BossHairBallSkill.h" />
@@ -350,9 +349,13 @@
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="StateMachine.cpp" />
     <ClCompile Include="TitleScene.cpp" />
+    <ClCompile Include="ToonSettings.cpp" />
     <ClCompile Include="UIBase.cpp" />
     <ClCompile Include="UIFactory.cpp" />
     <ClCompile Include="UIManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\Config\toon.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

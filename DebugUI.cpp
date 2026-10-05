@@ -50,31 +50,7 @@ void DebugUI::Init()
 
 	// Load ToonSettings from toon.json
     {
-        std::ifstream file("./Data/Config/toon.json");
-
-        if (file)
-        {
-            nlohmann::json json;
-            file >> json;
-
-            if (json.contains("shadowColor"))
-            {
-                for (int i = 0; i < 3; ++i)
-                    g_toonSettings.shadowColor[i] = json["shadowColor"][i];
-            }
-
-            if (json.contains("thresholds"))
-            {
-                for (int i = 0; i < 3; ++i)
-                    g_toonSettings.thresholds[i] = json["thresholds"][i];
-            }
-
-            if (json.contains("shadow"))
-            {
-                for (int i = 0; i < 2; ++i)
-                    g_toonSettings.shadow[i] = json["shadow"][i];
-            }
-        }
+        ToonSettingsManager::Load();
     }
 }
 
@@ -182,54 +158,19 @@ void DebugUI::Draw(GameContext& ctx)
 
         if (ImGui::Button(u8"保存"))
         {
-            nlohmann::json json;
-
-            json["shadowColor"] = {
-                g_toonSettings.shadowColor[0],
-                g_toonSettings.shadowColor[1],
-                g_toonSettings.shadowColor[2]
-            };
-
-            json["thresholds"] = {
-                g_toonSettings.thresholds[0],
-                g_toonSettings.thresholds[1],
-                g_toonSettings.thresholds[2]
-            };
-
-            json["shadow"] = {
-                g_toonSettings.shadow[0],
-                g_toonSettings.shadow[1]
-            };
-
-            std::ofstream file("./Data/Config/toon.json");
-            file << json.dump(4);
+            ToonSettingsManager::Save();
         }
 
         ImGui::SameLine();
 
         if (ImGui::Button(u8"読み込み"))
         {
-            std::ifstream file("./Data/Config/toon.json");
-
-            if (file)
-            {
-                nlohmann::json json;
-                file >> json;
-
-                for (int i = 0; i < 3; ++i)
-                    g_toonSettings.shadowColor[i] = json["shadowColor"][i];
-
-                for (int i = 0; i < 3; ++i)
-                    g_toonSettings.thresholds[i] = json["thresholds"][i];
-
-                for (int i = 0; i < 2; ++i)
-                    g_toonSettings.shadow[i] = json["shadow"][i];
-            }
+            ToonSettingsManager::Load();
         }
         ImGui::SameLine();
         if (ImGui::Button(u8"初期値に戻す"))
         {
-            g_toonSettings = ToonSettings{};
+            ToonSettingsManager::Reset();
         }
 
         ImGui::End();
