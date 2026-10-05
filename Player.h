@@ -36,6 +36,8 @@ public:
 
 	// ƒWƒƒƒ“ƒv
 	void JumpAction();
+	bool IsGravityEnabled() const { return gravityEnabled_; }
+	void SetGravityEnabled(bool enabled);
 
 	const ModelObject& GetModelObject() const { return model_; }
 	const PlayerInput& GetInput() const { return input_; }
@@ -51,4 +53,5 @@ private:
 
 	Vec3 velocity_{ 0.0f, 0.0f, 0.0f };
 	bool isGrounded_{ false };
+  bool gravityEnabled_{ true };
 };
