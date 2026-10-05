@@ -13,6 +13,10 @@
 #include "backends/imgui_impl_dx11.h"
 
 #include <filesystem>
+#include <fstream>
+#include <nlohmann/json.hpp>
+
+#include "ToonSettings.h"
 
 extern bool g_raise_imgui_viewports;
 
@@ -43,6 +47,35 @@ void DebugUI::Init()
     ImGui_ImplDX11_Init(device, context);
 
     ImGui::LoadIniSettingsFromDisk("./Data/Config/imgui.ini");
+
+	// Load ToonSettings from toon.json
+    {
+        std::ifstream file("./Data/Config/toon.json");
+
+        if (file)
+        {
+            nlohmann::json json;
+            file >> json;
+
+            if (json.contains("shadowColor"))
+            {
+                for (int i = 0; i < 3; ++i)
+                    g_toonSettings.shadowColor[i] = json["shadowColor"][i];
+            }
+
+            if (json.contains("thresholds"))
+            {
+                for (int i = 0; i < 3; ++i)
+                    g_toonSettings.thresholds[i] = json["thresholds"][i];
+            }
+
+            if (json.contains("shadow"))
+            {
+                for (int i = 0; i < 2; ++i)
+                    g_toonSettings.shadow[i] = json["shadow"][i];
+            }
+        }
+    }
 }
 
 void DebugUI::Shutdown()
@@ -94,63 +127,6 @@ void DebugUI::Draw(GameContext& ctx)
             }
         }
 
-        // グリッド
-        if (ImGui::TreeNode("Grids"))
-        {
-            Grid& grid = ctx.GetGrid();
-
-            // XY平面
-            {
-                bool drawXY = grid.IsDrawXY();
-                if (ImGui::Checkbox(u8"XY平面", &drawXY))
-                {
-                    grid.SetDrawXY(drawXY);
-                }
-            }
-
-            // YZ平面
-            {
-                bool drawYZ = grid.IsDrawYZ();
-                if (ImGui::Checkbox(u8"YZ平面", &drawYZ))
-                {
-                    grid.SetDrawYZ(drawYZ);
-                }
-            }
-
-            // ZX平面
-            {
-                bool drawZX = grid.IsDrawZX();
-                if (ImGui::Checkbox(u8"ZX平面", &drawZX))
-                {
-                    grid.SetDrawZX(drawZX);
-                }
-            }
-
-            // HalfCount
-            {
-                int halfCount = grid.GetHalfCount();
-                ImGui::Text("HalfCount");
-                ImGui::SameLine();
-                if (ImGui::DragInt("##HalfCount", &halfCount))
-                {
-                    grid.SetHalfCount(halfCount);
-                }
-            }
-
-            // Spacing
-            {
-                float spacing = grid.GetSpacing();
-                ImGui::Text("Spacing");
-                ImGui::SameLine();
-                if (ImGui::DragFloat("##Spacing", &spacing))
-                {
-                    grid.SetSpacing(spacing);
-                }
-            }
-
-            ImGui::TreePop();
-        }
-
         // フレームレート調節
         {
             int fpsCap = DxPlus::DxWrapper::GetInstance().GetFpsCap();
@@ -160,6 +136,100 @@ void DebugUI::Draw(GameContext& ctx)
             {
                 DxPlus::DxWrapper::GetInstance().SetFpsCap(fpsCap);
             }
+        }
+
+        ImGui::End();
+    }
+
+	// ToonSettings
+    {
+        ImGui::Begin("Toon Settings");
+
+        ImGui::ColorEdit3(
+            u8"影色",
+            g_toonSettings.shadowColor
+        );
+
+        ImGui::SliderFloat(
+            u8"明るい境界",
+            &g_toonSettings.thresholds[0],
+            0.0f, 1.0f
+        );
+
+        ImGui::SliderFloat(
+            u8"通常境界",
+            &g_toonSettings.thresholds[1],
+            0.0f, 1.0f
+        );
+
+        ImGui::SliderFloat(
+            u8"暗い境界",
+            &g_toonSettings.thresholds[2],
+            0.0f, 1.0f
+        );
+
+        ImGui::SliderFloat(
+            u8"影の暗さ",
+            &g_toonSettings.shadow[0],
+            0.0f, 1.0f
+        );
+
+        ImGui::SliderFloat(
+            u8"影色の強さ",
+            &g_toonSettings.shadow[1],
+            0.0f, 1.0f
+        );
+
+        if (ImGui::Button(u8"保存"))
+        {
+            nlohmann::json json;
+
+            json["shadowColor"] = {
+                g_toonSettings.shadowColor[0],
+                g_toonSettings.shadowColor[1],
+                g_toonSettings.shadowColor[2]
+            };
+
+            json["thresholds"] = {
+                g_toonSettings.thresholds[0],
+                g_toonSettings.thresholds[1],
+                g_toonSettings.thresholds[2]
+            };
+
+            json["shadow"] = {
+                g_toonSettings.shadow[0],
+                g_toonSettings.shadow[1]
+            };
+
+            std::ofstream file("./Data/Config/toon.json");
+            file << json.dump(4);
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button(u8"読み込み"))
+        {
+            std::ifstream file("./Data/Config/toon.json");
+
+            if (file)
+            {
+                nlohmann::json json;
+                file >> json;
+
+                for (int i = 0; i < 3; ++i)
+                    g_toonSettings.shadowColor[i] = json["shadowColor"][i];
+
+                for (int i = 0; i < 3; ++i)
+                    g_toonSettings.thresholds[i] = json["thresholds"][i];
+
+                for (int i = 0; i < 2; ++i)
+                    g_toonSettings.shadow[i] = json["shadow"][i];
+            }
+        }
+        ImGui::SameLine();
+        if (ImGui::Button(u8"初期値に戻す"))
+        {
+            g_toonSettings = ToonSettings{};
         }
 
         ImGui::End();

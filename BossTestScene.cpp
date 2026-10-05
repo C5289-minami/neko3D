@@ -6,6 +6,7 @@
 #include "ResourceManager.h"
 #include "SceneManager.h"
 #include "DrawableObject.h"
+#include "ToonSettings.h"
 
 #include <algorithm>
 #include <cmath>
@@ -21,7 +22,7 @@ namespace
 
 void BossTestScene::Init()
 {
-    DxLib::SetBackgroundColor(36, 42, 54);
+    DxLib::SetBackgroundColor(255, 178,102);
     DxLib::SetLightDirection(VGet(-0.3f, -1.0f, -0.5f));
    // DxLib::SetGlobalAmbientLight(DxLib::GetColorF(0.35f, 0.35f, 0.35f, 1.0f));
 
@@ -72,10 +73,23 @@ void BossTestScene::Init()
     float* outlineSize =
         static_cast<float*>(GetBufferShaderConstantBuffer(outlineConstantBuffer_));
 
+    toonConstantBuffer_ = CreateShaderConstantBuffer(sizeof(ToonSettings));
+
+    ToonSettings* settings =
+        static_cast<ToonSettings*>(
+            GetBufferShaderConstantBuffer(toonConstantBuffer_)
+            );
+
+    *settings = g_toonSettings;
+
+    UpdateShaderConstantBuffer(toonConstantBuffer_);
+
     outlineSize[0] = 5.0f;                    // 横3px
     outlineSize[1] = 5.0f;                    // 縦3px
     outlineSize[2] = DxPlus::CLIENT_WIDTH;
     outlineSize[3] = DxPlus::CLIENT_HEIGHT;
+
+    UpdateShaderConstantBuffer(toonConstantBuffer_);
 
     UpdateShaderConstantBuffer(outlineConstantBuffer_);
 
@@ -132,27 +146,30 @@ void BossTestScene::Update(float deltaTime)
     }
 #endif
 
-    const DxPlus::Vec2Int mouseDelta = DxPlus::Input::GetMouseDelta();
-    yaw += mouseDelta.x * MouseRotationRadiansPerPixel;
-	//boss.GetModelObject().rotation = { yaw, yaw, yaw };
-    pitch = std::clamp(pitch - mouseDelta.y * MouseRotationRadiansPerPixel, MinPitch, MaxPitch);
-
-    const float cosPitch = std::cos(pitch);
-    const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };
-    const Vec3 right = Vec3::Cross(Vec3::Up(), forward).Normalized();
-    Vec3 movement{};
-
-    if (DxLib::CheckHitKey(KEY_INPUT_W)) movement += forward;
-    if (DxLib::CheckHitKey(KEY_INPUT_S)) movement -= forward;
-    if (DxLib::CheckHitKey(KEY_INPUT_D)) movement += right;
-    if (DxLib::CheckHitKey(KEY_INPUT_A)) movement -= right;
-    if (DxLib::CheckHitKey(KEY_INPUT_E)) movement += Vec3::Up();
-    if (DxLib::CheckHitKey(KEY_INPUT_Q)) movement -= Vec3::Up();
-
-    if (movement.LengthSq() > 0.0f)
+    // --- 右クリックを押している間のみカメラ操作 ---
+    if ((DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
     {
-        const float speed = CameraMoveSpeed * (DxLib::CheckHitKey(KEY_INPUT_LSHIFT) ? 3.0f : 1.0f);
-        cameraEye += movement.Normalized() * (speed * deltaTime);
+        const DxPlus::Vec2Int mouseDelta = DxPlus::Input::GetMouseDelta();
+        yaw += mouseDelta.x * MouseRotationRadiansPerPixel;
+        pitch = std::clamp(pitch - mouseDelta.y * MouseRotationRadiansPerPixel, MinPitch, MaxPitch);
+
+        const float cosPitch = std::cos(pitch);
+        const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };
+        const Vec3 right = Vec3::Cross(Vec3::Up(), forward).Normalized();
+        Vec3 movement{};
+
+        if (DxLib::CheckHitKey(KEY_INPUT_W)) movement += forward;
+        if (DxLib::CheckHitKey(KEY_INPUT_S)) movement -= forward;
+        if (DxLib::CheckHitKey(KEY_INPUT_D)) movement += right;
+        if (DxLib::CheckHitKey(KEY_INPUT_A)) movement -= right;
+        if (DxLib::CheckHitKey(KEY_INPUT_E)) movement += Vec3::Up();
+        if (DxLib::CheckHitKey(KEY_INPUT_Q)) movement -= Vec3::Up();
+
+        if (movement.LengthSq() > 0.0f)
+        {
+            const float speed = CameraMoveSpeed * (DxLib::CheckHitKey(KEY_INPUT_LSHIFT) ? 3.0f : 1.0f);
+            cameraEye += movement.Normalized() * (speed * deltaTime);
+        }
     }
 
 }
@@ -180,11 +197,28 @@ void BossTestScene::Render() const
                 }
             };
 
+        ToonSettings* settings =
+            static_cast<ToonSettings*>(
+                GetBufferShaderConstantBuffer(toonConstantBuffer_)
+                );
+
+        *settings = g_toonSettings;
+
+        UpdateShaderConstantBuffer(toonConstantBuffer_);
+
+        SetShaderConstantBuffer(
+            toonConstantBuffer_,
+            DX_SHADERTYPE_PIXEL,
+            5
+        );
+
         SetShaderConstantBuffer(
             outlineConstantBuffer_,
             DX_SHADERTYPE_VERTEX,
             4
         );
+
+
 
         SetUsePixelShader(outlinePixelShader);
         SetUseVertexShader(outlineVertexShader);
@@ -230,6 +264,7 @@ void BossTestScene::Render() const
         SetUseVertexShader(-1);
         MV1SetUseOrigShader(FALSE);       // 描画後は標準に戻す
     }
+
 
     const int white = DxLib::GetColor(255, 255, 255);
     const int green = DxLib::GetColor(100, 255, 100);

@@ -54,5 +54,6 @@ private:
     bool shaderKeyWasDown_ = false;    // F2ƒL[‚Ì“ü—Í”»’è—p
 	ModelObject testModel_{ };
     int outlineConstantBuffer_ = -1;
+	int toonConstantBuffer_ = -1;
 };
 
