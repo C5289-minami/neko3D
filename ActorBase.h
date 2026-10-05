@@ -19,7 +19,7 @@ public:
 	void SetYaw(float yaw) { yaw_ = yaw; }
 	float GetPitch() const { return pitch_; }
 	void SetPitch(float pitch) { pitch_ = pitch; }
-private:
+protected:
 	Vec3 position_{ 0.0f, 0.0f, 0.0f };
 	float yaw_{ 0.0f };
 	float pitch_{ 0.0f };

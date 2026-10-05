@@ -226,7 +226,6 @@
     <ClInclude Include="DxPlus\Vector2.h" />
     <ClInclude Include="EntityBase.h" />
     <ClInclude Include="GameContext.h" />
-    <ClInclude Include="GamePram.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="BossHairBallSkill.h" />
@@ -240,10 +239,12 @@
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="MathUtil.h" />
+    <ClInclude Include="ModelToonRenderer.h" />
     <ClInclude Include="Motion.h" />
     <ClInclude Include="OrbitCamera.h" />
     <ClInclude Include="15_System\Player_camera.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="PlayerAnimType.h" />
     <ClInclude Include="PlayerBaseState.h" />
     <ClInclude Include="PlayerIdleState.h" />
     <ClInclude Include="PlayerInput.h" />
@@ -325,6 +326,7 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ModelToonRenderer.cpp" />
     <ClCompile Include="Motion.cpp" />
     <ClCompile Include="OrbitCamera.cpp" />
     <ClCompile Include="15_System\Player_camera.cpp" />
@@ -350,9 +352,13 @@
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="StateMachine.cpp" />
     <ClCompile Include="TitleScene.cpp" />
+    <ClCompile Include="ToonSettings.cpp" />
     <ClCompile Include="UIBase.cpp" />
     <ClCompile Include="UIFactory.cpp" />
     <ClCompile Include="UIManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\Config\toon.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

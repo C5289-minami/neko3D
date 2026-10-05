@@ -13,6 +13,7 @@ PlayerIdleState::PlayerIdleState(PlayerStateMachine& stateMachine, Player& playe
 void PlayerIdleState::Enter()
 {
 	player_.StopMove();
+	player_.SetAnimation(PlayerAnimType::Idle, true);
 
 	DxPlus::Debug::SetString(L"PlayerIdleState::Enter");
 }

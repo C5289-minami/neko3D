@@ -11,6 +11,7 @@ PlayerWalkState::PlayerWalkState(PlayerStateMachine& stateMachine, Player& playe
 
 void PlayerWalkState::Enter()
 {
+   player_.SetAnimation(PlayerAnimType::Walk, true);
 }
 
 void PlayerWalkState::Tick(float deltaTime)

@@ -1,8 +1,8 @@
 #pragma once
 
+#include <string>
+
 // シェーダーのトゥーン設定用
-
-
 struct ToonSettings
 {
     float shadowColor[4] = { 0.2f, 0.25f, 0.6f, 1.0f };
@@ -13,3 +13,20 @@ struct ToonSettings
 };
 
 inline ToonSettings g_toonSettings;
+
+
+class ToonSettingsManager
+{
+public:
+    static ToonSettings& Get();
+
+    static bool Save(
+        const std::string& filePath = "./Data/Config/toon.json"
+    );
+
+    static bool Load(
+        const std::string& filePath = "./Data/Config/toon.json"
+    );
+
+    static void Reset();
+};

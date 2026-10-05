@@ -7,6 +7,7 @@
 #include "SceneManager.h"
 #include "DrawableObject.h"
 #include "ToonSettings.h"
+#include "ModelToonRenderer.h"
 
 #include <algorithm>
 #include <cmath>
@@ -76,10 +77,7 @@ void BossTestScene::Init()
     pixelShader = LoadPixelShader(L"./DevData/ShaderCompiler/ToonPS.pso");
 	outlinePixelShader = LoadPixelShader(L"./DevData/ShaderCompiler/OutlinePS.pso");
 	outlineVertexShader = LoadVertexShader(L"./DevData/ShaderCompiler/OutlineVS.vso");
-	modelToonPixelShader = LoadPixelShader(L"./DevData/ShaderCompiler/ModelToonPS.pso");
-    modelToonVertexShader_4Frame = LoadVertexShader( L"./DevData/ShaderCompiler/ModelToonVS_4Frame.vso"  );
-    modelToonVertexShader_NMap4Frame =  LoadVertexShader(   L"./DevData/ShaderCompiler/ModelToonVS_NMap4Frame.vso");
-
+    modelToonRenderer_.Init();
     outlineConstantBuffer_ = CreateShaderConstantBuffer(sizeof(float) * 4);
 
     float* outlineSize =
@@ -109,6 +107,8 @@ void BossTestScene::Init()
     //player
 	test.Init();
 	test.Reset();
+   test.SetPosition({ 250.0f, 300.0f, 300.0f });
+   test.Update(0, stage);
 }
 
 void BossTestScene::Update(float deltaTime)
@@ -251,24 +251,16 @@ void BossTestScene::Render() const
         stage.Draw();
         testModel_.Draw();
 
-        // ========================================
-        // ãåBoss
-        // VertexType = 5
-        // ========================================
+        modelToonRenderer_.Draw(
+            test.GetModelObject(),
+            ModelToonType::NMap4Frame
+        );
+		test.Draw();
 
-        SetUsePixelShader(modelToonPixelShader);
-        SetUseVertexShader(modelToonVertexShader_NMap4Frame);
-
-        test.Draw();
-
-        // ========================================
-        // êVBoss
-        // VertexType = 4
-        // ========================================
-
-        SetUseVertexShader(modelToonVertexShader_4Frame);
-
-        boss.Draw();
+        modelToonRenderer_.Draw(
+            boss.GetModelObject(),
+            ModelToonType::FourFrame
+        );
     }
     else
     {

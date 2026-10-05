@@ -29,6 +29,7 @@ public:
 	BossStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }
 	ModelObject& GetModelObject() { return model_; }
 	const int GetModelHandle() const;
+	const ModelObject& GetModelObject() const { return model_; }
 	void SetAnimation(BossAnimType::Type type, bool loop = true)
 	{
 		currentAnimIndex_ = static_cast<int>(type);
