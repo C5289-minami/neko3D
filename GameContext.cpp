@@ -79,6 +79,7 @@ void GameContext::Init()
 {
     stage.Init();
     player.Init();
+    boss.Init();
 
     playerCamera.Reset();
     Debug_camera.Initialize(playerCamera.GetEye(), playerCamera.GetTarget());
@@ -95,6 +96,7 @@ void GameContext::Reset()
 
     stage.Reset();
     player.Reset();
+    boss.Reset();
     playerCamera.Reset();
     Debug_camera.Initialize(playerCamera.GetEye(), playerCamera.GetTarget());
 }
@@ -104,25 +106,26 @@ void GameContext::Update(float deltaTime)
     DxLib::SetBackgroundColor(bgRed, bgGreen, bgBlue);
 
 #ifndef NDEBUG
-    // 切り替え時は通常カメラの現在の位置・向きからデバッグ操作を開始する。
     Debug_camera.Update(deltaTime, player.GetPosition(),
         playerCamera.GetEye(), playerCamera.GetTarget());
     if (Debug_camera.IsSceneViewActive()) return;
 #endif
 
-    // 通常カメラは定点のまま。プレイヤーの座標・移動処理は維持する。
     player.Update(deltaTime, stage);
+    boss.Update(deltaTime);
+    playerCamera.Update(player.GetPosition(), boss.GetPosition(), deltaTime);
 }
 
 void GameContext::Draw() const
 {
     DxLib::SetCameraPositionAndTargetAndUpVec(
-        DxConv::ToVECTOR(GetCameraPosition()),
-        DxConv::ToVECTOR(GetCameraTarget()),
-        DxConv::ToVECTOR(GetCameraUp()));
+        DxConv::ToVECTOR(GetCameraPosition()), //Player
+        DxConv::ToVECTOR(GetCameraTarget()),   //boss
+        DxConv::ToVECTOR(GetCameraUp()));      //������Əォ��
 
     DxLib::ClearDrawScreen();
     grid.Draw();
     stage.Draw();
+    boss.Draw();
     player.Draw();
 }
