@@ -11,17 +11,12 @@ void Stage::Init()
 {
 	modelHandle = RM().GetModel(ResourceKeys::Model_Stage);
 	if (modelHandle < 0) return;
-
-	scale = { 10.0f, 10.0f, 10.0f };
-	MV1SetScale(modelHandle, DxConv::ToVECTOR(scale));
 	// ƒRƒŠƒWƒ‡ƒ“î•ñ‚ð¶¬
 	MV1SetupCollInfo(modelHandle, -1, 8, 8, 8);
 }
 
 void Stage::Reset()
 {
-	scale = { 10.0f, 10.0f, 10.0f };
-	MV1SetScale(modelHandle, DxConv::ToVECTOR(scale));
 }
 
 void Stage::Draw() const
