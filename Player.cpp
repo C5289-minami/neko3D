@@ -8,6 +8,7 @@
 #include "Stage.h"
 
 #include <cmath>
+#include "Sound3D.h"
 
 
 Player::Player()
@@ -119,6 +120,15 @@ void Player::Update(float deltaTime, const Stage& stage)
 	model_.position = GetPosition();
 	model_.rotation.y = GetYaw();
 	model_.rotation.x = GetPitch();
+
+	Sound3D::SetListener(
+		GetPosition(),
+		Vec3(
+			std::sin(GetYaw()),
+			0.0f,
+			std::cos(GetYaw())
+		)
+	);
 }
 
 void Player::Draw() const

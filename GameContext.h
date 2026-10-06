@@ -6,7 +6,7 @@
 
 #include "Vector3.h"
 #include "Grid.h"
-#include "15_System/Player_camera.h"
+#include "Player_camera.h"
 #include "Stage.h"
 #include "Player.h"
 #include "Boss.h" 

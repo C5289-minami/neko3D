@@ -29,6 +29,7 @@ namespace ResourceKeys
     // ===== Effects =====
 
     // ===== Musics / Sounds =====
+	inline constexpr const wchar_t* Sound_BossBite = L"SoundBossBite";
 
     // ===== Fonts =====
     inline constexpr const wchar_t* Font_Title      = L"Bitcount Light";
