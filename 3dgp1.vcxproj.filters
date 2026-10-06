@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="_DxPlus">
@@ -281,9 +281,6 @@
     </ClInclude>
     <ClInclude Include="Grid.h">
       <Filter>40_Gameplay\Debug</Filter>
-    </ClInclude>
-    <ClInclude Include="OrbitCamera.h">
-      <Filter>10_Core\Camera</Filter>
     </ClInclude>
     <ClInclude Include="Raycast.h">
       <Filter>40_Gameplay\Physics</Filter>
@@ -586,9 +583,6 @@
     </ClCompile>
     <ClCompile Include="Grid.cpp">
       <Filter>40_Gameplay\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="OrbitCamera.cpp">
-      <Filter>10_Core\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Raycast.cpp">
       <Filter>40_Gameplay\Physics</Filter>
