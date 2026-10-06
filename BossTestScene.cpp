@@ -13,6 +13,8 @@
 #include <cmath>
 
 #include "Player.h"
+#include "Sound3D.h"
+#include "ResourceManager.h"
 
 namespace
 {
@@ -187,6 +189,14 @@ void BossTestScene::Update(float deltaTime)
         }
     }
 	//test.Update(deltaTime, stage);
+
+
+
+    Sound3D::SetListener(
+        cameraEye,
+        Vec3{ std::sin(yaw) * std::cos(pitch), std::sin(pitch), std::cos(yaw) * std::cos(pitch) }
+	);
+    Sound3D::Play(RM().GetSound(ResourceKeys::Sound_BossBite), boss.GetPosition());
 }
 
 void BossTestScene::Render() const

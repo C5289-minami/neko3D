@@ -34,6 +34,10 @@ void ResourceManager::LoadAll()
     LoadSpriteStudioPlayer(ResourceKeys::SpriteStudio_Gauge,
         "character_template1", "./Data/Images/character_template1.ssbp",
         "character_template_2head/stance");
+
+    SetCreate3DSoundFlag(TRUE);
+	LoadSound(ResourceKeys::Sound_BossBite, L"./Data/Sounds/Explosion.mp3");
+    SetCreate3DSoundFlag(FALSE);
 }
 
 void ResourceManager::UnloadAll()
