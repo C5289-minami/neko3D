@@ -18,7 +18,7 @@ void PlayerIdleState::Enter()
 	DxPlus::Debug::SetString(L"PlayerIdleState::Enter");
 }
 
-void PlayerIdleState::Tick(float deltaTime)
+void PlayerIdleState::Tick(float)
 {
 	PlayerInput move = player_.GetInput();
 	if(move.isMoving)
