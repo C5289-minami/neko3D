@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #pragma once
 
 #include "AnimationDraw.h"
@@ -7,6 +7,7 @@
 #include "IAttackSkill.h"
 #include "Vector3.h"
 #include "BossAnimType.h"
+#include "TransformSettings.h"
 
 class Boss
 {
@@ -24,7 +25,14 @@ public:
 	void SetMoveDirection(const Vec3& moveDirection, float speed);
 	void StopMove();
 	IAttackSkill* GetActiveSkill() const { return activeSkill_; }
-	const Vec3& GetPosition() const { return model_.position; }
+	ObjectTransform GetTransform() const { return { model_.scale, model_.position, model_.rotation }; }
+    void SetTransform(const ObjectTransform& transform)
+    {
+        model_.scale = transform.scale;
+        model_.position = transform.position;
+        model_.rotation = transform.rotation;
+    }
+    const Vec3& GetPosition() const { return model_.position; }
 	void SetPosition(const Vec3& position) { model_.position = position; }
 	BossStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }
 	ModelObject& GetModelObject() { return model_; }
@@ -43,7 +51,7 @@ private:
 	IAttackSkill* activeSkill_{ nullptr };
 	BossStateMachine stateMachine_;
 
-	// Animation
+	// アニメーション設定
    AnimationDraw animation_;
 	int currentAnimIndex_{ -1 };
   bool currentAnimLoop_{ true };

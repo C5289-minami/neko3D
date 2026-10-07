@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "TransformDefaults.h"
 
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
@@ -19,22 +20,19 @@ Player::Player()
 
 void Player::Init()
 {
-	SetPosition({ 0.0f, 300.0f, 2300.0f });
+	SetTransform(TransformDefaults::GamePlayer);
 
     const int modelHandle = RM().GetModel(ResourceKeys::Model_Paladin);
 	if (modelHandle < 0) return;
 
 	model_.modelKey = ResourceKeys::Model_Paladin;
-	model_.scale = Vec3(100.0f,100.0f,100.0f);
 }
 
 
 void Player::Reset()
 {
-	SetPosition({ 0.0f, 100.f, 510.f });
+	SetTransform(TransformDefaults::GamePlayer);
 
-	SetYaw(0.0f);
-	SetPitch(0.0f);
 
 	velocity_ = { 0.0f, 0.0f, 0.0f };
 
@@ -43,7 +41,10 @@ void Player::Reset()
 	animation_.Reset();
 	SetAnimation(PlayerAnimType::Idle, true);
 
-	stateMachine_.Initialize();
+    stateMachine_.Initialize();
+    // 更新を止めても描画できるように初期ポーズを用意する
+    animation_.Play3D(RM().GetModel(model_.modelKey), currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
+    animation_.Update(0.0f);
 }
 
 
