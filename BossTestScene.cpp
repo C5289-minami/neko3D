@@ -11,6 +11,9 @@
 
 #include <algorithm>
 #include <cmath>
+#ifndef NDEBUG
+#include "imgui.h"
+#endif
 
 #include "Player.h"
 
@@ -41,6 +44,42 @@ namespace
             }
         }
     }
+}
+
+DebugSceneControls BossTestScene::GetDebugControls()
+{
+    return {
+        "boss_test",
+        {
+            MakeDebugTransformTarget("boss_test/player", "Player", test),
+            MakeDebugTransformTarget("boss_test/boss", "Boss", boss)
+        },
+        DebugCameraControls{
+            [this] { return debugCamera_.IsSceneViewActive(); },
+            [this] { return debugCamera_.IsSceneViewActive() ? debugCamera_.GetEye() : cameraEye; },
+            [this](const Vec3& position) {
+                if (debugCamera_.IsSceneViewActive()) debugCamera_.SetPosition(position);
+                else cameraEye = position;
+            },
+            [this] {
+                if (debugCamera_.IsSceneViewActive()) debugCamera_.ResetView();
+                else cameraEye = { 0.0f, 250.0f, -650.0f };
+            },
+            [this] {
+                if (!debugCamera_.IsSceneViewActive())
+                {
+                    const float cosPitch = std::cos(pitch);
+                    const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };
+                    debugCamera_.Initialize(cameraEye, cameraEye + forward);
+                    debugCamera_.Begin();
+                }
+                debugCamera_.FocusAt(test.GetPosition());
+            }
+        },
+        [this] { return debugActorsPaused_; },
+        [this](bool paused) { debugActorsPaused_ = paused; },
+        transformInitialStatus_
+    };
 }
 
 void BossTestScene::Init()
@@ -104,17 +143,36 @@ void BossTestScene::Init()
     StartFadeIn();
 
 
-    //player
+    // プレイヤーの初期設定
 	test.Init();
 	test.Reset();
-   test.SetPosition({ 250.0f, 300.0f, 300.0f });
    test.Update(0, stage);
+   debugActorsPaused_ = false;
+   TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
+   const float cosPitch = std::cos(pitch);
+   const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };
+   debugCamera_.Initialize(cameraEye, cameraEye + forward);
 }
 
 void BossTestScene::Update(float deltaTime)
 {
-    boss.Update(deltaTime);
-	testModel_.rotation.z += 1.0f * deltaTime;
+#ifndef NDEBUG
+    const float cosPitch = std::cos(pitch);
+    const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };
+    debugCamera_.Update(deltaTime, test.GetPosition(), cameraEye, cameraEye + forward);
+    const bool actorsPaused = debugActorsPaused_ || debugCamera_.IsSceneViewActive();
+#else
+    const bool actorsPaused = false;
+#endif
+#ifndef NDEBUG
+    const bool mouseCaptured = ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureMouse;
+    const bool keyboardCaptured = ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard;
+#else
+    const bool mouseCaptured = false;
+    const bool keyboardCaptured = false;
+#endif
+    if (!actorsPaused) boss.Update(deltaTime);
+	if (!actorsPaused) testModel_.rotation.z += 1.0f * deltaTime;
 
     // --- シェーダーON/OFF切り替え (F2キー) ---
     const bool shaderKeyDown = DxLib::CheckHitKey(KEY_INPUT_F2) != 0;
@@ -133,7 +191,7 @@ void BossTestScene::Update(float deltaTime)
     else if (DxLib::CheckHitKey(KEY_INPUT_5)) selectedSkill = 5;
 
     const bool skillKeyDown = selectedSkill != 0;
-    if (skillKeyDown && !skillKeyWasDown_ && boss.GetCurrentState() != BossStateType::Attack)
+    if (!actorsPaused && !keyboardCaptured && skillKeyDown && !skillKeyWasDown_ && boss.GetCurrentState() != BossStateType::Attack)
     {
         BossPoseSkill* skill = nullptr;
         switch (selectedSkill)
@@ -162,7 +220,7 @@ void BossTestScene::Update(float deltaTime)
 #endif
 
     // --- 右クリックを押している間のみカメラ操作 ---
-    if ((DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
+    if (!mouseCaptured && !debugCamera_.IsSceneViewActive() && (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
     {
         const DxPlus::Vec2Int mouseDelta = DxPlus::Input::GetMouseDelta();
         yaw += mouseDelta.x * MouseRotationRadiansPerPixel;
@@ -173,12 +231,12 @@ void BossTestScene::Update(float deltaTime)
         const Vec3 right = Vec3::Cross(Vec3::Up(), forward).Normalized();
         Vec3 movement{};
 
-        if (DxLib::CheckHitKey(KEY_INPUT_W)) movement += forward;
-        if (DxLib::CheckHitKey(KEY_INPUT_S)) movement -= forward;
-        if (DxLib::CheckHitKey(KEY_INPUT_D)) movement += right;
-        if (DxLib::CheckHitKey(KEY_INPUT_A)) movement -= right;
-        if (DxLib::CheckHitKey(KEY_INPUT_E)) movement += Vec3::Up();
-        if (DxLib::CheckHitKey(KEY_INPUT_Q)) movement -= Vec3::Up();
+        if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_W)) movement += forward;
+        if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_S)) movement -= forward;
+        if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_D)) movement += right;
+        if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_A)) movement -= right;
+        if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_E)) movement += Vec3::Up();
+        if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_Q)) movement -= Vec3::Up();
 
         if (movement.LengthSq() > 0.0f)
         {
@@ -194,8 +252,10 @@ void BossTestScene::Render() const
     const float cosPitch = std::cos(pitch);
     const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };
     const Vec3 target = cameraEye + forward;
+    const Vec3& viewEye = debugCamera_.IsSceneViewActive() ? debugCamera_.GetEye() : cameraEye;
+    const Vec3& viewTarget = debugCamera_.IsSceneViewActive() ? debugCamera_.GetTarget() : target;
     DxLib::SetCameraPositionAndTargetAndUpVec(
-        DxConv::ToVECTOR(cameraEye), DxConv::ToVECTOR(target), VGet(0.0f, 1.0f, 0.0f));
+        DxConv::ToVECTOR(viewEye), DxConv::ToVECTOR(viewTarget), VGet(0.0f, 1.0f, 0.0f));
 
     if (isShaderEnabled_)
     {
@@ -226,7 +286,7 @@ void BossTestScene::Render() const
         const int testModelHandle = RM().GetModel(testModel_.modelKey);
 
         // ========================================
-        // Outline
+        // 輪郭を描画する
         // ========================================
 
         SetUsePixelShader(outlinePixelShader);

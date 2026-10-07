@@ -12,9 +12,7 @@
 #include "backends/imgui_impl_win32.h"
 #include "backends/imgui_impl_dx11.h"
 
-#include <filesystem>
-#include <fstream>
-#include <nlohmann/json.hpp>
+#include <cmath>
 
 #include "ToonSettings.h"
 
@@ -48,7 +46,7 @@ void DebugUI::Init()
 
     ImGui::LoadIniSettingsFromDisk("./Data/Config/imgui.ini");
 
-	// Load ToonSettings from toon.json
+	// トゥーン設定を読み込む
     {
         ToonSettingsManager::Load();
     }
@@ -75,16 +73,119 @@ void DebugUI::BeginFrame()
     ImGui::DockSpaceOverViewport(ImGui::GetID("MainDockSpace"), ImGui::GetMainViewport(), flags);
 }
 
-void DebugUI::Draw(GameContext& ctx)
+namespace
 {
-    ImGui::Begin("Player debug");
-    const Vec3& playerPosition = ctx.GetPlayerPosition();
-    float position[3] = { playerPosition.x, playerPosition.y, playerPosition.z };
-    if (ImGui::DragFloat3("Position (X, Y, Z)", position, 1.0f, 0.0f, 0.0f, "%.1f"))
-        ctx.SetPlayerPosition({ position[0], position[1], position[2] });
+    // ImGuiに渡すときだけVec3を配列に変換する
+    bool EditVector3(const char* label, Vec3& value, float speed,
+        float minimum = 0.0f, float maximum = 0.0f,
+        ImGuiSliderFlags flags = ImGuiSliderFlags_None)
+    {
+        float components[3] = { value.x, value.y, value.z };
+        if (!ImGui::DragFloat3(label, components, speed, minimum, maximum, "%.3f", flags))
+            return false;
+        value = { components[0], components[1], components[2] };
+        return true;
+    }
+}
+
+void DebugUI::DrawTransformEditor(const DebugSceneControls& controls)
+{
+    if (transformScope_ != controls.scope)
+    {
+        transformScope_ = controls.scope;
+        transformStatus_.clear();
+        selectedTargetId_ = controls.targets.empty() ? "" : controls.targets.front().id;
+        cameraSelected_ = false;
+    }
+
+    ImGui::SetNextWindowSize(ImVec2(260.0f, 400.0f), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Hierarchy");
+    if (controls.targets.empty())
+        ImGui::TextWrapped(u8"このシーンには編集対象がありません。");
+    if (controls.isPaused && controls.setPaused)
+    {
+        bool paused = controls.isPaused();
+        if (ImGui::Checkbox(u8"オブジェクトの更新を停止", &paused))
+            controls.setPaused(paused);
+    }
+    ImGui::Separator();
+    for (const auto& target : controls.targets)
+    {
+        ImGui::PushID(target.id.c_str());
+        if (ImGui::Selectable(target.name.c_str(), !cameraSelected_ && selectedTargetId_ == target.id))
+        {
+            selectedTargetId_ = target.id;
+            cameraSelected_ = false;
+        }
+        ImGui::PopID();
+    }
+    if (controls.camera && ImGui::Selectable("Camera", cameraSelected_))
+        cameraSelected_ = true;
+
+    if (!controls.targets.empty())
+    {
+        ImGui::Separator();
+        if (ImGui::Button(u8"シーンをソースに保存"))
+            TransformSettings::Save(controls.targets, transformStatus_);
+        if (ImGui::Button(u8"シーンの初期値に戻す"))
+            TransformSettings::ResetToDefaults(controls.targets, transformStatus_);
+    }
     ImGui::End();
 
-    // Option
+    ImGui::SetNextWindowSize(ImVec2(520.0f, 440.0f), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Inspector");
+    if (cameraSelected_ && controls.camera)
+    {
+        const auto& camera = *controls.camera;
+        ImGui::Text("Camera: %s", camera.isActive() ? "Debug (Alt + Enter)" : "Normal");
+        Vec3 position = camera.getPosition();
+        if (EditVector3("Position", position, 1.0f) &&
+            std::isfinite(position.x) && std::isfinite(position.y) && std::isfinite(position.z))
+            camera.setPosition(position);
+        if (ImGui::Button("Reset camera")) camera.reset();
+        ImGui::SameLine();
+        if (ImGui::Button("Focus player")) camera.focusPlayer();
+    }
+    else
+    {
+        const DebugTransformTarget* selected = nullptr;
+        for (const auto& target : controls.targets)
+            if (target.id == selectedTargetId_) { selected = &target; break; }
+
+        if (selected)
+        {
+            ImGui::TextUnformatted(selected->name.c_str());
+            auto transform = selected->get();
+            ImGui::Separator();
+            bool changed = EditVector3("Position", transform.position, 1.0f);
+            changed |= EditVector3("Rotation (rad)", transform.rotation, 0.01f);
+            changed |= EditVector3("Scale", transform.scale, 0.1f, 0.001f, 100000.0f,
+                ImGuiSliderFlags_AlwaysClamp);
+            if (changed)
+            {
+                if (TransformSettings::IsValid(transform)) selected->set(transform);
+                else transformStatus_ = "Invalid transform: use finite values and positive scale.";
+            }
+            if (ImGui::Button(u8"ソースに保存")) TransformSettings::Save({ *selected }, transformStatus_);
+            ImGui::SameLine();
+            if (ImGui::Button(u8"初期値に戻す")) TransformSettings::ResetToDefaults({ *selected }, transformStatus_);
+        }
+        else ImGui::TextDisabled(u8"Hierarchyから対象を選択してください。");
+    }
+    if (controls.camera && controls.camera->isActive())
+        ImGui::TextWrapped(u8"デバッグカメラ中も編集・保存できます。オブジェクトの更新は自動停止します。");
+    ImGui::Separator();
+    ImGui::TextWrapped("Source: %s", TransformSettings::SourceFilePath().c_str());
+    ImGui::TextWrapped(u8"保存した初期値は、再ビルドして次回起動すると反映されます。");
+    const auto& status = transformStatus_.empty() ? controls.initialStatus : transformStatus_;
+    if (!status.empty()) ImGui::TextWrapped("%s", status.c_str());
+    ImGui::End();
+}
+
+void DebugUI::Draw(GameContext& ctx, const DebugSceneControls& controls)
+{
+    DrawTransformEditor(controls);
+    // オプション設定
     {
         ImGui::Begin("Option");     // "Option"ウィンドウを開始
 
@@ -117,7 +218,7 @@ void DebugUI::Draw(GameContext& ctx)
         ImGui::End();
     }
 
-	// ToonSettings
+	// トゥーン設定
     {
         ImGui::Begin("Toon Settings");
 

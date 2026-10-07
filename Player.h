@@ -8,6 +8,7 @@
 #include "Stage.h"
 #include "AnimationDraw.h"
 #include "PlayerAnimType.h"
+#include "TransformSettings.h"
 
 class Stage;
 
@@ -37,7 +38,24 @@ public:
 	// ƒWƒƒƒ“ƒv
 	void JumpAction();
 
-	const ModelObject& GetModelObject() const { return model_; }
+	void SetPosition(const Vec3& position)
+    {
+        ActorBase::SetPosition(position);
+        model_.position = position;
+    }
+    ObjectTransform GetTransform() const
+    {
+        return { model_.scale, GetPosition(), { GetPitch(), GetYaw(), model_.rotation.z } };
+    }
+    void SetTransform(const ObjectTransform& transform)
+    {
+        SetPosition(transform.position);
+        SetPitch(transform.rotation.x);
+        SetYaw(transform.rotation.y);
+        model_.rotation = transform.rotation;
+        model_.scale = transform.scale;
+    }
+    const ModelObject& GetModelObject() const { return model_; }
 	const PlayerInput& GetInput() const { return input_; }
 
 private:

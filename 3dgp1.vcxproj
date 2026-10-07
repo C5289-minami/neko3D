@@ -283,6 +283,8 @@
     <ClInclude Include="StateMachine.h" />
     <ClInclude Include="TitleScene.h" />
     <ClInclude Include="ToonSettings.h" />
+    <ClInclude Include="TransformSettings.h" />
+    <ClInclude Include="TransformDefaults.h" />
     <ClInclude Include="UIBase.h" />
     <ClInclude Include="UIFactory.h" />
     <ClInclude Include="UIManager.h" />
@@ -353,6 +355,9 @@
     <ClCompile Include="StateMachine.cpp" />
     <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="ToonSettings.cpp" />
+    <ClCompile Include="TransformSettings.cpp">
+      <UseFullPaths>true</UseFullPaths>
+    </ClCompile>
     <ClCompile Include="UIBase.cpp" />
     <ClCompile Include="UIFactory.cpp" />
     <ClCompile Include="UIManager.cpp" />

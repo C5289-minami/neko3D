@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="_DxPlus">
@@ -259,6 +259,12 @@
       <Filter>imgui\backends</Filter>
     </ClInclude>
     <ClInclude Include="Debug_camera.h">
+      <Filter>AboutDebug</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformDefaults.h">
+      <Filter>AboutDebug</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformSettings.h">
       <Filter>AboutDebug</Filter>
     </ClInclude>
     <ClInclude Include="DebugUI.h">
@@ -571,6 +577,9 @@
       <Filter>imgui\backends</Filter>
     </ClCompile>
     <ClCompile Include="Debug_camera.cpp">
+      <Filter>AboutDebug</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformSettings.cpp">
       <Filter>AboutDebug</Filter>
     </ClCompile>
     <ClCompile Include="DebugUI.cpp">

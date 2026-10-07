@@ -46,6 +46,8 @@ public:
     void ResetSceneCamera();
     void FocusSceneCameraOnPlayer();
 
+    DebugSceneControls GetDebugControls();
+
     // ---- lifecycle ----
     void Init();
     void Reset();
@@ -70,4 +72,6 @@ private:
 	// Player
 	Player player;
     Boss boss;
+    bool debugActorsPaused_{};
+    std::string transformInitialStatus_;
 };
