@@ -6,7 +6,7 @@
 
 #include <d3d11.h>
 #include "DxLib.h"
-#include "../GameContext.h"
+#include "GameContext.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_win32.h"
@@ -188,6 +188,14 @@ void DebugUI::Draw(GameContext& ctx, const DebugSceneControls& controls)
     // オプション設定
     {
         ImGui::Begin("Option");     // "Option"ウィンドウを開始
+
+        // ゲームシーンの重力を切り替える
+        if (controls.scope == "game")
+        {
+            bool gravityDisabled = !ctx.IsPlayerGravityEnabled();
+            if (ImGui::Checkbox(u8"重力を無効化", &gravityDisabled))
+                ctx.SetPlayerGravityEnabled(!gravityDisabled);
+        }
 
         // 背景色
         {

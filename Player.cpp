@@ -9,6 +9,7 @@
 #include "Stage.h"
 
 #include <cmath>
+#include "Sound3D.h"
 
 
 Player::Player()
@@ -35,7 +36,8 @@ void Player::Reset()
 
 	velocity_ = { 0.0f, 0.0f, 0.0f };
 
-	isGrounded_ = true;
+	// 空中から開始し、ステージへのレイキャストで接地させる。
+	isGrounded_ = false;
 	animation_.Reset();
 	SetAnimation(PlayerAnimType::Idle, true);
 
@@ -59,15 +61,60 @@ void Player::Update(float deltaTime)
 
 	stateMachine_.Tick(deltaTime);
 
-	// 横方向の移動
+	// 水平方向の移動
 	position_.x += velocity_.x * deltaTime;
 	position_.z += velocity_.z * deltaTime;
 
-	// 重力
-	if (!isGrounded_)
+ // ステージを考慮した更新処理で、プレイヤーを床面に合わせる。
+	if (gravityEnabled_)
 	{
 		velocity_.y -= Const::GRAVITY * deltaTime;
-		position_.y += velocity_.y * deltaTime;
+	}
+	position_.y += velocity_.y * deltaTime;
+	isGrounded_ = false;
+
+	SetPosition(position_);
+	model_.position = GetPosition();
+	model_.rotation.y = GetYaw();
+	model_.rotation.x = GetPitch();
+
+	const int modelHandle = RM().GetModel(model_.modelKey);
+	animation_.Play3D(modelHandle, currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
+	animation_.Update(deltaTime);
+}
+
+void Player::Update(float deltaTime, const Stage& stage)
+{
+	const float previousY = GetPosition().y;
+
+	Update(deltaTime);
+
+	// 落下中のみ床面に合わせ、このフレームの落下距離もレイの長さに含める。
+	if (velocity_.y <= 0.0f && stage.GetModelHandle() >= 0)
+	{
+		Physics::RayHit hit{};
+		constexpr float groundSnapDistance = 30.0f;
+		const float fallDistance = previousY - position_.y;
+		const float rayDistance =
+			fallDistance + groundSnapDistance + Const::PLAYER_SKIN;
+
+		if (Physics::RaycastDown(
+			stage.GetModelHandle(),
+			Vec3(
+				GetPosition().x,
+				previousY + Const::PLAYER_SKIN,
+				GetPosition().z
+			),
+			rayDistance,
+			hit))
+		{
+			if (position_.y - hit.point.y <= groundSnapDistance)
+			{
+				position_.y = hit.point.y;
+				velocity_.y = 0.0f;
+				isGrounded_ = true;
+			}
+		}
 	}
 
 	SetPosition(position_);
@@ -75,50 +122,15 @@ void Player::Update(float deltaTime)
 	model_.rotation.y = GetYaw();
 	model_.rotation.x = GetPitch();
 
-   const int modelHandle = RM().GetModel(model_.modelKey);
-	animation_.Play3D(modelHandle, currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
-	animation_.Update(deltaTime);
+	Sound3D::SetListener(
+		GetPosition(),
+		Vec3(
+			std::sin(GetYaw()),
+			0.0f,
+			std::cos(GetYaw())
+		)
+	);
 }
-
-
-void Player::Update(float deltaTime, const Stage& stage)
-{
-	const float oldY = GetPosition().y;
-
-	Update(deltaTime);
-
-	if (!isGrounded_ &&
-		velocity_.y <= 0.0f &&
-		stage.GetModelHandle() >= 0)
-	{
-		Physics::RayHit hit;
-
-		const float distance =
-			oldY - GetPosition().y +
-			Const::PLAYER_SKIN * 2.0f;
-
-		if (Physics::RaycastDown(
-			stage.GetModelHandle(),
-			Vec3(
-				GetPosition().x,
-				oldY + Const::PLAYER_SKIN,
-				GetPosition().z
-			),
-			distance,
-			hit))
-		{
-			position_.y = hit.point.y;
-			velocity_.y = 0.0f;
-			isGrounded_ = true;
-
-			SetPosition(position_);
-		}
-	}
-	model_.position = GetPosition();
-	model_.rotation.y = GetYaw();
-	model_.rotation.x = GetPitch();
-}
-
 
 void Player::Draw() const
 {
@@ -250,13 +262,23 @@ void Player::TurnTowards(
 
 void Player::JumpAction()
 {
-	if (!isGrounded_)
+   if (!gravityEnabled_ || !isGrounded_)
 	{
 		return;
 	}
 
-	velocity_.y =
+   velocity_.y =
 		Const::PLAYER_JUMP_SPEED;
 
 	isGrounded_ = false;
+}
+
+
+void Player::SetGravityEnabled(bool enabled)
+{
+	gravityEnabled_ = enabled;
+	if (!gravityEnabled_)
+	{
+		velocity_.y = 0.0f;
+	}
 }

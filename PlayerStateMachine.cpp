@@ -29,22 +29,16 @@ void PlayerStateMachine::ChangeState(PlayerStateType type)
 
 State* PlayerStateMachine::FindState(PlayerStateType type)
 {
-	switch (type)
-	{
-	case PlayerStateType::Idle:
-		return &idleState_;
-		break;
-	case PlayerStateType::Walk:
-		return &walkState_;
-		break;
-	case PlayerStateType::Run:
-		break;
-	case PlayerStateType::Jump:
-		break;
-	case PlayerStateType::Landing:
-		break;
-	default:
-		return nullptr;
-		break;
-	}
+    switch (type)
+    {
+    case PlayerStateType::Idle:
+        return &idleState_;
+    case PlayerStateType::Walk:
+        return &walkState_;
+    case PlayerStateType::Run:
+    case PlayerStateType::Jump:
+    case PlayerStateType::Landing:
+    default:
+        return nullptr;
+    }
 }

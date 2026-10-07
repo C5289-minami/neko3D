@@ -109,6 +109,10 @@ int main(int argc, char** argv)
         boss.SetTransform(bossValue);
 
         GameContext context;
+        context.SetPlayerGravityEnabled(false);
+        Check(!context.IsPlayerGravityEnabled(), "Gravity disable failed after merge.");
+        context.SetPlayerGravityEnabled(true);
+        Check(context.IsPlayerGravityEnabled(), "Gravity enable failed after merge.");
         BossTestScene bossScene(&context);
         auto gameControls = context.GetDebugControls();
         auto testControls = bossScene.GetDebugControls();

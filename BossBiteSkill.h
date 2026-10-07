@@ -3,6 +3,7 @@
 #include "BossAttackStateType.h"
 #include "BossPoseSkill.h"
 
+
 class BossBiteSkill final : public BossPoseSkill
 {
 public:
@@ -23,8 +24,10 @@ private:
         case AttackStateType::Aiming:
             break;
         case AttackStateType::Attack:
-			SetMotionDuration(AttackStateType::Attack, boss_.GetAnimTotalTime(BossAnimType::PowerUp));
-         boss_.SetAnimation(BossAnimType::PowerUp, false);
+        {
+            SetMotionDuration(AttackStateType::Attack, boss_.GetAnimTotalTime(BossAnimType::PowerUp));
+            boss_.SetAnimation(BossAnimType::PowerUp, false);
+        }
             break;
         case AttackStateType::Recovery:
         {

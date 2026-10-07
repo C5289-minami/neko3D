@@ -102,6 +102,8 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
+      <!-- The bundled Effekseer libraries do not include PDBs; suppress only LNK4099. -->
+      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(DxLibDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -124,6 +126,8 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
+      <!-- The bundled Effekseer libraries do not include PDBs; suppress only LNK4099. -->
+      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
@@ -141,14 +145,16 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(DxLibDir);$(ProjectDir)imgui;$(ProjectDir)SSPlayer;$(ProjectDir)imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Effekseer\プロジェクトに追加すべきファイル_VC用;$(DxLibDir);$(ProjectDir)imgui;$(ProjectDir)SSPlayer;$(ProjectDir)imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
+      <!-- The bundled Effekseer libraries do not include PDBs; suppress only LNK4099. -->
+      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(DxLibDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)Effekseer\プロジェクトに追加すべきファイル_VC用;$(DxLibDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
@@ -163,16 +169,18 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(DxLibDir);$(ProjectDir)imgui;$(ProjectDir)SSPlayer;$(ProjectDir)imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Effekseer\プロジェクトに追加すべきファイル_VC用;$(DxLibDir);$(ProjectDir)imgui;$(ProjectDir)SSPlayer;$(ProjectDir)imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
+      <!-- The bundled Effekseer libraries do not include PDBs; suppress only LNK4099. -->
+      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(DxLibDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)Effekseer\プロジェクトに追加すべきファイル_VC用;$(DxLibDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Manifest>
       <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
@@ -241,8 +249,6 @@
     <ClInclude Include="MathUtil.h" />
     <ClInclude Include="ModelToonRenderer.h" />
     <ClInclude Include="Motion.h" />
-    <ClInclude Include="OrbitCamera.h" />
-    <ClInclude Include="15_System\Player_camera.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerAnimType.h" />
     <ClInclude Include="PlayerBaseState.h" />
@@ -251,12 +257,14 @@
     <ClInclude Include="PlayerStateMachine.h" />
     <ClInclude Include="PlayerStateType.h" />
     <ClInclude Include="PlayerWalkState.h" />
+    <ClInclude Include="Player_camera.h" />
     <ClInclude Include="Raycast.h" />
     <ClInclude Include="ResourceKeys.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="ResultScene.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="Sound3D.h" />
     <ClInclude Include="SpriteStudioUI.h" />
     <ClInclude Include="SSAnimation.h" />
     <ClInclude Include="SSPlayer\common\Animator\MersenneTwister.h" />
@@ -330,18 +338,18 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ModelToonRenderer.cpp" />
     <ClCompile Include="Motion.cpp" />
-    <ClCompile Include="OrbitCamera.cpp" />
-    <ClCompile Include="15_System\Player_camera.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerIdleState.cpp" />
     <ClCompile Include="PlayerInput.cpp" />
     <ClCompile Include="PlayerStateMachine.cpp" />
     <ClCompile Include="PlayerWalkState.cpp" />
+    <ClCompile Include="Player_camera.cpp" />
     <ClCompile Include="Raycast.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="ResultScene.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="Sound3D.cpp" />
     <ClCompile Include="SpriteStudioUI.cpp" />
     <ClCompile Include="SSPlayer\common\Animator\ssplayer_effect.cpp" />
     <ClCompile Include="SSPlayer\common\Animator\ssplayer_effect2.cpp" />

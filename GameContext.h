@@ -6,7 +6,7 @@
 
 #include "Vector3.h"
 #include "Grid.h"
-#include "15_System/Player_camera.h"
+#include "Player_camera.h"
 #include "Stage.h"
 #include "Player.h"
 #include "Boss.h" 
@@ -36,6 +36,10 @@ public:
     const Player_camera& GetPlayerCamera() const { return playerCamera; }
     const Vec3& GetPlayerPosition() const { return player.GetPosition(); }
     void SetPlayerPosition(const Vec3& position) { player.SetPosition(position); }
+    //èdóÕ
+    bool IsPlayerGravityEnabled() const { return player.IsGravityEnabled(); }
+    void SetPlayerGravityEnabled(bool enabled) { player.SetGravityEnabled(enabled); }
+    //position
     const Vec3& GetCameraPosition() const;
     const Vec3& GetCameraTarget() const;
     const Vec3& GetCameraUp() const;

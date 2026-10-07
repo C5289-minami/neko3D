@@ -163,6 +163,9 @@
     <Filter Include="Shader">
       <UniqueIdentifier>{fe42c59f-7c56-4619-a154-a14d0ea68562}</UniqueIdentifier>
     </Filter>
+    <Filter Include="10_Core\Sound">
+      <UniqueIdentifier>{5f4479fc-254a-4be4-b339-b819f146adcc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -285,12 +288,6 @@
     <ClInclude Include="Grid.h">
       <Filter>40_Gameplay\Debug</Filter>
     </ClInclude>
-    <ClInclude Include="OrbitCamera.h">
-      <Filter>10_Core\Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="15_System\Player_camera.h">
-      <Filter>15_System</Filter>
-    </ClInclude>
     <ClInclude Include="Raycast.h">
       <Filter>40_Gameplay\Physics</Filter>
     </ClInclude>
@@ -388,9 +385,6 @@
       <Filter>10_Core\UI</Filter>
     </ClInclude>
     <ClInclude Include="Button.h">
-      <Filter>10_Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Volume.h">
       <Filter>10_Core</Filter>
     </ClInclude>
     <ClInclude Include="AnimationDraw.h">
@@ -495,7 +489,18 @@
     <ClInclude Include="ModelToonRenderer.h">
       <Filter>Shader</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerAnimType.h" />
+    <ClInclude Include="PlayerAnimType.h">
+      <Filter>40_Gameplay\Actors\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Player_camera.h">
+      <Filter>15_System</Filter>
+    </ClInclude>
+    <ClInclude Include="Volume.h">
+      <Filter>10_Core\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound3D.h">
+      <Filter>10_Core\Sound</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -587,12 +592,6 @@
     </ClCompile>
     <ClCompile Include="Grid.cpp">
       <Filter>40_Gameplay\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="OrbitCamera.cpp">
-      <Filter>10_Core\Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="15_System\Player_camera.cpp">
-      <Filter>15_System</Filter>
     </ClCompile>
     <ClCompile Include="Raycast.cpp">
       <Filter>40_Gameplay\Physics</Filter>
@@ -698,6 +697,12 @@
     </ClCompile>
     <ClCompile Include="ModelToonRenderer.cpp">
       <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Player_camera.cpp">
+      <Filter>15_System</Filter>
+    </ClCompile>
+    <ClCompile Include="Sound3D.cpp">
+      <Filter>10_Core\Sound</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
