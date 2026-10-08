@@ -7,17 +7,17 @@ void ModelToonRenderer::Init()
 {
     pixelShader_ =
         LoadPixelShader(
-            L"./DevData/ShaderCompiler/ModelToonPS.pso"
+            L"./DevData/ShaderCompiler/Bin/ModelToonPS.pso"
         );
 
     vertexShader4Frame_ =
         LoadVertexShader(
-            L"./DevData/ShaderCompiler/ModelToonVS_4Frame.vso"
+            L"./DevData/ShaderCompiler/Bin/ModelToonVS_4Frame.vso"
         );
 
     vertexShaderNMap4Frame_ =
         LoadVertexShader(
-            L"./DevData/ShaderCompiler/ModelToonVS_NMap4Frame.vso"
+            L"./DevData/ShaderCompiler/Bin/ModelToonVS_NMap4Frame.vso"
         );
 }
 
@@ -36,4 +36,18 @@ void ModelToonRenderer::Draw(const ModelObject& model, ModelToonType type) const
         break;
     }
     model.Draw();
+}
+
+void ModelToonRenderer::SetVertexShader(ModelToonType type) const
+{
+    switch (type)
+    {
+    case ModelToonType::FourFrame:
+        SetUseVertexShader(vertexShader4Frame_);
+        break;
+
+    case ModelToonType::NMap4Frame:
+        SetUseVertexShader(vertexShaderNMap4Frame_);
+        break;
+    }
 }

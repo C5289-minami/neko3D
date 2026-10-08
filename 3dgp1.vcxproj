@@ -249,6 +249,7 @@
     <ClInclude Include="MathUtil.h" />
     <ClInclude Include="ModelToonRenderer.h" />
     <ClInclude Include="Motion.h" />
+    <ClInclude Include="OutlineSettings.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerAnimType.h" />
     <ClInclude Include="PlayerBaseState.h" />
@@ -338,6 +339,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ModelToonRenderer.cpp" />
     <ClCompile Include="Motion.cpp" />
+    <ClCompile Include="OutlineSettings.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerIdleState.cpp" />
     <ClCompile Include="PlayerInput.cpp" />

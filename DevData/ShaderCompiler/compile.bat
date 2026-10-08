@@ -1,12 +1,20 @@
-ShaderCompiler.exe /Tvs_4_0 /FoToonVS.vso ToonVS.hlsl
-ShaderCompiler.exe /Tps_4_0 /FoToonPS.pso ToonPS.hlsl
+@echo off
 
-ShaderCompiler.exe /Tps_4_0 /FoOutlinePS.pso OutlinePS.hlsl
-ShaderCompiler.exe /Tvs_4_0 /FoOutlineVS.vso OutlineVS.hlsl
+if not exist "Bin" mkdir "Bin"
 
-ShaderCompiler.exe /Tps_4_0 /FoModelToonPS.pso ModelToonPS.hlsl
+rem --- 頂点シェーダー ---
+ShaderCompiler.exe /Tvs_4_0 /FoBin\ToonVS.vso Src\ToonVS.hlsl
+ShaderCompiler.exe /Tvs_4_0 /FoBin\OutlineVS.vso Src\OutlineVS.hlsl
+ShaderCompiler.exe /Tvs_4_0 /FoBin\ModelToonVS_4Frame.vso Src\ModelToonVS_4Frame.hlsl
+ShaderCompiler.exe /Tvs_4_0 /FoBin\ModelToonVS_NMap4Frame.vso Src\ModelToonVS_NMap4Frame.hlsl
 
-ShaderCompiler.exe /Tvs_4_0 /FoModelToonVS_4Frame.vso ModelToonVS_4Frame.hlsl
-ShaderCompiler.exe /Tvs_4_0 /FoModelToonVS_NMap4Frame.vso ModelToonVS_NMap4Frame.hlsl
+rem --- ピクセルシェーダー ---
+ShaderCompiler.exe /Tps_4_0 /FoBin\ToonPS.pso Src\ToonPS.hlsl
+ShaderCompiler.exe /Tps_4_0 /FoBin\OutlinePS.pso Src\OutlinePS.hlsl
+ShaderCompiler.exe /Tps_4_0 /FoBin\ModelToonPS.pso Src\ModelToonPS.hlsl
+ShaderCompiler.exe /Tps_4_0 /FoBin\DepthPS.pso Src\DepthPS.hlsl
+ShaderCompiler.exe /Tps_4_0 /FoBin\DepthViewPS.pso Src\DepthViewPS.hlsl
+ShaderCompiler.exe /Tps_4_0 /FoBin\PostProcessPS.pso Src\PostProcessPS.hlsl
 
+echo Shader Compilation Completed!
 pause

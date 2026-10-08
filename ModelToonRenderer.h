@@ -18,6 +18,7 @@ public:
         ModelToonType type
     ) const;
 
+    void SetVertexShader(ModelToonType type) const;
 private:
     int pixelShader_ = -1;
     int vertexShader4Frame_ = -1;

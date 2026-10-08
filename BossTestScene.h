@@ -62,5 +62,19 @@ private:
 	int toonConstantBuffer_ = -1;
     Player test;
     ModelToonRenderer modelToonRenderer_{};
+    int depthPixelShader_ = -1;
+    int depthBuffer_ = -1;
+    void RenderDepth() const;
+    int depthViewPixelShader_ = -1;
+
+    VERTEX2DSHADER depthViewVertices_[6]{};
+    void RenderDepthView() const;
+    int sceneBuffer_ = -1;
+
+    void RenderSceneBuffer() const;
+    int postProcessPixelShader_ = -1;
+
+    void RenderPostProcess() const;
+    int outlineSettingsConstantBuffer_ = -1;
 };
 
