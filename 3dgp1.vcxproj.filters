@@ -489,6 +489,9 @@
     <ClInclude Include="ModelToonRenderer.h">
       <Filter>Shader</Filter>
     </ClInclude>
+    <ClInclude Include="ModelAlpha.h">
+      <Filter>40_Gameplay\StageObjects</Filter>
+    </ClInclude>
     <ClInclude Include="PlayerAnimType.h">
       <Filter>40_Gameplay\Actors\Player</Filter>
     </ClInclude>
@@ -700,6 +703,9 @@
     </ClCompile>
     <ClCompile Include="ModelToonRenderer.cpp">
       <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelAlpha.cpp">
+      <Filter>40_Gameplay\StageObjects</Filter>
     </ClCompile>
     <ClCompile Include="Player_camera.cpp">
       <Filter>15_System</Filter>

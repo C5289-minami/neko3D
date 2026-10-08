@@ -24,6 +24,7 @@ void ResourceManager::LoadAll()
 
     // モデルの読み込み
     LoadModel(ResourceKeys::Model_Stage,    L"./Data/Models/Stage.mv1");
+    LoadModel(ResourceKeys::Model_StageAlpha, L"./Data/Models/Stage.mv1");
     LoadModel(ResourceKeys::Model_Paladin,    L"./Data/Models/Paladin.mv1");
     LoadModel(ResourceKeys::Model_Boss,    L"./DevData/Models/boss_kari.mv1");
     LoadModel(ResourceKeys::Model_Test,    L"./Data/Models/Sword.mv1");

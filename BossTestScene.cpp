@@ -259,6 +259,7 @@ void BossTestScene::Init()
    test.Update(0, stage);
    debugActorsPaused_ = false;
    TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
+   stage.ResetAlphaModel(test.GetPosition());
    const float cosPitch = std::cos(pitch);
    const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };
    debugCamera_.Initialize(cameraEye, cameraEye + forward);
@@ -357,6 +358,7 @@ void BossTestScene::Update(float deltaTime)
         }
     }
 	//test.Update(deltaTime, stage);
+	stage.UpdateAlphaModel(deltaTime, test.GetPosition());
 
 
 
@@ -708,6 +710,8 @@ void BossTestScene::RenderSceneBuffer() const
 	SetUseVertexShader(-1);
 
 	MV1SetUseOrigShader(FALSE);
+
+	stage.DrawAlphaModel();
 
 	SetUseZBuffer3D(FALSE);
 	SetWriteZBuffer3D(FALSE);

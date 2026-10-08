@@ -248,6 +248,7 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="MathUtil.h" />
     <ClInclude Include="ModelToonRenderer.h" />
+    <ClInclude Include="ModelAlpha.h" />
     <ClInclude Include="Motion.h" />
     <ClInclude Include="OutlineSettings.h" />
     <ClInclude Include="Player.h" />
@@ -338,6 +339,7 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ModelToonRenderer.cpp" />
+    <ClCompile Include="ModelAlpha.cpp" />
     <ClCompile Include="Motion.cpp" />
     <ClCompile Include="OutlineSettings.cpp" />
     <ClCompile Include="Player.cpp" />
