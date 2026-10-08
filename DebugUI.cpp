@@ -189,21 +189,21 @@ void DebugUI::Draw(GameContext& ctx)
         ImGui::SliderFloat(
             u8"アウトライン太さ",
             &g_outlineSettings.radius,
-            1.0f,
+            0.0f,
             5.0f
         );
 
         ImGui::SliderFloat(
             u8"深度強度",
             &g_outlineSettings.depthStrength,
-            1.0f,
+            0.0f,
             50.0f
         );
 
         ImGui::SliderFloat(
             u8"法線強度",
             &g_outlineSettings.normalStrength,
-            1.0f,
+            0.0f,
             20.0f
         );
 

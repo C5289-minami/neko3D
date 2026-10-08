@@ -207,28 +207,61 @@ float4 main(PS_INPUT input) : SV_TARGET
     // [“xƒGƒbƒW
     // ================================
 
+    int radius =
+    clamp(
+        (int) Outline.x,
+        1,
+        5
+    );
+
     float depthEdge = 0.0f;
 
-    if (centerDepth > 0.0f)
+    for (int offset = 1; offset <= radius; ++offset)
     {
-        if (leftDepth <= 0.0f)
-        {
-            depthEdge = 1.0f;
-        }
+        uint2 leftPixel = pixel;
+        leftPixel.x =
+        (pixel.x >= offset)
+        ? pixel.x - offset
+        : 0;
 
-        if (rightDepth <= 0.0f)
-        {
-            depthEdge = 1.0f;
-        }
+        uint2 rightPixel = pixel;
+        rightPixel.x =
+        min(
+            pixel.x + offset,
+            width - 1
+        );
 
-        if (upDepth <= 0.0f)
-        {
-            depthEdge = 1.0f;
-        }
+        uint2 upPixel = pixel;
+        upPixel.y =
+        (pixel.y >= offset)
+        ? pixel.y - offset
+        : 0;
 
-        if (downDepth <= 0.0f)
+        uint2 downPixel = pixel;
+        downPixel.y =
+        min(
+            pixel.y + offset,
+            height - 1
+        );
+
+        float leftDepth = LoadDepth(leftPixel);
+        float rightDepth = LoadDepth(rightPixel);
+        float upDepth = LoadDepth(upPixel);
+        float downDepth = LoadDepth(downPixel);
+
+        if (centerDepth > 0.0f)
         {
-            depthEdge = 1.0f;
+            if (leftDepth <= 0.0f)
+                depthEdge = 1.0f;
+
+            if (rightDepth <= 0.0f)
+                depthEdge = 1.0f;
+
+            if (upDepth <= 0.0f)
+                depthEdge = 1.0f;
+
+            if (downDepth <= 0.0f)
+                depthEdge = 1.0f;
         }
     }
 
@@ -307,11 +340,18 @@ float4 main(PS_INPUT input) : SV_TARGET
     // 0`20 ¨ 0`1
     // ================================
 
+    float normalSignal =
+    normalEdge * (Outline.z / 20.0f);
+
+    float normalThreshold =
+    0.20f +
+    Outline.w * 0.5f;
+
     float normalMask =
     smoothstep(
-        0.25f,
-        0.40f,
-        normalEdge
+        normalThreshold,
+        normalThreshold + 0.15f,
+        normalSignal
     );
 
 
