@@ -264,6 +264,12 @@
     <ClInclude Include="Debug_camera.h">
       <Filter>AboutDebug</Filter>
     </ClInclude>
+    <ClInclude Include="TransformDefaults.h">
+      <Filter>AboutDebug</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformSettings.h">
+      <Filter>AboutDebug</Filter>
+    </ClInclude>
     <ClInclude Include="DebugUI.h">
       <Filter>AboutDebug</Filter>
     </ClInclude>
@@ -579,6 +585,9 @@
       <Filter>imgui\backends</Filter>
     </ClCompile>
     <ClCompile Include="Debug_camera.cpp">
+      <Filter>AboutDebug</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformSettings.cpp">
       <Filter>AboutDebug</Filter>
     </ClCompile>
     <ClCompile Include="DebugUI.cpp">

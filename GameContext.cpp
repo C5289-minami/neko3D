@@ -4,6 +4,9 @@
 #include "GameContext.h"
 #include "DxConv.h"
 #include "DxPlus/DxPlus.h"
+#ifndef NDEBUG
+#include "imgui.h"
+#endif
 
 const Vec3& GameContext::GetCameraPosition() const
 {
@@ -75,6 +78,27 @@ void GameContext::FocusSceneCameraOnPlayer()
 #endif
 }
 
+DebugSceneControls GameContext::GetDebugControls()
+{
+    return {
+        "game",
+        {
+            MakeDebugTransformTarget("game/player", "Player", player),
+            MakeDebugTransformTarget("game/boss", "Boss", boss)
+        },
+        DebugCameraControls{
+            [this] { return IsSceneViewActive(); },
+            [this] { return GetCameraPosition(); },
+            [this](const Vec3& position) { SetCameraPosition(position); },
+            [this] { ResetSceneCamera(); },
+            [this] { FocusSceneCameraOnPlayer(); }
+        },
+        [this] { return debugActorsPaused_; },
+        [this](bool paused) { debugActorsPaused_ = paused; },
+        transformInitialStatus_
+    };
+}
+
 void GameContext::Init()
 {
     stage.Init();
@@ -97,6 +121,8 @@ void GameContext::Reset()
     stage.Reset();
     player.Reset();
     boss.Reset();
+    debugActorsPaused_ = false;
+    TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
     playerCamera.Reset();
     Debug_camera.Initialize(playerCamera.GetEye(), playerCamera.GetTarget());
 }
@@ -108,7 +134,8 @@ void GameContext::Update(float deltaTime)
 #ifndef NDEBUG
     Debug_camera.Update(deltaTime, player.GetPosition(),
         playerCamera.GetEye(), playerCamera.GetTarget());
-    if (Debug_camera.IsSceneViewActive()) return;
+    if (Debug_camera.IsSceneViewActive() || debugActorsPaused_ ||
+        (ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard)) return;
 #endif
 
     player.Update(deltaTime, stage);
@@ -119,8 +146,8 @@ void GameContext::Update(float deltaTime)
 void GameContext::Draw() const
 {
     DxLib::SetCameraPositionAndTargetAndUpVec(
-        DxConv::ToVECTOR(GetCameraPosition()), //Player
-        DxConv::ToVECTOR(GetCameraTarget()),   //boss
+        DxConv::ToVECTOR(GetCameraPosition()), // カメラの位置
+        DxConv::ToVECTOR(GetCameraTarget()),   // カメラの注視点
         DxConv::ToVECTOR(GetCameraUp()));      //ちょっと上から
 
     DxLib::ClearDrawScreen();

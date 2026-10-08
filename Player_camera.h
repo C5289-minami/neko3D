@@ -1,8 +1,8 @@
 ﻿// =============================
-// 15_System/Player_camera.h
+// Player_camera.h
 // =============================
 #pragma once
-#include "../Vector3.h"
+#include "Vector3.h"
 
 // ボス戦カメラの調整値。値を変えるとカメラの見え方が変わる。
 struct PlayerCameraSettings

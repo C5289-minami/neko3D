@@ -114,7 +114,7 @@ void SceneManager::Run()
             if (runConfig.enableDebugUI && runConfig.windowed)
             {
                 debugUI.BeginFrame();
-                debugUI.Draw(gameContext);
+                debugUI.Draw(gameContext, scene->GetDebugControls());
                 debugUI.EndFrame();
             }
 #endif

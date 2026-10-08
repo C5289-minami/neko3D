@@ -12,6 +12,7 @@
 #include "Stage.h"
 #include "Player.h"
 #include "ModelToonRenderer.h"
+#include "Debug_camera.h"
 
 class BossTestScene final : public Scene
 {
@@ -28,6 +29,7 @@ public:
     void Init() override;
     void Update(float deltaTime) override;
     void Render() const override;
+    DebugSceneControls GetDebugControls() override;
 
 private:
 
@@ -43,6 +45,9 @@ private:
     float yaw{};
     float pitch{};
     bool skillKeyWasDown_{};
+    Debug_camera debugCamera_;
+    bool debugActorsPaused_{};
+    std::string transformInitialStatus_;
 
 
     // シェーダー

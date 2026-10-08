@@ -3,6 +3,9 @@
 
 #include "DxPlus/DxPlus.h"
 #include "DxLib.h"
+#ifndef NDEBUG
+#include "imgui.h"
+#endif
 
 #include <algorithm>
 #include <cmath>
@@ -70,6 +73,9 @@ void Debug_camera::Update(float deltaTime, const Vec3& focusPoint, const Vec3& v
 {
 #ifndef NDEBUG
     // デバッグビルド時のみ、Alt + Enterでカメラ操作を切り替える
+    // 前のフレームのUI入力状態を確認する
+    const bool keyboardCaptured = ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard;
+    const bool mouseCaptured = ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureMouse;
     const bool toggleDown = DxLib::CheckHitKey(KEY_INPUT_LALT) != 0 &&//左Alt
         DxLib::CheckHitKey(KEY_INPUT_RETURN) != 0;                    //Enter が押されているか
     if (toggleDown && !wasToggleDown)
@@ -91,19 +97,19 @@ void Debug_camera::Update(float deltaTime, const Vec3& focusPoint, const Vec3& v
         return;
 
     // Rキーを押した瞬間に初期視点へ戻す
-    const bool resetDown = DxLib::CheckHitKey(KEY_INPUT_R) != 0;
+    const bool resetDown = !keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_R) != 0;
     if (resetDown && !wasResetDown&&active)
         ResetView();
     wasResetDown = resetDown;
 
     // Fキーを押した瞬間に指定地点へ注目する
-    const bool focusDown = DxLib::CheckHitKey(KEY_INPUT_F) != 0;
+    const bool focusDown = !keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_F) != 0;
     if (focusDown && !wasFocusDown)
         FocusAt(focusPoint);
     wasFocusDown = focusDown;
 
     // マウス移動量に応じてカメラの向きを変更する
-    const DxPlus::Vec2Int mouseDelta = DxPlus::Input::GetMouseDelta();
+    const DxPlus::Vec2Int mouseDelta = mouseCaptured ? DxPlus::Vec2Int{} : DxPlus::Input::GetMouseDelta();
     yaw += mouseDelta.x * c_MouseRotationRadiansPerPixel;
     pitch = std::clamp(pitch - mouseDelta.y * c_MouseRotationRadiansPerPixel, kMinPitch, kMaxPitch);
 
@@ -114,12 +120,12 @@ void Debug_camera::Update(float deltaTime, const Vec3& focusPoint, const Vec3& v
     Vec3 movement{};
 
     // キー入力から移動方向を作る
-    if (DxLib::CheckHitKey(KEY_INPUT_W)) movement += forward;
-    if (DxLib::CheckHitKey(KEY_INPUT_S)) movement -= forward;
-    if (DxLib::CheckHitKey(KEY_INPUT_D)) movement += right;
-    if (DxLib::CheckHitKey(KEY_INPUT_A)) movement -= right;
-    if (DxLib::CheckHitKey(KEY_INPUT_E)) movement += Vec3::Up();
-    if (DxLib::CheckHitKey(KEY_INPUT_Q)) movement -= Vec3::Up();
+    if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_W)) movement += forward;
+    if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_S)) movement -= forward;
+    if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_D)) movement += right;
+    if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_A)) movement -= right;
+    if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_E)) movement += Vec3::Up();
+    if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_Q)) movement -= Vec3::Up();
 
     if (movement.LengthSq() > 0.0f)
     {

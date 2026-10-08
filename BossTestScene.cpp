@@ -11,6 +11,9 @@
 
 #include <algorithm>
 #include <cmath>
+#ifndef NDEBUG
+#include "imgui.h"
+#endif
 
 #include "Player.h"
 #include "Sound3D.h"
@@ -43,6 +46,42 @@ namespace
 			}
 		}
 	}
+}
+
+DebugSceneControls BossTestScene::GetDebugControls()
+{
+    return {
+        "boss_test",
+        {
+            MakeDebugTransformTarget("boss_test/player", "Player", test),
+            MakeDebugTransformTarget("boss_test/boss", "Boss", boss)
+        },
+        DebugCameraControls{
+            [this] { return debugCamera_.IsSceneViewActive(); },
+            [this] { return debugCamera_.IsSceneViewActive() ? debugCamera_.GetEye() : cameraEye; },
+            [this](const Vec3& position) {
+                if (debugCamera_.IsSceneViewActive()) debugCamera_.SetPosition(position);
+                else cameraEye = position;
+            },
+            [this] {
+                if (debugCamera_.IsSceneViewActive()) debugCamera_.ResetView();
+                else cameraEye = { 0.0f, 250.0f, -650.0f };
+            },
+            [this] {
+                if (!debugCamera_.IsSceneViewActive())
+                {
+                    const float cosPitch = std::cos(pitch);
+                    const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };
+                    debugCamera_.Initialize(cameraEye, cameraEye + forward);
+                    debugCamera_.Begin();
+                }
+                debugCamera_.FocusAt(test.GetPosition());
+            }
+        },
+        [this] { return debugActorsPaused_; },
+        [this](bool paused) { debugActorsPaused_ = paused; },
+        transformInitialStatus_
+    };
 }
 
 void BossTestScene::Init()
@@ -95,8 +134,8 @@ void BossTestScene::Init()
 
 	*settings = g_toonSettings;
 
-	outlineSize[0] = 5.0f;                    // ‰¡3px
-	outlineSize[1] = 5.0f;                    // c3px
+	outlineSize[0] = 5.0f;                    // æ¨ª3px
+	outlineSize[1] = 5.0f;                    // ç¸¦3px
 	outlineSize[2] = DxPlus::CLIENT_WIDTH;
 	outlineSize[3] = DxPlus::CLIENT_HEIGHT;
 
@@ -204,65 +243,85 @@ void BossTestScene::Init()
 		outlineSettingsConstantBuffer_
 	);
 
-	// ì¬İ’è‚ğŒ³‚É–ß‚·
+	// ä½œæˆè¨­å®šã‚’å…ƒã«æˆ»ã™
 	SetDrawValidFloatTypeGraphCreateFlag(FALSE);
 	SetCreateDrawValidGraphChannelNum(0);
 	SetCreateGraphChannelBitDepth(0);
 
-	// ‚±‚Ì‰æ–Êê—p‚ÌZƒoƒbƒtƒ@‚ğì‚é
+	// ã“ã®ç”»é¢å°‚ç”¨ã®Zãƒãƒƒãƒ•ã‚¡ã‚’ä½œã‚‹
 	SetUseGraphZBuffer(depthBuffer_, TRUE);
 
 	StartFadeIn();
 
-
-	//player
+    // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®åˆæœŸè¨­å®š
 	test.Init();
 	test.Reset();
-	test.SetPosition({ 250.0f, 300.0f, 300.0f });
-	test.Update(0, stage);
+   test.Update(0, stage);
+   debugActorsPaused_ = false;
+   TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
+   const float cosPitch = std::cos(pitch);
+   const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };
+   debugCamera_.Initialize(cameraEye, cameraEye + forward);
+
 }
 
 void BossTestScene::Update(float deltaTime)
 {
-	boss.Update(deltaTime);
-	testModel_.rotation.z += 1.0f * deltaTime;
 
-	// --- ƒVƒF[ƒ_[ON/OFFØ‚è‘Ö‚¦ (F2ƒL[) ---
-	const bool shaderKeyDown = DxLib::CheckHitKey(KEY_INPUT_F2) != 0;
-	if (shaderKeyDown && !shaderKeyWasDown_)
-	{
-		isShaderEnabled_ = !isShaderEnabled_; // ƒtƒ‰ƒO‚ğ”½“]
-	}
-	shaderKeyWasDown_ = shaderKeyDown;
+#ifndef NDEBUG
+    const float cosPitch = std::cos(pitch);
+    const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };
+    debugCamera_.Update(deltaTime, test.GetPosition(), cameraEye, cameraEye + forward);
+    const bool actorsPaused = debugActorsPaused_ || debugCamera_.IsSceneViewActive();
+#else
+    const bool actorsPaused = false;
+#endif
+#ifndef NDEBUG
+    const bool mouseCaptured = ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureMouse;
+    const bool keyboardCaptured = ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard;
+#else
+    const bool mouseCaptured = false;
+    const bool keyboardCaptured = false;
+#endif
+    if (!actorsPaused) boss.Update(deltaTime);
+	if (!actorsPaused) testModel_.rotation.z += 1.0f * deltaTime;
 
-	// --- ƒXƒLƒ‹“ü—Íˆ— ---
-	int selectedSkill = 0;
-	if (DxLib::CheckHitKey(KEY_INPUT_1)) selectedSkill = 1;
-	else if (DxLib::CheckHitKey(KEY_INPUT_2)) selectedSkill = 2;
-	else if (DxLib::CheckHitKey(KEY_INPUT_3)) selectedSkill = 3;
-	else if (DxLib::CheckHitKey(KEY_INPUT_4)) selectedSkill = 4;
-	else if (DxLib::CheckHitKey(KEY_INPUT_5)) selectedSkill = 5;
+    // --- ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ON/OFFåˆ‡ã‚Šæ›¿ãˆ (F2ã‚­ãƒ¼) ---
+    const bool shaderKeyDown = DxLib::CheckHitKey(KEY_INPUT_F2) != 0;
+    if (shaderKeyDown && !shaderKeyWasDown_)
+    {
+        isShaderEnabled_ = !isShaderEnabled_; // ãƒ•ãƒ©ã‚°ã‚’åè»¢
+    }
+    shaderKeyWasDown_ = shaderKeyDown;
 
-	const bool skillKeyDown = selectedSkill != 0;
-	if (skillKeyDown && !skillKeyWasDown_ && boss.GetCurrentState() != BossStateType::Attack)
-	{
-		BossPoseSkill* skill = nullptr;
-		switch (selectedSkill)
-		{
-		case 1: skill = &bangSkill_; break;
-		case 2: skill = &tailWhipSkill_; break;
-		case 3: skill = &clapSkill_; break;
-		case 4: skill = &hairBallSkill_; break;
-		case 5: skill = &biteSkill_; break;
-		}
+    // --- ã‚¹ã‚­ãƒ«å…¥åŠ›å‡¦ç† ---
+    int selectedSkill = 0;
+    if (DxLib::CheckHitKey(KEY_INPUT_1)) selectedSkill = 1;
+    else if (DxLib::CheckHitKey(KEY_INPUT_2)) selectedSkill = 2;
+    else if (DxLib::CheckHitKey(KEY_INPUT_3)) selectedSkill = 3;
+    else if (DxLib::CheckHitKey(KEY_INPUT_4)) selectedSkill = 4;
+    else if (DxLib::CheckHitKey(KEY_INPUT_5)) selectedSkill = 5;
 
-		if (skill)
-		{
-			skill->Reset();
-			boss.UseSkill(*skill);
-		}
-	}
-	skillKeyWasDown_ = skillKeyDown;
+    const bool skillKeyDown = selectedSkill != 0;
+    if (!actorsPaused && !keyboardCaptured && skillKeyDown && !skillKeyWasDown_ && boss.GetCurrentState() != BossStateType::Attack)
+    {
+        BossPoseSkill* skill = nullptr;
+        switch (selectedSkill)
+        {
+        case 1: skill = &bangSkill_; break;
+        case 2: skill = &tailWhipSkill_; break;
+        case 3: skill = &clapSkill_; break;
+        case 4: skill = &hairBallSkill_; break;
+        case 5: skill = &biteSkill_; break;
+        }
+
+        if (skill)
+        {
+            skill->Reset();
+            boss.UseSkill(*skill);
+        }
+    }
+    skillKeyWasDown_ = skillKeyDown;
 #ifndef NDEBUG
 	if (DxLib::CheckHitKey(KEY_INPUT_F1))
 	{
@@ -272,31 +331,31 @@ void BossTestScene::Update(float deltaTime)
 	}
 #endif
 
-	// --- ‰EƒNƒŠƒbƒN‚ğ‰Ÿ‚µ‚Ä‚¢‚éŠÔ‚Ì‚İƒJƒƒ‰‘€ì ---
-	if ((DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
-	{
-		const DxPlus::Vec2Int mouseDelta = DxPlus::Input::GetMouseDelta();
-		yaw += mouseDelta.x * MouseRotationRadiansPerPixel;
-		pitch = std::clamp(pitch - mouseDelta.y * MouseRotationRadiansPerPixel, MinPitch, MaxPitch);
+    // --- å³ã‚¯ãƒªãƒƒã‚¯ã‚’æŠ¼ã—ã¦ã„ã‚‹é–“ã®ã¿ã‚«ãƒ¡ãƒ©æ“ä½œ ---
+    if (!mouseCaptured && !debugCamera_.IsSceneViewActive() && (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
+    {
+        const DxPlus::Vec2Int mouseDelta = DxPlus::Input::GetMouseDelta();
+        yaw += mouseDelta.x * MouseRotationRadiansPerPixel;
+        pitch = std::clamp(pitch - mouseDelta.y * MouseRotationRadiansPerPixel, MinPitch, MaxPitch);
 
-		const float cosPitch = std::cos(pitch);
-		const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };
-		const Vec3 right = Vec3::Cross(Vec3::Up(), forward).Normalized();
-		Vec3 movement{};
+        const float cosPitch = std::cos(pitch);
+        const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };
+        const Vec3 right = Vec3::Cross(Vec3::Up(), forward).Normalized();
+        Vec3 movement{};
 
-		if (DxLib::CheckHitKey(KEY_INPUT_W)) movement += forward;
-		if (DxLib::CheckHitKey(KEY_INPUT_S)) movement -= forward;
-		if (DxLib::CheckHitKey(KEY_INPUT_D)) movement += right;
-		if (DxLib::CheckHitKey(KEY_INPUT_A)) movement -= right;
-		if (DxLib::CheckHitKey(KEY_INPUT_E)) movement += Vec3::Up();
-		if (DxLib::CheckHitKey(KEY_INPUT_Q)) movement -= Vec3::Up();
+        if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_W)) movement += forward;
+        if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_S)) movement -= forward;
+        if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_D)) movement += right;
+        if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_A)) movement -= right;
+        if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_E)) movement += Vec3::Up();
+        if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_Q)) movement -= Vec3::Up();
 
-		if (movement.LengthSq() > 0.0f)
-		{
-			const float speed = CameraMoveSpeed * (DxLib::CheckHitKey(KEY_INPUT_LSHIFT) ? 3.0f : 1.0f);
-			cameraEye += movement.Normalized() * (speed * deltaTime);
-		}
-	}
+        if (movement.LengthSq() > 0.0f)
+        {
+            const float speed = CameraMoveSpeed * (DxLib::CheckHitKey(KEY_INPUT_LSHIFT) ? 3.0f : 1.0f);
+            cameraEye += movement.Normalized() * (speed * deltaTime);
+        }
+    }
 	//test.Update(deltaTime, stage);
 
 
@@ -383,7 +442,7 @@ void BossTestScene::Render() const
   //      testModel_.Draw();
 
   //      // ========================================
-  //      // ’ÊíToon
+  //      // é€šå¸¸Toon
   //      // ========================================
 
   //      SetModelCulling(stageModelHandle, DX_CULLING_LEFT);
@@ -418,7 +477,7 @@ void BossTestScene::Render() const
   //  {
   //      SetUsePixelShader(-1);
   //      SetUseVertexShader(-1);
-  //      MV1SetUseOrigShader(FALSE);       // •`‰æŒã‚Í•W€‚É–ß‚·
+  //      MV1SetUseOrigShader(FALSE);       // æç”»å¾Œã¯æ¨™æº–ã«æˆ»ã™
   //  }
 
 
@@ -434,7 +493,7 @@ void BossTestScene::Render() const
 		{ 24.0f, 24.0f }, white, DxPlus::Text::TextAlign::TOP_LEFT, { 1, 1 }, 0, fontHandle);
 #endif
 
-	// Œ»İ‚ÌƒVƒF[ƒ_[ó‘Ô‚ğ•\¦ (ON‚È‚ç—ÎAOFF‚È‚çÔ)
+	// ç¾åœ¨ã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼çŠ¶æ…‹ã‚’è¡¨ç¤º (ONãªã‚‰ç·‘ã€OFFãªã‚‰èµ¤)
 	const std::wstring shaderStatus = L"Shader [F2]: " + std::wstring(isShaderEnabled_ ? L"ON" : L"OFF");
 	DxPlus::Text::DrawString(shaderStatus.c_str(),
 		{ 24.0f, 68.0f }, isShaderEnabled_ ? green : red, DxPlus::Text::TextAlign::TOP_LEFT, { 0.8f, 0.8f }, 0, fontHandle);
@@ -469,14 +528,14 @@ void BossTestScene::RenderDepth() const
 		VGet(0.0f, 1.0f, 0.0f)
 	);
 
-	// [“xƒeƒXƒg‚ğ—LŒø‚É‚·‚é
+	// æ·±åº¦ãƒ†ã‚¹ãƒˆã‚’æœ‰åŠ¹ã«ã™ã‚‹
 	SetUseZBuffer3D(TRUE);
 	SetWriteZBuffer3D(TRUE);
 
 	ClearDrawScreen();
 	ClearDrawScreenZBuffer();
 
-	// [“x{–@ü‚ğ‘‚«‚Ş
+	// æ·±åº¦ï¼‹æ³•ç·šã‚’æ›¸ãè¾¼ã‚€
 	SetUsePixelShader(depthPixelShader_);
 
 	// --------------------------------
@@ -489,7 +548,7 @@ void BossTestScene::RenderDepth() const
 	//testModel_.Draw();
 
 	// --------------------------------
-	// ‹ŒBoss
+	// æ—§Boss
 	// --------------------------------
 
 	modelToonRenderer_.SetVertexShader(
@@ -499,7 +558,7 @@ void BossTestScene::RenderDepth() const
 	test.Draw();
 
 	// --------------------------------
-	// VBoss
+	// æ–°Boss
 	// --------------------------------
 
 	modelToonRenderer_.SetVertexShader(
@@ -509,7 +568,7 @@ void BossTestScene::RenderDepth() const
 	boss.Draw();
 
 	// --------------------------------
-	// Œã•Ğ•t‚¯
+	// å¾Œç‰‡ä»˜ã‘
 	// --------------------------------
 
 	SetUsePixelShader(-1);
@@ -628,7 +687,7 @@ void BossTestScene::RenderSceneBuffer() const
 	testModel_.Draw();
 
 	// -----------------------------
-	// ‹ŒBoss
+	// æ—§Boss
 	// -----------------------------
 
 	modelToonRenderer_.Draw(
@@ -637,7 +696,7 @@ void BossTestScene::RenderSceneBuffer() const
 	);
 
 	// -----------------------------
-	// VBoss
+	// æ–°Boss
 	// -----------------------------
 
 	modelToonRenderer_.Draw(
