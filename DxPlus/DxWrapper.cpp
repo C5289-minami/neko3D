@@ -77,9 +77,23 @@ namespace DxPlus
         DxLib::DxLib_End();
     }
 
-    void DxWrapper::DrawFrameStats() {
+    void DxWrapper::DrawFrameStats()
+    {
+        static double elapsed = 0.0;
+
+        elapsed += timer.GetRawDeltaTime();
+
+        if (elapsed < 0.25)
+            return;
+
+        elapsed = 0.0;
+
         double fps = 1.0 / timer.GetRawDeltaTime();
-        std::wstring title = L"DxPlus - FPS: " + std::to_wstring(static_cast<float>(fps)) + L" " + std::to_wstring(static_cast<float>(1.0 / timer.GetDeltaTime()));
+
+        std::wstring title =
+            L"DxPlus - FPS: " +
+            std::to_wstring(static_cast<int>(fps));
+
         DxLib::SetWindowText(title.c_str());
     }
 }

@@ -495,6 +495,9 @@
     <ClInclude Include="Sound3D.h">
       <Filter>10_Core\Sound</Filter>
     </ClInclude>
+    <ClInclude Include="OutlineSettings.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -694,6 +697,9 @@
     </ClCompile>
     <ClCompile Include="Sound3D.cpp">
       <Filter>10_Core\Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="OutlineSettings.cpp">
+      <Filter>Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

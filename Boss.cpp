@@ -36,6 +36,7 @@ void Boss::Reset()
 
 void Boss::Update(float deltaTime)
 {
+	
 	stateMachine_.Tick(deltaTime);
 	model_.position += velocity_ * deltaTime;
 

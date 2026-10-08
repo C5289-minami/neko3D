@@ -44,7 +44,17 @@ private:
 	BossStateMachine stateMachine_;
 
 	// Animation
-   AnimationDraw animation_;
+	AnimationDraw animation_;
 	int currentAnimIndex_{ -1 };
-  bool currentAnimLoop_{ true };
+	bool currentAnimLoop_{ true };
+
+	// ステータス
+	float health_{ 100.0f };
+	float maxHealth_{ 100.0f };
+	float downGauge_{ 0.0f };
+	float maxDownGauge_{ 100.0f };
+	float attackPower_{ 10.0f };
+
+	bool isHeatUp{ false };
+	
 };
