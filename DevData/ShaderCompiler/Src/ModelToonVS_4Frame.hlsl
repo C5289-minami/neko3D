@@ -1,5 +1,7 @@
 #include "ModelToonVS_Common.hlsli"
 
+// ModelToonVS_4Frame
+
 struct VS_INPUT
 {
     float4 Position : POSITION;

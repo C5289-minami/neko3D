@@ -3,9 +3,18 @@ Texture2D g_DepthTexture : register(t0);
 struct PS_INPUT
 {
     float4 Position : SV_POSITION;
+    float3 ViewPosition : TEXCOORD2;
 };
 
-float3 LoadNormal(Texture2D textureData, uint2 pixel)
+
+// ================================
+// 法線取得
+// ================================
+
+float3 LoadNormal(
+    Texture2D textureData,
+    uint2 pixel
+)
 {
     float3 normal =
         textureData.Load(
@@ -13,35 +22,58 @@ float3 LoadNormal(Texture2D textureData, uint2 pixel)
         ).rgb;
 
     // 0～1 → -1～1
-    normal = normal * 2.0f - 1.0f;
+    normal =
+        normal * 2.0f - 1.0f;
 
     return normalize(normal);
 }
+
+
+// ================================
+// メイン
+// ================================
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
     uint width;
     uint height;
 
-    g_DepthTexture.GetDimensions(width, height);
-
-    uint2 pixel = uint2(
-        input.Position.x,
-        input.Position.y
+    g_DepthTexture.GetDimensions(
+        width,
+        height
     );
 
-    pixel.x = min(pixel.x, width - 1);
-    pixel.y = min(pixel.y, height - 1);
+    uint2 pixel =
+        uint2(
+            input.Position.x,
+            input.Position.y
+        );
 
-    // 中央の法線
+    pixel.x =
+        min(pixel.x, width - 1);
+
+    pixel.y =
+        min(pixel.y, height - 1);
+
+
+    // ----------------------------
+    // 中央
+    // ----------------------------
+
     float3 centerNormal =
         LoadNormal(
             g_DepthTexture,
             pixel
         );
 
+
+    // ----------------------------
     // 左
-    uint2 leftPixel = pixel;
+    // ----------------------------
+
+    uint2 leftPixel =
+        pixel;
+
     leftPixel.x =
         (pixel.x > 0)
         ? pixel.x - 1
@@ -53,10 +85,19 @@ float4 main(PS_INPUT input) : SV_TARGET
             leftPixel
         );
 
+
+    // ----------------------------
     // 右
-    uint2 rightPixel = pixel;
+    // ----------------------------
+
+    uint2 rightPixel =
+        pixel;
+
     rightPixel.x =
-        min(pixel.x + 1, width - 1);
+        min(
+            pixel.x + 1,
+            width - 1
+        );
 
     float3 rightNormal =
         LoadNormal(
@@ -64,8 +105,14 @@ float4 main(PS_INPUT input) : SV_TARGET
             rightPixel
         );
 
+
+    // ----------------------------
     // 上
-    uint2 upPixel = pixel;
+    // ----------------------------
+
+    uint2 upPixel =
+        pixel;
+
     upPixel.y =
         (pixel.y > 0)
         ? pixel.y - 1
@@ -77,10 +124,19 @@ float4 main(PS_INPUT input) : SV_TARGET
             upPixel
         );
 
+
+    // ----------------------------
     // 下
-    uint2 downPixel = pixel;
+    // ----------------------------
+
+    uint2 downPixel =
+        pixel;
+
     downPixel.y =
-        min(pixel.y + 1, height - 1);
+        min(
+            pixel.y + 1,
+            height - 1
+        );
 
     float3 downNormal =
         LoadNormal(
@@ -88,28 +144,66 @@ float4 main(PS_INPUT input) : SV_TARGET
             downPixel
         );
 
-    // 法線の差
+
+    // ----------------------------
+    // 法線差
+    // ----------------------------
+
     float leftDifference =
-        length(centerNormal - leftNormal);
-
-    float rightDifference =
-        length(centerNormal - rightNormal);
-
-    float upDifference =
-        length(centerNormal - upNormal);
-
-    float downDifference =
-        length(centerNormal - downNormal);
-
-    // 4方向のうち最大の差
-    float edge =
-        max(
-            max(leftDifference, rightDifference),
-            max(upDifference, downDifference)
+        length(
+            centerNormal -
+            leftNormal
         );
 
+    float rightDifference =
+        length(
+            centerNormal -
+            rightNormal
+        );
+
+    float upDifference =
+        length(
+            centerNormal -
+            upNormal
+        );
+
+    float downDifference =
+        length(
+            centerNormal -
+            downNormal
+        );
+
+
+    // ----------------------------
+    // 最大値
+    // ----------------------------
+
+    float edge =
+        max(
+            max(
+                leftDifference,
+                rightDifference
+            ),
+            max(
+                upDifference,
+                downDifference
+            )
+        );
+
+
+    // ----------------------------
     // 見やすくする
-    edge = saturate(edge * 3.0f);
+    // ----------------------------
+
+    edge =
+        saturate(
+            edge * 3.0f
+        );
+
+
+    // ----------------------------
+    // 赤で表示
+    // ----------------------------
 
     return float4(
         edge,

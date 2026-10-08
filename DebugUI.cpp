@@ -17,6 +17,7 @@
 #include <nlohmann/json.hpp>
 
 #include "ToonSettings.h"
+#include "OutlineSettings.h"
 
 extern bool g_raise_imgui_viewports;
 
@@ -174,6 +175,48 @@ void DebugUI::Draw(GameContext& ctx)
         if (ImGui::Button(u8"初期値に戻す"))
         {
             ToonSettingsManager::Reset();
+        }
+
+
+
+        ImGui::End();
+    }
+
+    // Outline Settings
+    {
+        ImGui::Begin("Outline Settings");
+
+        ImGui::SliderFloat(
+            u8"アウトライン太さ",
+            &g_outlineSettings.radius,
+            1.0f,
+            5.0f
+        );
+
+        ImGui::SliderFloat(
+            u8"深度強度",
+            &g_outlineSettings.depthStrength,
+            1.0f,
+            50.0f
+        );
+
+        ImGui::SliderFloat(
+            u8"法線強度",
+            &g_outlineSettings.normalStrength,
+            1.0f,
+            20.0f
+        );
+
+        ImGui::SliderFloat(
+            u8"輪郭しきい値",
+            &g_outlineSettings.threshold,
+            0.0f,
+            1.0f
+        );
+
+        if (ImGui::Button(u8"初期値に戻す"))
+        {
+            g_outlineSettings = OutlineSettings{};
         }
 
         ImGui::End();

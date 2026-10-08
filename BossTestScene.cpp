@@ -485,8 +485,8 @@ void BossTestScene::RenderDepth() const
 
 	SetUseVertexShader(vertexShader);
 
-	stage.Draw();
-	testModel_.Draw();
+	//stage.Draw();
+	//testModel_.Draw();
 
 	// --------------------------------
 	// ‹ŒBoss
@@ -543,7 +543,10 @@ void BossTestScene::RenderDepthView() const
 
 	SetUsePixelShader(-1);
 
-	SetUseTextureToShader(0, -1);
+	SetUseTextureToShader(
+		0,
+		-1
+	);
 }
 
 void BossTestScene::RenderSceneBuffer() const

@@ -37,7 +37,9 @@ float3 LoadNormal(uint2 pixel)
             int3(pixel, 0)
         ).rgb;
 
-    normal = normal * 2.0f - 1.0f;
+    // 0～1 → -1～1
+    normal =
+        normal * 2.0f - 1.0f;
 
     return normalize(normal);
 }
@@ -49,6 +51,10 @@ float3 LoadNormal(uint2 pixel)
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
+    // ================================
+    // テクスチャサイズ
+    // ================================
+
     uint width;
     uint height;
 
@@ -57,22 +63,51 @@ float4 main(PS_INPUT input) : SV_TARGET
         height
     );
 
-    uint2 pixel = uint2(
-        input.Position.x,
-        input.Position.y
+    uint sceneWidth;
+    uint sceneHeight;
+
+    g_SceneTexture.GetDimensions(
+        sceneWidth,
+        sceneHeight
     );
 
-    pixel.x = min(pixel.x, width - 1);
-    pixel.y = min(pixel.y, height - 1);
+
+    // ================================
+    // Pixel座標
+    // ================================
+
+    uint2 pixel =
+        uint2(
+            input.Position.x,
+            input.Position.y
+        );
+
+    pixel.x =
+        min(
+            pixel.x,
+            width - 1
+        );
+
+    pixel.y =
+        min(
+            pixel.y,
+            height - 1
+        );
 
 
-    // ----------------------------
+    // ================================
     // 元画像
-    // ----------------------------
+    // ================================
 
     float2 uv =
         input.Position.xy /
-        float2(width, height);
+        float2(
+            sceneWidth,
+            sceneHeight
+        );
+
+    uv =
+        saturate(uv);
 
     float4 sceneColor =
         g_SceneTexture.Sample(
@@ -81,9 +116,9 @@ float4 main(PS_INPUT input) : SV_TARGET
         );
 
 
-    // ----------------------------
+    // ================================
     // 中央
-    // ----------------------------
+    // ================================
 
     float centerDepth =
         LoadDepth(pixel);
@@ -92,205 +127,232 @@ float4 main(PS_INPUT input) : SV_TARGET
         LoadNormal(pixel);
 
 
-    // ----------------------------
-    // アウトライン半径
-    // ----------------------------
+    // ================================
+    // 1px隣の座標
+    // ================================
 
-    int radius =
-        max(1, (int)Outline.x);
+    uint2 leftPixel =
+        pixel;
 
-
-    float depthEdge = 0.0f;
-    float normalEdge = 0.0f;
-
-
-    // ----------------------------
-    // 指定された半径まで調べる
-    // ----------------------------
-
-    for (int offset = 1; offset <= radius; ++offset)
-    {
-        // ========================
-        // 左
-        // ========================
-
-        uint2 leftPixel = pixel;
-
-        leftPixel.x =
-            (pixel.x >= offset)
-            ? pixel.x - offset
-            : 0;
-
-        float leftDepth =
-            LoadDepth(leftPixel);
-
-        float3 leftNormal =
-            LoadNormal(leftPixel);
+    leftPixel.x =
+        (pixel.x > 0)
+        ? pixel.x - 1
+        : 0;
 
 
-        // ========================
-        // 右
-        // ========================
+    uint2 rightPixel =
+        pixel;
 
-        uint2 rightPixel = pixel;
-
-        rightPixel.x =
-            min(
-                pixel.x + offset,
-                width - 1
-            );
-
-        float rightDepth =
-            LoadDepth(rightPixel);
-
-        float3 rightNormal =
-            LoadNormal(rightPixel);
-
-
-        // ========================
-        // 上
-        // ========================
-
-        uint2 upPixel = pixel;
-
-        upPixel.y =
-            (pixel.y >= offset)
-            ? pixel.y - offset
-            : 0;
-
-        float upDepth =
-            LoadDepth(upPixel);
-
-        float3 upNormal =
-            LoadNormal(upPixel);
-
-
-        // ========================
-        // 下
-        // ========================
-
-        uint2 downPixel = pixel;
-
-        downPixel.y =
-            min(
-                pixel.y + offset,
-                height - 1
-            );
-
-        float downDepth =
-            LoadDepth(downPixel);
-
-        float3 downNormal =
-            LoadNormal(downPixel);
-
-
-        // ========================
-        // 深度差
-        // ========================
-
-        depthEdge =
-            max(
-                depthEdge,
-                abs(centerDepth - leftDepth)
-            );
-
-        depthEdge =
-            max(
-                depthEdge,
-                abs(centerDepth - rightDepth)
-            );
-
-        depthEdge =
-            max(
-                depthEdge,
-                abs(centerDepth - upDepth)
-            );
-
-        depthEdge =
-            max(
-                depthEdge,
-                abs(centerDepth - downDepth)
-            );
-
-
-        // ========================
-        // 法線差
-        // ========================
-
-        normalEdge =
-            max(
-                normalEdge,
-                1.0f - dot(centerNormal, leftNormal)
-            );
-
-        normalEdge =
-            max(
-                normalEdge,
-                1.0f - dot(centerNormal, rightNormal)
-            );
-
-        normalEdge =
-            max(
-                normalEdge,
-                1.0f - dot(centerNormal, upNormal)
-            );
-
-        normalEdge =
-            max(
-                normalEdge,
-                1.0f - dot(centerNormal, downNormal)
-            );
-    }
-
-
-    // ----------------------------
-    // 強度調整
-    // ----------------------------
-
-    depthEdge =
-    saturate(
-        depthEdge * Outline.y
-    );
-
-    normalEdge =
-    saturate(
-        normalEdge * Outline.z
-    );
-
-
-    // ----------------------------
-    // Depth + Normal
-    // ----------------------------
-
-    float edge =
-        max(
-            depthEdge,
-            normalEdge
+    rightPixel.x =
+        min(
+            pixel.x + 1,
+            width - 1
         );
 
 
-    // ----------------------------
-    // しきい値
-    // ----------------------------
+    uint2 upPixel =
+        pixel;
 
-    edge =
+    upPixel.y =
+        (pixel.y > 0)
+        ? pixel.y - 1
+        : 0;
+
+
+    uint2 downPixel =
+        pixel;
+
+    downPixel.y =
+        min(
+            pixel.y + 1,
+            height - 1
+        );
+
+
+    // ================================
+    // 隣の深度
+    // ================================
+
+    float leftDepth =
+        LoadDepth(leftPixel);
+
+    float rightDepth =
+        LoadDepth(rightPixel);
+
+    float upDepth =
+        LoadDepth(upPixel);
+
+    float downDepth =
+        LoadDepth(downPixel);
+
+
+    // ================================
+    // 隣の法線
+    // ================================
+
+    float3 leftNormal =
+        LoadNormal(leftPixel);
+
+    float3 rightNormal =
+        LoadNormal(rightPixel);
+
+    float3 upNormal =
+        LoadNormal(upPixel);
+
+    float3 downNormal =
+        LoadNormal(downPixel);
+
+
+    // ================================
+    // 深度エッジ
+    // ================================
+
+    float depthEdge = 0.0f;
+
+    if (centerDepth > 0.0f)
+    {
+        if (leftDepth <= 0.0f)
+        {
+            depthEdge = 1.0f;
+        }
+
+        if (rightDepth <= 0.0f)
+        {
+            depthEdge = 1.0f;
+        }
+
+        if (upDepth <= 0.0f)
+        {
+            depthEdge = 1.0f;
+        }
+
+        if (downDepth <= 0.0f)
+        {
+            depthEdge = 1.0f;
+        }
+    }
+
+    // ================================
+    // 法線エッジ
+    // ================================
+
+    float normalEdge = 0.0f;
+
+    if (centerDepth > 0.0f)
+    {
+        if (leftDepth > 0.0f)
+        {
+            normalEdge =
+                max(
+                    normalEdge,
+                    length(
+                        centerNormal -
+                        leftNormal
+                    )
+                );
+        }
+
+        if (rightDepth > 0.0f)
+        {
+            normalEdge =
+                max(
+                    normalEdge,
+                    length(
+                        centerNormal -
+                        rightNormal
+                    )
+                );
+        }
+
+        if (upDepth > 0.0f)
+        {
+            normalEdge =
+                max(
+                    normalEdge,
+                    length(
+                        centerNormal -
+                        upNormal
+                    )
+                );
+        }
+
+        if (downDepth > 0.0f)
+        {
+            normalEdge =
+                max(
+                    normalEdge,
+                    length(
+                        centerNormal -
+                        downNormal
+                    )
+                );
+        }
+    }
+
+
+    // ================================
+    // 深度の強度
+    // ================================
+
+    float depthSignal =
+        saturate(
+            depthEdge *
+            Outline.y
+        );
+
+
+    // ================================
+    // 法線強度
+    //
+    // 0～20 → 0～1
+    // ================================
+
+    float normalMask =
     smoothstep(
-        Outline.w,
-        Outline.w + 0.3f,
-        edge
+        0.25f,
+        0.40f,
+        normalEdge
     );
 
 
-    // ----------------------------
-    // 黒いアウトライン
-    // ----------------------------
+    // ================================
+    // 深度のしきい値
+    // ================================
+
+    float depthMask =
+        smoothstep(
+            Outline.w,
+            Outline.w + 0.3f,
+            depthSignal
+        );
+
+
+    // ================================
+    // Depth + Normal
+    // ================================
+
+    float edge =
+        max(
+            depthMask,
+            normalMask
+        );
+
+
+    // ================================
+    // 黒アウトライン
+    // ================================
 
     sceneColor.rgb =
         lerp(
             sceneColor.rgb,
-            float3(0.0f, 0.0f, 0.0f),
+            float3(
+                0.0f,
+                0.0f,
+                0.0f
+            ),
             edge
         );
+
 
     return sceneColor;
 }
