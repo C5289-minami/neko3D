@@ -372,22 +372,6 @@ void BossTestScene::RenderSceneBuffer() const
 	modelToonRenderer_.Draw(
 		boss.GetModelObject(),
 		ModelToonType::FourFrame);
-
-<<<<<<< Updated upstream
-	SetUsePixelShader(-1);
-	SetUseVertexShader(-1);
-
-	MV1SetUseOrigShader(FALSE);
-
-	stage.DrawAlphaModel();
-
-	SetUseZBuffer3D(FALSE);
-	SetWriteZBuffer3D(FALSE);
-
-	SetDrawZBuffer(-1);
-	SetDrawScreen(DX_SCREEN_BACK);
-=======
 	outlineRenderer_.EndScenePass();
->>>>>>> Stashed changes
 }
 
