@@ -123,6 +123,7 @@ void GameContext::Reset()
     boss.Reset();
     debugActorsPaused_ = false;
     TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
+    stage.ResetAlphaModel(player.GetPosition());
     playerCamera.Reset();
     Debug_camera.Initialize(playerCamera.GetEye(), playerCamera.GetTarget());
 }
@@ -135,10 +136,15 @@ void GameContext::Update(float deltaTime)
     Debug_camera.Update(deltaTime, player.GetPosition(),
         playerCamera.GetEye(), playerCamera.GetTarget());
     if (Debug_camera.IsSceneViewActive() || debugActorsPaused_ ||
-        (ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard)) return;
+        (ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard))
+    {
+        stage.UpdateAlphaModel(deltaTime, player.GetPosition());
+        return;
+    }
 #endif
 
     player.Update(deltaTime, stage);
+    stage.UpdateAlphaModel(deltaTime, player.GetPosition());
     boss.Update(deltaTime);
     playerCamera.Update(player.GetPosition(), boss.GetPosition(), deltaTime);
 }
@@ -155,4 +161,5 @@ void GameContext::Draw() const
     stage.Draw();
     boss.Draw();
     player.Draw();
+    stage.DrawAlphaModel();
 }
