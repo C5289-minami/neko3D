@@ -1,4 +1,4 @@
-#include "ScreenSpaceOutlineRenderer.h"
+﻿#include "ScreenSpaceOutlineRenderer.h"
 
 #include "OutlineSettings.h"
 
@@ -9,6 +9,9 @@ namespace
         L"./DevData/ShaderCompiler/Bin/DepthPS.pso";
     constexpr const wchar_t* PostProcessShaderPath =
         L"./DevData/ShaderCompiler/Bin/PostProcessPS.pso";
+
+    constexpr const wchar_t* FullScreenPixelShaderPath =
+		L"./DevData/ShaderCompiler/Bin/FullScreenPS.pso";
 }
 
 ScreenSpaceOutlineRenderer::~ScreenSpaceOutlineRenderer()
@@ -30,6 +33,7 @@ bool ScreenSpaceOutlineRenderer::Init(int width, int height)
 
     depthPixelShader_ = LoadPixelShader(DepthShaderPath);
     postProcessPixelShader_ = LoadPixelShader(PostProcessShaderPath);
+    fullScreenPixelShader_ = LoadPixelShader(FullScreenPixelShaderPath);
 
     // 深度・法線を RGBA32F で保持できる画面を作る。
     SetDrawValidFloatTypeGraphCreateFlag(TRUE);
@@ -43,6 +47,9 @@ bool ScreenSpaceOutlineRenderer::Init(int width, int height)
     SetDrawValidFloatTypeGraphCreateFlag(FALSE);
     SetCreateDrawValidGraphChannelNum(0);
     SetCreateGraphChannelBitDepth(0);
+
+    // アウトライン適用後の画像を保存するバッファ
+    outlineBuffer_ = MakeScreen(width_, height_, TRUE);
 
     if (sceneBuffer_ >= 0)
     {
@@ -58,8 +65,10 @@ bool ScreenSpaceOutlineRenderer::Init(int width, int height)
 
     if (depthPixelShader_ < 0 ||
         postProcessPixelShader_ < 0 ||
+        fullScreenPixelShader_ < 0 ||
         sceneBuffer_ < 0 ||
         depthBuffer_ < 0 ||
+        outlineBuffer_ < 0 ||
         settingsConstantBuffer_ < 0)
     {
         Release();
@@ -76,6 +85,8 @@ bool ScreenSpaceOutlineRenderer::Init(int width, int height)
 
     *settings = g_outlineSettings;
     UpdateShaderConstantBuffer(settingsConstantBuffer_);
+
+  
 
     CreateFullscreenVertices();
     return true;
@@ -111,6 +122,17 @@ void ScreenSpaceOutlineRenderer::Release() noexcept
     {
         DeleteGraph(depthBuffer_);
         depthBuffer_ = -1;
+    }
+
+    if (fullScreenPixelShader_ >= 0)
+    {
+        DeleteShader(fullScreenPixelShader_);
+        fullScreenPixelShader_ = -1;
+    }
+    if (outlineBuffer_ >= 0)
+    {
+        DeleteGraph(outlineBuffer_);
+        outlineBuffer_ = -1;
     }
 
     width_ = 0;
@@ -176,21 +198,74 @@ void ScreenSpaceOutlineRenderer::EndDepthPass() const
 
 void ScreenSpaceOutlineRenderer::RenderPostProcess() const
 {
-    if (sceneBuffer_ < 0 || depthBuffer_ < 0 ||
-        postProcessPixelShader_ < 0 || settingsConstantBuffer_ < 0)
+    if (sceneBuffer_ < 0)
     {
         return;
     }
 
-    auto* settings = static_cast<OutlineSettings*>(
-        GetBufferShaderConstantBuffer(settingsConstantBuffer_));
-    if (settings != nullptr)
+    if (outlineEnabled_ && depthBuffer_ < 0)
     {
-        *settings = g_outlineSettings;
-        UpdateShaderConstantBuffer(settingsConstantBuffer_);
+        return;
     }
 
-    SetDrawScreen(DX_SCREEN_BACK);
+    if (outlineEnabled_ &&
+        (postProcessPixelShader_ < 0 ||
+            settingsConstantBuffer_ < 0))
+    {
+        return;
+    }
+
+    if (fullScreenEffectEnabled_ &&
+        fullScreenPixelShader_ < 0)
+    {
+        return;
+    }
+
+    if (outlineEnabled_ && fullScreenEffectEnabled_)
+    {
+        // アウトライン → 全画面エフェクト
+        if (outlineBuffer_ < 0)
+        {
+            return;
+        }
+
+        RenderOutlinePass(outlineBuffer_);
+        RenderFullScreenPass(outlineBuffer_);
+    }
+    else if (outlineEnabled_)
+    {
+        // アウトラインだけ
+        RenderOutlinePass(DX_SCREEN_BACK);
+    }
+    else if (fullScreenEffectEnabled_)
+    {
+        // 全画面エフェクトだけ
+        RenderFullScreenPass(sceneBuffer_);
+    }
+    else
+    {
+        // 両方無効：シーン画像をそのまま表示
+        SetDrawScreen(DX_SCREEN_BACK);
+        SetDrawZBuffer(-1);
+        DrawGraph(0, 0, sceneBuffer_, FALSE);
+    }
+}
+
+void ScreenSpaceOutlineRenderer::RenderOutlinePass(
+    int destinationScreen) const
+{
+    auto* settings = static_cast<OutlineSettings*>(
+        GetBufferShaderConstantBuffer(settingsConstantBuffer_));
+
+    if (settings == nullptr)
+    {
+        return;
+    }
+
+    *settings = g_outlineSettings;
+    UpdateShaderConstantBuffer(settingsConstantBuffer_);
+
+    SetDrawScreen(destinationScreen);
     SetDrawZBuffer(-1);
 
     SetShaderConstantBuffer(
@@ -210,17 +285,73 @@ void ScreenSpaceOutlineRenderer::RenderPostProcess() const
     SetUsePixelShader(-1);
     SetUseTextureToShader(0, -1);
     SetUseTextureToShader(1, -1);
+
+    SetDrawScreen(DX_SCREEN_BACK);
 }
 
 bool ScreenSpaceOutlineRenderer::IsInitialized() const noexcept
 {
     return depthPixelShader_ >= 0 &&
         postProcessPixelShader_ >= 0 &&
+        fullScreenPixelShader_ >= 0 &&
         sceneBuffer_ >= 0 &&
         depthBuffer_ >= 0 &&
+        outlineBuffer_ >= 0 &&
         settingsConstantBuffer_ >= 0;
 }
 
+void ScreenSpaceOutlineRenderer::RenderFullScreenShader() const
+{
+    if (sceneBuffer_ < 0 || fullScreenPixelShader_ < 0)
+    {
+        return;
+    }
+
+    // 出力先をバックバッファにする
+    SetDrawScreen(DX_SCREEN_BACK);
+    SetDrawZBuffer(-1);
+
+    // シーン画像をシェーダーに渡す
+    SetUseTextureToShader(0, sceneBuffer_);
+
+    // 全画面エフェクトを適用
+    SetUsePixelShader(fullScreenPixelShader_);
+
+    DrawPrimitive2DToShader(
+        const_cast<VERTEX2DSHADER*>(fullscreenVertices_),
+        6,
+        DX_PRIMTYPE_TRIANGLELIST
+    );
+
+    // 描画状態を解除
+    SetUsePixelShader(-1);
+    SetUseTextureToShader(0, -1);
+    SetUseTextureToShader(1, -1);
+}
+void ScreenSpaceOutlineRenderer::RenderFullScreenPass(
+    int sourceTexture) const
+{
+    if (sourceTexture < 0 ||
+        fullScreenPixelShader_ < 0)
+    {
+        return;
+    }
+
+    SetDrawScreen(DX_SCREEN_BACK);
+    SetDrawZBuffer(-1);
+
+    SetUseTextureToShader(0, sourceTexture);
+    SetUsePixelShader(fullScreenPixelShader_);
+
+    DrawPrimitive2DToShader(
+        const_cast<VERTEX2DSHADER*>(fullscreenVertices_),
+        6,
+        DX_PRIMTYPE_TRIANGLELIST);
+
+    SetUsePixelShader(-1);
+    SetUseTextureToShader(0, -1);
+    SetUseTextureToShader(1, -1);
+}
 void ScreenSpaceOutlineRenderer::CreateFullscreenVertices()
 {
     const float width = static_cast<float>(width_);

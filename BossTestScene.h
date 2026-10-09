@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <string>
 
@@ -15,7 +15,7 @@
 #include "Player.h"
 #include "ModelToonRenderer.h"
 #include "Debug_camera.h"
-#include "ScreenSpaceOutlineRenderer.h"
+#include "ShaderEffectController.h"
 
 class BossTestScene final : public Scene
 {
@@ -56,16 +56,18 @@ private:
     // シーン固有のトゥーン描画
     int toonPixelShader_{ -1 };
     int toonVertexShader_{ -1 };
-    bool isShaderEnabled_ = true;
-    bool shaderKeyWasDown_ = false;
     ModelObject testModel_{};
     int toonConstantBuffer_{ -1 };
     Player test;
     ModelToonRenderer modelToonRenderer_{};
 
     // 共通のスクリーン空間アウトライン描画
-    ScreenSpaceOutlineRenderer outlineRenderer_{};
+  ShaderEffectController shaderEffects_{};
 
-    void RenderSceneBuffer() const;
+    void RenderSceneBuffer(bool toonEnabled) const;
     void RenderDepth() const;
+
+
+    void ApplyCamera() const;
+    void DrawToonCharacters(bool depthPass) const;
 };

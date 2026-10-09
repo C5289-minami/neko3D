@@ -267,6 +267,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="ScreenSpaceOutlineRenderer.h" />
+    <ClInclude Include="ShaderEffectController.h" />
     <ClInclude Include="Sound3D.h" />
     <ClInclude Include="SpriteStudioUI.h" />
     <ClInclude Include="SSAnimation.h" />

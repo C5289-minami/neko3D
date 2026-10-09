@@ -16,5 +16,8 @@ ShaderCompiler.exe /Tps_4_0 /FoBin\DepthPS.pso Src\DepthPS.hlsl
 ShaderCompiler.exe /Tps_4_0 /FoBin\DepthViewPS.pso Src\DepthViewPS.hlsl
 ShaderCompiler.exe /Tps_4_0 /FoBin\PostProcessPS.pso Src\PostProcessPS.hlsl
 
+rem --- スクリーンシェーダー --- 
+ShaderCompiler.exe /Tps_4_0 /FoBin\FullScreenPS.pso Src\FullScreenPS.hlsl
+
 echo Shader Compilation Completed!
 pause
