@@ -47,9 +47,10 @@ void DebugUI::Init()
 
     ImGui::LoadIniSettingsFromDisk("./Data/Config/imgui.ini");
 
-	// トゥーン設定を読み込む
+    // 設定を読み込む
     {
         ToonSettingsManager::Load();
+        OutlineSettingsManager::Load();
     }
 }
 
@@ -320,9 +321,24 @@ void DebugUI::Draw(GameContext& ctx, const DebugSceneControls& controls)
             1.0f
         );
 
+
+        if (ImGui::Button(u8"保存"))
+        {
+            OutlineSettingsManager::Save();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button(u8"読み込み"))
+        {
+            OutlineSettingsManager::Load();
+        }
+
+        ImGui::SameLine();
+
         if (ImGui::Button(u8"初期値に戻す"))
         {
-            g_outlineSettings = OutlineSettings{};
+            OutlineSettingsManager::Reset();
         }
 
         ImGui::End();
