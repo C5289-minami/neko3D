@@ -13,6 +13,7 @@
 //    スクリーン空間アウトライン描画を行う。
 // ===============================
 
+
 // スクリーン空間アウトライン描画を管理するクラス
 class ScreenSpaceOutlineRenderer final
 {
@@ -37,6 +38,20 @@ public:
     void RenderPostProcess() const;
 
     bool IsInitialized() const noexcept;
+
+    template<typename SceneDraw, typename DepthDraw>
+    void Render(SceneDraw&& drawScene, DepthDraw&& drawDepth) const
+    {
+        BeginScenePass();
+        drawScene();
+        EndScenePass();
+
+        BeginDepthPass();
+        drawDepth();
+        EndDepthPass();
+
+        RenderPostProcess();
+    }
 
 private:
     int width_{};

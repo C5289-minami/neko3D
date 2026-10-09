@@ -265,11 +265,10 @@ void BossTestScene::Render() const
 	);
 
 
-	RenderSceneBuffer();
-
-	RenderDepth();
-
-	outlineRenderer_.RenderPostProcess();
+	outlineRenderer_.Render(
+		[this] { RenderSceneBuffer(); },
+		[this] { RenderDepth(); }
+	);
 
 
 	const int white = DxLib::GetColor(255, 255, 255);
