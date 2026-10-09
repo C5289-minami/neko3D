@@ -237,6 +237,7 @@ void BossTestScene::Update(float deltaTime)
         }
     }
 	//test.Update(deltaTime, stage);
+    Collision::UpdateModelContact(test.GetModelObject(), boss.GetModelObject());
 	stage.UpdateAlphaModel(deltaTime, test);
 
 
@@ -365,13 +366,24 @@ void BossTestScene::RenderSceneBuffer() const
 	stage.Draw();
 	testModel_.Draw();
 
-	modelToonRenderer_.Draw(
-		test.GetModelObject(),
-		ModelToonType::NMap4Frame);
-
-	modelToonRenderer_.Draw(
-		boss.GetModelObject(),
-		ModelToonType::FourFrame);
+    const auto drawActor = [this](const ModelObject& model, ModelToonType type)
+    {
+        if (model.collisionHighlighted)
+        {
+            // Use DxLib's standard rendering so MV1 color settings are applied.
+            SetUsePixelShader(-1);
+            SetUseVertexShader(-1);
+            MV1SetUseOrigShader(FALSE);
+            model.Draw();
+            MV1SetUseOrigShader(TRUE);
+        }
+        else
+        {
+            modelToonRenderer_.Draw(model, type);
+        }
+    };
+    drawActor(test.GetModelObject(), ModelToonType::NMap4Frame);
+    drawActor(boss.GetModelObject(), ModelToonType::FourFrame);
 	outlineRenderer_.EndScenePass();
 }
 

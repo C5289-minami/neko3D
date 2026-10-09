@@ -24,6 +24,7 @@ void Boss::Init()
 
 void Boss::Reset()
 {
+    model_.collisionHighlighted = false;
     SetTransform(TransformDefaults::GameBoss);
 	velocity_ = {};
 	activeSkill_ = nullptr;
@@ -50,6 +51,7 @@ void Boss::Update(float deltaTime)
 
 void Boss::Draw() const
 {
+    model_.ApplyCollisionColor();
 	animation_.Draw3D(model_.position, model_.scale, model_.rotation);
 }
 
