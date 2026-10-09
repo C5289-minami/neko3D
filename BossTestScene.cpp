@@ -17,7 +17,6 @@
 
 #include "Player.h"
 #include "Sound3D.h"
-#include "OutlineSettings.h"
 
 namespace
 {
@@ -29,7 +28,6 @@ namespace
 	constexpr float CameraMoveSpeed = 500.0f;
 
 	constexpr int ToonSettingsSlot = 5;
-	constexpr int OutlineConstantBufferSlot = 4;
 
 	void SetModelCulling(int modelHandle, int culling)
 	{
@@ -115,16 +113,9 @@ void BossTestScene::Init()
 	testModel_.modelKey = ResourceKeys::Model_Test;
 	testModel_.scale = { 500.0f, 500.0f, 500.0f };
 
-	vertexShader = LoadVertexShader(L"./DevData/ShaderCompiler/Bin/ToonVS.vso");
-	pixelShader = LoadPixelShader(L"./DevData/ShaderCompiler/Bin/ToonPS.pso");
-	outlinePixelShader = LoadPixelShader(L"./DevData/ShaderCompiler/Bin/OutlinePS.pso");
-	outlineVertexShader = LoadVertexShader(L"./DevData/ShaderCompiler/Bin/OutlineVS.vso");
+	toonVertexShader_ = LoadVertexShader(L"./DevData/ShaderCompiler/Bin/ToonVS.vso");
+	toonPixelShader_ = LoadPixelShader(L"./DevData/ShaderCompiler/Bin/ToonPS.pso");
 	modelToonRenderer_.Init();
-	outlineConstantBuffer_ = CreateShaderConstantBuffer(sizeof(float) * 4);
-
-	float* outlineSize =
-		static_cast<float*>(GetBufferShaderConstantBuffer(outlineConstantBuffer_));
-
 	toonConstantBuffer_ = CreateShaderConstantBuffer(sizeof(ToonSettings));
 
 	ToonSettings* settings =
@@ -134,122 +125,10 @@ void BossTestScene::Init()
 
 	*settings = g_toonSettings;
 
-	outlineSize[0] = 5.0f;                    // 横3px
-	outlineSize[1] = 5.0f;                    // 縦3px
-	outlineSize[2] = DxPlus::CLIENT_WIDTH;
-	outlineSize[3] = DxPlus::CLIENT_HEIGHT;
-
 	UpdateShaderConstantBuffer(toonConstantBuffer_);
 
-	UpdateShaderConstantBuffer(outlineConstantBuffer_);
-
-	depthPixelShader_ =
-		LoadPixelShader(
-			L"./DevData/ShaderCompiler/Bin/DepthPS.pso"
-		);
-	SetDrawValidFloatTypeGraphCreateFlag(TRUE);
-	SetCreateDrawValidGraphChannelNum(4);
-	SetCreateGraphChannelBitDepth(32);
-
-	depthBuffer_ =
-		MakeScreen(
-			DxPlus::CLIENT_WIDTH,
-			DxPlus::CLIENT_HEIGHT,
-			TRUE
-		);
-
-	depthViewPixelShader_ =
-		LoadPixelShader(
-			L"./DevData/ShaderCompiler/Bin/DepthViewPS.pso"
-		);
-	{
-		const float width =
-			static_cast<float>(DxPlus::CLIENT_WIDTH);
-
-		const float height =
-			static_cast<float>(DxPlus::CLIENT_HEIGHT);
-
-		depthViewVertices_[0].pos = VGet(0.0f, 0.0f, 0.0f);
-		depthViewVertices_[1].pos = VGet(width, 0.0f, 0.0f);
-		depthViewVertices_[2].pos = VGet(0.0f, height, 0.0f);
-		depthViewVertices_[3].pos = VGet(width, height, 0.0f);
-		depthViewVertices_[4] = depthViewVertices_[2];
-		depthViewVertices_[5] = depthViewVertices_[1];
-
-		for (int i = 0; i < 6; ++i)
-		{
-			depthViewVertices_[i].rhw = 1.0f;
-			depthViewVertices_[i].dif =
-				GetColorU8(255, 255, 255, 255);
-			depthViewVertices_[i].spc =
-				GetColorU8(0, 0, 0, 0);
-		}
-
-		depthViewVertices_[0].u = 0.0f;
-		depthViewVertices_[0].v = 0.0f;
-
-		depthViewVertices_[1].u = 1.0f;
-		depthViewVertices_[1].v = 0.0f;
-
-		depthViewVertices_[2].u = 0.0f;
-		depthViewVertices_[2].v = 1.0f;
-
-		depthViewVertices_[3].u = 1.0f;
-		depthViewVertices_[3].v = 1.0f;
-
-		depthViewVertices_[4] = depthViewVertices_[2];
-		depthViewVertices_[5] = depthViewVertices_[1];
-
-		depthViewVertices_[0].su = 0.0f;
-		depthViewVertices_[0].sv = 0.0f;
-		depthViewVertices_[1].su = 1.0f;
-		depthViewVertices_[1].sv = 0.0f;
-		depthViewVertices_[2].su = 0.0f;
-		depthViewVertices_[2].sv = 1.0f;
-		depthViewVertices_[3].su = 1.0f;
-		depthViewVertices_[3].sv = 1.0f;
-		depthViewVertices_[4].su = 0.0f;
-		depthViewVertices_[4].sv = 1.0f;
-		depthViewVertices_[5].su = 1.0f;
-		depthViewVertices_[5].sv = 0.0f;
-
-	}
-	sceneBuffer_ =
-		MakeScreen(
-			DxPlus::CLIENT_WIDTH,
-			DxPlus::CLIENT_HEIGHT,
-			TRUE
-		);
-
-	SetUseGraphZBuffer(sceneBuffer_, TRUE);
-	postProcessPixelShader_ =
-		LoadPixelShader(
-			L"./DevData/ShaderCompiler/Bin/PostProcessPS.pso"
-		);
-
-	outlineSettingsConstantBuffer_ =
-		CreateShaderConstantBuffer(sizeof(OutlineSettings));
-
-	OutlineSettings* outlineSettings =
-		static_cast<OutlineSettings*>(
-			GetBufferShaderConstantBuffer(
-				outlineSettingsConstantBuffer_
-			)
-			);
-
-	*outlineSettings = g_outlineSettings;
-
-	UpdateShaderConstantBuffer(
-		outlineSettingsConstantBuffer_
-	);
-
-	// 作成設定を元に戻す
-	SetDrawValidFloatTypeGraphCreateFlag(FALSE);
-	SetCreateDrawValidGraphChannelNum(0);
-	SetCreateGraphChannelBitDepth(0);
-
-	// この画面専用のZバッファを作る
-	SetUseGraphZBuffer(depthBuffer_, TRUE);
+	// 画面空間アウトライン用のシェーダーとバッファーを初期化
+	outlineRenderer_.Init(DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT);
 
 	StartFadeIn();
 
@@ -361,7 +240,6 @@ void BossTestScene::Update(float deltaTime)
 	stage.UpdateAlphaModel(deltaTime, test.GetPosition());
 
 
-
 	Sound3D::SetListener(
 		cameraEye,
 		Vec3{ std::sin(yaw) * std::cos(pitch), std::sin(pitch), std::cos(yaw) * std::cos(pitch) }
@@ -391,96 +269,7 @@ void BossTestScene::Render() const
 
 	RenderDepth();
 
-	RenderPostProcess();
-
-	//DrawExtendGraph(
-	//    0,
-	//    0,
-	//    DxPlus::CLIENT_WIDTH,
-	//    DxPlus::CLIENT_HEIGHT,
-	//    depthBuffer_,
-	//    FALSE
-	//);
-
-  //  if (isShaderEnabled_)
-  //  {
-  //      MV1SetUseOrigShader(TRUE);
-
-  //      ToonSettings* settings =
-  //          static_cast<ToonSettings*>(
-  //              GetBufferShaderConstantBuffer(toonConstantBuffer_)
-  //              );
-
-  //      *settings = g_toonSettings;
-
-  //      UpdateShaderConstantBuffer(toonConstantBuffer_);
-
-  //      SetShaderConstantBuffer(
-  //          toonConstantBuffer_,
-  //          DX_SHADERTYPE_PIXEL,
-  //          ToonSettingsSlot
-  //      );
-
-  //      SetShaderConstantBuffer(
-  //          outlineConstantBuffer_,
-  //          DX_SHADERTYPE_VERTEX,
-  //          OutlineConstantBufferSlot
-  //      );
-
-  //      const int stageModelHandle = stage.GetModelHandle();
-  //      const int testModelHandle = RM().GetModel(testModel_.modelKey);
-
-  //      // ========================================
-  //      // Outline
-  //      // ========================================
-
-  //      SetUsePixelShader(outlinePixelShader);
-  //      SetUseVertexShader(outlineVertexShader);
-
-  //      SetModelCulling(stageModelHandle, DX_CULLING_RIGHT);
-  //      SetModelCulling(testModelHandle, DX_CULLING_RIGHT);
-
-  //      stage.Draw();
-  //      testModel_.Draw();
-
-  //      // ========================================
-  //      // 通常Toon
-  //      // ========================================
-
-  //      SetModelCulling(stageModelHandle, DX_CULLING_LEFT);
-  //      SetModelCulling(testModelHandle, DX_CULLING_LEFT);
-
-  //      SetUsePixelShader(pixelShader);
-  //      SetUseVertexShader(vertexShader);
-
-  //      stage.Draw();
-  //      testModel_.Draw();
-
-  //      modelToonRenderer_.Draw(
-  //          test.GetModelObject(),
-  //          ModelToonType::NMap4Frame
-  //      );
-		//test.Draw();
-
-  //      modelToonRenderer_.Draw(
-  //          boss.GetModelObject(),
-  //          ModelToonType::FourFrame
-  //      );
-  //  }
-  //  else
-  //  {
-  //      stage.Draw();
-  //      testModel_.Draw();
-  //      boss.Draw();
-  //      test.Draw();
-  //  }
-
-  //  if (isShaderEnabled_)
-  //  {
-  //      SetUsePixelShader(-1);
-  //      SetUseVertexShader(-1);
-  //      MV1SetUseOrigShader(FALSE);       // 描画後は標準に戻す
-  //  }
+	outlineRenderer_.RenderPostProcess();
 
 
 	const int white = DxLib::GetColor(255, 255, 255);
@@ -508,21 +297,15 @@ void BossTestScene::Render() const
 
 void BossTestScene::RenderDepth() const
 {
-	MV1SetUseOrigShader(TRUE);
-
-	SetDrawScreen(depthBuffer_);
-	SetDrawZBuffer(depthBuffer_);
+	outlineRenderer_.BeginDepthPass();
 
 	const float cosPitch = std::cos(pitch);
-
 	const Vec3 forward{
 		std::sin(yaw) * cosPitch,
 		std::sin(pitch),
 		std::cos(yaw) * cosPitch
 	};
-
-	const Vec3 target =
-		cameraEye + forward;
+	const Vec3 target = cameraEye + forward;
 
 	DxLib::SetCameraPositionAndTargetAndUpVec(
 		DxConv::ToVECTOR(cameraEye),
@@ -530,101 +313,29 @@ void BossTestScene::RenderDepth() const
 		VGet(0.0f, 1.0f, 0.0f)
 	);
 
-	// 深度テストを有効にする
-	SetUseZBuffer3D(TRUE);
-	SetWriteZBuffer3D(TRUE);
+	// モデルごとの頂点シェーダーを設定して、深度・法線を書き込む。
+	SetUseVertexShader(toonVertexShader_);
 
-	ClearDrawScreen();
-	ClearDrawScreenZBuffer();
-
-	// 深度＋法線を書き込む
-	SetUsePixelShader(depthPixelShader_);
-
-	// --------------------------------
-	// Stage / OBJ
-	// --------------------------------
-
-	SetUseVertexShader(vertexShader);
-
-	//stage.Draw();
-	//testModel_.Draw();
-
-	// --------------------------------
-	// 旧Boss
-	// --------------------------------
-
-	modelToonRenderer_.SetVertexShader(
-		ModelToonType::NMap4Frame
-	);
-
+	modelToonRenderer_.SetVertexShader(ModelToonType::NMap4Frame);
 	test.Draw();
 
-	// --------------------------------
-	// 新Boss
-	// --------------------------------
-
-	modelToonRenderer_.SetVertexShader(
-		ModelToonType::FourFrame
-	);
-
+	modelToonRenderer_.SetVertexShader(ModelToonType::FourFrame);
 	boss.Draw();
 
-	// --------------------------------
-	// 後片付け
-	// --------------------------------
-
-	SetUsePixelShader(-1);
-	SetUseVertexShader(-1);
-
-	SetUseZBuffer3D(FALSE);
-	SetWriteZBuffer3D(FALSE);
-
-	SetDrawZBuffer(-1);
-	SetDrawScreen(DX_SCREEN_BACK);
-
-	MV1SetUseOrigShader(FALSE);
-}
-
-void BossTestScene::RenderDepthView() const
-{
-	SetUseTextureToShader(
-		0,
-		depthBuffer_
-	);
-
-	SetUsePixelShader(
-		depthViewPixelShader_
-	);
-
-	DrawPrimitive2DToShader(
-		depthViewVertices_,
-		6,
-		DX_PRIMTYPE_TRIANGLELIST
-	);
-
-	SetUsePixelShader(-1);
-
-	SetUseTextureToShader(
-		0,
-		-1
-	);
+	outlineRenderer_.EndDepthPass();
 }
 
 void BossTestScene::RenderSceneBuffer() const
 {
-	SetDrawScreen(sceneBuffer_);
-	SetDrawZBuffer(sceneBuffer_);
+	outlineRenderer_.BeginScenePass();
 
 	const float cosPitch = std::cos(pitch);
-
 	const Vec3 forward{
 		std::sin(yaw) * cosPitch,
 		std::sin(pitch),
 		std::cos(yaw) * cosPitch
 	};
-
-	const Vec3 target =
-		cameraEye + forward;
+	const Vec3 target = cameraEye + forward;
 
 	DxLib::SetCameraPositionAndTargetAndUpVec(
 		DxConv::ToVECTOR(cameraEye),
@@ -632,80 +343,37 @@ void BossTestScene::RenderSceneBuffer() const
 		VGet(0.0f, 1.0f, 0.0f)
 	);
 
-	SetUseZBuffer3D(TRUE);
-	SetWriteZBuffer3D(TRUE);
-
-	ClearDrawScreen();
-	ClearDrawScreenZBuffer();
-
-	MV1SetUseOrigShader(TRUE);
-
-	ToonSettings* settings =
-		static_cast<ToonSettings*>(
-			GetBufferShaderConstantBuffer(toonConstantBuffer_)
-			);
-
+	ToonSettings* settings = static_cast<ToonSettings*>(
+		GetBufferShaderConstantBuffer(toonConstantBuffer_));
 	*settings = g_toonSettings;
-
 	UpdateShaderConstantBuffer(toonConstantBuffer_);
 
 	SetShaderConstantBuffer(
 		toonConstantBuffer_,
 		DX_SHADERTYPE_PIXEL,
-		ToonSettingsSlot
-	);
+		ToonSettingsSlot);
 
-	SetShaderConstantBuffer(
-		outlineConstantBuffer_,
-		DX_SHADERTYPE_VERTEX,
-		OutlineConstantBufferSlot
-	);
+	const int stageModelHandle = stage.GetModelHandle();
+	const int testModelHandle = RM().GetModel(testModel_.modelKey);
 
-	const int stageModelHandle =
-		stage.GetModelHandle();
+	SetModelCulling(stageModelHandle, DX_CULLING_LEFT);
+	SetModelCulling(testModelHandle, DX_CULLING_LEFT);
 
-	const int testModelHandle =
-		RM().GetModel(testModel_.modelKey);
-
-
-	// -----------------------------
-	// Toon
-	// -----------------------------
-
-	SetModelCulling(
-		stageModelHandle,
-		DX_CULLING_LEFT
-	);
-
-	SetModelCulling(
-		testModelHandle,
-		DX_CULLING_LEFT
-	);
-
-	SetUsePixelShader(pixelShader);
-	SetUseVertexShader(vertexShader);
+	SetUsePixelShader(toonPixelShader_);
+	SetUseVertexShader(toonVertexShader_);
 
 	stage.Draw();
 	testModel_.Draw();
 
-	// -----------------------------
-	// 旧Boss
-	// -----------------------------
-
 	modelToonRenderer_.Draw(
 		test.GetModelObject(),
-		ModelToonType::NMap4Frame
-	);
-
-	// -----------------------------
-	// 新Boss
-	// -----------------------------
+		ModelToonType::NMap4Frame);
 
 	modelToonRenderer_.Draw(
 		boss.GetModelObject(),
-		ModelToonType::FourFrame
-	);
+		ModelToonType::FourFrame);
 
+<<<<<<< Updated upstream
 	SetUsePixelShader(-1);
 	SetUseVertexShader(-1);
 
@@ -718,41 +386,8 @@ void BossTestScene::RenderSceneBuffer() const
 
 	SetDrawZBuffer(-1);
 	SetDrawScreen(DX_SCREEN_BACK);
+=======
+	outlineRenderer_.EndScenePass();
+>>>>>>> Stashed changes
 }
-void BossTestScene::RenderPostProcess() const
-{
-	OutlineSettings* outlineSettings =
-		static_cast<OutlineSettings*>(
-			GetBufferShaderConstantBuffer(
-				outlineSettingsConstantBuffer_
-			)
-			);
 
-	*outlineSettings = g_outlineSettings;
-
-	UpdateShaderConstantBuffer(
-		outlineSettingsConstantBuffer_
-	);
-
-	SetShaderConstantBuffer(
-		outlineSettingsConstantBuffer_,
-		DX_SHADERTYPE_PIXEL,
-		6
-	);
-
-	SetUseTextureToShader(0, sceneBuffer_);
-	SetUseTextureToShader(1, depthBuffer_);
-
-	SetUsePixelShader(postProcessPixelShader_);
-
-	DrawPrimitive2DToShader(
-		depthViewVertices_,
-		6,
-		DX_PRIMTYPE_TRIANGLELIST
-	);
-
-	SetUsePixelShader(-1);
-
-	SetUseTextureToShader(0, -1);
-	SetUseTextureToShader(1, -1);
-}
