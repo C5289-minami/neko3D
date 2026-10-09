@@ -343,12 +343,12 @@ void BossTestScene::Update(float deltaTime)
         const Vec3 right = Vec3::Cross(Vec3::Up(), forward).Normalized();
         Vec3 movement{};
 
-        if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_W)) movement += forward;
-        if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_S)) movement -= forward;
-        if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_D)) movement += right;
-        if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_A)) movement -= right;
-        if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_E)) movement += Vec3::Up();
-        if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_Q)) movement -= Vec3::Up();
+        if (DxLib::CheckHitKey(KEY_INPUT_W)) movement += forward;
+        if (DxLib::CheckHitKey(KEY_INPUT_S)) movement -= forward;
+        if (DxLib::CheckHitKey(KEY_INPUT_D)) movement += right;
+        if (DxLib::CheckHitKey(KEY_INPUT_A)) movement -= right;
+        if (DxLib::CheckHitKey(KEY_INPUT_E)) movement += Vec3::Up();
+        if (DxLib::CheckHitKey(KEY_INPUT_Q)) movement -= Vec3::Up();
 
         if (movement.LengthSq() > 0.0f)
         {
