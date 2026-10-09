@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "Boss.h"
 #include "BossBangSkill.h"
 #include "BossBiteSkill.h"
@@ -13,6 +15,7 @@
 #include "Player.h"
 #include "ModelToonRenderer.h"
 #include "Debug_camera.h"
+#include "ScreenSpaceOutlineRenderer.h"
 
 class BossTestScene final : public Scene
 {
@@ -26,13 +29,13 @@ public:
           biteSkill_(boss)
     {
     }
+
     void Init() override;
     void Update(float deltaTime) override;
     void Render() const override;
     DebugSceneControls GetDebugControls() override;
 
 private:
-
     Stage stage{};
     Boss boss{};
     BossBangSkill bangSkill_;
@@ -40,6 +43,7 @@ private:
     BossClapSkill clapSkill_;
     BossHairBallSkill hairBallSkill_;
     BossBiteSkill biteSkill_;
+
     int fontHandle{ -1 };
     Vec3 cameraEye{ 0.0f, 250.0f, -650.0f };
     float yaw{};
@@ -49,32 +53,19 @@ private:
     bool debugActorsPaused_{};
     std::string transformInitialStatus_;
 
-
-    // シェーダー
-    int pixelShader{};
-	int vertexShader{};
-    int outlinePixelShader{};
-    int outlineVertexShader{};
-    bool isShaderEnabled_ = true;     // シェーダーのON/OFFフラグ
-    bool shaderKeyWasDown_ = false;    // F2キーの入力判定用
-	ModelObject testModel_{ };
-    int outlineConstantBuffer_ = -1;
-	int toonConstantBuffer_ = -1;
+    // 繧ｷ繝ｼ繝ｳ蝗ｺ譛峨�ｮ繝医ぇ繝ｼ繝ｳ謠冗判
+    int toonPixelShader_{ -1 };
+    int toonVertexShader_{ -1 };
+    bool isShaderEnabled_ = true;
+    bool shaderKeyWasDown_ = false;
+    ModelObject testModel_{};
+    int toonConstantBuffer_{ -1 };
     Player test;
     ModelToonRenderer modelToonRenderer_{};
-    int depthPixelShader_ = -1;
-    int depthBuffer_ = -1;
-    void RenderDepth() const;
-    int depthViewPixelShader_ = -1;
 
-    VERTEX2DSHADER depthViewVertices_[6]{};
-    void RenderDepthView() const;
-    int sceneBuffer_ = -1;
+    // 蜈ｱ騾壹�ｮ繧ｹ繧ｯ繝ｪ繝ｼ繝ｳ遨ｺ髢薙い繧ｦ繝医Λ繧､繝ｳ謠冗判
+    ScreenSpaceOutlineRenderer outlineRenderer_{};
 
     void RenderSceneBuffer() const;
-    int postProcessPixelShader_ = -1;
-
-    void RenderPostProcess() const;
-    int outlineSettingsConstantBuffer_ = -1;
+    void RenderDepth() const;
 };
-

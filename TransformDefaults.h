@@ -22,9 +22,9 @@ namespace TransformDefaults
 
     // BEGIN_TRANSFORM(boss_test/player)
     inline constexpr ObjectTransform BossTestPlayer{
-        { 100.0f, 100.0f, 100.0f },
-        { 250.0f, 300.0f, 300.0f },
-        { 0.0f, 0.0f, 0.0f }
+        { 141.800003f, 100.0f, 100.0f },
+        { 250.0f, 205.0f, 300.0f },
+        { 0.0f, -0.129999995f, 0.0f }
     };
     // END_TRANSFORM(boss_test/player)
 

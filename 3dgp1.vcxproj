@@ -266,6 +266,7 @@
     <ClInclude Include="ResultScene.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="ScreenSpaceOutlineRenderer.h" />
     <ClInclude Include="Sound3D.h" />
     <ClInclude Include="SpriteStudioUI.h" />
     <ClInclude Include="SSAnimation.h" />
@@ -353,6 +354,7 @@
     <ClCompile Include="ResultScene.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="ScreenSpaceOutlineRenderer.cpp" />
     <ClCompile Include="Sound3D.cpp" />
     <ClCompile Include="SpriteStudioUI.cpp" />
     <ClCompile Include="SSPlayer\common\Animator\ssplayer_effect.cpp" />
