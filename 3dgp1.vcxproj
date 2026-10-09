@@ -255,6 +255,7 @@
     <ClInclude Include="PlayerAnimType.h" />
     <ClInclude Include="PlayerBaseState.h" />
     <ClInclude Include="PlayerIdleState.h" />
+    <ClInclude Include="PlayerKedukuroiState.h" />
     <ClInclude Include="PlayerInput.h" />
     <ClInclude Include="PlayerStateMachine.h" />
     <ClInclude Include="PlayerStateType.h" />
@@ -345,6 +346,7 @@
     <ClCompile Include="OutlineSettings.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerIdleState.cpp" />
+    <ClCompile Include="PlayerKedukuroiState.cpp" />
     <ClCompile Include="PlayerInput.cpp" />
     <ClCompile Include="PlayerStateMachine.cpp" />
     <ClCompile Include="PlayerWalkState.cpp" />

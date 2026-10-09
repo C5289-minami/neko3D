@@ -5,6 +5,7 @@
 // State
 #include "PlayerIdleState.h"
 #include "PlayerWalkState.h"
+#include "PlayerKedukuroiState.h"
 
 class Player;
 
@@ -24,9 +25,11 @@ private:
 
 	Player& player_;
 	
-	PlayerStateType currentType_{ PlayerStateType::None };
+	PlayerStateType currentType_{ PlayerStateType::Idle };
+	bool initialized_{ false };
 
 	PlayerIdleState idleState_;
 	PlayerWalkState walkState_;
+	PlayerKedukuroiState kedukuroiState_;
 	// ‘¼‚ð‚±‚±‚É’Ç‰Á
 };

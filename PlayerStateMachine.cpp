@@ -2,28 +2,31 @@
 
 PlayerStateMachine::PlayerStateMachine(Player& player)
     : player_(player),
-	currentType_(PlayerStateType::None),
+	currentType_(PlayerStateType::Idle),
 	idleState_(*this, player),
-	walkState_(*this, player)
+	walkState_(*this, player),
+	kedukuroiState_(*this, player)
 {
 
 }
 void PlayerStateMachine::Initialize()
 {
-	currentType_ = PlayerStateType::None;
+	initialized_ = false;
 
 	ChangeState(PlayerStateType::Idle);
 }
 
 void PlayerStateMachine::ChangeState(PlayerStateType type)
 {
-	if (currentType_ == type) return;
+	if (initialized_ && currentType_ == type) return;
 
 	State* newState = FindState(type);
 	if (!newState)return;
 
 	currentType_ = type;
+	initialized_ = true;
 	StateMachine::SwitchState(newState);
+
 }
 
 
@@ -35,9 +38,8 @@ State* PlayerStateMachine::FindState(PlayerStateType type)
         return &idleState_;
     case PlayerStateType::Walk:
         return &walkState_;
-    case PlayerStateType::Run:
-    case PlayerStateType::Jump:
-    case PlayerStateType::Landing:
+    case PlayerStateType::Kedukuroi:
+        return &kedukuroiState_;
     default:
         return nullptr;
     }

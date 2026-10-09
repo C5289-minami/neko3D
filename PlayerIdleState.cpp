@@ -15,12 +15,17 @@ void PlayerIdleState::Enter()
 	player_.StopMove();
 	player_.SetAnimation(PlayerAnimType::Idle, true);
 
-	DxPlus::Debug::SetString(L"PlayerIdleState::Enter");
+	DxPlus::Debug::SetFormatString(L"PlayerIdleState::Enter");
 }
 
 void PlayerIdleState::Tick(float)
 {
-	PlayerInput move = player_.GetInput();
+	const PlayerInput& move = player_.GetInput();
+	if (move.kedukuroiPressed)
+	{
+		stateMachine_.ChangeState(PlayerStateType::Kedukuroi);
+		return;
+	}
 	if(move.isMoving)
 	{
 		stateMachine_.ChangeState(PlayerStateType::Walk);
@@ -28,10 +33,10 @@ void PlayerIdleState::Tick(float)
 	}
 
 
-	DxPlus::Debug::SetString(L"PlayerIdleState::Tick");
+	DxPlus::Debug::SetFormatString(L"state:idle");
 }
 
 void PlayerIdleState::Exit()
 {
-	DxPlus::Debug::SetString(L"PlayerIdleState::Exit");
+	DxPlus::Debug::SetFormatString(L"PlayerIdleState::Exit");
 }
