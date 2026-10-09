@@ -138,13 +138,13 @@ void GameContext::Update(float deltaTime)
     if (Debug_camera.IsSceneViewActive() || debugActorsPaused_ ||
         (ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard))
     {
-        stage.UpdateAlphaModel(deltaTime, player.GetPosition());
+        stage.UpdateAlphaModel(deltaTime, player);
         return;
     }
 #endif
 
     player.Update(deltaTime, stage);
-    stage.UpdateAlphaModel(deltaTime, player.GetPosition());
+    stage.UpdateAlphaModel(deltaTime, player);
     boss.Update(deltaTime);
     playerCamera.Update(player.GetPosition(), boss.GetPosition(), deltaTime);
 }
