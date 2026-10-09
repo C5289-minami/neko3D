@@ -234,7 +234,7 @@ void BossTestScene::Update(float deltaTime)
 		}
 	}
 	//test.Update(deltaTime, stage);
-	stage.UpdateAlphaModel(deltaTime, test.GetPosition());
+	stage.UpdateAlphaModel(deltaTime, test);
 
 
 	Sound3D::SetListener(

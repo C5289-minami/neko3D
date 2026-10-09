@@ -8,26 +8,13 @@
 #include "Raycast.h"
 #include "Consts.h"
 
-#include <algorithm>
-#include <cmath>
-
 namespace
 {
     // 透過表示するステージモデルの大きさと、プレイヤー頭上の余白。
     float AlphaStageScale = 0.15f;
     float AlphaStageHeadClearance = 40.0f;
 
-    // プレイヤーが近いときは薄く、離れるほど不透明にする。
-    float AlphaStageMinOpacity = 0.4f;
-	float AlphaStageFadeStart = Const::PLAYER_RADIUS * 4.0f;//半径の4倍の距離　Playerの半径の4倍
-    float AlphaStageFadeEnd = Const::PLAYER_RADIUS;         
     float AlphaStageFadeSpeed = 2.4f;
-
-    // 値が[min, max]の範囲内なら0、範囲外なら最も近い端までの距離を返す。
-    float DistanceToInterval(float value, float minimum, float maximum)
-    {
-        return std::max({ minimum - value, value - maximum, 0.0f });
-    }
 }
 
 void Stage::Init()
@@ -96,40 +83,14 @@ void Stage::ResetAlphaModel(const Vec3& playerPosition)
         playerPosition.z - (minimum.z + maximum.z) * 0.5f
     };
 
-    // 以降の距離判定で使う、配置後のモデル範囲をワールド座標で保持する。
-    alphaBoundsMin_ = minimum + alphaModel_.model.position;
-    alphaBoundsMax_ = maximum + alphaModel_.model.position;
     alphaModelReady_ = true;
 }
 
-void Stage::UpdateAlphaModel(float deltaTime, const Vec3& playerPosition)
+void Stage::UpdateAlphaModel(float deltaTime, const Player& player)
 {
     if (!alphaModelReady_) return;
 
-    // 透過モデルは見た目のためだけに使い、当たり判定には通常モデルを使う。
-    // 各軸でモデルの範囲外に出た距離を求める。範囲内ならその軸の距離は0。
-    const float dx = DistanceToInterval(playerPosition.x, alphaBoundsMin_.x, alphaBoundsMax_.x);
-    const float dz = DistanceToInterval(playerPosition.z, alphaBoundsMin_.z, alphaBoundsMax_.z);
-    const float horizontalDistance = std::sqrt(dx * dx + dz * dz);
-
-    // プレイヤーの足元ではなく、頭の高さまでを使って上下方向の距離を判定する。
-    const float verticalDistance = DistanceToInterval(
-        playerPosition.y + Const::PLAYER_HEIGHT, alphaBoundsMin_.y, alphaBoundsMax_.y);
-
-    // 水平方向と垂直方向の距離から、透明度計算に使う距離を決める。
-    const float distance = std::max(horizontalDistance, verticalDistance);
-
-    // フェード範囲内の距離を0～1に変換する。
-    // 近いほどtは0に近く、遠いほど1に近くなる。
-    float t = std::clamp((distance - AlphaStageFadeEnd) /
-        (AlphaStageFadeStart - AlphaStageFadeEnd), 0.0f, 1.0f);
-
-    // Smoothstepで変化をなめらかにし、透明度が急に切り替わるのを防ぐ。
-    t = t * t * (3.0f - 2.0f * t);
-
-    // 近距離では最低不透明度、フェード範囲の外では完全不透明にする。
-    const float targetAlpha = AlphaStageMinOpacity + (1.0f - AlphaStageMinOpacity) * t;
-    alphaModel_.FadeTo(targetAlpha, AlphaStageFadeSpeed, deltaTime);
+    alphaModel_.FadeTo(player, AlphaStageFadeSpeed, deltaTime);
 }
 
 void Stage::DrawAlphaModel() const
