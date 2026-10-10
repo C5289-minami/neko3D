@@ -1,4 +1,6 @@
 #include "ToonSettings.h"
+#include "DxLib.h"
+#include <cmath>
 
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -28,6 +30,12 @@ bool ToonSettingsManager::Save(const std::string& filePath)
         g_toonSettings.shadow[0],
         g_toonSettings.shadow[1]
     };
+
+    json["LightDirection"] = {
+        g_toonSettings.LightDirection[0],
+        g_toonSettings.LightDirection[1],
+        g_toonSettings.LightDirection[2]
+	};
 
     std::ofstream file(filePath);
 
@@ -77,6 +85,31 @@ bool ToonSettingsManager::Load(const std::string& filePath)
         {
             g_toonSettings.shadow[i] =
                 json["shadow"][i];
+        }
+    }
+
+    if (json.contains("LightDirection"))
+    {
+        for (int i = 0; i < 3; ++i)
+        {
+            g_toonSettings.LightDirection[i] =
+                json["LightDirection"][i];
+        }
+
+        const float x = g_toonSettings.LightDirection[0];
+        const float y = g_toonSettings.LightDirection[1];
+        const float z = g_toonSettings.LightDirection[2];
+
+        const float length = std::sqrt(x * x + y * y + z * z);
+
+        // 有効な方向ベクトルならDxLibにも反映
+        if (length > 0.001f)
+        {
+            DxLib::SetLightDirection(VGet(
+                x / length,
+                y / length,
+                z / length
+            ));
         }
     }
 

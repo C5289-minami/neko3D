@@ -86,7 +86,7 @@ void BossTestScene::Init()
 {
 	DxLib::SetBackgroundColor(255, 178, 102);
 	//SetBackgroundColor(40, 40, 40);
-	DxLib::SetLightDirection(VGet(-0.3f, -1.0f, -0.5f));
+	DxLib::SetLightDirection(DxLib::GetLightDirection());
 	// DxLib::SetGlobalAmbientLight(DxLib::GetColorF(0.35f, 0.35f, 0.35f, 1.0f));
 
 
@@ -118,14 +118,29 @@ void BossTestScene::Init()
 	modelToonRenderer_.Init();
 	toonConstantBuffer_ = CreateShaderConstantBuffer(sizeof(ToonSettings));
 
-	ToonSettings* settings =
-		static_cast<ToonSettings*>(
-			GetBufferShaderConstantBuffer(toonConstantBuffer_)
-			);
+	{
+		ToonSettings* settings = static_cast<ToonSettings*>(
+			GetBufferShaderConstantBuffer(toonConstantBuffer_));
 
-	*settings = g_toonSettings;
+		if (settings == nullptr)
+		{
+			return;
+		}
 
-	UpdateShaderConstantBuffer(toonConstantBuffer_);
+		// 基本のToon設定を反映
+		*settings = g_toonSettings;
+
+		// ゲームで現在設定されているライト方向を取得
+		const VECTOR lightDirection = DxLib::GetLightDirection();
+
+		settings->LightDirection[0] = lightDirection.x;
+		settings->LightDirection[1] = lightDirection.y;
+		settings->LightDirection[2] = lightDirection.z;
+		settings->LightDirection[3] = 0.0f;
+
+		// シェーダーへ反映
+		UpdateShaderConstantBuffer(toonConstantBuffer_);
+	}
 
   shaderEffects_.Init(
 		DxPlus::CLIENT_WIDTH,
