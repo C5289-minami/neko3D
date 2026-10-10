@@ -7,36 +7,87 @@
 // SceneのInit処理等でプレイヤー初期化
 void TestScene::Init()
 {
-	// SS6Player再生インスタンスの生成例
-	m_ssPlayer = RM().GetSpriteStudioPlayer(ResourceKeys::SpriteStudio_TitleCharacter);
-	flipTestMode = 0;
-	if (m_ssPlayer)
-	{
-		m_ssPlayer->reset();
-		m_ssPlayer->setPosition(DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.6f);
-		m_ssPlayer->setScale(0.5f, 0.5f);
-		m_ssPlayer->update(0.0f);
-	}
-	gaugeAnim = RM().GetSpriteStudioPlayer(ResourceKeys::SpriteStudio_Gauge);
-	if (gaugeAnim)
-	{
-		gaugeAnim->reset();
-		gaugeAnim->setPosition(DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.1f);
-		gaugeAnim->setScale(0.5f, 0.5f);
-		gaugeAnim->update(0.0f);
+    // キャラクター
+    m_ssPlayer = RM().GetSpriteStudioPlayer(
+        ResourceKeys::SpriteStudio_TitleCharacter);
 
-		gauge.SetPlayer(*gaugeAnim); 
-	}
+    flipTestMode = 0;
+
+    if (m_ssPlayer)
+    {
+        m_ssPlayer->reset();
+
+        // アニメーション一覧を自動取得
+        const auto animations =
+            RM().GetSpriteStudioAnimationNames(
+                ResourceKeys::SpriteStudio_TitleCharacter);
+
+        // 「/walk」で終わるアニメーションを探す
+        for (std::size_t i = 0; i < animations.size(); ++i)
+        {
+            const std::string& name = animations[i];
+            constexpr char suffix[] = "/walk";
+            constexpr std::size_t suffixLength = sizeof(suffix) - 1;
+
+            if (name.size() >= suffixLength &&
+                name.compare(
+                    name.size() - suffixLength,
+                    suffixLength,
+                    suffix) == 0)
+            {
+                // 見つかったインデックスで再生
+                RM().PlaySpriteStudioAnimation(
+                    ResourceKeys::SpriteStudio_TitleCharacter,
+                    i,
+                    0,      // 無限ループ
+                    1.0f);  // 通常速度
+
+                break;
+            }
+        }
+
+        m_ssPlayer->setPosition(
+            DxPlus::CLIENT_WIDTH * 0.5f,
+            DxPlus::CLIENT_HEIGHT * 0.6f);
+
+        m_ssPlayer->setScale(0.5f, 0.5f);
+        m_ssPlayer->update(0.0f);
+    }
+
+    // ゲージ
+    gaugeAnim = RM().GetSpriteStudioPlayer(
+        ResourceKeys::SpriteStudio_Gauge);
+
+    if (gaugeAnim)
+    {
+        gaugeAnim->reset();
+
+        // barパックの「bar」アニメーションを再生
+        RM().PlaySpriteStudioAnimation(
+            ResourceKeys::SpriteStudio_Gauge,
+            1,      // 0: Setup、1: bar
+            0,      // 無限ループ
+            1.0f);  // 通常速度
+
+        gaugeAnim->setPosition(
+            DxPlus::CLIENT_WIDTH * 0.5f,
+            DxPlus::CLIENT_HEIGHT * 0.5f);
+
+        gaugeAnim->setScale(0.5f, 0.5f);
+        gaugeAnim->update(0.0f);
+
+        gauge.SetPlayer(*gaugeAnim);
+    }
+
     StartFadeIn();
 }
-
 void TestScene::Update(float deltaTime)
 {
 	if (DxLib::CheckHitKey(KEY_INPUT_F2))
 	{
 		SetNextScene(SM().GetScene(SceneID::Title));
 		StartFadeOut();
-       return;
+		return;
 	}
 
 	if (DxLib::CheckHitKey(KEY_INPUT_1)) flipTestMode = 0;
@@ -64,10 +115,10 @@ void TestScene::Update(float deltaTime)
 	if (!gaugeAnim) return;
 	//gaugeAnim->update(deltaTime);
 	static float progress = 0.0f;
-	progress += deltaTime * 0.1f; // 進捗率を時間経過で増加させる例
+	progress += deltaTime; // 進捗率を時間経過で増加させる例
 	if (progress > 1.0f) progress = 0.0f; // 進捗率が1を超えたらリセット
 	gauge.Update(deltaTime, progress); // 進捗率を0.5に設定
-   gaugeAnim->update(0.0f);
+	gaugeAnim->update(0.0f);
 }
 
 void TestScene::Render() const
