@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<SpriteStudioCellMap version="1.00.00">
+    <name>monster_0000</name>
+    <exportPath></exportPath>
+    <imagePath>monster_0000.png</imagePath>
+    <pixelSize>512 256</pixelSize>
+    <overrideTexSettings>0</overrideTexSettings>
+    <wrapMode>clamp</wrapMode>
+    <filterMode>linear</filterMode>
+    <imagePathAtImport></imagePathAtImport>
+    <packInfoFilePath></packInfoFilePath>
+    <texPackSettings>
+        <maxSize>4096 4096</maxSize>
+        <forcePo2>1</forcePo2>
+        <forceSquare>0</forceSquare>
+        <margin>0</margin>
+        <padding>1</padding>
+    </texPackSettings>
+    <cells>
+        <cell>
+            <name>monster_00</name>
+            <pos>2 2</pos>
+            <size>46 96</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>monster_01</name>
+            <pos>50 2</pos>
+            <size>46 96</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>monster_02</name>
+            <pos>98 2</pos>
+            <size>46 96</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>monster_03</name>
+            <pos>146 2</pos>
+            <size>46 96</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>monster_04</name>
+            <pos>194 2</pos>
+            <size>46 96</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>monster_05</name>
+            <pos>242 2</pos>
+            <size>46 96</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>monster_06</name>
+            <pos>290 2</pos>
+            <size>46 96</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>monster_07</name>
+            <pos>338 2</pos>
+            <size>46 96</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>monster_08</name>
+            <pos>386 2</pos>
+            <size>46 96</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>monster_09</name>
+            <pos>434 2</pos>
+            <size>46 96</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>monster_10</name>
+            <pos>2 100</pos>
+            <size>46 96</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>monster_11</name>
+            <pos>50 100</pos>
+            <size>46 96</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>monster_12</name>
+            <pos>98 100</pos>
+            <size>46 96</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>monster_13</name>
+            <pos>146 100</pos>
+            <size>46 96</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>monster_14</name>
+            <pos>194 100</pos>
+            <size>46 96</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>monster_15</name>
+            <pos>242 100</pos>
+            <size>46 96</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>monster_16</name>
+            <pos>290 100</pos>
+            <size>46 96</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+    </cells>
+</SpriteStudioCellMap>

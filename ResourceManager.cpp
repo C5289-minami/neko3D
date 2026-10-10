@@ -33,8 +33,8 @@ void ResourceManager::LoadAll()
         "character_template1", "./Data/Images/character_template1.ssbp",
         "character_template_2head/walk");
     LoadSpriteStudioPlayer(ResourceKeys::SpriteStudio_Gauge,
-        "character_template1", "./Data/Images/character_template1.ssbp",
-        "character_template_2head/stance");
+        "UI", "./DevData/UI/UI.ssbp",
+        "bar/bar");
 
     SetCreate3DSoundFlag(TRUE);
 	LoadSound(ResourceKeys::Sound_BossBite, L"./Data/Sounds/Explosion.mp3");
@@ -144,8 +144,12 @@ int ResourceManager::LoadModel(const std::wstring& key, const std::wstring& path
     return h;
 }
 
-ss::Player* ResourceManager::LoadSpriteStudioPlayer(const std::wstring& key,
-    const std::string& dataKey, const std::string& path, const std::string& animation)
+ss::Player* ResourceManager::LoadSpriteStudioPlayer(
+	const std::wstring& key,  // ① ゲーム内で使う登録識別名      // なんでもいい
+    const std::string& dataKey, // ② スプスタデータの登録識別名  // なんでもいい
+    const std::string& path,    // ③ 読み込むファイルのパス
+    const std::string& animation // ④ 再生するアニメーション名
+)
 {
     if (!ssResMan)
     {

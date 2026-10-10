@@ -21,7 +21,7 @@ void TestScene::Init()
 	if (gaugeAnim)
 	{
 		gaugeAnim->reset();
-		gaugeAnim->setPosition(DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.1f);
+		gaugeAnim->setPosition(DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.5f);
 		gaugeAnim->setScale(0.5f, 0.5f);
 		gaugeAnim->update(0.0f);
 
@@ -64,7 +64,7 @@ void TestScene::Update(float deltaTime)
 	if (!gaugeAnim) return;
 	//gaugeAnim->update(deltaTime);
 	static float progress = 0.0f;
-	progress += deltaTime * 0.1f; // 進捗率を時間経過で増加させる例
+	progress += deltaTime; // 進捗率を時間経過で増加させる例
 	if (progress > 1.0f) progress = 0.0f; // 進捗率が1を超えたらリセット
 	gauge.Update(deltaTime, progress); // 進捗率を0.5に設定
    gaugeAnim->update(0.0f);
