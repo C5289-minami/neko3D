@@ -48,9 +48,9 @@ public:
     {
         renderer_.SetOutlineEnabled(
             enabled_ && settings_.outlineEnabled);
-        renderer_.SetFullScreenEffectEnabled(
-            enabled_ && settings_.fullScreenEffectEnabled);
-
+      /*  renderer_.SetFullScreenEffectEnabled(
+            enabled_ && settings_.fullScreenEffectEnabled);*/
+		renderer_.SetFullScreenEffectEnabled(false); // 全画面エフェクトは無効化
         renderer_.Render(
             [&] { sceneDraw(enabled_ && settings_.toonEnabled); },
             static_cast<DepthDraw&&>(depthDraw));

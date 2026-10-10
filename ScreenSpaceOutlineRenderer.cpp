@@ -203,13 +203,9 @@ void ScreenSpaceOutlineRenderer::RenderPostProcess() const
         return;
     }
 
-    if (outlineEnabled_ && depthBuffer_ < 0)
-    {
-        return;
-    }
-
     if (outlineEnabled_ &&
-        (postProcessPixelShader_ < 0 ||
+        (depthBuffer_ < 0 ||
+            postProcessPixelShader_ < 0 ||
             settingsConstantBuffer_ < 0))
     {
         return;
@@ -223,37 +219,60 @@ void ScreenSpaceOutlineRenderer::RenderPostProcess() const
 
     if (outlineEnabled_ && fullScreenEffectEnabled_)
     {
-        // アウトライン → 全画面エフェクト
+        // ① シーン画像にハーフトーンなどの画面効果を適用
+        // sceneBuffer_ → outlineBuffer_
         if (outlineBuffer_ < 0)
         {
             return;
         }
 
-        RenderOutlinePass(outlineBuffer_);
-        RenderFullScreenPass(outlineBuffer_);
+        RenderFullScreenPass(
+            sceneBuffer_,
+            outlineBuffer_
+        );
+
+        // ② 効果適用後の画像にアウトラインを描画
+        // outlineBuffer_ → バックバッファ
+        RenderOutlinePass(
+            outlineBuffer_,
+            DX_SCREEN_BACK
+        );
     }
     else if (outlineEnabled_)
     {
         // アウトラインだけ
-        RenderOutlinePass(DX_SCREEN_BACK);
+        RenderOutlinePass(
+            sceneBuffer_,
+            DX_SCREEN_BACK
+        );
     }
     else if (fullScreenEffectEnabled_)
     {
         // 全画面エフェクトだけ
-        RenderFullScreenPass(sceneBuffer_);
+        RenderFullScreenPass(
+            sceneBuffer_,
+            DX_SCREEN_BACK
+        );
     }
     else
     {
-        // 両方無効：シーン画像をそのまま表示
+        // 両方無効
         SetDrawScreen(DX_SCREEN_BACK);
         SetDrawZBuffer(-1);
+
         DrawGraph(0, 0, sceneBuffer_, FALSE);
     }
 }
-
 void ScreenSpaceOutlineRenderer::RenderOutlinePass(
+    int sourceTexture,
     int destinationScreen) const
 {
+    if (sourceTexture < 0 ||
+        destinationScreen < 0 && destinationScreen != DX_SCREEN_BACK)
+    {
+        return;
+    }
+
     auto* settings = static_cast<OutlineSettings*>(
         GetBufferShaderConstantBuffer(settingsConstantBuffer_));
 
@@ -271,16 +290,19 @@ void ScreenSpaceOutlineRenderer::RenderOutlinePass(
     SetShaderConstantBuffer(
         settingsConstantBuffer_,
         DX_SHADERTYPE_PIXEL,
-        OutlineSettingsSlot);
+        OutlineSettingsSlot
+    );
 
-    SetUseTextureToShader(0, sceneBuffer_);
+    // 入力画像を指定できるようにする
+    SetUseTextureToShader(0, sourceTexture);
     SetUseTextureToShader(1, depthBuffer_);
     SetUsePixelShader(postProcessPixelShader_);
 
     DrawPrimitive2DToShader(
         const_cast<VERTEX2DSHADER*>(fullscreenVertices_),
         6,
-        DX_PRIMTYPE_TRIANGLELIST);
+        DX_PRIMTYPE_TRIANGLELIST
+    );
 
     SetUsePixelShader(-1);
     SetUseTextureToShader(0, -1);
@@ -288,7 +310,6 @@ void ScreenSpaceOutlineRenderer::RenderOutlinePass(
 
     SetDrawScreen(DX_SCREEN_BACK);
 }
-
 bool ScreenSpaceOutlineRenderer::IsInitialized() const noexcept
 {
     return depthPixelShader_ >= 0 &&
@@ -329,7 +350,8 @@ void ScreenSpaceOutlineRenderer::RenderFullScreenShader() const
     SetUseTextureToShader(1, -1);
 }
 void ScreenSpaceOutlineRenderer::RenderFullScreenPass(
-    int sourceTexture) const
+    int sourceTexture,
+    int destinationScreen) const
 {
     if (sourceTexture < 0 ||
         fullScreenPixelShader_ < 0)
@@ -337,7 +359,7 @@ void ScreenSpaceOutlineRenderer::RenderFullScreenPass(
         return;
     }
 
-    SetDrawScreen(DX_SCREEN_BACK);
+    SetDrawScreen(destinationScreen);
     SetDrawZBuffer(-1);
 
     SetUseTextureToShader(0, sourceTexture);
@@ -346,12 +368,15 @@ void ScreenSpaceOutlineRenderer::RenderFullScreenPass(
     DrawPrimitive2DToShader(
         const_cast<VERTEX2DSHADER*>(fullscreenVertices_),
         6,
-        DX_PRIMTYPE_TRIANGLELIST);
+        DX_PRIMTYPE_TRIANGLELIST
+    );
 
     SetUsePixelShader(-1);
     SetUseTextureToShader(0, -1);
     SetUseTextureToShader(1, -1);
-}
+
+    SetDrawScreen(DX_SCREEN_BACK);
+}   
 void ScreenSpaceOutlineRenderer::CreateFullscreenVertices()
 {
     const float width = static_cast<float>(width_);
