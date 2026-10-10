@@ -28,8 +28,8 @@ void ResourceManager::LoadAll()
         L"./Data/Fonts/Bitcount/static/Bitcount-Light.ttf");
 
     // モデルの読み込み
-    LoadModel(ResourceKeys::Model_Stage,      L"./Data/Models/field.mv1");
-    LoadModel(ResourceKeys::Model_StageAlpha, L"./Data/Models/field.mv1");
+    LoadModel(ResourceKeys::Model_Stage,      L"./Data/Models/field_kari.mv1");
+    LoadModel(ResourceKeys::Model_StageAlpha, L"./Data/Models/field_kari.mv1");
     LoadModel(ResourceKeys::Model_Paladin,    L"./Data/Models/Paladin.mv1");
     LoadModel(ResourceKeys::Model_Boss,       L"./DevData/Models/boss_test.mv1");
     LoadModel(ResourceKeys::Model_Test,       L"./Data/Models/Sword.mv1");

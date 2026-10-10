@@ -250,6 +250,22 @@ void BossTestScene::Update(float deltaTime)
 	}
 	//test.Update(deltaTime, stage);
 	stage.UpdateAlphaModel(deltaTime, test);
+	// --- F2 でシェーダーON/OFF切り替え ---
+	static bool shaderToggleWasDown = false;
+	const bool shaderToggleDown = DxLib::CheckHitKey(KEY_INPUT_F2) != 0;
+
+	if (shaderToggleDown && !shaderToggleWasDown)
+	{
+		auto& settings = shaderEffects_.GetSettings();
+
+		const bool newState = !settings.toonEnabled;
+
+		settings.toonEnabled = newState;
+		settings.outlineEnabled = newState;
+		settings.fullScreenEffectEnabled = newState;
+	}
+
+	shaderToggleWasDown = shaderToggleDown;
 
 
 	Sound3D::SetListener(
@@ -263,6 +279,16 @@ void BossTestScene::Render() const
 {
 	ApplyCamera();
 
+	if (!shaderEffects_.GetSettings().toonEnabled)
+	{
+		SetUsePixelShader(-1);
+		SetUseVertexShader(-1);
+		stage.Draw();
+		boss.Draw();
+		test.Draw();
+		testModel_.Draw();
+		return;
+	}
  shaderEffects_.Render(
 		[this](bool toonEnabled) { RenderSceneBuffer(toonEnabled); },
 		[this] { RenderDepth(); }
