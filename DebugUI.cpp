@@ -425,6 +425,51 @@ void DebugUI::Draw(GameContext& ctx, const DebugSceneControls& controls)
         {
             ToonSettingsManager::Reset();
         }
+        bool halftoneShadow = g_toonSettings.shadow[2] > 0.5f;
+
+        if (ImGui::Checkbox(
+            u8"影をハーフトーンで表現",
+            &halftoneShadow))
+        {
+            g_toonSettings.shadow[2] =
+                halftoneShadow ? 1.0f : 0.0f;
+        }ImGui::Separator();
+        ImGui::Text(u8"ハーフトーン設定");
+
+        // ハーフトーン ON/OFF
+        bool halftoneEnabled = g_toonSettings.shadow[2] > 0.5f;
+
+        if (ImGui::Checkbox(
+            u8"影をトーンで表現",
+            &halftoneEnabled))
+        {
+            g_toonSettings.shadow[2] =
+                halftoneEnabled ? 1.0f : 0.0f;
+        }
+
+        // トーンの色
+        ImGui::ColorEdit3(
+            u8"トーンの色",
+            g_toonSettings.halftoneColor
+        );
+
+        // 大きさ：数値が大きいほどドットが大きく、間隔も広がる
+        ImGui::SliderFloat(
+            u8"トーンの大きさ",
+            &g_toonSettings.halftoneSettings[0],
+            3.0f,
+            20.0f,
+            u8"%.1f px"
+        );
+
+        // 不透明度：0 = 透明、1 = 完全に不透明
+        ImGui::SliderFloat(
+            u8"トーンの不透明度",
+            &g_toonSettings.halftoneSettings[1],
+            0.0f,
+            1.0f,
+            u8"%.2f"
+        );
 
         ImGui::End();
     }

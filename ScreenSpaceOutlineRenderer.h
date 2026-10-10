@@ -117,7 +117,13 @@ private:
 	bool outlineEnabled_ = true;
 	bool fullScreenEffectEnabled_ = false;
 
-	// 各エフェクトの描画処理
-	void RenderOutlinePass(int destinationScreen) const;
-	void RenderFullScreenPass(int sourceTexture) const;
+	void RenderOutlinePass(
+		int sourceTexture,
+		int destinationScreen
+	) const;
+
+	void RenderFullScreenPass(
+		int sourceTexture,
+		int destinationScreen
+	) const;
 };

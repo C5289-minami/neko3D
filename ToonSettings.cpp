@@ -36,6 +36,19 @@ bool ToonSettingsManager::Save(const std::string& filePath)
         g_toonSettings.LightDirection[1],
         g_toonSettings.LightDirection[2]
 	};
+    json["HalftoneColor"] = {
+    g_toonSettings.halftoneColor[0],
+    g_toonSettings.halftoneColor[1],
+    g_toonSettings.halftoneColor[2],
+    g_toonSettings.halftoneColor[3]
+    };
+
+    json["HalftoneSettings"] = {
+        g_toonSettings.halftoneSettings[0],
+        g_toonSettings.halftoneSettings[1],
+        g_toonSettings.halftoneSettings[2],
+        g_toonSettings.halftoneSettings[3]
+    };
 
     std::ofstream file(filePath);
 
@@ -112,6 +125,25 @@ bool ToonSettingsManager::Load(const std::string& filePath)
             ));
         }
     }
+
+    if (json.contains("HalftoneColor"))
+    {
+        for (int i = 0; i < 4; ++i)
+        {
+            g_toonSettings.halftoneColor[i] =
+                json["HalftoneColor"][i];
+        }
+	}
+
+    if (json.contains("HalftoneSettings"))
+    {
+        for (int i = 0; i < 4; ++i)
+        {
+            g_toonSettings.halftoneSettings[i] =
+                json["HalftoneSettings"][i];
+        }
+	}
+
 
     return true;
 }

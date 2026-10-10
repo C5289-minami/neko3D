@@ -54,17 +54,12 @@ float4 main(PS_INPUT input) : SV_TARGET
         radius + 0.04f,
         distanceToCenter
     );
-    // この明るさ以下にだけドットを表示
-    const float dotThreshold = 0.45f;
-
-// かなり暗い部分だけにドットを表示
-    float shadowMask = 1.0f - smoothstep(
-    0.10f,
-    0.22f,
-    luminance
-);
+    
+   // Toonシェーダーが影と判定した領域だけにドットを表示
+    float shadowMask = 1.0f - saturate(color.a);
 
     dots *= shadowMask;
+    
     // 黒いインクを重ねる
     const float dotStrength = 0.75f;
 

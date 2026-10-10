@@ -12,6 +12,17 @@ struct ToonSettings
     float shadow[4] = { 0.45f, 0.6f, 0.0f, 0.0f };
 
     float LightDirection[4] = {};
+
+    // ハーフトーンの色
+    float halftoneColor[4] = {
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
+
+    // x：トーンの大きさ
+    // y：トーンの不透明度
+    float halftoneSettings[4] = {
+        8.0f, 0.85f, 0.0f, 0.0f
+    };
 };
 
 inline ToonSettings g_toonSettings;
