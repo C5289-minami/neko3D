@@ -13,6 +13,7 @@
 #include "backends/imgui_impl_dx11.h"
 
 #include <cmath>
+#include <algorithm>
 
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
@@ -228,67 +229,6 @@ void DebugUI::Draw(GameContext& ctx, const DebugSceneControls& controls)
         ImGui::End();
     }
 
-	// トゥーン設定
-    {
-        ImGui::Begin("Toon Settings");
-
-        ImGui::ColorEdit3(
-            u8"影色",
-            g_toonSettings.shadowColor
-        );
-
-        ImGui::SliderFloat(
-            u8"明るい境界",
-            &g_toonSettings.thresholds[0],
-            0.0f, 1.0f
-        );
-
-        ImGui::SliderFloat(
-            u8"通常境界",
-            &g_toonSettings.thresholds[1],
-            0.0f, 1.0f
-        );
-
-        ImGui::SliderFloat(
-            u8"暗い境界",
-            &g_toonSettings.thresholds[2],
-            0.0f, 1.0f
-        );
-
-        ImGui::SliderFloat(
-            u8"影の暗さ",
-            &g_toonSettings.shadow[0],
-            0.0f, 1.0f
-        );
-
-        ImGui::SliderFloat(
-            u8"影色の強さ",
-            &g_toonSettings.shadow[1],
-            0.0f, 1.0f
-        );
-
-        if (ImGui::Button(u8"保存"))
-        {
-            ToonSettingsManager::Save();
-        }
-
-        ImGui::SameLine();
-
-        if (ImGui::Button(u8"読み込み"))
-        {
-            ToonSettingsManager::Load();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button(u8"初期値に戻す"))
-        {
-            ToonSettingsManager::Reset();
-        }
-
-
-
-        ImGui::End();
-    }
-
     // Outline Settings
     {
         ImGui::Begin("Outline Settings");
@@ -339,6 +279,151 @@ void DebugUI::Draw(GameContext& ctx, const DebugSceneControls& controls)
         if (ImGui::Button(u8"初期値に戻す"))
         {
             OutlineSettingsManager::Reset();
+        }
+
+        ImGui::End();
+    }
+    // トゥーン設定
+    {
+        ImGui::Begin("Toon Settings");
+
+        // =========================
+        // ライト設定
+        // =========================
+        static bool lightAngleInitialized = false;
+        static float lightAzimuth = 0.0f;
+        static float lightElevation = 45.0f;
+
+        constexpr float RadToDeg = 180.0f / DX_PI_F;
+        constexpr float DegToRad = DX_PI_F / 180.0f;
+
+        // 初回に現在のライト方向を角度へ変換
+        if (!lightAngleInitialized)
+        {
+            const VECTOR direction = DxLib::GetLightDirection();
+
+            const float length = std::sqrt(
+                direction.x * direction.x +
+                direction.y * direction.y +
+                direction.z * direction.z
+            );
+
+            if (length > 0.001f)
+            {
+                const float x = -direction.x / length;
+                const float y = -direction.y / length;
+                const float z = -direction.z / length;
+
+                lightAzimuth = std::atan2(x, z) * RadToDeg;
+                lightElevation =
+                    std::asin(std::clamp(y, -1.0f, 1.0f)) * RadToDeg;
+            }
+
+            lightAngleInitialized = true;
+        }
+
+        ImGui::Text(u8"ライトの向き");
+
+        bool lightChanged = ImGui::SliderFloat(
+            u8"方位角",
+            &lightAzimuth,
+            -180.0f,
+            180.0f,
+            u8"%.1f 度"
+        );
+
+        lightChanged |= ImGui::SliderFloat(
+            u8"高さ角",
+            &lightElevation,
+            -89.0f,
+            89.0f,
+            u8"%.1f 度"
+        );
+
+        if (lightChanged)
+        {
+            const float azimuth = lightAzimuth * DegToRad;
+            const float elevation = lightElevation * DegToRad;
+
+            const float x = std::cos(elevation) * std::sin(azimuth);
+            const float y = std::sin(elevation);
+            const float z = std::cos(elevation) * std::cos(azimuth);
+
+            DxLib::SetLightDirection(VGet(-x, -y, -z));
+        }
+
+        // Toonシェーダー用のライト方向を同期
+        const VECTOR currentLight = DxLib::GetLightDirection();
+
+        g_toonSettings.LightDirection[0] = currentLight.x;
+        g_toonSettings.LightDirection[1] = currentLight.y;
+        g_toonSettings.LightDirection[2] = currentLight.z;
+        g_toonSettings.LightDirection[3] = 0.0f;
+
+        ImGui::Separator();
+
+        // =========================
+        // Toonの影設定
+        // =========================
+        ImGui::ColorEdit3(
+            u8"影色",
+            g_toonSettings.shadowColor
+        );
+
+        ImGui::SliderFloat(
+            u8"明るい境界",
+            &g_toonSettings.thresholds[0],
+            0.0f, 1.0f
+        );
+
+        ImGui::SliderFloat(
+            u8"通常境界",
+            &g_toonSettings.thresholds[1],
+            0.0f, 1.0f
+        );
+
+        ImGui::SliderFloat(
+            u8"暗い境界",
+            &g_toonSettings.thresholds[2],
+            0.0f, 1.0f
+        );
+
+        float shadowDarkness = 1.0f - g_toonSettings.shadow[0];
+
+        if (ImGui::SliderFloat(
+            u8"影の暗さ",
+            &shadowDarkness,
+            0.0f, 1.0f))
+        {
+            g_toonSettings.shadow[0] = 1.0f - shadowDarkness;
+        }
+
+        ImGui::SliderFloat(
+            u8"影色の強さ",
+            &g_toonSettings.shadow[1],
+            0.0f, 1.0f
+        );
+
+        if (ImGui::Button(u8"保存"))
+        {
+            ToonSettingsManager::Save();
+        }
+
+        ImGui::SameLine();
+            
+        if (ImGui::Button(u8"読み込み"))
+        {
+            if (ToonSettingsManager::Load())
+            {
+                lightAngleInitialized = false;
+            }
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button(u8"初期値に戻す"))
+        {
+            ToonSettingsManager::Reset();
         }
 
         ImGui::End();

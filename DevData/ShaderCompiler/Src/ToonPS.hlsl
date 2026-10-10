@@ -5,6 +5,7 @@ cbuffer ToonSettings : register(b5)
     float4 ShadowColor;
     float4 Thresholds;
     float4 Shadow;
+    float4 LightDirection;
 };
 
 struct PS_INPUT
@@ -25,12 +26,12 @@ float4 main(PS_INPUT input) : SV_TARGET
     input.TexCoords0
 );
     
-    float3 lightDir = normalize(float3(-0.3f, -1.0f, -0.5f));
+    float3 lightDir = normalize(-LightDirection.xyz);
 
     float brightness = dot(
-        normalize(input.Normal),
-            -lightDir
-    );
+    normalize(input.Normal),
+    lightDir
+);
 
     if (brightness > Thresholds.x)
     {

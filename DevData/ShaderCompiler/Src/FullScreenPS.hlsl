@@ -59,8 +59,8 @@ float4 main(PS_INPUT input) : SV_TARGET
 
 // かなり暗い部分だけにドットを表示
     float shadowMask = 1.0f - smoothstep(
-    0.20f,
-    0.32f,
+    0.10f,
+    0.22f,
     luminance
 );
 
