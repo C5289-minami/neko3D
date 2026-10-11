@@ -14,30 +14,30 @@
 // ===============================
 
 /*==============================
-// // アウトラインだけ
-outlineRenderer_.SetOutlineEnabled(true);
-outlineRenderer_.SetFullScreenEffectEnabled(false);
-
-// 全画面エフェクトだけ
-outlineRenderer_.SetOutlineEnabled(false);
-outlineRenderer_.SetFullScreenEffectEnabled(true);
-
-// 両方無効
-outlineRenderer_.SetOutlineEnabled(false);
-outlineRenderer_.SetFullScreenEffectEnabled(false);
+* // アウトラインだけ
+* outlineRenderer_.SetOutlineEnabled(true);
+* outlineRenderer_.SetFullScreenEffectEnabled(false);
+* 
+* // 全画面エフェクトだけ
+* outlineRenderer_.SetOutlineEnabled(false);
+* outlineRenderer_.SetFullScreenEffectEnabled(true);
+* 
+* // 両方無効
+* outlineRenderer_.SetOutlineEnabled(false);
+* outlineRenderer_.SetFullScreenEffectEnabled(false);
 ================================= */
 
 
 // スクリーン空間アウトライン描画を管理するクラス
-class ScreenSpaceOutlineRenderer final
+class OutlineRenderer final
 {
 public:
-	ScreenSpaceOutlineRenderer() = default;
-	~ScreenSpaceOutlineRenderer();
+	OutlineRenderer() = default;
+	~OutlineRenderer();
 
-	ScreenSpaceOutlineRenderer(const ScreenSpaceOutlineRenderer&) = delete;
-	ScreenSpaceOutlineRenderer& operator=(
-		const ScreenSpaceOutlineRenderer&
+	OutlineRenderer(const OutlineRenderer&) = delete;
+	OutlineRenderer& operator=(
+		const OutlineRenderer&
 		) = delete;
 
 	bool Init(int width, int height);

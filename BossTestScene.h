@@ -62,7 +62,7 @@ private:
     ModelToonRenderer modelToonRenderer_{};
 
     // 共通のスクリーン空間アウトライン描画
-  ShaderEffectController shaderEffects_{};
+    ShaderEffectController shaderEffects_{};
 
     void RenderSceneBuffer(bool toonEnabled) const;
     void RenderDepth() const;

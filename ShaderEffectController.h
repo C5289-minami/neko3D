@@ -1,7 +1,10 @@
 #pragma once
 // shader effect controller
 
-#include "ScreenSpaceOutlineRenderer.h"
+// 設定値を取得・変更するためのAPIのような役割。
+// アウトラインの太さを変更したり、トゥーンの影の強さを設定したりする。
+
+#include "OutlineRenderer.h"
 
 struct ShaderEffectSettings
 {
@@ -57,7 +60,7 @@ public:
     }
 
 private:
- mutable ScreenSpaceOutlineRenderer renderer_{};
+ mutable OutlineRenderer renderer_{};
     ShaderEffectSettings settings_{};
     bool enabled_ = true;
 };

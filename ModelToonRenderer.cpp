@@ -12,12 +12,12 @@ void ModelToonRenderer::Init()
 
     vertexShader4Frame_ =
         LoadVertexShader(
-            L"./DevData/ShaderCompiler/Bin/ModelToonVS_4Frame.vso"
+            L"./DevData/ShaderCompiler/Bin/ModelVS.vso"
         );
 
     vertexShaderNMap4Frame_ =
         LoadVertexShader(
-            L"./DevData/ShaderCompiler/Bin/ModelToonVS_NMap4Frame.vso"
+            L"./DevData/ShaderCompiler/Bin/ModelVS_NMap.vso"
         );
 }
 

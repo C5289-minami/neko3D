@@ -1,3 +1,7 @@
+
+
+// 画面全体にドットを描画するピクセルシェーダー
+
 Texture2D g_SceneTexture : register(t0);
 SamplerState g_Sampler : register(s0);
 

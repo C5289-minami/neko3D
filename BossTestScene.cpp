@@ -113,8 +113,8 @@ void BossTestScene::Init()
 	testModel_.modelKey = ResourceKeys::Model_Test;
 	testModel_.scale = { 500.0f, 500.0f, 500.0f };
 
-	toonVertexShader_ = LoadVertexShader(L"./DevData/ShaderCompiler/Bin/ToonVS.vso");
-	toonPixelShader_ = LoadPixelShader(L"./DevData/ShaderCompiler/Bin/ToonPS.pso");
+	toonVertexShader_ = LoadVertexShader(L"./DevData/ShaderCompiler/Bin/ModelVS.vso");
+	toonPixelShader_ = LoadPixelShader(L"./DevData/ShaderCompiler/Bin/ModelToonPS.pso");
 	modelToonRenderer_.Init();
 	toonConstantBuffer_ = CreateShaderConstantBuffer(sizeof(ToonSettings));
 
@@ -251,6 +251,24 @@ void BossTestScene::Update(float deltaTime)
 	//test.Update(deltaTime, stage);
 	stage.UpdateAlphaModel(deltaTime, test);
 
+	// --- F2 でシェーダーON/OFF切り替え ---
+	static bool shaderToggleWasDown = false;
+	const bool shaderToggleDown = DxLib::CheckHitKey(KEY_INPUT_F2) != 0;
+
+	if (shaderToggleDown && !shaderToggleWasDown)
+	{
+		auto& settings = shaderEffects_.GetSettings();
+
+		const bool newState = !settings.toonEnabled;
+
+		settings.toonEnabled = newState;
+		settings.outlineEnabled = newState;
+		settings.fullScreenEffectEnabled = newState;
+
+		shaderEffects_.SetEnabled(newState);
+	}
+
+	shaderToggleWasDown = shaderToggleDown;
 
 	Sound3D::SetListener(
 		cameraEye,
@@ -263,10 +281,17 @@ void BossTestScene::Render() const
 {
 	ApplyCamera();
 
- shaderEffects_.Render(
-		[this](bool toonEnabled) { RenderSceneBuffer(toonEnabled); },
-		[this] { RenderDepth(); }
-	);
+	if(shaderEffects_.IsEnabled())
+	{
+		shaderEffects_.Render(
+			[this](bool toonEnabled) { RenderSceneBuffer(toonEnabled); },
+			[this] { RenderDepth(); }
+		);
+	}
+	else
+	{
+		RenderSceneBuffer(false);
+	}
 
 
 const int white = DxLib::GetColor(255, 255, 255);

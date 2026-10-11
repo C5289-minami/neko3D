@@ -1,6 +1,6 @@
-#include "ModelToonVS_Common.hlsli"
-
-// ModelToonVS_4Frame
+#include "ModelVS_Common.hlsli"
+// ModelVS
+//　通常Modelの頂点シェーダー
 
 struct VS_INPUT
 {

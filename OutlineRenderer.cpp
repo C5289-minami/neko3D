@@ -1,4 +1,4 @@
-﻿#include "ScreenSpaceOutlineRenderer.h"
+﻿#include "OutlineRenderer.h"
 
 #include "OutlineSettings.h"
 
@@ -14,12 +14,12 @@ namespace
 		L"./DevData/ShaderCompiler/Bin/FullScreenPS.pso";
 }
 
-ScreenSpaceOutlineRenderer::~ScreenSpaceOutlineRenderer()
+OutlineRenderer::~OutlineRenderer()
 {
     Release();
 }
 
-bool ScreenSpaceOutlineRenderer::Init(int width, int height)
+bool OutlineRenderer::Init(int width, int height)
 {
     Release();
 
@@ -92,7 +92,7 @@ bool ScreenSpaceOutlineRenderer::Init(int width, int height)
     return true;
 }
 
-void ScreenSpaceOutlineRenderer::Release() noexcept
+void OutlineRenderer::Release() noexcept
 {
     if (settingsConstantBuffer_ >= 0)
     {
@@ -139,7 +139,7 @@ void ScreenSpaceOutlineRenderer::Release() noexcept
     height_ = 0;
 }
 
-void ScreenSpaceOutlineRenderer::BeginScenePass() const
+void OutlineRenderer::BeginScenePass() const
 {
     if (sceneBuffer_ < 0)
     {
@@ -156,7 +156,7 @@ void ScreenSpaceOutlineRenderer::BeginScenePass() const
     ClearDrawScreenZBuffer();
 }
 
-void ScreenSpaceOutlineRenderer::EndScenePass() const
+void OutlineRenderer::EndScenePass() const
 {
     SetUsePixelShader(-1);
     SetUseVertexShader(-1);
@@ -167,7 +167,7 @@ void ScreenSpaceOutlineRenderer::EndScenePass() const
     SetDrawScreen(DX_SCREEN_BACK);
 }
 
-void ScreenSpaceOutlineRenderer::BeginDepthPass() const
+void OutlineRenderer::BeginDepthPass() const
 {
     if (depthBuffer_ < 0)
     {
@@ -185,7 +185,7 @@ void ScreenSpaceOutlineRenderer::BeginDepthPass() const
     SetUsePixelShader(depthPixelShader_);
 }
 
-void ScreenSpaceOutlineRenderer::EndDepthPass() const
+void OutlineRenderer::EndDepthPass() const
 {
     SetUsePixelShader(-1);
     SetUseVertexShader(-1);
@@ -196,7 +196,7 @@ void ScreenSpaceOutlineRenderer::EndDepthPass() const
     SetDrawScreen(DX_SCREEN_BACK);
 }
 
-void ScreenSpaceOutlineRenderer::RenderPostProcess() const
+void OutlineRenderer::RenderPostProcess() const
 {
     if (sceneBuffer_ < 0)
     {
@@ -263,7 +263,7 @@ void ScreenSpaceOutlineRenderer::RenderPostProcess() const
         DrawGraph(0, 0, sceneBuffer_, FALSE);
     }
 }
-void ScreenSpaceOutlineRenderer::RenderOutlinePass(
+void OutlineRenderer::RenderOutlinePass(
     int sourceTexture,
     int destinationScreen) const
 {
@@ -310,7 +310,7 @@ void ScreenSpaceOutlineRenderer::RenderOutlinePass(
 
     SetDrawScreen(DX_SCREEN_BACK);
 }
-bool ScreenSpaceOutlineRenderer::IsInitialized() const noexcept
+bool OutlineRenderer::IsInitialized() const noexcept
 {
     return depthPixelShader_ >= 0 &&
         postProcessPixelShader_ >= 0 &&
@@ -321,7 +321,7 @@ bool ScreenSpaceOutlineRenderer::IsInitialized() const noexcept
         settingsConstantBuffer_ >= 0;
 }
 
-void ScreenSpaceOutlineRenderer::RenderFullScreenShader() const
+void OutlineRenderer::RenderFullScreenShader() const
 {
     if (sceneBuffer_ < 0 || fullScreenPixelShader_ < 0)
     {
@@ -349,7 +349,7 @@ void ScreenSpaceOutlineRenderer::RenderFullScreenShader() const
     SetUseTextureToShader(0, -1);
     SetUseTextureToShader(1, -1);
 }
-void ScreenSpaceOutlineRenderer::RenderFullScreenPass(
+void OutlineRenderer::RenderFullScreenPass(
     int sourceTexture,
     int destinationScreen) const
 {
@@ -377,7 +377,7 @@ void ScreenSpaceOutlineRenderer::RenderFullScreenPass(
 
     SetDrawScreen(DX_SCREEN_BACK);
 }   
-void ScreenSpaceOutlineRenderer::CreateFullscreenVertices()
+void OutlineRenderer::CreateFullscreenVertices()
 {
     const float width = static_cast<float>(width_);
     const float height = static_cast<float>(height_);
