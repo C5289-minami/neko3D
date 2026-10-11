@@ -20,11 +20,15 @@ namespace
 void Stage::Init()
 {
     // 通常のステージモデルをリソース管理側から取得する。
-    modelHandle = RM().GetModel(ResourceKeys::Model_Stage);
-    if (modelHandle < 0) return;
 
+    // これ複製してるけど最終的に要らんからね
+    int modelHandle = DxLib::MV1DuplicateModel(RM().GetModel(ResourceKeys::Model_Stage));
+	stageModel_.modelKey = ResourceKeys::Model_Stage;
+    if (modelHandle < 0) return;
     // 地面との当たり判定に使うコリジョン情報を生成する。
     MV1SetupCollInfo(modelHandle, -1, 8, 8, 8);
+
+
 }
 
 void Stage::Reset()
@@ -38,10 +42,8 @@ void Stage::Reset()
 
 void Stage::Draw() const
 {
-    if (modelHandle < 0) return;
-
-    // 通常のステージは、プレイヤーとの距離に関係なく描画する。
-    MV1DrawModel(modelHandle);
+	stageModel_.Draw();
+	MV1DrawModel(RM().GetModel(ResourceKeys::Model_Stage));
 }
 
 void Stage::ResetAlphaModel(const Vec3& playerPosition)

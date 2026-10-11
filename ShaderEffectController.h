@@ -10,7 +10,6 @@ struct ShaderEffectSettings
 {
     bool toonEnabled = true;
     bool outlineEnabled = false;
-    bool fullScreenEffectEnabled = false;
 };
 
 class ShaderEffectController final
@@ -50,14 +49,20 @@ public:
     void Render(SceneDraw&& sceneDraw, DepthDraw&& depthDraw) const
     {
         renderer_.SetOutlineEnabled(
-            enabled_ && settings_.outlineEnabled);
-      /*  renderer_.SetFullScreenEffectEnabled(
-            enabled_ && settings_.fullScreenEffectEnabled);*/
-		renderer_.SetFullScreenEffectEnabled(false); // 全画面エフェクトは無効化
+            enabled_ && settings_.outlineEnabled
+        );
+
+        // フルスクリーンエフェクトは現在使用しない
+        renderer_.SetFullScreenEffectEnabled(false);
+
         renderer_.Render(
-            [&] { sceneDraw(enabled_ && settings_.toonEnabled); },
-            static_cast<DepthDraw&&>(depthDraw));
+            [&] {
+                sceneDraw(enabled_ && settings_.toonEnabled);
+            },
+            static_cast<DepthDraw&&>(depthDraw)
+        );
     }
+
 
 private:
  mutable OutlineRenderer renderer_{};
