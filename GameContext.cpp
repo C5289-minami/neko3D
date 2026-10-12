@@ -143,7 +143,9 @@ void GameContext::Update(float deltaTime)
     }
 #endif
 
-    player.Update(deltaTime, stage);
+    // 足場の中心 ボスが動いてもこの位置
+    const Vec3 stageCenterPosition{ 0.0f, 0.0f, 0.0f };
+    player.Update(deltaTime, stage, stageCenterPosition);
     stage.UpdateAlphaModel(deltaTime, player);
     boss.Update(deltaTime);
     playerCamera.Update(player.GetPosition(), boss.GetPosition(), deltaTime);

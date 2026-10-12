@@ -35,6 +35,7 @@ void Player::Reset()
 	SetTransform(TransformDefaults::GamePlayer);
 
 
+	moveInput_ = {};
 	velocity_ = { 0.0f, 0.0f, 0.0f };
 
 	// 空中から開始し、ステージへのレイキャストで接地させる。
@@ -53,8 +54,6 @@ void Player::Update(float deltaTime)
 {
 	input_.Update();
 
-	TurnTowards(input_.moveDir, deltaTime);
-
 	if (input_.jumpPressed)
 	{
 		JumpAction();
@@ -62,11 +61,84 @@ void Player::Update(float deltaTime)
 
 	stateMachine_.Tick(deltaTime);
 
-	// 水平方向の移動
-	position_.x += velocity_.x * deltaTime;
-	position_.z += velocity_.z * deltaTime;
+	// 中心がどっちにあるか調べる。高さはここでは考えない
+	Vec3 forward = movementCenter_ - position_;
+	forward.y = 0.0f;
+	const float radius = forward.Length();
+	const Vec3 input = moveInput_.Normalized();
 
- // ステージを考慮した更新処理で、プレイヤーを床面に合わせる。
+	bool canMove = true;
+	if (radius < 0.001f) 
+	{
+		canMove = false;
+	}
+	if (input.x == 0.0f && input.z == 0.0f) // 何も押していない
+	{
+		canMove = false;
+	}
+
+
+	if (canMove)
+	{
+		forward = forward.Normalized();
+
+		// 中心への向きを90度回すと、右向きになる
+		const Vec3 right{ forward.z, 0.0f, -forward.x };
+
+		Vec3 moveDir{};
+		const float moveDis = Const::PLAYER_MOVE_SPEED * deltaTime;
+		float nextRadius = radius;
+
+		if (input.z > 0.0f) // Wkey
+		{
+			const float forwardInput = input.z;
+			moveDir += forward * forwardInput;
+			nextRadius -= forwardInput * moveDis;
+		}
+
+		if (input.z < 0.0f) // Skey
+		{
+			const float backwardInput = -input.z;
+			moveDir -= forward * backwardInput;
+			nextRadius += backwardInput * moveDis;
+		}
+
+		// 中心を通り越さないように、距離は1までにする
+		if (nextRadius < 1.0f)
+		{
+			nextRadius = 1.0f;
+		}
+
+		// W/Sで近づいた分、離れた分だけ動かす
+		const float forwardDistance = radius - nextRadius;
+		Vec3 nextPosition = position_ + forward * forwardDistance;
+
+		if (input.x > 0.0f) // Dkey moveto right
+		{
+			const float rightInput = input.x;
+			moveDir += right * rightInput;
+			nextPosition += right * (rightInput * moveDis);
+		}
+
+		if (input.x < 0.0f) // Akey moveto left
+		{
+			const float leftI = -input.x;
+			moveDir -= right * leftI;
+			nextPosition -= right * (leftI * moveDis);
+		}
+
+		// 横に動くだけだと外側にずれるので、中心からの距離を合わせ直す
+		Vec3 fromCenter = nextPosition - movementCenter_;
+		fromCenter.y = 0.0f;
+		fromCenter = fromCenter.Normalized();
+		position_.x = movementCenter_.x + fromCenter.x * nextRadius;
+		position_.z = movementCenter_.z + fromCenter.z * nextRadius;
+
+		// 猫の顔も、進む方向に向ける
+		TurnTowards(moveDir, deltaTime);
+	}
+
+	// 立ち止まっていても、重力やジャンプは動かす
 	if (gravityEnabled_)
 	{
 		velocity_.y -= Const::GRAVITY * deltaTime;
@@ -84,8 +156,9 @@ void Player::Update(float deltaTime)
 	animation_.Update(deltaTime);
 }
 
-void Player::Update(float deltaTime, const Stage& stage)
+void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCenter)
 {
+	movementCenter_ = movementCenter;
 	const float previousY = GetPosition().y;
 
 	Update(deltaTime);
@@ -146,29 +219,16 @@ void Player::SetAnimation(PlayerAnimType::Type type, bool loop)
 }
 
 
-void Player::SetMoveDirection(const Vec3& moveDir, float speed)
+void Player::SetMoveDirection(const Vec3& moveDir)
 {
-	Vec3 move
-	{
-		moveDir.x,
-		0.0f,
-		moveDir.z
-	};
-
-	if (move.LengthSq() > 0.0f)
-	{
-		move = move.Normalized() * speed;
-	}
-
-	velocity_.x = move.x;
-	velocity_.z = move.z;
+	// 押している方向を覚えておく。実際に動かすのはUpdate
+	moveInput_ = { moveDir.x, 0.0f, moveDir.z };
 }
 
 
 void Player::StopMove()
 {
-	velocity_.x = 0.0f;
-	velocity_.z = 0.0f;
+	moveInput_ = {};
 }
 
 
