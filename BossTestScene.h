@@ -48,21 +48,23 @@ private:
     Vec3 cameraEye{ 0.0f, 250.0f, -650.0f };
     float yaw{};
     float pitch{};
+    // Debug
     bool skillKeyWasDown_{};
     Debug_camera debugCamera_;
     bool debugActorsPaused_{};
     std::string transformInitialStatus_;
 
-    // シーン固有のトゥーン描画
-    int toonPixelShader_{ -1 };
-    int toonVertexShader_{ -1 };
+    // テスト用モデル
     ModelObject testModel_{};
-    int toonConstantBuffer_{ -1 };
-    Player test;
+
+    // プレイヤー
+    Player player_;
+
+    // モデルのトゥーン描画を管理する
     ModelToonRenderer modelToonRenderer_{};
 
     // 共通のスクリーン空間アウトライン描画
-  ShaderEffectController shaderEffects_{};
+    ShaderEffectController shaderEffects_{};
 
     void RenderSceneBuffer(bool toonEnabled) const;
     void RenderDepth() const;

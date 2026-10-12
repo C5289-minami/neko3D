@@ -1,4 +1,7 @@
-#include "ModelToonVS_Common.hlsli"
+#include "ModelVS_Common.hlsli"
+// ModelVS_Bone
+
+//　BoneありのModelの頂点シェーダー
 
 cbuffer TestBuffer : register(b3)
 {

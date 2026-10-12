@@ -1,13 +1,15 @@
 #pragma once
 // shader effect controller
 
-#include "ScreenSpaceOutlineRenderer.h"
+// 設定値を取得・変更するためのAPIのような役割。
+// アウトラインの太さを変更したり、トゥーンの影の強さを設定したりする。
+
+#include "OutlineRenderer.h"
 
 struct ShaderEffectSettings
 {
     bool toonEnabled = true;
     bool outlineEnabled = false;
-    bool fullScreenEffectEnabled = false;
 };
 
 class ShaderEffectController final
@@ -47,17 +49,20 @@ public:
     void Render(SceneDraw&& sceneDraw, DepthDraw&& depthDraw) const
     {
         renderer_.SetOutlineEnabled(
-            enabled_ && settings_.outlineEnabled);
-      /*  renderer_.SetFullScreenEffectEnabled(
-            enabled_ && settings_.fullScreenEffectEnabled);*/
-		renderer_.SetFullScreenEffectEnabled(false); // 全画面エフェクトは無効化
+            enabled_ && settings_.outlineEnabled
+        );
+
         renderer_.Render(
-            [&] { sceneDraw(enabled_ && settings_.toonEnabled); },
-            static_cast<DepthDraw&&>(depthDraw));
+            [&] {
+                sceneDraw(enabled_ && settings_.toonEnabled);
+            },
+            static_cast<DepthDraw&&>(depthDraw)
+        );
     }
 
+
 private:
- mutable ScreenSpaceOutlineRenderer renderer_{};
+ mutable OutlineRenderer renderer_{};
     ShaderEffectSettings settings_{};
     bool enabled_ = true;
 };

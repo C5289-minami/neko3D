@@ -1,3 +1,8 @@
+// PostProcessPS.hlsl
+
+// アウトラインと法線エッジを描画するためのピクセルシェーダ
+
+
 Texture2D g_SceneTexture : register(t0);
 Texture2D g_DepthTexture : register(t1);
 
