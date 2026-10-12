@@ -3,18 +3,32 @@
 if not exist "Bin" mkdir "Bin"
 
 rem --- 頂点シェーダー ---
-ShaderCompiler.exe /Tvs_4_0 /FoBin\ToonVS.vso Src\ToonVS.hlsl
-ShaderCompiler.exe /Tvs_4_0 /FoBin\OutlineVS.vso Src\OutlineVS.hlsl
-ShaderCompiler.exe /Tvs_4_0 /FoBin\ModelToonVS_4Frame.vso Src\ModelToonVS_4Frame.hlsl
-ShaderCompiler.exe /Tvs_4_0 /FoBin\ModelToonVS_NMap4Frame.vso Src\ModelToonVS_NMap4Frame.hlsl
+ShaderCompiler.exe /Tvs_4_0 /FoBin\ModelVS.vso Src\ModelVS.hlsl
+if errorlevel 1 goto :error
+
+ShaderCompiler.exe /Tvs_4_0 /FoBin\ModelVS_Bone.vso Src\ModelVS_Bone.hlsl
+if errorlevel 1 goto :error
 
 rem --- ピクセルシェーダー ---
-ShaderCompiler.exe /Tps_4_0 /FoBin\ToonPS.pso Src\ToonPS.hlsl
-ShaderCompiler.exe /Tps_4_0 /FoBin\OutlinePS.pso Src\OutlinePS.hlsl
 ShaderCompiler.exe /Tps_4_0 /FoBin\ModelToonPS.pso Src\ModelToonPS.hlsl
-ShaderCompiler.exe /Tps_4_0 /FoBin\DepthPS.pso Src\DepthPS.hlsl
-ShaderCompiler.exe /Tps_4_0 /FoBin\DepthViewPS.pso Src\DepthViewPS.hlsl
-ShaderCompiler.exe /Tps_4_0 /FoBin\PostProcessPS.pso Src\PostProcessPS.hlsl
+if errorlevel 1 goto :error
 
+ShaderCompiler.exe /Tps_4_0 /FoBin\DepthPS.pso Src\DepthPS.hlsl
+if errorlevel 1 goto :error
+
+ShaderCompiler.exe /Tps_4_0 /FoBin\PostProcessPS.pso Src\PostProcessPS.hlsl
+if errorlevel 1 goto :error
+
+ShaderCompiler.exe /Tps_4_0 /FoBin\FullScreenPS.pso Src\FullScreenPS.hlsl
+if errorlevel 1 goto :error
+
+echo.
 echo Shader Compilation Completed!
 pause
+exit /b 0
+
+:error
+echo.
+echo Shader Compilation Failed!
+pause
+exit /b 1

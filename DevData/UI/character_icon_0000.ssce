@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<SpriteStudioCellMap version="1.00.00">
+    <name>character_icon_0000</name>
+    <exportPath></exportPath>
+    <imagePath>character_icon_0000.png</imagePath>
+    <pixelSize>512 512</pixelSize>
+    <overrideTexSettings>0</overrideTexSettings>
+    <wrapMode>clamp</wrapMode>
+    <filterMode>linear</filterMode>
+    <imagePathAtImport></imagePathAtImport>
+    <packInfoFilePath></packInfoFilePath>
+    <texPackSettings>
+        <maxSize>4096 4096</maxSize>
+        <forcePo2>1</forcePo2>
+        <forceSquare>0</forceSquare>
+        <margin>0</margin>
+        <padding>1</padding>
+    </texPackSettings>
+    <cells>
+        <cell>
+            <name>character_icon_00</name>
+            <pos>2 2</pos>
+            <size>90 116</size>
+            <pivot>-0.000000 -0.008621</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>character_icon_01</name>
+            <pos>370 234</pos>
+            <size>90 112</size>
+            <pivot>-0.000000 0.017857</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>character_icon_02</name>
+            <pos>2 236</pos>
+            <size>90 112</size>
+            <pivot>-0.000000 0.008929</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>character_icon_03</name>
+            <pos>94 236</pos>
+            <size>90 112</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>character_icon_04</name>
+            <pos>186 236</pos>
+            <size>90 112</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>character_icon_05</name>
+            <pos>278 2</pos>
+            <size>90 114</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>character_icon_06</name>
+            <pos>370 2</pos>
+            <size>90 114</size>
+            <pivot>-0.000000 -0.008772</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>character_icon_07</name>
+            <pos>278 118</pos>
+            <size>90 114</size>
+            <pivot>-0.000000 -0.017544</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>character_icon_08</name>
+            <pos>370 348</pos>
+            <size>90 112</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>character_icon_09</name>
+            <pos>370 118</pos>
+            <size>90 114</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>character_icon_10</name>
+            <pos>2 120</pos>
+            <size>90 114</size>
+            <pivot>-0.000000 -0.008772</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>character_icon_11</name>
+            <pos>2 350</pos>
+            <size>90 112</size>
+            <pivot>-0.000000 0.017857</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>character_icon_12</name>
+            <pos>94 350</pos>
+            <size>90 112</size>
+            <pivot>-0.000000 0.008929</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>character_icon_13</name>
+            <pos>94 120</pos>
+            <size>90 114</size>
+            <pivot>-0.000000 0.008772</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>character_icon_14</name>
+            <pos>186 120</pos>
+            <size>90 114</size>
+            <pivot>-0.000000 0.008772</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>character_icon_15</name>
+            <pos>278 234</pos>
+            <size>90 114</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>character_icon_16</name>
+            <pos>94 2</pos>
+            <size>90 116</size>
+            <pivot>-0.000000 -0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>character_icon_17</name>
+            <pos>186 2</pos>
+            <size>90 116</size>
+            <pivot>-0.000000 -0.008621</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+    </cells>
+</SpriteStudioCellMap>

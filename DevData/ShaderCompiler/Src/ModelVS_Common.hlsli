@@ -1,3 +1,6 @@
+
+// Modelの頂点シェーダー共通定数バッファ
+
 struct DX_D3D11_VS_CONST_BUFFER_BASE
 {
     float4 AntiViewportMatrix[4];
