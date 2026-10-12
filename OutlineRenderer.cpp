@@ -18,10 +18,6 @@ namespace
     // 深度・法線から輪郭を検出し、シーン画像に合成するシェーダー
     constexpr const wchar_t* PostProcessShaderPath =
         L"./DevData/ShaderCompiler/Bin/PostProcessPS.pso";
-
-    // 画像全体にエフェクトを適用するシェーダー
-    constexpr const wchar_t* FullScreenPixelShaderPath =
-        L"./DevData/ShaderCompiler/Bin/FullScreenPS.pso";
 }
 
 
@@ -63,45 +59,30 @@ bool OutlineRenderer::Init(int width, int height)
 
     depthPixelShader_ = LoadPixelShader(DepthShaderPath);
     postProcessPixelShader_ = LoadPixelShader(PostProcessShaderPath);
-    fullScreenPixelShader_ = LoadPixelShader(FullScreenPixelShaderPath);
-
+    
 
     // --------------------------------------------------------
-    // ② 描画用の画面バッファーを作成する
-    // --------------------------------------------------------
+  // ② 深度・法線用バッファーを作成する
+  // --------------------------------------------------------
 
-    // これから作る画面を、4チャンネル・32ビット浮動小数点形式にする。
-    // 深度・法線の情報を精度よく保存するための設定。
-    //
-    // 注意：
-    // この設定を戻すまでの MakeScreen() に適用される。
-    // 現在のコードでは depthBuffer_ と sceneBuffer_ の両方が
-    // この設定で作成される。
+  // 法線や深度を高精度で保存するため、浮動小数点形式にする
     SetDrawValidFloatTypeGraphCreateFlag(TRUE);
     SetCreateDrawValidGraphChannelNum(4);
     SetCreateGraphChannelBitDepth(32);
 
-    // 深度・法線情報を保存する画面
     depthBuffer_ = MakeScreen(width_, height_, TRUE);
 
-    // 通常のシーン画像を保存する画面
-    sceneBuffer_ = MakeScreen(width_, height_, TRUE);
+    // --------------------------------------------------------
+    // ③ 通常の画面バッファーを作成する
+    // --------------------------------------------------------
 
-
-    // これ以降に作る画面へ設定が影響しないよう、元に戻す。
+    // 以降の画面作成には浮動小数点形式の設定を適用しない
     SetDrawValidFloatTypeGraphCreateFlag(FALSE);
     SetCreateDrawValidGraphChannelNum(0);
     SetCreateGraphChannelBitDepth(0);
 
-
-    // --------------------------------------------------------
-    // ③ アウトライン適用後の画像を一時保存する画面
-    // --------------------------------------------------------
-
-    // この画面は上の浮動小数点設定を解除した後に作成している。
-    // アウトラインと全画面エフェクトを両方使う際、
-    // 全画面エフェクトを適用した途中結果を保存する。
-    outlineBuffer_ = MakeScreen(width_, height_, TRUE);
+    // 通常のシーン画像
+    sceneBuffer_ = MakeScreen(width_, height_, TRUE);
 
 
     // --------------------------------------------------------
@@ -132,10 +113,8 @@ bool OutlineRenderer::Init(int width, int height)
     // 必要なリソースが一つでも作成できなかった場合は失敗。
     if (depthPixelShader_ < 0 ||
         postProcessPixelShader_ < 0 ||
-        fullScreenPixelShader_ < 0 ||
         sceneBuffer_ < 0 ||
         depthBuffer_ < 0 ||
-        outlineBuffer_ < 0 ||
         settingsConstantBuffer_ < 0)
     {
         Release();
@@ -144,28 +123,7 @@ bool OutlineRenderer::Init(int width, int height)
 
 
     // --------------------------------------------------------
-    // ⑥ 定数バッファーに初期設定を格納する
-    // --------------------------------------------------------
-
-    auto* settings = static_cast<OutlineSettings*>(
-        GetBufferShaderConstantBuffer(settingsConstantBuffer_)
-        );
-
-    if (settings == nullptr)
-    {
-        Release();
-        return false;
-    }
-
-    // 設定データをコピーする。
-    *settings = g_outlineSettings;
-
-    // CPU側で変更した設定をシェーダーへ反映する。
-    UpdateShaderConstantBuffer(settingsConstantBuffer_);
-
-
-    // --------------------------------------------------------
-    // ⑦ 全画面描画用の頂点を作成する
+    // ６ 全画面描画用の頂点を作成する
     // --------------------------------------------------------
 
     CreateFullscreenVertices();
@@ -217,19 +175,6 @@ void OutlineRenderer::Release() noexcept
         depthBuffer_ = -1;
     }
 
-    // 全画面エフェクト用シェーダー
-    if (fullScreenPixelShader_ >= 0)
-    {
-        DeleteShader(fullScreenPixelShader_);
-        fullScreenPixelShader_ = -1;
-    }
-
-    // アウトライン適用後の一時バッファー
-    if (outlineBuffer_ >= 0)
-    {
-        DeleteGraph(outlineBuffer_);
-        outlineBuffer_ = -1;
-    }
 
     // 画面サイズも初期状態へ戻す。
     width_ = 0;
@@ -365,98 +310,30 @@ void OutlineRenderer::EndDepthPass() const
 
 void OutlineRenderer::RenderPostProcess() const
 {
-    // シーン画像がなければ何もできない。
+	// sceneBuffer_ が無効なら描画しない。
     if (sceneBuffer_ < 0)
     {
         return;
     }
 
-    // アウトラインを使う場合には、深度・法線バッファーと
-    // アウトライン用シェーダー、設定バッファーが必要。
-    if (outlineEnabled_ &&
-        (depthBuffer_ < 0 ||
+
+    if (outlineEnabled_)
+    {
+        // アウトラインを適用する。
+        if (depthBuffer_ < 0 ||
             postProcessPixelShader_ < 0 ||
-            settingsConstantBuffer_ < 0))
-    {
-        return;
-    }
-
-    // 全画面エフェクトを使う場合には、対応するシェーダーが必要。
-    if (fullScreenEffectEnabled_ &&
-        fullScreenPixelShader_ < 0)
-    {
-        return;
-    }
-
-
-    // --------------------------------------------------------
-    // ケース① アウトラインと全画面エフェクトの両方を使う
-    // --------------------------------------------------------
-
-    if (outlineEnabled_ && fullScreenEffectEnabled_)
-    {
-        // 先にシーン画像へ全画面エフェクトを適用する。
-        //
-        // 入力：sceneBuffer_
-        // 出力：outlineBuffer_
-        //
-        // 元画像を直接上書きせず、別の画面に結果を保存する。
-        if (outlineBuffer_ < 0)
+            settingsConstantBuffer_ < 0)
         {
             return;
         }
 
-        RenderFullScreenPass(
-            sceneBuffer_,
-            outlineBuffer_
-        );
-
-        // 次に、全画面エフェクト適用後の画像へ輪郭を合成する。
-        //
-        // 入力：outlineBuffer_ と depthBuffer_
-        // 出力：バックバッファー
-        RenderOutlinePass(
-            outlineBuffer_,
-            DX_SCREEN_BACK
-        );
+        RenderOutlinePass(sceneBuffer_, DX_SCREEN_BACK);
     }
-
-    // --------------------------------------------------------
-    // ケース② アウトラインだけを使う
-    // --------------------------------------------------------
-
-    else if (outlineEnabled_)
-    {
-        // シーン画像と深度・法線を使って輪郭を描画する。
-        RenderOutlinePass(
-            sceneBuffer_,
-            DX_SCREEN_BACK
-        );
-    }
-
-    // --------------------------------------------------------
-    // ケース③ 全画面エフェクトだけを使う
-    // --------------------------------------------------------
-
-    else if (fullScreenEffectEnabled_)
-    {
-        // シーン画像に全画面エフェクトを適用する。
-        RenderFullScreenPass(
-            sceneBuffer_,
-            DX_SCREEN_BACK
-        );
-    }
-
-    // --------------------------------------------------------
-    // ケース④ 両方とも使わない
-    // --------------------------------------------------------
-
     else
     {
-        // 加工せず、シーン画像をそのまま画面に表示する。
+		// アウトラインを適用しない場合は、sceneBuffer_ をそのまま描画する。
         SetDrawScreen(DX_SCREEN_BACK);
         SetDrawZBuffer(-1);
-
         DrawGraph(0, 0, sceneBuffer_, FALSE);
     }
 }
@@ -555,89 +432,6 @@ void OutlineRenderer::RenderOutlinePass(
     SetDrawScreen(DX_SCREEN_BACK);
 }
 
-
-// ============================================================
-// IsInitialized()
-//
-// 初期化に必要なリソースが揃っているかを調べる。
-// ============================================================
-
-bool OutlineRenderer::IsInitialized() const noexcept
-{
-    return depthPixelShader_ >= 0 &&
-        postProcessPixelShader_ >= 0 &&
-        fullScreenPixelShader_ >= 0 &&
-        sceneBuffer_ >= 0 &&
-        depthBuffer_ >= 0 &&
-        outlineBuffer_ >= 0 &&
-        settingsConstantBuffer_ >= 0;
-}
-
-
-// ============================================================
-// RenderFullScreenShader()
-//
-// sceneBuffer_ に保存された画像に全画面エフェクトを適用し、
-// バックバッファーへ出力する。
-// ============================================================
-
-void OutlineRenderer::RenderFullScreenShader() const
-{
-    // シーン画像に全画面エフェクトを適用し、
-    // バックバッファーへ描画する
-    RenderFullScreenPass(
-        sceneBuffer_,
-        DX_SCREEN_BACK
-    );
-}
-
-
-// ============================================================
-// RenderFullScreenPass()
-//
-// sourceTexture に全画面エフェクトを適用して、
-// destinationScreen へ出力する。
-// ============================================================
-
-void OutlineRenderer::RenderFullScreenPass(
-    int sourceTexture,
-    int destinationScreen
-) const
-{
-    if (sourceTexture < 0 ||
-        fullScreenPixelShader_ < 0)
-    {
-        return;
-    }
-
-    // 出力先を指定する。
-    SetDrawScreen(destinationScreen);
-
-    // 3D用の深度バッファーは使わない。
-    SetDrawZBuffer(-1);
-
-    // 入力画像を t0 に設定する。
-    SetUseTextureToShader(0, sourceTexture);
-
-    // 全画面エフェクト用シェーダーを設定する。
-    SetUsePixelShader(fullScreenPixelShader_);
-
-    // 出力先全体にエフェクトを適用する。
-    DrawPrimitive2DToShader(
-        const_cast<VERTEX2DSHADER*>(fullscreenVertices_),
-        6,
-        DX_PRIMTYPE_TRIANGLELIST
-    );
-
-    // シェーダーと入力テクスチャーを解除する。
-    SetUsePixelShader(-1);
-
-    SetUseTextureToShader(0, -1);
-    SetUseTextureToShader(1, -1);
-
-    // 通常の描画先へ戻す。
-    SetDrawScreen(DX_SCREEN_BACK);
-}
 
 
 // ============================================================

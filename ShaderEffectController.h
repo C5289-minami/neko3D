@@ -52,9 +52,6 @@ public:
             enabled_ && settings_.outlineEnabled
         );
 
-        // フルスクリーンエフェクトは現在使用しない
-        renderer_.SetFullScreenEffectEnabled(false);
-
         renderer_.Render(
             [&] {
                 sceneDraw(enabled_ && settings_.toonEnabled);
