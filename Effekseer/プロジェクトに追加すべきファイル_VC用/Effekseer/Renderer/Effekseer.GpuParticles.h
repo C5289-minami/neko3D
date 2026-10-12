@@ -1,4 +1,5 @@
 
+#pragma warning(disable : 4100)
 #ifndef __EFFEKSEER_GPU_PARTICLES_H__
 #define __EFFEKSEER_GPU_PARTICLES_H__
 

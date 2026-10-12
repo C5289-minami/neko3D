@@ -1,4 +1,5 @@
 ﻿
+#pragma warning(disable : 4100)
 #ifndef __EFFEKSEER_GPU_TIMER_H__
 #define __EFFEKSEER_GPU_TIMER_H__
 

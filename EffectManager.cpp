@@ -3,10 +3,6 @@
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
 
-void EffectManager::Load()
-{
-	// NULL
-}
 
 void EffectManager::Update(float deltaTime)
 {
@@ -19,10 +15,6 @@ void EffectManager::Draw() const
 	DrawEffekseer3D();
 }
 
-void EffectManager::Finalize()
-{
-	// NULL
-}
 
 void EffectManager::PlayHit(int key,const Vec3& position,float yaw)
 {

@@ -1,4 +1,5 @@
-﻿
+﻿#pragma warning(disable : 4100)
+
 #ifndef __EFFEKSEER_SOUNDLOADER_H__
 #define __EFFEKSEER_SOUNDLOADER_H__
 

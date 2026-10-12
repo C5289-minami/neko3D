@@ -23,6 +23,7 @@ void ResourceManager::Initialize()
 void ResourceManager::LoadAll()
 {
     Initialize();
+	// フォントの読み込み
 
     LoadFont(ResourceKeys::Font_Title,
         L"./Data/Fonts/Bitcount/static/Bitcount-Light.ttf");
@@ -34,7 +35,7 @@ void ResourceManager::LoadAll()
     LoadModel(ResourceKeys::Model_Boss,       L"./DevData/Models/boss_test.mv1");
     LoadModel(ResourceKeys::Model_Test,       L"./Data/Models/Sword.mv1");
 
-
+	// スプライトスタジオの読み込み
 
     LoadSpriteStudioPlayer(
         ResourceKeys::SpriteStudio_TitleCharacter,
@@ -45,10 +46,15 @@ void ResourceManager::LoadAll()
         ResourceKeys::SpriteStudio_Gauge,
         "UI",
         "./DevData/UI/UI.ssbp");
-
+        
+	// サウンドの読み込み
     SetCreate3DSoundFlag(TRUE);
     LoadSound(ResourceKeys::Sound_BossBite, L"./Data/Sounds/Explosion.mp3");
     SetCreate3DSoundFlag(FALSE);
+
+
+    // Effect
+	LoadEffect(ResourceKeys::Effect_Test, L"./Data/Effects/EffectTest.efkefc",30.0f);
 }
 
 void ResourceManager::UnloadAll()
@@ -59,6 +65,7 @@ void ResourceManager::UnloadAll()
     UnloadSounds();
     UnloadModels();
     UnloadSpriteStudioPlayers();
+    UnloadEffects();
 
     if (ssResMan != nullptr)
     {
@@ -297,6 +304,19 @@ ss::Player* ResourceManager::LoadSpriteStudioPlayer(
     return result;
 }
 
+int ResourceManager::LoadEffect(const std::wstring& key, const std::wstring& path, float scale)
+{
+    // 二重ロード防止（キャッシュ）
+    if (auto it = effects.find(key); it != effects.end())
+        return it->second;
+
+    int h = LoadEffekseerEffect(path.c_str(), scale);
+    if (h == -1) DxPlus::Utils::FatalError((L"Failed to load model " + path).c_str());
+
+    effects[key] = h;
+    return h;
+}
+
 void ResourceManager::UnloadMusics()
 {
     for (auto& music : musics)
@@ -328,6 +348,15 @@ void ResourceManager::UnloadSpriteStudioPlayers()
 {
     spriteStudioPlayers.clear();
     spriteStudioAnimationNames.clear();
+}
+
+void ResourceManager::UnloadEffects()
+{
+    for (auto& e : effects)
+    {
+        if (e.second >= 0) DxLib::MV1DeleteModel(e.second);
+    }
+    effects.clear();
 }
 
 // ===============================[ FONTS ]===================================

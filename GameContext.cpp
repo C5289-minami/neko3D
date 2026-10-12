@@ -151,6 +151,17 @@ void GameContext::Update(float deltaTime)
     boss.Update(deltaTime);
     Collision::UpdateModelContact(player.GetModelObject(), boss.GetModelObject());
     playerCamera.Update(player.GetPosition(), boss.GetPosition(), deltaTime);
+
+
+    // Effect
+	using namespace DxPlus::Input;
+    if (GetButtonDown(PLAYER1) & BUTTON_L3)
+    {
+        effectManager.PlayHit(RM().GetEffect(ResourceKeys::Effect_Test),
+            player.GetPosition() + Vec3::Up() * 100.0f, 
+            player.GetYaw() + DX_PI_F);
+    }
+    effectManager.Update(deltaTime);
 }
 
 void GameContext::Draw() const
@@ -166,4 +177,8 @@ void GameContext::Draw() const
     boss.Draw();
     player.Draw();
     stage.DrawAlphaModel();
+
+
+    effectManager.Draw();
+
 }
