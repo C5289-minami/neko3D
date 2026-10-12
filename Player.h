@@ -39,6 +39,7 @@ public:
 
 	// ƒWƒƒƒ“ƒv
 	void JumpAction();
+	bool IsGrounded() const { return isGrounded_; }
 	bool IsGravityEnabled() const { return gravityEnabled_; }
 	void SetGravityEnabled(bool enabled);
 

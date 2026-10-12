@@ -330,6 +330,9 @@
     <ClInclude Include="PlayerIdleState.h">
       <Filter>40_Gameplay\Actors\Player\State\Idle</Filter>
     </ClInclude>
+    <ClInclude Include="PlayerNeutralJumpState.h">
+      <Filter>40_Gameplay\Actors\Player\State</Filter>
+    </ClInclude>
     <ClInclude Include="PlayerKedukuroiState.h">
       <Filter>40_Gameplay\Actors\Player\State\Kedukuroi</Filter>
     </ClInclude>
@@ -643,6 +646,9 @@
     </ClCompile>
     <ClCompile Include="PlayerIdleState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Idle</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerNeutralJumpState.cpp">
+      <Filter>40_Gameplay\Actors\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="PlayerKedukuroiState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Kedukuroi</Filter>

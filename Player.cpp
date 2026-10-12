@@ -55,11 +55,6 @@ void Player::Update(float deltaTime)
 {
 	input_.Update();
 
-	if (input_.jumpPressed)
-	{
-		JumpAction();
-	}
-
 	stateMachine_.Tick(deltaTime);
 
 	// ’†S‚ª‚Ç‚Á‚¿‚É‚ ‚é‚©’²‚×‚éB‚‚³‚Í‚±‚±‚Å‚Íl‚¦‚È‚¢
