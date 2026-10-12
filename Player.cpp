@@ -10,7 +10,7 @@
 
 #include <cmath>
 #include "Sound3D.h"
-#include<math.h>
+#include <algorithm>
 
 
 Player::Player()
@@ -62,83 +62,8 @@ void Player::Update(float deltaTime)
 	stateMachine_.Tick(deltaTime);
 
 	// 中心がどっちにあるか調べる。高さはここでは考えない
-	Vec3 forward = movementCenter_ - position_;
-	forward.y = 0.0f;
-	const float radius = forward.Length();
-	const Vec3 input = moveInput_.Normalized();
+	PlayerDiagonalMove(deltaTime, position_, movementCenter_);
 
-	bool canMove = true;
-	if (radius < 0.001f) 
-	{
-		canMove = false;
-	}
-	if (input.x == 0.0f && input.z == 0.0f) // 何も押していない
-	{
-		canMove = false;
-	}
-
-
-	if (canMove)
-	{
-		forward = forward.Normalized();
-
-		// 中心への向きを90度回すと、右向きになる
-		const Vec3 right{ forward.z, 0.0f, -forward.x };
-
-		Vec3 moveDir{};
-		const float moveDis = Const::PLAYER_MOVE_SPEED * deltaTime;
-		float nextRadius = radius;
-
-		if (input.z > 0.0f) // Wkey
-		{
-			const float forwardInput = input.z;
-			moveDir += forward * forwardInput;
-			nextRadius -= forwardInput * moveDis;
-		}
-
-		if (input.z < 0.0f) // Skey
-		{
-			const float backwardInput = -input.z;
-			moveDir -= forward * backwardInput;
-			nextRadius += backwardInput * moveDis;
-		}
-
-		// 中心を通り越さないように、距離は1までにする
-		if (nextRadius < 1.0f)
-		{
-			nextRadius = 1.0f;
-		}
-
-		// W/Sで近づいた分、離れた分だけ動かす
-		const float forwardDistance = radius - nextRadius;
-		Vec3 nextPosition = position_ + forward * forwardDistance;
-
-		if (input.x > 0.0f) // Dkey moveto right
-		{
-			const float rightInput = input.x;
-			moveDir += right * rightInput;
-			nextPosition += right * (rightInput * moveDis);
-		}
-
-		if (input.x < 0.0f) // Akey moveto left
-		{
-			const float leftI = -input.x;
-			moveDir -= right * leftI;
-			nextPosition -= right * (leftI * moveDis);
-		}
-
-		// 横に動くだけだと外側にずれるので、中心からの距離を合わせ直す
-		Vec3 fromCenter = nextPosition - movementCenter_;
-		fromCenter.y = 0.0f;
-		fromCenter = fromCenter.Normalized();
-		position_.x = movementCenter_.x + fromCenter.x * nextRadius;
-		position_.z = movementCenter_.z + fromCenter.z * nextRadius;
-
-		// 猫の顔も、進む方向に向ける
-		TurnTowards(moveDir, deltaTime);
-	}
-
-	// 立ち止まっていても、重力やジャンプは動かす
 	if (gravityEnabled_)
 	{
 		velocity_.y -= Const::GRAVITY * deltaTime;
@@ -320,28 +245,37 @@ void Player::TurnTowards(
 	SetYaw(yaw);
 }
 
-void Player::PlayerDiagonalMove(float deltaTime, Vec3& PlayerPos, Vec3& BossPos)
+void Player::PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& movementCenter)
 {
-	Vec3 direction = PlayerPos - BossPos;
-	//direction.y = 0.0f; // 水平方向のみに制限
-	
-	if (direction.LengthSq() < 0.0001f)
+	if (deltaTime <= 0.0f || moveInput_.LengthSq() == 0.0f)
 	{
-		direction = Vec3(0.0f, 0.0f, 1.0f); // デフォルトの方向を設定
+		return;
+	}
+
+	// Apply input around the stage center; horizontal movement preserves radius.
+	Vec3 forward = movementCenter - playerPos;
+	forward.y = 0.0f;
+	const float radius = forward.Length();
+	if (radius < 0.001f)
+	{
+		forward = Vec3(std::sin(GetYaw()), 0.0f, std::cos(GetYaw()));
 	}
 	else
 	{
-		direction = direction.Normalized();
+		forward /= radius;
 	}
-	Vec3 targetPosition = BossPos + direction * 200.0f; // ボスから200の距離に設定
 
-	Vec3 moveDirection = targetPosition - PlayerPos;
+	const Vec3 input = moveInput_.Normalized();
+	const Vec3 right{ forward.z, 0.0f, -forward.x };
+	const float distance = Const::PLAYER_MOVE_SPEED * deltaTime;
+	const float nextRadius = (std::max)(1.0f, radius - input.z * distance);
+	const float angle = input.x * distance / (std::max)(1.0f, radius);
+	const Vec3 outward = -forward * std::cos(angle) + right * std::sin(angle);
 
-	Vec3 moveDirXZ = Vec3(moveDirection.x, 0.0f, moveDirection.z);
-	
-	
+	playerPos.x = movementCenter.x + outward.x * nextRadius;
+	playerPos.z = movementCenter.z + outward.z * nextRadius;
+	TurnTowards(forward * input.z + right * input.x, deltaTime);
 }
-
 
 void Player::JumpAction()
 {
