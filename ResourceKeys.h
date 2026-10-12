@@ -28,6 +28,7 @@ namespace ResourceKeys
     inline constexpr const wchar_t* SpriteStudio_Gauge = L"Gauge";
 
     // ===== Effects =====
+	inline constexpr const wchar_t* Effect_Test = L"EffectTest";
 
     // ===== Musics / Sounds =====
 	inline constexpr const wchar_t* Sound_BossBite = L"SoundBossBite";

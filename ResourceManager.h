@@ -12,6 +12,7 @@
 #include "DxPlus/DxPlus.h"
 #include "ResourceKeys.h"
 #include "SSPlayer/SS6Player.h"
+#include "EffekseerForDxLib.h"
 
 
 class ResourceManager
@@ -182,6 +183,7 @@ private:
         const std::string& path,
         const std::string& animation = ""
     );
+	int LoadEffect(const std::wstring& key, const std::wstring& path,float scale);
 
     void UnloadGrids();
     void UnloadFont(const std::wstring& fontName);
@@ -190,6 +192,7 @@ private:
     void UnloadSounds();
     void UnloadModels();
     void UnloadSpriteStudioPlayers();
+	void UnloadEffects();
 
     ResourceManager() = default;
     ~ResourceManager() = default;

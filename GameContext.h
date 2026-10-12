@@ -10,6 +10,7 @@
 #include "Stage.h"
 #include "Player.h"
 #include "Boss.h" 
+#include "EffectManager.h"
 
 class GameContext
 {
@@ -70,6 +71,9 @@ private:
     // Camera
     Player_camera playerCamera;
     Debug_camera Debug_camera;
+
+	// Effect Manager
+	EffectManager effectManager;
 
     // Stage
     Stage stage;

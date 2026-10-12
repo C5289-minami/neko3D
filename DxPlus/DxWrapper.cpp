@@ -7,7 +7,7 @@
 #include "DxWrapper.h"
 #include <string>
 #include <mmsystem.h>
-#include "DxLib.h"
+#include "EffekseerForDxLib.h"
 #include "Utils.h"
 #pragma comment(lib, "winmm.lib")
 
@@ -39,9 +39,16 @@ namespace DxPlus
         {
             DxPlus::Utils::FatalError(L"DxLib initialization failed!");
         }
-
+		const int maxParticles = 4000; // 最大パーティクル数を設定
+        if (Effekseer_Init(maxParticles) == -1)
+        {
+            DxPlus::Utils::FatalError(L"Effekseer initialization failed!");
+		}
         // フルスクリーンとウィンドウの切り替え時にリソースが消えないようにする
         DxLib::SetChangeScreenModeGraphicsSystemResetFlag(FALSE);
+
+		// DirectXデバイスが失われたときのコールバック関数を設定
+        Effekseer_SetGraphicsDeviceLostCallbackFunctions();
 
         // Zバッファを有効にする
         DxLib::SetUseZBuffer3D(TRUE);
@@ -73,6 +80,7 @@ namespace DxPlus
 
     void DxWrapper::Finalize()
     {
+        Effkseer_End();
         timeEndPeriod(1);
         DxLib::DxLib_End();
     }
