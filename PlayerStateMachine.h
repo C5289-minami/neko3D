@@ -6,6 +6,7 @@
 #include "PlayerIdleState.h"
 #include "PlayerWalkState.h"
 #include "PlayerKedukuroiState.h"
+#include "PlayerNeutralJumpState.h"
 
 class Player;
 
@@ -31,5 +32,6 @@ private:
 	PlayerIdleState idleState_;
 	PlayerWalkState walkState_;
 	PlayerKedukuroiState kedukuroiState_;
+	PlayerNeutralJumpState neutralJumpState_;
 	// ‘¼‚ð‚±‚±‚É’Ç‰Á
 };

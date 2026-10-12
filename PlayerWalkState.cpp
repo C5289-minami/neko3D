@@ -16,6 +16,12 @@ void PlayerWalkState::Enter()
 void PlayerWalkState::Tick(float)
 {
 	const PlayerInput& move = player_.GetInput();
+    // Space‚¾‚¯‚Å^ã‚ÉƒWƒƒƒ“ƒv
+    if (move.jumpPressed && !move.isMoving && player_.IsGrounded() && player_.IsGravityEnabled())
+    {
+        stateMachine_.ChangeState(PlayerStateType::NeutralJump);
+        return;
+    }
 	if (move.kedukuroiPressed)
 	{
 		stateMachine_.ChangeState(PlayerStateType::Kedukuroi);
