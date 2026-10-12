@@ -8,7 +8,8 @@ PlayerStateMachine::PlayerStateMachine(Player& player)
 	kedukuroiState_(*this, player),
 	neutralJumpState_(*this, player),
 	lungingJumpState_(*this, player),
-	attackState_(*this, player)
+	attackState_(*this, player),
+	ultimateAttackState_(*this, player)
 {
 
 }
@@ -49,6 +50,8 @@ State* PlayerStateMachine::FindState(PlayerStateType type)
         return &lungingJumpState_;
     case PlayerStateType::Attack:
         return &attackState_;
+    case PlayerStateType::UltimateAttack:
+        return &ultimateAttackState_;
     default:
         return nullptr;
     }

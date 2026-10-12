@@ -229,6 +229,21 @@ void DebugUI::Draw(GameContext& ctx, const DebugSceneControls& controls)
         ImGui::End();
     }
 
+    // 必殺ゲージの仮調整
+    if (controls.scope == "game")
+    {
+        ImGui::Begin("Ultimate debug");
+        float gauge = ctx.GetPlayerUltimateGauge();
+        ImGui::ProgressBar(gauge / Player::UltimateGaugeMax, ImVec2(-1.0f, 0.0f));
+        if (ImGui::SliderFloat(u8"仮ゲージ", &gauge, 0.0f, Player::UltimateGaugeMax, "%.0f"))
+            ctx.SetPlayerUltimateGauge(gauge);
+        if (ImGui::Button(u8"100にする"))
+            ctx.SetPlayerUltimateGauge(Player::UltimateGaugeMax);
+        ImGui::TextUnformatted(u8"100で右クリック：必殺技 / 発動後は0");
+        ImGui::TextUnformatted(u8"増加方法は未定（現在は手動調整）");
+        ImGui::End();
+    }
+
     // Outline Settings
     {
         ImGui::Begin("Outline Settings");

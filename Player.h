@@ -65,6 +65,14 @@ public:
     const ModelObject& GetModelObject() const { return model_; }
 	const PlayerInput& GetInput() const { return input_; }
 
+    // 必殺ゲージは仮。増加タイミングは後で決める
+    static constexpr float UltimateGaugeMax = 100.0f;
+    float GetUltimateGauge() const { return ultimateGauge_; }
+    void SetUltimateGauge(float value);
+    void AddUltimateGauge(float amount);
+    bool CanUseUltimate() const { return ultimateGauge_ >= UltimateGaugeMax; }
+    bool TryUseUltimateGauge();
+
 private:
 	ModelObject model_;
 	AnimationDraw animation_;
@@ -73,6 +81,8 @@ private:
 
 	PlayerInput input_;
 	PlayerStateMachine stateMachine_;
+    float ultimateGauge_{ 0.0f };
+	float kari_max_jissou_ = UltimateGaugeMax;
 
 	Vec3 movementCenter_{}; // 足場の中心
 	Vec3 moveInput_{};      // Xは左右、Zは前後の入力

@@ -16,6 +16,12 @@ void PlayerWalkState::Enter()
 void PlayerWalkState::Tick(float)
 {
 	const PlayerInput& move = player_.GetInput();
+    // ゲージ100で右クリックすると必殺技
+    if (move.ultimatePressed && player_.CanUseUltimate())
+    {
+        stateMachine_.ChangeState(PlayerStateType::UltimateAttack);
+        return;
+    }
     // 左クリックで通常攻撃
     if (move.attackPressed)
     {

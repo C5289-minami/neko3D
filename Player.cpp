@@ -33,6 +33,7 @@ void Player::Init()
 void Player::Reset()
 {
     model_.collisionHighlighted = false;
+    ultimateGauge_ = 0.0f;
 	SetTransform(TransformDefaults::GamePlayer);
 
 
@@ -143,6 +144,25 @@ void Player::SetAnimation(PlayerAnimType::Type type, bool loop)
 	currentAnimLoop_ = loop;
 }
 
+
+void Player::SetUltimateGauge(float value)//Ultのマックスゲージを超えないようにする
+{
+    if (!std::isfinite(value)) return;
+    ultimateGauge_ = std::clamp(value, 0.0f, UltimateGaugeMax);
+}
+
+void Player::AddUltimateGauge(float amount)//Ultゲージを増やす
+{
+    if (!std::isfinite(amount) || amount <= 0.0f) return;
+    SetUltimateGauge(ultimateGauge_ + amount);
+}
+
+bool Player::TryUseUltimateGauge()
+{
+    if (!CanUseUltimate()) return false;
+    ultimateGauge_ = 0.0f;
+    return true;
+}
 
 void Player::SetMoveDirection(const Vec3& moveDir)
 {
