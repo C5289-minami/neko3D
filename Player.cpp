@@ -10,6 +10,7 @@
 
 #include <cmath>
 #include "Sound3D.h"
+#include<math.h>
 
 
 Player::Player()
@@ -257,6 +258,28 @@ void Player::TurnTowards(
 	}
 
 	SetYaw(yaw);
+}
+
+void Player::PlayerDiagonalMove(float deltaTime, Vec3& PlayerPos, Vec3& BossPos)
+{
+	Vec3 direction = PlayerPos - BossPos;
+	//direction.y = 0.0f; // 水平方向のみに制限
+	
+	if (direction.LengthSq() < 0.0001f)
+	{
+		direction = Vec3(0.0f, 0.0f, 1.0f); // デフォルトの方向を設定
+	}
+	else
+	{
+		direction = direction.Normalized();
+	}
+	Vec3 targetPosition = BossPos + direction * 200.0f; // ボスから200の距離に設定
+
+	Vec3 moveDirection = targetPosition - PlayerPos;
+
+	Vec3 moveDirXZ = Vec3(moveDirection.x, 0.0f, moveDirection.z);
+	
+	
 }
 
 

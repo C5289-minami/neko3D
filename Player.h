@@ -34,6 +34,8 @@ public:
 	// ‰ñ“]
 	void Turn(float direction, float speed, float deltaTime);
 	void TurnTowards(const Vec3& moveDir, float deltaTime);
+	//Player‚ÌŽÎ‚ßˆÚ“®
+	void PlayerDiagonalMove(float deltaTime, Vec3& PlayerPos,Vec3& BossPos);
 
 	// ƒWƒƒƒ“ƒv
 	void JumpAction();
