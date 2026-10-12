@@ -18,8 +18,10 @@ namespace ResourceKeys
 
     // ===== Models =====
     inline constexpr const wchar_t* Model_Stage     = L"ModelStage";
+    inline constexpr const wchar_t* Model_StageAlpha = L"ModelStageAlpha";
     inline constexpr const wchar_t* Model_Paladin    = L"ModelPlayer";
     inline constexpr const wchar_t* Model_Boss    = L"ModelBoss";
+	inline constexpr const wchar_t* Model_Test = L"ModelTest";
 
     // ===== SpriteStudio =====
     inline constexpr const wchar_t* SpriteStudio_TitleCharacter = L"TitleCharacter";
@@ -28,6 +30,7 @@ namespace ResourceKeys
     // ===== Effects =====
 
     // ===== Musics / Sounds =====
+	inline constexpr const wchar_t* Sound_BossBite = L"SoundBossBite";
 
     // ===== Fonts =====
     inline constexpr const wchar_t* Font_Title      = L"Bitcount Light";

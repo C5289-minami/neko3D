@@ -5,6 +5,9 @@
 #include "SceneManager.h"
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
+#ifndef NDEBUG
+#include "imgui.h"
+#endif
 
 void GameScene::Init()
 {
@@ -17,6 +20,10 @@ void GameScene::Init()
 void GameScene::Update(float deltaTime)
 {
     gameContext->Update(deltaTime);
+#ifndef NDEBUG
+    // 数値入力中はシーン切り替えのキーを無視する
+    if (ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard) return;
+#endif
 
     using namespace DxPlus::Input;
     int buttonDown = GetButtonDown(PLAYER1);

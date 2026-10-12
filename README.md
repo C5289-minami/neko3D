@@ -67,7 +67,7 @@ lookAtPosition += (targetLookAtPosition - lookAtPosition) * movementAmount;
 
 ### カメラ設定値
 
-設定値は `15_System/Player_camera.h` の `PlayerCameraSettings` にあります。実行中は `GetPlayerCamera().GetSettings()` から変更できます。
+設定値は `Player_camera.h` の `PlayerCameraSettings` にあります。実行中は `GetPlayerCamera().GetSettings()` から変更できます。
 
 | 設定 | 初期値 | 内容 |
 | --- | ---: | --- |
@@ -104,13 +104,15 @@ Debugビルドでは左 Alt + Enter で、通常カメラと自由操作カメ�
 
 ### プレイヤー位置のデバッグ調整
 
-Debugビルドの `Player debug` ウィンドウで、`Position (X, Y, Z)` を左クリックしたまま左右にドラッグするとプレイヤーの座標を変更できます。カメラを切り替えたり移動したりする必要はありません。ドラッグ速度は `1.0` です。
+Debugビルドでは `Hierarchy` で `Player` を選択し、`Inspector` の `Position` をドラッグまたは直接入力して座標を変更できます。カメラの切り替えは不要です。ドラッグ速度は `1.0` です。
 
-開始位置とリセット位置はどちらも `(X=0, Y=300, Z=2300)` です。位置欄はワールド座標を直接設定するため、Yを変更すると高さも変わります。通常のプレイヤー移動や重力が動作中なら、その後のゲーム更新で座標が変化することがあります。
+Gameシーンの開始位置・リセット位置は `TransformDefaults.h` の `GamePlayer` にあり、現在は `(X=0, Y=36, Z=-521)` です。移動や重力による変化を止めて調整する場合は「オブジェクトの更新を停止」をオンにします。
+
+「ソースに保存」で初期値を保存し、再ビルドすると次回起動から反映されます。詳しい操作は [ImGuiPlayerSettings.md](ImGuiPlayerSettings.md) を参照してください。
 
 ### 現在の制約
 
 - ボスとプレイヤーが画面内に必ず収まるような画角・距離調整はしていません。距離は設定値で固定です。
 - カメラとステージの衝突判定はありません。
 - 注視点は2者の中間点を使う単純な計算です。
-- `Boss::Reset()` の現在のボス位置は `(0, -1000, 0)` です。カメラもこの座標を注視点計算に使うので、実際にボスを配置する高さと合わせて確認してください。
+- ボスの開始位置・リセット位置は `TransformDefaults.h` の `GameBoss` にあり、現在は `(0, 0, 0)` です。カメラは実行中のボス座標を注視点計算に使います。

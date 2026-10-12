@@ -431,5 +431,16 @@ FodyWeavers.xsd
 /3dgp1_debug.exe
 
 # Generated game executables and DxLib runtime log
-*.exe
+/3dgp1.exe
 [Ll]og.txt
+/OrbitCamera.cpp
+/.gitignore
+/.gitignore
+/OrbitCamera.h
+/.gitignore
+/README.md
+
+# Keep the bundled Effekseer binaries under version control
+!/tools/effekseer/bin/
+!/tools/effekseer/bin/**
+/Data/Config/imgui.ini

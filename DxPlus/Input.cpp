@@ -212,6 +212,6 @@ namespace DxPlus::Input
     {
         int mouseX, mouseY;
         DxLib::GetMousePoint(&mouseX, &mouseY);
-        return Vector2<float>(mouseX, mouseY);
+        return Vector2<float>(static_cast<float>(mouseX), static_cast<float>(mouseY));
     }
 }

@@ -6,13 +6,17 @@
 
 #include <d3d11.h>
 #include "DxLib.h"
-#include "../GameContext.h"
+#include "GameContext.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_win32.h"
 #include "backends/imgui_impl_dx11.h"
 
-#include <filesystem>
+#include <cmath>
+#include <algorithm>
+
+#include "ToonSettings.h"
+#include "OutlineSettings.h"
 
 extern bool g_raise_imgui_viewports;
 
@@ -43,6 +47,12 @@ void DebugUI::Init()
     ImGui_ImplDX11_Init(device, context);
 
     ImGui::LoadIniSettingsFromDisk("./Data/Config/imgui.ini");
+
+    // 設定を読み込む
+    {
+        ToonSettingsManager::Load();
+        OutlineSettingsManager::Load();
+    }
 }
 
 void DebugUI::Shutdown()
@@ -66,18 +76,129 @@ void DebugUI::BeginFrame()
     ImGui::DockSpaceOverViewport(ImGui::GetID("MainDockSpace"), ImGui::GetMainViewport(), flags);
 }
 
-void DebugUI::Draw(GameContext& ctx)
+namespace
 {
-    ImGui::Begin("Player debug");
-    const Vec3& playerPosition = ctx.GetPlayerPosition();
-    float position[3] = { playerPosition.x, playerPosition.y, playerPosition.z };
-    if (ImGui::DragFloat3("Position (X, Y, Z)", position, 1.0f, 0.0f, 0.0f, "%.1f"))
-        ctx.SetPlayerPosition({ position[0], position[1], position[2] });
+    // ImGuiに渡すときだけVec3を配列に変換する
+    bool EditVector3(const char* label, Vec3& value, float speed,
+        float minimum = 0.0f, float maximum = 0.0f,
+        ImGuiSliderFlags flags = ImGuiSliderFlags_None)
+    {
+        float components[3] = { value.x, value.y, value.z };
+        if (!ImGui::DragFloat3(label, components, speed, minimum, maximum, "%.3f", flags))
+            return false;
+        value = { components[0], components[1], components[2] };
+        return true;
+    }
+}
+
+void DebugUI::DrawTransformEditor(const DebugSceneControls& controls)
+{
+    if (transformScope_ != controls.scope)
+    {
+        transformScope_ = controls.scope;
+        transformStatus_.clear();
+        selectedTargetId_ = controls.targets.empty() ? "" : controls.targets.front().id;
+        cameraSelected_ = false;
+    }
+
+    ImGui::SetNextWindowSize(ImVec2(260.0f, 400.0f), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Hierarchy");
+    if (controls.targets.empty())
+        ImGui::TextWrapped(u8"このシーンには編集対象がありません。");
+    if (controls.isPaused && controls.setPaused)
+    {
+        bool paused = controls.isPaused();
+        if (ImGui::Checkbox(u8"オブジェクトの更新を停止", &paused))
+            controls.setPaused(paused);
+    }
+    ImGui::Separator();
+    for (const auto& target : controls.targets)
+    {
+        ImGui::PushID(target.id.c_str());
+        if (ImGui::Selectable(target.name.c_str(), !cameraSelected_ && selectedTargetId_ == target.id))
+        {
+            selectedTargetId_ = target.id;
+            cameraSelected_ = false;
+        }
+        ImGui::PopID();
+    }
+    if (controls.camera && ImGui::Selectable("Camera", cameraSelected_))
+        cameraSelected_ = true;
+
+    if (!controls.targets.empty())
+    {
+        ImGui::Separator();
+        if (ImGui::Button(u8"シーンをソースに保存"))
+            TransformSettings::Save(controls.targets, transformStatus_);
+        if (ImGui::Button(u8"シーンの初期値に戻す"))
+            TransformSettings::ResetToDefaults(controls.targets, transformStatus_);
+    }
     ImGui::End();
 
-    // Option
+    ImGui::SetNextWindowSize(ImVec2(520.0f, 440.0f), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Inspector");
+    if (cameraSelected_ && controls.camera)
+    {
+        const auto& camera = *controls.camera;
+        ImGui::Text("Camera: %s", camera.isActive() ? "Debug (Alt + Enter)" : "Normal");
+        Vec3 position = camera.getPosition();
+        if (EditVector3("Position", position, 1.0f) &&
+            std::isfinite(position.x) && std::isfinite(position.y) && std::isfinite(position.z))
+            camera.setPosition(position);
+        if (ImGui::Button("Reset camera")) camera.reset();
+        ImGui::SameLine();
+        if (ImGui::Button("Focus player")) camera.focusPlayer();
+    }
+    else
+    {
+        const DebugTransformTarget* selected = nullptr;
+        for (const auto& target : controls.targets)
+            if (target.id == selectedTargetId_) { selected = &target; break; }
+
+        if (selected)
+        {
+            ImGui::TextUnformatted(selected->name.c_str());
+            auto transform = selected->get();
+            ImGui::Separator();
+            bool changed = EditVector3("Position", transform.position, 1.0f);
+            changed |= EditVector3("Rotation (rad)", transform.rotation, 0.01f);
+            changed |= EditVector3("Scale", transform.scale, 0.1f, 0.001f, 100000.0f,
+                ImGuiSliderFlags_AlwaysClamp);
+            if (changed)
+            {
+                if (TransformSettings::IsValid(transform)) selected->set(transform);
+                else transformStatus_ = "Invalid transform: use finite values and positive scale.";
+            }
+            if (ImGui::Button(u8"ソースに保存")) TransformSettings::Save({ *selected }, transformStatus_);
+            ImGui::SameLine();
+            if (ImGui::Button(u8"初期値に戻す")) TransformSettings::ResetToDefaults({ *selected }, transformStatus_);
+        }
+        else ImGui::TextDisabled(u8"Hierarchyから対象を選択してください。");
+    }
+    if (controls.camera && controls.camera->isActive())
+        ImGui::TextWrapped(u8"デバッグカメラ中も編集・保存できます。オブジェクトの更新は自動停止します。");
+    ImGui::Separator();
+    ImGui::TextWrapped("Source: %s", TransformSettings::SourceFilePath().c_str());
+    ImGui::TextWrapped(u8"保存した初期値は、再ビルドして次回起動すると反映されます。");
+    const auto& status = transformStatus_.empty() ? controls.initialStatus : transformStatus_;
+    if (!status.empty()) ImGui::TextWrapped("%s", status.c_str());
+    ImGui::End();
+}
+
+void DebugUI::Draw(GameContext& ctx, const DebugSceneControls& controls)
+{
+    DrawTransformEditor(controls);
+    // オプション設定
     {
         ImGui::Begin("Option");     // "Option"ウィンドウを開始
+
+        // ゲームシーンの重力を切り替える
+        if (controls.scope == "game")
+        {
+            bool gravityDisabled = !ctx.IsPlayerGravityEnabled();
+            if (ImGui::Checkbox(u8"重力を無効化", &gravityDisabled))
+                ctx.SetPlayerGravityEnabled(!gravityDisabled);
+        }
 
         // 背景色
         {
@@ -94,63 +215,6 @@ void DebugUI::Draw(GameContext& ctx)
             }
         }
 
-        // グリッド
-        if (ImGui::TreeNode("Grids"))
-        {
-            Grid& grid = ctx.GetGrid();
-
-            // XY平面
-            {
-                bool drawXY = grid.IsDrawXY();
-                if (ImGui::Checkbox(u8"XY平面", &drawXY))
-                {
-                    grid.SetDrawXY(drawXY);
-                }
-            }
-
-            // YZ平面
-            {
-                bool drawYZ = grid.IsDrawYZ();
-                if (ImGui::Checkbox(u8"YZ平面", &drawYZ))
-                {
-                    grid.SetDrawYZ(drawYZ);
-                }
-            }
-
-            // ZX平面
-            {
-                bool drawZX = grid.IsDrawZX();
-                if (ImGui::Checkbox(u8"ZX平面", &drawZX))
-                {
-                    grid.SetDrawZX(drawZX);
-                }
-            }
-
-            // HalfCount
-            {
-                int halfCount = grid.GetHalfCount();
-                ImGui::Text("HalfCount");
-                ImGui::SameLine();
-                if (ImGui::DragInt("##HalfCount", &halfCount))
-                {
-                    grid.SetHalfCount(halfCount);
-                }
-            }
-
-            // Spacing
-            {
-                float spacing = grid.GetSpacing();
-                ImGui::Text("Spacing");
-                ImGui::SameLine();
-                if (ImGui::DragFloat("##Spacing", &spacing))
-                {
-                    grid.SetSpacing(spacing);
-                }
-            }
-
-            ImGui::TreePop();
-        }
-
         // フレームレート調節
         {
             int fpsCap = DxPlus::DxWrapper::GetInstance().GetFpsCap();
@@ -161,6 +225,251 @@ void DebugUI::Draw(GameContext& ctx)
                 DxPlus::DxWrapper::GetInstance().SetFpsCap(fpsCap);
             }
         }
+
+        ImGui::End();
+    }
+
+    // Outline Settings
+    {
+        ImGui::Begin("Outline Settings");
+
+        ImGui::SliderFloat(
+            u8"アウトライン太さ",
+            &g_outlineSettings.radius,
+            0.0f,
+            5.0f
+        );
+
+        ImGui::SliderFloat(
+            u8"深度強度",
+            &g_outlineSettings.depthStrength,
+            0.0f,
+            50.0f
+        );
+
+        ImGui::SliderFloat(
+            u8"法線強度",
+            &g_outlineSettings.normalStrength,
+            0.0f,
+            20.0f
+        );
+
+        ImGui::SliderFloat(
+            u8"輪郭しきい値",
+            &g_outlineSettings.threshold,
+            0.0f,
+            1.0f
+        );
+
+
+        if (ImGui::Button(u8"保存"))
+        {
+            OutlineSettingsManager::Save();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button(u8"読み込み"))
+        {
+            OutlineSettingsManager::Load();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button(u8"初期値に戻す"))
+        {
+            OutlineSettingsManager::Reset();
+        }
+
+        ImGui::End();
+    }
+    // トゥーン設定
+    {
+        ImGui::Begin("Toon Settings");
+
+        // =========================
+        // ライト設定
+        // =========================
+        static bool lightAngleInitialized = false;
+        static float lightAzimuth = 0.0f;
+        static float lightElevation = 45.0f;
+
+        constexpr float RadToDeg = 180.0f / DX_PI_F;
+        constexpr float DegToRad = DX_PI_F / 180.0f;
+
+        // 初回に現在のライト方向を角度へ変換
+        if (!lightAngleInitialized)
+        {
+            const VECTOR direction = DxLib::GetLightDirection();
+
+            const float length = std::sqrt(
+                direction.x * direction.x +
+                direction.y * direction.y +
+                direction.z * direction.z
+            );
+
+            if (length > 0.001f)
+            {
+                const float x = -direction.x / length;
+                const float y = -direction.y / length;
+                const float z = -direction.z / length;
+
+                lightAzimuth = std::atan2(x, z) * RadToDeg;
+                lightElevation =
+                    std::asin(std::clamp(y, -1.0f, 1.0f)) * RadToDeg;
+            }
+
+            lightAngleInitialized = true;
+        }
+
+        ImGui::Text(u8"ライトの向き");
+
+        bool lightChanged = ImGui::SliderFloat(
+            u8"方位角",
+            &lightAzimuth,
+            -180.0f,
+            180.0f,
+            u8"%.1f 度"
+        );
+
+        lightChanged |= ImGui::SliderFloat(
+            u8"高さ角",
+            &lightElevation,
+            -89.0f,
+            89.0f,
+            u8"%.1f 度"
+        );
+
+        if (lightChanged)
+        {
+            const float azimuth = lightAzimuth * DegToRad;
+            const float elevation = lightElevation * DegToRad;
+
+            const float x = std::cos(elevation) * std::sin(azimuth);
+            const float y = std::sin(elevation);
+            const float z = std::cos(elevation) * std::cos(azimuth);
+
+            DxLib::SetLightDirection(VGet(-x, -y, -z));
+        }
+
+        // Toonシェーダー用のライト方向を同期
+        const VECTOR currentLight = DxLib::GetLightDirection();
+
+        g_toonSettings.LightDirection[0] = currentLight.x;
+        g_toonSettings.LightDirection[1] = currentLight.y;
+        g_toonSettings.LightDirection[2] = currentLight.z;
+        g_toonSettings.LightDirection[3] = 0.0f;
+
+        ImGui::Separator();
+
+        // =========================
+        // Toonの影設定
+        // =========================
+        ImGui::ColorEdit3(
+            u8"影色",
+            g_toonSettings.shadowColor
+        );
+
+        ImGui::SliderFloat(
+            u8"明るい境界",
+            &g_toonSettings.thresholds[0],
+            0.0f, 1.0f
+        );
+
+        ImGui::SliderFloat(
+            u8"通常境界",
+            &g_toonSettings.thresholds[1],
+            0.0f, 1.0f
+        );
+
+        ImGui::SliderFloat(
+            u8"暗い境界",
+            &g_toonSettings.thresholds[2],
+            0.0f, 1.0f
+        );
+
+        float shadowDarkness = 1.0f - g_toonSettings.shadow[0];
+
+        if (ImGui::SliderFloat(
+            u8"影の暗さ",
+            &shadowDarkness,
+            0.0f, 1.0f))
+        {
+            g_toonSettings.shadow[0] = 1.0f - shadowDarkness;
+        }
+
+        ImGui::SliderFloat(
+            u8"影色の強さ",
+            &g_toonSettings.shadow[1],
+            0.0f, 1.0f
+        );
+
+        if (ImGui::Button(u8"保存"))
+        {
+            ToonSettingsManager::Save();
+        }
+
+        ImGui::SameLine();
+            
+        if (ImGui::Button(u8"読み込み"))
+        {
+            if (ToonSettingsManager::Load())
+            {
+                lightAngleInitialized = false;
+            }
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button(u8"初期値に戻す"))
+        {
+            ToonSettingsManager::Reset();
+        }
+        bool halftoneShadow = g_toonSettings.shadow[2] > 0.5f;
+
+        if (ImGui::Checkbox(
+            u8"影をハーフトーンで表現",
+            &halftoneShadow))
+        {
+            g_toonSettings.shadow[2] =
+                halftoneShadow ? 1.0f : 0.0f;
+        }ImGui::Separator();
+        ImGui::Text(u8"ハーフトーン設定");
+
+        // ハーフトーン ON/OFF
+        bool halftoneEnabled = g_toonSettings.shadow[2] > 0.5f;
+
+        if (ImGui::Checkbox(
+            u8"影をトーンで表現",
+            &halftoneEnabled))
+        {
+            g_toonSettings.shadow[2] =
+                halftoneEnabled ? 1.0f : 0.0f;
+        }
+
+        // トーンの色
+        ImGui::ColorEdit3(
+            u8"トーンの色",
+            g_toonSettings.halftoneColor
+        );
+
+        // 大きさ：数値が大きいほどドットが大きく、間隔も広がる
+        ImGui::SliderFloat(
+            u8"トーンの大きさ",
+            &g_toonSettings.halftoneSettings[0],
+            3.0f,
+            20.0f,
+            u8"%.1f px"
+        );
+
+        // 不透明度：0 = 透明、1 = 完全に不透明
+        ImGui::SliderFloat(
+            u8"トーンの不透明度",
+            &g_toonSettings.halftoneSettings[1],
+            0.0f,
+            1.0f,
+            u8"%.2f"
+        );
 
         ImGui::End();
     }

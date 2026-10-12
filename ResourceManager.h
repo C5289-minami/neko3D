@@ -2,13 +2,18 @@
 // Resources/ResourceManager.h
 // =============================
 #pragma once
-#include <memory>
+#include <cstddef>
 #include <string>
+#include <vector>
+#include <memory>
+#include <map>
 #include <unordered_map>
 #include <unordered_set>
 #include "DxPlus/DxPlus.h"
 #include "ResourceKeys.h"
 #include "SSPlayer/SS6Player.h"
+
+
 class ResourceManager
 {
 public:
@@ -54,6 +59,29 @@ public:
     int GetEffect(const std::wstring& key) const;
     ss::Player* GetSpriteStudioPlayer(const std::wstring& key) const;
 
+
+
+
+    std::vector<std::string> GetSpriteStudioAnimationNames(
+        const std::wstring& key) const;
+
+    bool PlaySpriteStudioAnimation(
+        const std::wstring& key,
+        std::size_t index,
+        int loopCount = 0,
+        float speed = 1.0f);
+
+    bool StopSpriteStudioAnimation(const std::wstring& key);
+    bool PauseSpriteStudioAnimation(const std::wstring& key);
+    bool ResumeSpriteStudioAnimation(const std::wstring& key);
+
+    bool SetSpriteStudioSpeed(
+        const std::wstring& key,
+        float speed);
+
+    bool SetSpriteStudioLoop(
+        const std::wstring& key,
+        int loopCount);
 private:
     // スプライトシートを分割して登録（詳細は定義部参照）
     template <typename TSprite = DxPlus::Sprite::SpriteBottom>
@@ -148,8 +176,12 @@ private:
     int LoadSound(const std::wstring& key, const std::wstring& path);
     int LoadFont(const std::wstring& fontName, const std::wstring& path);
     int LoadModel(const std::wstring& key, const std::wstring& path);
-    ss::Player* LoadSpriteStudioPlayer(const std::wstring& key, const std::string& dataKey,
-        const std::string& path, const std::string& animation);
+    ss::Player* LoadSpriteStudioPlayer(
+        const std::wstring& key,
+        const std::string& dataKey,
+        const std::string& path,
+        const std::string& animation = ""
+    );
 
     void UnloadGrids();
     void UnloadFont(const std::wstring& fontName);
@@ -187,6 +219,8 @@ private:
     std::unordered_map<std::wstring, std::unique_ptr<ss::Player>> spriteStudioPlayers;
    std::unordered_set<std::string> spriteStudioDataKeys;
     ss::ResourceManager* ssResMan{ nullptr }; // SS6Player用のリソースマネージャ
+    std::map<std::wstring, std::vector<std::string>>
+        spriteStudioAnimationNames;
 };
 /// <summary>
 /// ResourceManager のシングルトンインスタンスを取得するショートカット

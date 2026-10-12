@@ -1,4 +1,6 @@
-#pragma once
+﻿#pragma once
+
+#include <string>
 
 #include "Boss.h"
 #include "BossBangSkill.h"
@@ -10,6 +12,10 @@
 #include "DrawableObject.h"
 #include "Vector3.h"
 #include "Stage.h"
+#include "Player.h"
+#include "ModelToonRenderer.h"
+#include "Debug_camera.h"
+#include "ShaderEffectController.h"
 
 class BossTestScene final : public Scene
 {
@@ -23,12 +29,13 @@ public:
           biteSkill_(boss)
     {
     }
+
     void Init() override;
     void Update(float deltaTime) override;
     void Render() const override;
+    DebugSceneControls GetDebugControls() override;
 
 private:
-
     Stage stage{};
     Boss boss{};
     BossBangSkill bangSkill_;
@@ -36,10 +43,29 @@ private:
     BossClapSkill clapSkill_;
     BossHairBallSkill hairBallSkill_;
     BossBiteSkill biteSkill_;
-    int fontHandle{ -1 };
+
+  
     Vec3 cameraEye{ 0.0f, 250.0f, -650.0f };
     float yaw{};
     float pitch{};
+    // Debug
     bool skillKeyWasDown_{};
-};
+    Debug_camera debugCamera_;
+    bool debugActorsPaused_{};
+    std::string transformInitialStatus_;
 
+    // プレイヤー
+    Player player_;
+
+    // モデルのトゥーン描画を管理する
+    ModelToonRenderer modelToonRenderer_{};
+
+    // 共通のスクリーン空間アウトライン描画
+    ShaderEffectController shaderEffects_{};
+
+    void DrawScene(bool toonEnabled) const;
+    void RenderDepth() const;
+
+
+    void ApplyCamera() const;
+};

@@ -1,6 +1,7 @@
 #include "Boss.h"
 #include "Boss.h"
 #include "Consts.h"
+#include "TransformDefaults.h"
 #include "ResourceKeys.h"
 #include "ResourceManager.h"
 
@@ -19,23 +20,26 @@ void Boss::Init()
 {
 	activeSkill_ = nullptr;
 	stateMachine_.Initialize();
+	Reset();
 }
 
 void Boss::Reset()
 {
- model_.position = { 0.0f, Const::BOSS_HIDDEN_POSITION_Y, 0.0f };
-	const float scaleFactor = Const::BOSS_MODEL_SCALE;
-	model_.scale = { scaleFactor, scaleFactor, scaleFactor };
-	model_.rotation = {};
+    model_.collisionHighlighted = false;
+    SetTransform(TransformDefaults::GameBoss);
 	velocity_ = {};
 	activeSkill_ = nullptr;
  SetAnimation(BossAnimType::Idle, true);
-	animation_.Reset();
-	stateMachine_.Initialize();
+    animation_.Reset();
+    stateMachine_.Initialize();
+    // 更新を止めても描画できるように初期ポーズを用意する
+    animation_.Play3D(RM().GetModel(model_.modelKey), currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
+    animation_.Update(0.0f);
 }
 
 void Boss::Update(float deltaTime)
 {
+	
 	stateMachine_.Tick(deltaTime);
 	model_.position += velocity_ * deltaTime;
 
@@ -48,6 +52,7 @@ void Boss::Update(float deltaTime)
 
 void Boss::Draw() const
 {
+    model_.ApplyCollisionColor();
 	animation_.Draw3D(model_.position, model_.scale, model_.rotation);
 }
 
@@ -74,6 +79,8 @@ void Boss::StopMove()
 		stateMachine_.ChangeState(BossStateType::Idle);
 	}
 }
+
+const int Boss::GetModelHandle() const { return RM().GetModel(model_.modelKey); }
 
 float Boss::GetAnimTotalTime(BossAnimType::Type type) const 
 { 

@@ -1053,31 +1053,29 @@ ResourceSet* ResourceManager::getData(const std::string& dataKey)
 	return rs;
 }
 
-std::vector<std::string> ResourceManager::getAnimeName(const std::string& dataKey)
+std::vector<std::string> ResourceManager::getAnimeName(
+	const std::string& dataKey)
 {
-	std::vector<std::string> animename;
-	ResourceSet* rs = _dataDic.at(dataKey);
-	//アニメーション名を取得してリストを返す
-	std::map<std::string, ss::AnimeRef*>::iterator itpairstri = rs->animeCache->_dic.begin();
-	while (1)
-	{
-		// イテレータは pair<const string, int> 型なので、
-		std::string strKey = itpairstri->first;     // イテレータからキーが得られる。
+	std::vector<std::string> names;
 
-		if (strKey.find("/") == std::string::npos)	//ssae名が含まれていない場合はスキップ
+	auto dataIt = _dataDic.find(dataKey);
+	if (dataIt == _dataDic.end() || !dataIt->second ||
+		!dataIt->second->animeCache)
+	{
+		return names;
+	}
+
+	for (const auto& pair : dataIt->second->animeCache->_dic)
+	{
+		// パック名/アニメーション名の形式だけ取得する
+		if (pair.first.find('/') != std::string::npos)
 		{
-			continue;
-		}
-		animename.push_back(strKey);
-		itpairstri++;
-		if (itpairstri == rs->animeCache->_dic.end())
-		{
-			break;
+			names.push_back(pair.first);
 		}
 	}
-	return animename;
-}
 
+	return names;
+}
 std::string ResourceManager::addData(const std::string& dataKey, const ProjectData* data, const std::string& imageBaseDir, const std::string& zipFilepath, bool imageZipLoad)
 {
 	SS_ASSERT2(data != NULL, "Invalid data");

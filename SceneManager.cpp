@@ -22,6 +22,7 @@ void SceneManager::Init()
     {
         debugUI.Init();
     }
+	DxLib::SetWindowSize(1280, 720);
 #endif
     DxPlus::DxWrapper::GetInstance().SetFpsCap(runConfig.fpsCap);
 
@@ -113,7 +114,7 @@ void SceneManager::Run()
             if (runConfig.enableDebugUI && runConfig.windowed)
             {
                 debugUI.BeginFrame();
-                debugUI.Draw(gameContext);
+                debugUI.Draw(gameContext, scene->GetDebugControls());
                 debugUI.EndFrame();
             }
 #endif

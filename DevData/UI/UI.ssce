@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<SpriteStudioCellMap version="2.02.00" editorVersion="7.5.1">
+	<name>UI</name>
+	<exportPath></exportPath>
+	<generator>SpriteStudio</generator>
+	<packed>0</packed>
+	<imagePath>UI.png</imagePath>
+	<pixelSize>1024 1024</pixelSize>
+	<overrideTexSettings>0</overrideTexSettings>
+	<wrapMode>clamp</wrapMode>
+	<filterMode>linear</filterMode>
+	<imagePathAtImport></imagePathAtImport>
+	<packInfoFilePath></packInfoFilePath>
+	<texPackSettings>
+		<maxSize>4096 4096</maxSize>
+		<forcePo2>1</forcePo2>
+		<forceSquare>0</forceSquare>
+		<margin>0</margin>
+		<padding>1</padding>
+	</texPackSettings>
+	<cells>
+		<cell>
+			<name>bar1</name>
+			<pos>4 72</pos>
+			<size>855 26</size>
+			<pivot>-0.5 0</pivot>
+			<rotated>0</rotated>
+			<trimmed>0</trimmed>
+			<untrimmedSize>0 0</untrimmedSize>
+			<orgImageName></orgImageName>
+			<posStable>0</posStable>
+			<ismesh>0</ismesh>
+			<divtype>unknown</divtype>
+			<innerPoint />
+			<outerPoint />
+			<meshPointList />
+			<meshTriList />
+		</cell>
+		<cell>
+			<name>bar2</name>
+			<pos>4 4</pos>
+			<size>897 66</size>
+			<pivot>0 0</pivot>
+			<rotated>0</rotated>
+			<trimmed>0</trimmed>
+			<untrimmedSize>0 0</untrimmedSize>
+			<orgImageName></orgImageName>
+			<posStable>0</posStable>
+			<ismesh>0</ismesh>
+			<divtype>unknown</divtype>
+			<innerPoint />
+			<outerPoint />
+			<meshPointList />
+			<meshTriList />
+		</cell>
+		<cell>
+			<name>monster_line</name>
+			<pos>905 0</pos>
+			<size>112 158</size>
+			<pivot>0 -0.322785</pivot>
+			<rotated>0</rotated>
+			<trimmed>0</trimmed>
+			<untrimmedSize>0 0</untrimmedSize>
+			<orgImageName></orgImageName>
+			<posStable>0</posStable>
+			<ismesh>0</ismesh>
+			<divtype>unknown</divtype>
+			<innerPoint />
+			<outerPoint />
+			<meshPointList />
+			<meshTriList />
+		</cell>
+		<cell>
+			<name>window</name>
+			<pos>0 115</pos>
+			<size>508 145</size>
+			<pivot>0 -0.0517241</pivot>
+			<rotated>0</rotated>
+			<trimmed>0</trimmed>
+			<untrimmedSize>0 0</untrimmedSize>
+			<orgImageName></orgImageName>
+			<posStable>0</posStable>
+			<ismesh>0</ismesh>
+			<divtype>unknown</divtype>
+			<innerPoint />
+			<outerPoint />
+			<meshPointList />
+			<meshTriList />
+		</cell>
+		<cell>
+			<name>dog</name>
+			<pos>6 264</pos>
+			<size>433 63</size>
+			<pivot>0 0</pivot>
+			<rotated>0</rotated>
+			<trimmed>0</trimmed>
+			<untrimmedSize>0 0</untrimmedSize>
+			<orgImageName></orgImageName>
+			<posStable>0</posStable>
+			<ismesh>0</ismesh>
+			<divtype>unknown</divtype>
+			<innerPoint />
+			<outerPoint />
+			<meshPointList />
+			<meshTriList />
+		</cell>
+		<cell>
+			<name>car</name>
+			<pos>3 326</pos>
+			<size>430 66</size>
+			<pivot>0 0</pivot>
+			<rotated>0</rotated>
+			<trimmed>0</trimmed>
+			<untrimmedSize>0 0</untrimmedSize>
+			<orgImageName></orgImageName>
+			<posStable>0</posStable>
+			<ismesh>0</ismesh>
+			<divtype>unknown</divtype>
+			<innerPoint />
+			<outerPoint />
+			<meshPointList />
+			<meshTriList />
+		</cell>
+		<cell>
+			<name>bicycle</name>
+			<pos>6 393</pos>
+			<size>440 62</size>
+			<pivot>0 0</pivot>
+			<rotated>0</rotated>
+			<trimmed>0</trimmed>
+			<untrimmedSize>0 0</untrimmedSize>
+			<orgImageName></orgImageName>
+			<posStable>0</posStable>
+			<ismesh>0</ismesh>
+			<divtype>unknown</divtype>
+			<innerPoint />
+			<outerPoint />
+			<meshPointList />
+			<meshTriList />
+		</cell>
+		<cell>
+			<name>document</name>
+			<pos>14 456</pos>
+			<size>418 64</size>
+			<pivot>0 0</pivot>
+			<rotated>0</rotated>
+			<trimmed>0</trimmed>
+			<untrimmedSize>0 0</untrimmedSize>
+			<orgImageName></orgImageName>
+			<posStable>0</posStable>
+			<ismesh>0</ismesh>
+			<divtype>unknown</divtype>
+			<innerPoint />
+			<outerPoint />
+			<meshPointList />
+			<meshTriList />
+		</cell>
+		<cell>
+			<name>deadline</name>
+			<pos>3 520</pos>
+			<size>431 62</size>
+			<pivot>0 0</pivot>
+			<rotated>0</rotated>
+			<trimmed>0</trimmed>
+			<untrimmedSize>0 0</untrimmedSize>
+			<orgImageName></orgImageName>
+			<posStable>0</posStable>
+			<ismesh>0</ismesh>
+			<divtype>unknown</divtype>
+			<innerPoint />
+			<outerPoint />
+			<meshPointList />
+			<meshTriList />
+		</cell>
+		<cell>
+			<name>window_efect</name>
+			<pos>21 586</pos>
+			<size>465 100</size>
+			<pivot>0 0</pivot>
+			<rotated>0</rotated>
+			<trimmed>0</trimmed>
+			<untrimmedSize>0 0</untrimmedSize>
+			<orgImageName></orgImageName>
+			<posStable>0</posStable>
+			<ismesh>0</ismesh>
+			<divtype>unknown</divtype>
+			<innerPoint />
+			<outerPoint />
+			<meshPointList />
+			<meshTriList />
+		</cell>
+		<cell>
+			<name>coffin</name>
+			<pos>522 112</pos>
+			<size>119 146</size>
+			<pivot>0 0</pivot>
+			<rotated>0</rotated>
+			<trimmed>0</trimmed>
+			<untrimmedSize>0 0</untrimmedSize>
+			<orgImageName></orgImageName>
+			<posStable>0</posStable>
+			<ismesh>0</ismesh>
+			<divtype>unknown</divtype>
+			<innerPoint />
+			<outerPoint />
+			<meshPointList />
+			<meshTriList />
+		</cell>
+	</cells>
+	<useCellMapOptOption>0</useCellMapOptOption>
+	<cellMapOptOption>
+		<fitToImage>0</fitToImage>
+		<margeSameImage>0</margeSameImage>
+		<compressOneColor>0</compressOneColor>
+		<includeZeroAlpha>0</includeZeroAlpha>
+		<shapePadding>8</shapePadding>
+	</cellMapOptOption>
+</SpriteStudioCellMap>

@@ -13,11 +13,12 @@ PlayerIdleState::PlayerIdleState(PlayerStateMachine& stateMachine, Player& playe
 void PlayerIdleState::Enter()
 {
 	player_.StopMove();
+	player_.SetAnimation(PlayerAnimType::Idle, true);
 
 	DxPlus::Debug::SetString(L"PlayerIdleState::Enter");
 }
 
-void PlayerIdleState::Tick(float deltaTime)
+void PlayerIdleState::Tick(float)
 {
 	PlayerInput move = player_.GetInput();
 	if(move.isMoving)
