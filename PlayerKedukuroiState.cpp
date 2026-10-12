@@ -19,6 +19,12 @@ void PlayerKedukuroiState::Enter()
 void PlayerKedukuroiState::Tick(float)
 {
     const PlayerInput& input = player_.GetInput();
+    // 左クリックで通常攻撃
+    if (input.attackPressed)
+    {
+        stateMachine_.ChangeState(PlayerStateType::Attack);
+        return;
+    }
     // WASD+Space　入力方向へ突進ジャンプ
     if (input.jumpPressed && input.isMoving && player_.IsGrounded() && player_.IsGravityEnabled())
     {

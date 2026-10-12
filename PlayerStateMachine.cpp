@@ -7,7 +7,8 @@ PlayerStateMachine::PlayerStateMachine(Player& player)
 	walkState_(*this, player),
 	kedukuroiState_(*this, player),
 	neutralJumpState_(*this, player),
-	lungingJumpState_(*this, player)
+	lungingJumpState_(*this, player),
+	attackState_(*this, player)
 {
 
 }
@@ -46,6 +47,8 @@ State* PlayerStateMachine::FindState(PlayerStateType type)
         return &neutralJumpState_;
     case PlayerStateType::LungingJump:
         return &lungingJumpState_;
+    case PlayerStateType::Attack:
+        return &attackState_;
     default:
         return nullptr;
     }

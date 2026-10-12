@@ -21,6 +21,12 @@ void PlayerIdleState::Enter()
 void PlayerIdleState::Tick(float)
 {
 	const PlayerInput& move = player_.GetInput();
+    // 左クリックで通常攻撃
+    if (move.attackPressed)
+    {
+        stateMachine_.ChangeState(PlayerStateType::Attack);
+        return;
+    }
     // WASD+Space　入力方向へ突進ジャンプ
     if (move.jumpPressed && move.isMoving && player_.IsGrounded() && player_.IsGravityEnabled())
     {
