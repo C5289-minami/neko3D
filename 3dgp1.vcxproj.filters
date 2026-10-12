@@ -88,6 +88,9 @@
     <Filter Include="40_Gameplay\Actors\Player\State\Idle">
       <UniqueIdentifier>{b173a18d-7ff2-4986-8a69-bd9110aa1854}</UniqueIdentifier>
     </Filter>
+    <Filter Include="40_Gameplay\Actors\Player\State\Kedukuroi">
+      <UniqueIdentifier>{e88798f2-22e7-48b4-9ea2-e1c15cb16078}</UniqueIdentifier>
+    </Filter>
     <Filter Include="40_Gameplay\Actors\Player\State\Walk">
       <UniqueIdentifier>{6c0d4e4b-0114-4f9f-a8c2-d512e6eed8c0}</UniqueIdentifier>
     </Filter>
@@ -326,6 +329,9 @@
     </ClInclude>
     <ClInclude Include="PlayerIdleState.h">
       <Filter>40_Gameplay\Actors\Player\State\Idle</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerKedukuroiState.h">
+      <Filter>40_Gameplay\Actors\Player\State\Kedukuroi</Filter>
     </ClInclude>
     <ClInclude Include="PlayerWalkState.h">
       <Filter>40_Gameplay\Actors\Player\State\Walk</Filter>
@@ -637,6 +643,9 @@
     </ClCompile>
     <ClCompile Include="PlayerIdleState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Idle</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerKedukuroiState.cpp">
+      <Filter>40_Gameplay\Actors\Player\State\Kedukuroi</Filter>
     </ClCompile>
     <ClCompile Include="PlayerWalkState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Walk</Filter>

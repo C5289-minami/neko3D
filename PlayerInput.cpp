@@ -13,9 +13,10 @@ void PlayerInput::Update()
 	if (button & BUTTON_UP) moveDir.z += 1.0f;
 	if (button & BUTTON_DOWN) moveDir.z -= 1.0f;
 	if (button & (BUTTON_LEFT | BUTTON_L1)) moveDir.x -= 1.0f;
-	if (button & (BUTTON_RIGHT | BUTTON_R1)) moveDir.x += 1.0f;
+	if (button & BUTTON_RIGHT) moveDir.x += 1.0f;
 
 	jumpPressed = (buttonDown & BUTTON_TRIGGER1) != 0;
+	kedukuroiPressed = (buttonDown & BUTTON_R1) != 0;
 
 	isMoving = (moveDir.LengthSq() > 0.0f);
 }

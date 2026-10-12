@@ -16,7 +16,12 @@ void PlayerWalkState::Enter()
 
 void PlayerWalkState::Tick(float)
 {
-	PlayerInput move = player_.GetInput();
+	const PlayerInput& move = player_.GetInput();
+	if (move.kedukuroiPressed)
+	{
+		stateMachine_.ChangeState(PlayerStateType::Kedukuroi);
+		return;
+	}
 	if (!move.isMoving)
 	{
 		stateMachine_.ChangeState(PlayerStateType::Idle);
@@ -26,7 +31,7 @@ void PlayerWalkState::Tick(float)
 	player_.SetMoveDirection(move.moveDir, Const::PLAYER_MOVE_SPEED);
 
 
-	DxPlus::Debug::SetString(L"PlayerWalkState::Tick");
+	DxPlus::Debug::SetFormatString(L"state:walk");
 }
 
 void PlayerWalkState::Exit()
