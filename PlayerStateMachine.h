@@ -8,6 +8,7 @@
 #include "PlayerKedukuroiState.h"
 #include "PlayerNeutralJumpState.h"
 #include "PlayerLungingJumpState.h"
+#include "PlayerAttackState.h"
 
 class Player;
 
@@ -35,5 +36,6 @@ private:
 	PlayerKedukuroiState kedukuroiState_;
 	PlayerNeutralJumpState neutralJumpState_;
 	PlayerLungingJumpState lungingJumpState_;
+	PlayerAttackState attackState_;
 	// ‘¼‚ð‚±‚±‚É’Ç‰Á
 };

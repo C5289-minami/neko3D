@@ -330,6 +330,9 @@
     <ClInclude Include="PlayerIdleState.h">
       <Filter>40_Gameplay\Actors\Player\State\Idle</Filter>
     </ClInclude>
+    <ClInclude Include="PlayerAttackState.h">
+      <Filter>40_Gameplay\Actors\Player\State</Filter>
+    </ClInclude>
     <ClInclude Include="PlayerLungingJumpState.h">
       <Filter>40_Gameplay\Actors\Player\State</Filter>
     </ClInclude>
@@ -649,6 +652,9 @@
     </ClCompile>
     <ClCompile Include="PlayerIdleState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Idle</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerAttackState.cpp">
+      <Filter>40_Gameplay\Actors\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="PlayerLungingJumpState.cpp">
       <Filter>40_Gameplay\Actors\Player\State</Filter>
