@@ -25,15 +25,17 @@ public:
  void SetAnimation(PlayerAnimType::Type type, bool loop = true);
 
 	// ステージとの当たり判定込みの更新
-	void Update(float deltaTime, const Stage& stage);
+	void Update(float deltaTime, const Stage& stage, const Vec3& movementCenter = Vec3{});
 
 	// 移動
-	void SetMoveDirection(const Vec3& moveDir, float speed);
+	void SetMoveDirection(const Vec3& moveDir);
 	void StopMove();
 
 	// 回転
 	void Turn(float direction, float speed, float deltaTime);
 	void TurnTowards(const Vec3& moveDir, float deltaTime);
+	//Playerの斜め移動
+	void PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& movementCenter);
 
 	// ジャンプ
 	void JumpAction();
@@ -70,6 +72,8 @@ private:
 	PlayerInput input_;
 	PlayerStateMachine stateMachine_;
 
+	Vec3 movementCenter_{}; // 足場の中心
+	Vec3 moveInput_{};      // Xは左右、Zは前後の入力
 	Vec3 velocity_{ 0.0f, 0.0f, 0.0f };
 	bool isGrounded_{ false };
   bool gravityEnabled_{ true };

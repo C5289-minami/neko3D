@@ -2,7 +2,6 @@
 #include "DxPlus/Debug.h"
 #include "Player.h"
 #include "PlayerInput.h"
-#include "Consts.h"
 
 PlayerWalkState::PlayerWalkState(PlayerStateMachine& stateMachine, Player& player)
 	: PlayerBaseState(stateMachine, player)
@@ -28,7 +27,7 @@ void PlayerWalkState::Tick(float)
 		return;
 	}
 
-	player_.SetMoveDirection(move.moveDir, Const::PLAYER_MOVE_SPEED);
+	player_.SetMoveDirection(move.moveDir);
 
 
 	DxPlus::Debug::SetFormatString(L"state:walk");

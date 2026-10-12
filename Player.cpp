@@ -10,6 +10,7 @@
 
 #include <cmath>
 #include "Sound3D.h"
+#include <algorithm>
 
 
 Player::Player()
@@ -35,6 +36,7 @@ void Player::Reset()
 	SetTransform(TransformDefaults::GamePlayer);
 
 
+	moveInput_ = {};
 	velocity_ = { 0.0f, 0.0f, 0.0f };
 
 	// 空中から開始し、ステージへのレイキャストで接地させる。
@@ -53,8 +55,6 @@ void Player::Update(float deltaTime)
 {
 	input_.Update();
 
-	TurnTowards(input_.moveDir, deltaTime);
-
 	if (input_.jumpPressed)
 	{
 		JumpAction();
@@ -62,11 +62,9 @@ void Player::Update(float deltaTime)
 
 	stateMachine_.Tick(deltaTime);
 
-	// 水平方向の移動
-	position_.x += velocity_.x * deltaTime;
-	position_.z += velocity_.z * deltaTime;
+	// 中心がどっちにあるか調べる。高さはここでは考えない
+	PlayerDiagonalMove(deltaTime, position_, movementCenter_);
 
- // ステージを考慮した更新処理で、プレイヤーを床面に合わせる。
 	if (gravityEnabled_)
 	{
 		velocity_.y -= Const::GRAVITY * deltaTime;
@@ -84,8 +82,9 @@ void Player::Update(float deltaTime)
 	animation_.Update(deltaTime);
 }
 
-void Player::Update(float deltaTime, const Stage& stage)
+void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCenter)
 {
+	movementCenter_ = movementCenter;
 	const float previousY = GetPosition().y;
 
 	Update(deltaTime);
@@ -147,29 +146,16 @@ void Player::SetAnimation(PlayerAnimType::Type type, bool loop)
 }
 
 
-void Player::SetMoveDirection(const Vec3& moveDir, float speed)
+void Player::SetMoveDirection(const Vec3& moveDir)
 {
-	Vec3 move
-	{
-		moveDir.x,
-		0.0f,
-		moveDir.z
-	};
-
-	if (move.LengthSq() > 0.0f)
-	{
-		move = move.Normalized() * speed;
-	}
-
-	velocity_.x = move.x;
-	velocity_.z = move.z;
+	// 押している方向を覚えておく。実際に動かすのはUpdate
+	moveInput_ = { moveDir.x, 0.0f, moveDir.z };
 }
 
 
 void Player::StopMove()
 {
-	velocity_.x = 0.0f;
-	velocity_.z = 0.0f;
+	moveInput_ = {};
 }
 
 
@@ -261,6 +247,37 @@ void Player::TurnTowards(
 	SetYaw(yaw);
 }
 
+void Player::PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& movementCenter)
+{
+	if (deltaTime <= 0.0f || moveInput_.LengthSq() == 0.0f)
+	{
+		return;
+	}
+
+	// Apply input around the stage center; horizontal movement preserves radius.
+	Vec3 forward = movementCenter - playerPos;
+	forward.y = 0.0f;
+	const float radius = forward.Length();
+	if (radius < 0.001f)
+	{
+		forward = Vec3(std::sin(GetYaw()), 0.0f, std::cos(GetYaw()));
+	}
+	else
+	{
+		forward /= radius;
+	}
+
+	const Vec3 input = moveInput_.Normalized();
+	const Vec3 right{ forward.z, 0.0f, -forward.x };
+	const float distance = Const::PLAYER_MOVE_SPEED * deltaTime;
+	const float nextRadius = (std::max)(1.0f, radius - input.z * distance);
+	const float angle = input.x * distance / (std::max)(1.0f, radius);
+	const Vec3 outward = -forward * std::cos(angle) + right * std::sin(angle);
+
+	playerPos.x = movementCenter.x + outward.x * nextRadius;
+	playerPos.z = movementCenter.z + outward.z * nextRadius;
+	TurnTowards(forward * input.z + right * input.x, deltaTime);
+}
 
 void Player::JumpAction()
 {
