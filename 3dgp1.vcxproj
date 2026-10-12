@@ -258,6 +258,7 @@
     <ClInclude Include="PlayerIdleState.h" />
     <ClInclude Include="PlayerKedukuroiState.h" />
     <ClInclude Include="PlayerNeutralJumpState.h" />
+    <ClInclude Include="PlayerLungingJumpState.h" />
     <ClInclude Include="PlayerInput.h" />
     <ClInclude Include="PlayerStateMachine.h" />
     <ClInclude Include="PlayerStateType.h" />
@@ -352,6 +353,7 @@
     <ClCompile Include="PlayerIdleState.cpp" />
     <ClCompile Include="PlayerKedukuroiState.cpp" />
     <ClCompile Include="PlayerNeutralJumpState.cpp" />
+    <ClCompile Include="PlayerLungingJumpState.cpp" />
     <ClCompile Include="PlayerInput.cpp" />
     <ClCompile Include="PlayerStateMachine.cpp" />
     <ClCompile Include="PlayerWalkState.cpp" />

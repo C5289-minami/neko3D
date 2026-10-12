@@ -21,6 +21,12 @@ void PlayerIdleState::Enter()
 void PlayerIdleState::Tick(float)
 {
 	const PlayerInput& move = player_.GetInput();
+    // WASD+Space　入力方向へ突進ジャンプ
+    if (move.jumpPressed && move.isMoving && player_.IsGrounded() && player_.IsGravityEnabled())
+    {
+        stateMachine_.ChangeState(PlayerStateType::LungingJump);
+        return;
+    }
     // Spaceだけで真上にジャンプ
     if (move.jumpPressed &&!move.isMoving &&
 		player_.IsGrounded() &&player_.IsGravityEnabled())

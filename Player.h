@@ -39,6 +39,7 @@ public:
 
 	// ƒWƒƒƒ“ƒv
 	void JumpAction();
+	void StartLungingJump(const Vec3& moveDir);
 	bool IsGrounded() const { return isGrounded_; }
 	bool IsGravityEnabled() const { return gravityEnabled_; }
 	void SetGravityEnabled(bool enabled);

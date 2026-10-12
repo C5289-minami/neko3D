@@ -59,6 +59,9 @@ void Player::Update(float deltaTime)
 
 	// 中心がどっちにあるか調べる。高さはここでは考えない
 	PlayerDiagonalMove(deltaTime, position_, movementCenter_);
+	// 突進中の横方向の移動
+	position_.x += velocity_.x * deltaTime;
+	position_.z += velocity_.z * deltaTime;
 
 	if (gravityEnabled_)
 	{
@@ -151,6 +154,8 @@ void Player::SetMoveDirection(const Vec3& moveDir)
 void Player::StopMove()
 {
 	moveInput_ = {};
+	velocity_.x = 0.0f;
+	velocity_.z = 0.0f;
 }
 
 
@@ -249,7 +254,7 @@ void Player::PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& mo
 		return;
 	}
 
-	// Apply input around the stage center; horizontal movement preserves radius.
+	//センターを中心にして、プレイヤーの位置から前方向を求める
 	Vec3 forward = movementCenter - playerPos;
 	forward.y = 0.0f;
 	const float radius = forward.Length();
@@ -272,6 +277,35 @@ void Player::PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& mo
 	playerPos.x = movementCenter.x + outward.x * nextRadius;
 	playerPos.z = movementCenter.z + outward.z * nextRadius;
 	TurnTowards(forward * input.z + right * input.x, deltaTime);
+}
+
+void Player::StartLungingJump(const Vec3& moveDir)
+{
+    if (!gravityEnabled_ || !isGrounded_ || moveDir.LengthSq() == 0.0f)
+    {
+        return;
+    }
+
+    // 通常移動と同じ基準で、踏み切る方向を決める
+	Vec3 forward = movementCenter_ - position_;// 足場の中心からプレイヤーの位置へのベクトル
+    forward.y = 0.0f;
+    if (forward.LengthSq() < 0.000001f)
+    {
+		forward = Vec3(std::sin(GetYaw()), 0.0f, std::cos(GetYaw()));
+		// 足場の中心とプレイヤーの位置がほぼ同じ場合は、プレイヤーの向きから前方向を決める
+    }
+    else
+    {
+        forward = forward.Normalized();
+    }
+    const Vec3 right{ forward.z, 0.0f, -forward.x };
+    const Vec3 direction = (forward * moveDir.z + right * moveDir.x).Normalized();
+
+    StopMove();
+    velocity_ = direction * Const::PLAYER_LUNGING_MOVE_SPEED;
+    velocity_.y = Const::PLAYER_LUNGING_JUMP_SPEED;
+    SetYaw(std::atan2(direction.x, direction.z));
+    isGrounded_ = false;
 }
 
 void Player::JumpAction()

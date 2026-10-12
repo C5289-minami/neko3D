@@ -20,7 +20,7 @@ void Player_camera::Update( const Vec3& playerPosition, const Vec3& bossPosition
     }
 	//カメラの目標位置を計算する
     const Vec3 targetCameraPosition = playerPosition
-        + directionFromBossToPlayer * settings.cameraDistance
+        + directionFromBossToPlayer * settings.cameraDistance   
         + Vec3(0.0f, settings.cameraHeight, 0.0f);
 
     //カメラの注視点の目標位置を計算する
