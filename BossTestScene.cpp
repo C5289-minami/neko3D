@@ -217,6 +217,9 @@ void BossTestScene::Update(float deltaTime)
 		}
 	}
 	//test.Update(deltaTime, stage);
+
+    Collision::UpdateModelContact(test.GetModelObject(), boss.GetModelObject());
+
 	stage.UpdateAlphaModel(deltaTime, player_);
 
 
@@ -233,6 +236,7 @@ void BossTestScene::Update(float deltaTime)
 	}
 
 	shaderToggleWasDown = shaderToggleDown;
+
 
 
 	Sound3D::SetListener(
@@ -395,6 +399,28 @@ void BossTestScene::RenderSceneBuffer(bool toonEnabled) const
 // トゥーン描画開始
 	modelToonRenderer_.BeginPass();
 
+//<<<<<<< Player/Hit
+    const auto drawActor = [this](const ModelObject& model, ModelToonType type)
+    {
+        if (model.collisionHighlighted)
+        {
+            // Use DxLib's standard rendering so MV1 color settings are applied.
+            SetUsePixelShader(-1);
+            SetUseVertexShader(-1);
+            MV1SetUseOrigShader(FALSE);
+            model.Draw();
+            MV1SetUseOrigShader(TRUE);
+        }
+        else
+        {
+            modelToonRenderer_.Draw(model, type);
+        }
+    };
+    drawActor(test.GetModelObject(), ModelToonType::NMap4Frame);
+    drawActor(boss.GetModelObject(), ModelToonType::FourFrame);
+	outlineRenderer_.EndScenePass();
+}
+// =======
 	// ステージとテストモデルを描画
 	modelToonRenderer_.Draw(
 		stage.GetModelObject(),
@@ -407,6 +433,7 @@ void BossTestScene::RenderSceneBuffer(bool toonEnabled) const
 	);
 
 	DrawToonCharacters(false);
+// >>>>>>> main
 
 	modelToonRenderer_.EndPass();
 }

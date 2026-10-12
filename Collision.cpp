@@ -25,3 +25,27 @@ namespace Collision
 			sphereB.center, sphereB.radius);
 	}
 }
+namespace Collision
+{
+    bool IsHitEllipsoidEllipsoid(const Ellipsoid& a, const Ellipsoid& b)
+    {
+
+		// 2‚Â‚Ì‘È‰~‘Ì‚Ì”¼Œa‚ª0ˆÈ‰º‚¾‚Á‚½‚ç“–‚½‚è”»’è‚ğs‚í‚È‚¢
+		if (a.radii.x <= 0.0f || a.radii.y <= 0.0f || a.radii.z <= 0.0f ||
+            b.radii.x <= 0.0f || b.radii.y <= 0.0f || b.radii.z <= 0.0f)
+        {
+            return false;
+        }
+
+        const Vec3 difference = b.center - a.center;
+        const Vec3 radiiSum = a.radii + b.radii;
+        const Vec3 normalized{
+            difference.x / radiiSum.x,
+            difference.y / radiiSum.y,
+            difference.z / radiiSum.z
+        };
+        return normalized.LengthSq() <= 1.0f;
+    }
+
+
+}

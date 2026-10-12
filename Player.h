@@ -57,6 +57,7 @@ public:
         model_.rotation = transform.rotation;
         model_.scale = transform.scale;
     }
+    ModelObject& GetModelObject() { return model_; }
     const ModelObject& GetModelObject() const { return model_; }
 	const PlayerInput& GetInput() const { return input_; }
 

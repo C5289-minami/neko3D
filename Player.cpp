@@ -31,6 +31,7 @@ void Player::Init()
 
 void Player::Reset()
 {
+    model_.collisionHighlighted = false;
 	SetTransform(TransformDefaults::GamePlayer);
 
 
@@ -134,6 +135,7 @@ void Player::Update(float deltaTime, const Stage& stage)
 
 void Player::Draw() const
 {
+    model_.ApplyCollisionColor();
 	animation_.Draw3D(model_.position, model_.scale, model_.rotation);
 }
 
