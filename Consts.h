@@ -13,6 +13,10 @@ namespace Const
     constexpr float PLAYER_ROTATE_SPEED = DxPlus::Deg2Rad * 180.0f;
     constexpr float PLAYER_JUMP_SPEED = 1000.0f;
     constexpr float PLAYER_MOVE_SPEED = 200.0f;
+    // 突進ジャンプの仮の速度
+    constexpr float PLAYER_LUNGING_MOVE_SPEED = 600.0f;
+    constexpr float PLAYER_LUNGING_JUMP_SPEED = 800.0f;
+
     constexpr float PLAYER_HEIGHT = 180.0f;
     constexpr float PLAYER_SKIN = 1.0f;
     constexpr float PLAYER_RADIUS = 60.0f;
