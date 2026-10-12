@@ -63,7 +63,7 @@ private:
     // 共通のスクリーン空間アウトライン描画
     ShaderEffectController shaderEffects_{};
 
-    void RenderSceneBuffer(bool toonEnabled) const;
+    void DrawScene(bool toonEnabled) const;
     void RenderDepth() const;
 
 

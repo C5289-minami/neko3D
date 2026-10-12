@@ -189,8 +189,6 @@ void BossTestScene::Update(float deltaTime)
 			cameraEye += movement.Normalized() * (speed * deltaTime);
 		}
 	}
-	//test.Update(deltaTime, stage);
-
 	Collision::UpdateModelContact(player_.GetModelObject(), boss.GetModelObject());
 
 	stage.UpdateAlphaModel(deltaTime, player_);
@@ -217,7 +215,7 @@ void BossTestScene::Render() const
 	{
 		shaderEffects_.Render(
 			[this](bool toonEnabled) {
-				RenderSceneBuffer(toonEnabled);
+				DrawScene(toonEnabled);
 			},
 			[this] {
 				RenderDepth();
@@ -226,7 +224,7 @@ void BossTestScene::Render() const
 	}
 	else
 	{
-		RenderSceneBuffer(false);
+		DrawScene(false);
 	}
 
 	const int white = DxLib::GetColor(255, 255, 255);
@@ -244,22 +242,17 @@ void BossTestScene::RenderDepth() const
 	// シーンのカメラを設定する
 	ApplyCamera();
 
-	// 深度描画ではピクセルシェーダーを変更しない。
-	// ShaderEffectController 側で設定された DepthPS を使用し、
-	// 頂点シェーダーだけ ModelToonRenderer に選ばせる。
-// ステージの頂点シェーダーを設定
+	// Boneなしシェーダー
 	modelToonRenderer_.SetVertexShader(ModelToonType::Model);
 
-	// ステージを描画
 	stage.GetModelObject().Draw();
+	boss.Draw();
 
-	// プレイヤーはボーン対応の頂点シェーダーを使用
+	// Bone対応の頂点シェーダー
 	modelToonRenderer_.SetVertexShader(ModelToonType::Bone);
+
 	player_.Draw();
 
-	// ボスは通常モデル用の頂点シェーダーを使用
-	modelToonRenderer_.SetVertexShader(ModelToonType::Model);
-	boss.Draw();
 }
 
 void BossTestScene::ApplyCamera() const
@@ -281,7 +274,7 @@ void BossTestScene::ApplyCamera() const
 	);
 }
 
-void BossTestScene::RenderSceneBuffer(bool toonEnabled) const
+void BossTestScene::DrawScene(bool toonEnabled) const
 {
 	// カメラを設定する
 	ApplyCamera();
