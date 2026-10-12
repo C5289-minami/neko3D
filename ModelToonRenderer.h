@@ -21,7 +21,7 @@ public:
     ModelToonRenderer& operator=(const ModelToonRenderer&) = delete;
 
     // シェーダーと定数バッファーを初期化する
-    void Init();
+    bool Init();
 
     // 確保したリソースを解放する
     void Release() noexcept;

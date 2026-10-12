@@ -44,7 +44,7 @@ private:
     BossHairBallSkill hairBallSkill_;
     BossBiteSkill biteSkill_;
 
-    int fontHandle{ -1 };
+  
     Vec3 cameraEye{ 0.0f, 250.0f, -650.0f };
     float yaw{};
     float pitch{};
@@ -53,9 +53,6 @@ private:
     Debug_camera debugCamera_;
     bool debugActorsPaused_{};
     std::string transformInitialStatus_;
-
-    // テスト用モデル
-    ModelObject testModel_{};
 
     // プレイヤー
     Player player_;
@@ -71,5 +68,4 @@ private:
 
 
     void ApplyCamera() const;
-    void DrawToonCharacters(bool depthPass) const;
 };

@@ -32,7 +32,7 @@ ModelToonRenderer::~ModelToonRenderer()
 // 初期化
 // ============================================================
 
-void ModelToonRenderer::Init()
+bool ModelToonRenderer::Init()
 {
     // 再初期化にも対応できるよう、既存リソースを解放する
     Release();
@@ -53,8 +53,9 @@ void ModelToonRenderer::Init()
         toonConstantBuffer_ < 0)
     {
         Release();
-        return;
+        return false;
     }
+	return true;
 }
 
 

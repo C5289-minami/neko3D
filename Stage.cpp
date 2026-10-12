@@ -28,7 +28,7 @@ void Stage::Init()
     // 地面との当たり判定に使うコリジョン情報を生成する。
     MV1SetupCollInfo(modelHandle, -1, 8, 8, 8);
 
-
+	Reset();
 }
 
 void Stage::Reset()

@@ -20,6 +20,7 @@ void Boss::Init()
 {
 	activeSkill_ = nullptr;
 	stateMachine_.Initialize();
+	Reset();
 }
 
 void Boss::Reset()

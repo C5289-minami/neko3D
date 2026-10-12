@@ -19,29 +19,13 @@
 
 namespace
 {
+	// カメラ関連なのでクラスを作ったのならすべて移動させてね
 	constexpr float MouseRotationRadiansPerPixel =
 		DxPlus::PI * 2.0f / DxPlus::CLIENT_WIDTH;
 
 	constexpr float MinPitch = DxPlus::Deg2Rad * -89.0f;
 	constexpr float MaxPitch = DxPlus::Deg2Rad * 89.0f;
 	constexpr float CameraMoveSpeed = 500.0f;
-
-
-	void SetModelCulling(int modelHandle, int culling)
-	{
-		if (modelHandle < 0)
-		{
-			return;
-		}
-
-		for (int i = 0; i < MV1GetMeshNum(modelHandle); ++i)
-		{
-			if (MV1GetMeshBackCulling(modelHandle, i) != DX_CULLING_NONE)
-			{
-				MV1SetMeshBackCulling(modelHandle, i, culling);
-			}
-		}
-	}
 }
 
 DebugSceneControls BossTestScene::GetDebugControls()
@@ -82,44 +66,34 @@ DebugSceneControls BossTestScene::GetDebugControls()
 
 void BossTestScene::Init()
 {
+	// 背景色とライトの方向を設定
 	DxLib::SetBackgroundColor(255, 178, 102);
-	//SetBackgroundColor(40, 40, 40);
 	DxLib::SetLightDirection(DxLib::GetLightDirection());
-	// DxLib::SetGlobalAmbientLight(DxLib::GetColorF(0.35f, 0.35f, 0.35f, 1.0f));
 
 
-	stage.Init();
-	stage.Reset();
-	MV1SetMeshCategoryVisible(
-		stage.GetModelHandle(),
-		DX_MV1_MESHCATEGORY_OUTLINE_ORIG_SHADER,
-		TRUE
-	);
-
-	boss.Init();
-
-	boss.Reset();
-
+	// デバッグカメラの初期化
 	cameraEye = { 0.0f, 250.0f, -650.0f };
 	const Vec3 direction = (Vec3{ 0.0f, 100.0f, 0.0f } - cameraEye).Normalized();
 	pitch = std::asin(std::clamp(direction.y, -1.0f, 1.0f));
 	yaw = std::atan2(direction.x, direction.z);
 
-	testModel_.modelKey = ResourceKeys::Model_Test;
-	testModel_.scale = { 500.0f, 500.0f, 500.0f };
-
 	// トゥーン描画に必要なシェーダーと設定バッファーを初期化
-	modelToonRenderer_.Init();
+	if (!modelToonRenderer_.Init())
+		DxPlus::Utils::FatalError(L"modelToonRendererの初期化失敗");
+	if (!shaderEffects_.Init(DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT))
+		DxPlus::Utils::FatalError(L"shaderEffectsの初期化失敗");
 
-  shaderEffects_.Init(
-		DxPlus::CLIENT_WIDTH,
-		DxPlus::CLIENT_HEIGHT
-	);
+	// toon描画とアウトライン描画を有効にする
 	shaderEffects_.GetSettings().toonEnabled = true;
-    shaderEffects_.GetSettings().outlineEnabled = true;
+	shaderEffects_.GetSettings().outlineEnabled = true;
 
+	// FadeInを開始する
 	StartFadeIn();
+	
 
+	// Objの初期化
+	stage.Init();
+	boss.Init();
 	// プレイヤーの初期設定
 	player_.Init();
 	player_.Reset();
@@ -152,7 +126,6 @@ void BossTestScene::Update(float deltaTime)
 	const bool keyboardCaptured = false;
 #endif
 	if (!actorsPaused) boss.Update(deltaTime);
-	if (!actorsPaused) testModel_.rotation.z += 1.0f * deltaTime;
 
 	// --- スキル入力処理 ---
 	int selectedSkill = 0;
@@ -218,7 +191,7 @@ void BossTestScene::Update(float deltaTime)
 	}
 	//test.Update(deltaTime, stage);
 
-    Collision::UpdateModelContact(test.GetModelObject(), boss.GetModelObject());
+	Collision::UpdateModelContact(player_.GetModelObject(), boss.GetModelObject());
 
 	stage.UpdateAlphaModel(deltaTime, player_);
 
@@ -236,14 +209,6 @@ void BossTestScene::Update(float deltaTime)
 	}
 
 	shaderToggleWasDown = shaderToggleDown;
-
-
-
-	Sound3D::SetListener(
-		cameraEye,
-		Vec3{ std::sin(yaw) * std::cos(pitch), std::sin(pitch), std::cos(yaw) * std::cos(pitch) }
-	);
-//	Sound3D::Play(RM().GetSound(ResourceKeys::Sound_BossBite), boss.GetPosition());
 }
 
 void BossTestScene::Render() const
@@ -264,14 +229,14 @@ void BossTestScene::Render() const
 		RenderSceneBuffer(false);
 	}
 
-const int white = DxLib::GetColor(255, 255, 255);
-int fontHandle = RM().GetFont(ResourceKeys::Font_Title);
+	const int white = DxLib::GetColor(255, 255, 255);
+	int fontHandle = RM().GetFont(ResourceKeys::Font_Title);
 #ifndef NDEBUG
-DxPlus::Text::DrawString(L"BOSS TEST  |  F1: Back to Title",
-	{ 24.0f, 24.0f }, white, DxPlus::Text::TextAlign::TOP_LEFT, { 1, 1 }, 0, fontHandle);
+	DxPlus::Text::DrawString(L"BOSS TEST  |  F1: Back to Title",
+		{ 24.0f, 24.0f }, white, DxPlus::Text::TextAlign::TOP_LEFT, { 1, 1 }, 0, fontHandle);
 #endif
-DxPlus::Text::DrawString(L"1: Bang   2: Tail Whip   3: Clap   4: HairBall   5: Bite",
-	{ 24.0f, 100.0f }, white, DxPlus::Text::TextAlign::TOP_LEFT, { 0.7f, 0.7f }, 0, fontHandle);
+	DxPlus::Text::DrawString(L"1: Bang   2: Tail Whip   3: Clap   4: HairBall   5: Bite",
+		{ 24.0f, 100.0f }, white, DxPlus::Text::TextAlign::TOP_LEFT, { 0.7f, 0.7f }, 0, fontHandle);
 }
 
 void BossTestScene::RenderDepth() const
@@ -285,12 +250,16 @@ void BossTestScene::RenderDepth() const
 // ステージの頂点シェーダーを設定
 	modelToonRenderer_.SetVertexShader(ModelToonType::Model);
 
-	// ステージを描画（深度用ピクセルシェーダーは維持）
+	// ステージを描画
 	stage.GetModelObject().Draw();
-	testModel_.Draw();
 
-	// プレイヤーとボスも、それぞれに合う頂点シェーダーで描画する
-	DrawToonCharacters(true);
+	// プレイヤーはボーン対応の頂点シェーダーを使用
+	modelToonRenderer_.SetVertexShader(ModelToonType::Bone);
+	player_.Draw();
+
+	// ボスは通常モデル用の頂点シェーダーを使用
+	modelToonRenderer_.SetVertexShader(ModelToonType::Model);
+	boss.Draw();
 }
 
 void BossTestScene::ApplyCamera() const
@@ -312,63 +281,6 @@ void BossTestScene::ApplyCamera() const
 	);
 }
 
-void BossTestScene::DrawToonCharacters(bool depthPass) const
-{
-	enum class Character
-	{
-		Player,
-		Boss
-	};
-
-	struct DrawItem
-	{
-		const ModelObject* model;
-		ModelToonType type;
-		Character character;
-	};
-
-	// モデルと使用するシェーダーの対応を一元管理
-	const DrawItem characters[] =
-	{
-		{
-			&player_.GetModelObject(),
-			ModelToonType::Bone,
-			Character::Player
-		},
-		{
-			&boss.GetModelObject(),
-			ModelToonType::Model,
-			Character::Boss
-		}
-	};
-
-	for (const DrawItem& item : characters)
-	{
-		if (depthPass)
-		{
-			// 深度パスではピクセルシェーダーを変更せず、
-			// モデルに合った頂点シェーダーだけを設定する。
-			modelToonRenderer_.SetVertexShader(item.type);
-
-			switch (item.character)
-			{
-			case Character::Player:
-				player_.Draw();
-				break;
-
-			case Character::Boss:
-				boss.Draw();
-				break;
-			}
-		}
-		else
-		{
-			// 通常パスでは専用のトゥーンシェーダーで描画
-			modelToonRenderer_.Draw(*item.model, item.type);
-		}
-	}	
-}
-
 void BossTestScene::RenderSceneBuffer(bool toonEnabled) const
 {
 	// カメラを設定する
@@ -383,57 +295,31 @@ void BossTestScene::RenderSceneBuffer(bool toonEnabled) const
 		stage.Draw();
 		boss.Draw();
 		player_.Draw();
-		testModel_.Draw();
 
 		return;
 	}
 
-	// カリング設定に使用するモデルハンドルを取得
-	const int stageModelHandle = stage.GetModelHandle();
-	const int testModelHandle = RM().GetModel(testModel_.modelKey);
-
-	SetModelCulling(stageModelHandle, DX_CULLING_LEFT);
-	SetModelCulling(testModelHandle, DX_CULLING_LEFT);
-
 	// トゥーン描画開始
-// トゥーン描画開始
 	modelToonRenderer_.BeginPass();
 
-//<<<<<<< Player/Hit
-    const auto drawActor = [this](const ModelObject& model, ModelToonType type)
-    {
-        if (model.collisionHighlighted)
-        {
-            // Use DxLib's standard rendering so MV1 color settings are applied.
-            SetUsePixelShader(-1);
-            SetUseVertexShader(-1);
-            MV1SetUseOrigShader(FALSE);
-            model.Draw();
-            MV1SetUseOrigShader(TRUE);
-        }
-        else
-        {
-            modelToonRenderer_.Draw(model, type);
-        }
-    };
-    drawActor(test.GetModelObject(), ModelToonType::NMap4Frame);
-    drawActor(boss.GetModelObject(), ModelToonType::FourFrame);
-	outlineRenderer_.EndScenePass();
-}
-// =======
-	// ステージとテストモデルを描画
-	modelToonRenderer_.Draw(
-		stage.GetModelObject(),
-		ModelToonType::Model
-	);
-
-	modelToonRenderer_.Draw(
-		testModel_,
-		ModelToonType::Model
-	);
-
-	DrawToonCharacters(false);
-// >>>>>>> main
+	const auto drawActor = [this](const ModelObject& model, ModelToonType type)
+		{
+			if (model.collisionHighlighted)
+			{
+				SetUsePixelShader(-1);
+				SetUseVertexShader(-1);
+				MV1SetUseOrigShader(FALSE);
+				model.Draw();
+				MV1SetUseOrigShader(TRUE);
+			}
+			else
+			{
+				modelToonRenderer_.Draw(model, type);
+			}
+		};
+	drawActor(player_.GetModelObject(), ModelToonType::Bone);
+	drawActor(boss.GetModelObject(),	ModelToonType::Model);
+	drawActor(stage.GetModelObject(),	ModelToonType::Model);
 
 	modelToonRenderer_.EndPass();
 }
