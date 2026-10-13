@@ -16,6 +16,7 @@
 #include "ModelToonRenderer.h"
 #include "Debug_camera.h"
 #include "ShaderEffectController.h"
+#include "Camera.h"
 
 class BossTestScene final : public Scene
 {
@@ -66,6 +67,5 @@ private:
     void DrawScene(bool toonEnabled) const;
     void RenderDepth() const;
 
-
-    void ApplyCamera() const;
+	FreeCamera camera_{};
 };

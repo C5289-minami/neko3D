@@ -207,6 +207,7 @@
     <ClInclude Include="BossTailWhipSkill.h" />
     <ClInclude Include="BossTestScene.h" />
     <ClInclude Include="BossWalkState.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="DebugScene.h" />
     <ClInclude Include="Debug_camera.h" />
     <ClInclude Include="Button.h" />

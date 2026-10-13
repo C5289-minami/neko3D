@@ -558,6 +558,9 @@
     <ClInclude Include="NekoMotionTestScene.h">
       <Filter>30_Scenes\Test</Filter>
     </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>10_Core\Camera</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
