@@ -285,9 +285,6 @@
     <ClInclude Include="imgui\backends\imgui_impl_win32.h">
       <Filter>imgui\backends</Filter>
     </ClInclude>
-    <ClInclude Include="Debug_camera.h">
-      <Filter>AboutDebug</Filter>
-    </ClInclude>
     <ClInclude Include="TransformDefaults.h">
       <Filter>AboutDebug</Filter>
     </ClInclude>
@@ -522,9 +519,6 @@
     <ClInclude Include="PlayerAnimType.h">
       <Filter>40_Gameplay\Actors\Player</Filter>
     </ClInclude>
-    <ClInclude Include="Player_camera.h">
-      <Filter>15_System</Filter>
-    </ClInclude>
     <ClInclude Include="Volume.h">
       <Filter>10_Core\Sound</Filter>
     </ClInclude>
@@ -640,9 +634,6 @@
     </ClCompile>
     <ClCompile Include="imgui\backends\imgui_impl_win32.cpp">
       <Filter>imgui\backends</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug_camera.cpp">
-      <Filter>AboutDebug</Filter>
     </ClCompile>
     <ClCompile Include="TransformSettings.cpp">
       <Filter>AboutDebug</Filter>
@@ -766,9 +757,6 @@
     </ClCompile>
     <ClCompile Include="ModelAlpha.cpp">
       <Filter>40_Gameplay\StageObjects</Filter>
-    </ClCompile>
-    <ClCompile Include="Player_camera.cpp">
-      <Filter>15_System</Filter>
     </ClCompile>
     <ClCompile Include="Sound3D.cpp">
       <Filter>10_Core\Sound</Filter>

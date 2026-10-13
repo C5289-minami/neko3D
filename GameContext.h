@@ -2,15 +2,15 @@
 // Core/GameContext.h
 // =============================
 #pragma once
-#include "Debug_camera.h"
+#include <string>
 
 #include "Vector3.h"
 #include "Grid.h"
-#include "Player_camera.h"
 #include "Stage.h"
 #include "Player.h"
 #include "Boss.h" 
 #include "EffectManager.h"
+#include "Camera.h"
 
 class GameContext
 {
@@ -32,26 +32,12 @@ public:
     Grid& GetGrid() { return grid; }
     const Grid& GetGrid() const { return grid; }
 
-    // Player Camera
-    Player_camera& GetPlayerCamera() { return playerCamera; }
-    const Player_camera& GetPlayerCamera() const { return playerCamera; }
     const Vec3& GetPlayerPosition() const { return player.GetPosition(); }
     void SetPlayerPosition(const Vec3& position) { player.SetPosition(position); }
     //èdóÕ
     bool IsPlayerGravityEnabled() const { return player.IsGravityEnabled(); }
     void SetPlayerGravityEnabled(bool enabled) { player.SetGravityEnabled(enabled); }
-    //position
-    const Vec3& GetCameraPosition() const;
-    const Vec3& GetCameraTarget() const;
-    const Vec3& GetCameraUp() const;
-    void SetCameraPosition(const Vec3& position);
-    bool IsSceneViewActive() const;
-    float GetSceneCameraMoveSpeed() const { return Debug_camera.GetMoveSpeed(); }
-    void SetSceneCameraMoveSpeed(float speed) { Debug_camera.SetMoveSpeed(speed); }
-    void ResetSceneCamera();
-    void FocusSceneCameraOnPlayer();
-
-    DebugSceneControls GetDebugControls();
+    //DebugSceneControls GetDebugControls();
 
     // ---- lifecycle ----
     void Init();
@@ -68,9 +54,12 @@ private:
     // Grid
     Grid grid;
 
-    // Camera
-    Player_camera playerCamera;
-    Debug_camera Debug_camera;
+    Camera::HomingCamera playerCamera;
+#ifndef NDEBUG
+    Camera::FreeCamera freeCamera;
+    Camera::Camera* activeCamera_{ nullptr };
+    bool wasFreeCameraToggleDown_{};
+#endif
 
 	// Effect Manager
 	EffectManager effectManager;

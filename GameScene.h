@@ -13,7 +13,6 @@ public:
     void Update(float deltaTime) override;
     void Render() const override;
     void End() override;
-    DebugSceneControls GetDebugControls() override { return gameContext->GetDebugControls(); }
 
 private:
 };

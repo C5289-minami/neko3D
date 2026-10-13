@@ -7,97 +7,27 @@
 #ifndef NDEBUG
 #include "imgui.h"
 #endif
-
-const Vec3& GameContext::GetCameraPosition() const
-{
-#ifndef NDEBUG
-    if (Debug_camera.IsSceneViewActive()) return Debug_camera.GetEye();
-#endif
-    return playerCamera.GetPosition();
-}
-
-const Vec3& GameContext::GetCameraTarget() const
-{
-#ifndef NDEBUG
-    if (Debug_camera.IsSceneViewActive()) return Debug_camera.GetTarget();
-#endif
-    return playerCamera.GetTarget();
-}
-
-const Vec3& GameContext::GetCameraUp() const
-{
-#ifndef NDEBUG
-    if (Debug_camera.IsSceneViewActive()) return Debug_camera.GetUp();
-#endif
-    return playerCamera.GetUp();
-}
-
-bool GameContext::IsSceneViewActive() const
-{
-#ifndef NDEBUG
-    return Debug_camera.IsSceneViewActive();
-#else
-    return false;
-#endif
-}
-
-void GameContext::SetCameraPosition(const Vec3& position)
-{
-#ifndef NDEBUG
-    if (Debug_camera.IsSceneViewActive())
-    {
-        Debug_camera.SetPosition(position);
-        return;
-    }
-#endif
-    playerCamera.SetPosition(position);
-}
-
-void GameContext::ResetSceneCamera()
-{
-    if (IsSceneViewActive())
-    {
-        Debug_camera.ResetView();
-    }
-    else
-    {
-        playerCamera.Reset();
-        Debug_camera.Initialize(playerCamera.GetEye(), playerCamera.GetTarget());
-    }
-}
-
-void GameContext::FocusSceneCameraOnPlayer()
-{
-#ifndef NDEBUG
-    if (!Debug_camera.IsSceneViewActive())
-    {
-        Debug_camera.Initialize(playerCamera.GetEye(), playerCamera.GetTarget());
-        Debug_camera.Begin();
-    }
-    Debug_camera.FocusAt(player.GetPosition());
-#endif
-}
-
-DebugSceneControls GameContext::GetDebugControls()
-{
-    return {
-        "game",
-        {
-            MakeDebugTransformTarget("game/player", "Player", player),
-            MakeDebugTransformTarget("game/boss", "Boss", boss)
-        },
-        DebugCameraControls{
-            [this] { return IsSceneViewActive(); },
-            [this] { return GetCameraPosition(); },
-            [this](const Vec3& position) { SetCameraPosition(position); },
-            [this] { ResetSceneCamera(); },
-            [this] { FocusSceneCameraOnPlayer(); }
-        },
-        [this] { return debugActorsPaused_; },
-        [this](bool paused) { debugActorsPaused_ = paused; },
-        transformInitialStatus_
-    };
-}
+//
+//DebugSceneControls GameContext::GetDebugControls()
+//{
+//    return {
+//        "game",
+//        {
+//            MakeDebugTransformTarget("game/player", "Player", player),
+//            MakeDebugTransformTarget("game/boss", "Boss", boss)
+//        },
+//        DebugCameraControls{
+//            [this] { return IsSceneViewActive(); },
+//            [this] { return GetCameraPosition(); },
+//            [this](const Vec3& position) { SetCameraPosition(position); },
+//            [this] { ResetSceneCamera(); },
+//            [this] { FocusSceneCameraOnPlayer(); }
+//        },
+//        [this] { return debugActorsPaused_; },
+//        [this](bool paused) { debugActorsPaused_ = paused; },
+//        transformInitialStatus_
+//    };
+//}
 
 void GameContext::Init()
 {
@@ -106,7 +36,10 @@ void GameContext::Init()
     boss.Init();
 
     playerCamera.Reset();
-    Debug_camera.Initialize(playerCamera.GetEye(), playerCamera.GetTarget());
+#ifndef NDEBUG
+    activeCamera_ = nullptr;
+    wasFreeCameraToggleDown_ = false;
+#endif
 }
 
 void GameContext::Reset()
@@ -122,10 +55,14 @@ void GameContext::Reset()
     player.Reset();
     boss.Reset();
     debugActorsPaused_ = false;
-    TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
+    //TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
     stage.ResetAlphaModel(player.GetPosition());
     playerCamera.Reset();
-    Debug_camera.Initialize(playerCamera.GetEye(), playerCamera.GetTarget());
+#ifndef NDEBUG
+    activeCamera_ = nullptr;
+    freeCamera.Reset();
+    wasFreeCameraToggleDown_ = false;
+#endif
 }
 
 void GameContext::Update(float deltaTime)
@@ -133,13 +70,22 @@ void GameContext::Update(float deltaTime)
     DxLib::SetBackgroundColor(bgRed, bgGreen, bgBlue);
 
 #ifndef NDEBUG
-    Debug_camera.Update(deltaTime, player.GetPosition(),
-        playerCamera.GetEye(), playerCamera.GetTarget());
-    if (Debug_camera.IsSceneViewActive() || debugActorsPaused_ ||
-        (ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard))
+    const bool toggleDown = DxLib::CheckHitKey(KEY_INPUT_LALT) != 0 &&
+        DxLib::CheckHitKey(KEY_INPUT_RETURN) != 0;
+    if (toggleDown && !wasFreeCameraToggleDown_)
     {
-        Collision::UpdateModelContact(player.GetModelObject(), boss.GetModelObject());
-        stage.UpdateAlphaModel(deltaTime, player);
+        if (activeCamera_)
+            activeCamera_ = nullptr;
+        else
+        {
+            freeCamera.Initialize(playerCamera.GetPosition(), playerCamera.GetTarget());
+            activeCamera_ = &freeCamera;
+        }
+    }
+    wasFreeCameraToggleDown_ = toggleDown;
+    if (activeCamera_ == &freeCamera)
+    {
+        freeCamera.InputUpdate(deltaTime);
         return;
     }
 #endif
@@ -166,12 +112,17 @@ void GameContext::Update(float deltaTime)
 
 void GameContext::Draw() const
 {
-    DxLib::SetCameraPositionAndTargetAndUpVec(
-        DxConv::ToVECTOR(GetCameraPosition()), // カメラの位置
-        DxConv::ToVECTOR(GetCameraTarget()),   // カメラの注視点
-        DxConv::ToVECTOR(GetCameraUp()));      //ちょっと上から
+    //DxLib::SetCameraPositionAndTargetAndUpVec(
+    //    DxConv::ToVECTOR(GetCameraPosition()), // カメラの位置
+    //    DxConv::ToVECTOR(GetCameraTarget()),   // カメラの注視点
+    //    DxConv::ToVECTOR(GetCameraUp()));      //ちょっと上から
 
     DxLib::ClearDrawScreen();
+#ifndef NDEBUG
+    (activeCamera_ ? activeCamera_ : &playerCamera)->ApplyCamera();
+#else
+    playerCamera.ApplyCamera();
+#endif
     grid.Draw();
     stage.Draw();
     boss.Draw();

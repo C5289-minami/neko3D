@@ -209,7 +209,6 @@
     <ClInclude Include="BossWalkState.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DebugScene.h" />
-    <ClInclude Include="Debug_camera.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="ButtonUI.h" />
     <ClInclude Include="Collision.h" />
@@ -266,7 +265,6 @@
     <ClInclude Include="PlayerStateMachine.h" />
     <ClInclude Include="PlayerStateType.h" />
     <ClInclude Include="PlayerWalkState.h" />
-    <ClInclude Include="Player_camera.h" />
     <ClInclude Include="Raycast.h" />
     <ClInclude Include="ResourceKeys.h" />
     <ClInclude Include="ResourceManager.h" />
@@ -322,7 +320,6 @@
     <ClCompile Include="BossTestScene.cpp" />
     <ClCompile Include="BossWalkState.cpp" />
     <ClCompile Include="DebugScene.cpp" />
-    <ClCompile Include="Debug_camera.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="DebugUI.cpp" />
     <ClCompile Include="DrawableObject.cpp" />
@@ -363,7 +360,6 @@
     <ClCompile Include="PlayerInput.cpp" />
     <ClCompile Include="PlayerStateMachine.cpp" />
     <ClCompile Include="PlayerWalkState.cpp" />
-    <ClCompile Include="Player_camera.cpp" />
     <ClCompile Include="Raycast.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="ResultScene.cpp" />

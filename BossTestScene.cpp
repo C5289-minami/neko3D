@@ -60,7 +60,7 @@ void BossTestScene::Init()
 	DxLib::SetLightDirection(DxLib::GetLightDirection());
 
 
-	// デバッグカメラの初期化
+  // 通常カメラの初期化
 	cameraEye = { 0.0f, 250.0f, -650.0f };
 	const Vec3 direction = (Vec3{ 0.0f, 100.0f, 0.0f } - cameraEye).Normalized();
 	pitch = std::asin(std::clamp(direction.y, -1.0f, 1.0f));
@@ -217,7 +217,8 @@ void BossTestScene::Render() const
 void BossTestScene::RenderDepth() const
 {
 	// シーンのカメラを設定する
-	camera_.ApplyCamera();
+  if (debugCamera_.IsSceneViewActive()) debugCamera_.ApplyCamera();
+	else camera_.ApplyCamera();
 	// Boneなしシェーダー
 	modelToonRenderer_.SetVertexShader(ModelToonType::Model);
 
@@ -234,7 +235,8 @@ void BossTestScene::RenderDepth() const
 void BossTestScene::DrawScene(bool toonEnabled) const
 {
 	// カメラを設定する
-	camera_.ApplyCamera();
+  if (debugCamera_.IsSceneViewActive()) debugCamera_.ApplyCamera();
+	else camera_.ApplyCamera();
 	// トゥーンシェーダーを使わない場合
 	if (!toonEnabled)
 	{

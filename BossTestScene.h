@@ -14,7 +14,6 @@
 #include "Stage.h"
 #include "Player.h"
 #include "ModelToonRenderer.h"
-#include "Debug_camera.h"
 #include "ShaderEffectController.h"
 #include "Camera.h"
 
@@ -51,7 +50,7 @@ private:
     float pitch{};
     // Debug
     bool skillKeyWasDown_{};
-    Debug_camera debugCamera_;
+  Camera::DebugCamera debugCamera_;
     bool debugActorsPaused_{};
     std::string transformInitialStatus_;
 
@@ -67,5 +66,5 @@ private:
     void DrawScene(bool toonEnabled) const;
     void RenderDepth() const;
 
-	FreeCamera camera_{};
+	Camera::FreeCamera camera_{};
 };
