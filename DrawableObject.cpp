@@ -63,6 +63,14 @@ void ModelObject::Draw(Vec3 masterPos) const
     MV1SetPosition(handle, DxConv::ToVECTOR(modelPosition));
     MV1SetScale(handle, DxConv::ToVECTOR(scale));
     MV1SetRotationXYZ(handle, DxConv::ToVECTOR(rotation));
+}
+
+void ModelObject::Draw(Vec3 masterPos) const
+{
+    const int handle = RM().GetModel(modelKey);
+    if (handle < 0) return;
+
+    Draw(masterPos);
     ApplyCollisionColor();
     MV1DrawModel(handle);
 }
@@ -73,9 +81,7 @@ Collision::Ellipsoid ModelObject::GetHitEllipsoid() const
     if (handle < 0) return {};
 
 
-    MV1SetPosition(handle, DxConv::ToVECTOR(position - RotateXYZ(center, rotation)));
-    MV1SetScale(handle, DxConv::ToVECTOR(scale));
-    MV1SetRotationXYZ(handle, DxConv::ToVECTOR(rotation));
+    Draw();
     if (MV1SetupReferenceMesh(handle, -1, TRUE, TRUE) < 0) return {};//キャラがないとき
 	// 参照用メッシュを更新して取得
     const int refreshResult = MV1RefreshReferenceMesh(handle, -1, TRUE, TRUE);

@@ -11,6 +11,7 @@
 #include <cmath>
 #include "Sound3D.h"
 #include <algorithm>
+#include <vector>
 
 
 Player::Player()
@@ -89,7 +90,7 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 	Update(deltaTime);
 
 	// 落下中のみ床面に合わせ、このフレームの落下距離もレイの長さに含める。
-	if (velocity_.y <= 0.0f && stage.GetModelHandle() >= 0)
+	if (velocity_.y <= 0.0f)
 	{
 		Physics::RayHit hit{};
 		constexpr float groundSnapDistance = 30.0f;
@@ -97,8 +98,11 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 		const float rayDistance =
 			fallDistance + groundSnapDistance + Const::PLAYER_SKIN;
 
+		std::vector<int> handles;
+		stage.GetCollisionModelHandles(handles);
+
 		if (Physics::RaycastDown(
-			stage.GetModelHandle(),
+			handles,
 			Vec3(
 				GetPosition().x,
 				previousY + Const::PLAYER_SKIN,
