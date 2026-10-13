@@ -34,6 +34,7 @@ void SceneManager::Init()
     resultScene.SetGameContext(&gameContext);
     bossTestScene.SetGameContext(&gameContext);
     ssFlipTestScene.SetGameContext(&gameContext);
+	nekoMotionTestScene.SetGameContext(&gameContext);
 
     scene = &titleScene; // 最初のシーン
 }
@@ -67,6 +68,7 @@ Scene* SceneManager::GetScene(SceneID id)
         case SceneID::Result:   return &resultScene;
         case SceneID::BossTest: return &bossTestScene;
         case SceneID::SsFlipTest: return &ssFlipTestScene;
+		case SceneID::NekoMotionTest: return &nekoMotionTestScene;
     }
     return &titleScene;
 }
