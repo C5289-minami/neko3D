@@ -28,6 +28,8 @@ public:
     int GetBgBlue() const { return bgBlue; }		// ”wŒiFB‚ğæ“¾
     void SetBgBlue(int b) { bgBlue = b; }		// ”wŒiFB‚ğİ’è
 
+    void DrawStageDebugUI() { stage.DrawDebugUI(); }
+
     // Grid
     Grid& GetGrid() { return grid; }
     const Grid& GetGrid() const { return grid; }
@@ -66,6 +68,8 @@ private:
     int bgRed{ 24 };
     int bgGreen{ 160 };
     int bgBlue{ 224 };
+
+
 
     // Grid
     Grid grid;

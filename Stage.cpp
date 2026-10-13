@@ -7,6 +7,12 @@
 #include "DxConv.h"
 #include "Raycast.h"
 #include "Consts.h"
+#include "imgui.h"
+#include "TransformSettings.h"
+#include <nlohmann/json.hpp>
+#include <fstream>
+#include <filesystem>
+#include <stdexcept>
 
 namespace
 {
@@ -32,6 +38,7 @@ void Stage::Init()
     if (modelHandle < 0) return;
     MV1SetupCollInfo(modelHandle, -1, 8, 8, 8);
 
+    LoadModelSettings();
     Reset();
 }
 void Stage::Reset()
@@ -105,4 +112,92 @@ void Stage::UpdateAlphaModel(float deltaTime, const Player& player)
 void Stage::DrawAlphaModel() const
 {
     if (alphaModelReady_) alphaModel_.Draw();
+}
+namespace
+{
+    constexpr const char* StageSettingsPath = "Data/Settings/stage_models.json";
+    constexpr const char* StageModelNames[] = {"hashira_l", "hashira_m", "hashira_s", "stand_l", "stand_m"};
+    nlohmann::json ModelVectorJson(const Vec3& v) { return nlohmann::json::array({v.x, v.y, v.z}); }
+    Vec3 ReadModelVector(const nlohmann::json& v)
+    {
+        if (!v.is_array() || v.size() != 3) throw std::runtime_error("Expected 3 numbers.");
+        return {v.at(0).get<float>(), v.at(1).get<float>(), v.at(2).get<float>()};
+    }
+}
+bool Stage::SaveModelSettings()
+{
+    try
+    {
+        nlohmann::json doc;
+        doc["version"] = 1;
+        for (std::size_t i = 0; i < stageModels_.size(); ++i)
+        {
+            const auto& m = stageModels_[i];
+            if (!TransformSettings::IsValid({m.scale, m.position, m.rotation})) throw std::runtime_error("Invalid transform.");
+            doc["models"][StageModelNames[i]] = {{"position", ModelVectorJson(m.position)}, {"rotation", ModelVectorJson(m.rotation)}, {"scale", ModelVectorJson(m.scale)}};
+        }
+        std::filesystem::create_directories("Data/Settings");
+        // 書き込み完了後に保存ファイルを置き換える
+        const std::filesystem::path path(StageSettingsPath), temporary(std::string(StageSettingsPath) + ".tmp");
+        std::ofstream output(temporary);
+        if (!output) throw std::runtime_error("Cannot open save file.");
+        output << doc.dump(4) << '\n';
+        output.close();
+        if (!output) throw std::runtime_error("Write failed.");
+        if (!MoveFileExW(temporary.c_str(), path.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)) throw std::runtime_error("Cannot replace save file.");
+        modelSettingsStatus_ = "Saved.";
+        return true;
+    }
+    catch (const std::exception& e) { modelSettingsStatus_ = std::string("Save failed: ") + e.what(); return false; }
+}
+bool Stage::LoadModelSettings()
+{
+    try
+    {
+        std::ifstream input(StageSettingsPath);
+        if (!input) { modelSettingsStatus_ = "No settings file. Using current values."; return false; }
+        nlohmann::json doc;
+        input >> doc;
+        if (doc.at("version").get<int>() != 1) throw std::runtime_error("Unsupported version.");
+        // 全モデルを確認してから反映する
+        auto loaded = stageModels_;
+        for (std::size_t i = 0; i < loaded.size(); ++i)
+        {
+            const auto& v = doc.at("models").at(StageModelNames[i]);
+            auto& m = loaded[i];
+            m.position = ReadModelVector(v.at("position"));
+            m.rotation = ReadModelVector(v.at("rotation"));
+            m.scale = ReadModelVector(v.at("scale"));
+            if (!TransformSettings::IsValid({m.scale, m.position, m.rotation})) throw std::runtime_error("Invalid transform.");
+        }
+        stageModels_ = loaded;
+        modelSettingsStatus_ = "Loaded.";
+        return true;
+    }
+    catch (const std::exception& e) { modelSettingsStatus_ = std::string("Load failed: ") + e.what(); return false; }
+}
+void Stage::DrawDebugUI()
+{
+    ImGui::Begin("Stage parts");
+    for (std::size_t i = 0; i < stageModels_.size(); ++i)
+    {
+        ImGui::PushID(static_cast<int>(i));
+        if (ImGui::TreeNode(StageModelNames[i]))
+        {
+            auto& m = stageModels_[i];
+            ObjectTransform v{m.scale, m.position, m.rotation};
+            bool changed = ImGui::DragFloat3("Position", &v.position.x, 1.0f);
+            changed |= ImGui::DragFloat3("Rotation (radians)", &v.rotation.x, 0.01f);
+            changed |= ImGui::DragFloat3("Scale", &v.scale.x, 0.01f, 0.001f, 10000.0f);
+            if (changed && TransformSettings::IsValid(v)) { m.position = v.position; m.rotation = v.rotation; m.scale = v.scale; }
+            ImGui::TreePop();
+        }
+        ImGui::PopID();
+    }
+    if (ImGui::Button("Save JSON")) SaveModelSettings();
+    ImGui::SameLine();
+    if (ImGui::Button("Load JSON")) LoadModelSettings();
+    ImGui::TextWrapped("%s", StageSettingsPath);
+    ImGui::TextWrapped("%s", modelSettingsStatus_.c_str());
+    ImGui::End();
 }

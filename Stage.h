@@ -18,6 +18,10 @@ public:
 	int GetModelHandle() const { return RM().GetModel(stageModel_.modelKey); }
 	ModelObject GetModelObject() const { return stageModel_; }
 
+    void DrawDebugUI();
+    bool SaveModelSettings();
+    bool LoadModelSettings();
+
 	// lifecycle
 	void Init();
 	void Reset();
@@ -31,6 +35,7 @@ private:
     // ’Œ‚Æ‘äÀ‚ğ‚Ü‚Æ‚ß‚ÄŠÇ—
 
     std::array<ModelObject, 5> stageModels_{};
+    std::string modelSettingsStatus_;
 
 	ModelAlpha alphaModel_;
 	ModelObject stageModel_; // ‰¼‚ÅƒfƒtƒH
