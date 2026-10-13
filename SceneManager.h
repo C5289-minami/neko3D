@@ -12,8 +12,16 @@
 #include "DebugUI.h"
 #include "Consts.h"
 #include "./SSPlayer/SS6Player.h"
+#include "NekoMotionTestScene.h"
 
-enum class SceneID { Title, Game, Result, BossTest, SsFlipTest };
+enum class SceneID { 
+    Title,
+    Game,
+    Result,
+    BossTest,
+    SsFlipTest,
+	NekoMotionTest,
+};
 
 class SceneManager
 {
@@ -36,6 +44,7 @@ public:
         if (scene == &resultScene) return SceneID::Result;
         if (scene == &bossTestScene) return SceneID::BossTest;
         if (scene == &ssFlipTestScene) return SceneID::SsFlipTest;
+
         return SceneID::Title; // デフォルトはタイトルシーン
 	}
 
@@ -63,6 +72,7 @@ private:
     ResultScene resultScene{ &gameContext };
     BossTestScene bossTestScene{ &gameContext };
     TestScene ssFlipTestScene{ &gameContext };
+	NekoMotionTestScene nekoMotionTestScene{ &gameContext };
 
     Scene* scene = nullptr; // 現在のシーン
 

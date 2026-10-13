@@ -251,6 +251,7 @@
     <ClInclude Include="ModelToonRenderer.h" />
     <ClInclude Include="ModelAlpha.h" />
     <ClInclude Include="Motion.h" />
+    <ClInclude Include="NekoMotionTestScene.h" />
     <ClInclude Include="OutlineSettings.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerAnimType.h" />
@@ -269,6 +270,7 @@
     <ClInclude Include="ResourceKeys.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="ResultScene.h" />
+    <ClInclude Include="Room.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="OutlineRenderer.h" />
@@ -349,6 +351,7 @@
     <ClCompile Include="ModelToonRenderer.cpp" />
     <ClCompile Include="ModelAlpha.cpp" />
     <ClCompile Include="Motion.cpp" />
+    <ClCompile Include="NekoMotionTestScene.cpp" />
     <ClCompile Include="OutlineSettings.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerIdleState.cpp" />
@@ -363,6 +366,7 @@
     <ClCompile Include="Raycast.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="ResultScene.cpp" />
+    <ClCompile Include="Room.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="OutlineRenderer.cpp" />
