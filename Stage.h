@@ -2,6 +2,8 @@
 // Gameplay/Actors/Stage.h
 // =============================
 #pragma once
+#include <array>
+#include <cstddef>
 #include "Vector3.h"
 #include "ModelAlpha.h"
 #include "DrawableObject.h"
@@ -26,6 +28,10 @@ public:
 	float GetAlphaModelOpacity() const { return alphaModel_.GetAlpha(); }
 
 private:
+    // ’Œ‚Æ‘äÀ‚ğ‚Ü‚Æ‚ß‚ÄŠÇ—
+
+    std::array<ModelObject, 5> stageModels_{};
+
 	ModelAlpha alphaModel_;
 	ModelObject stageModel_; // ‰¼‚ÅƒfƒtƒH
 	bool alphaModelReady_{};

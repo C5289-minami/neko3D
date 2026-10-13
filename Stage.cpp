@@ -19,18 +19,21 @@ namespace
 
 void Stage::Init()
 {
-    // 通常のステージモデルをリソース管理側から取得する。
+    //int modelHandle = DxLib::MV1DuplicateModel(RM().GetModel(ResourceKeys::Model_Stage));
+    stageModels_[0].modelKey = ResourceKeys::Model_hashira_l;
+    stageModels_[1].modelKey = ResourceKeys::Model_hashira_m;
+    stageModels_[2].modelKey = ResourceKeys::Model_hashira_s;
+    stageModels_[3].modelKey = ResourceKeys::Model_stand_l;
+    stageModels_[4].modelKey = ResourceKeys::Model_stand_m;
 
-    // これ複製してるけど最終的に要らんからね
-    int modelHandle = DxLib::MV1DuplicateModel(RM().GetModel(ResourceKeys::Model_Stage));
-	stageModel_.modelKey = ResourceKeys::Model_Stage;
+    // 地面の当たり判定に使うモデル
+    stageModel_.modelKey = ResourceKeys::Model_StageFbx;
+    const int modelHandle = GetModelHandle();
     if (modelHandle < 0) return;
-    // 地面との当たり判定に使うコリジョン情報を生成する。
     MV1SetupCollInfo(modelHandle, -1, 8, 8, 8);
 
-	Reset();
+    Reset();
 }
-
 void Stage::Reset()
 {
     // 透過モデルの配置情報は毎回リセット
@@ -42,13 +45,17 @@ void Stage::Reset()
 
 void Stage::Draw() const
 {
-	stageModel_.Draw();
-	MV1DrawModel(RM().GetModel(ResourceKeys::Model_Stage));
-}
+    // 柱と台座をそれぞれ描画
+    for (const auto& model : stageModels_)
+    {
+        model.Draw();
+    }
 
+    MV1DrawModel(RM().GetModel(ResourceKeys::Model_StageFbx));
+}
 void Stage::ResetAlphaModel(const Vec3& playerPosition)
 {
-  
+
     alphaModelReady_ = false;
 
     // ResourceKeys
