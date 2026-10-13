@@ -188,6 +188,7 @@ void DebugUI::DrawTransformEditor(const DebugSceneControls& controls)
 void DebugUI::Draw(GameContext& ctx, const DebugSceneControls& controls)
 {
     DrawTransformEditor(controls);
+    if (controls.scope == "game") ctx.DrawStageDebugUI();
     // オプション設定
     {
         ImGui::Begin("Option");     // "Option"ウィンドウを開始
