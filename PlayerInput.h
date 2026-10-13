@@ -11,6 +11,7 @@ struct PlayerInput
 	bool run{ false };
 	bool jumpPressed{ false };
 	bool attackPressed{ false };
+	bool ultimatePressed{ false };
 	bool kedukuroiPressed{ false };
 
 	void Update();

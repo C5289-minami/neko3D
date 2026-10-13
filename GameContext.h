@@ -37,6 +37,8 @@ public:
     const Player_camera& GetPlayerCamera() const { return playerCamera; }
     const Vec3& GetPlayerPosition() const { return player.GetPosition(); }
     void SetPlayerPosition(const Vec3& position) { player.SetPosition(position); }
+    float GetPlayerUltimateGauge() const { return player.GetUltimateGauge(); }
+    void SetPlayerUltimateGauge(float value) { player.SetUltimateGauge(value); }
     //èdóÕ
     bool IsPlayerGravityEnabled() const { return player.IsGravityEnabled(); }
     void SetPlayerGravityEnabled(bool enabled) { player.SetGravityEnabled(enabled); }

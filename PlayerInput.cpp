@@ -18,6 +18,7 @@ void PlayerInput::Update()
 	jumpPressed = (buttonDown & BUTTON_TRIGGER1) != 0;
 	// ¶ƒNƒŠƒbƒN‚ÌUŒ‚“ü—Í
 	attackPressed = (buttonDown & BUTTON_TRIGGER3) != 0;
+	ultimatePressed = (buttonDown & BUTTON_TRIGGER4) != 0;
 	kedukuroiPressed = (buttonDown & BUTTON_R1) != 0;
 
 	isMoving = (moveDir.LengthSq() > 0.0f);

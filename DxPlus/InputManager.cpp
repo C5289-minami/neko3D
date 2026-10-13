@@ -76,6 +76,7 @@ namespace DxPlus
         std::vector<ActionMapping> mouseMappingsP1
         {
             { BUTTON_TRIGGER3,  MOUSE_INPUT_LEFT },     // Fire1 (UnityのFire1に対応)
+            { BUTTON_TRIGGER4,  MOUSE_INPUT_RIGHT },    // 必殺技（仮）
         };
 
         std::vector<ActionMapping> mouseMappingsP2
