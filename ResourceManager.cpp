@@ -1,4 +1,4 @@
-// =============================
+﻿// =============================
 // Resources/ResourceManager.cpp
 // =============================
 #include "ResourceManager.h"
@@ -34,7 +34,12 @@ void ResourceManager::LoadAll()
     LoadModel(ResourceKeys::Model_Paladin,    L"./Data/Models/Paladin.mv1");
     LoadModel(ResourceKeys::Model_Boss,       L"./DevData/Models/boss_test.mv1");
     LoadModel(ResourceKeys::Model_Test,       L"./Data/Models/Sword.mv1");
-
+    LoadModel(ResourceKeys::Model_hashira_l, L"./Data/Models/stage/hashira_l.mv1");
+    LoadModel(ResourceKeys::Model_hashira_m, L"./Data/Models/stage/hashira_m.mv1");
+    LoadModel(ResourceKeys::Model_hashira_s, L"./Data/Models/stage/hashira_s.mv1");
+    LoadModel(ResourceKeys::Model_StageFbx,  L"./Data/Models/stage/Stage.mv1");
+    LoadModel(ResourceKeys::Model_stand_l,  L"./Data/Models/stage/stand_l.mv1");
+    LoadModel(ResourceKeys::Model_stand_m,  L"./Data/Models/stage/stand_m.mv1");
 	// スプライトスタジオの読み込み
 
     LoadSpriteStudioPlayer(
@@ -342,6 +347,7 @@ void ResourceManager::UnloadModels()
         if (model.second >= 0) DxLib::MV1DeleteModel(model.second);
     }
     models.clear();
+
 }
 
 void ResourceManager::UnloadSpriteStudioPlayers()

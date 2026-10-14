@@ -85,6 +85,18 @@
     <Filter Include="40_Gameplay\Actors\Player\State">
       <UniqueIdentifier>{b7812527-44c5-4edd-9d06-87861bac22d5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="40_Gameplay\Actors\Player\State\Attack">
+      <UniqueIdentifier>{6abc340a-046a-48dd-9042-c471d2f8875f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Player\State\NeutralJump">
+      <UniqueIdentifier>{d86ce60d-04a6-4895-85ad-1ae4163b633a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Player\State\LungingJump">
+      <UniqueIdentifier>{8396d9bd-15c9-4538-84eb-9a92844361ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Player\State\UltimateAttack">
+      <UniqueIdentifier>{a29ecff3-914c-433d-a87c-743225febb3e}</UniqueIdentifier>
+    </Filter>
     <Filter Include="40_Gameplay\Actors\Player\State\Idle">
       <UniqueIdentifier>{b173a18d-7ff2-4986-8a69-bd9110aa1854}</UniqueIdentifier>
     </Filter>
@@ -330,14 +342,17 @@
     <ClInclude Include="PlayerIdleState.h">
       <Filter>40_Gameplay\Actors\Player\State\Idle</Filter>
     </ClInclude>
+    <ClInclude Include="PlayerUltimateAttackState.h">
+      <Filter>40_Gameplay\Actors\Player\State\UltimateAttack</Filter>
+    </ClInclude>
     <ClInclude Include="PlayerAttackState.h">
-      <Filter>40_Gameplay\Actors\Player\State</Filter>
+      <Filter>40_Gameplay\Actors\Player\State\Attack</Filter>
     </ClInclude>
     <ClInclude Include="PlayerLungingJumpState.h">
-      <Filter>40_Gameplay\Actors\Player\State</Filter>
+      <Filter>40_Gameplay\Actors\Player\State\LungingJump</Filter>
     </ClInclude>
     <ClInclude Include="PlayerNeutralJumpState.h">
-      <Filter>40_Gameplay\Actors\Player\State</Filter>
+      <Filter>40_Gameplay\Actors\Player\State\NeutralJump</Filter>
     </ClInclude>
     <ClInclude Include="PlayerKedukuroiState.h">
       <Filter>40_Gameplay\Actors\Player\State\Kedukuroi</Filter>
@@ -659,14 +674,17 @@
     <ClCompile Include="PlayerIdleState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Idle</Filter>
     </ClCompile>
+    <ClCompile Include="PlayerUltimateAttackState.cpp">
+      <Filter>40_Gameplay\Actors\Player\State\UltimateAttack</Filter>
+    </ClCompile>
     <ClCompile Include="PlayerAttackState.cpp">
-      <Filter>40_Gameplay\Actors\Player\State</Filter>
+      <Filter>40_Gameplay\Actors\Player\State\Attack</Filter>
     </ClCompile>
     <ClCompile Include="PlayerLungingJumpState.cpp">
-      <Filter>40_Gameplay\Actors\Player\State</Filter>
+      <Filter>40_Gameplay\Actors\Player\State\LungingJump</Filter>
     </ClCompile>
     <ClCompile Include="PlayerNeutralJumpState.cpp">
-      <Filter>40_Gameplay\Actors\Player\State</Filter>
+      <Filter>40_Gameplay\Actors\Player\State\NeutralJump</Filter>
     </ClCompile>
     <ClCompile Include="PlayerKedukuroiState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Kedukuroi</Filter>

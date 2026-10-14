@@ -28,12 +28,16 @@ public:
     int GetBgBlue() const { return bgBlue; }		// ”wŒiFB‚ğæ“¾
     void SetBgBlue(int b) { bgBlue = b; }		// ”wŒiFB‚ğİ’è
 
+    void DrawStageDebugUI() { stage.DrawDebugUI(); }
+
     // Grid
     Grid& GetGrid() { return grid; }
     const Grid& GetGrid() const { return grid; }
 
     const Vec3& GetPlayerPosition() const { return player.GetPosition(); }
     void SetPlayerPosition(const Vec3& position) { player.SetPosition(position); }
+    float GetPlayerUltimateGauge() const { return player.GetUltimateGauge(); }
+    void SetPlayerUltimateGauge(float value) { player.SetUltimateGauge(value); }
     //d—Í
     bool IsPlayerGravityEnabled() const { return player.IsGravityEnabled(); }
     void SetPlayerGravityEnabled(bool enabled) { player.SetGravityEnabled(enabled); }
@@ -50,6 +54,8 @@ private:
     int bgRed{ 24 };
     int bgGreen{ 160 };
     int bgBlue{ 224 };
+
+
 
     // Grid
     Grid grid;
