@@ -30,5 +30,6 @@ struct ModelObject
    Collision::Ellipsoid GetHitEllipsoid() const;
     Vec3 GetSize() const { return GetHitEllipsoid().radii * 2.0f; }
     void ApplyCollisionColor() const;
+    void Draw(Vec3 masterPos = { 0.0f, 0.0f, 0.0f }) const;
     void Draw(Vec3 masterPos = { 0.0f,0.0f,0.0f }) const;
 };
