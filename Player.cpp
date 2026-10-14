@@ -33,6 +33,7 @@ void Player::Init()
 
 void Player::Reset()
 {
+    health_ = MaxHealth;
     model_.collisionHighlighted = false;
     ultimateGauge_ = 0.0f;
 	SetTransform(TransformDefaults::GamePlayer);
@@ -141,6 +142,22 @@ void Player::Draw() const
 	animation_.Draw3D(model_.position, model_.scale, model_.rotation);
 }
 
+
+bool Player::TakeDamage()
+{
+    if (IsDead() || IsDamaging()) return false;
+
+    --health_;
+    stateMachine_.ChangeState(PlayerStateType::Damaging);
+    return true;
+}
+
+void Player::DrawStatus() const
+{
+    const wchar_t* state = IsDamaging() ? L"Damaging" : IsDead() ? L"Die" : L"";
+    DxLib::DrawFormatString(24, 150, DxLib::GetColor(255, 255, 255),
+        L"HP: %d / %d  %s", health_, MaxHealth, state);
+}
 
 void Player::SetAnimation(PlayerAnimType::Type type, bool loop)
 {

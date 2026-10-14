@@ -115,10 +115,11 @@ void ModelObject::ApplyCollisionColor() const
 }
 namespace Collision
 {
-    void UpdateModelContact(ModelObject& a, ModelObject& b)
+    bool UpdateModelContact(ModelObject& a, ModelObject& b)
 	{//“ñ‚Â‚Ìƒ‚ƒfƒ‹‚Ì“–‚½‚è”»’è‚ğs‚¢AÕ“Ë‚µ‚Ä‚¢‚éê‡‚ÍcollisionHighlighted‚ğtrue‚É‚·‚é
         const bool touching = IsHitEllipsoidEllipsoid(a.GetHitEllipsoid(), b.GetHitEllipsoid());
         a.collisionHighlighted = touching;
         b.collisionHighlighted = touching;
+        return touching;
     }
 }
