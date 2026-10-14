@@ -53,7 +53,7 @@ void ImageObject::Draw(DxPlus::Vec2 masterPos) const
     sprite->Draw(position + masterPos, scale, pivot, rotation);
 }
 
-void ModelObject::Draw(Vec3 masterPos) const
+void ModelObject::ApplyTransform(Vec3 masterPos) const
 {
     const int handle = RM().GetModel(modelKey);
     if (handle < 0) return;
@@ -70,7 +70,7 @@ void ModelObject::Draw(Vec3 masterPos) const
     const int handle = RM().GetModel(modelKey);
     if (handle < 0) return;
 
-    Draw(masterPos);
+    ApplyTransform(masterPos);
     ApplyCollisionColor();
     MV1DrawModel(handle);
 }
@@ -81,15 +81,18 @@ Collision::Ellipsoid ModelObject::GetHitEllipsoid() const
     if (handle < 0) return {};
 
 
-    Draw();
+    ApplyTransform();
     if (MV1SetupReferenceMesh(handle, -1, TRUE, TRUE) < 0) return {};//キャラがないとき
 	// 参照用メッシュを更新して取得
     const int refreshResult = MV1RefreshReferenceMesh(handle, -1, TRUE, TRUE);
     const auto mesh = MV1GetReferenceMesh(handle, -1, TRUE, TRUE);
+	// 頂点の最小座標と最大座標を取得
     const Vec3 minimum = DxConv::ToVec3(mesh.MinPosition);
     const Vec3 maximum = DxConv::ToVec3(mesh.MaxPosition);
+	// 頂点がない場合は無効とする
 	const bool valid = refreshResult >= 0 && mesh.VertexNum > 0;    // 頂点がない場合は無効とする
 	MV1TerminateReferenceMesh(handle, -1, TRUE, TRUE);//参照用メッシュの後始末
+
     if (!valid) return {};
 
 	return { (minimum + maximum) * 0.5f, (maximum - minimum) * 0.5f };//中心と半径を返す
@@ -104,6 +107,7 @@ void ModelObject::ApplyCollisionColor() const
 	const auto color = collisionHighlighted //カラーを赤にするか白にするか
         ? GetColorF(1.0f, 0.0f, 0.0f, 1.0f)
         : GetColorF(1.0f, 1.0f, 1.0f, 1.0f);
+
     MV1SetDifColorScale(handle, color);     //ディフューズ色。光が当たった面の基本的な色  だってよ　　　基本これでよき
     MV1SetAmbColorScale(handle, color);     //アンビエント色。環境光による色            だってよ      基本これでよき
     MV1SetSpcColorScale(handle, color);     //スペキュラ色。光沢・ハイライトの色         だってよ     これは正直いらない
