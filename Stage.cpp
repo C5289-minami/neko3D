@@ -5,7 +5,6 @@
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
 #include "DxConv.h"
-#include "Raycast.h"
 #include "Consts.h"
 #include "imgui.h"
 #include "TransformSettings.h"
@@ -34,15 +33,79 @@ void Stage::Init()
 
     // 地面の当たり判定に使うモデル
     stageModel_.modelKey = ResourceKeys::Model_StageFbx;
-    const int modelHandle = GetModelHandle();
-    if (modelHandle < 0) return;
-    MV1SetupCollInfo(modelHandle, -1, 8, 8, 8);
-
     LoadModelSettings();
+    SetupCollisionInfo();
     Reset();
 }
+void Stage::SetupCollisionInfo()//当たり判定のセットアップ
+{
+    const auto setup = [](const ModelObject& model)//ラムダ式で書き換えれるように
+    {
+        int handle = RM().GetModel(model.modelKey);
+        if (handle < 0) return -1;
+
+        // 描画前でも、保存済みの配置・回転・拡大率で判定できるようにする。
+        model.Draw();
+
+        int result = MV1SetupCollInfo(handle, -1, 8, 8, 8);
+        if (result < 0) return -1;
+
+        return handle;
+    };
+
+    groundCollisionHandle_ = setup(stageModel_);
+    for (int i = 0; i < stageModels_.size(); ++i)
+    {
+        stageCollisionHandles_[i] = setup(stageModels_[i]);
+    }
+    // コリジョン情報はRMによるMV1DeleteModel時にモデルと一緒に解放される。
+}
+
+void Stage::RefreshCollisionInfo()
+{
+    const auto refresh = [](const ModelObject& model, int handle)
+    {
+        if (handle < 0) return -1;
+        // モデルが解放・差し替えされていたら、古いハンドルは使わない。
+        if (RM().GetModel(model.modelKey) != handle) return -1;
+
+        model.Draw();
+
+		int result = MV1RefreshCollInfo(handle, -1);// コリジョン情報を更新する
+        if (result < 0) return -1;
+
+        return handle;
+    };
+
+    groundCollisionHandle_ = refresh(stageModel_, groundCollisionHandle_);
+    for (int i = 0; i < stageModels_.size(); ++i)
+    {
+        stageCollisionHandles_[i] = refresh(stageModels_[i], stageCollisionHandles_[i]);
+    }
+}
+
+void Stage::GetCollisionModelHandles(std::vector<int>& handles) const
+{
+    // 呼び出し元の配列を、現在使えるハンドルの一覧に更新する。
+    handles.clear();
+    handles.reserve(stageCollisionHandles_.size() + 1);
+
+    if (groundCollisionHandle_ >= 0)
+    {
+        handles.emplace_back(groundCollisionHandle_);
+    }
+    for (int handle : stageCollisionHandles_)
+    {
+        if (handle >= 0)
+        {
+            handles.emplace_back(handle);
+        }
+    }
+}
+
 void Stage::Reset()
 {
+    RefreshCollisionInfo();
     // 透過モデルの配置情報は毎回リセット
     alphaModelReady_ = false;
 
@@ -58,7 +121,7 @@ void Stage::Draw() const
         model.Draw();
     }
 
-    MV1DrawModel(RM().GetModel(ResourceKeys::Model_StageFbx));
+    stageModel_.Draw();
 }
 void Stage::ResetAlphaModel(const Vec3& playerPosition)
 {
@@ -171,6 +234,7 @@ bool Stage::LoadModelSettings()
             if (!TransformSettings::IsValid({m.scale, m.position, m.rotation})) throw std::runtime_error("Invalid transform.");
         }
         stageModels_ = loaded;
+        RefreshCollisionInfo();
         modelSettingsStatus_ = "Loaded.";
         return true;
     }
@@ -189,7 +253,16 @@ void Stage::DrawDebugUI()
             bool changed = ImGui::DragFloat3("Position", &v.position.x, 1.0f);
             changed |= ImGui::DragFloat3("Rotation (radians)", &v.rotation.x, 0.01f);
             changed |= ImGui::DragFloat3("Scale", &v.scale.x, 0.01f, 0.001f, 10000.0f);
-            if (changed && TransformSettings::IsValid(v)) { m.position = v.position; m.rotation = v.rotation; m.scale = v.scale; }
+            if (changed && TransformSettings::IsValid(v))
+            {
+                m.position = v.position;
+                m.rotation = v.rotation;
+                m.scale = v.scale;
+                RefreshCollisionInfo();
+            }
+            ImGui::Text("MV1 collision: %s (handle: %d)",
+                stageCollisionHandles_[i] >= 0 ? "Ready" : "Unavailable",
+                stageCollisionHandles_[i]);
             ImGui::TreePop();
         }
         ImGui::PopID();

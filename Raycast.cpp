@@ -21,12 +21,41 @@ bool Physics::Raycast(int modelHandle, Vec3 start, Vec3 end, RayHit& hit)
     return true;
 }
 
-bool Physics::RaycastDown(int modelHandle, Vec3 origin, float maxDistance, RayHit& hit)
+bool Physics::Raycast(const std::vector<int>& modelHandles, Vec3 start, Vec3 end, RayHit& hit)
 {
-    return Raycast(modelHandle, origin, origin - Vec3::Up() * maxDistance, hit);
+    bool isHit = false;
+    RayHit nearestHit{};
+
+    for (int modelHandle : modelHandles)
+    {
+        if (modelHandle < 0) continue;
+
+        RayHit modelHit{};
+        // 上にある元の処理を、各モデルに対してそのまま呼ぶ。
+        if (!Raycast(modelHandle, start, end, modelHit)) continue;
+
+        if (!isHit || modelHit.distance < nearestHit.distance)
+        {
+            nearestHit = modelHit;
+            isHit = true;
+        }
+    }
+
+    if (isHit)
+    {
+        hit = nearestHit;
+    }
+    return isHit;
 }
 
-bool Physics::RaycastUp(int modelHandle, Vec3 origin, float maxDistance, RayHit& hit)
+bool Physics::RaycastDown(const std::vector<int>& modelHandles, Vec3 origin, float maxDistance, RayHit& hit)
 {
-    return Raycast(modelHandle, origin, origin + Vec3::Up() * maxDistance, hit);
+    if (maxDistance <= 0.0f) return false;
+    return Raycast(modelHandles, origin, origin - Vec3::Up() * maxDistance, hit);
+}
+
+bool Physics::RaycastUp(const std::vector<int>& modelHandles, Vec3 origin, float maxDistance, RayHit& hit)
+{
+    if (maxDistance <= 0.0f) return false;
+    return Raycast(modelHandles, origin, origin + Vec3::Up() * maxDistance, hit);
 }
