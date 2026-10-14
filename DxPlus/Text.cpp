@@ -16,7 +16,7 @@ namespace DxPlus::Text
             DeleteFontToHandle(defaultFontHandle);
         }
 
-        defaultFontHandle = CreateFontToHandle(fontName, fontSize, fontThickness, DX_FONTTYPE_NORMAL, -1, TRUE);
+        defaultFontHandle = CreateFontToHandle(fontName, fontSize, fontThickness, DX_FONTTYPE_ANTIALIASING_4X4, -1, TRUE);
 
         if (defaultFontHandle == -1)
         {
@@ -35,7 +35,7 @@ namespace DxPlus::Text
 
     int InitializeFont(const wchar_t* fontName, int fontSize, int fontThickness)
     {
-        return DxLib::CreateFontToHandle(fontName, fontSize, fontThickness, DX_FONTTYPE_NORMAL, -1, TRUE);
+        return DxLib::CreateFontToHandle(fontName, fontSize, fontThickness, DX_FONTTYPE_ANTIALIASING_4X4, -1, TRUE);
     }
 
     void DeleteFont(int fontHandle)
