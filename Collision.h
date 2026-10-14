@@ -19,7 +19,7 @@ namespace Collision									// あたり判定用名前空間
     bool IsHitEllipsoidEllipsoid(const Ellipsoid& a, const Ellipsoid& b);
 
 	//モデルのコンタクトを更新し、接触している間は両方のモデルをハイライト表示する。
-    void UpdateModelContact(ModelObject& a, ModelObject& b);
+    bool UpdateModelContact(ModelObject& a, ModelObject& b);
 
 	struct Sphere									// 球のあたり判定情報
 	{

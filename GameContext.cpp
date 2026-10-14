@@ -149,7 +149,8 @@ void GameContext::Update(float deltaTime)
     player.Update(deltaTime, stage, stageCenterPosition);
     stage.UpdateAlphaModel(deltaTime, player);
     boss.Update(deltaTime);
-    Collision::UpdateModelContact(player.GetModelObject(), boss.GetModelObject());
+    const bool touching = Collision::UpdateModelContact(player.GetModelObject(), boss.GetModelObject());
+    if (touching) player.TakeDamage();
     playerCamera.Update(player.GetPosition(), boss.GetPosition(), deltaTime);
 
 
@@ -180,5 +181,6 @@ void GameContext::Draw() const
 
 
     effectManager.Draw();
+    player.DrawStatus();
 
 }

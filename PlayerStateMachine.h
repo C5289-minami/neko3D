@@ -10,6 +10,8 @@
 #include "PlayerLungingJumpState.h"
 #include "PlayerAttackState.h"
 #include "PlayerUltimateAttackState.h"
+#include "PlayerDamagingState.h"
+#include "PlayerDieState.h"
 
 class Player;
 
@@ -39,5 +41,7 @@ private:
 	PlayerLungingJumpState lungingJumpState_;
 	PlayerAttackState attackState_;
 	PlayerUltimateAttackState ultimateAttackState_;
+	PlayerDamagingState damagingState_;
+	PlayerDieState dieState_;
 	// ‘¼‚ð‚±‚±‚É’Ç‰Á
 };

@@ -125,7 +125,12 @@ void BossTestScene::Update(float deltaTime)
 	const bool mouseCaptured = false;
 	const bool keyboardCaptured = false;
 #endif
-	if (!actorsPaused) boss.Update(deltaTime);
+    const bool updateActors = !actorsPaused && !keyboardCaptured;
+    if (updateActors)
+    {
+        player_.Update(deltaTime, stage);
+        boss.Update(deltaTime);
+    }
 
 	// --- スキル入力処理 ---
 	int selectedSkill = 0;
@@ -189,7 +194,8 @@ void BossTestScene::Update(float deltaTime)
 			cameraEye += movement.Normalized() * (speed * deltaTime);
 		}
 	}
-	Collision::UpdateModelContact(player_.GetModelObject(), boss.GetModelObject());
+    const bool touching = Collision::UpdateModelContact(player_.GetModelObject(), boss.GetModelObject());
+    if (updateActors && touching) player_.TakeDamage();
 
 	stage.UpdateAlphaModel(deltaTime, player_);
 
@@ -226,6 +232,8 @@ void BossTestScene::Render() const
 	{
 		DrawScene(false);
 	}
+
+    player_.DrawStatus();
 
 	const int white = DxLib::GetColor(255, 255, 255);
 	int fontHandle = RM().GetFont(ResourceKeys::Font_Title);

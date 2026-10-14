@@ -1,15 +1,15 @@
-#pragma once
+ï»¿#pragma once
 
-// Še—ñ‹“’l‚Íƒ‚ƒfƒ‹‚ÌƒAƒjƒ[ƒVƒ‡ƒ“”Ô†‚Æ‚µ‚Äg‚¤B
-// ƒ‚ƒfƒ‹“à‚ÌƒNƒŠƒbƒv‡‚Æˆê’v‚µ‚Ä‚¢‚é‚±‚Æ‚ğŠm”F‚·‚éB
+// ã‚¹ãƒ†ãƒ¼ãƒˆã®ç•ªå·ã¨ã€PlayerAnimTypeã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç•ªå·ã¯åˆ¥ã«ç®¡ç†ã™ã‚‹ã€‚
 enum class PlayerStateType
 {
-    Idle = 0,       // ‘Ò‹@
-    Walk,           // •às
-    Kedukuroi,       // –Ñ‚Ã‚­‚ë‚¢
-    NeutralJump,    // ‚»‚Ìê‚ÅƒWƒƒƒ“ƒv
-    LungingJump,    // ˆÚ“®‚µ‚È‚ª‚çƒWƒƒƒ“ƒv
-    Attack,         // ’ÊíUŒ‚
-    UltimateAttack, // •KE‹Z
-    Die,            // €–S
+    Idle = 0,       // å¾…æ©Ÿ
+    Walk,           // æ­©è¡Œ
+    Kedukuroi,      // æ¯›ã¥ãã‚ã„
+    NeutralJump,    // ãã®å ´ã§ã‚¸ãƒ£ãƒ³ãƒ—
+    LungingJump,    // ç§»å‹•ã—ãªãŒã‚‰ã‚¸ãƒ£ãƒ³ãƒ—
+    Attack,         // é€šå¸¸æ”»æ’ƒ
+    UltimateAttack, // å¿…æ®ºæŠ€
+    Die,            // æ­»äº¡
+    Damaging,       // è¢«å¼¾ä¸­
 };

@@ -21,6 +21,15 @@ public:
 	void Reset() override;
 	void Update(float deltaTime) override;
 	void Draw() const override;
+    void DrawStatus() const;
+
+    static constexpr int MaxHealth = 5;
+    static constexpr float DamageRecoveryTime = 0.5f;
+    int GetHealth() const { return health_; }
+    bool IsDead() const { return health_ <= 0; }
+    bool IsDamaging() const { return GetCurrentState() == PlayerStateType::Damaging; }
+    PlayerStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }
+    bool TakeDamage();
 
  void SetAnimation(PlayerAnimType::Type type, bool loop = true);
 
@@ -74,6 +83,7 @@ public:
     bool TryUseUltimateGauge();
 
 private:
+    int health_{ MaxHealth };
 	ModelObject model_;
 	AnimationDraw animation_;
 	int currentAnimIndex_{ static_cast<int>(PlayerAnimType::Idle) };
