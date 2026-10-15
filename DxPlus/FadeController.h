@@ -18,7 +18,7 @@ namespace DxPlus
 		// フェードイン・アウトを開始する
 		void StartFadeIn(float duration = 1.0f);
 		void StartFadeOut(float duration = 1.0f);
-		void Update();    // 更新処理
+		void Update(float deltaTime);    // 更新処理
 		void Draw() const;	// 描画処理
 
 		// 状態判定

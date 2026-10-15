@@ -4,13 +4,13 @@
 
 void Room::Init()
 {
-	roomModel_.modelKey = ResourceKeys::Model_Test;
+	roomModel_.modelKey = ResourceKeys::Model_Room;
 	Reset();
 }
 
 void Room::Reset()
 {
-	float scale = 100.0f;
+	float scale = 1.0f;
 	roomModel_.scale = { scale, scale, scale };
 }
 

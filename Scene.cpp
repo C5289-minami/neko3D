@@ -9,7 +9,7 @@ void Scene::Drive(float deltaTime)
 #if 0   // フェードを有効にする場合は#if 0に変更すること
     Update(deltaTime);
 #else
-    UpdateFadeController();
+    UpdateFadeController(deltaTime);
     if (fade.IsStable())
     {
         Update(deltaTime);
@@ -23,9 +23,9 @@ void Scene::SetNextScene(Scene* scene)
     //finished = (scene != nullptr);  // フェードイン/アウトさせたい場合はこの行をコメントアウト
 }
 
-void Scene::UpdateFadeController()
+void Scene::UpdateFadeController(float deltaTime)
 {
-    fade.Update();
+    fade.Update(deltaTime);
     if (!fade.IsStable())
     {
         if (fade.IsFadeOutDone())

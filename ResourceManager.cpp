@@ -40,6 +40,7 @@ void ResourceManager::LoadAll()
     LoadModel(ResourceKeys::Model_StageFbx,  L"./Data/Models/stage/Stage.mv1");
     LoadModel(ResourceKeys::Model_stand_l,  L"./Data/Models/stage/stand_l.mv1");
     LoadModel(ResourceKeys::Model_stand_m,  L"./Data/Models/stage/stand_m.mv1");
+	LoadModel(ResourceKeys::Model_Room, L"./Data/Models/Room/heya.mv1");
 	// スプライトスタジオの読み込み
 
     LoadSpriteStudioPlayer(

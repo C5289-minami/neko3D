@@ -7,106 +7,33 @@
 #ifndef NDEBUG
 #include "imgui.h"
 #endif
-
-const Vec3& GameContext::GetCameraPosition() const
-{
-#ifndef NDEBUG
-    if (Debug_camera.IsSceneViewActive()) return Debug_camera.GetEye();
-#endif
-    return playerCamera.GetPosition();
-}
-
-const Vec3& GameContext::GetCameraTarget() const
-{
-#ifndef NDEBUG
-    if (Debug_camera.IsSceneViewActive()) return Debug_camera.GetTarget();
-#endif
-    return playerCamera.GetTarget();
-}
-
-const Vec3& GameContext::GetCameraUp() const
-{
-#ifndef NDEBUG
-    if (Debug_camera.IsSceneViewActive()) return Debug_camera.GetUp();
-#endif
-    return playerCamera.GetUp();
-}
-
-bool GameContext::IsSceneViewActive() const
-{
-#ifndef NDEBUG
-    return Debug_camera.IsSceneViewActive();
-#else
-    return false;
-#endif
-}
-
-void GameContext::SetCameraPosition(const Vec3& position)
-{
-#ifndef NDEBUG
-    if (Debug_camera.IsSceneViewActive())
-    {
-        Debug_camera.SetPosition(position);
-        return;
-    }
-#endif
-    playerCamera.SetPosition(position);
-}
-
-void GameContext::ResetSceneCamera()
-{
-    if (IsSceneViewActive())
-    {
-        Debug_camera.ResetView();
-    }
-    else
-    {
-        playerCamera.Reset();
-        Debug_camera.Initialize(playerCamera.GetEye(), playerCamera.GetTarget());
-    }
-}
-
-void GameContext::FocusSceneCameraOnPlayer()
-{
-#ifndef NDEBUG
-    if (!Debug_camera.IsSceneViewActive())
-    {
-        Debug_camera.Initialize(playerCamera.GetEye(), playerCamera.GetTarget());
-        Debug_camera.Begin();
-    }
-    Debug_camera.FocusAt(player.GetPosition());
-#endif
-}
-
-DebugSceneControls GameContext::GetDebugControls()
-{
-    return {
-        "game",
-        {
-            MakeDebugTransformTarget("game/player", "Player", player),
-            MakeDebugTransformTarget("game/boss", "Boss", boss)
-        },
-        DebugCameraControls{
-            [this] { return IsSceneViewActive(); },
-            [this] { return GetCameraPosition(); },
-            [this](const Vec3& position) { SetCameraPosition(position); },
-            [this] { ResetSceneCamera(); },
-            [this] { FocusSceneCameraOnPlayer(); }
-        },
-        [this] { return debugActorsPaused_; },
-        [this](bool paused) { debugActorsPaused_ = paused; },
-        transformInitialStatus_
-    };
-}
+//
+//DebugSceneControls GameContext::GetDebugControls()
+//{
+//    return {
+//        "game",
+//        {
+//            MakeDebugTransformTarget("game/player", "Player", player),
+//            MakeDebugTransformTarget("game/boss", "Boss", boss)
+//        },
+//        DebugCameraControls{
+//            [this] { return IsSceneViewActive(); },
+//            [this] { return GetCameraPosition(); },
+//            [this](const Vec3& position) { SetCameraPosition(position); },
+//            [this] { ResetSceneCamera(); },
+//            [this] { FocusSceneCameraOnPlayer(); }
+//        },
+//        [this] { return debugActorsPaused_; },
+//        [this](bool paused) { debugActorsPaused_ = paused; },
+//        transformInitialStatus_
+//    };
+//}
 
 void GameContext::Init()
 {
     stage.Init();
     player.Init();
     boss.Init();
-
-    playerCamera.Reset();
-    Debug_camera.Initialize(playerCamera.GetEye(), playerCamera.GetTarget());
 }
 
 void GameContext::Reset()
@@ -122,8 +49,9 @@ void GameContext::Reset()
     player.Reset();
     boss.Reset();
     debugActorsPaused_ = false;
-    TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
+    //TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
     stage.ResetAlphaModel(player.GetPosition());
+/*
     playerCamera.Reset();
     Debug_camera.Initialize(playerCamera.GetEye(), playerCamera.GetTarget());
 }
@@ -144,7 +72,7 @@ void GameContext::Update(float deltaTime)
     }
 #endif
 
-    // ‘«ê‚Ì’†S ƒ{ƒX‚ª“®‚¢‚Ä‚à‚±‚ÌˆÊ’u
+    // ï¿½ï¿½ï¿½ï¿½Ì’ï¿½ï¿½S ï¿½{ï¿½Xï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½ï¿½ÌˆÊ’u
     const Vec3 stageCenterPosition{ 0.0f, 0.0f, 0.0f };
     player.Update(deltaTime, stage, stageCenterPosition);
     stage.UpdateAlphaModel(deltaTime, player);
@@ -168,9 +96,9 @@ void GameContext::Update(float deltaTime)
 void GameContext::Draw() const
 {
     DxLib::SetCameraPositionAndTargetAndUpVec(
-        DxConv::ToVECTOR(GetCameraPosition()), // ƒJƒƒ‰‚ÌˆÊ’u
-        DxConv::ToVECTOR(GetCameraTarget()),   // ƒJƒƒ‰‚Ì’‹“_
-        DxConv::ToVECTOR(GetCameraUp()));      //‚¿‚å‚Á‚Æã‚©‚ç
+        DxConv::ToVECTOR(GetCameraPosition()), // ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½ÌˆÊ’u
+        DxConv::ToVECTOR(GetCameraTarget()),   // ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½Ì’ï¿½ï¿½ï¿½ï¿½_
+        DxConv::ToVECTOR(GetCameraUp()));      //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æã‚©ï¿½ï¿½
 
     DxLib::ClearDrawScreen();
     grid.Draw();
@@ -183,4 +111,5 @@ void GameContext::Draw() const
     effectManager.Draw();
     player.DrawStatus();
 
+*/
 }

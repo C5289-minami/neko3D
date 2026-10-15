@@ -17,17 +17,6 @@
 #include "Player.h"
 #include "Sound3D.h"
 
-namespace
-{
-	// カメラ関連なのでクラスを作ったのならすべて移動させてね
-	constexpr float MouseRotationRadiansPerPixel =
-		DxPlus::PI * 2.0f / DxPlus::CLIENT_WIDTH;
-
-	constexpr float MinPitch = DxPlus::Deg2Rad * -89.0f;
-	constexpr float MaxPitch = DxPlus::Deg2Rad * 89.0f;
-	constexpr float CameraMoveSpeed = 500.0f;
-}
-
 DebugSceneControls BossTestScene::GetDebugControls()
 {
 	return {
@@ -71,11 +60,16 @@ void BossTestScene::Init()
 	DxLib::SetLightDirection(DxLib::GetLightDirection());
 
 
-	// デバッグカメラの初期化
+  // 通常カメラの初期化
 	cameraEye = { 0.0f, 250.0f, -650.0f };
 	const Vec3 direction = (Vec3{ 0.0f, 100.0f, 0.0f } - cameraEye).Normalized();
 	pitch = std::asin(std::clamp(direction.y, -1.0f, 1.0f));
 	yaw = std::atan2(direction.x, direction.z);
+
+	camera_.SetPosition(cameraEye);
+	camera_.SetPitch(pitch);
+	camera_.SetYaw(yaw);
+	camera_.ApplyCamera();
 
 	// トゥーン描画に必要なシェーダーと設定バッファーを初期化
 	if (!modelToonRenderer_.Init())
@@ -172,30 +166,14 @@ void BossTestScene::Update(float deltaTime)
 	// --- 右クリックを押している間のみカメラ操作 ---
 	if (!mouseCaptured && !debugCamera_.IsSceneViewActive() && (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
 	{
-		const DxPlus::Vec2Int mouseDelta = DxPlus::Input::GetMouseDelta();
-		yaw += mouseDelta.x * MouseRotationRadiansPerPixel;
-		pitch = std::clamp(pitch - mouseDelta.y * MouseRotationRadiansPerPixel, MinPitch, MaxPitch);
-
-		const float cosPitch = std::cos(pitch);
-		const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };
-		const Vec3 right = Vec3::Cross(Vec3::Up(), forward).Normalized();
-		Vec3 movement{};
-
-		if (DxLib::CheckHitKey(KEY_INPUT_W)) movement += forward;
-		if (DxLib::CheckHitKey(KEY_INPUT_S)) movement -= forward;
-		if (DxLib::CheckHitKey(KEY_INPUT_D)) movement += right;
-		if (DxLib::CheckHitKey(KEY_INPUT_A)) movement -= right;
-		if (DxLib::CheckHitKey(KEY_INPUT_E)) movement += Vec3::Up();
-		if (DxLib::CheckHitKey(KEY_INPUT_Q)) movement -= Vec3::Up();
-
-		if (movement.LengthSq() > 0.0f)
-		{
-			const float speed = CameraMoveSpeed * (DxLib::CheckHitKey(KEY_INPUT_LSHIFT) ? 3.0f : 1.0f);
-			cameraEye += movement.Normalized() * (speed * deltaTime);
-		}
+		SetMouseDispFlag(FALSE);
+		camera_.InputUpdate(deltaTime);
 	}
-    const bool touching = Collision::UpdateModelContact(player_.GetModelObject(), boss.GetModelObject());
-    if (updateActors && touching) player_.TakeDamage();
+  else SetMouseDispFlag(TRUE);
+  const bool touching = Collision::UpdateModelContact(player_.GetModelObject(), boss.GetModelObject());
+  if (updateActors && touching) player_.TakeDamage();
+//Collision::UpdateModelContact(player_.GetModelObject(), boss.GetModelObject());
+
 
 	stage.UpdateAlphaModel(deltaTime, player_);
 
@@ -248,8 +226,8 @@ void BossTestScene::Render() const
 void BossTestScene::RenderDepth() const
 {
 	// シーンのカメラを設定する
-	ApplyCamera();
-
+  if (debugCamera_.IsSceneViewActive()) debugCamera_.ApplyCamera();
+	else camera_.ApplyCamera();
 	// Boneなしシェーダー
 	modelToonRenderer_.SetVertexShader(ModelToonType::Model);
 
@@ -263,30 +241,11 @@ void BossTestScene::RenderDepth() const
 
 }
 
-void BossTestScene::ApplyCamera() const
-{
-	const float cosPitch = std::cos(pitch);
-
-	const Vec3 forward{
-		std::sin(yaw) * cosPitch,
-		std::sin(pitch),
-		std::cos(yaw) * cosPitch
-	};
-
-	const Vec3 target = cameraEye + forward;
-
-	DxLib::SetCameraPositionAndTargetAndUpVec(
-		DxConv::ToVECTOR(cameraEye),
-		DxConv::ToVECTOR(target),
-		VGet(0.0f, 1.0f, 0.0f)
-	);
-}
-
 void BossTestScene::DrawScene(bool toonEnabled) const
 {
 	// カメラを設定する
-	ApplyCamera();
-
+  if (debugCamera_.IsSceneViewActive()) debugCamera_.ApplyCamera();
+	else camera_.ApplyCamera();
 	// トゥーンシェーダーを使わない場合
 	if (!toonEnabled)
 	{

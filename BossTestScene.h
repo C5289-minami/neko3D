@@ -14,8 +14,8 @@
 #include "Stage.h"
 #include "Player.h"
 #include "ModelToonRenderer.h"
-#include "Debug_camera.h"
 #include "ShaderEffectController.h"
+#include "Camera.h"
 
 class BossTestScene final : public Scene
 {
@@ -50,7 +50,7 @@ private:
     float pitch{};
     // Debug
     bool skillKeyWasDown_{};
-    Debug_camera debugCamera_;
+  Camera::DebugCamera debugCamera_;
     bool debugActorsPaused_{};
     std::string transformInitialStatus_;
 
@@ -59,13 +59,10 @@ private:
 
     // モデルのトゥーン描画を管理する
     ModelToonRenderer modelToonRenderer_{};
-
     // 共通のスクリーン空間アウトライン描画
     ShaderEffectController shaderEffects_{};
-
     void DrawScene(bool toonEnabled) const;
     void RenderDepth() const;
 
-
-    void ApplyCamera() const;
+	Camera::FreeCamera camera_{};
 };

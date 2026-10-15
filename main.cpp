@@ -63,7 +63,7 @@ int WINAPI wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 	// ウィンドウモード / フルスクリーンの切り替え
 	cfg.windowed = true;
 
-	SetFullSceneAntiAliasingMode(4, 4);
+	//DxLib::SetFullSceneAntiAliasingMode(4,4);
 
 	// SS6Platformの初期化
 	ss::SSPlatformInit();
