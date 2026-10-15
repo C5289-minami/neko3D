@@ -51,4 +51,65 @@ void GameContext::Reset()
     debugActorsPaused_ = false;
     //TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
     stage.ResetAlphaModel(player.GetPosition());
+/*
+    playerCamera.Reset();
+    Debug_camera.Initialize(playerCamera.GetEye(), playerCamera.GetTarget());
+}
+
+void GameContext::Update(float deltaTime)
+{
+    DxLib::SetBackgroundColor(bgRed, bgGreen, bgBlue);
+
+#ifndef NDEBUG
+    Debug_camera.Update(deltaTime, player.GetPosition(),
+        playerCamera.GetEye(), playerCamera.GetTarget());
+    if (Debug_camera.IsSceneViewActive() || debugActorsPaused_ ||
+        (ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard))
+    {
+        Collision::UpdateModelContact(player.GetModelObject(), boss.GetModelObject());
+        stage.UpdateAlphaModel(deltaTime, player);
+        return;
+    }
+#endif
+
+    // ����̒��S �{�X�������Ă����̈ʒu
+    const Vec3 stageCenterPosition{ 0.0f, 0.0f, 0.0f };
+    player.Update(deltaTime, stage, stageCenterPosition);
+    stage.UpdateAlphaModel(deltaTime, player);
+    boss.Update(deltaTime);
+    const bool touching = Collision::UpdateModelContact(player.GetModelObject(), boss.GetModelObject());
+    if (touching) player.TakeDamage();
+    playerCamera.Update(player.GetPosition(), boss.GetPosition(), deltaTime);
+
+
+    // Effect
+	using namespace DxPlus::Input;
+    if (GetButtonDown(PLAYER1) & BUTTON_L3)
+    {
+        effectManager.PlayHit(RM().GetEffect(ResourceKeys::Effect_Test),
+            player.GetPosition() + Vec3::Up() * 100.0f, 
+            player.GetYaw() + DX_PI_F);
+    }
+    effectManager.Update(deltaTime);
+}
+
+void GameContext::Draw() const
+{
+    DxLib::SetCameraPositionAndTargetAndUpVec(
+        DxConv::ToVECTOR(GetCameraPosition()), // �J�����̈ʒu
+        DxConv::ToVECTOR(GetCameraTarget()),   // �J�����̒����_
+        DxConv::ToVECTOR(GetCameraUp()));      //������Əォ��
+
+    DxLib::ClearDrawScreen();
+    grid.Draw();
+    stage.Draw();
+    boss.Draw();
+    player.Draw();
+    stage.DrawAlphaModel();
+
+
+    effectManager.Draw();
+    player.DrawStatus();
+
+*/
 }

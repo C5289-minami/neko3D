@@ -261,6 +261,8 @@
     <ClInclude Include="PlayerNeutralJumpState.h" />
     <ClInclude Include="PlayerLungingJumpState.h" />
     <ClInclude Include="PlayerAttackState.h" />
+    <ClInclude Include="PlayerDamagingState.h" />
+    <ClInclude Include="PlayerDieState.h" />
     <ClInclude Include="PlayerUltimateAttackState.h" />
     <ClInclude Include="PlayerInput.h" />
     <ClInclude Include="PlayerStateMachine.h" />
@@ -358,6 +360,8 @@
     <ClCompile Include="PlayerNeutralJumpState.cpp" />
     <ClCompile Include="PlayerLungingJumpState.cpp" />
     <ClCompile Include="PlayerAttackState.cpp" />
+    <ClCompile Include="PlayerDamagingState.cpp" />
+    <ClCompile Include="PlayerDieState.cpp" />
     <ClCompile Include="PlayerUltimateAttackState.cpp" />
     <ClCompile Include="PlayerInput.cpp" />
     <ClCompile Include="PlayerStateMachine.cpp" />

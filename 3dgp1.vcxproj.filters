@@ -85,6 +85,12 @@
     <Filter Include="40_Gameplay\Actors\Player\State">
       <UniqueIdentifier>{b7812527-44c5-4edd-9d06-87861bac22d5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="40_Gameplay\Actors\Player\State\Damaging">
+      <UniqueIdentifier>{b8f0362f-af21-489e-8b51-7b668c3780f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Player\State\Die">
+      <UniqueIdentifier>{85850796-14bb-42f4-9eb4-29d6e50511cb}</UniqueIdentifier>
+    </Filter>
     <Filter Include="40_Gameplay\Actors\Player\State\Attack">
       <UniqueIdentifier>{6abc340a-046a-48dd-9042-c471d2f8875f}</UniqueIdentifier>
     </Filter>
@@ -347,6 +353,12 @@
     </ClInclude>
     <ClInclude Include="PlayerAttackState.h">
       <Filter>40_Gameplay\Actors\Player\State\Attack</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerDamagingState.h">
+      <Filter>40_Gameplay\Actors\Player\State\Damaging</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerDieState.h">
+      <Filter>40_Gameplay\Actors\Player\State\Die</Filter>
     </ClInclude>
     <ClInclude Include="PlayerLungingJumpState.h">
       <Filter>40_Gameplay\Actors\Player\State\LungingJump</Filter>
@@ -679,6 +691,12 @@
     </ClCompile>
     <ClCompile Include="PlayerAttackState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Attack</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerDamagingState.cpp">
+      <Filter>40_Gameplay\Actors\Player\State\Damaging</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerDieState.cpp">
+      <Filter>40_Gameplay\Actors\Player\State\Die</Filter>
     </ClCompile>
     <ClCompile Include="PlayerLungingJumpState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\LungingJump</Filter>
