@@ -13,6 +13,8 @@ public:
 	void Reset() override;
 	void Update(float deltaTime) override;
 	void Draw() const override;
+
+	ModelObject GetModelObject() const { return roomModel_; }
 private:
 	ModelObject roomModel_;
 };

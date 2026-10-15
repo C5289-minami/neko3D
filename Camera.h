@@ -102,6 +102,7 @@ namespace Camera
 			pitch_ = std::clamp(pitch_ - mouseDelta.y * rotateSpeed,
 				-DxPlus::Deg2Rad * 89.0f, DxPlus::Deg2Rad * 89.0f);
 			ApplyCamera();
+			SetMousePoint(DxPlus::CLIENT_WIDTH / 2, DxPlus::CLIENT_HEIGHT / 2);
 		}
 	};
 
@@ -252,6 +253,7 @@ namespace Camera
 				position_ += movement.Normalized() * (speed * deltaTime);
 			}
 			RebuildTarget();
+			SetMousePoint(DxPlus::CLIENT_WIDTH / 2, DxPlus::CLIENT_HEIGHT / 2);
 #else
 			(void)deltaTime;
 			(void)focusPoint;
