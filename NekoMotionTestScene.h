@@ -2,6 +2,10 @@
 #include "Scene.h"
 #include "Player.h"
 #include "Room.h"
+#include "Camera.h"
+#include "Grid.h"
+#include "ModelToonRenderer.h"
+#include "ShaderEffectController.h"
 
 class NekoMotionTestScene : public Scene
 {
@@ -13,5 +17,15 @@ public:
 private:
 	Player player_;
 	Room room_;
+	Camera::FreeCamera camera_;
+	Grid grid_;
+
+
+	// モデルのトゥーン描画を管理する
+	ModelToonRenderer modelToonRenderer_{};
+	// 共通のスクリーン空間アウトライン描画
+	ShaderEffectController shaderEffects_{};
+	void DrawScene(bool toonEnabled) const;
+	void RenderDepth() const;
 };
 
