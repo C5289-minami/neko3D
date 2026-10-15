@@ -6,7 +6,7 @@ namespace PlayerAnimType
     {
         Idle = 0,         //
         Walk,             //
-		けづくろい,        // けづくろい（Grooming）                    ・E
+		Kedukuroi,        // けづくろい（Grooming）                    ・E
 		neutral_Jump,     // ニュートラルジャンプ（Neutral Jump）       ・space
 		Lunging_Jump,     //　ランジジャンプ（Lunging Jump）           ・WorAorSorD+Space
 		Attack,           // 攻撃（Attack）                           ・left mouse button

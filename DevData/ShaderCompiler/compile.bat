@@ -1,4 +1,7 @@
 @echo off
+setlocal
+pushd "%~dp0"
+if errorlevel 1 exit /b 1
 
 if not exist "Bin" mkdir "Bin"
 
@@ -24,11 +27,11 @@ if errorlevel 1 goto :error
 
 echo.
 echo Shader Compilation Completed!
-pause
+popd
 exit /b 0
 
 :error
 echo.
 echo Shader Compilation Failed!
-pause
+popd
 exit /b 1
