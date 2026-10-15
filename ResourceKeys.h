@@ -15,8 +15,8 @@ namespace ResourceKeys
     inline constexpr const wchar_t* UI_TestCharacter = L"UITestCharacter";
 
     // ===== Textures / Grids =====
-    inline constexpr const wchar_t* Texture_openPBR_shader1 = L"openPBR_shader1";
-    inline constexpr const wchar_t* Texture_petanurihatyottohuben = L"petanurihatyottohuben";
+    //inline constexpr const wchar_t* Texture_openPBR_shader1 = L"openPBR_shader1";
+    //inline constexpr const wchar_t* Texture_petanurihatyottohuben = L"petanurihatyottohuben";
 
     // ===== Models =====
     inline constexpr const wchar_t* Model_Stage     = L"ModelStage";
@@ -24,6 +24,8 @@ namespace ResourceKeys
     inline constexpr const wchar_t* Model_Paladin    = L"ModelPlayer";
     inline constexpr const wchar_t* Model_Boss    = L"ModelBoss";
 	inline constexpr const wchar_t* Model_Test = L"ModelTest";
+    // room
+	inline constexpr const wchar_t* Model_Room = L"ModelRoom";
 
     // ===== Stage Models =====
     inline constexpr const wchar_t* Model_hashira_l = L"hashira_l";

@@ -3,7 +3,6 @@
 #include "Vector3.h"
 #include "DrawableObject.h"
 
-
 class Room : public ActorBase
 {
 public:
@@ -16,6 +15,5 @@ public:
 	void Draw() const override;
 private:
 	ModelObject roomModel_;
-
 };
 

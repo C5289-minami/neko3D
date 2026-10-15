@@ -2,6 +2,8 @@
 #include "Scene.h"
 #include "Player.h"
 #include "Room.h"
+#include "Camera.h"
+#include "Grid.h"
 
 class NekoMotionTestScene : public Scene
 {
@@ -13,5 +15,7 @@ public:
 private:
 	Player player_;
 	Room room_;
+	Camera::DebugCamera debugCamera_;
+	Grid grid_;
 };
 

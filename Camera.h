@@ -206,9 +206,13 @@ namespace Camera
 			if (toggleDown && !wasToggleDown_)
 			{
 				if (active_)
+				{
 					active_ = false;
+					SetMouseDispFlag(TRUE);
+				}
 				else
 				{
+					SetMouseDispFlag(FALSE);
 					Initialize(viewEye, viewTarget);
 					Begin();
 					wasToggleDown_ = toggleDown;
