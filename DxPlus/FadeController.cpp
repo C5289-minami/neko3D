@@ -35,17 +35,16 @@ namespace DxPlus
         state = State::FadeOut;
     }
 
-    void FadeController::Update()
+    void FadeController::Update(float deltaTime)
     {
         if (duration <= 0.0f)
         {
             return;
         }
 
-        float speed = 1.0f / (duration * 60.0f);
         if (state == State::FadeIn)
         {
-            timer -= speed;
+            timer -= deltaTime;
             if (timer <= 0.0f)
             {
                 timer = 0.0f;
@@ -54,7 +53,7 @@ namespace DxPlus
         }
         else if (state == State::FadeOut)
         {
-            timer += speed;
+            timer += deltaTime;
             if (timer >= duration)
             {
                 timer = duration;
