@@ -65,10 +65,13 @@ void GameScene::Update(float deltaTime)
 		auto& boss = gameContext->GetBoss();
 		auto& stage = gameContext->GetStage();
 
+
 		player.Update(deltaTime, stage, stageCenterPosition);
 		stage.UpdateAlphaModel(deltaTime, player);
 		boss.Update(deltaTime);
-		Collision::UpdateModelContact(player.GetModelObject(), boss.GetModelObject());
+		const bool touching = Collision::UpdateModelContact(player.GetModelObject(), boss.GetModelObject());
+		if (touching) player.TakeDamage();
+
 		playerCamera_.Update(player.GetPosition(), boss.GetPosition(), deltaTime);
 
 		using namespace DxPlus::Input;
