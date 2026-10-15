@@ -98,5 +98,6 @@ private:
 	Vec3 moveInput_{};      // X‚Í¶‰EAZ‚Í‘OŒã‚Ì“ü—Í
 	Vec3 velocity_{ 0.0f, 0.0f, 0.0f };
 	bool isGrounded_{ false };
+    bool wasTouchingPillar_{ false };
   bool gravityEnabled_{ true };
 };

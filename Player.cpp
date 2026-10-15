@@ -12,6 +12,7 @@
 #include "Sound3D.h"
 #include <algorithm>
 #include <vector>
+#include <iostream>
 
 
 Player::Player()
@@ -34,6 +35,7 @@ void Player::Init()
 void Player::Reset()
 {
     health_ = MaxHealth;
+    wasTouchingPillar_ = false;
     model_.collisionHighlighted = false;
     ultimateGauge_ = 0.0f;
 	SetTransform(TransformDefaults::GamePlayer);
@@ -125,6 +127,17 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 	model_.position = GetPosition();
 	model_.rotation.y = GetYaw();
 	model_.rotation.x = GetPitch();
+
+    // 足元から高さ・半径を使って、プレイヤーのカプセルを作る。
+    const Vec3 capsuleStart = GetPosition() + Vec3::Up() * Const::PLAYER_RADIUS;
+    const Vec3 capsuleEnd = GetPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
+    const bool touchingPillar = stage.IsHitPillar(capsuleStart, capsuleEnd, Const::PLAYER_RADIUS);
+    if (touchingPillar && !wasTouchingPillar_)
+    {
+        std::cout << "Hit: Player touched a pillar." << std::endl;
+        OutputDebugStringA("Hit: Player touched a pillar.\n");
+    }
+    wasTouchingPillar_ = touchingPillar;
 
 	Sound3D::SetListener(
 		GetPosition(),

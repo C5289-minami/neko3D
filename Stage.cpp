@@ -25,11 +25,12 @@ namespace
 void Stage::Init()
 {
     //int modelHandle = DxLib::MV1DuplicateModel(RM().GetModel(ResourceKeys::Model_Stage));
-    stageModels_[0].modelKey = ResourceKeys::Model_hashira_l;
-    stageModels_[1].modelKey = ResourceKeys::Model_hashira_m;
-    stageModels_[2].modelKey = ResourceKeys::Model_hashira_s;
-    stageModels_[3].modelKey = ResourceKeys::Model_stand_l;
-    stageModels_[4].modelKey = ResourceKeys::Model_stand_m;
+    stagePillars_[0].modelKey = ResourceKeys::Model_hashira_l;
+    stagePillars_[1].modelKey = ResourceKeys::Model_hashira_m;
+    stagePillars_[2].modelKey = ResourceKeys::Model_hashira_s;
+
+    stageModels_[0].modelKey = ResourceKeys::Model_stand_l;
+    stageModels_[1].modelKey = ResourceKeys::Model_stand_m;
 
     // 地面の当たり判定に使うモデル
     stageModel_.modelKey = ResourceKeys::Model_StageFbx;
@@ -54,6 +55,10 @@ void Stage::SetupCollisionInfo()//当たり判定のセットアップ
     };
 
     groundCollisionHandle_ = setup(stageModel_);
+    for (int i = 0; i < stagePillars_.size(); ++i)
+    {
+        pillarCollisionHandles_[i] = setup(stagePillars_[i]);
+    }
     for (int i = 0; i < stageModels_.size(); ++i)
     {
         stageCollisionHandles_[i] = setup(stageModels_[i]);
@@ -78,6 +83,10 @@ void Stage::RefreshCollisionInfo()
     };
 
     groundCollisionHandle_ = refresh(stageModel_, groundCollisionHandle_);
+    for (int i = 0; i < stagePillars_.size(); ++i)
+    {
+        pillarCollisionHandles_[i] = refresh(stagePillars_[i], pillarCollisionHandles_[i]);
+    }
     for (int i = 0; i < stageModels_.size(); ++i)
     {
         stageCollisionHandles_[i] = refresh(stageModels_[i], stageCollisionHandles_[i]);
@@ -88,11 +97,18 @@ void Stage::GetCollisionModelHandles(std::vector<int>& handles) const
 {
     // 呼び出し元の配列を、現在使えるハンドルの一覧に更新する。
     handles.clear();
-    handles.reserve(stageCollisionHandles_.size() + 1);
+    handles.reserve(pillarCollisionHandles_.size() + stageCollisionHandles_.size() + 1);
 
     if (groundCollisionHandle_ >= 0)
     {
         handles.emplace_back(groundCollisionHandle_);
+    }
+    for (int handle : pillarCollisionHandles_)
+    {
+        if (handle >= 0)
+        {
+            handles.emplace_back(handle);
+        }
     }
     for (int handle : stageCollisionHandles_)
     {
@@ -101,6 +117,24 @@ void Stage::GetCollisionModelHandles(std::vector<int>& handles) const
             handles.emplace_back(handle);
         }
     }
+}
+
+bool Stage::IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float radius) const
+{
+    if (radius <= 0.0f) return false;
+
+    for (int handle : pillarCollisionHandles_)
+    {
+        if (handle < 0) continue;
+
+        const auto result = MV1CollCheck_Capsule(
+            handle, -1, DxConv::ToVECTOR(capsuleStart), DxConv::ToVECTOR(capsuleEnd), radius);
+        const bool hit = result.HitNum > 0;
+        // 判定結果の配列は、当たった場合も当たらない場合も解放する。
+        MV1CollResultPolyDimTerminate(result);
+        if (hit) return true;
+    }
+    return false;
 }
 
 void Stage::Reset()
@@ -116,6 +150,10 @@ void Stage::Reset()
 void Stage::Draw() const
 {
     // 柱と台座をそれぞれ描画
+    for (const auto& model : stagePillars_)
+    {
+        model.Draw();
+    }
     for (const auto& model : stageModels_)
     {
         model.Draw();
@@ -179,7 +217,8 @@ void Stage::DrawAlphaModel() const
 namespace
 {
     constexpr const char* StageSettingsPath = "Data/Settings/stage_models.json";
-    constexpr const char* StageModelNames[] = {"hashira_l", "hashira_m", "hashira_s", "stand_l", "stand_m"};
+    constexpr const char* StagePillarNames[] = {"hashira_l", "hashira_m", "hashira_s"};
+    constexpr const char* StageModelNames[] = {"stand_l", "stand_m"};
     nlohmann::json ModelVectorJson(const Vec3& v) { return nlohmann::json::array({v.x, v.y, v.z}); }
     Vec3 ReadModelVector(const nlohmann::json& v)
     {
@@ -193,12 +232,17 @@ bool Stage::SaveModelSettings()
     {
         nlohmann::json doc;
         doc["version"] = 1;
-        for (std::size_t i = 0; i < stageModels_.size(); ++i)
+        const auto saveModels = [&doc](const auto& models, const auto& names)
         {
-            const auto& m = stageModels_[i];
-            if (!TransformSettings::IsValid({m.scale, m.position, m.rotation})) throw std::runtime_error("Invalid transform.");
-            doc["models"][StageModelNames[i]] = {{"position", ModelVectorJson(m.position)}, {"rotation", ModelVectorJson(m.rotation)}, {"scale", ModelVectorJson(m.scale)}};
-        }
+            for (int i = 0; i < models.size(); ++i)
+            {
+                const auto& m = models[i];
+                if (!TransformSettings::IsValid({m.scale, m.position, m.rotation})) throw std::runtime_error("Invalid transform.");
+                doc["models"][names[i]] = {{"position", ModelVectorJson(m.position)}, {"rotation", ModelVectorJson(m.rotation)}, {"scale", ModelVectorJson(m.scale)}};
+            }
+        };
+        saveModels(stagePillars_, StagePillarNames);
+        saveModels(stageModels_, StageModelNames);
         std::filesystem::create_directories("Data/Settings");
         // 書き込み完了後に保存ファイルを置き換える
         const std::filesystem::path path(StageSettingsPath), temporary(std::string(StageSettingsPath) + ".tmp");
@@ -223,19 +267,34 @@ bool Stage::LoadModelSettings()
         input >> doc;
         if (doc.at("version").get<int>() != 1) throw std::runtime_error("Unsupported version.");
         // 全モデルを確認してから反映する
-        auto loaded = stageModels_;
-        for (std::size_t i = 0; i < loaded.size(); ++i)
+        auto loadedPillars = stagePillars_;
+        auto loadedModels = stageModels_;
+        const auto loadModels = [&doc](auto& models, const auto& names)
         {
-            const auto& v = doc.at("models").at(StageModelNames[i]);
-            auto& m = loaded[i];
-            m.position = ReadModelVector(v.at("position"));
-            m.rotation = ReadModelVector(v.at("rotation"));
-            m.scale = ReadModelVector(v.at("scale"));
-            if (!TransformSettings::IsValid({m.scale, m.position, m.rotation})) throw std::runtime_error("Invalid transform.");
-        }
-        stageModels_ = loaded;
+            for (int i = 0; i < models.size(); ++i)
+            {
+                const auto& v = doc.at("models").at(names[i]);
+
+                auto& m = models[i];
+
+                m.position = ReadModelVector(v.at("position"));
+                m.rotation = ReadModelVector(v.at("rotation"));
+                m.scale = ReadModelVector(v.at("scale"));
+
+                if (!TransformSettings::IsValid({m.scale, m.position, m.rotation})) throw std::runtime_error("Invalid transform.");
+            }
+        };
+
+        loadModels(loadedPillars, StagePillarNames);
+        loadModels(loadedModels, StageModelNames);
+
+        stagePillars_ = loadedPillars;
+        stageModels_ = loadedModels;
+
         RefreshCollisionInfo();
+
         modelSettingsStatus_ = "Loaded.";
+
         return true;
     }
     catch (const std::exception& e) { modelSettingsStatus_ = std::string("Load failed: ") + e.what(); return false; }
@@ -243,30 +302,39 @@ bool Stage::LoadModelSettings()
 void Stage::DrawDebugUI()
 {
     ImGui::Begin("Stage parts");
-    for (std::size_t i = 0; i < stageModels_.size(); ++i)
-    {
-        ImGui::PushID(static_cast<int>(i));
-        if (ImGui::TreeNode(StageModelNames[i]))
+    const auto drawModels = [this](auto& models, const auto& handles, const auto& names)
         {
-            auto& m = stageModels_[i];
-            ObjectTransform v{m.scale, m.position, m.rotation};
-            bool changed = ImGui::DragFloat3("Position", &v.position.x, 1.0f);
-            changed |= ImGui::DragFloat3("Rotation (radians)", &v.rotation.x, 0.01f);
-            changed |= ImGui::DragFloat3("Scale", &v.scale.x, 0.01f, 0.001f, 10000.0f);
-            if (changed && TransformSettings::IsValid(v))
+        for (int i = 0; i < models.size(); ++i)
+        {
+            ImGui::PushID(names[i]);
+            if (ImGui::TreeNode(names[i]))
             {
-                m.position = v.position;
-                m.rotation = v.rotation;
-                m.scale = v.scale;
-                RefreshCollisionInfo();
+                auto& m = models[i];
+
+                ObjectTransform v{m.scale, m.position, m.rotation};
+
+                bool changed = ImGui::DragFloat3("Position", &v.position.x, 1.0f);
+                changed |= ImGui::DragFloat3("Rotation (radians)", &v.rotation.x, 0.01f);
+                changed |= ImGui::DragFloat3("Scale", &v.scale.x, 0.01f, 0.001f, 10000.0f);
+
+                if (changed && TransformSettings::IsValid(v))
+                {
+                    m.position = v.position;
+                    m.rotation = v.rotation;
+                    m.scale = v.scale;
+
+                    RefreshCollisionInfo();
+                }
+                ImGui::Text("MV1 collision: %s (handle: %d)",
+                    handles[i] >= 0 ? "Ready" : "Unavailable",
+                    handles[i]);
+                ImGui::TreePop();
             }
-            ImGui::Text("MV1 collision: %s (handle: %d)",
-                stageCollisionHandles_[i] >= 0 ? "Ready" : "Unavailable",
-                stageCollisionHandles_[i]);
-            ImGui::TreePop();
+            ImGui::PopID();
         }
-        ImGui::PopID();
-    }
+    };
+    drawModels(stagePillars_, pillarCollisionHandles_, StagePillarNames);
+    drawModels(stageModels_, stageCollisionHandles_, StageModelNames);
     if (ImGui::Button("Save JSON")) SaveModelSettings();
     ImGui::SameLine();
     if (ImGui::Button("Load JSON")) LoadModelSettings();
