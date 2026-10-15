@@ -11,6 +11,7 @@ SamplerState g_Sampler : register(s0);
 cbuffer OutlineSettings : register(b6)
 {
     float4 Outline;
+    float4 OutlineColor;
 };
 
 struct PS_INPUT
@@ -384,17 +385,13 @@ float4 main(PS_INPUT input) : SV_TARGET
 
 
     // ================================
-    // 黒アウトライン
+    // アウトライン
     // ================================
-
+    float3 outlineColor = OutlineColor.rgb;
     sceneColor.rgb =
         lerp(
             sceneColor.rgb,
-            float3(
-                0.0f,
-                0.0f,
-                0.0f
-            ),
+            outlineColor,
             edge
         );
 

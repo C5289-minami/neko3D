@@ -249,6 +249,11 @@ void DebugUI::Draw(GameContext& ctx, const DebugSceneControls& controls)
     {
         ImGui::Begin("Outline Settings");
 
+        ImGui::ColorEdit3(
+            u8"アウトライン色",
+            g_outlineSettings.outlineColor
+		);
+
         ImGui::SliderFloat(
             u8"アウトライン太さ",
             &g_outlineSettings.radius,
@@ -441,15 +446,9 @@ void DebugUI::Draw(GameContext& ctx, const DebugSceneControls& controls)
         {
             ToonSettingsManager::Reset();
         }
-        bool halftoneShadow = g_toonSettings.shadow[2] > 0.5f;
 
-        if (ImGui::Checkbox(
-            u8"影をハーフトーンで表現",
-            &halftoneShadow))
-        {
-            g_toonSettings.shadow[2] =
-                halftoneShadow ? 1.0f : 0.0f;
-        }ImGui::Separator();
+     
+        ImGui::Separator();
         ImGui::Text(u8"ハーフトーン設定");
 
         // ハーフトーン ON/OFF

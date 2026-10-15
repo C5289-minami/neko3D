@@ -55,9 +55,8 @@ DebugSceneControls BossTestScene::GetDebugControls()
 
 void BossTestScene::Init()
 {
-	// 背景色とライトの方向を設定
-	DxLib::SetBackgroundColor(255, 178, 102);
-	DxLib::SetLightDirection(DxLib::GetLightDirection());
+	// 背景色
+	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
 
   // 通常カメラの初期化
@@ -103,7 +102,7 @@ void BossTestScene::Init()
 
 void BossTestScene::Update(float deltaTime)
 {
-
+	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 #ifndef NDEBUG
 	const float cosPitch = std::cos(pitch);
 	const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };

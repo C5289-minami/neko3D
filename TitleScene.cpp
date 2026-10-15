@@ -8,7 +8,7 @@
 
 void TitleScene::Init()
 {
-    DxLib::SetBackgroundColor(199, 18, 21);
+    DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 //    frameCount = 0;
     fontHandle = RM().GetFont(ResourceKeys::Font_Title);
     StartFadeIn();
@@ -19,6 +19,7 @@ void TitleScene::Init()
 
 void TitleScene::Update(float deltaTime)
 {
+    DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 #ifndef NDEBUG
     if (DxLib::CheckHitKey(KEY_INPUT_F1))
     {
@@ -68,14 +69,20 @@ void TitleScene::Render() const
     const int yellow = DxLib::GetColor(255, 255, 0);
     if (isPushEnterVisible)
     {
-        DxPlus::Text::DrawString(L"Push Enter",
-            { DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.75f },
+        DxPlus::Text::DrawString(L"Push Enter TO MAINGAME",
+            { DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.65f },
             yellow, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 1,1 }, 0, fontHandle);
     }
 
 #ifndef NDEBUG
-    DxPlus::Text::DrawString(L"F1: SS Flip Test",
+    DxPlus::Text::DrawString(L"F1: スプスタテストシーン",
+        { DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.75f },
+        white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
+    DxPlus::Text::DrawString(L"F2:シェーダーテストシーン",
+        { DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.8f },
+        white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
+    DxPlus::Text::DrawString(L"F3: 部屋テストシーン",
         { DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.85f },
-        white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0, fontHandle);
+        white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
 #endif
 }

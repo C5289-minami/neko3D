@@ -1,7 +1,9 @@
 #include "NekoMotionTestScene.h"
+#include "GameContext.h"
 
 void NekoMotionTestScene::Init()
 {
+	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 	player_.Init();
 	room_.Init();
 	camera_.Initialize({ 0.0f, 400.0f, -400.0f }, { 0.0f, 100.0f, 0.0f });
@@ -20,6 +22,7 @@ void NekoMotionTestScene::Init()
 
 void NekoMotionTestScene::Update(float deltaTime)
 {
+	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 	player_.Update(0);
 	room_.Update(deltaTime);
 

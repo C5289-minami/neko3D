@@ -7,7 +7,7 @@
 #include "ModelToonRenderer.h"
 #include "ShaderEffectController.h"
 
-class NekoMotionTestScene : public Scene
+class NekoMotionTestScene final: public Scene
 {
 public:
 	explicit NekoMotionTestScene(class GameContext* context) : Scene(context) {}
