@@ -30,7 +30,7 @@ void ResultScene::Update(float deltaTime)
 
 void ResultScene::Render() const
 {
-    gameContext->Draw();
+    //gameContext->Draw();
 
     const int white = DxLib::GetColor(255, 255, 255);
     DxPlus::Text::DrawString(L"Result",

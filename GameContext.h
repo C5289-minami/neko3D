@@ -10,7 +10,6 @@
 #include "Player.h"
 #include "Boss.h" 
 #include "EffectManager.h"
-#include "Camera.h"
 
 class GameContext
 {
@@ -42,12 +41,15 @@ public:
     bool IsPlayerGravityEnabled() const { return player.IsGravityEnabled(); }
     void SetPlayerGravityEnabled(bool enabled) { player.SetGravityEnabled(enabled); }
     //DebugSceneControls GetDebugControls();
+	Boss& GetBoss() { return boss; }
+	Player& GetPlayer() { return player; }
+	Stage& GetStage() { return stage; }
+	EffectManager& GetEffectManager() { return effectManager; }
 
     // ---- lifecycle ----
     void Init();
     void Reset();
-    void Update(float deltaTime);
-    void Draw() const;
+    //void Draw() const;
 
 private:
     // Colors
@@ -59,13 +61,6 @@ private:
 
     // Grid
     Grid grid;
-
-    Camera::HomingCamera playerCamera;
-#ifndef NDEBUG
-    Camera::FreeCamera freeCamera;
-    Camera::Camera* activeCamera_{ nullptr };
-    bool wasFreeCameraToggleDown_{};
-#endif
 
 	// Effect Manager
 	EffectManager effectManager;

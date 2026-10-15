@@ -4,6 +4,9 @@
 #pragma once
 #include "Scene.h"
 #include "GameContext.h"
+#include "ModelToonRenderer.h"
+#include "ShaderEffectController.h"
+#include "Camera.h"
 
 class GameScene final : public Scene
 {
@@ -14,5 +17,20 @@ public:
     void Render() const override;
     void End() override;
 
+	void SetActiveCamera(Camera::Camera* camera) { activeCamera_ = camera; }
+
 private:
+	Camera::Camera* activeCamera_{ nullptr };
+    Camera::HomingCamera playerCamera_;
+#ifndef NDEBUG
+    Camera::FreeCamera freeCamera_;
+    bool wasFreeCameraToggleDown_{};
+#endif
+
+    // モデルのトゥーン描画を管理する
+    ModelToonRenderer modelToonRenderer_{};
+    // 共通のスクリーン空間アウトライン描画
+    ShaderEffectController shaderEffects_{};
+    void DrawScene(bool toonEnabled) const;
+    void RenderDepth() const;
 };
