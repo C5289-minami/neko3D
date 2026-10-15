@@ -8,6 +8,12 @@ bool OutlineSettingsManager::Save(const std::string& filePath)
 {
     nlohmann::json json;
 
+    json["outlineColor"] = {
+        g_outlineSettings.outlineColor[0],
+        g_outlineSettings.outlineColor[1],
+        g_outlineSettings.outlineColor[2]
+	};
+
     json["radius"] = g_outlineSettings.radius;
     json["depthStrength"] = g_outlineSettings.depthStrength;
     json["normalStrength"] = g_outlineSettings.normalStrength;
@@ -37,6 +43,15 @@ bool OutlineSettingsManager::Load(const std::string& filePath)
     {
         nlohmann::json json;
         file >> json;
+
+        if (json.contains("outlineColor"))
+        {
+            for (int i = 0; i < 3; ++i)
+            {
+                g_outlineSettings.outlineColor[i] =
+                    json["outlineColor"][i];
+            }
+        }
 
         if (json.contains("radius") &&
             json["radius"].is_number())

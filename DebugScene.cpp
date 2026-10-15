@@ -7,6 +7,8 @@
 // SceneのInit処理等でプレイヤー初期化
 void TestScene::Init()
 {
+    DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
+
     // キャラクター
     m_ssPlayer = RM().GetSpriteStudioPlayer(
         ResourceKeys::SpriteStudio_TitleCharacter);
@@ -83,6 +85,7 @@ void TestScene::Init()
 }
 void TestScene::Update(float deltaTime)
 {
+    DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 	if (DxLib::CheckHitKey(KEY_INPUT_F2))
 	{
 		SetNextScene(SM().GetScene(SceneID::Title));

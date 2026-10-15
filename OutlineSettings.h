@@ -8,6 +8,7 @@ struct OutlineSettings
     float depthStrength = 20.0f;
     float normalStrength = 5.0f;
     float threshold = 0.1f;
+	float outlineColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 };
 
 inline OutlineSettings g_outlineSettings;
