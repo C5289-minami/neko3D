@@ -43,5 +43,6 @@ protected:
     bool finished = false;
 
 private:
+    friend class SceneManager;
     DxPlus::FadeController fade;
 };

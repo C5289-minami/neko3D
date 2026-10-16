@@ -45,12 +45,9 @@ private:
     BossBiteSkill biteSkill_;
 
   
-    Vec3 cameraEye{ 0.0f, 250.0f, -650.0f };
-    float yaw{};
-    float pitch{};
     // Debug
     bool skillKeyWasDown_{};
-  Camera::DebugCamera debugCamera_;
+    Camera::FreeCamera camera_{};
     bool debugActorsPaused_{};
     std::string transformInitialStatus_;
 
@@ -64,5 +61,4 @@ private:
     void DrawScene(bool toonEnabled) const;
     void RenderDepth() const;
 
-	Camera::FreeCamera camera_{};
 };

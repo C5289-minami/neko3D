@@ -10,9 +10,37 @@
 #include "imgui.h"
 #endif
 
+DebugSceneControls GameScene::GetDebugControls()
+{
+	return {
+		"boss_test",
+		{
+			MakeDebugTransformTarget("boss_test/player", "Player", gameContext->GetPlayer()),
+			MakeDebugTransformTarget("boss_test/boss", "Boss", gameContext->GetBoss())
+		},
+		DebugCameraControls{
+			[this] { return freeCamera_.IsSceneViewActive(); },
+			[this] { return freeCamera_.GetPosition(); },
+			[this](const Vec3& position) { freeCamera_.SetPosition(position); },
+			[this] { freeCamera_.ResetView(); },
+			[this] {
+			  if (!freeCamera_.IsSceneViewActive()) freeCamera_.BeginSceneView();
+			  freeCamera_.FocusAt(gameContext->GetPlayer().GetPosition());
+			}
+		},
+		[this] { return debugActorsPaused_; },
+		[this](bool paused) { debugActorsPaused_ = paused; },
+		transformInitialStatus_
+	};
+}
+
 void GameScene::Init()
 {
-    DxLib::SetBackgroundColor(32, 32, 32);
+    //DxLib::SetBackgroundColor(32, 32, 32);
+
+	TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
+
+
     gameContext->Reset();
 	playerCamera_.Reset();
 #ifndef NDEBUG
@@ -32,6 +60,7 @@ void GameScene::Init()
 	shaderEffects_.GetSettings().toonEnabled = true;
 	shaderEffects_.GetSettings().outlineEnabled = true;
 
+	
     StartFadeIn();
 }
 
@@ -53,6 +82,19 @@ void GameScene::Update(float deltaTime)
 		}
 	}
 	wasFreeCameraToggleDown_ = toggleDown;
+
+	if (DxLib::CheckHitKey(KEY_INPUT_R) != 0)
+	{
+		TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
+	}
+	if( DxLib::CheckHitKey(KEY_INPUT_F) != 0)
+	{
+		freeCamera_.FocusAt(gameContext->GetPlayer().GetPosition());
+	}
+	DxPlus::Debug::SetString(L" R: Transformリセット, F: FreeCameraをプレイヤーにフォーカス");
+
+
+
 	if (activeCamera_ == &freeCamera_)
 	{
 		freeCamera_.InputUpdate(deltaTime);
