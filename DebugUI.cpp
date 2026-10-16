@@ -7,6 +7,7 @@
 #include <d3d11.h>
 #include "DxLib.h"
 #include "GameContext.h"
+#include "Camera.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_win32.h"
@@ -140,11 +141,26 @@ void DebugUI::DrawTransformEditor(const DebugSceneControls& controls)
     if (cameraSelected_ && controls.camera)
     {
         const auto& camera = *controls.camera;
-        ImGui::Text("Camera: %s", camera.isActive() ? "Debug (Alt + Enter)" : "Normal");
+        ImGui::TextUnformatted("Normal Camera Settings");
+        float fieldOfView = Camera::Camera::GetFieldOfView();
+        if (ImGui::SliderFloat(u8"視野角 (度)", &fieldOfView, 10.0f, 150.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp))
+            Camera::Camera::SetFieldOfView(fieldOfView);
+        if (ImGui::Button(u8"視野角を初期値に戻す"))
+            Camera::Camera::SetFieldOfView(Camera::Camera::DefaultFieldOfView);
+        ImGui::TextWrapped(u8"通常・デバッグカメラに共通で反映されます。設定は実行中のみ有効です。");
         Vec3 position = camera.getPosition();
-        if (EditVector3("Position", position, 1.0f) &&
+        if (EditVector3(u8"位置 X / Y / Z", position, 1.0f) &&
             std::isfinite(position.x) && std::isfinite(position.y) && std::isfinite(position.z))
             camera.setPosition(position);
+        if (camera.getAnglesDegrees && camera.setAnglesDegrees)
+        {
+            Vec3 angles = camera.getAnglesDegrees();
+            if (EditVector3(camera.followsTarget ? u8"角度オフセット X / Y / Z (度)" : u8"アングル X / Y / Z (度)", angles, 0.5f))
+                camera.setAnglesDegrees(angles);
+            ImGui::TextWrapped(u8"X: 上下 / Y: 左右 / Z: 傾き。通常カメラの設定を変更します。" );
+        }
+        if (camera.followsTarget)
+            ImGui::TextWrapped(u8"位置はワールド座標で調整します。追従を続けながら位置と角度を調整できます。Reset cameraで初期化します。" );
         if (ImGui::Button("Reset camera")) camera.reset();
         ImGui::SameLine();
         if (ImGui::Button("Focus player")) camera.focusPlayer();
@@ -230,6 +246,22 @@ void DebugUI::Draw(GameContext& ctx, const DebugSceneControls& controls)
         ImGui::End();
     }
 
+    if (controls.scope == "game")
+    {
+        Player& player = ctx.GetPlayer();
+        ImGui::Begin("Lunging Settings");
+        float moveSpeed = player.GetLungingMoveSpeed();
+        float jumpSpeed = player.GetLungingJumpSpeed();
+        if (ImGui::DragFloat(u8"移動速度", &moveSpeed, 10.0f, 0.0f, 5000.0f, "%.0f", ImGuiSliderFlags_AlwaysClamp))
+            player.SetLungingMoveSpeed(moveSpeed);
+        if (ImGui::DragFloat(u8"ジャンプ初速", &jumpSpeed, 10.0f, 0.0f, 5000.0f, "%.0f", ImGuiSliderFlags_AlwaysClamp))
+            player.SetLungingJumpSpeed(jumpSpeed);
+        if (ImGui::Button(u8"初期値に戻す"))
+            player.ResetLungingSpeeds();
+        ImGui::TextWrapped(u8"移動速度は即時反映、ジャンプ初速は次のLungingから反映されます。");
+        ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
+        ImGui::End();
+    }
     // 必殺ゲージの仮調整
     if (controls.scope == "game")
     {

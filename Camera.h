@@ -19,11 +19,20 @@ namespace Camera
 	public:
 		virtual ~Camera() = default;
 
+        static constexpr float DefaultFieldOfView = 60.0f;
+        static float GetFieldOfView() { return fieldOfViewDegrees_; }
+        static void SetFieldOfView(float degrees)
+        {
+            if (std::isfinite(degrees))
+                fieldOfViewDegrees_ = std::clamp(degrees, 10.0f, 150.0f);
+        }
+
 		virtual void Reset()
 		{
 			position_ = {};
 			yaw_ = 0.0f;
 			pitch_ = 0.0f;
+            roll_ = 0.0f;
 		}
 		virtual void Update(float) {}
 
@@ -44,19 +53,39 @@ namespace Camera
 		void SetPosition(const Vec3& position) { position_ = position; }
 		float GetYaw() const { return yaw_; }
 		float GetPitch() const { return pitch_; }
+        Vec3 GetAnglesDegrees() const
+        {
+            return { pitch_ / DxPlus::Deg2Rad, yaw_ / DxPlus::Deg2Rad, roll_ / DxPlus::Deg2Rad };
+        }
+        void SetAnglesDegrees(const Vec3& angles)
+        {
+            if (!std::isfinite(angles.x) || !std::isfinite(angles.y) || !std::isfinite(angles.z)) return;
+            pitch_ = std::clamp(angles.x, -89.0f, 89.0f) * DxPlus::Deg2Rad;
+            yaw_ = std::remainder(angles.y, 360.0f) * DxPlus::Deg2Rad;
+            roll_ = std::remainder(angles.z, 360.0f) * DxPlus::Deg2Rad;
+        }
 
 	protected:
 		void ApplyView(const Vec3& target) const
 		{
+			Vec3 forward = (target - position_).Normalized();
+            Vec3 right{ forward.z, 0.0f, -forward.x };
+            if (right.LengthSq() < 0.000001f) right = { 1.0f, 0.0f, 0.0f };
+            else right = right.Normalized();
+            const Vec3 up{ forward.y * right.z, forward.z * right.x - forward.x * right.z, -forward.y * right.x };
+            const Vec3 rolledUp = up * std::cos(roll_) + right * std::sin(roll_);
+            DxLib::SetupCamera_Perspective(fieldOfViewDegrees_ * DxPlus::Deg2Rad);
 			DxLib::SetCameraPositionAndTargetAndUpVec(
 				DxConv::ToVECTOR(position_),
 				DxConv::ToVECTOR(target),
-				VGet(0.0f, 1.0f, 0.0f));
+				DxConv::ToVECTOR(rolledUp));
 		}
 
+		inline static float fieldOfViewDegrees_{ DefaultFieldOfView };
 		Vec3 position_{};
 		float yaw_{};
 		float pitch_{};
+        float roll_{};
 	};
 
 	class FreeCamera : public Camera
@@ -76,6 +105,7 @@ namespace Camera
 		void Initialize(const Vec3& eye, const Vec3& target)
 		{
 			position_ = eye;
+            roll_ = 0.0f;
 			const Vec3 direction = (target - eye).Normalized();
 			pitch_ = std::asin(std::clamp(direction.y, -1.0f, 1.0f));
             yaw_ = std::atan2(direction.x, direction.z);
@@ -86,7 +116,13 @@ namespace Camera
 
        void Update(float deltaTime) override
 		{
-			UpdateFreeFlight(deltaTime, false, false);
+			#ifndef NDEBUG
+            const bool keyboardCaptured = ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard;
+            const bool mouseCaptured = ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureMouse;
+            UpdateFreeFlight(deltaTime, keyboardCaptured, mouseCaptured);
+#else
+            UpdateFreeFlight(deltaTime, false, false);
+#endif
 			ApplyCamera();
 		}
 
@@ -200,7 +236,7 @@ namespace Camera
 			yaw_ += mouseDelta.x * rotateSpeed_;
 			pitch_ = std::clamp(pitch_ - mouseDelta.y * rotateSpeed_,
 				-DxPlus::Deg2Rad * 89.0f, DxPlus::Deg2Rad * 89.0f);
-			SetMousePoint(DxPlus::CLIENT_WIDTH / 2, DxPlus::CLIENT_HEIGHT / 2);
+			if (!mouseCaptured) SetMousePoint(DxPlus::CLIENT_WIDTH / 2, DxPlus::CLIENT_HEIGHT / 2);
 		}
 
 		float moveSpeed_{ 500.0f };
@@ -229,11 +265,14 @@ namespace Camera
 			Camera::Reset();
 			position_ = { 400.0f, 400.0f, 400.0f };
 			target_ = {};
+            followPosition_ = position_;
+            positionOffset_ = {};
+            angleOffsetDegrees_ = {};
 		}
 
 		void Update(const Vec3& playerPosition, const Vec3& bossPosition, float deltaTime)
 		{
-			Vec3 awayFromBoss = playerPosition - bossPosition;
+            Vec3 awayFromBoss = playerPosition - bossPosition;
 			awayFromBoss.y = 0.0f;
 			if (awayFromBoss.LengthSq() < 0.001f)
 				awayFromBoss = { 0.0f, 0.0f, 1.0f };
@@ -246,20 +285,58 @@ namespace Camera
 			const Vec3 desiredTarget = (playerPosition + bossPosition) * 0.5f +
 				Vec3(0.0f, settings_.targetHeight, 0.0f);
 			const float followAmount = std::clamp(settings_.followSpeed * deltaTime, 0.0f, 1.0f);
-			position_ += (desiredPosition - position_) * followAmount;
+			followPosition_ += (desiredPosition - followPosition_) * followAmount;
+            position_ = followPosition_ + positionOffset_;
 			target_ += (desiredTarget - target_) * followAmount;
 		}
 
-		void SetTarget(const Vec3& target) { target_ = target; }
+        const Vec3& GetAngleOffsetDegrees() const { return angleOffsetDegrees_; }
+        Vec3 GetViewAnglesDegrees() const
+        {
+            const Vec3 direction = (target_ - position_).Normalized();
+            return { std::clamp(std::asin(std::clamp(direction.y, -1.0f, 1.0f)) / DxPlus::Deg2Rad + angleOffsetDegrees_.x, -89.0f, 89.0f),
+                std::atan2(direction.x, direction.z) / DxPlus::Deg2Rad + angleOffsetDegrees_.y, angleOffsetDegrees_.z };
+        }
+        void SetViewPosition(const Vec3& position)
+        {
+            if (!std::isfinite(position.x) || !std::isfinite(position.y) || !std::isfinite(position.z)) return;
+            positionOffset_ = position - followPosition_;
+            position_ = followPosition_ + positionOffset_;
+        }
+        void SetAngleOffsetDegrees(const Vec3& angles)
+        {
+            if (!std::isfinite(angles.x) || !std::isfinite(angles.y) || !std::isfinite(angles.z)) return;
+            angleOffsetDegrees_ = { std::clamp(angles.x, -89.0f, 89.0f),
+                std::remainder(angles.y, 360.0f), std::remainder(angles.z, 360.0f) };
+            roll_ = angleOffsetDegrees_.z * DxPlus::Deg2Rad;
+        }
+        void FocusAt(const Vec3& point)
+        {
+            const Vec3 direction = (point - position_).Normalized();
+            if (direction.LengthSq() < 0.000001f) return;
+            const Vec3 current = GetViewAnglesDegrees();
+            SetAngleOffsetDegrees(angleOffsetDegrees_ + Vec3{
+                std::asin(std::clamp(direction.y, -1.0f, 1.0f)) / DxPlus::Deg2Rad - current.x,
+                std::atan2(direction.x, direction.z) / DxPlus::Deg2Rad - current.y, 0.0f });
+        }
+        void SetTarget(const Vec3& target) { target_ = target; }
 		const Vec3& GetTarget() const { return target_; }
 		HomingCameraSettings& GetSettings() { return settings_; }
 		const HomingCameraSettings& GetSettings() const { return settings_; }
 
-		void ApplyCamera() const override { ApplyView(target_); }
+		void ApplyCamera() const override
+        {
+            const Vec3 angles = GetViewAnglesDegrees() * DxPlus::Deg2Rad;
+            const float cosPitch = std::cos(angles.x);
+            ApplyView(position_ + Vec3{ std::sin(angles.y) * cosPitch, std::sin(angles.x), std::cos(angles.y) * cosPitch });
+        }
 
 	private:
 		Vec3 target_{};
 		HomingCameraSettings settings_{};
+        Vec3 followPosition_{ 400.0f, 400.0f, 400.0f };
+        Vec3 positionOffset_{};
+        Vec3 angleOffsetDegrees_{};
 	};
 
 }
