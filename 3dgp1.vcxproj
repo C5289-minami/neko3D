@@ -205,9 +205,10 @@
     <ClInclude Include="BossStateMachine.h" />
     <ClInclude Include="BossStateType.h" />
     <ClInclude Include="BossTailWhipSkill.h" />
-    <ClInclude Include="BossTestScene.h" />
+    <ClInclude Include="ShaderTestScene.h" />
     <ClInclude Include="BossWalkState.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CharSettings.h" />
     <ClInclude Include="DebugScene.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="ButtonUI.h" />
@@ -302,6 +303,7 @@
     <ClInclude Include="Stage.h" />
     <ClInclude Include="State.h" />
     <ClInclude Include="StateMachine.h" />
+    <ClInclude Include="StatusTestScene.h" />
     <ClInclude Include="TitleScene.h" />
     <ClInclude Include="ToonSettings.h" />
     <ClInclude Include="TransformSettings.h" />
@@ -313,6 +315,7 @@
     <ClInclude Include="Volume.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CharSettings.cpp" />
     <ClCompile Include="AnimationDraw.cpp" />
     <ClCompile Include="AttackBaseState.cpp" />
     <ClCompile Include="AttackStateMachine.cpp" />
@@ -320,7 +323,7 @@
     <ClCompile Include="BossAttackState.cpp" />
     <ClCompile Include="BossIdleState.cpp" />
     <ClCompile Include="BossStateMachine.cpp" />
-    <ClCompile Include="BossTestScene.cpp" />
+    <ClCompile Include="ShaderTestScene.cpp" />
     <ClCompile Include="BossWalkState.cpp" />
     <ClCompile Include="DebugScene.cpp" />
     <ClCompile Include="Collision.cpp" />
@@ -385,6 +388,7 @@
     <ClCompile Include="SSPlayer\SS6PlayerPlatform.cpp" />
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="StateMachine.cpp" />
+    <ClCompile Include="StatusTestScene.cpp" />
     <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="ToonSettings.cpp" />
     <ClCompile Include="TransformSettings.cpp">

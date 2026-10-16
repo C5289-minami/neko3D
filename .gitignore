@@ -428,10 +428,10 @@ FodyWeavers.xsd
 *.msm
 *.msp
 /Log.txt
-/3dgp1_debug.exe
+# /3dgp1_debug.exe
 
 # Generated game executables and DxLib runtime log
-/3dgp1.exe
+# /3dgp1.exe
 [Ll]og.txt
 /OrbitCamera.cpp
 /.gitignore
