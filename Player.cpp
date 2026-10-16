@@ -64,9 +64,7 @@ void Player::Update(float deltaTime)
 
 	// 中心がどっちにあるか調べる。高さはここでは考えない
 	PlayerDiagonalMove(deltaTime, position_, movementCenter_);
-	// 突進中の横方向の移動
-	position_.x += velocity_.x * deltaTime;
-	position_.z += velocity_.z * deltaTime;
+    // 横移動は PlayerDiagonalMove、上下移動は velocity_.y にまとめる。
 
 	if (gravityEnabled_)
 	{
@@ -323,13 +321,19 @@ void Player::PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& mo
 
 	const Vec3 input = moveInput_.Normalized();
 	const Vec3 right{ forward.z, 0.0f, -forward.x };
-	const float distance = Const::PLAYER_MOVE_SPEED * deltaTime;
+    
+	const float moveSpeed =
+		GetCurrentState() == PlayerStateType::LungingJump?
+		Const::PLAYER_LUNGING_MOVE_SPEED: Const::PLAYER_MOVE_SPEED;
+
+    const float distance = moveSpeed * deltaTime;
 	const float nextRadius = (std::max)(1.0f, radius - input.z * distance);
 	const float angle = input.x * distance / (std::max)(1.0f, radius);
 	const Vec3 outward = -forward * std::cos(angle) + right * std::sin(angle);
 
 	playerPos.x = movementCenter.x + outward.x * nextRadius;
 	playerPos.z = movementCenter.z + outward.z * nextRadius;
+
 	TurnTowards(forward * input.z + right * input.x, deltaTime);
 }
 
@@ -340,25 +344,10 @@ void Player::StartLungingJump(const Vec3& moveDir)
         return;
     }
 
-    // 通常移動と同じ基準で、踏み切る方向を決める
-	Vec3 forward = movementCenter_ - position_;// 足場の中心からプレイヤーの位置へのベクトル
-    forward.y = 0.0f;
-    if (forward.LengthSq() < 0.000001f)
-    {
-		forward = Vec3(std::sin(GetYaw()), 0.0f, std::cos(GetYaw()));
-		// 足場の中心とプレイヤーの位置がほぼ同じ場合は、プレイヤーの向きから前方向を決める
-    }
-    else
-    {
-        forward = forward.Normalized();
-    }
-    const Vec3 right{ forward.z, 0.0f, -forward.x };
-    const Vec3 direction = (forward * moveDir.z + right * moveDir.x).Normalized();
-
     StopMove();
-    velocity_ = direction * Const::PLAYER_LUNGING_MOVE_SPEED;
+    // 横移動の入力を保存し、ジャンプでは上向きの速度だけ設定する。
+    SetMoveDirection(moveDir);
     velocity_.y = Const::PLAYER_LUNGING_JUMP_SPEED;
-    SetYaw(std::atan2(direction.x, direction.z));
     isGrounded_ = false;
 }
 

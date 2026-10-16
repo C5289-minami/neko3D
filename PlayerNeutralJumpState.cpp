@@ -10,21 +10,22 @@ PlayerNeutralJumpState::PlayerNeutralJumpState(PlayerStateMachine& stateMachine,
 void PlayerNeutralJumpState::Enter()
 {
     player_.StopMove();
-    player_.SetAnimation(PlayerAnimType::neutral_Jump, false);
+    player_.SetAnimation(PlayerAnimType::Neutral_Jump, false);
     player_.JumpAction();
     DxPlus::Debug::SetFormatString(L"PlayerNeutralJumpState::Enter");
 }
 
 void PlayerNeutralJumpState::Tick(float)
 {
-    // 着地するまで横移動しない
-    player_.StopMove();
     if (player_.IsGrounded() || !player_.IsGravityEnabled())
     {
         stateMachine_.ChangeState(player_.GetInput().isMoving
             ? PlayerStateType::Walk : PlayerStateType::Idle);
         return;
     }
+
+    // その場ジャンプの後も、空中で移動方向を変えられる。
+    player_.SetMoveDirection(player_.GetInput().moveDir);
     DxPlus::Debug::SetFormatString(L"state:neutral_jump");
 }
 
