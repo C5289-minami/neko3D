@@ -39,6 +39,12 @@ void TitleScene::Update(float deltaTime)
         StartFadeOut();
         return;
 	}
+    else if (DxLib::CheckHitKey(KEY_INPUT_F4))
+    {
+        SetNextScene(SceneManager::GetInstance().GetScene(SceneID::StatusTestScene));
+        StartFadeOut();
+        return;
+	}
 #endif
 
     using namespace DxPlus::Input;
@@ -84,7 +90,7 @@ void TitleScene::Render() const
     DxPlus::Text::DrawString(L"F3: 部屋テストシーン",
         { DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.85f },
         white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
-    DxPlus::Text::DrawString(L"F3: キャラテストシーン",
+    DxPlus::Text::DrawString(L"F4: キャラテストシーン",
         { DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.9f },
         white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
 #endif

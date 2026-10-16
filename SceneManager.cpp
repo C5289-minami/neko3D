@@ -35,6 +35,7 @@ void SceneManager::Init()
     shaderTestScene.SetGameContext(&gameContext);
     ssFlipTestScene.SetGameContext(&gameContext);
 	nekoMotionTestScene.SetGameContext(&gameContext);
+	statusTestScene.SetGameContext(&gameContext);
 
     scene = &titleScene; // 最初のシーン
 }
@@ -69,6 +70,7 @@ Scene* SceneManager::GetScene(SceneID id)
         case SceneID::ShaderTestScene: return &shaderTestScene;
         case SceneID::SsFlipTest: return &ssFlipTestScene;
 		case SceneID::NekoMotionTest: return &nekoMotionTestScene;
+		case SceneID::StatusTestScene: return &statusTestScene;
     }
     return &titleScene;
 }
@@ -83,6 +85,14 @@ void SceneManager::Run()
     while (DxPlus::GameLoop(true))
     {
         DxPlus::Input::Update();
+
+        const bool f11Down = DxLib::CheckHitKey(KEY_INPUT_F11) != 0;
+        if (f11Down && !wasF11Down && scene && scene != &titleScene)
+        {
+            scene->SetNextScene(&titleScene);
+            scene->StartFadeOut();
+        }
+        wasF11Down = f11Down;
 
         if (scene)
         {

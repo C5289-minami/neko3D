@@ -4,15 +4,17 @@
 #pragma once
 #include "Scene.h"
 #include "GameContext.h"
+#include "DebugUI.h"
+#include "Consts.h"
+#include "./SSPlayer/SS6Player.h"
+
 #include "TitleScene.h"
 #include "GameScene.h"
 #include "ResultScene.h"
 #include "ShaderTestScene.h"
 #include "DebugScene.h"
-#include "DebugUI.h"
-#include "Consts.h"
-#include "./SSPlayer/SS6Player.h"
 #include "NekoMotionTestScene.h"
+#include "StatusTestScene.h"
 
 enum class SceneID { 
     Title,
@@ -21,6 +23,7 @@ enum class SceneID {
     ShaderTestScene,
     SsFlipTest,
 	NekoMotionTest,
+    StatusTestScene,
 };
 
 class SceneManager
@@ -73,8 +76,10 @@ private:
     ShaderTestScene shaderTestScene{ &gameContext };
     TestScene ssFlipTestScene{ &gameContext };
 	NekoMotionTestScene nekoMotionTestScene{ &gameContext };
+	StatusTestScene statusTestScene{ &gameContext };
 
     Scene* scene = nullptr; // åªç›ÇÃÉVÅ[Éì
+    bool wasF11Down = false;
 
     RunConfig runConfig{};
     DebugUI debugUI;
