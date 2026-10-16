@@ -126,10 +126,8 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 	model_.rotation.y = GetYaw();
 	model_.rotation.x = GetPitch();
 
-    // 足元から高さ・半径を使って、プレイヤーのカプセルを作る。
-    const Vec3 capsuleStart = GetPosition() + Vec3::Up() * Const::PLAYER_RADIUS;
-    const Vec3 capsuleEnd = GetPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
-    const bool touchingPillar = stage.IsHitPillar(capsuleStart, capsuleEnd, Const::PLAYER_RADIUS);
+    // ボスとの接触判定と同じプレイヤーの楕円体を使用する。
+    const bool touchingPillar = stage.IsHitPillar(model_.GetHitEllipsoid());
     if (touchingPillar && !wasTouchingPillar_)
     {
         std::cout << "Hit: Player touched a pillar." << std::endl;

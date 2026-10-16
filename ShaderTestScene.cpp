@@ -220,6 +220,17 @@ void ShaderTestScene::DrawScene(bool toonEnabled) const
 	// カメラを設定する
  camera_.ApplyCamera();
 	// トゥーンシェーダーを使わない場合
+
+#ifndef NDEBUG
+    const auto drawCollisionDebug = [&]() {
+        if (!Collision::showDebugEllipsoids) return;
+        SetUsePixelShader(-1);
+        SetUseVertexShader(-1);
+        Collision::DrawDebugEllipsoid(player_.GetModelObject().GetHitEllipsoid());
+        Collision::DrawDebugEllipsoid(boss.GetModelObject().GetHitEllipsoid());
+        stage.DrawCollisionDebug();
+    };
+#endif
 	if (!toonEnabled)
 	{
 		SetUsePixelShader(-1);
@@ -229,6 +240,9 @@ void ShaderTestScene::DrawScene(bool toonEnabled) const
 		boss.Draw();
 		player_.Draw();
 
+#ifndef NDEBUG
+        drawCollisionDebug();
+#endif
 		return;
 	}
 
@@ -255,4 +269,7 @@ void ShaderTestScene::DrawScene(bool toonEnabled) const
 	drawActor(stage.GetModelObject(),	ModelToonType::Model);
 
 	modelToonRenderer_.EndPass();
+#ifndef NDEBUG
+    drawCollisionDebug();
+#endif
 }

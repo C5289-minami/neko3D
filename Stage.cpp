@@ -119,22 +119,18 @@ void Stage::GetCollisionModelHandles(std::vector<int>& handles) const
     }
 }
 
-bool Stage::IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float radius) const
+bool Stage::IsHitPillar(const Collision::Ellipsoid& player) const
 {
-    if (radius <= 0.0f) return false;
+    bool touching = false;
+    for (const auto& pillar : stagePillars_)
+        touching |= Collision::IsHitEllipsoidEllipsoid(player, pillar.GetHitEllipsoid());
+    return touching;
+}
 
-    for (int handle : pillarCollisionHandles_)
-    {
-        if (handle < 0) continue;
-
-        const auto result = MV1CollCheck_Capsule(
-            handle, -1, DxConv::ToVECTOR(capsuleStart), DxConv::ToVECTOR(capsuleEnd), radius);
-        const bool hit = result.HitNum > 0;
-        // ”»’èŒ‹‰Ê‚Ì”z—ñ‚ÍA“–‚½‚Á‚½ê‡‚à“–‚½‚ç‚È‚¢ê‡‚à‰ğ•ú‚·‚éB
-        MV1CollResultPolyDimTerminate(result);
-        if (hit) return true;
-    }
-    return false;
+void Stage::DrawCollisionDebug() const
+{
+    for (const auto& pillar : stagePillars_)
+        Collision::DrawDebugEllipsoid(pillar.GetHitEllipsoid());
 }
 
 void Stage::Reset()

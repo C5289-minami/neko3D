@@ -213,6 +213,17 @@ void GameScene::DrawScene(bool toonEnabled) const
 	grid.Draw();
 
 	// トゥーンシェーダーを使わない場合
+
+#ifndef NDEBUG
+    const auto drawCollisionDebug = [&]() {
+        if (!Collision::showDebugEllipsoids) return;
+        SetUsePixelShader(-1);
+        SetUseVertexShader(-1);
+        Collision::DrawDebugEllipsoid(player.GetModelObject().GetHitEllipsoid());
+        Collision::DrawDebugEllipsoid(boss.GetModelObject().GetHitEllipsoid());
+        stage.DrawCollisionDebug();
+    };
+#endif
 	if (!toonEnabled)
 	{
 		SetUsePixelShader(-1);
@@ -221,6 +232,9 @@ void GameScene::DrawScene(bool toonEnabled) const
 		stage.Draw();
 		player.Draw();
 		stage.DrawAlphaModel();
+#ifndef NDEBUG
+        drawCollisionDebug();
+#endif
 		return;
 	}
 
@@ -248,5 +262,8 @@ void GameScene::DrawScene(bool toonEnabled) const
 	drawActor(stage.GetAlphaModelObject(), ModelToonType::Model);
 
 	modelToonRenderer_.EndPass();
+#ifndef NDEBUG
+    drawCollisionDebug();
+#endif
 }
 

@@ -194,6 +194,7 @@ void DebugUI::Draw(GameContext& ctx, const DebugSceneControls& controls)
         ImGui::Begin("Option");     // "Option"ウィンドウを開始
 
         // ゲームシーンの重力を切り替える
+        ImGui::Checkbox(u8"当たり判定（楕円体）を表示", &Collision::showDebugEllipsoids);
         if (controls.scope == "game")
         {
             bool gravityDisabled = !ctx.IsPlayerGravityEnabled();

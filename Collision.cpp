@@ -2,6 +2,9 @@
 // Gameplay/Collision/Collision.cpp
 // ================================
 #include "Collision.h"
+#include "DxConv.h"
+#include "DxLib.h"
+#include <cmath>
 
 namespace Collision
 {
@@ -48,4 +51,34 @@ namespace Collision
     }
 
 
+}
+namespace Collision
+{
+    void DrawDebugEllipsoid(const Ellipsoid& e)
+    {
+#ifndef NDEBUG
+        if (!showDebugEllipsoids || e.radii.x <= 0 || e.radii.y <= 0 || e.radii.z <= 0) return;
+        constexpr int segments = 48;
+        constexpr float tau = 6.28318530718f;
+        const unsigned int color = GetColor(0, 255, 80);
+        // ÚG‚Ì‹ßŽ—”»’è‚Æ“¯‚¶ƒ[ƒ‹ƒhŽ²‚É‰ˆ‚Á‚Ä‘È‰~‘Ì‚ð•`‰æ‚·‚éB
+        for (int ring = 0; ring < 15; ++ring)
+        {
+            const auto point = [&](int step) {
+                const float t = tau * step / segments;
+                if (ring < 7)
+                {
+                    const float phi = (ring - 3) * tau / 16;
+                    return e.center + Vec3{e.radii.x * std::cos(phi) * std::cos(t),
+                        e.radii.y * std::sin(phi), e.radii.z * std::cos(phi) * std::sin(t)};
+                }
+                const float theta = tau * (ring - 7) / 8;
+                return e.center + Vec3{e.radii.x * std::cos(t) * std::cos(theta),
+                    e.radii.y * std::sin(t), e.radii.z * std::cos(t) * std::sin(theta)};
+            };
+            for (int i = 0; i < segments; ++i)
+                DrawLine3D(DxConv::ToVECTOR(point(i)), DxConv::ToVECTOR(point(i + 1)), color);
+        }
+#endif
+    }
 }
