@@ -205,6 +205,8 @@
     <ClInclude Include="BossStateMachine.h" />
     <ClInclude Include="BossStateType.h" />
     <ClInclude Include="BossTailWhipSkill.h" />
+    <ClInclude Include="ModelConfigScene.h" />
+    <ClInclude Include="ModelObjectManager.h" />
     <ClInclude Include="ShaderTestScene.h" />
     <ClInclude Include="BossWalkState.h" />
     <ClInclude Include="Camera.h" />
@@ -323,6 +325,8 @@
     <ClCompile Include="BossAttackState.cpp" />
     <ClCompile Include="BossIdleState.cpp" />
     <ClCompile Include="BossStateMachine.cpp" />
+    <ClCompile Include="ModelConfigScene.cpp" />
+    <ClCompile Include="ModelObjectManager.cpp" />
     <ClCompile Include="ShaderTestScene.cpp" />
     <ClCompile Include="BossWalkState.cpp" />
     <ClCompile Include="DebugScene.cpp" />

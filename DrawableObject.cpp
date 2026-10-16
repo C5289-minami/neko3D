@@ -2,9 +2,17 @@
 #include "DxConv.h"
 #include "ResourceManager.h"
 #include <cmath>
+#include <filesystem>
+#include <fstream>
+#include <nlohmann/json.hpp>
 
 namespace
 {
+    std::string NarrowModelKey(const std::wstring& key)
+    {
+        return { key.begin(), key.end() };
+    }
+
     Vec3 RotateXYZ(const Vec3& value, const Vec3& rotation)
     {
         const float cosX = std::cos(rotation.x);
@@ -30,6 +38,94 @@ namespace
             rotatedY.x * sinZ + rotatedY.y * cosZ,
             rotatedY.z
         };
+    }
+}
+
+void ModelObject::Init()
+{
+    Load();
+}
+
+bool ModelObject::Load(const std::string& filePath)
+{
+    if (modelKey.empty()) return false;
+
+    try
+    {
+        std::ifstream file(filePath);
+        if (!file) return false;
+
+        nlohmann::json json;
+        file >> json;
+        const auto objects = json.find("objects");
+        if (objects == json.end() || !objects->is_object()) return false;
+        const auto saved = objects->find(NarrowModelKey(modelKey));
+        if (saved == objects->end() || !saved->is_object()) return false;
+
+        const auto readVector = [](const nlohmann::json& value, Vec3& output)
+        {
+            if (!value.is_array() || value.size() != 3) return false;
+            output = { value[0].get<float>(), value[1].get<float>(), value[2].get<float>() };
+            return std::isfinite(output.x) && std::isfinite(output.y) && std::isfinite(output.z);
+        };
+
+        Vec3 loadedPosition = position;
+        Vec3 loadedScale = scale;
+        Vec3 loadedRotation = rotation;
+        if (!readVector(saved->at("position"), loadedPosition) ||
+            !readVector(saved->at("scale"), loadedScale) ||
+            !readVector(saved->at("rotation"), loadedRotation) ||
+            loadedScale.x <= 0.0f || loadedScale.y <= 0.0f || loadedScale.z <= 0.0f)
+            return false;
+
+        position = loadedPosition;
+        scale = loadedScale;
+        rotation = loadedRotation;
+        return true;
+    }
+    catch (const std::exception&)
+    {
+        return false;
+    }
+}
+
+bool ModelObject::Save(const std::string& filePath) const
+{
+    if (modelKey.empty() ||
+        !std::isfinite(position.x) || !std::isfinite(position.y) || !std::isfinite(position.z) ||
+        !std::isfinite(scale.x) || !std::isfinite(scale.y) || !std::isfinite(scale.z) ||
+        !std::isfinite(rotation.x) || !std::isfinite(rotation.y) || !std::isfinite(rotation.z) ||
+        scale.x <= 0.0f || scale.y <= 0.0f || scale.z <= 0.0f)
+        return false;
+
+    try
+    {
+        nlohmann::json json = nlohmann::json::object();
+        std::ifstream input(filePath);
+        if (input)
+        {
+            input >> json;
+            if (!json.is_object()) return false;
+        }
+        if (!json.contains("objects") || !json["objects"].is_object())
+            json["objects"] = nlohmann::json::object();
+
+        json["objects"][NarrowModelKey(modelKey)] = {
+            { "position", { position.x, position.y, position.z } },
+            { "scale", { scale.x, scale.y, scale.z } },
+            { "rotation", { rotation.x, rotation.y, rotation.z } }
+        };
+
+        const std::filesystem::path path(filePath);
+        if (!path.parent_path().empty()) std::filesystem::create_directories(path.parent_path());
+        std::ofstream output(filePath, std::ios::trunc);
+        if (!output) return false;
+        output << json.dump(4);
+        return output.good();
+    }
+    catch (const std::exception&)
+    {
+        return false;
     }
 }
 

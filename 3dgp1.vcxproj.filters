@@ -591,6 +591,8 @@
     <ClInclude Include="StatusTestScene.h">
       <Filter>30_Scenes\Test</Filter>
     </ClInclude>
+    <ClInclude Include="ModelObjectManager.h" />
+    <ClInclude Include="ModelConfigScene.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -833,6 +835,8 @@
     <ClCompile Include="StatusTestScene.cpp">
       <Filter>30_Scenes\Test</Filter>
     </ClCompile>
+    <ClCompile Include="ModelObjectManager.cpp" />
+    <ClCompile Include="ModelConfigScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Config\toon.json">
