@@ -324,7 +324,11 @@ void Player::PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& mo
     
 	const float moveSpeed =
 		GetCurrentState() == PlayerStateType::LungingJump?
-		Const::PLAYER_LUNGING_MOVE_SPEED: Const::PLAYER_MOVE_SPEED;
+		lungingMoveSpeed_: Const::PLAYER_MOVE_SPEED;
+	if (GetCurrentState() == PlayerStateType::LungingJump)
+	{
+		input_.isMoving = false;
+	}
 
     const float distance = moveSpeed * deltaTime;
 	const float nextRadius = (std::max)(1.0f, radius - input.z * distance);
@@ -337,6 +341,22 @@ void Player::PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& mo
 	TurnTowards(forward * input.z + right * input.x, deltaTime);
 }
 
+void Player::SetLungingMoveSpeed(float value)
+{
+    if (std::isfinite(value)) lungingMoveSpeed_ = (std::max)(0.0f, value);
+}
+
+void Player::SetLungingJumpSpeed(float value)
+{
+    if (std::isfinite(value)) lungingJumpSpeed_ = (std::max)(0.0f, value);
+}
+
+void Player::ResetLungingSpeeds()
+{
+    lungingMoveSpeed_ = Const::PLAYER_LUNGING_MOVE_SPEED;
+    lungingJumpSpeed_ = Const::PLAYER_LUNGING_JUMP_SPEED;
+}
+
 void Player::StartLungingJump(const Vec3& moveDir)
 {
     if (!gravityEnabled_ || !isGrounded_ || moveDir.LengthSq() == 0.0f)
@@ -347,7 +367,7 @@ void Player::StartLungingJump(const Vec3& moveDir)
     StopMove();
     // 横移動の入力を保存し、ジャンプでは上向きの速度だけ設定する。
     SetMoveDirection(moveDir);
-    velocity_.y = Const::PLAYER_LUNGING_JUMP_SPEED;
+    velocity_.y = lungingJumpSpeed_;
     isGrounded_ = false;
 }
 

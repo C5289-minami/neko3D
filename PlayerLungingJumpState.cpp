@@ -17,15 +17,13 @@ void PlayerLungingJumpState::Enter()
 
 void PlayerLungingJumpState::Tick(float)
 {
+    // 空中では踏み切った方向へ進み続ける
     if (player_.IsGrounded() || !player_.IsGravityEnabled())
     {
         stateMachine_.ChangeState(player_.GetInput().isMoving
             ? PlayerStateType::Walk : PlayerStateType::Idle);
         return;
     }
-
-    // 空中でも入力を更新し、通常移動と同じ回り込み処理を使う。
-    player_.SetMoveDirection(player_.GetInput().moveDir);
     DxPlus::Debug::SetFormatString(L"state:lunging_jump");
 }
 
