@@ -11,7 +11,7 @@ PlayerKedukuroiState::PlayerKedukuroiState(PlayerStateMachine& stateMachine, Pla
 void PlayerKedukuroiState::Enter()
 {
     player_.StopMove();
-    player_.SetAnimation(PlayerAnimType::‚¯‚Ã‚­‚ë‚¢, true);
+    player_.SetAnimation(PlayerAnimType::Kedukuroi, true);
 
     DxPlus::Debug::SetFormatString(L"PlayerKedukuroiState::Enter");
 }
