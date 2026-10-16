@@ -20,7 +20,7 @@ void TitleScene::Init()
 void TitleScene::Update(float deltaTime)
 {
     DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
-#ifdef NDEBUG
+#ifndef NDEBUG
     if (DxLib::CheckHitKey(KEY_INPUT_F1))
     {
         SetNextScene(SceneManager::GetInstance().GetScene(SceneID::SsFlipTest));
