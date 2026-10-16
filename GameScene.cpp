@@ -250,6 +250,14 @@ void GameScene::DrawScene(bool toonEnabled) const
 	drawActor(boss.GetModelObject(), ModelToonType::Model);
 	drawActor(stage.GetModelObject(), ModelToonType::Model);
 	drawActor(stage.GetAlphaModelObject(), ModelToonType::Model);
+	for(const auto& pillar : stage.GetPillarModelObjects())
+	{
+		drawActor(pillar, ModelToonType::Model);
+	}
+	for(const auto& pillar : stage.GetStageModelObjects())
+	{
+		drawActor(pillar, ModelToonType::Model);
+	}
 
 	modelToonRenderer_.EndPass();
 }
