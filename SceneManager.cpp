@@ -127,6 +127,7 @@ void SceneManager::Run()
             {
                 debugUI.BeginFrame();
                 debugUI.Draw(gameContext, scene->GetDebugControls());
+                scene->DrawImGui();
                 debugUI.EndFrame();
             }
 #endif

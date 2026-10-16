@@ -112,7 +112,11 @@ void GameScene::Update(float deltaTime)
 		stage.UpdateAlphaModel(deltaTime, player);
 		boss.Update(deltaTime);
 		const bool touching = Collision::UpdateModelContact(player.GetModelObject(), boss.GetModelObject());
-		if (touching) player.TakeDamage();
+      if (touching)
+		{
+			player.SetPosition(player.GetModelObject().position);
+			player.TakeDamage();
+		}
 
 		playerCamera_.Update(player.GetPosition(), boss.GetPosition(), deltaTime);
 
@@ -246,6 +250,14 @@ void GameScene::DrawScene(bool toonEnabled) const
 	drawActor(boss.GetModelObject(), ModelToonType::Model);
 	drawActor(stage.GetModelObject(), ModelToonType::Model);
 	drawActor(stage.GetAlphaModelObject(), ModelToonType::Model);
+	for(const auto& pillar : stage.GetPillarModelObjects())
+	{
+		drawActor(pillar, ModelToonType::Model);
+	}
+	for(const auto& pillar : stage.GetStageModelObjects())
+	{
+		drawActor(pillar, ModelToonType::Model);
+	}
 
 	modelToonRenderer_.EndPass();
 }
