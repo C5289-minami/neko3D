@@ -32,7 +32,7 @@ public:
     PlayerStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }
     bool TakeDamage();
 
- void SetAnimation(PlayerAnimType::Type type, bool loop = true);
+    void SetAnimation(PlayerAnimType::Type type, bool loop = true);
 
 	// ステージとの当たり判定込みの更新
 	void Update(float deltaTime, const Stage& stage, const Vec3& movementCenter = Vec3{});
@@ -56,6 +56,7 @@ public:
     void SetLungingJumpSpeed(float value);
     void ResetLungingSpeeds();
 	bool IsGrounded() const { return isGrounded_; }
+	void SetGround(bool grounded) { isGrounded_ = grounded; }
 	bool IsGravityEnabled() const { return gravityEnabled_; }
 	void SetGravityEnabled(bool enabled);
 

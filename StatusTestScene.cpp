@@ -33,6 +33,7 @@ void StatusTestScene::Init()
 	testModel_.modelKey = ResourceKeys::Model_Test;
 
 	player_.Init();
+    player_.Reset();
 	player_.SetPosition({ 0.0f, 100.0f, 0.0f });
 
 	if (!CharSettingsManager::Load())
@@ -70,6 +71,11 @@ void StatusTestScene::Update(float deltaTime)
 	shaderToggleWasDown = shaderToggleDown;
 
 	player_.Update(deltaTime);
+	if (player_.GetPosition().y < 0.0f)
+	{
+		player_.SetPosition({ player_.GetPosition().x, 0.0f, player_.GetPosition().z });
+		player_.SetGround(true);
+	}
 
 	Collision::UpdateModelContact(player_.GetModelObject(), testModel_);
 
