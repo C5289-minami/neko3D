@@ -591,8 +591,12 @@
     <ClInclude Include="StatusTestScene.h">
       <Filter>30_Scenes\Test</Filter>
     </ClInclude>
-    <ClInclude Include="ModelObjectManager.h" />
-    <ClInclude Include="ModelConfigScene.h" />
+    <ClInclude Include="ModelObjectManager.h">
+      <Filter>40_Gameplay\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelConfigScene.h">
+      <Filter>30_Scenes\Test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -835,11 +839,24 @@
     <ClCompile Include="StatusTestScene.cpp">
       <Filter>30_Scenes\Test</Filter>
     </ClCompile>
-    <ClCompile Include="ModelObjectManager.cpp" />
-    <ClCompile Include="ModelConfigScene.cpp" />
+    <ClCompile Include="ModelObjectManager.cpp">
+      <Filter>40_Gameplay\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelConfigScene.cpp">
+      <Filter>30_Scenes\Test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Config\toon.json">
+      <Filter>JSON</Filter>
+    </None>
+    <None Include="Data\Config\charData.json">
+      <Filter>JSON</Filter>
+    </None>
+    <None Include="Data\Config\model_objects.json">
+      <Filter>JSON</Filter>
+    </None>
+    <None Include="Data\Config\outline.json">
       <Filter>JSON</Filter>
     </None>
   </ItemGroup>

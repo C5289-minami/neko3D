@@ -19,7 +19,7 @@ public:
     void DrawImGui() override;
 
 private:
-    Camera::FreeCamera camera_;
-    ModelObject* selected_{};
-    std::string status_;
+	Camera::FreeCamera camera_; // カメラ
+	ModelObject* selected_{};   // 選択中のオブジェクト
+	std::string status_;        // ImGuiのステータス表示用
 };

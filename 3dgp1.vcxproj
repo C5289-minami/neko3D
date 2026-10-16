@@ -403,6 +403,9 @@
     <ClCompile Include="UIManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Data\Config\charData.json" />
+    <None Include="Data\Config\model_objects.json" />
+    <None Include="Data\Config\outline.json" />
     <None Include="Data\Config\toon.json" />
   </ItemGroup>
   <Target Name="CompileGameShaders" BeforeTargets="PrepareForBuild">
