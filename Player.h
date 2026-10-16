@@ -9,6 +9,7 @@
 #include "AnimationDraw.h"
 #include "PlayerAnimType.h"
 #include "TransformSettings.h"
+#include "Consts.h"
 
 class Stage;
 
@@ -49,6 +50,11 @@ public:
 	// ÉWÉÉÉìÉv
 	void JumpAction();
 	void StartLungingJump(const Vec3& moveDir);
+    float GetLungingMoveSpeed() const { return lungingMoveSpeed_; }
+    float GetLungingJumpSpeed() const { return lungingJumpSpeed_; }
+    void SetLungingMoveSpeed(float value);
+    void SetLungingJumpSpeed(float value);
+    void ResetLungingSpeeds();
 	bool IsGrounded() const { return isGrounded_; }
 	bool IsGravityEnabled() const { return gravityEnabled_; }
 	void SetGravityEnabled(bool enabled);
@@ -92,6 +98,8 @@ private:
 	PlayerInput input_;
 	PlayerStateMachine stateMachine_;
     float ultimateGauge_{ 0.0f };
+    float lungingMoveSpeed_{ Const::PLAYER_LUNGING_MOVE_SPEED };
+    float lungingJumpSpeed_{ Const::PLAYER_LUNGING_JUMP_SPEED };
 	float kari_max_jissou_ = UltimateGaugeMax;
 
 	Vec3 movementCenter_{}; // ë´èÍÇÃíÜêS

@@ -230,6 +230,22 @@ void DebugUI::Draw(GameContext& ctx, const DebugSceneControls& controls)
         ImGui::End();
     }
 
+    if (controls.scope == "game")
+    {
+        Player& player = ctx.GetPlayer();
+        ImGui::Begin("Lunging Settings");
+        float moveSpeed = player.GetLungingMoveSpeed();
+        float jumpSpeed = player.GetLungingJumpSpeed();
+        if (ImGui::DragFloat(u8"移動速度", &moveSpeed, 10.0f, 0.0f, 5000.0f, "%.0f", ImGuiSliderFlags_AlwaysClamp))
+            player.SetLungingMoveSpeed(moveSpeed);
+        if (ImGui::DragFloat(u8"ジャンプ初速", &jumpSpeed, 10.0f, 0.0f, 5000.0f, "%.0f", ImGuiSliderFlags_AlwaysClamp))
+            player.SetLungingJumpSpeed(jumpSpeed);
+        if (ImGui::Button(u8"初期値に戻す"))
+            player.ResetLungingSpeeds();
+        ImGui::TextWrapped(u8"移動速度は即時反映、ジャンプ初速は次のLungingから反映されます。");
+        ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
+        ImGui::End();
+    }
     // 必殺ゲージの仮調整
     if (controls.scope == "game")
     {
