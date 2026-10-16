@@ -33,6 +33,7 @@ public:
     void Init() override;
     void Update(float deltaTime) override;
     void Render() const override;
+	void DrawImGui() override;
     DebugSceneControls GetDebugControls() override;
 
 private:

@@ -7,6 +7,8 @@
 
 #include "DebugUI.h"
 #include "UIManager.h"
+#include "ToonSettings.h"
+#include "OutlineSettings.h"
 
 void SceneManager::Init()
 {
@@ -32,12 +34,18 @@ void SceneManager::Init()
     titleScene.SetGameContext(&gameContext);
     gameScene.SetGameContext(&gameContext);
     resultScene.SetGameContext(&gameContext);
+#ifndef NDEBUG
     shaderTestScene.SetGameContext(&gameContext);
     ssFlipTestScene.SetGameContext(&gameContext);
 	nekoMotionTestScene.SetGameContext(&gameContext);
 	statusTestScene.SetGameContext(&gameContext);
+#endif
 
     scene = &titleScene; // 最初のシーン
+
+	// 設定ファイルのロード
+    ToonSettingsManager::Load();
+    OutlineSettingsManager::Load();
 }
 
 void SceneManager::Shutdown()
@@ -67,10 +75,12 @@ Scene* SceneManager::GetScene(SceneID id)
         case SceneID::Title:    return &titleScene;
         case SceneID::Game:     return &gameScene;
         case SceneID::Result:   return &resultScene;
+#ifndef NDEBUG
         case SceneID::ShaderTestScene: return &shaderTestScene;
         case SceneID::SsFlipTest: return &ssFlipTestScene;
 		case SceneID::NekoMotionTest: return &nekoMotionTestScene;
 		case SceneID::StatusTestScene: return &statusTestScene;
+#endif // !NDEBUG
     }
     return &titleScene;
 }

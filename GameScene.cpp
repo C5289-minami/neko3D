@@ -9,6 +9,8 @@
 #ifndef NDEBUG
 #include "imgui.h"
 #endif
+#include "ToonSettings.h"
+#include "OutlineSettings.h"
 
 DebugSceneControls GameScene::GetDebugControls()
 {
@@ -49,6 +51,9 @@ void GameScene::Init()
 	wasFreeCameraToggleDown_ = false;
 #endif
 
+
+	ToonSettingsManager::Load();
+	OutlineSettingsManager::Load();
 
 	// トゥーン描画に必要なシェーダーと設定バッファーを初期化
 	if (!modelToonRenderer_.Init())
@@ -182,6 +187,7 @@ void GameScene::RenderDepth() const
 	const auto& boss = gameContext->GetBoss();
 	const auto& player = gameContext->GetPlayer();
 	const auto& stage = gameContext->GetStage();
+	const auto& effectManager = gameContext->GetEffectManager();
 
 	// Boneなしシェーダー
 	modelToonRenderer_.SetVertexShader(ModelToonType::Model);
@@ -212,9 +218,6 @@ void GameScene::DrawScene(bool toonEnabled) const
 	const auto& effectManager = gameContext->GetEffectManager();
 	const auto& grid = gameContext->GetGrid();
 
-	// Shaderを使わないもの
-	effectManager.Draw();
-	grid.Draw();
 
 	// トゥーンシェーダーを使わない場合
 	if (!toonEnabled)
@@ -225,6 +228,8 @@ void GameScene::DrawScene(bool toonEnabled) const
 		stage.Draw();
 		player.Draw();
 		stage.DrawAlphaModel();
+		effectManager.Draw();
+		grid.Draw();
 		return;
 	}
 
@@ -258,7 +263,8 @@ void GameScene::DrawScene(bool toonEnabled) const
 	{
 		drawActor(pillar, ModelToonType::Model);
 	}
-
+	effectManager.Draw();
+	grid.Draw();
 	modelToonRenderer_.EndPass();
 }
 

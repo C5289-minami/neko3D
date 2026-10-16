@@ -61,7 +61,7 @@ void ResourceManager::LoadAll()
 
 
     // Effect
-	LoadEffect(ResourceKeys::Effect_Test, L"./Data/Effects/EffectTest.efkefc",30.0f);
+	LoadEffect(ResourceKeys::Effect_Test, L"./Data/Effects/shabondama.efkefc",30.0f);
 }
 
 void ResourceManager::UnloadAll()
