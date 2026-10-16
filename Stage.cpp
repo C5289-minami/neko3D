@@ -8,6 +8,7 @@
 #include "Consts.h"
 #include "imgui.h"
 #include "TransformSettings.h"
+#include "ModelObjectManager.h"
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <filesystem>
@@ -35,6 +36,9 @@ void Stage::Init()
     // ’n–Ê‚Ì“–‚½‚è”»’è‚ÉŽg‚¤ƒ‚ƒfƒ‹
     stageModel_.modelKey = ResourceKeys::Model_StageFbx;
     LoadModelSettings();
+    for (auto& model : stagePillars_) MObjs().Add(model);
+    for (auto& model : stageModels_) MObjs().Add(model);
+    MObjs().Add(stageModel_);
     SetupCollisionInfo();
     Reset();
 }

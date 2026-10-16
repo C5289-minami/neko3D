@@ -39,6 +39,7 @@ void SceneManager::Init()
     ssFlipTestScene.SetGameContext(&gameContext);
 	nekoMotionTestScene.SetGameContext(&gameContext);
 	statusTestScene.SetGameContext(&gameContext);
+  modelConfigScene.SetGameContext(&gameContext);
 #endif
 
     scene = &titleScene; // 最初のシーン
@@ -80,6 +81,7 @@ Scene* SceneManager::GetScene(SceneID id)
         case SceneID::SsFlipTest: return &ssFlipTestScene;
 		case SceneID::NekoMotionTest: return &nekoMotionTestScene;
 		case SceneID::StatusTestScene: return &statusTestScene;
+       case SceneID::ModelConfig: return &modelConfigScene;
 #endif // !NDEBUG
     }
     return &titleScene;

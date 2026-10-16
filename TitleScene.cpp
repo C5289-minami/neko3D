@@ -45,6 +45,12 @@ void TitleScene::Update(float deltaTime)
         StartFadeOut();
         return;
 	}
+    else if (DxLib::CheckHitKey(KEY_INPUT_F5))
+    {
+        SetNextScene(SceneManager::GetInstance().GetScene(SceneID::ModelConfig));
+        StartFadeOut();
+        return;
+    }
 #endif
 
     using namespace DxPlus::Input;
@@ -92,6 +98,9 @@ void TitleScene::Render() const
         white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
     DxPlus::Text::DrawString(L"F4: キャラテストシーン",
         { DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.9f },
+        white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
+    DxPlus::Text::DrawString(L"F5: Model Config",
+        { DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.95f },
         white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
 #endif
 }

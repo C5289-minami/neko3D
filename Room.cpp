@@ -5,7 +5,8 @@
 void Room::Init()
 {
 	roomModel_.modelKey = ResourceKeys::Model_Room;
-	Reset();
+  Reset();
+	roomModel_.Init();
 }
 
 void Room::Reset()
