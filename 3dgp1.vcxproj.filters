@@ -208,6 +208,9 @@
     <Filter Include="40_Gameplay\Actors\Room">
       <UniqueIdentifier>{de2106ab-e259-4649-aecb-d52f877a3677}</UniqueIdentifier>
     </Filter>
+    <Filter Include="40_Gameplay\Actors\Player\Character">
+      <UniqueIdentifier>{b9d16cfe-8fb4-4edb-8820-eec6049b3696}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -573,7 +576,7 @@
     <ClInclude Include="EffectManager.h">
       <Filter>40_Gameplay\Effects</Filter>
     </ClInclude>
-    <ClInclude Include="BossTestScene.h">
+    <ClInclude Include="ShaderTestScene.h">
       <Filter>30_Scenes\Test</Filter>
     </ClInclude>
     <ClInclude Include="NekoMotionTestScene.h">
@@ -581,6 +584,12 @@
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>10_Core\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="CharSettings.h">
+      <Filter>40_Gameplay\Actors\Player\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="StatusTestScene.h">
+      <Filter>30_Scenes\Test</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -758,7 +767,7 @@
     <ClCompile Include="Boss.cpp">
       <Filter>40_Gameplay\Actors\Boss</Filter>
     </ClCompile>
-    <ClCompile Include="BossTestScene.cpp">
+    <ClCompile Include="ShaderTestScene.cpp">
       <Filter>30_Scenes\Test</Filter>
     </ClCompile>
     <ClCompile Include="Motion.cpp">
@@ -816,6 +825,12 @@
       <Filter>40_Gameplay\Effects</Filter>
     </ClCompile>
     <ClCompile Include="NekoMotionTestScene.cpp">
+      <Filter>30_Scenes\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="CharSettings.cpp">
+      <Filter>40_Gameplay\Actors\Player\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="StatusTestScene.cpp">
       <Filter>30_Scenes\Test</Filter>
     </ClCompile>
   </ItemGroup>

@@ -7,7 +7,7 @@
 #include "TitleScene.h"
 #include "GameScene.h"
 #include "ResultScene.h"
-#include "BossTestScene.h"
+#include "ShaderTestScene.h"
 #include "DebugScene.h"
 #include "DebugUI.h"
 #include "Consts.h"
@@ -18,7 +18,7 @@ enum class SceneID {
     Title,
     Game,
     Result,
-    BossTest,
+    ShaderTestScene,
     SsFlipTest,
 	NekoMotionTest,
 };
@@ -42,7 +42,7 @@ public:
         if (scene == &titleScene) return SceneID::Title;
         if (scene == &gameScene) return SceneID::Game;
         if (scene == &resultScene) return SceneID::Result;
-        if (scene == &bossTestScene) return SceneID::BossTest;
+        if (scene == &shaderTestScene) return SceneID::ShaderTestScene;
         if (scene == &ssFlipTestScene) return SceneID::SsFlipTest;
 
         return SceneID::Title; // デフォルトはタイトルシーン
@@ -70,7 +70,7 @@ private:
     TitleScene  titleScene{ &gameContext };
     GameScene   gameScene{ &gameContext };
     ResultScene resultScene{ &gameContext };
-    BossTestScene bossTestScene{ &gameContext };
+    ShaderTestScene shaderTestScene{ &gameContext };
     TestScene ssFlipTestScene{ &gameContext };
 	NekoMotionTestScene nekoMotionTestScene{ &gameContext };
 

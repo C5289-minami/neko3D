@@ -29,7 +29,7 @@ void TitleScene::Update(float deltaTime)
     }
     else if (DxLib::CheckHitKey(KEY_INPUT_F2))
     {
-        SetNextScene(SceneManager::GetInstance().GetScene(SceneID::BossTest));
+        SetNextScene(SceneManager::GetInstance().GetScene(SceneID::ShaderTestScene));
         StartFadeOut();
         return;
 	}
