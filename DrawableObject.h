@@ -27,6 +27,7 @@ struct ModelObject
     bool collisionHighlighted{ false };
 
 	void Init();
+	// JSONファイルから読み込み、オブジェクトを初期化する
 	bool Load(const std::string& filePath = "./Data/Config/model_objects.json");
 	bool Save(const std::string& filePath = "./Data/Config/model_objects.json") const;
 
