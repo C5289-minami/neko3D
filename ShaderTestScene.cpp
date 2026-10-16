@@ -31,9 +31,11 @@ DebugSceneControls ShaderTestScene::GetDebugControls()
 			[this](const Vec3& position) { camera_.SetPosition(position); },
 			[this] { camera_.ResetView(); },
 			[this] {
-              if (!camera_.IsSceneViewActive()) camera_.BeginSceneView();
+
 				camera_.FocusAt(player_.GetPosition());
-			}
+			},
+            [this] { return camera_.GetAnglesDegrees(); },
+            [this](const Vec3& angles) { camera_.SetAnglesDegrees(angles); }
 		},
 		[this] { return debugActorsPaused_; },
 		[this](bool paused) { debugActorsPaused_ = paused; },

@@ -37,6 +37,9 @@ struct DebugCameraControls
     std::function<void(const Vec3&)> setPosition;
     std::function<void()> reset;
     std::function<void()> focusPlayer;
+    std::function<Vec3()> getAnglesDegrees;
+    std::function<void(const Vec3&)> setAnglesDegrees;
+    bool followsTarget{};
 };
 
 struct DebugSceneControls

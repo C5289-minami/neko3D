@@ -18,16 +18,16 @@ DebugSceneControls GameScene::GetDebugControls()
 			MakeDebugTransformTarget("boss_test/player", "Player", gameContext->GetPlayer()),
 			MakeDebugTransformTarget("boss_test/boss", "Boss", gameContext->GetBoss())
 		},
-		DebugCameraControls{
-			[this] { return freeCamera_.IsSceneViewActive(); },
-			[this] { return freeCamera_.GetPosition(); },
-			[this](const Vec3& position) { freeCamera_.SetPosition(position); },
-			[this] { freeCamera_.ResetView(); },
-			[this] {
-			  if (!freeCamera_.IsSceneViewActive()) freeCamera_.BeginSceneView();
-			  freeCamera_.FocusAt(gameContext->GetPlayer().GetPosition());
-			}
-		},
+        DebugCameraControls{
+            [] { return false; },
+            [this] { return playerCamera_.GetPosition(); },
+            [this](const Vec3& position) { playerCamera_.SetViewPosition(position); },
+            [this] { playerCamera_.Reset(); },
+            [this] { playerCamera_.FocusAt(gameContext->GetPlayer().GetPosition()); },
+            [this] { return playerCamera_.GetAngleOffsetDegrees(); },
+            [this](const Vec3& angles) { playerCamera_.SetAngleOffsetDegrees(angles); },
+            true
+        },
 		[this] { return debugActorsPaused_; },
 		[this](bool paused) { debugActorsPaused_ = paused; },
 		transformInitialStatus_
