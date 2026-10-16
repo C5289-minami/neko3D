@@ -22,6 +22,9 @@ public:
 
     void GetCollisionModelHandles(std::vector<int>& handles) const;//modelの判定をまとめてやる
 
+    // プレイヤーのカプセルと柱L・M・Sのメッシュを判定する。
+    bool IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float radius) const;
+
     void DrawDebugUI();
     bool SaveModelSettings();
     bool LoadModelSettings();
@@ -39,11 +42,14 @@ private:
     void SetupCollisionInfo();
     void RefreshCollisionInfo();
 
-    // 柱と台座をまとめて管理
 
-    std::array<ModelObject, 5> stageModels_{};
+    std::array<ModelObject, 3> stagePillars_{};				
+    std::array<int, 3> pillarCollisionHandles_{ -1, -1, -1 };
+
+ 
+    std::array<ModelObject, 2> stageModels_{};
     // 当たり判定に使えるモデルハンドル。未準備・失敗時は -1。
-    std::array<int, 5> stageCollisionHandles_{ -1, -1, -1, -1, -1 };
+    std::array<int, 2> stageCollisionHandles_{ -1, -1 };
     int groundCollisionHandle_{ -1 };
     std::string modelSettingsStatus_;
 
