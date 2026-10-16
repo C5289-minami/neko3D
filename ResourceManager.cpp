@@ -24,7 +24,6 @@ void ResourceManager::LoadAll()
 {
     Initialize();
 	// フォントの読み込み
-
     LoadFont(ResourceKeys::Font_Title,
         L"./Data/Fonts/Bitcount/static/Bitcount-Light.ttf");
 
@@ -32,16 +31,16 @@ void ResourceManager::LoadAll()
     LoadModel(ResourceKeys::Model_Stage,      L"./Data/Models/field.mv1");
     LoadModel(ResourceKeys::Model_StageAlpha, L"./Data/Models/field.mv1");
     LoadModel(ResourceKeys::Model_Paladin,    L"./Data/Models/Paladin.mv1");
-    LoadModel(ResourceKeys::Model_Boss,       L"./DevData/Models/boss_test.mv1");
+    LoadModel(ResourceKeys::Model_Boss,       L"./Data/Models/Boss/boss_test.mv1");
     LoadModel(ResourceKeys::Model_hashira_l, L"./Data/Models/stage/hashira_l.mv1");
     LoadModel(ResourceKeys::Model_hashira_m, L"./Data/Models/stage/hashira_m.mv1");
     LoadModel(ResourceKeys::Model_hashira_s, L"./Data/Models/stage/hashira_s.mv1");
     LoadModel(ResourceKeys::Model_StageFbx,  L"./Data/Models/stage/Stage.mv1");
     LoadModel(ResourceKeys::Model_stand_l,  L"./Data/Models/stage/stand_l.mv1");
     LoadModel(ResourceKeys::Model_stand_m,  L"./Data/Models/stage/stand_m.mv1");
-	LoadModel(ResourceKeys::Model_Room, L"./Data/Models/Room/heya.mv1");
+	LoadModel(ResourceKeys::Model_Room, L"./Data/Models/Room/oheya.mv1");
 
-	LoadModel(ResourceKeys::Model_Test, L"./Data/Models/test1.mv1");
+	//LoadModel(ResourceKeys::Model_Test, L"./Data/Models/test1.mv1");
 	// スプライトスタジオの読み込み
 
     LoadSpriteStudioPlayer(
@@ -52,7 +51,7 @@ void ResourceManager::LoadAll()
     LoadSpriteStudioPlayer(
         ResourceKeys::SpriteStudio_Gauge,
         "UI",
-        "./DevData/UI/UI.ssbp");
+        "./Data/UI/UI.ssbp");
         
 	// サウンドの読み込み
     SetCreate3DSoundFlag(TRUE);

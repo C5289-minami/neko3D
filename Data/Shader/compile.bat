@@ -2,7 +2,6 @@
 setlocal
 pushd "%~dp0"
 if errorlevel 1 exit /b 1
-
 if not exist "Bin" mkdir "Bin"
 
 rem --- 頂点シェーダー ---

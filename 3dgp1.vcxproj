@@ -409,7 +409,7 @@
     <None Include="Data\Config\toon.json" />
   </ItemGroup>
   <Target Name="CompileGameShaders" BeforeTargets="PrepareForBuild">
-    <Exec Command="call &quot;$(ProjectDir)DevData\ShaderCompiler\compile.bat&quot;" WorkingDirectory="$(ProjectDir)" />
+    <Exec Command="call &quot;$(ProjectDir)Data\Shader\compile.bat&quot;" WorkingDirectory="$(ProjectDir)" />
   </Target>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
