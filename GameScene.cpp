@@ -112,7 +112,11 @@ void GameScene::Update(float deltaTime)
 		stage.UpdateAlphaModel(deltaTime, player);
 		boss.Update(deltaTime);
 		const bool touching = Collision::UpdateModelContact(player.GetModelObject(), boss.GetModelObject());
-		if (touching) player.TakeDamage();
+      if (touching)
+		{
+			player.SetPosition(player.GetModelObject().position);
+			player.TakeDamage();
+		}
 
 		playerCamera_.Update(player.GetPosition(), boss.GetPosition(), deltaTime);
 

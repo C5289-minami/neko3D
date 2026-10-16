@@ -75,8 +75,7 @@ void Player::Update(float deltaTime)
 	position_.y += velocity_.y * deltaTime;
 	isGrounded_ = false;
 
-	SetPosition(position_);
-	model_.position = GetPosition();
+	model_.position = position_;
 	model_.rotation.y = GetYaw();
 	model_.rotation.x = GetPitch();
 
@@ -123,8 +122,7 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 		}
 	}
 
-	SetPosition(position_);
-	model_.position = GetPosition();
+	model_.position = position_;
 	model_.rotation.y = GetYaw();
 	model_.rotation.x = GetPitch();
 
