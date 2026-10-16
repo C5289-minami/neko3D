@@ -3,6 +3,13 @@
 #include "ResourceKeys.h"
 #include "Collision.h"
 
+#include <algorithm>
+
+#ifndef NDEBUG
+#include "imgui.h"
+#endif // !NDEBUG
+
+
 void StatusTestScene::Init()
 {
 	// 背景色
@@ -27,6 +34,9 @@ void StatusTestScene::Init()
 
 	player_.Init();
 	player_.SetPosition({ 0.0f, 100.0f, 0.0f });
+
+	if (!CharSettingsManager::Load())
+		DxPlus::Utils::FatalError(L"キャラクター情報の読み込みに失敗");
 }
 
 void StatusTestScene::Update(float deltaTime)
@@ -62,6 +72,67 @@ void StatusTestScene::Update(float deltaTime)
 	player_.Update(deltaTime);
 
 	Collision::UpdateModelContact(player_.GetModelObject(), testModel_);
+
+}
+
+void StatusTestScene::DrawImGui()
+{
+  #ifndef NDEBUG
+	ImGui::Begin("Status Test Scene");
+	{
+		ImGui::Text("F2: Toggle Shader Effects");
+
+		// キャラクターの追加とStatus設定
+		if (ImGui::Button("Add Character", ImVec2(-1, 0)))
+		{
+			CharData newChar{};
+         newChar.name = u8"キャラクター " + std::to_string(charSettings_.GetCount() + 1);
+			charSettings_.Add(newChar);
+		}
+		for (size_t i = 0; i < charSettings_.GetCount(); ++i)
+		{
+            ImGui::PushID(static_cast<int>(i));
+			CharData& charData = charSettings_.Get(i);
+            const std::string headerLabel = charData.name + "###CharacterHeader";
+			if (ImGui::CollapsingHeader(headerLabel.c_str()))
+			{
+                char nameBuffer[256]{};
+				const size_t nameLength = std::min(charData.name.size(), sizeof(nameBuffer) - 1);
+				std::copy_n(charData.name.data(), nameLength, nameBuffer);
+				ImGui::Text(u8"名前"); ImGui::SameLine();
+               if (ImGui::InputText(u8"###名前", nameBuffer, sizeof(nameBuffer)))
+					charData.name = nameBuffer;
+				ImGui::Text(u8"最大HP"); ImGui::SameLine();
+				ImGui::InputFloat(u8"###最大HP",   &charData.maxHealth);
+				ImGui::Text(u8"移動速度"); ImGui::SameLine();
+				ImGui::InputFloat(u8"###移動速度",   &charData.moveSpeed);
+				ImGui::Text(u8"攻撃倍率"); ImGui::SameLine();
+				ImGui::InputFloat(u8"###攻撃倍率", &charData.attackRatio);
+				ImGui::Text(u8"攻撃速度"); ImGui::SameLine();
+				ImGui::InputFloat(u8"###攻撃速度", &charData.attackSpeed);
+				if (ImGui::Button("Remove Character"))
+				{
+					charSettings_.Remove(i);
+					ImGui::PopID();
+					break;
+				}
+			}
+           ImGui::PopID();
+		}
+		// 保存、読み込み
+		if (ImGui::Button("Save", ImVec2(-1, 0)))
+		{
+			if (!CharSettingsManager::Save())
+				DxPlus::Utils::FatalError(L"キャラクター情報の保存に失敗");
+		}
+		if (ImGui::Button("Load", ImVec2(-1, 0)))
+		{
+			if (!CharSettingsManager::Load())
+				DxPlus::Utils::FatalError(L"キャラクター情報の読み込みに失敗");
+		}
+	}
+	ImGui::End();
+   #endif
 }
 
 void StatusTestScene::Render() const
@@ -83,7 +154,8 @@ void StatusTestScene::Render() const
 	{
 		DrawScene(false);
 	}
-	
+
+
 
 }
 

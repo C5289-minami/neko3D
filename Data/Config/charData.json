@@ -1,0 +1,25 @@
+{
+    "characters": [
+        {
+            "attackRatio": 1.0,
+            "attackSpeed": 1.0,
+            "maxHealth": 100.0,
+            "moveSpeed": 5.0,
+            "name": "たか"
+        },
+        {
+            "attackRatio": 1.0,
+            "attackSpeed": 1.0,
+            "maxHealth": 100.0,
+            "moveSpeed": 5.0,
+            "name": "ぎし"
+        },
+        {
+            "attackRatio": 1.0,
+            "attackSpeed": 1.0,
+            "maxHealth": 100.0,
+            "moveSpeed": 5.0,
+            "name": "ゆう"
+        }
+    ]
+}

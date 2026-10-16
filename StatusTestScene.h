@@ -24,13 +24,15 @@ public:
 	}
 	void Init() override;
 	void Update(float deltaTime) override;
-	void Render() const override;
+    void Render() const override;
+	void DrawImGui() override;
 private:
 	CharSettingsManager charSettings_;
+
 	Camera::HomingCamera camera_;
 	Camera::FreeCamera freeCamera_;
 	Camera::Camera* activeCamera_{ nullptr };
-
+		
 	// モデルのトゥーン描画を管理する
 	ModelToonRenderer modelToonRenderer_{};
 	// 共通のスクリーン空間アウトライン描画

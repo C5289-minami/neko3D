@@ -25,7 +25,7 @@ namespace Camera
 			yaw_ = 0.0f;
 			pitch_ = 0.0f;
 		}
-		virtual void Update(float deltaTime) {}
+		virtual void Update(float) {}
 
 		virtual void ApplyCamera() const
 		{
