@@ -26,25 +26,13 @@ DebugSceneControls ShaderTestScene::GetDebugControls()
 			MakeDebugTransformTarget("boss_test/boss", "Boss", boss)
 		},
 		DebugCameraControls{
-			[this] { return debugCamera_.IsSceneViewActive(); },
-			[this] { return debugCamera_.IsSceneViewActive() ? debugCamera_.GetEye() : cameraEye; },
-			[this](const Vec3& position) {
-				if (debugCamera_.IsSceneViewActive()) debugCamera_.SetPosition(position);
-				else cameraEye = position;
-			},
+            [this] { return camera_.IsSceneViewActive(); },
+			[this] { return camera_.GetPosition(); },
+			[this](const Vec3& position) { camera_.SetPosition(position); },
+			[this] { camera_.ResetView(); },
 			[this] {
-				if (debugCamera_.IsSceneViewActive()) debugCamera_.ResetView();
-				else cameraEye = { 0.0f, 250.0f, -650.0f };
-			},
-			[this] {
-				if (!debugCamera_.IsSceneViewActive())
-				{
-					const float cosPitch = std::cos(pitch);
-					const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };
-					debugCamera_.Initialize(cameraEye, cameraEye + forward);
-					debugCamera_.Begin();
-				}
-				debugCamera_.FocusAt(player_.GetPosition());
+              if (!camera_.IsSceneViewActive()) camera_.BeginSceneView();
+				camera_.FocusAt(player_.GetPosition());
 			}
 		},
 		[this] { return debugActorsPaused_; },
@@ -60,14 +48,8 @@ void ShaderTestScene::Init()
 
 
   // 通常カメラの初期化
-	cameraEye = { 0.0f, 250.0f, -650.0f };
-	const Vec3 direction = (Vec3{ 0.0f, 100.0f, 0.0f } - cameraEye).Normalized();
-	pitch = std::asin(std::clamp(direction.y, -1.0f, 1.0f));
-	yaw = std::atan2(direction.x, direction.z);
-
-	camera_.SetPosition(cameraEye);
-	camera_.SetPitch(pitch);
-	camera_.SetYaw(yaw);
+	const Vec3 cameraEye{ 0.0f, 250.0f, -650.0f };
+	camera_.Initialize(cameraEye, { 0.0f, 100.0f, 0.0f });
 	camera_.ApplyCamera();
 
 	// トゥーン描画に必要なシェーダーと設定バッファーを初期化
@@ -94,20 +76,14 @@ void ShaderTestScene::Init()
 	debugActorsPaused_ = false;
 	TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
 	stage.ResetAlphaModel(player_.GetPosition());
-	const float cosPitch = std::cos(pitch);
-	const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };
-	debugCamera_.Initialize(cameraEye, cameraEye + forward);
-
 }
 
 void ShaderTestScene::Update(float deltaTime)
 {
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 #ifndef NDEBUG
-	const float cosPitch = std::cos(pitch);
-	const Vec3 forward{ std::sin(yaw) * cosPitch, std::sin(pitch), std::cos(yaw) * cosPitch };
-	debugCamera_.Update(deltaTime, player_.GetPosition(), cameraEye, cameraEye + forward);
-	const bool actorsPaused = debugActorsPaused_ || debugCamera_.IsSceneViewActive();
+ camera_.UpdateSceneView(deltaTime, player_.GetPosition());
+	const bool actorsPaused = debugActorsPaused_ || camera_.IsSceneViewActive();
 #else
 	const bool actorsPaused = false;
 #endif
@@ -163,7 +139,7 @@ void ShaderTestScene::Update(float deltaTime)
 #endif
 
 	// --- 右クリックを押している間のみカメラ操作 ---
-	if (!mouseCaptured && !debugCamera_.IsSceneViewActive() && (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
+   if (!mouseCaptured && !camera_.IsSceneViewActive() && (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
 	{
 		SetMouseDispFlag(FALSE);
 		camera_.InputUpdate(deltaTime);
@@ -225,8 +201,7 @@ void ShaderTestScene::Render() const
 void ShaderTestScene::RenderDepth() const
 {
 	// シーンのカメラを設定する
-  if (debugCamera_.IsSceneViewActive()) debugCamera_.ApplyCamera();
-	else camera_.ApplyCamera();
+ camera_.ApplyCamera();
 	// Boneなしシェーダー
 	modelToonRenderer_.SetVertexShader(ModelToonType::Model);
 
@@ -243,8 +218,7 @@ void ShaderTestScene::RenderDepth() const
 void ShaderTestScene::DrawScene(bool toonEnabled) const
 {
 	// カメラを設定する
-  if (debugCamera_.IsSceneViewActive()) debugCamera_.ApplyCamera();
-	else camera_.ApplyCamera();
+ camera_.ApplyCamera();
 	// トゥーンシェーダーを使わない場合
 	if (!toonEnabled)
 	{

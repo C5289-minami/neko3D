@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 
 #include "Vector3.h"
 #include "DxLib.h"
@@ -26,6 +25,7 @@ namespace Camera
 			yaw_ = 0.0f;
 			pitch_ = 0.0f;
 		}
+		virtual void Update(float deltaTime) {}
 
 		virtual void ApplyCamera() const
 		{
@@ -61,49 +61,156 @@ namespace Camera
 
 	class FreeCamera : public Camera
 	{
-	public:
-       void Initialize(const Vec3& eye, const Vec3& target)
+ public:
+		void Reset() override
+		{
+			Camera::Reset();
+			homeEye_ = {};
+			homeTarget_ = {};
+			active_ = false;
+			wasToggleDown_ = false;
+			wasResetDown_ = false;
+			wasFocusDown_ = false;
+		}
+
+		void Initialize(const Vec3& eye, const Vec3& target)
 		{
 			position_ = eye;
 			const Vec3 direction = (target - eye).Normalized();
 			pitch_ = std::asin(std::clamp(direction.y, -1.0f, 1.0f));
+            yaw_ = std::atan2(direction.x, direction.z);
+			homeEye_ = eye;
+			homeTarget_ = target;
+			active_ = false;
+		}
+
+       void Update(float deltaTime) override
+		{
+			UpdateFreeFlight(deltaTime, false, false);
+			ApplyCamera();
+		}
+
+		void InputUpdate(float deltaTime) { Update(deltaTime); }
+
+		void BeginSceneView()
+		{
+			if (active_) return;
+			homeEye_ = position_;
+			homeTarget_ = GetForwardTarget();
+			active_ = true;
+		}
+
+        void ResetView()
+		{
+			const bool wasActive = active_;
+			Initialize(homeEye_, homeTarget_);
+			active_ = wasActive;
+		}
+
+		void FocusAt(const Vec3& point, float distance = 350.0f)
+		{
+			position_ = point - GetForward() * distance;
+		}
+
+		bool IsSceneViewActive() const { return active_; }
+		const Vec3& GetEye() const { return position_; }
+		Vec3 GetTarget() const { return GetForwardTarget(); }
+
+		void UpdateSceneView(float deltaTime, const Vec3& focusPoint)
+		{
+#ifndef NDEBUG
+			const bool keyboardCaptured = ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard;
+			const bool mouseCaptured = ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureMouse;
+			const bool toggleDown = DxLib::CheckHitKey(KEY_INPUT_LALT) != 0 &&
+				DxLib::CheckHitKey(KEY_INPUT_RETURN) != 0;
+			if (toggleDown && !wasToggleDown_)
+			{
+				if (active_)
+				{
+					active_ = false;
+					RestoreHomeView();
+					SetMouseDispFlag(TRUE);
+				}
+				else
+				{
+					BeginSceneView();
+					SetMouseDispFlag(FALSE);
+					wasToggleDown_ = toggleDown;
+					return;
+				}
+			}
+			wasToggleDown_ = toggleDown;
+			if (!active_) return;
+
+			const bool resetDown = !keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_R) != 0;
+			if (resetDown && !wasResetDown_) ResetView();
+			wasResetDown_ = resetDown;
+			const bool focusDown = !keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_F) != 0;
+			if (focusDown && !wasFocusDown_) FocusAt(focusPoint);
+			wasFocusDown_ = focusDown;
+
+			UpdateFreeFlight(deltaTime, keyboardCaptured, mouseCaptured);
+#else
+			(void)deltaTime;
+			(void)focusPoint;
+#endif
+		}
+
+		void SetMoveSpeed(float speed) { moveSpeed_ = speed; }
+		void SetRotateSpeed(float speed) { rotateSpeed_ = speed; }
+		float GetMoveSpeed() const { return moveSpeed_; }
+		float GetRotateSpeed() const { return rotateSpeed_; }
+
+    private:
+		Vec3 GetForward() const
+		{
+			const float cosPitch = std::cos(pitch_);
+			return { std::sin(yaw_) * cosPitch, std::sin(pitch_), std::cos(yaw_) * cosPitch };
+		}
+
+		Vec3 GetForwardTarget() const { return position_ + GetForward(); }
+
+		void RestoreHomeView()
+		{
+			position_ = homeEye_;
+			const Vec3 direction = (homeTarget_ - homeEye_).Normalized();
+			pitch_ = std::asin(std::clamp(direction.y, -1.0f, 1.0f));
 			yaw_ = std::atan2(direction.x, direction.z);
 		}
 
-		void InputUpdate(float deltaTime,
-			float moveSpeed = 500.0f,
-			float rotateSpeed = 0.2f * DxPlus::Deg2Rad)
+		void UpdateFreeFlight(float deltaTime, bool keyboardCaptured, bool mouseCaptured)
 		{
-			const float cosPitch = std::cos(pitch_);
-			const Vec3 forward{
-				std::sin(yaw_) * cosPitch,
-				std::sin(pitch_),
-				std::cos(yaw_) * cosPitch
-			};
+			const Vec3 forward = GetForward();
 			const Vec3 right{ std::cos(yaw_), 0.0f, -std::sin(yaw_) };
 			Vec3 movement{};
-
-			if (DxLib::CheckHitKey(KEY_INPUT_W)) movement += forward;
-			if (DxLib::CheckHitKey(KEY_INPUT_S)) movement -= forward;
-			if (DxLib::CheckHitKey(KEY_INPUT_A)) movement -= right;
-			if (DxLib::CheckHitKey(KEY_INPUT_D)) movement += right;
-			if (DxLib::CheckHitKey(KEY_INPUT_Q)) movement.y -= 1.0f;
-			if (DxLib::CheckHitKey(KEY_INPUT_E)) movement.y += 1.0f;
-
+			if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_W)) movement += forward;
+			if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_S)) movement -= forward;
+			if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_A)) movement -= right;
+			if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_D)) movement += right;
+			if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_Q)) movement.y -= 1.0f;
+			if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_E)) movement.y += 1.0f;
 			if (movement.LengthSq() > 0.0f)
 			{
-				const float speed = moveSpeed *
+				const float speed = moveSpeed_ *
 					(DxLib::CheckHitKey(KEY_INPUT_LSHIFT) ? 2.0f : 1.0f);
 				position_ += movement.Normalized() * (speed * deltaTime);
 			}
 
-			const auto mouseDelta = DxPlus::Input::GetMouseDelta();
-			yaw_ += mouseDelta.x * rotateSpeed;
-			pitch_ = std::clamp(pitch_ - mouseDelta.y * rotateSpeed,
+			const DxPlus::Vec2Int mouseDelta = mouseCaptured ? DxPlus::Vec2Int{} : DxPlus::Input::GetMouseDelta();
+			yaw_ += mouseDelta.x * rotateSpeed_;
+			pitch_ = std::clamp(pitch_ - mouseDelta.y * rotateSpeed_,
 				-DxPlus::Deg2Rad * 89.0f, DxPlus::Deg2Rad * 89.0f);
-			ApplyCamera();
 			SetMousePoint(DxPlus::CLIENT_WIDTH / 2, DxPlus::CLIENT_HEIGHT / 2);
 		}
+
+		float moveSpeed_{ 500.0f };
+		float rotateSpeed_{ 0.2f * DxPlus::Deg2Rad };
+      bool active_{};
+		bool wasToggleDown_{};
+		bool wasResetDown_{};
+		bool wasFocusDown_{};
+		Vec3 homeEye_{};
+		Vec3 homeTarget_{};
 	};
 
 	struct HomingCameraSettings
@@ -120,7 +227,7 @@ namespace Camera
 		void Reset() override
 		{
 			Camera::Reset();
-           position_ = { 400.0f, 400.0f, 400.0f };
+			position_ = { 400.0f, 400.0f, 400.0f };
 			target_ = {};
 		}
 
@@ -155,131 +262,4 @@ namespace Camera
 		HomingCameraSettings settings_{};
 	};
 
-	class DebugCamera : public Camera
-	{
-	public:
-		void Initialize(const Vec3& eye, const Vec3& target)
-		{
-			position_ = eye;
-			target_ = target;
-			homeEye_ = eye;
-			homeTarget_ = target;
-			const Vec3 direction = (target - eye).Normalized();
-			pitch_ = std::asin(std::clamp(direction.y, -1.0f, 1.0f));
-			yaw_ = std::atan2(direction.x, direction.z);
-			active_ = false;
-		}
-
-		void Begin() { active_ = true; }
-		void SetPosition(const Vec3& position)
-		{
-			position_ = position;
-			RebuildTarget();
-		}
-		void ResetView()
-		{
-			const bool wasActive = active_;
-			Initialize(homeEye_, homeTarget_);
-			active_ = wasActive;
-		}
-		void FocusAt(const Vec3& point, float distance = 350.0f)
-		{
-			const float cosPitch = std::cos(pitch_);
-			const Vec3 forward{ std::sin(yaw_) * cosPitch, std::sin(pitch_), std::cos(yaw_) * cosPitch };
-			target_ = point;
-			position_ = point - forward * distance;
-			RebuildTarget();
-		}
-		bool IsSceneViewActive() const { return active_; }
-		float GetMoveSpeed() const { return moveSpeed_; }
-		void SetMoveSpeed(float speed) { moveSpeed_ = speed; }
-		const Vec3& GetEye() const { return position_; }
-		const Vec3& GetTarget() const { return target_; }
-		const Vec3& GetUp() const { return up_; }
-
-		void Update(float deltaTime, const Vec3& focusPoint, const Vec3& viewEye, const Vec3& viewTarget)
-		{
-#ifndef NDEBUG
-			const bool keyboardCaptured = ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard;
-			const bool mouseCaptured = ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureMouse;
-			const bool toggleDown = DxLib::CheckHitKey(KEY_INPUT_LALT) != 0 &&
-				DxLib::CheckHitKey(KEY_INPUT_RETURN) != 0;
-			if (toggleDown && !wasToggleDown_)
-			{
-				if (active_)
-				{
-					active_ = false;
-					SetMouseDispFlag(TRUE);
-				}
-				else
-				{
-					SetMouseDispFlag(FALSE);
-					Initialize(viewEye, viewTarget);
-					Begin();
-					wasToggleDown_ = toggleDown;
-					return;
-				}
-			}
-			wasToggleDown_ = toggleDown;
-			if (!active_) return;
-
-			const bool resetDown = !keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_R) != 0;
-			if (resetDown && !wasResetDown_) ResetView();
-			wasResetDown_ = resetDown;
-			const bool focusDown = !keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_F) != 0;
-			if (focusDown && !wasFocusDown_) FocusAt(focusPoint);
-			wasFocusDown_ = focusDown;
-
-			const DxPlus::Vec2Int mouseDelta = mouseCaptured ? DxPlus::Vec2Int{} : DxPlus::Input::GetMouseDelta();
-			constexpr float rotationRate = DxPlus::PI * 2.0f / DxPlus::CLIENT_WIDTH;
-			yaw_ += mouseDelta.x * rotationRate;
-			pitch_ = std::clamp(pitch_ - mouseDelta.y * rotationRate,
-				-DxPlus::Deg2Rad * 89.0f, DxPlus::Deg2Rad * 89.0f);
-
-			const float cosPitch = std::cos(pitch_);
-			const Vec3 forward{ std::sin(yaw_) * cosPitch, std::sin(pitch_), std::cos(yaw_) * cosPitch };
-			const Vec3 right = Vec3::Cross(Vec3::Up(), forward).Normalized();
-			Vec3 movement{};
-			if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_W)) movement += forward;
-			if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_S)) movement -= forward;
-			if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_D)) movement += right;
-			if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_A)) movement -= right;
-			if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_E)) movement += Vec3::Up();
-			if (!keyboardCaptured && DxLib::CheckHitKey(KEY_INPUT_Q)) movement -= Vec3::Up();
-			if (movement.LengthSq() > 0.0f)
-			{
-				const float speed = moveSpeed_ *
-					(DxLib::CheckHitKey(KEY_INPUT_LSHIFT) ? 3.0f : 1.0f);
-				position_ += movement.Normalized() * (speed * deltaTime);
-			}
-			RebuildTarget();
-			SetMousePoint(DxPlus::CLIENT_WIDTH / 2, DxPlus::CLIENT_HEIGHT / 2);
-#else
-			(void)deltaTime;
-			(void)focusPoint;
-			(void)viewEye;
-			(void)viewTarget;
-#endif
-		}
-
-		void ApplyCamera() const override { ApplyView(target_); }
-
-	private:
-		void RebuildTarget()
-		{
-			const float cosPitch = std::cos(pitch_);
-			const Vec3 forward{ std::sin(yaw_) * cosPitch, std::sin(pitch_), std::cos(yaw_) * cosPitch };
-			target_ = position_ + forward;
-		}
-
-		bool active_{};
-		bool wasToggleDown_{};
-		bool wasResetDown_{};
-		bool wasFocusDown_{};
-		Vec3 target_{};
-		Vec3 homeEye_{};
-		Vec3 homeTarget_{};
-		Vec3 up_{ 0.0f, 1.0f, 0.0f };
-		float moveSpeed_{ 500.0f };
-	};
 }

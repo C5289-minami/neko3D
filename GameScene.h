@@ -7,6 +7,7 @@
 #include "ModelToonRenderer.h"
 #include "ShaderEffectController.h"
 #include "Camera.h"
+#include "TransformSettings.h"
 
 class GameScene final : public Scene
 {
@@ -18,6 +19,8 @@ public:
     void End() override;
 
 	void SetActiveCamera(Camera::Camera* camera) { activeCamera_ = camera; }
+    DebugSceneControls GetDebugControls();
+
 
 private:
 	Camera::Camera* activeCamera_{ nullptr };
@@ -33,4 +36,7 @@ private:
     ShaderEffectController shaderEffects_{};
     void DrawScene(bool toonEnabled) const;
     void RenderDepth() const;
+
+    std::string transformInitialStatus_;
+    bool debugActorsPaused_{};
 };
