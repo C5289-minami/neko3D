@@ -7,6 +7,8 @@
 
 #include "DebugUI.h"
 #include "UIManager.h"
+#include "ToonSettings.h"
+#include "OutlineSettings.h"
 
 void SceneManager::Init()
 {
@@ -38,6 +40,10 @@ void SceneManager::Init()
 	statusTestScene.SetGameContext(&gameContext);
 
     scene = &titleScene; // 最初のシーン
+
+	// 設定ファイルのロード
+    ToonSettingsManager::Load();
+    OutlineSettingsManager::Load();
 }
 
 void SceneManager::Shutdown()
