@@ -6,8 +6,8 @@
 #include "DrawableObject.h"
 #include "IAttackSkill.h"
 #include "Vector3.h"
+#include "ObjectTransform.h"
 #include "BossAnimType.h"
-#include "TransformSettings.h"
 
 class Boss
 {
@@ -58,7 +58,6 @@ private:
 	int currentAnimIndex_{ -1 };
 	bool currentAnimLoop_{ true };
 
-	// �X�e�[�^�X
 	float health_{ 100.0f };
 	float maxHealth_{ 100.0f };
 	float downGauge_{ 0.0f };

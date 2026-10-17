@@ -12,35 +12,11 @@
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
 
-DebugSceneControls GameTestScene::GetDebugControls()
-{
-	return {
-		"boss_test",
-		{
-			MakeDebugTransformTarget("boss_test/player", "Player", gameContext->GetPlayer()),
-			MakeDebugTransformTarget("boss_test/boss", "Boss", gameContext->GetBoss())
-		},
-        DebugCameraControls{
-            [] { return false; },
-            [this] { return playerCamera_.GetPosition(); },
-            [this](const Vec3& position) { playerCamera_.SetViewPosition(position); },
-            [this] { playerCamera_.Reset(); },
-            [this] { playerCamera_.FocusAt(gameContext->GetPlayer().GetPosition()); },
-            [this] { return playerCamera_.GetAngleOffsetDegrees(); },
-            [this](const Vec3& angles) { playerCamera_.SetAngleOffsetDegrees(angles); },
-            true
-        },
-		[this] { return debugActorsPaused_; },
-		[this](bool paused) { debugActorsPaused_ = paused; },
-		transformInitialStatus_
-	};
-}
 
-void GameTestScene::Init()
+void GameTest::Init()
 {
     //DxLib::SetBackgroundColor(32, 32, 32);
 
-	TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
 
 
     gameContext->Reset();
@@ -69,7 +45,7 @@ void GameTestScene::Init()
     StartFadeIn();
 }
 
-void GameTestScene::Update(float deltaTime)
+void GameTest::Update(float deltaTime)
 {
     DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
@@ -90,7 +66,7 @@ void GameTestScene::Update(float deltaTime)
 
 	if (DxLib::CheckHitKey(KEY_INPUT_R) != 0)
 	{
-		TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
+		freeCamera_.ResetView();
 	}
 	if( DxLib::CheckHitKey(KEY_INPUT_F) != 0)
 	{
@@ -119,10 +95,12 @@ void GameTestScene::Update(float deltaTime)
 		player.Update(deltaTime, stage, stageCenterPosition);
 		stage.UpdateAlphaModel(deltaTime, player);
 		boss.Update(deltaTime);
-		const bool touching = Collision::UpdateModelContact(player.GetModelObject(), boss.GetModelObject());
+      ModelObject playerModel = player.GetModelObject().WithParentTransform(
+		  player.GetPosition(), player.GetRotation());
+	  const bool touching = Collision::UpdateModelContact(playerModel, boss.GetModelObject());
+	  player.GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
       if (touching)
 		{
-			player.SetPosition(player.GetModelObject().position);
 			player.TakeDamage();
 		}
 
@@ -154,7 +132,7 @@ void GameTestScene::Update(float deltaTime)
     }
 }
 
-void GameTestScene::Render() const
+void GameTest::Render() const
 {
 
 	DxLib::ClearDrawScreen();
@@ -175,11 +153,11 @@ void GameTestScene::Render() const
 	}
 }
 
-void GameTestScene::End()
+void GameTest::End()
 {
 }
 
-void GameTestScene::RenderDepth() const
+void GameTest::RenderDepth() const
 {
 #ifndef NDEBUG
 	(activeCamera_ ? activeCamera_ : &playerCamera_)->ApplyCamera();
@@ -207,7 +185,7 @@ void GameTestScene::RenderDepth() const
 
 }
 
-void GameTestScene::DrawScene(bool toonEnabled) const
+void GameTest::DrawScene(bool toonEnabled) const
 {
 #ifndef NDEBUG
 	(activeCamera_ ? activeCamera_ : &playerCamera_)->ApplyCamera();
@@ -254,7 +232,9 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 				modelToonRenderer_.Draw(model, type);
 			}
 		};
-	drawActor(player.GetModelObject(), ModelToonType::Bone);
+   const ModelObject playerModel = player.GetModelObject().WithParentTransform(
+		player.GetPosition(), player.GetRotation());
+	drawActor(playerModel, ModelToonType::Bone);
 	drawActor(boss.GetModelObject(), ModelToonType::Model);
 	drawActor(stage.GetModelObject(), ModelToonType::Model);
 	drawActor(stage.GetAlphaModelObject(), ModelToonType::Model);

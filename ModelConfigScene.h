@@ -9,6 +9,8 @@
 
 #include <string>
 
+class ActorBase;
+
 class ModelConfigScene final : public Scene
 {
 public:
@@ -21,5 +23,6 @@ public:
 private:
 	Camera::FreeCamera camera_; // カメラ
 	ModelObject* selected_{};   // 選択中のオブジェクト
+    ActorBase* selectedActor_{};
 	std::string status_;        // ImGuiのステータス表示用
 };

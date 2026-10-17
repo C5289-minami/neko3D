@@ -1,4 +1,4 @@
-
+ï»¿
 #include "ModelConfigScene.h"
 
 #include "ModelObjectManager.h"
@@ -10,7 +10,7 @@
 
 namespace
 {
-	// ImGui‚ÅVec3‚ğ•ÒW‚·‚é‚½‚ß‚Ìƒwƒ‹ƒp[ŠÖ”
+	// ImGuiã§Vec3ã‚’ç·¨é›†ã™ã‚‹ãŸã‚ã®ãƒ˜ãƒ«ãƒ‘ãƒ¼é–¢æ•°
     bool EditVector3(const char* label, Vec3& value, float speed)
     {
         float components[] = { value.x, value.y, value.z };
@@ -22,15 +22,22 @@ namespace
 
 void ModelConfigScene::Init()
 {   
-    // ”wŒiF
+    // èƒŒæ™¯è‰²
     DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
-	//camera‚Ì‰Šú‰»
+	//cameraã®åˆæœŸåŒ–
     camera_.Initialize({ 0.0f, 150.0f, -1000.0f }, {});
     
-	// Å‰‚ÌƒIƒuƒWƒFƒNƒg‚ğ‘I‘ğ
+	// æœ€åˆã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’é¸æŠ
     const auto& objects = MObjs().GetObjects();
-    selected_ = objects.empty() ? nullptr : objects.front();
+    const auto& actors = MObjs().GetActors();
+    selectedActor_ = actors.empty() ? nullptr : actors.front().second;
+    selected_ = selectedActor_ || objects.empty() ? nullptr : objects.front();
+
+	for (const auto& [name, actor] : actors)
+		if (actor) actor->Init();
+    for (auto* object : objects)
+		if (object) object->Init();
     
     
     StartFadeIn();
@@ -39,9 +46,17 @@ void ModelConfigScene::Init()
 void ModelConfigScene::Update(float deltaTime)
 {
     Vec3 focus{};
-    if (selected_) focus = selected_->position;
+    if (selectedActor_)
+        focus = selectedActor_->GetPosition();
+    else if (selected_)
+    {
+        const auto* owner = MObjs().GetOwner(*selected_);
+        focus = owner
+            ? selected_->WithParentTransform(owner->GetPosition(), owner->GetRotation()).position
+            : selected_->position;
+    }
  
-    // --- ‰EƒNƒŠƒbƒN‚ğ‰Ÿ‚µ‚Ä‚¢‚éŠÔ‚Ì‚İƒJƒƒ‰‘€ì ---
+    // --- å³ã‚¯ãƒªãƒƒã‚¯ã‚’æŠ¼ã—ã¦ã„ã‚‹é–“ã®ã¿ã‚«ãƒ¡ãƒ©æ“ä½œ ---
     if (!camera_.IsSceneViewActive() && (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
     {
         SetMouseDispFlag(FALSE);
@@ -53,7 +68,16 @@ void ModelConfigScene::Update(float deltaTime)
 void ModelConfigScene::Render() const
 {
     camera_.ApplyCamera();
-    MObjs().Draw();
+    const auto& objects = MObjs().GetObjects();
+    for (const auto* object : objects)
+    {
+        if (!object) continue;
+        const auto* owner = MObjs().GetOwner(*object);
+        if (owner)
+            object->WithParentTransform(owner->GetPosition(), owner->GetRotation()).Draw();
+        else
+            object->Draw();
+    }
 }
 
 void ModelConfigScene::DrawImGui()
@@ -62,51 +86,115 @@ void ModelConfigScene::DrawImGui()
 
 
     const auto& objects = MObjs().GetObjects();
-    ImGui::Begin(u8"ModelObjectİ’è");
-    ImGui::TextWrapped(u8"ŠeƒV[ƒ“‚È‚Ç‚©‚çMObjs().Add(object)‚µ‚½ModelObject‚ğ•\¦E•ÒW‚·‚é");
-    ImGui::TextWrapped(u8"Free Camera: ‰EƒNƒŠ‚Å‰Ò“­ / WASDEQE‚ÅˆÚ“® / ƒ}ƒEƒX‚Å‹“_ / Shift‚Å‰Á‘¬ / F‚Å‘I‘ğ‘ÎÛ‚Ö / R‚Å‹“_ƒŠƒZƒbƒg");
-
-    // •ÒW—p‚ª‚È‚¢ê‡
-    if (objects.empty())
+    const auto& actors = MObjs().GetActors();
+    ImGui::Begin(u8"ModelObjectè¨­å®š");
+    ImGui::TextWrapped(u8"Model Configã®ä½¿ã„æ–¹ãƒ¡ãƒ¢");
+        ImGui::TextWrapped(u8"  1.	Debugãƒ“ãƒ«ãƒ‰ã§èµ·å‹•ã—ã€ã‚¿ã‚¤ãƒˆãƒ«ç”»é¢ã§F5ã‚’æŠ¼ã™ã€‚");
+        ImGui::TextWrapped(u8"  2.	å·¦ã®ãƒ„ãƒªãƒ¼ã§Playerã‚’é–‹ãã€‚");
+        ImGui::TextWrapped(u8"  3.	ç·¨é›†ã—ãŸã„å¯¾è±¡ã‚’é¸ã¶ã€‚");
+        ImGui::TextWrapped(u8"  4.	ä¿å­˜ã™ã‚‹ã€‚");
+        ImGui::TextWrapped(u8"  5.	å³ã‚¯ãƒªãƒƒã‚¯ä¸­ã«ã‚«ãƒ¡ãƒ©æ“ä½œã€‚WASDãƒ»QEã§ç§»å‹•ã€ãƒã‚¦ã‚¹ã§è¦–ç‚¹ã‚’æ“ä½œã™ã‚‹ã€‚");
+        ImGui::TextWrapped(u8"   è¨­å®šã¯Data / Config / model_objects.jsonã«ä¿å­˜ã•ã‚Œã‚‹ã€‚");
+    for (const auto& [name, actor] : actors)
     {
-        ImGui::TextWrapped(u8"“o˜^‚³‚ê‚½ModelObject‚ª‚ ‚è‚Ü‚¹‚ñBModelObject‚ğì¬‚µ‚½êŠ‚ÅMObjs().Add(object)‚ğŒÄ‚ñ‚Å‚­‚¾‚³‚¢B");
-        selected_ = nullptr;
+        if (!actor) continue;
+        ImGui::PushID(actor);
+        const ImGuiTreeNodeFlags actorFlags = ImGuiTreeNodeFlags_DefaultOpen |
+            (selectedActor_ == actor ? ImGuiTreeNodeFlags_Selected : 0);
+        const bool expanded = ImGui::TreeNodeEx(name.c_str(), actorFlags);
+        if (ImGui::IsItemClicked())
+        {
+            selectedActor_ = actor;
+            selected_ = nullptr;
+        }
+        if (expanded)
+        {
+            for (auto* object : objects)
+            {
+                if (!object || MObjs().GetOwner(*object) != actor) continue;
+
+                const std::string modelName(object->modelKey.begin(), object->modelKey.end());
+                const std::string label = modelName + " (Local)";
+                ImGui::PushID(object);
+                if (ImGui::Selectable(label.c_str(), selected_ == object))
+                {
+                    selected_ = object;
+                    selectedActor_ = nullptr;
+                }
+                ImGui::PopID();
+            }
+            ImGui::TreePop();
+        }
+        ImGui::PopID();
     }
-    else
+
+    if (actors.empty())
+        ImGui::TextDisabled(u8"ç™»éŒ²ã•ã‚ŒãŸActorã¯ã‚ã‚Šã¾ã›ã‚“ã€‚");
+
+    bool hasUnownedObjects = false;
+    for (auto* object : objects)
+        if (object && !MObjs().GetOwner(*object)) hasUnownedObjects = true;
+
+    if (hasUnownedObjects && ImGui::TreeNodeEx(u8"Other ModelObjects", ImGuiTreeNodeFlags_DefaultOpen))
     {
         for (auto* object : objects)
         {
-            if (!object) continue;
-			// modelKey‚ğUTF-8‚É•ÏŠ·‚µ‚Ä•\¦
-            const std::string label(object->modelKey.begin(), object->modelKey.end());
+            if (!object || MObjs().GetOwner(*object)) continue;
+			// modelKeyã‚’UTF-8ã«å¤‰æ›ã—ã¦è¡¨ç¤º
+            const std::string modelName(object->modelKey.begin(), object->modelKey.end());
             ImGui::PushID(object);
-			// ‘I‘ğ’†‚ÌƒIƒuƒWƒFƒNƒg‚ğƒnƒCƒ‰ƒCƒg
-            if (ImGui::Selectable(label.c_str(), selected_ == object)) selected_ = object;
+			// é¸æŠä¸­ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ãƒã‚¤ãƒ©ã‚¤ãƒˆ
+            if (ImGui::Selectable(modelName.c_str(), !selectedActor_ && selected_ == object))
+            {
+                selected_ = object;
+                selectedActor_ = nullptr;
+            }
             ImGui::PopID();
+        }
+        ImGui::TreePop();
+    }
+
+    if (selectedActor_)
+    {
+        ImGui::Separator();
+        ImGui::TextUnformatted(u8"Actor Transform (World)");
+        Vec3 position = selectedActor_->GetPosition();
+        if (EditVector3(u8"World Position", position, 1.0f)) selectedActor_->SetPosition(position);
+        float rotation[2]{ selectedActor_->GetPitch(), selectedActor_->GetYaw() };
+        if (ImGui::DragFloat2(u8"World Rotation (Pitch/Yaw rad)", rotation, 0.01f))
+        {
+            selectedActor_->SetPitch(rotation[0]);
+            selectedActor_->SetYaw(rotation[1]);
+        }
+        if (ImGui::Button(u8"Actorå¤‰æ›ã‚’JSONã«ä¿å­˜"))
+        {
+            status_ = MObjs().SaveActorTransform(*selectedActor_)
+                ? u8"Actorå¤‰æ›ã‚’model_objects.jsonã«ä¿å­˜ã—ã¾ã—ãŸã€‚"
+                : u8"Actorå¤‰æ›ã®ä¿å­˜ã«å¤±æ•—ã—ã¾ã—ãŸã€‚";
         }
     }
 
-	// ‘I‘ğ’†‚ÌƒIƒuƒWƒFƒNƒg‚ª—LŒø‚Èê‡‚Ì‚İ•ÒWUI‚ğ•\¦
-    if (selected_ && std::find(objects.begin(), objects.end(), selected_) != objects.end())
+	// é¸æŠä¸­ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒæœ‰åŠ¹ãªå ´åˆã®ã¿ç·¨é›†UIã‚’è¡¨ç¤º
+    if (!selectedActor_ && selected_ && std::find(objects.begin(), objects.end(), selected_) != objects.end())
     {
         ImGui::Separator();
-		// ‘I‘ğ’†‚ÌƒIƒuƒWƒFƒNƒg‚ÌƒvƒƒpƒeƒB‚ğ•ÒW
-        bool changed = EditVector3("Position", selected_->position, 1.0f);
+		// é¸æŠä¸­ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã‚’ç·¨é›†
+        const bool isLocalModel = MObjs().GetOwner(*selected_) != nullptr;
+        bool changed = EditVector3(isLocalModel ? u8"Local Position" : "Position", selected_->position, 1.0f);
         changed |= EditVector3("Rotation (rad)", selected_->rotation, 0.01f);
         changed |= EditVector3("Scale", selected_->scale, 0.1f);
-		// Scale‚ª0ˆÈ‰º‚É‚È‚Á‚½ê‡‚ÍŒx‚ğ•\¦
+		// ScaleãŒ0ä»¥ä¸‹ã«ãªã£ãŸå ´åˆã¯è­¦å‘Šã‚’è¡¨ç¤º
         if (changed && (selected_->scale.x <= 0.0f || selected_->scale.y <= 0.0f || selected_->scale.z <= 0.0f))
-            status_ = u8"Scale‚Í0‚æ‚è‘å‚«‚¢’l‚É‚µ‚Ä‚­‚¾‚³‚¢B";
-		// •Û‘¶ƒ{ƒ^ƒ“
-        if (ImGui::Button(u8"‘I‘ğ’†‚ğ•Û‘¶"))
-            status_ = selected_->Save() ? u8"•Û‘¶‚µ‚Ü‚µ‚½B" : u8"•Û‘¶‚É¸”s‚µ‚Ü‚µ‚½B";
-        ImGui::SameLine();
-		// ‚·‚×‚Ä•Û‘¶ƒ{ƒ^ƒ“
-        if (ImGui::Button(u8"‚·‚×‚Ä•Û‘¶"))
-            status_ = MObjs().SaveAll() ? u8"•Û‘¶‚µ‚Ü‚µ‚½B" : u8"•Û‘¶‚É¸”s‚µ‚Ü‚µ‚½B";
+            status_ = u8"Scaleã¯0ã‚ˆã‚Šå¤§ãã„å€¤ã«ã—ã¦ãã ã•ã„ã€‚";
+		// ä¿å­˜ãƒœã‚¿ãƒ³
+        if (ImGui::Button(u8"é¸æŠä¸­ã‚’ä¿å­˜"))
+            status_ = selected_->Save() ? u8"ä¿å­˜ã—ã¾ã—ãŸã€‚" : u8"ä¿å­˜ã«å¤±æ•—ã—ã¾ã—ãŸã€‚";
     }
 
-	// ƒXƒe[ƒ^ƒX•\¦
+    if (ImGui::Button(u8"ã™ã¹ã¦ä¿å­˜"))
+        status_ = MObjs().SaveAll() ? u8"ä¿å­˜ã—ã¾ã—ãŸã€‚" : u8"ä¿å­˜ã«å¤±æ•—ã—ã¾ã—ãŸã€‚";
+
+	// ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹è¡¨ç¤º
     if (!status_.empty()) ImGui::TextUnformatted(status_.c_str());
     ImGui::End();
 #endif // !NDEBUG

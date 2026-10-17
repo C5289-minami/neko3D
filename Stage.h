@@ -5,22 +5,24 @@
 #include <array>
 #include <cstddef>
 #include "Vector3.h"
-#include "ModelAlpha.h"
+#include "ActorBase.h"
 #include "DrawableObject.h"
 #include "ResourceManager.h"
 #include <vector>
+#include "Player.h"
 
-class Stage
+class Stage : public ActorBase
 {
 public:
 	Stage() = default;
+	~Stage() = default;
 
 	// accessor
 	int GetModelHandle() const { return RM().GetModel(stageModel_.modelKey); }
 	ModelObject GetModelObject() const { return stageModel_; }
 	std::vector<ModelObject> GetPillarModelObjects() const { return { stagePillars_.begin(), stagePillars_.end() }; }
 	std::vector<ModelObject> GetStageModelObjects() const { return { stageModels_.begin(), stageModels_.end() }; }
-	ModelObject GetAlphaModelObject() const { return alphaModel_.model; }
+	ModelObject GetAlphaModelObject() const { return alphaModel_; }
 
     void GetCollisionModelHandles(std::vector<int>& handles) const;//model‚Ì”»’è‚ð‚Ü‚Æ‚ß‚Ä‚â‚é
 
@@ -28,15 +30,15 @@ public:
     bool IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float radius) const;
 
     void DrawDebugUI();
-    bool SaveModelSettings();
-    bool LoadModelSettings();
 
 	// lifecycle
-	void Init();
-	void Reset();
+	void Init() override;
+	void Reset()override;
+	void Update(float deltaTime) override;
+	void Draw() const override;
+
 	void ResetAlphaModel(const Vec3& playerPosition);
 	void UpdateAlphaModel(float deltaTime, const Player& player);
-	void Draw() const;
 	void DrawAlphaModel() const;
 	float GetAlphaModelOpacity() const { return alphaModel_.GetAlpha(); }
 
@@ -55,7 +57,7 @@ private:
     int groundCollisionHandle_{ -1 };
     std::string modelSettingsStatus_;
 
-	ModelAlpha alphaModel_;
-	ModelObject stageModel_; // ‰¼‚ÅƒfƒtƒH
+	ModelObject alphaModel_;
+	ModelObject stageModel_;
 	bool alphaModelReady_{};
 };

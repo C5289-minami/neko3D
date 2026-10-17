@@ -37,7 +37,7 @@ void SceneManager::Init()
 #ifndef NDEBUG
 	shaderTestScene.SetGameContext(&gameContext);
 	ssFlipTestScene.SetGameContext(&gameContext);
-	nekoMotionTestScene.SetGameContext(&gameContext);
+	roomTestScene.SetGameContext(&gameContext);
 	statusTestScene.SetGameContext(&gameContext);
 	modelConfigScene.SetGameContext(&gameContext);
 	gameTestScene.SetGameContext(&gameContext);
@@ -78,12 +78,12 @@ Scene* SceneManager::GetScene(SceneID id)
 	case SceneID::Game:     return &gameScene;
 	case SceneID::Result:   return &resultScene;
 #ifndef NDEBUG
-	case SceneID::ShaderTestScene: return &shaderTestScene;
+	case SceneID::ShaderTest: return &shaderTestScene;
 	case SceneID::SsFlipTest: return &ssFlipTestScene;
-	case SceneID::NekoMotionTest: return &nekoMotionTestScene;
-	case SceneID::StatusTestScene: return &statusTestScene;
+	case SceneID::NekoMotionTest: return &roomTestScene;
+	case SceneID::StatusTest: return &statusTestScene;
 	case SceneID::ModelConfig: return &modelConfigScene;
-	case SceneID::GameTestScene: return &gameTestScene;
+	case SceneID::GameTest: return &gameTestScene;
 #endif // !NDEBUG
 	}
 	return &titleScene;
@@ -140,7 +140,7 @@ void SceneManager::Run()
 			if (runConfig.enableDebugUI && runConfig.windowed)
 			{
 				debugUI.BeginFrame();
-				debugUI.Draw(gameContext, scene->GetDebugControls());
+				debugUI.Draw(gameContext);
 				scene->DrawImGui();
 				debugUI.EndFrame();
 			}

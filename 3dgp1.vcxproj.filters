@@ -46,9 +46,6 @@
     <Filter Include="40_Gameplay\Physics">
       <UniqueIdentifier>{8e7c07b8-112f-4b8f-8ffb-88fbeb47800e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="40_Gameplay\StageObjects">
-      <UniqueIdentifier>{7f946674-b388-4159-81f6-18346883422d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="imgui">
       <UniqueIdentifier>{7a11fac8-2ba5-4e20-931f-69e3d3d48502}</UniqueIdentifier>
     </Filter>
@@ -214,6 +211,24 @@
     <Filter Include="30_Scenes\Main">
       <UniqueIdentifier>{9963b091-0616-41e6-9536-99fa38220427}</UniqueIdentifier>
     </Filter>
+    <Filter Include="30_Scenes\Test\SpriteStudio">
+      <UniqueIdentifier>{f218faf2-e5ef-451b-9076-46536c997159}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes\Test\GameTest">
+      <UniqueIdentifier>{74896546-4c47-411d-bf00-8e343d111012}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes\Test\ModelConfig">
+      <UniqueIdentifier>{177c446d-0316-480f-90c6-d53b36d2d19b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes\Test\Shader">
+      <UniqueIdentifier>{bafd8505-dbce-4c9d-8cc2-d757206a95b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes\Test\RoomTest">
+      <UniqueIdentifier>{fb459d8f-29c5-40f4-9d93-8fe1f6403681}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes\Test\Status">
+      <UniqueIdentifier>{c0fbb9b4-adcd-48a7-ba83-374c381ce04a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -308,12 +323,6 @@
     </ClInclude>
     <ClInclude Include="imgui\backends\imgui_impl_win32.h">
       <Filter>imgui\backends</Filter>
-    </ClInclude>
-    <ClInclude Include="TransformDefaults.h">
-      <Filter>AboutDebug</Filter>
-    </ClInclude>
-    <ClInclude Include="TransformSettings.h">
-      <Filter>AboutDebug</Filter>
     </ClInclude>
     <ClInclude Include="DebugUI.h">
       <Filter>AboutDebug</Filter>
@@ -465,17 +474,11 @@
     <ClInclude Include="SpriteStudioUI.h">
       <Filter>10_Core\UI</Filter>
     </ClInclude>
-    <ClInclude Include="DrawableObject.h">
-      <Filter>20_Resources</Filter>
-    </ClInclude>
     <ClInclude Include="Boss.h">
       <Filter>40_Gameplay\Actors\Boss</Filter>
     </ClInclude>
     <ClInclude Include="Motion.h">
       <Filter>10_Core\Motion</Filter>
-    </ClInclude>
-    <ClInclude Include="DebugScene.h">
-      <Filter>30_Scenes\Test</Filter>
     </ClInclude>
     <ClInclude Include="BossIdleState.h">
       <Filter>40_Gameplay\Actors\Boss\State\Idle</Filter>
@@ -546,9 +549,6 @@
     <ClInclude Include="SSAnimation.h">
       <Filter>10_Core\Animation</Filter>
     </ClInclude>
-    <ClInclude Include="ModelAlpha.h">
-      <Filter>40_Gameplay\StageObjects</Filter>
-    </ClInclude>
     <ClInclude Include="PlayerAnimType.h">
       <Filter>40_Gameplay\Actors\Player</Filter>
     </ClInclude>
@@ -579,28 +579,39 @@
     <ClInclude Include="EffectManager.h">
       <Filter>40_Gameplay\Effects</Filter>
     </ClInclude>
-    <ClInclude Include="ShaderTestScene.h">
-      <Filter>30_Scenes\Test</Filter>
-    </ClInclude>
-    <ClInclude Include="NekoMotionTestScene.h">
-      <Filter>30_Scenes\Test</Filter>
-    </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>10_Core\Camera</Filter>
     </ClInclude>
     <ClInclude Include="CharSettings.h">
       <Filter>40_Gameplay\Actors\Player\Character</Filter>
     </ClInclude>
-    <ClInclude Include="StatusTestScene.h">
-      <Filter>30_Scenes\Test</Filter>
-    </ClInclude>
     <ClInclude Include="ModelObjectManager.h">
       <Filter>40_Gameplay\Debug</Filter>
     </ClInclude>
-    <ClInclude Include="ModelConfigScene.h">
-      <Filter>30_Scenes\Test</Filter>
+    <ClInclude Include="DebugScene.h">
+      <Filter>30_Scenes\Test\SpriteStudio</Filter>
     </ClInclude>
-    <ClInclude Include="GameTestScene.h" />
+    <ClInclude Include="GameTestScene.h">
+      <Filter>30_Scenes\Test\GameTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelConfigScene.h">
+      <Filter>30_Scenes\Test\ModelConfig</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderTestScene.h">
+      <Filter>30_Scenes\Test\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="RoomTestScene.h">
+      <Filter>30_Scenes\Test\RoomTest</Filter>
+    </ClInclude>
+    <ClInclude Include="StatusTestScene.h">
+      <Filter>30_Scenes\Test\Status</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectTransform.h">
+      <Filter>40_Gameplay\Actors\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawableObject.h">
+      <Filter>40_Gameplay\Actors\Base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -680,9 +691,6 @@
     </ClCompile>
     <ClCompile Include="imgui\backends\imgui_impl_win32.cpp">
       <Filter>imgui\backends</Filter>
-    </ClCompile>
-    <ClCompile Include="TransformSettings.cpp">
-      <Filter>AboutDebug</Filter>
     </ClCompile>
     <ClCompile Include="DebugUI.cpp">
       <Filter>AboutDebug</Filter>
@@ -771,20 +779,11 @@
     <ClCompile Include="SpriteStudioUI.cpp">
       <Filter>10_Core\UI</Filter>
     </ClCompile>
-    <ClCompile Include="DrawableObject.cpp">
-      <Filter>20_Resources</Filter>
-    </ClCompile>
     <ClCompile Include="Boss.cpp">
       <Filter>40_Gameplay\Actors\Boss</Filter>
     </ClCompile>
-    <ClCompile Include="ShaderTestScene.cpp">
-      <Filter>30_Scenes\Test</Filter>
-    </ClCompile>
     <ClCompile Include="Motion.cpp">
       <Filter>10_Core\Motion</Filter>
-    </ClCompile>
-    <ClCompile Include="DebugScene.cpp">
-      <Filter>30_Scenes\Test</Filter>
     </ClCompile>
     <ClCompile Include="BossIdleState.cpp">
       <Filter>40_Gameplay\Actors\Boss\State\Idle</Filter>
@@ -810,9 +809,6 @@
     <ClCompile Include="AttackBaseState.cpp">
       <Filter>40_Gameplay\Actors\Base\Attack</Filter>
     </ClCompile>
-    <ClCompile Include="ModelAlpha.cpp">
-      <Filter>40_Gameplay\StageObjects</Filter>
-    </ClCompile>
     <ClCompile Include="Sound3D.cpp">
       <Filter>10_Core\Sound</Filter>
     </ClCompile>
@@ -834,22 +830,33 @@
     <ClCompile Include="EffectManager.cpp">
       <Filter>40_Gameplay\Effects</Filter>
     </ClCompile>
-    <ClCompile Include="NekoMotionTestScene.cpp">
-      <Filter>30_Scenes\Test</Filter>
-    </ClCompile>
     <ClCompile Include="CharSettings.cpp">
       <Filter>40_Gameplay\Actors\Player\Character</Filter>
-    </ClCompile>
-    <ClCompile Include="StatusTestScene.cpp">
-      <Filter>30_Scenes\Test</Filter>
     </ClCompile>
     <ClCompile Include="ModelObjectManager.cpp">
       <Filter>40_Gameplay\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="ModelConfigScene.cpp">
-      <Filter>30_Scenes\Test</Filter>
+    <ClCompile Include="DebugScene.cpp">
+      <Filter>30_Scenes\Test\SpriteStudio</Filter>
     </ClCompile>
-    <ClCompile Include="GameTestScene.cpp" />
+    <ClCompile Include="GameTestScene.cpp">
+      <Filter>30_Scenes\Test\GameTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelConfigScene.cpp">
+      <Filter>30_Scenes\Test\ModelConfig</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderTestScene.cpp">
+      <Filter>30_Scenes\Test\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="RoomTestScene.cpp">
+      <Filter>30_Scenes\Test\RoomTest</Filter>
+    </ClCompile>
+    <ClCompile Include="StatusTestScene.cpp">
+      <Filter>30_Scenes\Test\Status</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawableObject.cpp">
+      <Filter>40_Gameplay\Actors\Base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Config\toon.json">
