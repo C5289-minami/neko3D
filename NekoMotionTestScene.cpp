@@ -32,7 +32,7 @@ void NekoMotionTestScene::Update(float deltaTime)
 	if ((DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
 	{
 		SetMouseDispFlag(FALSE);
-		camera_.InputUpdate(deltaTime);
+		camera_.Update(deltaTime);
 	}
 	else SetMouseDispFlag(TRUE);
 
