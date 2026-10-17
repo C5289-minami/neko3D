@@ -10,6 +10,7 @@
 #include "Player.h"
 #include "Boss.h" 
 #include "EffectManager.h"
+#include "Room.h"
 
 class GameContext
 {
@@ -45,6 +46,7 @@ public:
 	Player& GetPlayer() { return player; }
 	Stage& GetStage() { return stage; }
 	EffectManager& GetEffectManager() { return effectManager; }
+	Room& GetRoom() { return room_; }
 
     // ---- lifecycle ----
     void Init();
@@ -65,11 +67,12 @@ private:
 	// Effect Manager
 	EffectManager effectManager;
 
-    // Stage
+	// Actors
     Stage stage;
-	// Player
+    Room room_;
 	Player player;
     Boss boss;
+
     bool debugActorsPaused_{};
     std::string transformInitialStatus_;
 };

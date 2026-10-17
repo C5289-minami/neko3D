@@ -468,9 +468,6 @@
     <ClInclude Include="ActorBase.h">
       <Filter>40_Gameplay\Actors\Base</Filter>
     </ClInclude>
-    <ClInclude Include="EntityBase.h">
-      <Filter>40_Gameplay\Actors\Base</Filter>
-    </ClInclude>
     <ClInclude Include="SpriteStudioUI.h">
       <Filter>10_Core\UI</Filter>
     </ClInclude>

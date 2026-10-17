@@ -5,17 +5,15 @@
 
 void RoomTestScene::SetModelEditTargets()
 {
-	MObjs().AddActor("Room", room_);
-	MObjs().Add(room_.GetModelObject(), room_);
+	auto& room = gameContext->GetRoom();
+	MObjs().AddActor("Room", room);
+	MObjs().Add(room.GetModelObject(), room);
 }
 #endif
 
 void RoomTestScene::Init()
 {
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
-	gameContext->GetPlayer().Init();
-	room_.Init();
-	gameContext->GetStage().Init();
 	camera_.Initialize({ 0.0f, 400.0f, -400.0f }, { 0.0f, 100.0f, 0.0f });
 
 
@@ -35,9 +33,14 @@ void RoomTestScene::Init()
 void RoomTestScene::Update(float deltaTime)
 {
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
-	gameContext->GetPlayer().Update(0);
-	room_.Update(deltaTime);
-	gameContext->GetStage().UpdateAlphaModel(deltaTime, gameContext->GetPlayer());
+
+	auto& room = gameContext->GetRoom();
+	auto& player = gameContext->GetPlayer();
+	auto& stage = gameContext->GetStage();
+
+	player.Update(0);
+	room.Update(deltaTime);
+	stage.UpdateAlphaModel(deltaTime, gameContext->GetPlayer());
 
 	// --- 右クリックを押している間のみカメラ操作 ---
 	if ((DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
@@ -86,12 +89,15 @@ void RoomTestScene::Render() const
 
 void RoomTestScene::RenderDepth() const
 {
+	auto& room = gameContext->GetRoom();
+	auto& player = gameContext->GetPlayer();
+	auto& stage = gameContext->GetStage();
+
 	// シーンのカメラを設定する
 	camera_.ApplyCamera();
 	// Boneなしシェーダー
 	modelToonRenderer_.SetVertexShader(ModelType::Model);
-
-	room_.Draw();
+	room.Draw();
 	gameContext->GetStage().Draw();
 
 	// Bone対応の頂点シェーダー
@@ -103,6 +109,7 @@ void RoomTestScene::RenderDepth() const
 
 void RoomTestScene::DrawScene(bool toonEnabled) const
 {
+	auto& room = gameContext->GetRoom();
 	// カメラを設定する
 	camera_.ApplyCamera();
 	// トゥーンシェーダーを使わない場合
@@ -112,7 +119,7 @@ void RoomTestScene::DrawScene(bool toonEnabled) const
 		SetUseVertexShader(-1);
 
 		gameContext->GetPlayer().Draw();
-		room_.Draw();
+		room.Draw();
 
 		return;
 	}
@@ -139,7 +146,7 @@ void RoomTestScene::DrawScene(bool toonEnabled) const
 	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
 		player.GetPosition(), player.GetRotation());
 	drawActor(playerModel, ModelType::Bone);
-	drawActor(room_.GetModelObject(), ModelType::Model);
+	drawActor(room.GetModelObject(), ModelType::Model);
 	drawActor(gameContext->GetStage().GetModelObject(), ModelType::Model);
 	for (const auto& pillar : gameContext->GetStage().GetPillarModelObjects())
 	{

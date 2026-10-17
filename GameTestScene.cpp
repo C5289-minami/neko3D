@@ -18,6 +18,7 @@ void GameScene::SetModelEditTargets()
 {
 	auto& player = gameContext->GetPlayer();
 	auto& stage = gameContext->GetStage();
+	auto& boss = gameContext->GetBoss();
 
 	MObjs().AddActor("Player", player);
 	MObjs().Add(player.GetModelObject(), player);
@@ -27,6 +28,9 @@ void GameScene::SetModelEditTargets()
 	for (auto& model : stage.GetStageModelObjects())
 		MObjs().Add(model, stage);
 	MObjs().Add(stage.GetModelObject(), stage);
+
+	MObjs().AddActor("Boss", boss);
+	MObjs().Add(boss.GetModelObject(), boss);
 }
 #endif
 
@@ -34,8 +38,6 @@ void GameScene::SetModelEditTargets()
 
 void GameTest::Init()
 {
-    //DxLib::SetBackgroundColor(32, 32, 32);
-
 
 
     gameContext->Reset();
@@ -196,6 +198,7 @@ void GameTest::RenderDepth() const
 	boss.Draw();
 	stage.Draw();
 	stage.DrawAlphaModel();
+	gameContext->GetRoom().Draw();
 
 	// Bone対応の頂点シェーダー
 	modelToonRenderer_.SetVertexShader(ModelType::Bone);
@@ -218,7 +221,7 @@ void GameTest::DrawScene(bool toonEnabled) const
 	const auto& stage = gameContext->GetStage();
 	const auto& effectManager = gameContext->GetEffectManager();
 	const auto& grid = gameContext->GetGrid();
-
+	const auto& room = gameContext->GetRoom();
 
 	// トゥーンシェーダーを使わない場合
 	if (!toonEnabled)
@@ -231,6 +234,7 @@ void GameTest::DrawScene(bool toonEnabled) const
 		stage.DrawAlphaModel();
 		effectManager.Draw();
 		grid.Draw();
+		room.Draw();
 		return;
 	}
 
@@ -255,7 +259,9 @@ void GameTest::DrawScene(bool toonEnabled) const
    const ModelObject playerModel = player.GetModelObject().WithParentTransform(
 		player.GetPosition(), player.GetRotation());
 	drawActor(playerModel, ModelType::Bone);
-	drawActor(boss.GetModelObject(), ModelType::Model);
+	// bossのモデルにboss自体の位置と回転を適用して描画する
+	drawActor(boss.GetModelObject().WithParentTransform(
+		boss.GetPosition(), boss.GetRotation()), ModelType::Model);
     drawActor(stage.GetModelObject().WithParentTransform(
 		stage.GetPosition(), stage.GetRotation()), ModelType::Model);
 	drawActor(stage.GetAlphaModelObject(), ModelType::Model);
@@ -269,6 +275,8 @@ void GameTest::DrawScene(bool toonEnabled) const
 	}
 	effectManager.Draw();
 	grid.Draw();
+
+	drawActor(room.GetModelObject(), ModelType::Model);
 	modelToonRenderer_.EndPass();
 }
 

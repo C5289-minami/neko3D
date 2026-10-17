@@ -35,15 +35,14 @@ void Player::Init()
 
 void Player::Reset()
 {
+
 	health_ = MaxHealth;
 	wasTouchingPillar_ = false;
 	model_.collisionHighlighted = false;
 	ultimateGauge_ = 0.0f;
-	SetPosition({ 0.0f, 26.0f, -1066.0f });
-	SetPitch(0.0f);
-	SetYaw(0.0f);
+	// 初期位置・回転・拡大率は既定値を設定した後にJSONから読み込む
 	MObjs().LoadActorTransform(*this);
-	model_.scale = { 100.0f, 100.0f, 100.0f };
+	model_.Load();
 
 
 	moveInput_ = {};
@@ -58,8 +57,6 @@ void Player::Reset()
 	// 更新を止めても描画できるように初期ポーズを用意する
 	animation_.Play3D(RM().GetModel(model_.modelKey), currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
 	animation_.Update(0.0f);
-
-	model_.Load(); // 無理やり上書きしてます
 }
 
 

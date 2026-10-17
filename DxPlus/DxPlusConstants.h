@@ -9,8 +9,8 @@
 namespace DxPlus
 {
     // ゲームウィンドウの設定
-    constexpr int CLIENT_WIDTH = 1280;
-    constexpr int CLIENT_HEIGHT = 720;
+    constexpr int CLIENT_WIDTH = 1920;
+    constexpr int CLIENT_HEIGHT = 1080;
 
     // 数学的な定数
     constexpr float PI = 3.14159265358979323846f;
