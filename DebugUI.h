@@ -16,6 +16,9 @@ public:
     void EndFrame();
 
 private:
+    void DrawScreenSizeControls();
+    int screenSize_[2]{};
+    std::string screenSizeStatus_;
     void DrawTransformEditor(const DebugSceneControls& controls);
     std::string transformStatus_;
     std::string transformScope_;

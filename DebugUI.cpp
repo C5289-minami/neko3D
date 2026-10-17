@@ -193,6 +193,54 @@ void DebugUI::DrawTransformEditor(const DebugSceneControls& controls)
     ImGui::End();
 }
 
+void DebugUI::DrawScreenSizeControls()
+{
+    int width = 0, height = 0;
+    if (DxLib::GetWindowSize(&width, &height) < 0) return;
+    if (screenSize_[0] == 0 || screenSize_[1] == 0)
+    {
+        screenSize_[0] = width;
+        screenSize_[1] = height;
+    }
+
+    ImGui::Separator();
+    ImGui::Text(u8"画面サイズ（現在: %d x %d）", width, height);
+    const int presets[][2] = { { 960, 540 }, { 1280, 720 }, { 1600, 900 }, { 1920, 1080 } };
+    const char* labels[] = { "960 x 540", "1280 x 720", "1600 x 900", "1920 x 1080" };
+    if (ImGui::BeginCombo(u8"プリセット", u8"サイズを選択"))
+    {
+        for (int i = 0; i < 4; ++i)
+        {
+            if (ImGui::Selectable(labels[i], screenSize_[0] == presets[i][0] && screenSize_[1] == presets[i][1]))
+            {
+                screenSize_[0] = presets[i][0];
+                screenSize_[1] = presets[i][1];
+            }
+        }
+        ImGui::EndCombo();
+    }
+    ImGui::InputInt2(u8"幅 / 高さ (px)", screenSize_);
+    const bool valid = screenSize_[0] >= 320 && screenSize_[0] <= 7680 &&
+        screenSize_[1] >= 180 && screenSize_[1] <= 4320;
+    ImGui::BeginDisabled(!valid);
+    if (ImGui::Button(u8"画面サイズを適用"))
+    {
+        screenSizeStatus_ = DxLib::SetWindowSize(screenSize_[0], screenSize_[1]) < 0
+            ? u8"画面サイズを変更できませんでした。" : u8"画面サイズを変更しました。";
+    }
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+    if (ImGui::Button(u8"現在のサイズを取得"))
+    {
+        screenSize_[0] = width;
+        screenSize_[1] = height;
+        screenSizeStatus_.clear();
+    }
+    if (!valid) ImGui::TextWrapped(u8"幅は320〜7680、高さは180〜4320で指定してください。");
+    ImGui::TextWrapped(u8"ウィンドウの表示サイズを変更します。設定は実行中のみ有効です。");
+    if (!screenSizeStatus_.empty()) ImGui::TextWrapped("%s", screenSizeStatus_.c_str());
+}
+
 void DebugUI::Draw(GameContext& ctx, const DebugSceneControls& controls)
 {
     DrawTransformEditor(controls);
@@ -200,6 +248,7 @@ void DebugUI::Draw(GameContext& ctx, const DebugSceneControls& controls)
     // オプション設定
     {
         ImGui::Begin("Option");     // "Option"ウィンドウを開始
+        DrawScreenSizeControls();
 
         // ゲームシーンの重力を切り替える
         if (controls.scope == "game")
