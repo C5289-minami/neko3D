@@ -1,8 +1,5 @@
 #pragma once
 #include "Scene.h"
-#include "Player.h"
-#include "Room.h"
-#include "Stage.h"
 #include "Camera.h"
 #include "Grid.h"
 #include "ModelToonRenderer.h"
@@ -19,7 +16,6 @@ public:
 	void SetModelEditTargets() override;
 #endif
 private:
-	Room room_;
 	Camera::FreeCamera camera_;
 
 

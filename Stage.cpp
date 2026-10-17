@@ -12,6 +12,8 @@
 #include <filesystem>
 #include <stdexcept>
 
+#include "ModelObjectManager.h"
+
 namespace
 {
     // 透過表示するステージモデルの大きさと、プレイヤー頭上の余白。
@@ -33,17 +35,6 @@ void Stage::Init()
 
     // 地面の当たり判定に使うモデル
     stageModel_.modelKey = ResourceKeys::Model_StageFbx;
-
-    // 編集対象に設定
-    for (auto& model : stagePillars_)
-    {
-		model.Load();
-    }
-    for (auto& model : stageModels_)
-    {
-        model.Load(); 
-    }
-    stageModel_.Load(); 
 
     SetupCollisionInfo();
     Reset();
@@ -149,10 +140,24 @@ bool Stage::IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float 
 
 void Stage::Reset()
 {
+    // 初期位置・回転・拡大率はJSONファイルから読み込む
+    MObjs().LoadActorTransform(*this);
+    // モデルのロード
+    for (auto& model : stagePillars_)
+    {
+        model.Load();
+    }
+    for (auto& model : stageModels_)
+    {
+        model.Load();
+    }
+    stageModel_.Load();
+
+
+
     RefreshCollisionInfo();
     // 透過モデルの配置情報は毎回リセット
     alphaModelReady_ = false;
-
     // リセット直後は透過効果が残らないように不透明度を初期値へ
     alphaModel_.SetAlpha(1.0f);
 }

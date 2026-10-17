@@ -14,6 +14,7 @@ void GameContext::Init()
     stage.Init();
     player.Init();
     boss.Init();
+	room_.Init();
 }
 
 void GameContext::Reset()
@@ -28,6 +29,9 @@ void GameContext::Reset()
     stage.Reset();
     player.Reset();
     boss.Reset();
+	room_.Reset();
+
+
     debugActorsPaused_ = false;
     //TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
     stage.ResetAlphaModel(player.GetPosition());
