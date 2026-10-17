@@ -1,3 +1,4 @@
+
 name: Windows-x64
 
 on:
@@ -9,8 +10,7 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    
-    # マトリックスの設定
+
     strategy:
       matrix:
         configuration: [Debug, Release]
@@ -20,7 +20,10 @@ jobs:
 
       - uses: microsoft/setup-msbuild@v2
 
-      # ${{ matrix.configuration }} の部分に Debug と Release がそれぞれ入ります
-      # 片方エラーが出ているならPRできないようにセット
+      # NuGetパッケージを復元
+      - name: Restore NuGet Packages
+        run: msbuild 3dgp1.sln /t:Restore /p:Platform=x64
+
+      # Debug / Release のビルド
       - name: Build
         run: msbuild 3dgp1.sln /p:Configuration=${{ matrix.configuration }} /p:Platform=x64
