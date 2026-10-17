@@ -180,6 +180,13 @@ void DebugUI::DrawTransformEditor(const DebugSceneControls& controls)
             changed |= EditVector3("Rotation (rad)", transform.rotation, 0.01f);
             changed |= EditVector3("Scale", transform.scale, 0.1f, 0.001f, 100000.0f,
                 ImGuiSliderFlags_AlwaysClamp);
+            float uniformScale = transform.scale.x;
+            if (ImGui::DragFloat("Uniform scale", &uniformScale, 0.01f, 0.001f, 100000.0f,
+                "%.3f", ImGuiSliderFlags_AlwaysClamp))
+            {
+                transform.scale = transform.scale * (uniformScale / transform.scale.x);
+                changed = true;
+            }
             if (changed)
             {
                 if (TransformSettings::IsValid(transform)) selected->set(transform);
@@ -204,7 +211,7 @@ void DebugUI::DrawTransformEditor(const DebugSceneControls& controls)
 void DebugUI::Draw(GameContext& ctx, const DebugSceneControls& controls)
 {
     DrawTransformEditor(controls);
-    if (controls.scope == "game") ctx.DrawStageDebugUI();
+    if (controls.drawAdditional) controls.drawAdditional();
     // オプション設定
     {
         ImGui::Begin("Option");     // "Option"ウィンドウを開始

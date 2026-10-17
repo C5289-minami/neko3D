@@ -50,6 +50,7 @@ struct DebugSceneControls
     std::function<bool()> isPaused;
     std::function<void(bool)> setPaused;
     std::string initialStatus;
+    std::function<void()> drawAdditional;
 };
 
 class TransformSettings

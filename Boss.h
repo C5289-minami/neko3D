@@ -58,7 +58,7 @@ private:
 	int currentAnimIndex_{ -1 };
 	bool currentAnimLoop_{ true };
 
-	// �X�e�[�^�X
+	// ステータス
 	float health_{ 100.0f };
 	float maxHealth_{ 100.0f };
 	float downGauge_{ 0.0f };

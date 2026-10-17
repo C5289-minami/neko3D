@@ -14,7 +14,9 @@ public:
 	void Init() override;
 	void Update(float deltaTime) override;
 	void Render() const override;
+    DebugSceneControls GetDebugControls() override;
 private:
+    std::string transformInitialStatus_;
 	Player player_;
 	Room room_;
 	Camera::FreeCamera camera_;

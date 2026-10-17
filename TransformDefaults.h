@@ -36,6 +36,22 @@ namespace TransformDefaults
     };
     // END_TRANSFORM(boss_test/boss)
 
+    // BEGIN_TRANSFORM(motion_test/player)
+    inline constexpr ObjectTransform MotionTestPlayer{
+        { 100.0f, 100.0f, 100.0f },
+        { 0.0f, 36.0f, -521.0f },
+        { 0.0f, 0.0f, 0.0f }
+    };
+    // END_TRANSFORM(motion_test/player)
+
+    // BEGIN_TRANSFORM(motion_test/room)
+    inline constexpr ObjectTransform MotionTestRoom{
+        { 1.0f, 1.0f, 1.0f },
+        { 0.0f, 0.0f, 0.0f },
+        { 0.0f, 0.0f, 0.0f }
+    };
+    // END_TRANSFORM(motion_test/room)
+
     struct Entry
     {
         const char* id;
@@ -47,6 +63,8 @@ namespace TransformDefaults
         { "game/player", "GamePlayer", &GamePlayer },
         { "game/boss", "GameBoss", &GameBoss },
         { "boss_test/player", "BossTestPlayer", &BossTestPlayer },
-        { "boss_test/boss", "BossTestBoss", &BossTestBoss }
+        { "boss_test/boss", "BossTestBoss", &BossTestBoss },
+        { "motion_test/player", "MotionTestPlayer", &MotionTestPlayer },
+        { "motion_test/room", "MotionTestRoom", &MotionTestRoom }
     };
 }

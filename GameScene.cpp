@@ -1,4 +1,4 @@
-// =============================
+ï»¿// =============================
 // Scenes/Game/GameScene.cpp
 // =============================
 #include "GameScene.h"
@@ -50,13 +50,13 @@ void GameScene::Init()
 #endif
 
 
-	// ƒgƒD[ƒ“•`‰æ‚É•K—v‚ÈƒVƒF[ƒ_[‚Æİ’èƒoƒbƒtƒ@[‚ğ‰Šú‰»
+	// ãƒˆã‚¥ãƒ¼ãƒ³æç”»ã«å¿…è¦ãªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã¨è¨­å®šãƒãƒƒãƒ•ã‚¡ãƒ¼ã‚’åˆæœŸåŒ–
 	if (!modelToonRenderer_.Init())
-		DxPlus::Utils::FatalError(L"modelToonRenderer‚Ì‰Šú‰»¸”s");
+		DxPlus::Utils::FatalError(L"modelToonRendererã®åˆæœŸåŒ–å¤±æ•—");
 	if (!shaderEffects_.Init(DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT))
-		DxPlus::Utils::FatalError(L"shaderEffects‚Ì‰Šú‰»¸”s");
+		DxPlus::Utils::FatalError(L"shaderEffectsã®åˆæœŸåŒ–å¤±æ•—");
 
-	// toon•`‰æ‚ÆƒAƒEƒgƒ‰ƒCƒ“•`‰æ‚ğ—LŒø‚É‚·‚é
+	// toonæç”»ã¨ã‚¢ã‚¦ãƒˆãƒ©ã‚¤ãƒ³æç”»ã‚’æœ‰åŠ¹ã«ã™ã‚‹
 	shaderEffects_.GetSettings().toonEnabled = true;
 	shaderEffects_.GetSettings().outlineEnabled = true;
 
@@ -91,7 +91,7 @@ void GameScene::Update(float deltaTime)
 	{
 		freeCamera_.FocusAt(gameContext->GetPlayer().GetPosition());
 	}
-	DxPlus::Debug::SetString(L" R: TransformƒŠƒZƒbƒg, F: FreeCamera‚ğƒvƒŒƒCƒ„[‚ÉƒtƒH[ƒJƒX");
+	DxPlus::Debug::SetString(L" R: Transformãƒªã‚»ãƒƒãƒˆ, F: FreeCameraã‚’ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã«ãƒ•ã‚©ãƒ¼ã‚«ã‚¹");
 
 
 
@@ -127,7 +127,7 @@ void GameScene::Update(float deltaTime)
 	}
 
 #ifndef NDEBUG
-    // ”’l“ü—Í’†‚ÍƒV[ƒ“Ø‚è‘Ö‚¦‚ÌƒL[‚ğ–³‹‚·‚é
+    // æ•°å€¤å…¥åŠ›ä¸­ã¯ã‚·ãƒ¼ãƒ³åˆ‡ã‚Šæ›¿ãˆã®ã‚­ãƒ¼ã‚’ç„¡è¦–ã™ã‚‹
     if (ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard) return;
 #endif
 
@@ -137,7 +137,7 @@ void GameScene::Update(float deltaTime)
     {
         Scene* resultScene = SceneManager::GetInstance().GetScene(SceneID::Result);
         SetNextScene(resultScene);
-        finished = true;    // ƒtƒF[ƒh–³‚µ‚Ìê‡‚Í finished ‚ğ true ‚É‚µ‚Ä‚¨‚­•K—v‚ ‚è
+        finished = true;    // ãƒ•ã‚§ãƒ¼ãƒ‰ç„¡ã—ã®å ´åˆã¯ finished ã‚’ true ã«ã—ã¦ãŠãå¿…è¦ã‚ã‚Š
         return;
     }
 }
@@ -179,14 +179,14 @@ void GameScene::RenderDepth() const
 	const auto& player = gameContext->GetPlayer();
 	const auto& stage = gameContext->GetStage();
 
-	// Bone‚È‚µƒVƒF[ƒ_[
+	// Boneãªã—ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 	modelToonRenderer_.SetVertexShader(ModelToonType::Model);
 
 	boss.Draw();
 	stage.Draw();
 	stage.DrawAlphaModel();
 
-	// Bone‘Î‰‚Ì’¸“_ƒVƒF[ƒ_[
+	// Boneå¯¾å¿œã®é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 	modelToonRenderer_.SetVertexShader(ModelToonType::Bone);
 
 	player.Draw();
@@ -208,11 +208,11 @@ void GameScene::DrawScene(bool toonEnabled) const
 	const auto& effectManager = gameContext->GetEffectManager();
 	const auto& grid = gameContext->GetGrid();
 
-	// Shader‚ğg‚í‚È‚¢‚à‚Ì
+	// Shaderã‚’ä½¿ã‚ãªã„ã‚‚ã®
 	effectManager.Draw();
 	grid.Draw();
 
-	// ƒgƒD[ƒ“ƒVƒF[ƒ_[‚ğg‚í‚È‚¢ê‡
+	// ãƒˆã‚¥ãƒ¼ãƒ³ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ä½¿ã‚ãªã„å ´åˆ
 	if (!toonEnabled)
 	{
 		SetUsePixelShader(-1);
@@ -224,7 +224,7 @@ void GameScene::DrawScene(bool toonEnabled) const
 		return;
 	}
 
-	// ƒgƒD[ƒ“•`‰æŠJn
+	// ãƒˆã‚¥ãƒ¼ãƒ³æç”»é–‹å§‹
 	modelToonRenderer_.BeginPass();
 
 	const auto drawActor = [this](const ModelObject& model, ModelToonType type)

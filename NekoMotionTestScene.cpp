@@ -1,11 +1,24 @@
 #include "NekoMotionTestScene.h"
 #include "GameContext.h"
 
+DebugSceneControls NekoMotionTestScene::GetDebugControls()
+{
+    return {
+        "motion_test",
+        {
+            MakeDebugTransformTarget("motion_test/player", "Player", player_),
+            MakeDebugTransformTarget("motion_test/room", "Room", room_)
+        },
+        std::nullopt, {}, {}, transformInitialStatus_
+    };
+}
+
 void NekoMotionTestScene::Init()
 {
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 	player_.Init();
 	room_.Init();
+    TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
 	camera_.Initialize({ 0.0f, 400.0f, -400.0f }, { 0.0f, 100.0f, 0.0f });
 
 

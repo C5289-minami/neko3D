@@ -16,7 +16,6 @@
 namespace
 {
     // 透過表示するステージモデルの大きさと、プレイヤー頭上の余白。
-    float AlphaStageScale = 0.15f;
     float AlphaStageHeadClearance = 40.0f;
 
     float AlphaStageFadeSpeed = 2.4f;
@@ -46,7 +45,7 @@ void Stage::SetupCollisionInfo()//当たり判定のセットアップ
         if (handle < 0) return -1;
 
         // 描画前でも、保存済みの配置・回転・拡大率で判定できるようにする。
-        model.Draw();
+        model.ApplyTransform();
 
         int result = MV1SetupCollInfo(handle, -1, 8, 8, 8);
         if (result < 0) return -1;
@@ -74,7 +73,7 @@ void Stage::RefreshCollisionInfo()
         // モデルが解放・差し替えされていたら、古いハンドルは使わない。
         if (RM().GetModel(model.modelKey) != handle) return -1;
 
-        model.Draw();
+        model.ApplyTransform();
 
 		int result = MV1RefreshCollInfo(handle, -1);// コリジョン情報を更新する
         if (result < 0) return -1;
@@ -149,18 +148,16 @@ void Stage::Reset()
 
 void Stage::Draw() const
 {
-    // 柱と台座をそれぞれ描画
-    for (const auto& model : stagePillars_)
-    {
-        model.Draw();
-    }
-    for (const auto& model : stageModels_)
-    {
-        model.Draw();
-    }
-
-    stageModel_.Draw();
+    ForEachModel([](const ModelObject& model) { model.Draw(); });
 }
+
+void Stage::ForEachModel(const std::function<void(const ModelObject&)>& draw) const
+{
+    for (const auto& model : stagePillars_) draw(model);
+    for (const auto& model : stageModels_) draw(model);
+    draw(stageModel_);
+}
+
 void Stage::ResetAlphaModel(const Vec3& playerPosition)
 {
 
@@ -168,7 +165,7 @@ void Stage::ResetAlphaModel(const Vec3& playerPosition)
 
     // ResourceKeys
     alphaModel_.model.modelKey = ResourceKeys::Model_StageAlpha;
-    alphaModel_.model.scale = { AlphaStageScale, AlphaStageScale, AlphaStageScale };
+    alphaModel_.model.scale = alphaModelScale_;
     alphaModel_.model.rotation = {};
     alphaModel_.model.center = {};
     alphaModel_.SetAlpha(1.0f);
@@ -241,6 +238,15 @@ bool Stage::SaveModelSettings()
                 doc["models"][names[i]] = {{"position", ModelVectorJson(m.position)}, {"rotation", ModelVectorJson(m.rotation)}, {"scale", ModelVectorJson(m.scale)}};
             }
         };
+        const auto saveModel = [&doc](const char* name, const ModelObject& m)
+        {
+            if (!TransformSettings::IsValid({m.scale, m.position, m.rotation}))
+                throw std::runtime_error("Invalid transform.");
+            doc["models"][name] = {{"position", ModelVectorJson(m.position)},
+                {"rotation", ModelVectorJson(m.rotation)}, {"scale", ModelVectorJson(m.scale)}};
+        };
+        saveModel("ground", stageModel_);
+        doc["alphaScale"] = ModelVectorJson(alphaModelScale_);
         saveModels(stagePillars_, StagePillarNames);
         saveModels(stageModels_, StageModelNames);
         std::filesystem::create_directories("Data/Settings");
@@ -269,6 +275,8 @@ bool Stage::LoadModelSettings()
         // 全モデルを確認してから反映する
         auto loadedPillars = stagePillars_;
         auto loadedModels = stageModels_;
+        auto loadedGround = stageModel_;
+        auto loadedAlphaScale = alphaModelScale_;
         const auto loadModels = [&doc](auto& models, const auto& names)
         {
             for (int i = 0; i < models.size(); ++i)
@@ -288,6 +296,25 @@ bool Stage::LoadModelSettings()
         loadModels(loadedPillars, StagePillarNames);
         loadModels(loadedModels, StageModelNames);
 
+        // Older settings files only contain pillars and platforms.
+        if (doc.at("models").contains("ground"))
+        {
+            const auto& v = doc.at("models").at("ground");
+            loadedGround.position = ReadModelVector(v.at("position"));
+            loadedGround.rotation = ReadModelVector(v.at("rotation"));
+            loadedGround.scale = ReadModelVector(v.at("scale"));
+            if (!TransformSettings::IsValid({loadedGround.scale, loadedGround.position, loadedGround.rotation}))
+                throw std::runtime_error("Invalid ground transform.");
+        }
+        if (doc.contains("alphaScale"))
+        {
+            loadedAlphaScale = ReadModelVector(doc.at("alphaScale"));
+            if (!TransformSettings::IsValid({loadedAlphaScale, {}, {}}))
+                throw std::runtime_error("Invalid alpha scale.");
+        }
+        stageModel_ = loadedGround;
+        alphaModelScale_ = loadedAlphaScale;
+        alphaModel_.model.scale = alphaModelScale_;
         stagePillars_ = loadedPillars;
         stageModels_ = loadedModels;
 
@@ -302,39 +329,60 @@ bool Stage::LoadModelSettings()
 void Stage::DrawDebugUI()
 {
     ImGui::Begin("Stage parts");
-    const auto drawModels = [this](auto& models, const auto& handles, const auto& names)
+    const auto drawModel = [this](ModelObject& model, int handle, const char* name)
+    {
+        ImGui::PushID(name);
+        if (ImGui::TreeNode(name))
         {
-        for (int i = 0; i < models.size(); ++i)
-        {
-            ImGui::PushID(names[i]);
-            if (ImGui::TreeNode(names[i]))
+            ObjectTransform value{model.scale, model.position, model.rotation};
+            bool changed = ImGui::DragFloat3("Position", &value.position.x, 1.0f);
+            changed |= ImGui::DragFloat3("Rotation (radians)", &value.rotation.x, 0.01f);
+            changed |= ImGui::DragFloat3("Scale", &value.scale.x, 0.01f, 0.001f, 10000.0f,
+                "%.3f", ImGuiSliderFlags_AlwaysClamp);
+            float uniformScale = value.scale.x;
+            if (ImGui::DragFloat("Uniform scale", &uniformScale, 0.01f, 0.001f, 10000.0f,
+                "%.3f", ImGuiSliderFlags_AlwaysClamp))
             {
-                auto& m = models[i];
-
-                ObjectTransform v{m.scale, m.position, m.rotation};
-
-                bool changed = ImGui::DragFloat3("Position", &v.position.x, 1.0f);
-                changed |= ImGui::DragFloat3("Rotation (radians)", &v.rotation.x, 0.01f);
-                changed |= ImGui::DragFloat3("Scale", &v.scale.x, 0.01f, 0.001f, 10000.0f);
-
-                if (changed && TransformSettings::IsValid(v))
-                {
-                    m.position = v.position;
-                    m.rotation = v.rotation;
-                    m.scale = v.scale;
-
-                    RefreshCollisionInfo();
-                }
-                ImGui::Text("MV1 collision: %s (handle: %d)",
-                    handles[i] >= 0 ? "Ready" : "Unavailable",
-                    handles[i]);
-                ImGui::TreePop();
+                value.scale = value.scale * (uniformScale / value.scale.x);
+                changed = true;
             }
-            ImGui::PopID();
+            if (changed && TransformSettings::IsValid(value))
+            {
+                model.scale = value.scale;
+                model.position = value.position;
+                model.rotation = value.rotation;
+                RefreshCollisionInfo();
+            }
+            ImGui::Text("MV1 collision: %s (handle: %d)",
+                handle >= 0 ? "Ready" : "Unavailable", handle);
+            ImGui::TreePop();
         }
+        ImGui::PopID();
     };
-    drawModels(stagePillars_, pillarCollisionHandles_, StagePillarNames);
-    drawModels(stageModels_, stageCollisionHandles_, StageModelNames);
+    drawModel(stageModel_, groundCollisionHandle_, "Ground / Stage");
+    for (int i = 0; i < stagePillars_.size(); ++i)
+        drawModel(stagePillars_[i], pillarCollisionHandles_[i], StagePillarNames[i]);
+    for (int i = 0; i < stageModels_.size(); ++i)
+        drawModel(stageModels_[i], stageCollisionHandles_[i], StageModelNames[i]);
+    if (ImGui::TreeNode("Alpha model"))
+    {
+        Vec3 scale = alphaModelScale_;
+        bool changed = ImGui::DragFloat3("Scale", &scale.x, 0.01f, 0.001f, 10000.0f,
+            "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        float uniformScale = scale.x;
+        if (ImGui::DragFloat("Uniform scale", &uniformScale, 0.01f, 0.001f, 10000.0f,
+            "%.3f", ImGuiSliderFlags_AlwaysClamp))
+        {
+            scale = scale * (uniformScale / scale.x);
+            changed = true;
+        }
+        if (changed && TransformSettings::IsValid({scale, {}, {}}))
+        {
+            alphaModelScale_ = scale;
+            alphaModel_.model.scale = scale;
+        }
+        ImGui::TreePop();
+    }
     if (ImGui::Button("Save JSON")) SaveModelSettings();
     ImGui::SameLine();
     if (ImGui::Button("Load JSON")) LoadModelSettings();

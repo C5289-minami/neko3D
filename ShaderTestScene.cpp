@@ -39,7 +39,8 @@ DebugSceneControls ShaderTestScene::GetDebugControls()
 		},
 		[this] { return debugActorsPaused_; },
 		[this](bool paused) { debugActorsPaused_ = paused; },
-		transformInitialStatus_
+		transformInitialStatus_,
+        [this] { stage.DrawDebugUI(); }
 	};
 }
 
@@ -207,7 +208,7 @@ void ShaderTestScene::RenderDepth() const
 	// Boneなしシェーダー
 	modelToonRenderer_.SetVertexShader(ModelToonType::Model);
 
-	stage.GetModelObject().Draw();
+	stage.Draw();
 	boss.Draw();
 
 	// Bone対応の頂点シェーダー
@@ -254,7 +255,7 @@ void ShaderTestScene::DrawScene(bool toonEnabled) const
 		};
 	drawActor(player_.GetModelObject(), ModelToonType::Bone);
 	drawActor(boss.GetModelObject(),	ModelToonType::Model);
-	drawActor(stage.GetModelObject(),	ModelToonType::Model);
+	stage.ForEachModel([&drawActor](const ModelObject& model) { drawActor(model, ModelToonType::Model); });
 
 	modelToonRenderer_.EndPass();
 }
