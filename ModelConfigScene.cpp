@@ -45,7 +45,7 @@ void ModelConfigScene::Update(float deltaTime)
     if (!camera_.IsSceneViewActive() && (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
     {
         SetMouseDispFlag(FALSE);
-        camera_.InputUpdate(deltaTime);
+        camera_.Update(deltaTime);
     }
     else SetMouseDispFlag(TRUE);
 }

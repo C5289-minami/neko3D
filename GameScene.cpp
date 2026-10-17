@@ -102,7 +102,10 @@ void GameScene::Update(float deltaTime)
 
 	if (activeCamera_ == &freeCamera_)
 	{
-		freeCamera_.InputUpdate(deltaTime);
+		if (!freeCamera_.IsSceneViewActive() && (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
+		{
+			freeCamera_.Update(deltaTime);
+		}
 	}
 	else
 #endif

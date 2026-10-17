@@ -126,8 +126,6 @@ namespace Camera
 			ApplyCamera();
 		}
 
-		void InputUpdate(float deltaTime) { Update(deltaTime); }
-
 		void BeginSceneView()
 		{
 			if (active_) return;

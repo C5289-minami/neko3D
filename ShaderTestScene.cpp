@@ -146,7 +146,7 @@ void ShaderTestScene::Update(float deltaTime)
    if (!mouseCaptured && !camera_.IsSceneViewActive() && (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
 	{
 		SetMouseDispFlag(FALSE);
-		camera_.InputUpdate(deltaTime);
+		camera_.Update(deltaTime);
 	}
   else SetMouseDispFlag(TRUE);
   const bool touching = Collision::UpdateModelContact(player_.GetModelObject(), boss.GetModelObject());
