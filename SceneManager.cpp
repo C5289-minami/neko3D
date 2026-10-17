@@ -83,7 +83,7 @@ Scene* SceneManager::GetScene(SceneID id)
 	case SceneID::NekoMotionTest: return &nekoMotionTestScene;
 	case SceneID::StatusTestScene: return &statusTestScene;
 	case SceneID::ModelConfig: return &modelConfigScene;
-	case SceneID::gameTestScene: return &gameTestScene;
+	case SceneID::GameTestScene: return &gameTestScene;
 #endif // !NDEBUG
 	}
 	return &titleScene;

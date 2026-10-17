@@ -30,7 +30,7 @@ enum class SceneID {
 	NekoMotionTest,
     StatusTestScene,
     ModelConfig,
-    gameTestScene,
+    GameTestScene,
 #endif
 };
 
@@ -59,7 +59,7 @@ public:
 		if (scene == &nekoMotionTestScene) return SceneID::NekoMotionTest;
 		if (scene == &statusTestScene) return SceneID::StatusTestScene;
         if (scene == &modelConfigScene) return SceneID::ModelConfig;
-	    if (scene == &gameTestScene) return SceneID::gameTestScene;
+	    if (scene == &gameTestScene) return SceneID::GameTestScene;
 #endif
         return SceneID::Title; // デフォルトはタイトルシーン
 	}
