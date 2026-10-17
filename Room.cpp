@@ -2,10 +2,14 @@
 #include "DxLib.h"
 #include "Resourcekeys.h"
 
-void Room::Init()
+Room::Room()
 {
 	roomModel_.modelKey = ResourceKeys::Model_Room;
-  Reset();
+}
+
+void Room::Init()
+{
+	Reset();
 	roomModel_.Init();
 }
 
@@ -17,6 +21,7 @@ void Room::Reset()
 
 void Room::Update(float deltaTime)
 {
+	(void)deltaTime; // –¢g—p‚Ìˆø”‚ğ–³‹
 }
 
 void Room::Draw() const

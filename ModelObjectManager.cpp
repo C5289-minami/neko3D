@@ -37,7 +37,6 @@ void ModelObjectManager::Add(ModelObject& object)
 	// ‚·‚Å‚É’Ç‰Á‚³‚ê‚Ä‚¢‚éê‡‚Í‰½‚à‚µ‚È‚¢
     if (std::find(objects_.begin(), objects_.end(), &object) != objects_.end()) return;
 	// ‰Šú‰»‚µ‚Ä’Ç‰Á
-    object.Init();
     objects_.push_back(&object);
 }
 

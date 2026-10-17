@@ -612,6 +612,9 @@
     <ClInclude Include="DrawableObject.h">
       <Filter>40_Gameplay\Actors\Base</Filter>
     </ClInclude>
+    <ClInclude Include="ModelType.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">

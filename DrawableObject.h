@@ -3,6 +3,7 @@
 #include "DxPlus/Vector2.h"
 #include "Vector3.h"
 #include "Collision.h"
+#include "ModelType.h"
 
 struct ImageObject
 {
@@ -12,8 +13,8 @@ struct ImageObject
 	DxPlus::Vec2 center{ 0.5f, 0.5f };
 	float rotation{};
 
-    DxPlus::Vec2 GetSize() const;
-    void Draw(DxPlus::Vec2 masterPos = { 0.0f,0.0f }) const;
+	DxPlus::Vec2 GetSize() const;
+	void Draw(DxPlus::Vec2 masterPos = { 0.0f,0.0f }) const;
 };
 
 struct ModelObject
@@ -25,7 +26,7 @@ struct ModelObject
 	Vec3 rotation{};
 	float alpha{ 1.0f };
 
-    bool collisionHighlighted{ false };
+	bool collisionHighlighted{ false };
 
 	void Init();
 	// JSONファイルから読み込み、オブジェクトを初期化する
@@ -33,15 +34,17 @@ struct ModelObject
 	bool Save(const std::string& filePath = "./Data/Config/model_objects.json") const;
 
 	//センターやスケールを考慮して、楕円体の当たり判定を返す　回転は無視
-   Collision::Ellipsoid GetHitEllipsoid() const;
-    Vec3 GetSize() const { return GetHitEllipsoid().radii * 2.0f; }
-    void ApplyTransform(Vec3 masterPos = { 0.0f, 0.0f, 0.0f }) const;
-    void ApplyCollisionColor() const;
-    void Draw(Vec3 masterPos = { 0.0f, 0.0f, 0.0f }) const;
-    ModelObject WithParentTransform(const Vec3& parentPosition, const Vec3& parentRotation) const;
+	Collision::Ellipsoid GetHitEllipsoid() const;
+	Vec3 GetSize() const { return GetHitEllipsoid().radii * 2.0f; }
+	void ApplyTransform(Vec3 masterPos = { 0.0f, 0.0f, 0.0f }) const;
+	void ApplyCollisionColor() const;
+	void Draw(Vec3 masterPos = { 0.0f, 0.0f, 0.0f }) const;
+	ModelObject WithParentTransform(const Vec3& parentPosition, const Vec3& parentRotation) const;
 
 	void SetAlpha(float value) { alpha = (std::max)(0.0f, (std::min)(1.0f, value)); }
 	float GetAlpha(float& outValue) const { outValue = alpha; }
 	float GetAlpha() const { return alpha; }
 	void FadeTo(const class ActorBase& player, float speed, float deltaTime);
+
+	ModelType modelType_ = ModelType::Model;
 };

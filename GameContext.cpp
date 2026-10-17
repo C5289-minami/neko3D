@@ -7,27 +7,7 @@
 #ifndef NDEBUG
 #include "imgui.h"
 #endif
-//
-//DebugSceneControls GameContext::GetDebugControls()
-//{
-//    return {
-//        "game",
-//        {
-//            MakeDebugTransformTarget("game/player", "Player", player),
-//            MakeDebugTransformTarget("game/boss", "Boss", boss)
-//        },
-//        DebugCameraControls{
-//            [this] { return IsSceneViewActive(); },
-//            [this] { return GetCameraPosition(); },
-//            [this](const Vec3& position) { SetCameraPosition(position); },
-//            [this] { ResetSceneCamera(); },
-//            [this] { FocusSceneCameraOnPlayer(); }
-//        },
-//        [this] { return debugActorsPaused_; },
-//        [this](bool paused) { debugActorsPaused_ = paused; },
-//        transformInitialStatus_
-//    };
-//}
+
 
 void GameContext::Init()
 {

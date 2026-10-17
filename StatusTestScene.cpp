@@ -175,12 +175,12 @@ void StatusTest::RenderDepth() const
 	// シーンのカメラを設定する
 	activeCamera_->ApplyCamera();
 	// Boneなしシェーダー
-	modelToonRenderer_.SetVertexShader(ModelToonType::Model);
+	modelToonRenderer_.SetVertexShader(ModelType::Model);
 
 	testModel_.Draw();
 
 	// Bone対応の頂点シェーダー
-	modelToonRenderer_.SetVertexShader(ModelToonType::Bone);
+	modelToonRenderer_.SetVertexShader(ModelType::Bone);
  gameContext->GetPlayer().Draw();
 
 }
@@ -209,7 +209,7 @@ void StatusTest::DrawScene(bool toonEnabled) const
 	// トゥーン描画開始
 	modelToonRenderer_.BeginPass();
 
-	const auto drawActor = [this](const ModelObject& model, ModelToonType type)
+	const auto drawActor = [this](const ModelObject& model, ModelType type)
 		{
 			if (model.collisionHighlighted)
 			{
@@ -224,11 +224,11 @@ void StatusTest::DrawScene(bool toonEnabled) const
 				modelToonRenderer_.Draw(model, type);
 			}
 		};
-	drawActor(testModel_, ModelToonType::Model);
+	drawActor(testModel_, ModelType::Model);
    const auto& player = gameContext->GetPlayer();
 	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
 		player.GetPosition(), player.GetRotation());
-	drawActor(playerModel, ModelToonType::Bone);
+	drawActor(playerModel, ModelType::Bone);
 
 
 	modelToonRenderer_.EndPass();

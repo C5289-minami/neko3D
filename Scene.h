@@ -17,6 +17,9 @@ public:
     virtual void Render() const {}      // 毎フレーム描画（派生で実装）
     virtual void DrawImGui() {}
     virtual void End() {}
+#ifndef NDEBUG
+    virtual void SetModelEditTargets() {}
+#endif
 
     // 駆動（メインループから毎フレーム呼ぶ）
     void Drive(float deltaTime);

@@ -5,13 +5,13 @@
 #include "Raycast.h"
 #include "DxLib.h"
 #include "Stage.h"
+#include "ModelObjectManager.h"
 
 #include <cmath>
 #include "Sound3D.h"
 #include <algorithm>
 #include <vector>
 #include <iostream>
-#include "ModelObjectManager.h"
 
 
 Player::Player()
@@ -22,26 +22,24 @@ Player::Player()
 
 void Player::Init()
 {
-  model_.modelKey = ResourceKeys::Model_Paladin;
+	model_.modelKey = ResourceKeys::Model_Paladin;
 	const int modelHandle = RM().GetModel(model_.modelKey);
 	if (modelHandle < 0) return;
 
+	model_.modelType_ = ModelType::Bone;
 	model_.scale = { 100.0f, 100.0f, 100.0f };
 
-	// 編集対象に設定
-    MObjs().Add(model_, *this);
-	MObjs().AddActor("Player", *this);
- Reset();
+	Reset();
 }
 
 
 void Player::Reset()
 {
-    health_ = MaxHealth;
-    wasTouchingPillar_ = false;
-    model_.collisionHighlighted = false;
-    ultimateGauge_ = 0.0f;
-  SetPosition({ 0.0f, 26.0f, -1066.0f });
+	health_ = MaxHealth;
+	wasTouchingPillar_ = false;
+	model_.collisionHighlighted = false;
+	ultimateGauge_ = 0.0f;
+	SetPosition({ 0.0f, 26.0f, -1066.0f });
 	SetPitch(0.0f);
 	SetYaw(0.0f);
 	MObjs().LoadActorTransform(*this);
@@ -56,10 +54,10 @@ void Player::Reset()
 	animation_.Reset();
 	SetAnimation(PlayerAnimType::Idle, true);
 
-    stateMachine_.Initialize();
-    // 更新を止めても描画できるように初期ポーズを用意する
-    animation_.Play3D(RM().GetModel(model_.modelKey), currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
-    animation_.Update(0.0f);
+	stateMachine_.Initialize();
+	// 更新を止めても描画できるように初期ポーズを用意する
+	animation_.Play3D(RM().GetModel(model_.modelKey), currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
+	animation_.Update(0.0f);
 
 	model_.Load(); // 無理やり上書きしてます
 }
@@ -73,7 +71,7 @@ void Player::Update(float deltaTime)
 
 	// 中心がどっちにあるか調べる。高さはここでは考えない
 	PlayerDiagonalMove(deltaTime, position_, movementCenter_);
-    // 横移動は PlayerDiagonalMove、上下移動は velocity_.y にまとめる。
+	// 横移動は PlayerDiagonalMove、上下移動は velocity_.y にまとめる。
 
 	if (gravityEnabled_)
 	{
@@ -125,16 +123,16 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 		}
 	}
 
-    // 足元から高さ・半径を使って、プレイヤーのカプセルを作る。
-    const Vec3 capsuleStart = GetPosition() + Vec3::Up() * Const::PLAYER_RADIUS;
-    const Vec3 capsuleEnd = GetPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
-    const bool touchingPillar = stage.IsHitPillar(capsuleStart, capsuleEnd, Const::PLAYER_RADIUS);
-    if (touchingPillar && !wasTouchingPillar_)
-    {
-        std::cout << "Hit: Player touched a pillar." << std::endl;
-        OutputDebugStringA("Hit: Player touched a pillar.\n");
-    }
-    wasTouchingPillar_ = touchingPillar;
+	// 足元から高さ・半径を使って、プレイヤーのカプセルを作る。
+	const Vec3 capsuleStart = GetPosition() + Vec3::Up() * Const::PLAYER_RADIUS;
+	const Vec3 capsuleEnd = GetPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
+	const bool touchingPillar = stage.IsHitPillar(capsuleStart, capsuleEnd, Const::PLAYER_RADIUS);
+	if (touchingPillar && !wasTouchingPillar_)
+	{
+		std::cout << "Hit: Player touched a pillar." << std::endl;
+		OutputDebugStringA("Hit: Player touched a pillar.\n");
+	}
+	wasTouchingPillar_ = touchingPillar;
 
 	Sound3D::SetListener(
 		GetPosition(),
@@ -148,7 +146,7 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 
 void Player::Draw() const
 {
-   const ModelObject worldModel = model_.WithParentTransform(GetPosition(), GetRotation());
+	const ModelObject worldModel = model_.WithParentTransform(GetPosition(), GetRotation());
 	worldModel.ApplyCollisionColor();
 	animation_.Draw3D(worldModel.position, worldModel.scale, worldModel.rotation);
 }
@@ -156,18 +154,18 @@ void Player::Draw() const
 
 bool Player::TakeDamage()
 {
-    if (IsDead() || IsDamaging()) return false;
+	if (IsDead() || IsDamaging()) return false;
 
-    --health_;
-    stateMachine_.ChangeState(PlayerStateType::Damaging);
-    return true;
+	--health_;
+	stateMachine_.ChangeState(PlayerStateType::Damaging);
+	return true;
 }
 
 void Player::DrawStatus() const
 {
-    const wchar_t* state = IsDamaging() ? L"Damaging" : IsDead() ? L"Die" : L"";
-    DxLib::DrawFormatString(24, 150, DxLib::GetColor(255, 255, 255),
-        L"HP: %d / %d  %s", health_, MaxHealth, state);
+	const wchar_t* state = IsDamaging() ? L"Damaging" : IsDead() ? L"Die" : L"";
+	DxLib::DrawFormatString(24, 150, DxLib::GetColor(255, 255, 255),
+		L"HP: %d / %d  %s", health_, MaxHealth, state);
 }
 
 void Player::SetAnimation(PlayerAnimType::Type type, bool loop)
@@ -179,21 +177,21 @@ void Player::SetAnimation(PlayerAnimType::Type type, bool loop)
 
 void Player::SetUltimateGauge(float value)//Ultのマックスゲージを超えないようにする
 {
-    if (!std::isfinite(value)) return;
-    ultimateGauge_ = std::clamp(value, 0.0f, UltimateGaugeMax);
+	if (!std::isfinite(value)) return;
+	ultimateGauge_ = std::clamp(value, 0.0f, UltimateGaugeMax);
 }
 
 void Player::AddUltimateGauge(float amount)//Ultゲージを増やす
 {
-    if (!std::isfinite(amount) || amount <= 0.0f) return;
-    SetUltimateGauge(ultimateGauge_ + amount);
+	if (!std::isfinite(amount) || amount <= 0.0f) return;
+	SetUltimateGauge(ultimateGauge_ + amount);
 }
 
 bool Player::TryUseUltimateGauge()
 {
-    if (!CanUseUltimate()) return false;
-    ultimateGauge_ = 0.0f;
-    return true;
+	if (!CanUseUltimate()) return false;
+	ultimateGauge_ = 0.0f;
+	return true;
 }
 
 void Player::SetMoveDirection(const Vec3& moveDir)
@@ -321,16 +319,16 @@ void Player::PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& mo
 
 	const Vec3 input = moveInput_.Normalized();
 	const Vec3 right{ forward.z, 0.0f, -forward.x };
-    
+
 	const float moveSpeed =
-		GetCurrentState() == PlayerStateType::LungingJump?
-		lungingMoveSpeed_: Const::PLAYER_MOVE_SPEED;
+		GetCurrentState() == PlayerStateType::LungingJump ?
+		lungingMoveSpeed_ : Const::PLAYER_MOVE_SPEED;
 	if (GetCurrentState() == PlayerStateType::LungingJump)
 	{
 		input_.isMoving = false;
 	}
 
-    const float distance = moveSpeed * deltaTime;
+	const float distance = moveSpeed * deltaTime;
 	const float nextRadius = (std::max)(1.0f, radius - input.z * distance);
 	const float angle = input.x * distance / (std::max)(1.0f, radius);
 	const Vec3 outward = -forward * std::cos(angle) + right * std::sin(angle);
@@ -343,42 +341,42 @@ void Player::PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& mo
 
 void Player::SetLungingMoveSpeed(float value)
 {
-    if (std::isfinite(value)) lungingMoveSpeed_ = (std::max)(0.0f, value);
+	if (std::isfinite(value)) lungingMoveSpeed_ = (std::max)(0.0f, value);
 }
 
 void Player::SetLungingJumpSpeed(float value)
 {
-    if (std::isfinite(value)) lungingJumpSpeed_ = (std::max)(0.0f, value);
+	if (std::isfinite(value)) lungingJumpSpeed_ = (std::max)(0.0f, value);
 }
 
 void Player::ResetLungingSpeeds()
 {
-    lungingMoveSpeed_ = Const::PLAYER_LUNGING_MOVE_SPEED;
-    lungingJumpSpeed_ = Const::PLAYER_LUNGING_JUMP_SPEED;
+	lungingMoveSpeed_ = Const::PLAYER_LUNGING_MOVE_SPEED;
+	lungingJumpSpeed_ = Const::PLAYER_LUNGING_JUMP_SPEED;
 }
 
 void Player::StartLungingJump(const Vec3& moveDir)
 {
-    if (!gravityEnabled_ || !isGrounded_ || moveDir.LengthSq() == 0.0f)
-    {
-        return;
-    }
-
-    StopMove();
-    // 横移動の入力を保存し、ジャンプでは上向きの速度だけ設定する。
-    SetMoveDirection(moveDir);
-    velocity_.y = lungingJumpSpeed_;
-    isGrounded_ = false;
-}
-
-void Player::JumpAction()
-{
-   if (!gravityEnabled_ || !isGrounded_)
+	if (!gravityEnabled_ || !isGrounded_ || moveDir.LengthSq() == 0.0f)
 	{
 		return;
 	}
 
-   velocity_.y =
+	StopMove();
+	// 横移動の入力を保存し、ジャンプでは上向きの速度だけ設定する。
+	SetMoveDirection(moveDir);
+	velocity_.y = lungingJumpSpeed_;
+	isGrounded_ = false;
+}
+
+void Player::JumpAction()
+{
+	if (!gravityEnabled_ || !isGrounded_)
+	{
+		return;
+	}
+
+	velocity_.y =
 		Const::PLAYER_JUMP_SPEED;
 
 	isGrounded_ = false;

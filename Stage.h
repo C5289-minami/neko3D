@@ -19,9 +19,12 @@ public:
 
 	// accessor
 	int GetModelHandle() const { return RM().GetModel(stageModel_.modelKey); }
-	ModelObject GetModelObject() const { return stageModel_; }
-	std::vector<ModelObject> GetPillarModelObjects() const { return { stagePillars_.begin(), stagePillars_.end() }; }
-	std::vector<ModelObject> GetStageModelObjects() const { return { stageModels_.begin(), stageModels_.end() }; }
+  ModelObject& GetModelObject() { return stageModel_; }
+	const ModelObject& GetModelObject() const { return stageModel_; }
+	std::array<ModelObject, 3>& GetPillarModelObjects() { return stagePillars_; }
+	const std::array<ModelObject, 3>& GetPillarModelObjects() const { return stagePillars_; }
+	std::array<ModelObject, 2>& GetStageModelObjects() { return stageModels_; }
+	const std::array<ModelObject, 2>& GetStageModelObjects() const { return stageModels_; }
 	ModelObject GetAlphaModelObject() const { return alphaModel_; }
 
     void GetCollisionModelHandles(std::vector<int>& handles) const;//model‚Ì”»’è‚ð‚Ü‚Æ‚ß‚Ä‚â‚é

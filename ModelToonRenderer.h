@@ -1,13 +1,7 @@
 #pragma once
+#include "ModelType.h"
 
 struct ModelObject;
-
-// モデルの種類
-enum class ModelToonType
-{
-    Model,  // 通常モデル
-    Bone    // ボーン変形を使うモデル
-};
 
 // モデルのトゥーン描画を管理するクラス
 class ModelToonRenderer
@@ -36,12 +30,12 @@ public:
     // 指定したモデルをトゥーン描画する
     void Draw(
         const ModelObject& model,
-        ModelToonType type
+        ModelType type
     ) const;
 
     // 頂点シェーダーだけを切り替える
     // 深度・法線の描画中にも使用する
-    void SetVertexShader(ModelToonType type) const;
+    void SetVertexShader(ModelType type) const;
 
 private:
     // トゥーンの色を計算するピクセルシェーダー
