@@ -56,7 +56,7 @@ void TitleScene::Update(float deltaTime)
     using namespace DxPlus::Input;
     if (GetButtonDown(PLAYER1) & BUTTON_START)
     {
-        Scene* gameScene = SceneManager::GetInstance().GetScene(SceneID::Game);
+        Scene* gameScene = SceneManager::GetInstance().GetScene(SceneID::gameTestScene);
         SetNextScene(gameScene);
         StartFadeOut();
         return;

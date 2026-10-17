@@ -17,6 +17,7 @@
 #include "NekoMotionTestScene.h"
 #include "StatusTestScene.h"
 #include "ModelConfigScene.h"
+#include "GameTestScene.h"
 #endif
 
 enum class SceneID { 
@@ -29,6 +30,7 @@ enum class SceneID {
 	NekoMotionTest,
     StatusTestScene,
     ModelConfig,
+    gameTestScene,
 #endif
 };
 
@@ -56,7 +58,8 @@ public:
         if (scene == &ssFlipTestScene) return SceneID::SsFlipTest;
 		if (scene == &nekoMotionTestScene) return SceneID::NekoMotionTest;
 		if (scene == &statusTestScene) return SceneID::StatusTestScene;
-      if (scene == &modelConfigScene) return SceneID::ModelConfig;
+        if (scene == &modelConfigScene) return SceneID::ModelConfig;
+	    if (scene == &gameTestScene) return SceneID::gameTestScene;
 #endif
         return SceneID::Title; // デフォルトはタイトルシーン
 	}
@@ -88,7 +91,8 @@ private:
     TestScene ssFlipTestScene{ &gameContext };
 	NekoMotionTestScene nekoMotionTestScene{ &gameContext };
 	StatusTestScene statusTestScene{ &gameContext };
-  ModelConfigScene modelConfigScene{ &gameContext };
+    ModelConfigScene modelConfigScene{ &gameContext };
+    GameTestScene gameTestScene{ &gameContext };
 #endif
     Scene* scene = nullptr; // 現在のシーン
     bool wasF11Down = false;
