@@ -34,7 +34,7 @@ namespace Camera
 			pitch_ = 0.0f;
             roll_ = 0.0f;
 		}
-		virtual void Update(float deltaTime) {}
+		virtual void Update(float) {}
 
 		virtual void ApplyCamera() const
 		{
@@ -125,8 +125,6 @@ namespace Camera
 #endif
 			ApplyCamera();
 		}
-
-		void InputUpdate(float deltaTime) { Update(deltaTime); }
 
 		void BeginSceneView()
 		{

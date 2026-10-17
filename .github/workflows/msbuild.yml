@@ -1,0 +1,31 @@
+
+name: Windows-x64
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: microsoft/setup-msbuild@v2
+      - name: Restore NuGet Packages
+        run: nuget restore 3dgp1.sln -NonInteractive
+
+      # NuGetパッケージを復元
+      - name: Restore NuGet Packages
+        run: msbuild 3dgp1.sln /t:Restore /p:Platform=x64
+
+      # Debug / Release のビルド
+      - name: Build
+        run: msbuild 3dgp1.sln /p:Configuration=${{ matrix.configuration }} /p:Platform=x64

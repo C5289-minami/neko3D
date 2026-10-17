@@ -211,6 +211,9 @@
     <Filter Include="40_Gameplay\Actors\Player\Character">
       <UniqueIdentifier>{b9d16cfe-8fb4-4edb-8820-eec6049b3696}</UniqueIdentifier>
     </Filter>
+    <Filter Include="30_Scenes\Main">
+      <UniqueIdentifier>{9963b091-0616-41e6-9536-99fa38220427}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -591,6 +594,13 @@
     <ClInclude Include="StatusTestScene.h">
       <Filter>30_Scenes\Test</Filter>
     </ClInclude>
+    <ClInclude Include="ModelObjectManager.h">
+      <Filter>40_Gameplay\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelConfigScene.h">
+      <Filter>30_Scenes\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="GameTestScene.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -833,9 +843,25 @@
     <ClCompile Include="StatusTestScene.cpp">
       <Filter>30_Scenes\Test</Filter>
     </ClCompile>
+    <ClCompile Include="ModelObjectManager.cpp">
+      <Filter>40_Gameplay\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelConfigScene.cpp">
+      <Filter>30_Scenes\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="GameTestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Config\toon.json">
+      <Filter>JSON</Filter>
+    </None>
+    <None Include="Data\Config\charData.json">
+      <Filter>JSON</Filter>
+    </None>
+    <None Include="Data\Config\model_objects.json">
+      <Filter>JSON</Filter>
+    </None>
+    <None Include="Data\Config\outline.json">
       <Filter>JSON</Filter>
     </None>
   </ItemGroup>

@@ -128,9 +128,38 @@ size_t CharSettingsManager::GetCount()
 }
 
 // インデックス指定で取得
-const CharData& CharSettingsManager::Get(size_t index)
+CharData& CharSettingsManager::Get(size_t index)
 {
     return charDataList.at(index);
+}
+
+const CharData* CharSettingsManager::GetByName(const std::string& name)
+{
+    auto it = std::find_if(charDataList.begin(), charDataList.end(),
+        [&name](const CharData& data) {
+            return data.name == name;
+        });
+    if (it != charDataList.end())
+    {
+        return &(*it);
+    }
+    else
+    {
+        return nullptr;
+	}
+}
+
+void CharSettingsManager::Add(const CharData& data)
+{
+	charDataList.push_back(data);
+}
+
+void CharSettingsManager::Remove(size_t index)
+{
+    if (index < charDataList.size())
+    {
+        charDataList.erase(charDataList.begin() + index);
+	}
 }
 
 // 全件取得

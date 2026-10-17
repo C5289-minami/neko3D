@@ -11,19 +11,27 @@
 #include "TitleScene.h"
 #include "GameScene.h"
 #include "ResultScene.h"
+#ifndef NDEBUG
 #include "ShaderTestScene.h"
 #include "DebugScene.h"
 #include "NekoMotionTestScene.h"
 #include "StatusTestScene.h"
+#include "ModelConfigScene.h"
+#include "GameTestScene.h"
+#endif
 
 enum class SceneID { 
     Title,
     Game,
     Result,
+#ifndef NDEBUG
     ShaderTestScene,
     SsFlipTest,
 	NekoMotionTest,
     StatusTestScene,
+    ModelConfig,
+    GameTestScene,
+#endif
 };
 
 class SceneManager
@@ -45,9 +53,14 @@ public:
         if (scene == &titleScene) return SceneID::Title;
         if (scene == &gameScene) return SceneID::Game;
         if (scene == &resultScene) return SceneID::Result;
+#ifndef NDEBUG
         if (scene == &shaderTestScene) return SceneID::ShaderTestScene;
         if (scene == &ssFlipTestScene) return SceneID::SsFlipTest;
-
+		if (scene == &nekoMotionTestScene) return SceneID::NekoMotionTest;
+		if (scene == &statusTestScene) return SceneID::StatusTestScene;
+        if (scene == &modelConfigScene) return SceneID::ModelConfig;
+	    if (scene == &gameTestScene) return SceneID::GameTestScene;
+#endif
         return SceneID::Title; // デフォルトはタイトルシーン
 	}
 
@@ -73,11 +86,14 @@ private:
     TitleScene  titleScene{ &gameContext };
     GameScene   gameScene{ &gameContext };
     ResultScene resultScene{ &gameContext };
+#ifndef NDEBUG
     ShaderTestScene shaderTestScene{ &gameContext };
     TestScene ssFlipTestScene{ &gameContext };
 	NekoMotionTestScene nekoMotionTestScene{ &gameContext };
 	StatusTestScene statusTestScene{ &gameContext };
-
+    ModelConfigScene modelConfigScene{ &gameContext };
+    GameTestScene gameTestScene{ &gameContext };
+#endif
     Scene* scene = nullptr; // 現在のシーン
     bool wasF11Down = false;
 

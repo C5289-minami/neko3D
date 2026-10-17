@@ -2,9 +2,19 @@
 #include "DxConv.h"
 #include "ResourceManager.h"
 #include <cmath>
+#include <filesystem>
+#include <fstream>
+#include <nlohmann/json.hpp>
 
 namespace
 {
+	// ヘルパー関数: std::wstringをstd::stringに変換する
+    std::string NarrowModelKey(const std::wstring& key)
+    {
+        return { key.begin(), key.end() };
+    }
+
+	// ヘルパー関数: 回転を考慮してベクトルを回転させる
     Vec3 RotateXYZ(const Vec3& value, const Vec3& rotation)
     {
         const float cosX = std::cos(rotation.x);
@@ -30,6 +40,114 @@ namespace
             rotatedY.x * sinZ + rotatedY.y * cosZ,
             rotatedY.z
         };
+    }
+}
+
+void ModelObject::Init()
+{
+    if(!Load()) 
+    {
+		// 初期化に失敗した場合はデフォルト値を設定
+        position = {};
+        scale = { 1.0f, 1.0f, 1.0f };
+        rotation = {};
+	}
+}
+
+bool ModelObject::Load(const std::string& filePath)
+{
+	// モデルキーが空の場合は読み込みをスキップ
+    if (modelKey.empty()) return false;
+
+	// JSONファイルを読み込み、オブジェクトの位置、スケール、回転を設定
+    try
+    {
+		// JSONファイルを開く
+        std::ifstream file(filePath);
+        if (!file) return false;
+
+		// JSONを解析
+        nlohmann::json json;
+        file >> json;
+
+		// "objects"キーが存在し、オブジェクトが存在するか確認
+        const auto objects = json.find("objects");
+        if (objects == json.end() || !objects->is_object()) return false;
+        const auto saved = objects->find(NarrowModelKey(modelKey));
+        if (saved == objects->end() || !saved->is_object()) return false;
+
+		// JSONからVec3を読み込むためのラムダ関数
+        const auto readVector = [](const nlohmann::json& value, Vec3& output)
+        {
+            if (!value.is_array() || value.size() != 3) return false;
+            output = { value[0].get<float>(), value[1].get<float>(), value[2].get<float>() };
+            return std::isfinite(output.x) && std::isfinite(output.y) && std::isfinite(output.z);
+        };
+
+		// JSONから読み込んだ値を一時的に保持し、検証後に設定
+        Vec3 loadedPosition = position;
+        Vec3 loadedScale = scale;
+        Vec3 loadedRotation = rotation;
+        if (!readVector(saved->at("position"), loadedPosition) ||
+            !readVector(saved->at("scale"), loadedScale) ||
+            !readVector(saved->at("rotation"), loadedRotation) ||
+            loadedScale.x <= 0.0f || loadedScale.y <= 0.0f || loadedScale.z <= 0.0f)
+            return false;
+
+		// すべての値が有効であれば、オブジェクトのプロパティを更新
+        position = loadedPosition;
+        scale = loadedScale;
+        rotation = loadedRotation;
+        return true;
+    }
+    catch (const std::exception&)
+    {
+		// 万が一、JSONの読み込みや解析に失敗した場合はfalseを返す
+        return false;
+    }
+}
+
+bool ModelObject::Save(const std::string& filePath) const
+{
+	// モデルキーが空、または位置・スケール・回転のいずれかが無限大やNaNの場合は保存をスキップ
+	// スケールが0以下の場合も保存をスキップ
+    // std::isfiniteは、引数が有限の値かどうか判定する関数
+    if (modelKey.empty() ||
+        !std::isfinite(position.x) || !std::isfinite(position.y) || !std::isfinite(position.z) ||
+        !std::isfinite(scale.x) || !std::isfinite(scale.y) || !std::isfinite(scale.z) ||
+        !std::isfinite(rotation.x) || !std::isfinite(rotation.y) || !std::isfinite(rotation.z) ||
+        scale.x <= 0.0f || scale.y <= 0.0f || scale.z <= 0.0f)
+        return false;
+
+	// JSONファイルにオブジェクトの位置、スケール、回転を保存
+    try
+    {
+        nlohmann::json json = nlohmann::json::object();
+        std::ifstream input(filePath);
+        if (input)
+        {
+            input >> json;
+            if (!json.is_object()) return false;
+        }
+        if (!json.contains("objects") || !json["objects"].is_object())
+            json["objects"] = nlohmann::json::object();
+
+        json["objects"][NarrowModelKey(modelKey)] = {
+            { "position", { position.x, position.y, position.z } },
+            { "scale", { scale.x, scale.y, scale.z } },
+            { "rotation", { rotation.x, rotation.y, rotation.z } }
+        };
+
+        const std::filesystem::path path(filePath);
+        if (!path.parent_path().empty()) std::filesystem::create_directories(path.parent_path());
+        std::ofstream output(filePath, std::ios::trunc);
+        if (!output) return false;
+        output << json.dump(4);
+        return output.good();
+    }
+    catch (const std::exception&)
+    {
+        return false;
     }
 }
 

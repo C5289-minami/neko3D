@@ -11,13 +11,13 @@ namespace
 
     // シェーダーの読み込み先
     constexpr const wchar_t* PixelShaderPath =
-        L"./DevData/ShaderCompiler/Bin/ModelToonPS.pso";
+        L"./Data/Shader/Bin/ModelToonPS.pso";
 
     constexpr const wchar_t* VertexShaderPath =
-        L"./DevData/ShaderCompiler/Bin/ModelVS.vso";
+        L"./Data/Shader/Bin/ModelVS.vso";
 
     constexpr const wchar_t* BoneVertexShaderPath =
-        L"./DevData/ShaderCompiler/Bin/ModelVS_Bone.vso";
+        L"./Data/Shader/Bin/ModelVS_Bone.vso";
 }
 
 

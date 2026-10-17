@@ -26,6 +26,11 @@ struct ModelObject
 
     bool collisionHighlighted{ false };
 
+	void Init();
+	// JSONファイルから読み込み、オブジェクトを初期化する
+	bool Load(const std::string& filePath = "./Data/Config/model_objects.json");
+	bool Save(const std::string& filePath = "./Data/Config/model_objects.json") const;
+
 	//センターやスケールを考慮して、楕円体の当たり判定を返す　回転は無視
    Collision::Ellipsoid GetHitEllipsoid() const;
     Vec3 GetSize() const { return GetHitEllipsoid().radii * 2.0f; }

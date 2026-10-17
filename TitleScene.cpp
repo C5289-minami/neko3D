@@ -8,90 +8,105 @@
 
 void TitleScene::Init()
 {
-    DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
-//    frameCount = 0;
-    fontHandle = RM().GetFont(ResourceKeys::Font_Title);
-    StartFadeIn();
+	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
+	//    frameCount = 0;
+	fontHandle = RM().GetFont(ResourceKeys::Font_Title);
+	StartFadeIn();
 
-    blinkTimer = BLINK_INTERVAL;
-    isPushEnterVisible = false;
+	blinkTimer = BLINK_INTERVAL;
+	isPushEnterVisible = false;
 }
 
 void TitleScene::Update(float deltaTime)
 {
-    DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
+	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 #ifndef NDEBUG
-    if (DxLib::CheckHitKey(KEY_INPUT_F1))
-    {
-        SetNextScene(SceneManager::GetInstance().GetScene(SceneID::SsFlipTest));
-        StartFadeOut();
-        return;
-    }
-    else if (DxLib::CheckHitKey(KEY_INPUT_F2))
-    {
-        SetNextScene(SceneManager::GetInstance().GetScene(SceneID::ShaderTestScene));
-        StartFadeOut();
-        return;
+	if (DxLib::CheckHitKey(KEY_INPUT_F1))
+	{
+		SetNextScene(SceneManager::GetInstance().GetScene(SceneID::SsFlipTest));
+		StartFadeOut();
+		return;
 	}
-    else if (DxLib::CheckHitKey(KEY_INPUT_F3))
-    {
-        SetNextScene(SceneManager::GetInstance().GetScene(SceneID::NekoMotionTest));
-        StartFadeOut();
-        return;
+	else if (DxLib::CheckHitKey(KEY_INPUT_F2))
+	{
+		SetNextScene(SceneManager::GetInstance().GetScene(SceneID::ShaderTestScene));
+		StartFadeOut();
+		return;
 	}
-    else if (DxLib::CheckHitKey(KEY_INPUT_F4))
-    {
-        SetNextScene(SceneManager::GetInstance().GetScene(SceneID::StatusTestScene));
-        StartFadeOut();
-        return;
+	else if (DxLib::CheckHitKey(KEY_INPUT_F3))
+	{
+		SetNextScene(SceneManager::GetInstance().GetScene(SceneID::NekoMotionTest));
+		StartFadeOut();
+		return;
+	}
+	else if (DxLib::CheckHitKey(KEY_INPUT_F4))
+	{
+		SetNextScene(SceneManager::GetInstance().GetScene(SceneID::StatusTestScene));
+		StartFadeOut();
+		return;
+	}
+	else if (DxLib::CheckHitKey(KEY_INPUT_F5))
+	{
+		SetNextScene(SceneManager::GetInstance().GetScene(SceneID::ModelConfig));
+		StartFadeOut();
+		return;
 	}
 #endif
 
-    using namespace DxPlus::Input;
-    if (GetButtonDown(PLAYER1) & BUTTON_START)
-    {
-        Scene* gameScene = SceneManager::GetInstance().GetScene(SceneID::Game);
-        SetNextScene(gameScene);
-        StartFadeOut();
-        return;
-    }
+	using namespace DxPlus::Input;
+	if (GetButtonDown(PLAYER1) & BUTTON_START)
+	{
+		Scene* gameScene = nullptr;
+#ifndef NDEBUG
+		gameScene = SceneManager::GetInstance().GetScene(SceneID::GameTestScene);
+#else
+		gameScene = SceneManager::GetInstance().GetScene(SceneID::Game);
+#endif // !NDEBUG
+		if (gameScene)
+			SetNextScene(gameScene);
+		StartFadeOut();
+		return;
+	}
 
-    // PushEnterの点滅
-    blinkTimer -= deltaTime;
-    if (blinkTimer <= 0.0f)
-    {
-        blinkTimer += BLINK_INTERVAL;
-        isPushEnterVisible = !isPushEnterVisible;
-    }
+	// PushEnterの点滅
+	blinkTimer -= deltaTime;
+	if (blinkTimer <= 0.0f)
+	{
+		blinkTimer += BLINK_INTERVAL;
+		isPushEnterVisible = !isPushEnterVisible;
+	}
 }
 
 void TitleScene::Render() const
 {
-    const int white = DxLib::GetColor(255, 255, 255);
-    DxPlus::Text::DrawString(L"バカみたいなカオスなえほんだお！",
-        { DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.25f },
-        white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 2, 2 }, 0);
+	const int white = DxLib::GetColor(255, 255, 255);
+	DxPlus::Text::DrawString(L"バカみたいなカオスなえほんだお！",
+		{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.25f },
+		white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 2, 2 }, 0);
 
-    const int yellow = DxLib::GetColor(255, 255, 0);
-    if (isPushEnterVisible)
-    {
-        DxPlus::Text::DrawString(L"Push Enter TO MAINGAME",
-            { DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.65f },
-            yellow, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 1,1 }, 0, fontHandle);
-    }
+	const int yellow = DxLib::GetColor(255, 255, 0);
+	if (isPushEnterVisible)
+	{
+		DxPlus::Text::DrawString(L"Push Enter TO MAINGAME",
+			{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.65f },
+			yellow, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 1,1 }, 0, fontHandle);
+	}
 
 #ifndef NDEBUG
-    DxPlus::Text::DrawString(L"F1: スプスタテストシーン",
-        { DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.75f },
-        white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
-    DxPlus::Text::DrawString(L"F2:シェーダーテストシーン",
-        { DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.8f },
-        white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
-    DxPlus::Text::DrawString(L"F3: 部屋テストシーン",
-        { DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.85f },
-        white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
-    DxPlus::Text::DrawString(L"F4: キャラテストシーン",
-        { DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.9f },
-        white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
+	DxPlus::Text::DrawString(L"F1: スプスタテストシーン",
+		{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.75f },
+		white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
+	DxPlus::Text::DrawString(L"F2:シェーダーテストシーン",
+		{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.8f },
+		white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
+	DxPlus::Text::DrawString(L"F3: 部屋テストシーン",
+		{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.85f },
+		white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
+	DxPlus::Text::DrawString(L"F4: キャラテストシーン",
+		{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.9f },
+		white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
+	DxPlus::Text::DrawString(L"F5: Model Config",
+		{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.95f },
+		white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
 #endif
 }

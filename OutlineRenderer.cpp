@@ -13,11 +13,11 @@ namespace
 
     // 深度・法線情報を出力するシェーダー
     constexpr const wchar_t* DepthShaderPath =
-        L"./DevData/ShaderCompiler/Bin/DepthPS.pso";
+        L"./Data/Shader/Bin/DepthPS.pso";
 
     // 深度・法線から輪郭を検出し、シーン画像に合成するシェーダー
     constexpr const wchar_t* PostProcessShaderPath =
-        L"./DevData/ShaderCompiler/Bin/PostProcessPS.pso";
+        L"./Data/Shader/Bin/PostProcessPS.pso";
 }
 
 
