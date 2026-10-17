@@ -50,13 +50,13 @@ void Stage::Init()
 }
 void Stage::SetupCollisionInfo()//当たり判定のセットアップ
 {
-    const auto setup = [](const ModelObject& model)//ラムダ式で書き換えれるように
+    const auto setup = [this](const ModelObject& model)//ラムダ式で書き換えれるように
     {
         int handle = RM().GetModel(model.modelKey);
         if (handle < 0) return -1;
 
         // 描画前でも、保存済みの配置・回転・拡大率で判定できるようにする。
-        model.Draw();
+        model.WithParentTransform(GetPosition(), GetRotation()).Draw();
 
         int result = MV1SetupCollInfo(handle, -1, 8, 8, 8);
         if (result < 0) return -1;
@@ -78,13 +78,13 @@ void Stage::SetupCollisionInfo()//当たり判定のセットアップ
 
 void Stage::RefreshCollisionInfo()
 {
-    const auto refresh = [](const ModelObject& model, int handle)
+    const auto refresh = [this](const ModelObject& model, int handle)
     {
         if (handle < 0) return -1;
         // モデルが解放・差し替えされていたら、古いハンドルは使わない。
         if (RM().GetModel(model.modelKey) != handle) return -1;
 
-        model.Draw();
+        model.WithParentTransform(GetPosition(), GetRotation()).Draw();
 
 		int result = MV1RefreshCollInfo(handle, -1);// コリジョン情報を更新する
         if (result < 0) return -1;
@@ -166,14 +166,14 @@ void Stage::Draw() const
     // 柱と台座をそれぞれ描画
     for (const auto& model : stagePillars_)
     {
-        model.Draw();
+        model.WithParentTransform(GetPosition(), GetRotation()).Draw();
     }
     for (const auto& model : stageModels_)
     {
-        model.Draw();
+        model.WithParentTransform(GetPosition(), GetRotation()).Draw();
     }
 
-    stageModel_.Draw();
+    stageModel_.WithParentTransform(GetPosition(), GetRotation()).Draw();
 }
 void Stage::ResetAlphaModel(const Vec3& playerPosition)
 {

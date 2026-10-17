@@ -11,6 +11,25 @@
 #endif
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
+#ifndef NDEBUG
+#include "ModelObjectManager.h"
+
+void GameScene::SetModelEditTargets()
+{
+	auto& player = gameContext->GetPlayer();
+	auto& stage = gameContext->GetStage();
+
+	MObjs().AddActor("Player", player);
+	MObjs().Add(player.GetModelObject(), player);
+	MObjs().AddActor("Stage", stage);
+	for (auto& model : stage.GetPillarModelObjects())
+		MObjs().Add(model, stage);
+	for (auto& model : stage.GetStageModelObjects())
+		MObjs().Add(model, stage);
+	MObjs().Add(stage.GetModelObject(), stage);
+}
+#endif
+
 
 
 void GameTest::Init()
@@ -40,6 +59,7 @@ void GameTest::Init()
 	// toon描画とアウトライン描画を有効にする
 	shaderEffects_.GetSettings().toonEnabled = true;
 	shaderEffects_.GetSettings().outlineEnabled = true;
+
 
 	
     StartFadeIn();
@@ -86,10 +106,10 @@ void GameTest::Update(float deltaTime)
 	else
 #endif
 	{
-		const Vec3 stageCenterPosition{ 0.0f, 0.0f, 0.0f };
 		auto& player = gameContext->GetPlayer();
 		auto& boss = gameContext->GetBoss();
 		auto& stage = gameContext->GetStage();
+		const Vec3 stageCenterPosition = stage.GetPosition();
 
 
 		player.Update(deltaTime, stage, stageCenterPosition);
@@ -236,15 +256,16 @@ void GameTest::DrawScene(bool toonEnabled) const
 		player.GetPosition(), player.GetRotation());
 	drawActor(playerModel, ModelType::Bone);
 	drawActor(boss.GetModelObject(), ModelType::Model);
-	drawActor(stage.GetModelObject(), ModelType::Model);
+    drawActor(stage.GetModelObject().WithParentTransform(
+		stage.GetPosition(), stage.GetRotation()), ModelType::Model);
 	drawActor(stage.GetAlphaModelObject(), ModelType::Model);
-	for(const auto& pillar : stage.GetPillarModelObjects())
+ for (const auto& pillar : stage.GetPillarModelObjects())
 	{
-		drawActor(pillar, ModelType::Model);
+        drawActor(pillar.WithParentTransform(stage.GetPosition(), stage.GetRotation()), ModelType::Model);
 	}
-	for(const auto& pillar : stage.GetStageModelObjects())
+  for (const auto& model : stage.GetStageModelObjects())
 	{
-		drawActor(pillar, ModelType::Model);
+        drawActor(model.WithParentTransform(stage.GetPosition(), stage.GetRotation()), ModelType::Model);
 	}
 	effectManager.Draw();
 	grid.Draw();
