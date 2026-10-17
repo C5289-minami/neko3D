@@ -271,6 +271,7 @@ void ModelObject::FadeTo(const ActorBase& player, float speed, float deltaTime)
 
 
 
+
 Collision::Ellipsoid ModelObject::GetHitEllipsoid() const
 {
      int handle = RM().GetModel(modelKey);

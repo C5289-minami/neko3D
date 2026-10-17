@@ -15,6 +15,9 @@ public:
 	void Init() override;
 	void Update(float deltaTime) override;
 	void Render() const override;
+#ifndef NDEBUG
+	void SetModelEditTargets() override;
+#endif
 private:
 	Room room_;
 	Camera::FreeCamera camera_;

@@ -7,7 +7,6 @@
 #include "DxConv.h"
 #include "Consts.h"
 #include "imgui.h"
-#include "ModelObjectManager.h"
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <filesystem>
@@ -38,16 +37,12 @@ void Stage::Init()
     // ï“èWëŒè€Ç…ê›íË
     for (auto& model : stagePillars_)
     {
-        MObjs().Add(model, *this);
 		model.Load();
     }
     for (auto& model : stageModels_)
     {
-        MObjs().Add(model, *this);
         model.Load(); 
     }
-    MObjs().Add(stageModel_,*this);
-    MObjs().AddActor("Stage", *this);
     stageModel_.Load(); 
 
     SetupCollisionInfo();

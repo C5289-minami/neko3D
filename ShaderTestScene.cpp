@@ -26,7 +26,7 @@ void ShaderTest::Init()
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
 
-  // 通常カメラの初期化
+	// 通常カメラの初期化
 	const Vec3 cameraEye{ 0.0f, 250.0f, -650.0f };
 	camera_.Initialize(cameraEye, { 0.0f, 100.0f, 0.0f });
 	camera_.ApplyCamera();
@@ -43,24 +43,24 @@ void ShaderTest::Init()
 
 	// FadeInを開始する
 	StartFadeIn();
-	
+
 
 	// Objの初期化
-   gameContext->GetStage().Init();
+	gameContext->GetStage().Init();
 	gameContext->GetBoss().Init();
 	// プレイヤーの初期設定
- gameContext->GetPlayer().Init();
+	gameContext->GetPlayer().Init();
 	gameContext->GetPlayer().Reset();
 	gameContext->GetPlayer().Update(0, gameContext->GetStage());
 	debugActorsPaused_ = false;
-   gameContext->GetStage().ResetAlphaModel(gameContext->GetPlayer().GetPosition());
+	gameContext->GetStage().ResetAlphaModel(gameContext->GetPlayer().GetPosition());
 }
 
 void ShaderTest::Update(float deltaTime)
 {
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 #ifndef NDEBUG
- camera_.UpdateSceneView(deltaTime, gameContext->GetPlayer().GetPosition());
+	camera_.UpdateSceneView(deltaTime, gameContext->GetPlayer().GetPosition());
 	const bool actorsPaused = debugActorsPaused_ || camera_.IsSceneViewActive();
 #else
 	const bool actorsPaused = false;
@@ -72,12 +72,12 @@ void ShaderTest::Update(float deltaTime)
 	const bool mouseCaptured = false;
 	const bool keyboardCaptured = false;
 #endif
-    const bool updateActors = !actorsPaused && !keyboardCaptured;
-    if (updateActors)
-    {
-               gameContext->GetPlayer().Update(deltaTime, gameContext->GetStage());
-				gameContext->GetBoss().Update(deltaTime);
-    }
+	const bool updateActors = !actorsPaused && !keyboardCaptured;
+	if (updateActors)
+	{
+		gameContext->GetPlayer().Update(deltaTime, gameContext->GetStage());
+		gameContext->GetBoss().Update(deltaTime);
+	}
 
 	// --- スキル入力処理 ---
 	int selectedSkill = 0;
@@ -88,7 +88,7 @@ void ShaderTest::Update(float deltaTime)
 	else if (DxLib::CheckHitKey(KEY_INPUT_5)) selectedSkill = 5;
 
 	const bool skillKeyDown = selectedSkill != 0;
- if (!actorsPaused && !keyboardCaptured && skillKeyDown && !skillKeyWasDown_ && gameContext->GetBoss().GetCurrentState() != BossStateType::Attack)
+	if (!actorsPaused && !keyboardCaptured && skillKeyDown && !skillKeyWasDown_ && gameContext->GetBoss().GetCurrentState() != BossStateType::Attack)
 	{
 		BossPoseSkill* skill = nullptr;
 		switch (selectedSkill)
@@ -103,7 +103,7 @@ void ShaderTest::Update(float deltaTime)
 		if (skill)
 		{
 			skill->Reset();
-          gameContext->GetBoss().UseSkill(*skill);
+			gameContext->GetBoss().UseSkill(*skill);
 		}
 	}
 	skillKeyWasDown_ = skillKeyDown;
@@ -117,21 +117,21 @@ void ShaderTest::Update(float deltaTime)
 #endif
 
 	// --- 右クリックを押している間のみカメラ操作 ---
-   if (!mouseCaptured && !camera_.IsSceneViewActive() && (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
+	if (!mouseCaptured && !camera_.IsSceneViewActive() && (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
 	{
 		SetMouseDispFlag(FALSE);
 		camera_.Update(deltaTime);
 	}
-  else SetMouseDispFlag(TRUE);
-  auto& player = gameContext->GetPlayer();
-  ModelObject playerModel = player.GetModelObject().WithParentTransform(
-	  player.GetPosition(), player.GetRotation());
-  const bool touching = Collision::UpdateModelContact(playerModel, gameContext->GetBoss().GetModelObject());
-  player.GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
+	else SetMouseDispFlag(TRUE);
+	auto& player = gameContext->GetPlayer();
+	ModelObject playerModel = player.GetModelObject().WithParentTransform(
+		player.GetPosition(), player.GetRotation());
+	const bool touching = Collision::UpdateModelContact(playerModel, gameContext->GetBoss().GetModelObject());
+	player.GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
 	if (updateActors && touching) gameContext->GetPlayer().TakeDamage();
 
 
- gameContext->GetStage().UpdateAlphaModel(deltaTime, gameContext->GetPlayer());
+	gameContext->GetStage().UpdateAlphaModel(deltaTime, gameContext->GetPlayer());
 
 
 	// --- F2 でシェーダー全体のON/OFFを切り替える ---
@@ -167,7 +167,7 @@ void ShaderTest::Render() const
 		DrawScene(false);
 	}
 
-    gameContext->GetPlayer().DrawStatus();
+	gameContext->GetPlayer().DrawStatus();
 
 	const int white = DxLib::GetColor(255, 255, 255);
 	int fontHandle = RM().GetFont(ResourceKeys::Font_Title);
@@ -429,31 +429,31 @@ void ShaderTest::DrawImGui()
 void ShaderTest::RenderDepth() const
 {
 	// シーンのカメラを設定する
- camera_.ApplyCamera();
+	camera_.ApplyCamera();
 	// Boneなしシェーダー
-	modelToonRenderer_.SetVertexShader(ModelToonType::Model);
+	modelToonRenderer_.SetVertexShader(ModelType::Model);
 
-  gameContext->GetStage().GetModelObject().Draw();
+	gameContext->GetStage().GetModelObject().Draw();
 	gameContext->GetBoss().Draw();
 
 	// Bone対応の頂点シェーダー
-	modelToonRenderer_.SetVertexShader(ModelToonType::Bone);
+	modelToonRenderer_.SetVertexShader(ModelType::Bone);
 
- gameContext->GetPlayer().Draw();
+	gameContext->GetPlayer().Draw();
 
 }
 
 void ShaderTest::DrawScene(bool toonEnabled) const
 {
 	// カメラを設定する
- camera_.ApplyCamera();
+	camera_.ApplyCamera();
 	// トゥーンシェーダーを使わない場合
 	if (!toonEnabled)
 	{
 		SetUsePixelShader(-1);
 		SetUseVertexShader(-1);
 
-       gameContext->GetStage().Draw();
+		gameContext->GetStage().Draw();
 		gameContext->GetBoss().Draw();
 		gameContext->GetPlayer().Draw();
 
@@ -463,7 +463,7 @@ void ShaderTest::DrawScene(bool toonEnabled) const
 	// トゥーン描画開始
 	modelToonRenderer_.BeginPass();
 
-	const auto drawActor = [this](const ModelObject& model, ModelToonType type)
+	const auto drawActor = [this](const ModelObject& model, ModelType type)
 		{
 			if (model.collisionHighlighted)
 			{
@@ -478,12 +478,12 @@ void ShaderTest::DrawScene(bool toonEnabled) const
 				modelToonRenderer_.Draw(model, type);
 			}
 		};
-   const auto& player = gameContext->GetPlayer();
-   const ModelObject playerModel = player.GetModelObject().WithParentTransform(
-	   player.GetPosition(), player.GetRotation());
-   drawActor(playerModel, ModelToonType::Bone);
-	drawActor(gameContext->GetBoss().GetModelObject(),	ModelToonType::Model);
-	drawActor(gameContext->GetStage().GetModelObject(),	ModelToonType::Model);
+	const auto& player = gameContext->GetPlayer();
+	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
+		player.GetPosition(), player.GetRotation());
+	drawActor(playerModel, ModelType::Bone);
+	drawActor(gameContext->GetBoss().GetModelObject(), ModelType::Model);
+	drawActor(gameContext->GetStage().GetModelObject(), ModelType::Model);
 
 	modelToonRenderer_.EndPass();
 }

@@ -24,7 +24,9 @@ void SceneManager::Init()
 	{
 		debugUI.Init();
 	}
-	DxLib::SetWindowSize(1280, 720);
+	DxLib::SetWindowSize(w * 0.7f, h * 0.7f);
+#else
+	DxLib::SetWindowSize(w, h);
 #endif
 	DxPlus::DxWrapper::GetInstance().SetFpsCap(runConfig.fpsCap);
 
@@ -41,6 +43,8 @@ void SceneManager::Init()
 	statusTestScene.SetGameContext(&gameContext);
 	modelConfigScene.SetGameContext(&gameContext);
 	gameTestScene.SetGameContext(&gameContext);
+  gameScene.SetModelEditTargets();
+	roomTestScene.SetModelEditTargets();
 #endif
 
 	scene = &titleScene; // 最初のシーン

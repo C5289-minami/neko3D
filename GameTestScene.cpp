@@ -171,14 +171,14 @@ void GameTest::RenderDepth() const
 	const auto& effectManager = gameContext->GetEffectManager();
 
 	// Boneなしシェーダー
-	modelToonRenderer_.SetVertexShader(ModelToonType::Model);
+	modelToonRenderer_.SetVertexShader(ModelType::Model);
 
 	boss.Draw();
 	stage.Draw();
 	stage.DrawAlphaModel();
 
 	// Bone対応の頂点シェーダー
-	modelToonRenderer_.SetVertexShader(ModelToonType::Bone);
+	modelToonRenderer_.SetVertexShader(ModelType::Bone);
 
 	player.Draw();
 
@@ -217,7 +217,7 @@ void GameTest::DrawScene(bool toonEnabled) const
 	// トゥーン描画開始
 	modelToonRenderer_.BeginPass();
 
-	const auto drawActor = [this](const ModelObject& model, ModelToonType type)
+	const auto drawActor = [this](const ModelObject& model, ModelType type)
 		{
 			if (model.collisionHighlighted)
 			{
@@ -234,17 +234,17 @@ void GameTest::DrawScene(bool toonEnabled) const
 		};
    const ModelObject playerModel = player.GetModelObject().WithParentTransform(
 		player.GetPosition(), player.GetRotation());
-	drawActor(playerModel, ModelToonType::Bone);
-	drawActor(boss.GetModelObject(), ModelToonType::Model);
-	drawActor(stage.GetModelObject(), ModelToonType::Model);
-	drawActor(stage.GetAlphaModelObject(), ModelToonType::Model);
+	drawActor(playerModel, ModelType::Bone);
+	drawActor(boss.GetModelObject(), ModelType::Model);
+	drawActor(stage.GetModelObject(), ModelType::Model);
+	drawActor(stage.GetAlphaModelObject(), ModelType::Model);
 	for(const auto& pillar : stage.GetPillarModelObjects())
 	{
-		drawActor(pillar, ModelToonType::Model);
+		drawActor(pillar, ModelType::Model);
 	}
 	for(const auto& pillar : stage.GetStageModelObjects())
 	{
-		drawActor(pillar, ModelToonType::Model);
+		drawActor(pillar, ModelType::Model);
 	}
 	effectManager.Draw();
 	grid.Draw();

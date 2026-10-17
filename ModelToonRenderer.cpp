@@ -156,7 +156,7 @@ void ModelToonRenderer::EndPass() const
 
 void ModelToonRenderer::Draw(
     const ModelObject& model,
-    ModelToonType type
+    ModelType type
 ) const
 {
     // モデルに合った頂点シェーダーを選択する
@@ -172,16 +172,16 @@ void ModelToonRenderer::Draw(
 // ============================================================
 
 void ModelToonRenderer::SetVertexShader(
-    ModelToonType type
+    ModelType type
 ) const
 {
     switch (type)
     {
-    case ModelToonType::Model:
+    case ModelType::Model:
         SetUseVertexShader(vertexShader_);
         break;
 
-    case ModelToonType::Bone:
+    case ModelType::Bone:
         SetUseVertexShader(vertexShaderBone_);
         break;
     }
