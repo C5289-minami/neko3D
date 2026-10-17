@@ -19,6 +19,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: microsoft/setup-msbuild@v2
+      - name: Restore NuGet Packages
+        run: nuget restore 3dgp1.sln -NonInteractive
 
       # NuGetパッケージを復元
       - name: Restore NuGet Packages
