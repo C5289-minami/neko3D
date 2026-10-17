@@ -1,7 +1,5 @@
 #include "Boss.h"
-#include "Boss.h"
 #include "Consts.h"
-#include "TransformDefaults.h"
 #include "ResourceKeys.h"
 #include "ResourceManager.h"
 
@@ -26,10 +24,9 @@ void Boss::Init()
 void Boss::Reset()
 {
     model_.collisionHighlighted = false;
-    SetTransform(TransformDefaults::GameBoss);
 	velocity_ = {};
 	activeSkill_ = nullptr;
- SetAnimation(BossAnimType::Idle, true);
+	SetAnimation(BossAnimType::Idle, true);
     animation_.Reset();
     stateMachine_.Initialize();
     // 更新を止めても描画できるように初期ポーズを用意する

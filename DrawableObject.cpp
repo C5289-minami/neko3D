@@ -1,13 +1,19 @@
 #include "DrawableObject.h"
 #include "DxConv.h"
 #include "ResourceManager.h"
+#include <algorithm>
+#include <array>
+#include <cstddef>
 #include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include "ActorBase.h"
 
 namespace
 {
+    using RotationMatrix = std::array<std::array<float, 3>, 3>;
+
 	// ヘルパー関数: std::wstringをstd::stringに変換する
     std::string NarrowModelKey(const std::wstring& key)
     {
@@ -40,6 +46,48 @@ namespace
             rotatedY.x * sinZ + rotatedY.y * cosZ,
             rotatedY.z
         };
+    }
+
+    RotationMatrix MakeRotationMatrix(const Vec3& rotation)
+    {
+        const float cosX = std::cos(rotation.x);
+        const float sinX = std::sin(rotation.x);
+        const float cosY = std::cos(rotation.y);
+        const float sinY = std::sin(rotation.y);
+        const float cosZ = std::cos(rotation.z);
+        const float sinZ = std::sin(rotation.z);
+
+        return {{
+            { cosY * cosZ, sinX * sinY * cosZ - cosX * sinZ, cosX * sinY * cosZ + sinX * sinZ },
+            { cosY * sinZ, sinX * sinY * sinZ + cosX * cosZ, cosX * sinY * sinZ - sinX * cosZ },
+            { -sinY, sinX * cosY, cosX * cosY }
+        }};
+    }
+
+    RotationMatrix Multiply(const RotationMatrix& left, const RotationMatrix& right)
+    {
+        RotationMatrix result{};
+        for (std::size_t row = 0; row < 3; ++row)
+            for (std::size_t column = 0; column < 3; ++column)
+                for (std::size_t index = 0; index < 3; ++index)
+                    result[row][column] += left[row][index] * right[index][column];
+        return result;
+    }
+
+    Vec3 ToRotationXYZ(const RotationMatrix& matrix)
+    {
+        const float y = std::asin(std::clamp(-matrix[2][0], -1.0f, 1.0f));
+        const float cosY = std::cos(y);
+        if (std::abs(cosY) > 0.00001f)
+        {
+            return {
+                std::atan2(matrix[2][1], matrix[2][2]),
+                y,
+                std::atan2(matrix[1][0], matrix[0][0])
+            };
+        }
+
+        return { std::atan2(-matrix[1][2], matrix[1][1]), y, 0.0f };
     }
 }
 
@@ -193,6 +241,36 @@ void ModelObject::Draw(Vec3 masterPos) const
     MV1DrawModel(handle);
 }
 
+ModelObject ModelObject::WithParentTransform(const Vec3& parentPosition, const Vec3& parentRotation) const
+{
+    ModelObject world = *this;
+    world.position = parentPosition + RotateXYZ(position, parentRotation);
+    world.rotation = ToRotationXYZ(Multiply(MakeRotationMatrix(parentRotation), MakeRotationMatrix(rotation)));
+    return world;
+}
+
+void ModelObject::FadeTo(const ActorBase& player, float speed, float deltaTime)
+{
+    if (player.GetPosition().y >= position.y)
+    {
+        SetAlpha(1.0f);
+        return;
+    }
+
+    const float targetAlpha = 0.0f;
+    const float step = std::max(speed, 0.0f) * std::max(deltaTime, 0.0f);
+    const float difference = targetAlpha - alpha;
+    if (std::abs(difference) <= step)
+    {
+        SetAlpha(targetAlpha);
+        return;
+    }
+    SetAlpha(alpha + (difference > 0.0f ? step : -step));
+}
+
+
+
+
 Collision::Ellipsoid ModelObject::GetHitEllipsoid() const
 {
      int handle = RM().GetModel(modelKey);
@@ -209,7 +287,7 @@ Collision::Ellipsoid ModelObject::GetHitEllipsoid() const
     const Vec3 maximum = DxConv::ToVec3(mesh.MaxPosition);
 	// 頂点がない場合は無効とする
 	const bool valid = refreshResult >= 0 && mesh.VertexNum > 0;    // 頂点がない場合は無効とする
-	MV1TerminateReferenceMesh(handle, -1, TRUE, TRUE);//参照用メッシュの後始末
+	DxLib::MV1TerminateReferenceMesh(handle, -1, TRUE, TRUE);//参照用メッシュの後始末
 
     if (!valid) return {};
 

@@ -1,6 +1,4 @@
 #include "Player.h"
-#include "TransformDefaults.h"
-
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
 #include "Consts.h"
@@ -13,6 +11,7 @@
 #include <algorithm>
 #include <vector>
 #include <iostream>
+#include "ModelObjectManager.h"
 
 
 Player::Player()
@@ -23,12 +22,16 @@ Player::Player()
 
 void Player::Init()
 {
-	SetTransform(TransformDefaults::GamePlayer);
-
-    const int modelHandle = RM().GetModel(ResourceKeys::Model_Paladin);
+  model_.modelKey = ResourceKeys::Model_Paladin;
+	const int modelHandle = RM().GetModel(model_.modelKey);
 	if (modelHandle < 0) return;
 
-	model_.modelKey = ResourceKeys::Model_Paladin;
+	model_.scale = { 100.0f, 100.0f, 100.0f };
+
+	// 編集対象に設定
+    MObjs().Add(model_, *this);
+	MObjs().AddActor("Player", *this);
+ Reset();
 }
 
 
@@ -38,7 +41,11 @@ void Player::Reset()
     wasTouchingPillar_ = false;
     model_.collisionHighlighted = false;
     ultimateGauge_ = 0.0f;
-	SetTransform(TransformDefaults::GamePlayer);
+  SetPosition({ 0.0f, 26.0f, -1066.0f });
+	SetPitch(0.0f);
+	SetYaw(0.0f);
+	MObjs().LoadActorTransform(*this);
+	model_.scale = { 100.0f, 100.0f, 100.0f };
 
 
 	moveInput_ = {};
@@ -53,6 +60,8 @@ void Player::Reset()
     // 更新を止めても描画できるように初期ポーズを用意する
     animation_.Play3D(RM().GetModel(model_.modelKey), currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
     animation_.Update(0.0f);
+
+	model_.Load(); // 無理やり上書きしてます
 }
 
 
@@ -72,10 +81,6 @@ void Player::Update(float deltaTime)
 	}
 	position_.y += velocity_.y * deltaTime;
 	isGrounded_ = false;
-
-	model_.position = position_;
-	model_.rotation.y = GetYaw();
-	model_.rotation.x = GetPitch();
 
 	const int modelHandle = RM().GetModel(model_.modelKey);
 	animation_.Play3D(modelHandle, currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
@@ -120,10 +125,6 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 		}
 	}
 
-	model_.position = position_;
-	model_.rotation.y = GetYaw();
-	model_.rotation.x = GetPitch();
-
     // 足元から高さ・半径を使って、プレイヤーのカプセルを作る。
     const Vec3 capsuleStart = GetPosition() + Vec3::Up() * Const::PLAYER_RADIUS;
     const Vec3 capsuleEnd = GetPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
@@ -147,8 +148,9 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 
 void Player::Draw() const
 {
-    model_.ApplyCollisionColor();
-	animation_.Draw3D(model_.position, model_.scale, model_.rotation);
+   const ModelObject worldModel = model_.WithParentTransform(GetPosition(), GetRotation());
+	worldModel.ApplyCollisionColor();
+	animation_.Draw3D(worldModel.position, worldModel.scale, worldModel.rotation);
 }
 
 

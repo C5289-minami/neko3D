@@ -10,7 +10,7 @@
 #endif // !NDEBUG
 
 
-void StatusTestScene::Init()
+void StatusTest::Init()
 {
 	// 背景色
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
@@ -32,15 +32,15 @@ void StatusTestScene::Init()
 
 	testModel_.modelKey = ResourceKeys::Model_Test;
 
-	player_.Init();
-    player_.Reset();
-	player_.SetPosition({ 0.0f, 100.0f, 0.0f });
+ gameContext->GetPlayer().Init();
+	gameContext->GetPlayer().Reset();
+	gameContext->GetPlayer().SetPosition({ 0.0f, 100.0f, 0.0f });
 
 	if (!CharSettingsManager::Load())
 		DxPlus::Utils::FatalError(L"キャラクター情報の読み込みに失敗");
 }
 
-void StatusTestScene::Update(float deltaTime)
+void StatusTest::Update(float deltaTime)
 {
 	// 背景色
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
@@ -70,18 +70,22 @@ void StatusTestScene::Update(float deltaTime)
 
 	shaderToggleWasDown = shaderToggleDown;
 
-	player_.Update(deltaTime);
-	if (player_.GetPosition().y < 0.0f)
+  gameContext->GetPlayer().Update(deltaTime);
+	if (gameContext->GetPlayer().GetPosition().y < 0.0f)
 	{
-		player_.SetPosition({ player_.GetPosition().x, 0.0f, player_.GetPosition().z });
-		player_.SetGround(true);
+        gameContext->GetPlayer().SetPosition({ gameContext->GetPlayer().GetPosition().x, 0.0f, gameContext->GetPlayer().GetPosition().z });
+		gameContext->GetPlayer().SetGround(true);
 	}
 
-	Collision::UpdateModelContact(player_.GetModelObject(), testModel_);
+    auto& player = gameContext->GetPlayer();
+	ModelObject playerModel = player.GetModelObject().WithParentTransform(
+		player.GetPosition(), player.GetRotation());
+	Collision::UpdateModelContact(playerModel, testModel_);
+    player.GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
 
 }
 
-void StatusTestScene::DrawImGui()
+void StatusTest::DrawImGui()
 {
   #ifndef NDEBUG
 	ImGui::Begin("Status Test Scene");
@@ -141,7 +145,7 @@ void StatusTestScene::DrawImGui()
    #endif
 }
 
-void StatusTestScene::Render() const
+void StatusTest::Render() const
 {
 	activeCamera_->ApplyCamera();
 
@@ -166,7 +170,7 @@ void StatusTestScene::Render() const
 }
 
 
-void StatusTestScene::RenderDepth() const
+void StatusTest::RenderDepth() const
 {
 	// シーンのカメラを設定する
 	activeCamera_->ApplyCamera();
@@ -177,17 +181,17 @@ void StatusTestScene::RenderDepth() const
 
 	// Bone対応の頂点シェーダー
 	modelToonRenderer_.SetVertexShader(ModelToonType::Bone);
-	player_.Draw();
+ gameContext->GetPlayer().Draw();
 
 }
 
-void StatusTestScene::DrawScene(bool toonEnabled) const
+void StatusTest::DrawScene(bool toonEnabled) const
 {
 	// シーンのカメラを設定する
 	activeCamera_->ApplyCamera();
 
 	// つかわないもの
-	grid_.Draw();
+   gameContext->GetGrid().Draw();
 
 	// トゥーンシェーダーを使わない場合
 	if (!toonEnabled)
@@ -196,7 +200,7 @@ void StatusTestScene::DrawScene(bool toonEnabled) const
 		SetUseVertexShader(-1);
 
 		testModel_.Draw();
-		player_.Draw();
+     gameContext->GetPlayer().Draw();
 
 
 		return;
@@ -221,7 +225,10 @@ void StatusTestScene::DrawScene(bool toonEnabled) const
 			}
 		};
 	drawActor(testModel_, ModelToonType::Model);
-	drawActor(player_.GetModelObject(), ModelToonType::Bone);
+   const auto& player = gameContext->GetPlayer();
+	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
+		player.GetPosition(), player.GetRotation());
+	drawActor(playerModel, ModelToonType::Bone);
 
 
 	modelToonRenderer_.EndPass();

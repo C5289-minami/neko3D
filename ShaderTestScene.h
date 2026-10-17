@@ -9,6 +9,7 @@
 #include "BossHairBallSkill.h"
 #include "BossTailWhipSkill.h"
 #include "Scene.h"
+#include "GameContext.h"
 #include "DrawableObject.h"
 #include "Vector3.h"
 #include "Stage.h"
@@ -17,16 +18,16 @@
 #include "ShaderEffectController.h"
 #include "Camera.h"
 
-class ShaderTestScene final : public Scene
+class ShaderTest final : public Scene
 {
 public:
-    explicit ShaderTestScene(class GameContext* context)
+    explicit ShaderTest(class GameContext* context)
         : Scene(context),
-          bangSkill_(boss),
-          tailWhipSkill_(boss),
-          clapSkill_(boss),
-          hairBallSkill_(boss),
-          biteSkill_(boss)
+          bangSkill_(context->GetBoss()),
+          tailWhipSkill_(context->GetBoss()),
+          clapSkill_(context->GetBoss()),
+          hairBallSkill_(context->GetBoss()),
+          biteSkill_(context->GetBoss())
     {
     }
 
@@ -34,11 +35,8 @@ public:
     void Update(float deltaTime) override;
     void Render() const override;
 	void DrawImGui() override;
-    DebugSceneControls GetDebugControls() override;
 
 private:
-    Stage stage{};
-    Boss boss{};
     BossBangSkill bangSkill_;
     BossTailWhipSkill tailWhipSkill_;
     BossClapSkill clapSkill_;
@@ -52,8 +50,6 @@ private:
     bool debugActorsPaused_{};
     std::string transformInitialStatus_;
 
-    // プレイヤー
-    Player player_;
 
     // モデルのトゥーン描画を管理する
     ModelToonRenderer modelToonRenderer_{};

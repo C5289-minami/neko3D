@@ -208,6 +208,7 @@
     <ClInclude Include="GameTestScene.h" />
     <ClInclude Include="ModelConfigScene.h" />
     <ClInclude Include="ModelObjectManager.h" />
+    <ClInclude Include="ObjectTransform.h" />
     <ClInclude Include="ShaderTestScene.h" />
     <ClInclude Include="BossWalkState.h" />
     <ClInclude Include="Camera.h" />
@@ -253,9 +254,8 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="MathUtil.h" />
     <ClInclude Include="ModelToonRenderer.h" />
-    <ClInclude Include="ModelAlpha.h" />
     <ClInclude Include="Motion.h" />
-    <ClInclude Include="NekoMotionTestScene.h" />
+    <ClInclude Include="RoomTestScene.h" />
     <ClInclude Include="OutlineSettings.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerAnimType.h" />
@@ -309,8 +309,6 @@
     <ClInclude Include="StatusTestScene.h" />
     <ClInclude Include="TitleScene.h" />
     <ClInclude Include="ToonSettings.h" />
-    <ClInclude Include="TransformSettings.h" />
-    <ClInclude Include="TransformDefaults.h" />
     <ClInclude Include="UIBase.h" />
     <ClInclude Include="UIFactory.h" />
     <ClInclude Include="UIManager.h" />
@@ -359,9 +357,8 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ModelToonRenderer.cpp" />
-    <ClCompile Include="ModelAlpha.cpp" />
     <ClCompile Include="Motion.cpp" />
-    <ClCompile Include="NekoMotionTestScene.cpp" />
+    <ClCompile Include="RoomTestScene.cpp" />
     <ClCompile Include="OutlineSettings.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerIdleState.cpp" />
@@ -397,9 +394,6 @@
     <ClCompile Include="StatusTestScene.cpp" />
     <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="ToonSettings.cpp" />
-    <ClCompile Include="TransformSettings.cpp">
-      <UseFullPaths>true</UseFullPaths>
-    </ClCompile>
     <ClCompile Include="UIBase.cpp" />
     <ClCompile Include="UIFactory.cpp" />
     <ClCompile Include="UIManager.cpp" />

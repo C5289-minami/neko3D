@@ -23,6 +23,7 @@ struct ModelObject
 	Vec3 scale{ 1.0f, 1.0f, 1.0f };
 	Vec3 center{ 0.0f, 0.0f, 0.0f }; // スケールと同期はできないが回転の中心をずらすために使用する
 	Vec3 rotation{};
+	float alpha{ 1.0f };
 
     bool collisionHighlighted{ false };
 
@@ -37,4 +38,10 @@ struct ModelObject
     void ApplyTransform(Vec3 masterPos = { 0.0f, 0.0f, 0.0f }) const;
     void ApplyCollisionColor() const;
     void Draw(Vec3 masterPos = { 0.0f, 0.0f, 0.0f }) const;
+    ModelObject WithParentTransform(const Vec3& parentPosition, const Vec3& parentRotation) const;
+
+	void SetAlpha(float value) { alpha = (std::max)(0.0f, (std::min)(1.0f, value)); }
+	float GetAlpha(float& outValue) const { outValue = alpha; }
+	float GetAlpha() const { return alpha; }
+	void FadeTo(const class ActorBase& player, float speed, float deltaTime);
 };
