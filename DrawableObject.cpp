@@ -241,6 +241,7 @@ void ModelObject::Draw(Vec3 masterPos) const
     MV1DrawModel(handle);
 }
 
+// 引数二つを受け取り、親の位置と回転を考慮して新しいModelObjectを返す
 ModelObject ModelObject::WithParentTransform(const Vec3& parentPosition, const Vec3& parentRotation) const
 {
     ModelObject world = *this;
