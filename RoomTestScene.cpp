@@ -1,15 +1,5 @@
 #include "RoomTestScene.h"
 #include "GameContext.h"
-#ifndef NDEBUG
-#include "ModelObjectManager.h"
-
-void RoomTestScene::SetModelEditTargets()
-{
-	auto& room = gameContext->GetRoom();
-	MObjs().AddActor("Room", room);
-	MObjs().Add(room.GetModelObject(), room);
-}
-#endif
 
 void RoomTestScene::Init()
 {

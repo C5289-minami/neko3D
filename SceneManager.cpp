@@ -10,10 +10,12 @@
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
 
+#include <vector>
+
 void SceneManager::Init()
 {
-	const int w = DxPlus::CLIENT_WIDTH;
-	const int h = DxPlus::CLIENT_HEIGHT;
+	const int w = DxPlus::CLIENT_WIDTH * 0.7f;
+	const int h = DxPlus::CLIENT_HEIGHT * 0.7f;
 
 	DxPlus::Initialize(w, h, runConfig.windowed);
 	DxLib::SetMouseDispFlag(TRUE);
@@ -33,19 +35,23 @@ void SceneManager::Init()
 	ResourceManager::GetInstance().LoadAll();
 	gameContext.Init();
 
-	titleScene.SetGameContext(&gameContext);
-	gameScene.SetGameContext(&gameContext);
-	resultScene.SetGameContext(&gameContext);
+    std::vector<Scene*> scenes{
+		&titleScene,
+		&gameScene,
+		&resultScene
+	};
 #ifndef NDEBUG
-	shaderTestScene.SetGameContext(&gameContext);
-	ssFlipTestScene.SetGameContext(&gameContext);
-	roomTestScene.SetGameContext(&gameContext);
-	statusTestScene.SetGameContext(&gameContext);
-	modelConfigScene.SetGameContext(&gameContext);
-	gameTestScene.SetGameContext(&gameContext);
-  gameScene.SetModelEditTargets();
-	roomTestScene.SetModelEditTargets();
+   scenes.insert(scenes.end(), {
+		&shaderTestScene,
+		&ssFlipTestScene,
+		&roomTestScene,
+		&statusTestScene,
+		&modelConfigScene,
+		&gameTestScene
+	});
 #endif
+	for (Scene* currentScene : scenes)
+		currentScene->SetGameContext(&gameContext);
 
 	scene = &titleScene; // 最初のシーン
 

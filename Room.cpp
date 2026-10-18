@@ -1,8 +1,10 @@
 #include "Room.h"
 #include "DxLib.h"
 #include "Resourcekeys.h"
+#include "ModelObjectManager.h"
 
 Room::Room()
+	: ActorBase("Room")
 {
 	roomModel_.modelKey = ResourceKeys::Model_Room;
 }
@@ -15,6 +17,7 @@ void Room::Init()
 
 void Room::Reset()
 {
+ MObjs().LoadActorTransform(*this);
 	float scale = 1.0f;
 	roomModel_.scale = { scale, scale, scale };
 }

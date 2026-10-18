@@ -14,7 +14,7 @@
 class Stage : public ActorBase
 {
 public:
-	Stage() = default;
+  Stage() : ActorBase("Stage") {}
 	~Stage() = default;
 
 	// accessor

@@ -9,7 +9,7 @@
 
 
 Boss::Boss()
-	: stateMachine_(*this)
+  : ActorBase("Boss"), stateMachine_(*this)
 {
 	model_.modelKey = ResourceKeys::Model_Boss;
 	currentAnimIndex_ = 0;

@@ -12,23 +12,27 @@ ModelObjectManager& ModelObjectManager::GetInstance()
     return instance;
 }
 
-void ModelObjectManager::AddActor(const std::string& name, ActorBase& actor)
+std::string ModelObjectManager::GetActorKey(const ActorBase& actor) const
 {
-    if (name.empty()) return;
-    const auto existing = std::find_if(actors_.begin(), actors_.end(), [&actor](const auto& entry)
-    {
-        return entry.second == &actor;
-    });
-    if (existing != actors_.end()) return;
+    return actor.GetIdentifier();
+}
 
-    const auto duplicateName = std::find_if(actors_.begin(), actors_.end(), [&name](const auto& entry)
+std::vector<std::pair<std::string, ActorBase*>> ModelObjectManager::GetActors() const
+{
+    std::vector<std::pair<std::string, ActorBase*>> actors;
+    for (const auto& [object, actor] : ownership_)
     {
-        return entry.first == name;
-    });
-    if (duplicateName != actors_.end()) return;
+        if (!object || !actor) continue;
+        const auto existing = std::find_if(actors.begin(), actors.end(), [actor](const auto& entry)
+        {
+            return entry.second == actor;
+        });
+        if (existing != actors.end()) continue;
 
-    actors_.emplace_back(name, &actor);
-    LoadActorTransform(actor);
+        const std::string key = GetActorKey(*actor);
+        if (!key.empty()) actors.emplace_back(key, actor);
+    }
+    return actors;
 }
 
 // オブジェクトの追加・削除・描画・保存
@@ -87,21 +91,23 @@ bool ModelObjectManager::SaveAll() const
     bool success = true;
     for (const auto* object : objects_)
         if (object) success = object->Save() && success;
-    for (const auto& [name, actor] : actors_)
+    for (auto entry = ownership_.begin(); entry != ownership_.end(); ++entry)
     {
-        (void)name;
-        if (actor) success = SaveActorTransform(*actor) && success;
+        ActorBase* actor = entry->second;
+        if (!actor) continue;
+        const bool alreadySaved = std::any_of(ownership_.begin(), entry, [actor](const auto& earlier)
+        {
+            return earlier.second == actor;
+        });
+        if (!alreadySaved) success = SaveActorTransform(*actor) && success;
     }
     return success;
 }
 
 bool ModelObjectManager::LoadActorTransform(ActorBase& actor, const std::string& filePath) const
 {
-    const auto registered = std::find_if(actors_.begin(), actors_.end(), [&actor](const auto& entry)
-    {
-        return entry.second == &actor;
-    });
-    if (registered == actors_.end()) return false;
+    const std::string actorKey = GetActorKey(actor);
+    if (actorKey.empty()) return false;
 
     try
     {
@@ -112,7 +118,7 @@ bool ModelObjectManager::LoadActorTransform(ActorBase& actor, const std::string&
         file >> json;
         const auto actors = json.find("actors");
         if (actors == json.end() || !actors->is_object()) return false;
-        const auto saved = actors->find(registered->first);
+        const auto saved = actors->find(actorKey);
         if (saved == actors->end() || !saved->is_object()) return false;
 
         const auto readVector = [](const nlohmann::json& value, Vec3& output)
@@ -141,11 +147,8 @@ bool ModelObjectManager::LoadActorTransform(ActorBase& actor, const std::string&
 
 bool ModelObjectManager::SaveActorTransform(const ActorBase& actor, const std::string& filePath) const
 {
-    const auto registered = std::find_if(actors_.begin(), actors_.end(), [&actor](const auto& entry)
-    {
-        return entry.second == &actor;
-    });
-    if (registered == actors_.end()) return false;
+    const std::string actorKey = GetActorKey(actor);
+    if (actorKey.empty()) return false;
 
     const Vec3 position = actor.GetPosition();
     const Vec3 rotation = actor.GetRotation();
@@ -166,7 +169,7 @@ bool ModelObjectManager::SaveActorTransform(const ActorBase& actor, const std::s
         if (!json.contains("actors") || !json["actors"].is_object())
             json["actors"] = nlohmann::json::object();
 
-        json["actors"][registered->first] = {
+        json["actors"][actorKey] = {
             { "position", { position.x, position.y, position.z } },
             { "rotation", { rotation.x, rotation.y, rotation.z } }
         };

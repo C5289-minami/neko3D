@@ -18,7 +18,6 @@ public:
     void Add(ModelObject& object);
     void Add(ModelObject& object, ActorBase& owner);
     void Remove(ModelObject& object);
-    void AddActor(const std::string& name, ActorBase& actor);
     ActorBase* GetOwner(const ModelObject& object) const;
     void Draw() const;
     bool SaveAll() const;
@@ -26,12 +25,13 @@ public:
         const std::string& filePath = "./Data/Config/model_objects.json") const;
     bool SaveActorTransform(const ActorBase& actor,
         const std::string& filePath = "./Data/Config/model_objects.json") const;
-    const std::vector<std::pair<std::string, ActorBase*>>& GetActors() const { return actors_; }
+    std::vector<std::pair<std::string, ActorBase*>> GetActors() const;
     const std::vector<ModelObject*>& GetObjects() const { return objects_; }
 
 private:
+    std::string GetActorKey(const ActorBase& actor) const;
+
     std::vector<ModelObject*> objects_;
-    std::vector<std::pair<std::string, ActorBase*>> actors_;
     std::vector<std::pair<ModelObject*, ActorBase*>> ownership_;
 };
 
