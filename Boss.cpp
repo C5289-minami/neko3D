@@ -11,6 +11,7 @@
 Boss::Boss()
   : ActorBase("Boss"), stateMachine_(*this)
 {
+ model_.SetOwner(*this);
 	model_.modelKey = ResourceKeys::Model_Boss;
 	currentAnimIndex_ = 0;
 }

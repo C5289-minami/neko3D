@@ -5,6 +5,8 @@
 #include "Collision.h"
 #include "ModelType.h"
 
+class ActorBase;
+
 struct ImageObject
 {
 	std::wstring imageKey;
@@ -27,6 +29,7 @@ struct ModelObject
 	float alpha{ 1.0f };
 
 	bool collisionHighlighted{ false };
+	const ActorBase* owner_{ nullptr };
 
 	void Init();
 	// JSONファイルから読み込み、オブジェクトを初期化する
@@ -37,6 +40,7 @@ struct ModelObject
 	Collision::Ellipsoid GetHitEllipsoid() const;
 	Vec3 GetSize() const { return GetHitEllipsoid().radii * 2.0f; }
 	void ApplyTransform(Vec3 masterPos = { 0.0f, 0.0f, 0.0f }) const;
+   void SetOwner(const ActorBase& owner) { owner_ = &owner; }
 	void ApplyCollisionColor() const;
 	void Draw(Vec3 masterPos = { 0.0f, 0.0f, 0.0f }) const;
 	ModelObject WithParentTransform(const Vec3& parentPosition, const Vec3& parentRotation) const;

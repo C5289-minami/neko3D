@@ -118,6 +118,21 @@ ss::Player* ResourceManager::GetSpriteStudioPlayer(
     return it->second.get();
 }
 
+std::unique_ptr<ss::Player> ResourceManager::CreateSpriteStudioPlayerInstance(
+    const std::wstring& key) const
+{
+    if (ssResMan == nullptr) return nullptr;
+    auto dataKey = spriteStudioDataKeyByPlayerKey.find(key);
+    if (dataKey == spriteStudioDataKeyByPlayerKey.end()) return nullptr;
+
+    std::unique_ptr<ss::Player> player(ss::Player::create(ssResMan));
+    if (!player) return nullptr;
+    player->setData(dataKey->second);
+    player->setAlpha(255);
+    player->setFlip(false, false);
+    return player;
+}
+
 std::vector<std::string> ResourceManager::GetSpriteStudioAnimationNames(
     const std::wstring& key) const
 {
@@ -283,6 +298,7 @@ ss::Player* ResourceManager::LoadSpriteStudioPlayer(
     {
         ssResMan->addDataWithKey(dataKey, path);
     }
+    spriteStudioDataKeyByPlayerKey[key] = dataKey;
 
     std::unique_ptr<ss::Player> player(ss::Player::create(ssResMan));
     if (!player)
@@ -355,6 +371,7 @@ void ResourceManager::UnloadSpriteStudioPlayers()
 {
     spriteStudioPlayers.clear();
     spriteStudioAnimationNames.clear();
+    spriteStudioDataKeyByPlayerKey.clear();
 }
 
 void ResourceManager::UnloadEffects()

@@ -224,6 +224,12 @@ void ModelObject::ApplyTransform(Vec3 masterPos) const
     const int handle = RM().GetModel(modelKey);
     if (handle < 0) return;
 
+    if (owner_)
+    {
+        WithParentTransform(owner_->GetPosition(), owner_->GetRotation()).ApplyTransform(masterPos);
+        return;
+    }
+
     const Vec3 modelPosition = position + masterPos - RotateXYZ(center, rotation);
 
     MV1SetPosition(handle, DxConv::ToVECTOR(modelPosition));
@@ -245,6 +251,7 @@ void ModelObject::Draw(Vec3 masterPos) const
 ModelObject ModelObject::WithParentTransform(const Vec3& parentPosition, const Vec3& parentRotation) const
 {
     ModelObject world = *this;
+    world.owner_ = nullptr;
     world.position = parentPosition + RotateXYZ(position, parentRotation);
     world.rotation = ToRotationXYZ(Multiply(MakeRotationMatrix(parentRotation), MakeRotationMatrix(rotation)));
     return world;
