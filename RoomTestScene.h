@@ -14,6 +14,9 @@ public:
 	void Init() override;
 	void Update(float deltaTime) override;
 	void Render() const override;
+	void DrawImGui() override;
+
+
 private:
 	// モデルのトゥーン描画を管理する
 	ModelToonRenderer modelToonRenderer_{};
@@ -26,10 +29,6 @@ private:
 	// メンバー変数
 	Camera::FreeCamera camera_;
 	Camera::CameraDirector cameraDirector_{ camera_ };
-
-	bool wasCameraMoveKeyDown_{};
-	bool wasCameraCloseUpKeyDown_{};
-	bool wasCameraFollowKeyDown_{};
 
 };
 

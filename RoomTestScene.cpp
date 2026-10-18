@@ -122,47 +122,6 @@ void RoomTestScene::Update(float deltaTime)
 		SetMouseDispFlag(TRUE);
 	}
 
-	// --- F3：演出用アングルA ---
-	const bool cameraMoveKeyDown =
-		DxLib::CheckHitKey(KEY_INPUT_F3) != 0;
-
-	if (cameraMoveKeyDown && !wasCameraMoveKeyDown_)
-	{
-		cameraDirector_.PlayShot(
-			"LookUp",
-			0.8f,
-			Motion::Easing::EaseInOut);
-	}
-
-	wasCameraMoveKeyDown_ = cameraMoveKeyDown;
-
-	// --- F5：演出用アングルB ---
-	const bool cameraCloseUpKeyDown =
-		DxLib::CheckHitKey(KEY_INPUT_F5) != 0;
-
-	if (cameraCloseUpKeyDown && !wasCameraCloseUpKeyDown_)
-	{
-		cameraDirector_.PlayShot(
-			"CloseUp",
-			0.5f,
-			Motion::Easing::EaseInOut);
-	}
-
-	wasCameraCloseUpKeyDown_ = cameraCloseUpKeyDown;
-
-	// --- F4：通常のFreeCameraの姿勢へ戻る ---
-	const bool cameraFollowKeyDown =
-		DxLib::CheckHitKey(KEY_INPUT_F4) != 0;
-
-	if (cameraFollowKeyDown && !wasCameraFollowKeyDown_)
-	{
-		cameraDirector_.ReturnToPreviousCamera(
-			0.6f,
-			Motion::Easing::EaseInOut);
-	}
-
-	wasCameraFollowKeyDown_ = cameraFollowKeyDown;
-
 	// --- カメラの遷移と最終適用 ---
 	cameraDirector_.Update(deltaTime);
 
@@ -188,6 +147,38 @@ void RoomTestScene::Render() const
 	}
 	camera_.ApplyPose(cameraDirector_.GetCurrentPose());
 	gameContext->GetGrid().Draw();
+}
+
+void RoomTestScene::DrawImGui()
+{
+#ifndef  NDEBUG
+	ImGui::Begin("RoomTestScene Debug");
+
+  if (ImGui::Button(u8"演出用アングルA"))
+	{
+		cameraDirector_.PlayShot(
+			"LookUp",
+			0.8f,
+			Motion::Easing::EaseInOut);
+	}
+	if (ImGui::Button(u8"演出用アングルB"))
+	{
+		cameraDirector_.PlayShot(
+			"CloseUp",
+			0.5f,
+			Motion::Easing::EaseInOut);
+	}
+	if (ImGui::Button(u8"FreeCameraに戻る"))
+	{
+		cameraDirector_.ReturnToPreviousCamera(
+			0.6f,
+			Motion::Easing::EaseInOut);
+	}
+
+	ImGui::End();
+
+#endif // ! NDEBUG
+
 }
 
 void RoomTestScene::RenderDepth() const
