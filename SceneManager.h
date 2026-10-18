@@ -92,7 +92,7 @@ private:
     RoomTestScene roomTestScene{ &gameContext };
 	StatusTest statusTestScene{ &gameContext };
     ModelConfigScene modelConfigScene{ &gameContext };
-    GameTest gameTestScene{ &gameContext };
+    GameTestScene gameTestScene{ &gameContext };
 #endif
     Scene* scene = nullptr; // åªç›ÇÃÉVÅ[Éì
     bool wasF11Down = false;
