@@ -18,7 +18,7 @@ public:
 	void SetActiveCamera(Camera::Camera* camera) { activeCamera_ = camera; }
 private:
     Camera::Camera* activeCamera_{ nullptr };
-    Camera::HomingCamera playerCamera_;
+    Camera::TargetCamera playerCamera_;
 #ifndef NDEBUG
     Camera::FreeCamera freeCamera_;
     bool wasFreeCameraToggleDown_{};

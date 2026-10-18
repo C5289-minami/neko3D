@@ -19,7 +19,6 @@
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
 
-
 void ShaderTest::Init()
 {
 	// 背景色
@@ -54,6 +53,8 @@ void ShaderTest::Init()
 	gameContext->GetPlayer().Update(0, gameContext->GetStage());
 	debugActorsPaused_ = false;
 	gameContext->GetStage().ResetAlphaModel(gameContext->GetPlayer().GetPosition());
+
+
 }
 
 void ShaderTest::Update(float deltaTime)
@@ -147,6 +148,8 @@ void ShaderTest::Update(float deltaTime)
 	}
 
 	shaderToggleWasDown = shaderToggleDown;
+
+
 }
 
 void ShaderTest::Render() const

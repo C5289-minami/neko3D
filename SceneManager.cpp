@@ -63,6 +63,8 @@ void SceneManager::Init()
 
 void SceneManager::Shutdown()
 {
+	// UI が所有する SpriteStudio Player を、参照先リソースより先に破棄する。
+	UIM().Clear();
 	ResourceManager::GetInstance().UnloadAll();
 
 #ifndef NDEBUG

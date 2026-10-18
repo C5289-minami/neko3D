@@ -1,9 +1,11 @@
 #pragma once
 #include "Scene.h"
-#include "Camera.h"
 #include "Grid.h"
 #include "ModelToonRenderer.h"
 #include "ShaderEffectController.h"
+
+#include "Camera.h"
+#include "CameraDirector.h"
 
 class RoomTestScene final: public Scene
 {
@@ -13,14 +15,21 @@ public:
 	void Update(float deltaTime) override;
 	void Render() const override;
 private:
-	Camera::FreeCamera camera_;
-
-
 	// モデルのトゥーン描画を管理する
 	ModelToonRenderer modelToonRenderer_{};
 	// 共通のスクリーン空間アウトライン描画
 	ShaderEffectController shaderEffects_{};
 	void DrawScene(bool toonEnabled) const;
 	void RenderDepth() const;
+
+
+	// メンバー変数
+	Camera::FreeCamera camera_;
+	Camera::CameraDirector cameraDirector_{ camera_ };
+
+	bool wasCameraMoveKeyDown_{};
+	bool wasCameraCloseUpKeyDown_{};
+	bool wasCameraFollowKeyDown_{};
+
 };
 
