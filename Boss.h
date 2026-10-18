@@ -6,18 +6,19 @@
 #include "DrawableObject.h"
 #include "IAttackSkill.h"
 #include "Vector3.h"
+#include "ObjectTransform.h"
 #include "BossAnimType.h"
-#include "TransformSettings.h"
+#include "ActorBase.h"
 
-class Boss
+class Boss : public ActorBase
 {
 public:
 	Boss();
 
-	void Init();
-	void Reset();
-	void Update(float deltaTime);
-	void Draw() const;
+	void Init() override;
+	void Reset()override;
+	void Update(float deltaTime)override;
+	void Draw() const override;
 
 	bool UseSkill(IAttackSkill& skill);
 	void ClearActiveSkill() { activeSkill_ = nullptr; }
@@ -32,8 +33,6 @@ public:
         model_.position = transform.position;
         model_.rotation = transform.rotation;
     }
-    const Vec3& GetPosition() const { return model_.position; }
-	void SetPosition(const Vec3& position) { model_.position = position; }
 	BossStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }
 	ModelObject& GetModelObject() { return model_; }
 	const int GetModelHandle() const;
@@ -58,7 +57,6 @@ private:
 	int currentAnimIndex_{ -1 };
 	bool currentAnimLoop_{ true };
 
-	// �X�e�[�^�X
 	float health_{ 100.0f };
 	float maxHealth_{ 100.0f };
 	float downGauge_{ 0.0f };

@@ -3,7 +3,6 @@
 // =============================
 #pragma once
 #include "DxPlus/DxPlus.h"
-#include "TransformSettings.h"
 
 class Scene
 {
@@ -18,7 +17,9 @@ public:
     virtual void Render() const {}      // 毎フレーム描画（派生で実装）
     virtual void DrawImGui() {}
     virtual void End() {}
-    virtual DebugSceneControls GetDebugControls() { return {}; }
+#ifndef NDEBUG
+    virtual void SetModelEditTargets() {}
+#endif
 
     // 駆動（メインループから毎フレーム呼ぶ）
     void Drive(float deltaTime);

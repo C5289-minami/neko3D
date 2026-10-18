@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "StateMachine.h"
 #include "PlayerStateType.h"
 
@@ -43,5 +43,5 @@ private:
 	PlayerUltimateAttackState ultimateAttackState_;
 	PlayerDamagingState damagingState_;
 	PlayerDieState dieState_;
-	// ‘¼‚ğ‚±‚±‚É’Ç‰Á
+	// ä»–ã‚’ã“ã“ã«è¿½åŠ 
 };

@@ -11,36 +11,33 @@
 #endif
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
+#ifndef NDEBUG
+#include "ModelObjectManager.h"
 
-DebugSceneControls GameTestScene::GetDebugControls()
+void GameScene::SetModelEditTargets()
 {
-	return {
-		"boss_test",
-		{
-			MakeDebugTransformTarget("boss_test/player", "Player", gameContext->GetPlayer()),
-			MakeDebugTransformTarget("boss_test/boss", "Boss", gameContext->GetBoss())
-		},
-        DebugCameraControls{
-            [] { return false; },
-            [this] { return playerCamera_.GetPosition(); },
-            [this](const Vec3& position) { playerCamera_.SetViewPosition(position); },
-            [this] { playerCamera_.Reset(); },
-            [this] { playerCamera_.FocusAt(gameContext->GetPlayer().GetPosition()); },
-            [this] { return playerCamera_.GetAngleOffsetDegrees(); },
-            [this](const Vec3& angles) { playerCamera_.SetAngleOffsetDegrees(angles); },
-            true
-        },
-		[this] { return debugActorsPaused_; },
-		[this](bool paused) { debugActorsPaused_ = paused; },
-		transformInitialStatus_
-	};
+	auto& player = gameContext->GetPlayer();
+	auto& stage = gameContext->GetStage();
+	auto& boss = gameContext->GetBoss();
+
+	MObjs().AddActor("Player", player);
+	MObjs().Add(player.GetModelObject(), player);
+	MObjs().AddActor("Stage", stage);
+	for (auto& model : stage.GetPillarModelObjects())
+		MObjs().Add(model, stage);
+	for (auto& model : stage.GetStageModelObjects())
+		MObjs().Add(model, stage);
+	MObjs().Add(stage.GetModelObject(), stage);
+
+	MObjs().AddActor("Boss", boss);
+	MObjs().Add(boss.GetModelObject(), boss);
 }
+#endif
 
-void GameTestScene::Init()
+
+
+void GameTest::Init()
 {
-    //DxLib::SetBackgroundColor(32, 32, 32);
-
-	TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
 
 
     gameContext->Reset();
@@ -65,11 +62,12 @@ void GameTestScene::Init()
 	shaderEffects_.GetSettings().toonEnabled = true;
 	shaderEffects_.GetSettings().outlineEnabled = true;
 
+
 	
     StartFadeIn();
 }
 
-void GameTestScene::Update(float deltaTime)
+void GameTest::Update(float deltaTime)
 {
     DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
@@ -90,7 +88,7 @@ void GameTestScene::Update(float deltaTime)
 
 	if (DxLib::CheckHitKey(KEY_INPUT_R) != 0)
 	{
-		TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
+		freeCamera_.ResetView();
 	}
 	if( DxLib::CheckHitKey(KEY_INPUT_F) != 0)
 	{
@@ -110,19 +108,21 @@ void GameTestScene::Update(float deltaTime)
 	else
 #endif
 	{
-		const Vec3 stageCenterPosition{ 0.0f, 0.0f, 0.0f };
 		auto& player = gameContext->GetPlayer();
 		auto& boss = gameContext->GetBoss();
 		auto& stage = gameContext->GetStage();
+		const Vec3 stageCenterPosition = stage.GetPosition();
 
 
 		player.Update(deltaTime, stage, stageCenterPosition);
 		stage.UpdateAlphaModel(deltaTime, player);
 		boss.Update(deltaTime);
-		const bool touching = Collision::UpdateModelContact(player.GetModelObject(), boss.GetModelObject());
+      ModelObject playerModel = player.GetModelObject().WithParentTransform(
+		  player.GetPosition(), player.GetRotation());
+	  const bool touching = Collision::UpdateModelContact(playerModel, boss.GetModelObject());
+	  player.GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
       if (touching)
 		{
-			player.SetPosition(player.GetModelObject().position);
 			player.TakeDamage();
 		}
 
@@ -154,7 +154,7 @@ void GameTestScene::Update(float deltaTime)
     }
 }
 
-void GameTestScene::Render() const
+void GameTest::Render() const
 {
 
 	DxLib::ClearDrawScreen();
@@ -175,11 +175,11 @@ void GameTestScene::Render() const
 	}
 }
 
-void GameTestScene::End()
+void GameTest::End()
 {
 }
 
-void GameTestScene::RenderDepth() const
+void GameTest::RenderDepth() const
 {
 #ifndef NDEBUG
 	(activeCamera_ ? activeCamera_ : &playerCamera_)->ApplyCamera();
@@ -193,21 +193,22 @@ void GameTestScene::RenderDepth() const
 	const auto& effectManager = gameContext->GetEffectManager();
 
 	// Boneなしシェーダー
-	modelToonRenderer_.SetVertexShader(ModelToonType::Model);
+	modelToonRenderer_.SetVertexShader(ModelType::Model);
 
 	boss.Draw();
 	stage.Draw();
 	stage.DrawAlphaModel();
+	gameContext->GetRoom().Draw();
 
 	// Bone対応の頂点シェーダー
-	modelToonRenderer_.SetVertexShader(ModelToonType::Bone);
+	modelToonRenderer_.SetVertexShader(ModelType::Bone);
 
 	player.Draw();
 
 
 }
 
-void GameTestScene::DrawScene(bool toonEnabled) const
+void GameTest::DrawScene(bool toonEnabled) const
 {
 #ifndef NDEBUG
 	(activeCamera_ ? activeCamera_ : &playerCamera_)->ApplyCamera();
@@ -220,7 +221,7 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	const auto& stage = gameContext->GetStage();
 	const auto& effectManager = gameContext->GetEffectManager();
 	const auto& grid = gameContext->GetGrid();
-
+	const auto& room = gameContext->GetRoom();
 
 	// トゥーンシェーダーを使わない場合
 	if (!toonEnabled)
@@ -233,13 +234,14 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 		stage.DrawAlphaModel();
 		effectManager.Draw();
 		grid.Draw();
+		room.Draw();
 		return;
 	}
 
 	// トゥーン描画開始
 	modelToonRenderer_.BeginPass();
 
-	const auto drawActor = [this](const ModelObject& model, ModelToonType type)
+	const auto drawActor = [this](const ModelObject& model, ModelType type)
 		{
 			if (model.collisionHighlighted)
 			{
@@ -254,20 +256,27 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 				modelToonRenderer_.Draw(model, type);
 			}
 		};
-	drawActor(player.GetModelObject(), ModelToonType::Bone);
-	drawActor(boss.GetModelObject(), ModelToonType::Model);
-	drawActor(stage.GetModelObject(), ModelToonType::Model);
-	drawActor(stage.GetAlphaModelObject(), ModelToonType::Model);
-	for(const auto& pillar : stage.GetPillarModelObjects())
+   const ModelObject playerModel = player.GetModelObject().WithParentTransform(
+		player.GetPosition(), player.GetRotation());
+	drawActor(playerModel, ModelType::Bone);
+	// bossのモデルにboss自体の位置と回転を適用して描画する
+	drawActor(boss.GetModelObject().WithParentTransform(
+		boss.GetPosition(), boss.GetRotation()), ModelType::Model);
+    drawActor(stage.GetModelObject().WithParentTransform(
+		stage.GetPosition(), stage.GetRotation()), ModelType::Model);
+	drawActor(stage.GetAlphaModelObject(), ModelType::Model);
+ for (const auto& pillar : stage.GetPillarModelObjects())
 	{
-		drawActor(pillar, ModelToonType::Model);
+        drawActor(pillar.WithParentTransform(stage.GetPosition(), stage.GetRotation()), ModelType::Model);
 	}
-	for(const auto& pillar : stage.GetStageModelObjects())
+  for (const auto& model : stage.GetStageModelObjects())
 	{
-		drawActor(pillar, ModelToonType::Model);
+        drawActor(model.WithParentTransform(stage.GetPosition(), stage.GetRotation()), ModelType::Model);
 	}
 	effectManager.Draw();
 	grid.Draw();
+
+	drawActor(room.GetModelObject(), ModelType::Model);
 	modelToonRenderer_.EndPass();
 }
 

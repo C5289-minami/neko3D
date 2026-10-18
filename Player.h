@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "ActorBase.h"
 #include "DrawableObject.h"
@@ -8,7 +8,7 @@
 #include "Stage.h"
 #include "AnimationDraw.h"
 #include "PlayerAnimType.h"
-#include "TransformSettings.h"
+#include "ObjectTransform.h"
 #include "Consts.h"
 
 class Stage;
@@ -34,20 +34,20 @@ public:
 
     void SetAnimation(PlayerAnimType::Type type, bool loop = true);
 
-	// ƒXƒe[ƒW‚Æ‚Ì“–‚½‚è”»’è‚İ‚ÌXV
+	// ã‚¹ãƒ†ãƒ¼ã‚¸ã¨ã®å½“ãŸã‚Šåˆ¤å®šè¾¼ã¿ã®æ›´æ–°
 	void Update(float deltaTime, const Stage& stage, const Vec3& movementCenter = Vec3{});
 
-	// ˆÚ“®
+	// ç§»å‹•
 	void SetMoveDirection(const Vec3& moveDir);
 	void StopMove();
 
-	// ‰ñ“]
+	// å›è»¢
 	void Turn(float direction, float speed, float deltaTime);
 	void TurnTowards(const Vec3& moveDir, float deltaTime);
-	//Player‚ÌÎ‚ßˆÚ“®
+	//Playerã®æ–œã‚ç§»å‹•
 	void PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& movementCenter);
 
-	// ƒWƒƒƒ“ƒv
+	// ã‚¸ãƒ£ãƒ³ãƒ—
 	void JumpAction();
 	void StartLungingJump(const Vec3& moveDir);
     float GetLungingMoveSpeed() const { return lungingMoveSpeed_; }
@@ -63,25 +63,23 @@ public:
 	void SetPosition(const Vec3& position)
     {
         ActorBase::SetPosition(position);
-        model_.position = position;
     }
     ObjectTransform GetTransform() const
     {
-        return { model_.scale, GetPosition(), { GetPitch(), GetYaw(), model_.rotation.z } };
+        return { model_.scale, GetPosition(), GetRotation() };
     }
     void SetTransform(const ObjectTransform& transform)
     {
         SetPosition(transform.position);
         SetPitch(transform.rotation.x);
         SetYaw(transform.rotation.y);
-        model_.rotation = transform.rotation;
         model_.scale = transform.scale;
     }
     ModelObject& GetModelObject() { return model_; }
     const ModelObject& GetModelObject() const { return model_; }
 	const PlayerInput& GetInput() const { return input_; }
 
-    // •KEƒQ[ƒW‚Í‰¼B‘‰Áƒ^ƒCƒ~ƒ“ƒO‚ÍŒã‚ÅŒˆ‚ß‚é
+    // å¿…æ®ºã‚²ãƒ¼ã‚¸ã¯ä»®ã€‚å¢—åŠ ã‚¿ã‚¤ãƒŸãƒ³ã‚°ã¯å¾Œã§æ±ºã‚ã‚‹
     static constexpr float UltimateGaugeMax = 100.0f;
     float GetUltimateGauge() const { return ultimateGauge_; }
     void SetUltimateGauge(float value);
@@ -103,8 +101,8 @@ private:
     float lungingJumpSpeed_{ Const::PLAYER_LUNGING_JUMP_SPEED };
 	float kari_max_jissou_ = UltimateGaugeMax;
 
-	Vec3 movementCenter_{}; // ‘«ê‚Ì’†S
-	Vec3 moveInput_{};      // X‚Í¶‰EAZ‚Í‘OŒã‚Ì“ü—Í
+	Vec3 movementCenter_{}; // è¶³å ´ã®ä¸­å¿ƒ
+	Vec3 moveInput_{};      // Xã¯å·¦å³ã€Zã¯å‰å¾Œã®å…¥åŠ›
 	Vec3 velocity_{ 0.0f, 0.0f, 0.0f };
 
     bool touchingPillar = false;

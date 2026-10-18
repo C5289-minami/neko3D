@@ -24,7 +24,9 @@ void SceneManager::Init()
 	{
 		debugUI.Init();
 	}
-	DxLib::SetWindowSize(1280, 720);
+	DxLib::SetWindowSize(w * 0.7f, h * 0.7f);
+#else
+	DxLib::SetWindowSize(w, h);
 #endif
 	DxPlus::DxWrapper::GetInstance().SetFpsCap(runConfig.fpsCap);
 
@@ -37,10 +39,12 @@ void SceneManager::Init()
 #ifndef NDEBUG
 	shaderTestScene.SetGameContext(&gameContext);
 	ssFlipTestScene.SetGameContext(&gameContext);
-	nekoMotionTestScene.SetGameContext(&gameContext);
+	roomTestScene.SetGameContext(&gameContext);
 	statusTestScene.SetGameContext(&gameContext);
 	modelConfigScene.SetGameContext(&gameContext);
 	gameTestScene.SetGameContext(&gameContext);
+  gameScene.SetModelEditTargets();
+	roomTestScene.SetModelEditTargets();
 #endif
 
 	scene = &titleScene; // 最初のシーン
@@ -78,12 +82,12 @@ Scene* SceneManager::GetScene(SceneID id)
 	case SceneID::Game:     return &gameScene;
 	case SceneID::Result:   return &resultScene;
 #ifndef NDEBUG
-	case SceneID::ShaderTestScene: return &shaderTestScene;
+	case SceneID::ShaderTest: return &shaderTestScene;
 	case SceneID::SsFlipTest: return &ssFlipTestScene;
-	case SceneID::NekoMotionTest: return &nekoMotionTestScene;
-	case SceneID::StatusTestScene: return &statusTestScene;
+	case SceneID::NekoMotionTest: return &roomTestScene;
+	case SceneID::StatusTest: return &statusTestScene;
 	case SceneID::ModelConfig: return &modelConfigScene;
-	case SceneID::GameTestScene: return &gameTestScene;
+	case SceneID::GameTest: return &gameTestScene;
 #endif // !NDEBUG
 	}
 	return &titleScene;
@@ -140,7 +144,7 @@ void SceneManager::Run()
 			if (runConfig.enableDebugUI && runConfig.windowed)
 			{
 				debugUI.BeginFrame();
-				debugUI.Draw(gameContext, scene->GetDebugControls());
+				debugUI.Draw(gameContext);
 				scene->DrawImGui();
 				debugUI.EndFrame();
 			}

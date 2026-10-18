@@ -1,59 +1,114 @@
-
+ï»¿
 #include "ModelConfigScene.h"
 
 #include "ModelObjectManager.h"
 #include "SceneManager.h"
 #include "imgui.h"
+#include "GameContext.h"
+
 
 #include <algorithm>
 #include <string>
 
 namespace
 {
-	// ImGui‚ÅVec3‚ð•ÒW‚·‚é‚½‚ß‚Ìƒwƒ‹ƒp[ŠÖ”
-    bool EditVector3(const char* label, Vec3& value, float speed)
-    {
-        float components[] = { value.x, value.y, value.z };
-        if (!ImGui::DragFloat3(label, components, speed)) return false;
-        value = { components[0], components[1], components[2] };
-        return true;
-    }
+	// ImGuiã§Vec3ã‚’ç·¨é›†ã™ã‚‹ãŸã‚ã®ãƒ˜ãƒ«ãƒ‘ãƒ¼é–¢æ•°
+	bool EditVector3(const char* label, Vec3& value, float speed)
+	{
+		float components[] = { value.x, value.y, value.z };
+		if (!ImGui::DragFloat3(label, components, speed)) return false;
+		value = { components[0], components[1], components[2] };
+		return true;
+	}
 }
 
 void ModelConfigScene::Init()
-{   
-    // ”wŒiF
-    DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
+{
+	// èƒŒæ™¯è‰²
+	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
-	//camera‚Ì‰Šú‰»
-    camera_.Initialize({ 0.0f, 150.0f, -1000.0f }, {});
-    
-	// Å‰‚ÌƒIƒuƒWƒFƒNƒg‚ð‘I‘ð
-    const auto& objects = MObjs().GetObjects();
-    selected_ = objects.empty() ? nullptr : objects.front();
-    
-    
-    StartFadeIn();
+	//cameraã®åˆæœŸåŒ–
+	camera_.Initialize({ 0.0f, 150.0f, -1000.0f }, {});
+	camera_.SetMoveShiftRatio(5.0f);
+
+	// æœ€åˆã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’é¸æŠž
+	const auto& objects = MObjs().GetObjects();
+	const auto& actors = MObjs().GetActors();
+	selectedActor_ = actors.empty() ? nullptr : actors.front().second;
+	selected_ = selectedActor_ || objects.empty() ? nullptr : objects.front();
+
+	for (const auto& [name, actor] : actors)
+		if (actor) actor->Init();
+	for (auto* object : objects)
+		if (object) object->Init();
+
+	// ãƒˆã‚¥ãƒ¼ãƒ³æç”»ã«å¿…è¦ãªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã¨è¨­å®šãƒãƒƒãƒ•ã‚¡ãƒ¼ã‚’åˆæœŸåŒ–
+	if (!modelToonRenderer_.Init())
+		DxPlus::Utils::FatalError(L"modelToonRendererã®åˆæœŸåŒ–å¤±æ•—");
+	if (!shaderEffects_.Init(DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT))
+		DxPlus::Utils::FatalError(L"shaderEffectsã®åˆæœŸåŒ–å¤±æ•—");
+
+	// toonæç”»ã¨ã‚¢ã‚¦ãƒˆãƒ©ã‚¤ãƒ³æç”»ã‚’æœ‰åŠ¹ã«ã™ã‚‹
+	shaderEffects_.GetSettings().toonEnabled = true;
+	shaderEffects_.GetSettings().outlineEnabled = true;
+
+
+	StartFadeIn();
 }
 
 void ModelConfigScene::Update(float deltaTime)
 {
-    Vec3 focus{};
-    if (selected_) focus = selected_->position;
- 
-    // --- ‰EƒNƒŠƒbƒN‚ð‰Ÿ‚µ‚Ä‚¢‚éŠÔ‚Ì‚ÝƒJƒƒ‰‘€ì ---
-    if (!camera_.IsSceneViewActive() && (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
-    {
-        SetMouseDispFlag(FALSE);
-        camera_.Update(deltaTime);
-    }
-    else SetMouseDispFlag(TRUE);
+	Vec3 focus{};
+	if (selectedActor_)
+		focus = selectedActor_->GetPosition();
+	else if (selected_)
+	{
+		const auto* owner = MObjs().GetOwner(*selected_);
+		focus = owner
+			? selected_->WithParentTransform(owner->GetPosition(), owner->GetRotation()).position
+			: selected_->position;
+	}
+
+	// --- å³ã‚¯ãƒªãƒƒã‚¯ã‚’æŠ¼ã—ã¦ã„ã‚‹é–“ã®ã¿ã‚«ãƒ¡ãƒ©æ“ä½œ ---
+	if (!camera_.IsSceneViewActive() && (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
+	{
+		SetMouseDispFlag(FALSE);
+		camera_.Update(deltaTime);
+	}
+	else SetMouseDispFlag(TRUE);
+
+	// --- F2 ã§ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼å…¨ä½“ã®ON/OFFã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹ ---
+	static bool shaderToggleWasDown = false;
+	const bool shaderToggleDown =
+		DxLib::CheckHitKey(KEY_INPUT_F2) != 0;
+
+	if (shaderToggleDown && !shaderToggleWasDown)
+	{
+		shaderEffects_.SetEnabled(
+			!shaderEffects_.IsEnabled()
+		);
+	}
+
+	shaderToggleWasDown = shaderToggleDown;
 }
 
 void ModelConfigScene::Render() const
 {
-    camera_.ApplyCamera();
-    MObjs().Draw();
+	if (shaderEffects_.IsEnabled())
+	{
+		shaderEffects_.Render(
+			[this](bool toonEnabled) {
+				DrawScene(toonEnabled);
+			},
+			[this] {
+				RenderDepth();
+			}
+		);
+	}
+	else
+	{
+		DrawScene(false);
+	}
 }
 
 void ModelConfigScene::DrawImGui()
@@ -61,53 +116,198 @@ void ModelConfigScene::DrawImGui()
 #ifndef NDEBUG
 
 
-    const auto& objects = MObjs().GetObjects();
-    ImGui::Begin(u8"ModelObjectÝ’è");
-    ImGui::TextWrapped(u8"ŠeƒV[ƒ“‚È‚Ç‚©‚çMObjs().Add(object)‚µ‚½ModelObject‚ð•\Ž¦E•ÒW‚·‚é");
-    ImGui::TextWrapped(u8"Free Camera: ‰EƒNƒŠ‚Å‰Ò“­ / WASDEQE‚ÅˆÚ“® / ƒ}ƒEƒX‚ÅŽ‹“_ / Shift‚Å‰Á‘¬ / F‚Å‘I‘ð‘ÎÛ‚Ö / R‚ÅŽ‹“_ƒŠƒZƒbƒg");
+	const auto& objects = MObjs().GetObjects();
+	const auto& actors = MObjs().GetActors();
+	ImGui::Begin(u8"ModelObjectè¨­å®š");
+	ImGui::TextWrapped(u8"Model Configã®ä½¿ã„æ–¹ãƒ¡ãƒ¢");
+	ImGui::TextWrapped(u8"  1.	Debugãƒ“ãƒ«ãƒ‰ã§èµ·å‹•ã—ã€ã‚¿ã‚¤ãƒˆãƒ«ç”»é¢ã§F5ã‚’æŠ¼ã™ã€‚");
+	ImGui::TextWrapped(u8"  2.	å·¦ã®ãƒ„ãƒªãƒ¼ã§Playerã‚’é–‹ãã€‚");
+	ImGui::TextWrapped(u8"  3.	ç·¨é›†ã—ãŸã„å¯¾è±¡ã‚’é¸ã¶ã€‚");
+	ImGui::TextWrapped(u8"  4.	ä¿å­˜ã™ã‚‹ã€‚");
+	ImGui::TextWrapped(u8"  5.	å³ã‚¯ãƒªãƒƒã‚¯ä¸­ã«ã‚«ãƒ¡ãƒ©æ“ä½œã€‚WASDãƒ»QEã§ç§»å‹•ã€ãƒžã‚¦ã‚¹ã§è¦–ç‚¹ã‚’æ“ä½œã™ã‚‹ã€‚");
+	ImGui::TextWrapped(u8"   è¨­å®šã¯Data / Config / model_objects.jsonã«ä¿å­˜ã•ã‚Œã‚‹ã€‚");
+	for (const auto& [name, actor] : actors)
+	{
+		if (!actor) continue;
+		ImGui::PushID(actor);
+		const ImGuiTreeNodeFlags actorFlags = ImGuiTreeNodeFlags_DefaultOpen |
+			(selectedActor_ == actor ? ImGuiTreeNodeFlags_Selected : 0);
+		const bool expanded = ImGui::TreeNodeEx(name.c_str(), actorFlags);
+		if (ImGui::IsItemClicked())
+		{
+			selectedActor_ = actor;
+			selected_ = nullptr;
+		}
+		if (expanded)
+		{
+			for (auto* object : objects)
+			{
+				if (!object || MObjs().GetOwner(*object) != actor) continue;
 
-    // •ÒW—p‚ª‚È‚¢ê‡
-    if (objects.empty())
-    {
-        ImGui::TextWrapped(u8"“o˜^‚³‚ê‚½ModelObject‚ª‚ ‚è‚Ü‚¹‚ñBModelObject‚ðì¬‚µ‚½êŠ‚ÅMObjs().Add(object)‚ðŒÄ‚ñ‚Å‚­‚¾‚³‚¢B");
-        selected_ = nullptr;
-    }
-    else
-    {
-        for (auto* object : objects)
-        {
-            if (!object) continue;
-			// modelKey‚ðUTF-8‚É•ÏŠ·‚µ‚Ä•\Ž¦
-            const std::string label(object->modelKey.begin(), object->modelKey.end());
-            ImGui::PushID(object);
-			// ‘I‘ð’†‚ÌƒIƒuƒWƒFƒNƒg‚ðƒnƒCƒ‰ƒCƒg
-            if (ImGui::Selectable(label.c_str(), selected_ == object)) selected_ = object;
-            ImGui::PopID();
-        }
-    }
+				const std::string modelName(object->modelKey.begin(), object->modelKey.end());
+				const std::string label = modelName + " (Local)";
+				ImGui::PushID(object);
+				if (ImGui::Selectable(label.c_str(), selected_ == object))
+				{
+					selected_ = object;
+					selectedActor_ = nullptr;
+				}
+				ImGui::PopID();
+			}
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
+	}
 
-	// ‘I‘ð’†‚ÌƒIƒuƒWƒFƒNƒg‚ª—LŒø‚Èê‡‚Ì‚Ý•ÒWUI‚ð•\Ž¦
-    if (selected_ && std::find(objects.begin(), objects.end(), selected_) != objects.end())
-    {
-        ImGui::Separator();
-		// ‘I‘ð’†‚ÌƒIƒuƒWƒFƒNƒg‚ÌƒvƒƒpƒeƒB‚ð•ÒW
-        bool changed = EditVector3("Position", selected_->position, 1.0f);
-        changed |= EditVector3("Rotation (rad)", selected_->rotation, 0.01f);
-        changed |= EditVector3("Scale", selected_->scale, 0.1f);
-		// Scale‚ª0ˆÈ‰º‚É‚È‚Á‚½ê‡‚ÍŒx‚ð•\Ž¦
-        if (changed && (selected_->scale.x <= 0.0f || selected_->scale.y <= 0.0f || selected_->scale.z <= 0.0f))
-            status_ = u8"Scale‚Í0‚æ‚è‘å‚«‚¢’l‚É‚µ‚Ä‚­‚¾‚³‚¢B";
-		// •Û‘¶ƒ{ƒ^ƒ“
-        if (ImGui::Button(u8"‘I‘ð’†‚ð•Û‘¶"))
-            status_ = selected_->Save() ? u8"•Û‘¶‚µ‚Ü‚µ‚½B" : u8"•Û‘¶‚ÉŽ¸”s‚µ‚Ü‚µ‚½B";
-        ImGui::SameLine();
-		// ‚·‚×‚Ä•Û‘¶ƒ{ƒ^ƒ“
-        if (ImGui::Button(u8"‚·‚×‚Ä•Û‘¶"))
-            status_ = MObjs().SaveAll() ? u8"•Û‘¶‚µ‚Ü‚µ‚½B" : u8"•Û‘¶‚ÉŽ¸”s‚µ‚Ü‚µ‚½B";
-    }
+	if (actors.empty())
+		ImGui::TextDisabled(u8"ç™»éŒ²ã•ã‚ŒãŸActorã¯ã‚ã‚Šã¾ã›ã‚“ã€‚");
 
-	// ƒXƒe[ƒ^ƒX•\Ž¦
-    if (!status_.empty()) ImGui::TextUnformatted(status_.c_str());
-    ImGui::End();
+	bool hasUnownedObjects = false;
+	for (auto* object : objects)
+		if (object && !MObjs().GetOwner(*object)) hasUnownedObjects = true;
+
+	if (hasUnownedObjects && ImGui::TreeNodeEx(u8"Other ModelObjects", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		for (auto* object : objects)
+		{
+			if (!object || MObjs().GetOwner(*object)) continue;
+			// modelKeyã‚’UTF-8ã«å¤‰æ›ã—ã¦è¡¨ç¤º
+			const std::string modelName(object->modelKey.begin(), object->modelKey.end());
+			ImGui::PushID(object);
+			// é¸æŠžä¸­ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ãƒã‚¤ãƒ©ã‚¤ãƒˆ
+			if (ImGui::Selectable(modelName.c_str(), !selectedActor_ && selected_ == object))
+			{
+				selected_ = object;
+				selectedActor_ = nullptr;
+			}
+			ImGui::PopID();
+		}
+		ImGui::TreePop();
+	}
+
+	if (selectedActor_)
+	{
+		ImGui::Separator();
+		ImGui::TextUnformatted(u8"Actor Transform (World)");
+		Vec3 position = selectedActor_->GetPosition();
+		if (EditVector3(u8"World Position", position, 1.0f)) selectedActor_->SetPosition(position);
+		float rotation[2]{ selectedActor_->GetPitch(), selectedActor_->GetYaw() };
+		if (ImGui::DragFloat2(u8"World Rotation (Pitch/Yaw rad)", rotation, 0.01f))
+		{
+			selectedActor_->SetPitch(rotation[0]);
+			selectedActor_->SetYaw(rotation[1]);
+		}
+		if (ImGui::Button(u8"Actorå¤‰æ›ã‚’JSONã«ä¿å­˜"))
+		{
+			status_ = MObjs().SaveActorTransform(*selectedActor_)
+				? u8"Actorå¤‰æ›ã‚’model_objects.jsonã«ä¿å­˜ã—ã¾ã—ãŸã€‚"
+				: u8"Actorå¤‰æ›ã®ä¿å­˜ã«å¤±æ•—ã—ã¾ã—ãŸã€‚";
+		}
+	}
+
+	// é¸æŠžä¸­ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒæœ‰åŠ¹ãªå ´åˆã®ã¿ç·¨é›†UIã‚’è¡¨ç¤º
+	if (!selectedActor_ && selected_ && std::find(objects.begin(), objects.end(), selected_) != objects.end())
+	{
+		ImGui::Separator();
+		// é¸æŠžä¸­ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã‚’ç·¨é›†
+		const bool isLocalModel = MObjs().GetOwner(*selected_) != nullptr;
+		bool changed = EditVector3(isLocalModel ? u8"Local Position" : "Position", selected_->position, 1.0f);
+		changed |= EditVector3("Rotation (rad)", selected_->rotation, 0.01f);
+		changed |= EditVector3("Scale", selected_->scale, 0.1f);
+		// ScaleãŒ0ä»¥ä¸‹ã«ãªã£ãŸå ´åˆã¯è­¦å‘Šã‚’è¡¨ç¤º
+		if (changed && (selected_->scale.x <= 0.0f || selected_->scale.y <= 0.0f || selected_->scale.z <= 0.0f))
+			status_ = u8"Scaleã¯0ã‚ˆã‚Šå¤§ãã„å€¤ã«ã—ã¦ãã ã•ã„ã€‚";
+		// ä¿å­˜ãƒœã‚¿ãƒ³
+		if (ImGui::Button(u8"é¸æŠžä¸­ã‚’ä¿å­˜"))
+			status_ = selected_->Save() ? u8"ä¿å­˜ã—ã¾ã—ãŸã€‚" : u8"ä¿å­˜ã«å¤±æ•—ã—ã¾ã—ãŸã€‚";
+	}
+
+	if (ImGui::Button(u8"ã™ã¹ã¦ä¿å­˜"))
+		status_ = MObjs().SaveAll() ? u8"ä¿å­˜ã—ã¾ã—ãŸã€‚" : u8"ä¿å­˜ã«å¤±æ•—ã—ã¾ã—ãŸã€‚";
+
+	// ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹è¡¨ç¤º
+	if (!status_.empty()) ImGui::TextUnformatted(status_.c_str());
+	ImGui::End();
 #endif // !NDEBUG
+}
+
+void ModelConfigScene::RenderDepth() const
+{
+	const auto& objects = MObjs().GetObjects();
+	// ã‚·ãƒ¼ãƒ³ã®ã‚«ãƒ¡ãƒ©ã‚’è¨­å®šã™ã‚‹
+	camera_.ApplyCamera();
+
+	for (const auto* object : objects)
+	{
+		if (!object) continue;
+
+		if (object->modelType_ == ModelType::Bone)
+			modelToonRenderer_.SetVertexShader(ModelType::Bone);
+		else
+			modelToonRenderer_.SetVertexShader(ModelType::Model);
+
+		const auto* owner = MObjs().GetOwner(*object);
+		if (owner)
+			object->WithParentTransform(owner->GetPosition(), owner->GetRotation()).Draw();
+		else
+			object->Draw();
+	}
+
+}
+
+void ModelConfigScene::DrawScene(bool toonEnabled) const
+{
+	const auto& objects = MObjs().GetObjects();
+
+	// ã‚«ãƒ¡ãƒ©ã‚’è¨­å®šã™ã‚‹
+	camera_.ApplyCamera();
+	// ãƒˆã‚¥ãƒ¼ãƒ³ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ä½¿ã‚ãªã„å ´åˆ
+	if (!toonEnabled)
+	{
+		SetUsePixelShader(-1);
+		SetUseVertexShader(-1);
+
+		for (const auto* object : objects)
+		{
+			if (!object) continue;
+			const auto* owner = MObjs().GetOwner(*object);
+			if (owner)
+				object->WithParentTransform(owner->GetPosition(), owner->GetRotation()).Draw();
+			else
+				object->Draw();
+		}
+
+		return;
+	}
+
+	// ãƒˆã‚¥ãƒ¼ãƒ³æç”»é–‹å§‹
+	modelToonRenderer_.BeginPass();
+
+	const auto drawActor = [this](const ModelObject& model, ModelType type)
+		{
+			if (model.collisionHighlighted)
+			{
+				SetUsePixelShader(-1);
+				SetUseVertexShader(-1);
+				MV1SetUseOrigShader(FALSE);
+				model.Draw();
+				MV1SetUseOrigShader(TRUE);
+			}
+			else
+			{
+				modelToonRenderer_.Draw(model, type);
+			}
+		};
+
+	for (const auto* object : objects)
+	{
+		if (!object) continue;
+		const auto* owner = MObjs().GetOwner(*object);
+		const ModelObject drawObject = owner
+			? object->WithParentTransform(owner->GetPosition(), owner->GetRotation())
+			: *object;
+		drawActor(drawObject, drawObject.modelType_);
+	}
+
+	modelToonRenderer_.EndPass();
 }

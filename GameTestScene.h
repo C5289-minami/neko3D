@@ -4,19 +4,17 @@
 #include "ModelToonRenderer.h"
 #include "ShaderEffectController.h"
 #include "Camera.h"
-#include "TransformSettings.h"
 
-class GameTestScene final : public Scene
+class GameTest final : public Scene
 {
 public:
-    explicit GameTestScene(GameContext* context) : Scene(context) {}
+    explicit GameTest(GameContext* context) : Scene(context) {}
     void Init() override;
     void Update(float deltaTime) override;
     void Render() const override;
     void End() override;
 
     void SetActiveCamera(Camera::Camera* camera) { activeCamera_ = camera; }
-    DebugSceneControls GetDebugControls();
 
 private:
     Camera::Camera* activeCamera_{ nullptr };

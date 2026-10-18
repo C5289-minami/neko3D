@@ -15,10 +15,10 @@
 // サンドバックやBossで確認も
 // =============================
 
-class StatusTestScene final :  public Scene
+class StatusTest final :  public Scene
 {
 public:
-	explicit StatusTestScene(class GameContext* context)
+	explicit StatusTest(class GameContext* context)
 		: Scene(context)
 	{
 	}
@@ -40,8 +40,6 @@ private:
 	void DrawScene(bool toonEnabled) const;
 	void RenderDepth() const;
 
-	Player player_{};
 	ModelObject testModel_{};
-	Grid grid_{};
 };
 

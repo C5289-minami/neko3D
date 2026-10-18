@@ -1,4 +1,4 @@
-#include "PlayerGroomingState.h"
+ï»¿#include "PlayerGroomingState.h"
 #include "DxPlus/Debug.h"
 #include "Player.h"
 #include "PlayerInput.h"
@@ -19,25 +19,25 @@ void PlayerGroomingState::Enter()
 void PlayerGroomingState::Tick(float)
 {
     const PlayerInput& input = player_.GetInput();
-    // ƒQ[ƒW100‚Å‰EƒNƒŠƒbƒN‚·‚é‚Æ•KE‹Z
+    // ã‚²ãƒ¼ã‚¸100ã§å³ã‚¯ãƒªãƒƒã‚¯ã™ã‚‹ã¨å¿…æ®ºæŠ€
     if (input.ultimatePressed && player_.CanUseUltimate())
     {
         stateMachine_.ChangeState(PlayerStateType::UltimateAttack);
         return;
     }
-    // ¶ƒNƒŠƒbƒN‚Å’ÊíUŒ‚
+    // å·¦ã‚¯ãƒªãƒƒã‚¯ã§é€šå¸¸æ”»æ’ƒ
     if (input.attackPressed)
     {
         stateMachine_.ChangeState(PlayerStateType::Attack);
         return;
     }
-    // WASD+Space@“ü—Í•ûŒü‚Ö“ËiƒWƒƒƒ“ƒv
+    // WASD+Spaceã€€å…¥åŠ›æ–¹å‘ã¸çªé€²ã‚¸ãƒ£ãƒ³ãƒ—
     if (input.jumpPressed && input.isMoving && player_.IsGrounded() && player_.IsGravityEnabled())
     {
         stateMachine_.ChangeState(PlayerStateType::LungingJump);
         return;
     }
-    // Space‚¾‚¯‚Å^ã‚ÉƒWƒƒƒ“ƒv
+    // Spaceã ã‘ã§çœŸä¸Šã«ã‚¸ãƒ£ãƒ³ãƒ—
     if (input.jumpPressed && !input.isMoving && player_.IsGrounded() && player_.IsGravityEnabled())
     {
         stateMachine_.ChangeState(PlayerStateType::NeutralJump);

@@ -9,4 +9,7 @@ class GameScene final : public Scene
 public:
     explicit GameScene(GameContext* context) : Scene(context) {}
     void Init() override {}
+#ifndef NDEBUG
+    void SetModelEditTargets() override;
+#endif
 };

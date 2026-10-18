@@ -6,7 +6,7 @@
 class Room : public ActorBase
 {
 public:
-	Room() = default;
+   Room();
 	~Room() = default;
 
 	void Init() override;
@@ -14,7 +14,8 @@ public:
 	void Update(float deltaTime) override;
 	void Draw() const override;
 
-	ModelObject GetModelObject() const { return roomModel_; }
+   ModelObject& GetModelObject() { return roomModel_; }
+	const ModelObject& GetModelObject() const { return roomModel_; }
 private:
 	ModelObject roomModel_;
 };

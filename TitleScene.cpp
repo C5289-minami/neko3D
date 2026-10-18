@@ -29,7 +29,7 @@ void TitleScene::Update(float deltaTime)
 	}
 	else if (DxLib::CheckHitKey(KEY_INPUT_F2))
 	{
-		SetNextScene(SceneManager::GetInstance().GetScene(SceneID::ShaderTestScene));
+		SetNextScene(SceneManager::GetInstance().GetScene(SceneID::ShaderTest));
 		StartFadeOut();
 		return;
 	}
@@ -41,7 +41,7 @@ void TitleScene::Update(float deltaTime)
 	}
 	else if (DxLib::CheckHitKey(KEY_INPUT_F4))
 	{
-		SetNextScene(SceneManager::GetInstance().GetScene(SceneID::StatusTestScene));
+		SetNextScene(SceneManager::GetInstance().GetScene(SceneID::StatusTest));
 		StartFadeOut();
 		return;
 	}
@@ -58,7 +58,7 @@ void TitleScene::Update(float deltaTime)
 	{
 		Scene* gameScene = nullptr;
 #ifndef NDEBUG
-		gameScene = SceneManager::GetInstance().GetScene(SceneID::GameTestScene);
+		gameScene = SceneManager::GetInstance().GetScene(SceneID::GameTest);
 #else
 		gameScene = SceneManager::GetInstance().GetScene(SceneID::Game);
 #endif // !NDEBUG

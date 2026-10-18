@@ -1,4 +1,4 @@
-// =============================
+ï»¿// =============================
 // Gameplay/Actors/Stage.cpp
 // =============================
 #include "Stage.h"
@@ -7,8 +7,6 @@
 #include "DxConv.h"
 #include "Consts.h"
 #include "imgui.h"
-#include "TransformSettings.h"
-#include "ModelObjectManager.h"
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <filesystem>
@@ -16,9 +14,11 @@
 #include <algorithm>
 #include <cmath>
 
+#include "ModelObjectManager.h"
+
 namespace
 {
-    // “§‰ß•\¦‚·‚éƒXƒe[ƒWƒ‚ƒfƒ‹‚Ì‘å‚«‚³‚ÆAƒvƒŒƒCƒ„[“ªã‚Ì—]”’B
+    // é€éè¡¨ç¤ºã™ã‚‹ã‚¹ãƒ†ãƒ¼ã‚¸ãƒ¢ãƒ‡ãƒ«ã®å¤§ãã•ã¨ã€ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼é ­ä¸Šã®ä½™ç™½ã€‚
     float AlphaStageScale = 0.15f;
     float AlphaStageHeadClearance = 40.0f;
 
@@ -35,24 +35,21 @@ void Stage::Init()
     stageModels_[0].modelKey = ResourceKeys::Model_stand_l;
     stageModels_[1].modelKey = ResourceKeys::Model_stand_m;
 
-    // ’n–Ê‚Ì“–‚½‚è”»’è‚Ég‚¤ƒ‚ƒfƒ‹
+    // åœ°é¢ã®å½“ãŸã‚Šåˆ¤å®šã«ä½¿ã†ãƒ¢ãƒ‡ãƒ«
     stageModel_.modelKey = ResourceKeys::Model_StageFbx;
-    LoadModelSettings();
-    for (auto& model : stagePillars_) MObjs().Add(model);
-    for (auto& model : stageModels_) MObjs().Add(model);
-    MObjs().Add(stageModel_);
+
     SetupCollisionInfo();
     Reset();
 }
-void Stage::SetupCollisionInfo()//“–‚½‚è”»’è‚ÌƒZƒbƒgƒAƒbƒv
+void Stage::SetupCollisionInfo()//å½“ãŸã‚Šåˆ¤å®šã®ã‚»ãƒƒãƒˆã‚¢ãƒƒãƒ—
 {
-    const auto setup = [](const ModelObject& model)//ƒ‰ƒ€ƒ_®‚Å‘‚«Š·‚¦‚ê‚é‚æ‚¤‚É
+    const auto setup = [this](const ModelObject& model)//ãƒ©ãƒ ãƒ€å¼ã§æ›¸ãæ›ãˆã‚Œã‚‹ã‚ˆã†ã«
     {
         int handle = RM().GetModel(model.modelKey);
         if (handle < 0) return -1;
 
-        // •`‰æ‘O‚Å‚àA•Û‘¶Ï‚İ‚Ì”z’uE‰ñ“]EŠg‘å—¦‚Å”»’è‚Å‚«‚é‚æ‚¤‚É‚·‚éB
-        model.Draw();
+        // æç”»å‰ã§ã‚‚ã€ä¿å­˜æ¸ˆã¿ã®é…ç½®ãƒ»å›è»¢ãƒ»æ‹¡å¤§ç‡ã§åˆ¤å®šã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹ã€‚
+        model.WithParentTransform(GetPosition(), GetRotation()).Draw();
 
         int result = MV1SetupCollInfo(handle, -1, 8, 8, 8);
         if (result < 0) return -1;
@@ -69,20 +66,20 @@ void Stage::SetupCollisionInfo()//“–‚½‚è”»’è‚ÌƒZƒbƒgƒAƒbƒv
     {
         stageCollisionHandles_[i] = setup(stageModels_[i]);
     }
-    // ƒRƒŠƒWƒ‡ƒ“î•ñ‚ÍRM‚É‚æ‚éMV1DeleteModel‚Éƒ‚ƒfƒ‹‚Æˆê‚É‰ğ•ú‚³‚ê‚éB
+    // ã‚³ãƒªã‚¸ãƒ§ãƒ³æƒ…å ±ã¯RMã«ã‚ˆã‚‹MV1DeleteModelæ™‚ã«ãƒ¢ãƒ‡ãƒ«ã¨ä¸€ç·’ã«è§£æ”¾ã•ã‚Œã‚‹ã€‚
 }
 
 void Stage::RefreshCollisionInfo()
 {
-    const auto refresh = [](const ModelObject& model, int handle)
+    const auto refresh = [this](const ModelObject& model, int handle)
     {
         if (handle < 0) return -1;
-        // ƒ‚ƒfƒ‹‚ª‰ğ•úE·‚µ‘Ö‚¦‚³‚ê‚Ä‚¢‚½‚çAŒÃ‚¢ƒnƒ“ƒhƒ‹‚Íg‚í‚È‚¢B
+        // ãƒ¢ãƒ‡ãƒ«ãŒè§£æ”¾ãƒ»å·®ã—æ›¿ãˆã•ã‚Œã¦ã„ãŸã‚‰ã€å¤ã„ãƒãƒ³ãƒ‰ãƒ«ã¯ä½¿ã‚ãªã„ã€‚
         if (RM().GetModel(model.modelKey) != handle) return -1;
 
-        model.Draw();
+        model.WithParentTransform(GetPosition(), GetRotation()).Draw();
 
-		int result = MV1RefreshCollInfo(handle, -1);// ƒRƒŠƒWƒ‡ƒ“î•ñ‚ğXV‚·‚é
+		int result = MV1RefreshCollInfo(handle, -1);// ã‚³ãƒªã‚¸ãƒ§ãƒ³æƒ…å ±ã‚’æ›´æ–°ã™ã‚‹
         if (result < 0) return -1;
 
         return handle;
@@ -101,7 +98,7 @@ void Stage::RefreshCollisionInfo()
 
 void Stage::GetCollisionModelHandles(std::vector<int>& handles) const
 {
-    // ŒÄ‚Ño‚µŒ³‚Ì”z—ñ‚ğAŒ»İg‚¦‚éƒnƒ“ƒhƒ‹‚Ìˆê——‚ÉXV‚·‚éB
+    // å‘¼ã³å‡ºã—å…ƒã®é…åˆ—ã‚’ã€ç¾åœ¨ä½¿ãˆã‚‹ãƒãƒ³ãƒ‰ãƒ«ã®ä¸€è¦§ã«æ›´æ–°ã™ã‚‹ã€‚
     handles.clear();
     handles.reserve(pillarCollisionHandles_.size() + stageCollisionHandles_.size() + 1);
 
@@ -136,7 +133,7 @@ bool Stage::IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float 
         const auto result = MV1CollCheck_Capsule(
             handle, -1, DxConv::ToVECTOR(capsuleStart), DxConv::ToVECTOR(capsuleEnd), radius);
         const bool hit = result.HitNum > 0;
-        // ”»’èŒ‹‰Ê‚Ì”z—ñ‚ÍA“–‚½‚Á‚½ê‡‚à“–‚½‚ç‚È‚¢ê‡‚à‰ğ•ú‚·‚éB
+        // åˆ¤å®šçµæœã®é…åˆ—ã¯ã€å½“ãŸã£ãŸå ´åˆã‚‚å½“ãŸã‚‰ãªã„å ´åˆã‚‚è§£æ”¾ã™ã‚‹ã€‚
         MV1CollResultPolyDimTerminate(result);
         if (hit) return true;
     }
@@ -191,27 +188,45 @@ Vec3 Stage::SlideAlongPillars(const Vec3& oldPosition, const Vec3& desiredPositi
 
 void Stage::Reset()
 {
-    RefreshCollisionInfo();
-    // “§‰ßƒ‚ƒfƒ‹‚Ì”z’uî•ñ‚Í–ˆ‰ñƒŠƒZƒbƒg
-    alphaModelReady_ = false;
+    // åˆæœŸä½ç½®ãƒ»å›è»¢ãƒ»æ‹¡å¤§ç‡ã¯JSONãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰èª­ã¿è¾¼ã‚€
+    MObjs().LoadActorTransform(*this);
+    // ãƒ¢ãƒ‡ãƒ«ã®ãƒ­ãƒ¼ãƒ‰
+    for (auto& model : stagePillars_)
+    {
+        model.Load();
+    }
+    for (auto& model : stageModels_)
+    {
+        model.Load();
+    }
+    stageModel_.Load();
 
-    // ƒŠƒZƒbƒg’¼Œã‚Í“§‰ßŒø‰Ê‚ªc‚ç‚È‚¢‚æ‚¤‚É•s“§–¾“x‚ğ‰Šú’l‚Ö
+
+
+    RefreshCollisionInfo();
+    // é€éãƒ¢ãƒ‡ãƒ«ã®é…ç½®æƒ…å ±ã¯æ¯å›ãƒªã‚»ãƒƒãƒˆ
+    alphaModelReady_ = false;
+    // ãƒªã‚»ãƒƒãƒˆç›´å¾Œã¯é€éåŠ¹æœãŒæ®‹ã‚‰ãªã„ã‚ˆã†ã«ä¸é€æ˜åº¦ã‚’åˆæœŸå€¤ã¸
     alphaModel_.SetAlpha(1.0f);
+}
+
+void Stage::Update(float deltaTime)
+{
 }
 
 void Stage::Draw() const
 {
-    // ’Œ‚Æ‘äÀ‚ğ‚»‚ê‚¼‚ê•`‰æ
+    // æŸ±ã¨å°åº§ã‚’ãã‚Œãã‚Œæç”»
     for (const auto& model : stagePillars_)
     {
-        model.Draw();
+        model.WithParentTransform(GetPosition(), GetRotation()).Draw();
     }
     for (const auto& model : stageModels_)
     {
-        model.Draw();
+        model.WithParentTransform(GetPosition(), GetRotation()).Draw();
     }
 
-    stageModel_.Draw();
+    stageModel_.WithParentTransform(GetPosition(), GetRotation()).Draw();
 }
 void Stage::ResetAlphaModel(const Vec3& playerPosition)
 {
@@ -219,10 +234,10 @@ void Stage::ResetAlphaModel(const Vec3& playerPosition)
     alphaModelReady_ = false;
 
     // ResourceKeys
-    alphaModel_.model.modelKey = ResourceKeys::Model_StageAlpha;
-    alphaModel_.model.scale = { AlphaStageScale, AlphaStageScale, AlphaStageScale };
-    alphaModel_.model.rotation = {};
-    alphaModel_.model.center = {};
+    alphaModel_.modelKey = ResourceKeys::Model_StageAlpha;
+    alphaModel_.scale = { AlphaStageScale, AlphaStageScale, AlphaStageScale };
+    alphaModel_.rotation = {};
+    alphaModel_.center = {};
     alphaModel_.SetAlpha(1.0f);
 
     const int handle = RM().GetModel(ResourceKeys::Model_StageAlpha);
@@ -230,23 +245,23 @@ void Stage::ResetAlphaModel(const Vec3& playerPosition)
 
     MV1SetPosition(handle, VGet(0.0f, 0.0f, 0.0f));
     MV1SetRotationXYZ(handle, VGet(0.0f, 0.0f, 0.0f));
-    MV1SetScale(handle, DxConv::ToVECTOR(alphaModel_.model.scale));// ƒXƒP[ƒ‹‚ğ“K—p‚µ‚Ä‚©‚ç”ÍˆÍ‚ğæ“¾‚·‚é‚½‚ßAæ‚ÉƒXƒP[ƒ‹‚ğƒZƒbƒg‚·‚éB
+    MV1SetScale(handle, DxConv::ToVECTOR(alphaModel_.scale));// ã‚¹ã‚±ãƒ¼ãƒ«ã‚’é©ç”¨ã—ã¦ã‹ã‚‰ç¯„å›²ã‚’å–å¾—ã™ã‚‹ãŸã‚ã€å…ˆã«ã‚¹ã‚±ãƒ¼ãƒ«ã‚’ã‚»ãƒƒãƒˆã™ã‚‹ã€‚
     if (MV1SetupReferenceMesh(handle, -1, TRUE, TRUE) < 0) return;
 
     MV1RefreshReferenceMesh(handle, -1, TRUE, TRUE);
     const auto mesh = MV1GetReferenceMesh(handle, -1, TRUE, TRUE);
     const bool hasVertices = mesh.VertexNum > 0;
 
-    //ƒXƒP[ƒ‹“K—pŒã‚Ìƒ‚ƒfƒ‹‚Ì”ÍˆÍ‚Æ‚µ‚Ä•Û‘¶‚·‚éB
+    //ã‚¹ã‚±ãƒ¼ãƒ«é©ç”¨å¾Œã®ãƒ¢ãƒ‡ãƒ«ã®ç¯„å›²ã¨ã—ã¦ä¿å­˜ã™ã‚‹ã€‚
     const Vec3 minimum{ mesh.MinPosition.x, mesh.MinPosition.y, mesh.MinPosition.z };
     const Vec3 maximum{ mesh.MaxPosition.x, mesh.MaxPosition.y, mesh.MaxPosition.z };
 
-    // QÆƒƒbƒVƒ…‚Í”ÍˆÍ‚ğæ“¾‚µ‚½‚ç‰ğ•ú‚·‚éB
-	MV1TerminateReferenceMesh(handle, -1, TRUE, TRUE);// QÆƒƒbƒVƒ…‚ğ‰ğ•ú‚µ‚È‚¢‚ÆAƒ‚ƒfƒ‹‚Ì”ÍˆÍ‚ª³‚µ‚­æ“¾‚Å‚«‚È‚¢ê‡‚ª‚ ‚éB ‚Ö‚¥
+    // å‚ç…§ãƒ¡ãƒƒã‚·ãƒ¥ã¯ç¯„å›²ã‚’å–å¾—ã—ãŸã‚‰è§£æ”¾ã™ã‚‹ã€‚
+	MV1TerminateReferenceMesh(handle, -1, TRUE, TRUE);// å‚ç…§ãƒ¡ãƒƒã‚·ãƒ¥ã‚’è§£æ”¾ã—ãªã„ã¨ã€ãƒ¢ãƒ‡ãƒ«ã®ç¯„å›²ãŒæ­£ã—ãå–å¾—ã§ããªã„å ´åˆãŒã‚ã‚‹ã€‚ ã¸ã‡
     if (!hasVertices) return;
 
-   //Player‚Ì“ª‚Ìã‚Éo‚Ä‚­‚é
-    alphaModel_.model.position = {
+   //Playerã®é ­ã®ä¸Šã«å‡ºã¦ãã‚‹
+    alphaModel_.position = {
         playerPosition.x - (minimum.x + maximum.x) * 0.5f,
         playerPosition.y + Const::PLAYER_HEIGHT + AlphaStageHeadClearance - minimum.y,
         playerPosition.z - (minimum.z + maximum.z) * 0.5f
@@ -266,131 +281,8 @@ void Stage::DrawAlphaModel() const
 {
     if (alphaModelReady_) alphaModel_.Draw();
 }
-namespace
-{
-    constexpr const char* StageSettingsPath = "Data/Settings/stage_models.json";
-    constexpr const char* StagePillarNames[] = {"hashira_l", "hashira_m", "hashira_s"};
-    constexpr const char* StageModelNames[] = {"stand_l", "stand_m"};
-    nlohmann::json ModelVectorJson(const Vec3& v) { return nlohmann::json::array({v.x, v.y, v.z}); }
-    Vec3 ReadModelVector(const nlohmann::json& v)
-    {
-        if (!v.is_array() || v.size() != 3) throw std::runtime_error("Expected 3 numbers.");
-        return {v.at(0).get<float>(), v.at(1).get<float>(), v.at(2).get<float>()};
-    }
-}
-bool Stage::SaveModelSettings()
-{
-    try
-    {
-        nlohmann::json doc;
-        doc["version"] = 1;
-        const auto saveModels = [&doc](const auto& models, const auto& names)
-        {
-            for (int i = 0; i < models.size(); ++i)
-            {
-                const auto& m = models[i];
-                if (!TransformSettings::IsValid({m.scale, m.position, m.rotation})) throw std::runtime_error("Invalid transform.");
-                doc["models"][names[i]] = {{"position", ModelVectorJson(m.position)}, {"rotation", ModelVectorJson(m.rotation)}, {"scale", ModelVectorJson(m.scale)}};
-            }
-        };
-        saveModels(stagePillars_, StagePillarNames);
-        saveModels(stageModels_, StageModelNames);
-        std::filesystem::create_directories("Data/Settings");
-        // ‘‚«‚İŠ®—¹Œã‚É•Û‘¶ƒtƒ@ƒCƒ‹‚ğ’u‚«Š·‚¦‚é
-        const std::filesystem::path path(StageSettingsPath), temporary(std::string(StageSettingsPath) + ".tmp");
-        std::ofstream output(temporary);
-        if (!output) throw std::runtime_error("Cannot open save file.");
-        output << doc.dump(4) << '\n';
-        output.close();
-        if (!output) throw std::runtime_error("Write failed.");
-        if (!MoveFileExW(temporary.c_str(), path.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)) throw std::runtime_error("Cannot replace save file.");
-        modelSettingsStatus_ = "Saved.";
-        return true;
-    }
-    catch (const std::exception& e) { modelSettingsStatus_ = std::string("Save failed: ") + e.what(); return false; }
-}
-bool Stage::LoadModelSettings()
-{
-    try
-    {
-        std::ifstream input(StageSettingsPath);
-        if (!input) { modelSettingsStatus_ = "No settings file. Using current values."; return false; }
-        nlohmann::json doc;
-        input >> doc;
-        if (doc.at("version").get<int>() != 1) throw std::runtime_error("Unsupported version.");
-        // ‘Sƒ‚ƒfƒ‹‚ğŠm”F‚µ‚Ä‚©‚ç”½‰f‚·‚é
-        auto loadedPillars = stagePillars_;
-        auto loadedModels = stageModels_;
-        const auto loadModels = [&doc](auto& models, const auto& names)
-        {
-            for (int i = 0; i < models.size(); ++i)
-            {
-                const auto& v = doc.at("models").at(names[i]);
 
-                auto& m = models[i];
-
-                m.position = ReadModelVector(v.at("position"));
-                m.rotation = ReadModelVector(v.at("rotation"));
-                m.scale = ReadModelVector(v.at("scale"));
-
-                if (!TransformSettings::IsValid({m.scale, m.position, m.rotation})) throw std::runtime_error("Invalid transform.");
-            }
-        };
-
-        loadModels(loadedPillars, StagePillarNames);
-        loadModels(loadedModels, StageModelNames);
-
-        stagePillars_ = loadedPillars;
-        stageModels_ = loadedModels;
-
-        RefreshCollisionInfo();
-
-        modelSettingsStatus_ = "Loaded.";
-
-        return true;
-    }
-    catch (const std::exception& e) { modelSettingsStatus_ = std::string("Load failed: ") + e.what(); return false; }
-}
 void Stage::DrawDebugUI()
 {
-    ImGui::Begin("Stage parts");
-    const auto drawModels = [this](auto& models, const auto& handles, const auto& names)
-        {
-        for (int i = 0; i < models.size(); ++i)
-        {
-            ImGui::PushID(names[i]);
-            if (ImGui::TreeNode(names[i]))
-            {
-                auto& m = models[i];
 
-                ObjectTransform v{m.scale, m.position, m.rotation};
-
-                bool changed = ImGui::DragFloat3("Position", &v.position.x, 1.0f);
-                changed |= ImGui::DragFloat3("Rotation (radians)", &v.rotation.x, 0.01f);
-                changed |= ImGui::DragFloat3("Scale", &v.scale.x, 0.01f, 0.001f, 10000.0f);
-
-                if (changed && TransformSettings::IsValid(v))
-                {
-                    m.position = v.position;
-                    m.rotation = v.rotation;
-                    m.scale = v.scale;
-
-                    RefreshCollisionInfo();
-                }
-                ImGui::Text("MV1 collision: %s (handle: %d)",
-                    handles[i] >= 0 ? "Ready" : "Unavailable",
-                    handles[i]);
-                ImGui::TreePop();
-            }
-            ImGui::PopID();
-        }
-    };
-    drawModels(stagePillars_, pillarCollisionHandles_, StagePillarNames);
-    drawModels(stageModels_, stageCollisionHandles_, StageModelNames);
-    if (ImGui::Button("Save JSON")) SaveModelSettings();
-    ImGui::SameLine();
-    if (ImGui::Button("Load JSON")) LoadModelSettings();
-    ImGui::TextWrapped("%s", StageSettingsPath);
-    ImGui::TextWrapped("%s", modelSettingsStatus_.c_str());
-    ImGui::End();
 }

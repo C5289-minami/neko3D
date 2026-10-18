@@ -14,7 +14,7 @@
 #ifndef NDEBUG
 #include "ShaderTestScene.h"
 #include "DebugScene.h"
-#include "NekoMotionTestScene.h"
+#include "RoomTestScene.h"
 #include "StatusTestScene.h"
 #include "ModelConfigScene.h"
 #include "GameTestScene.h"
@@ -25,12 +25,12 @@ enum class SceneID {
     Game,
     Result,
 #ifndef NDEBUG
-    ShaderTestScene,
+    ShaderTest,
     SsFlipTest,
 	NekoMotionTest,
-    StatusTestScene,
+    StatusTest,
     ModelConfig,
-    GameTestScene,
+    GameTest,
 #endif
 };
 
@@ -54,12 +54,12 @@ public:
         if (scene == &gameScene) return SceneID::Game;
         if (scene == &resultScene) return SceneID::Result;
 #ifndef NDEBUG
-        if (scene == &shaderTestScene) return SceneID::ShaderTestScene;
+        if (scene == &shaderTestScene) return SceneID::ShaderTest;
         if (scene == &ssFlipTestScene) return SceneID::SsFlipTest;
-		if (scene == &nekoMotionTestScene) return SceneID::NekoMotionTest;
-		if (scene == &statusTestScene) return SceneID::StatusTestScene;
+		if (scene == &roomTestScene) return SceneID::NekoMotionTest;
+		if (scene == &statusTestScene) return SceneID::StatusTest;
         if (scene == &modelConfigScene) return SceneID::ModelConfig;
-	    if (scene == &gameTestScene) return SceneID::GameTestScene;
+	    if (scene == &gameTestScene) return SceneID::GameTest;
 #endif
         return SceneID::Title; // デフォルトはタイトルシーン
 	}
@@ -87,12 +87,12 @@ private:
     GameScene   gameScene{ &gameContext };
     ResultScene resultScene{ &gameContext };
 #ifndef NDEBUG
-    ShaderTestScene shaderTestScene{ &gameContext };
+    ShaderTest shaderTestScene{ &gameContext };
     TestScene ssFlipTestScene{ &gameContext };
-	NekoMotionTestScene nekoMotionTestScene{ &gameContext };
-	StatusTestScene statusTestScene{ &gameContext };
+    RoomTestScene roomTestScene{ &gameContext };
+	StatusTest statusTestScene{ &gameContext };
     ModelConfigScene modelConfigScene{ &gameContext };
-    GameTestScene gameTestScene{ &gameContext };
+    GameTest gameTestScene{ &gameContext };
 #endif
     Scene* scene = nullptr; // 現在のシーン
     bool wasF11Down = false;
