@@ -106,6 +106,8 @@ private:
 	Vec3 movementCenter_{}; // 足場の中心
 	Vec3 moveInput_{};      // Xは左右、Zは前後の入力
 	Vec3 velocity_{ 0.0f, 0.0f, 0.0f };
+
+    bool touchingPillar = false;
 	bool isGrounded_{ false };
     bool wasTouchingPillar_{ false };
   bool gravityEnabled_{ true };

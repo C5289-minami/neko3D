@@ -1,22 +1,22 @@
-#include "PlayerKedukuroiState.h"
+#include "PlayerGroomingState.h"
 #include "DxPlus/Debug.h"
 #include "Player.h"
 #include "PlayerInput.h"
 
-PlayerKedukuroiState::PlayerKedukuroiState(PlayerStateMachine& stateMachine, Player& player)
+PlayerGroomingState::PlayerGroomingState(PlayerStateMachine& stateMachine, Player& player)
     : PlayerBaseState(stateMachine, player)
 {
 }
 
-void PlayerKedukuroiState::Enter()
+void PlayerGroomingState::Enter()
 {
     player_.StopMove();
-    player_.SetAnimation(PlayerAnimType::Kedukuroi, true);
+    player_.SetAnimation(PlayerAnimType::Grooming, true);
 
-    DxPlus::Debug::SetFormatString(L"PlayerKedukuroiState::Enter");
+    DxPlus::Debug::SetFormatString(L"PlayerGroomingState::Enter");
 }
 
-void PlayerKedukuroiState::Tick(float)
+void PlayerGroomingState::Tick(float)
 {
     const PlayerInput& input = player_.GetInput();
     // ゲージ100で右クリックすると必殺技
@@ -49,18 +49,18 @@ void PlayerKedukuroiState::Tick(float)
         return;
     }
 
-    if (input.kedukuroiPressed)
+    if (input.groomingPressed)
     {
         stateMachine_.ChangeState(PlayerStateType::Idle);
         return;
     }
 
-    DxPlus::Debug::SetFormatString(L"state:kedukuroi");
+    DxPlus::Debug::SetFormatString(L"state:grooming");
 }
 
-void PlayerKedukuroiState::Exit()
+void PlayerGroomingState::Exit()
 {
     player_.StopMove();
 
-    DxPlus::Debug::SetFormatString(L"PlayerKedukuroiState::Exit");
+    DxPlus::Debug::SetFormatString(L"PlayerGroomingState::Exit");
 }

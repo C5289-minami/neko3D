@@ -5,7 +5,7 @@ PlayerStateMachine::PlayerStateMachine(Player& player)
 	currentType_(PlayerStateType::Idle),
 	idleState_(*this, player),
 	walkState_(*this, player),
-	kedukuroiState_(*this, player),
+	groomingState_(*this, player),
 	neutralJumpState_(*this, player),
 	lungingJumpState_(*this, player),
 	attackState_(*this, player),
@@ -44,8 +44,8 @@ State* PlayerStateMachine::FindState(PlayerStateType type)
         return &idleState_;
     case PlayerStateType::Walk:
         return &walkState_;
-    case PlayerStateType::Kedukuroi:
-        return &kedukuroiState_;
+    case PlayerStateType::Grooming:
+        return &groomingState_;
     case PlayerStateType::NeutralJump:
         return &neutralJumpState_;
     case PlayerStateType::LungingJump:

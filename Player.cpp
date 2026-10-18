@@ -85,9 +85,13 @@ void Player::Update(float deltaTime)
 void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCenter)
 {
 	movementCenter_ = movementCenter;
-	const float previousY = GetPosition().y;
+	const Vec3 oldPosition = GetPosition();
+	const float previousY = oldPosition.y;
 
 	Update(deltaTime);
+
+	// ステージの柱に沿ってスライドさせる
+    position_ = stage.SlideAlongPillars(oldPosition, position_, touchingPillar);
 
 	// 落下中のみ床面に合わせ、このフレームの落下距離もレイの長さに含める。
 	if (velocity_.y <= 0.0f)
@@ -127,8 +131,15 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
     // 足元から高さ・半径を使って、プレイヤーのカプセルを作る。
     const Vec3 capsuleStart = GetPosition() + Vec3::Up() * Const::PLAYER_RADIUS;
     const Vec3 capsuleEnd = GetPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
-    const bool touchingPillar = stage.IsHitPillar(capsuleStart, capsuleEnd, Const::PLAYER_RADIUS);
-    if (touchingPillar && !wasTouchingPillar_)
+
+	const bool hitPillar = stage.IsHitPillar(capsuleStart,capsuleEnd,Const::PLAYER_RADIUS);
+
+	if (hitPillar)
+	{
+		touchingPillar = true;
+	}
+
+	if (touchingPillar && !wasTouchingPillar_)
     {
         std::cout << "Hit: Player touched a pillar." << std::endl;
         OutputDebugStringA("Hit: Player touched a pillar.\n");

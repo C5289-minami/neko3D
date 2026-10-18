@@ -46,9 +46,9 @@ void PlayerIdleState::Tick(float)
         stateMachine_.ChangeState(PlayerStateType::NeutralJump);
         return;
     }
-	if (move.kedukuroiPressed)
+	if (move.groomingPressed)
 	{
-		stateMachine_.ChangeState(PlayerStateType::Kedukuroi);
+		stateMachine_.ChangeState(PlayerStateType::Grooming);
 		return;
 	}
 	if(move.isMoving)
