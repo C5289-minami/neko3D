@@ -29,7 +29,7 @@ public:
 private:
 	CharSettingsManager charSettings_;
 
-	Camera::HomingCamera camera_;
+	Camera::TargetCamera camera_;
 	Camera::FreeCamera freeCamera_;
 	Camera::Camera* activeCamera_{ nullptr };
 		
