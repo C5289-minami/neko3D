@@ -103,7 +103,7 @@
     <Filter Include="40_Gameplay\Actors\Player\State\Idle">
       <UniqueIdentifier>{b173a18d-7ff2-4986-8a69-bd9110aa1854}</UniqueIdentifier>
     </Filter>
-    <Filter Include="40_Gameplay\Actors\Player\State\Kedukuroi">
+    <Filter Include="40_Gameplay\Actors\Player\State\Grooming">
       <UniqueIdentifier>{e88798f2-22e7-48b4-9ea2-e1c15cb16078}</UniqueIdentifier>
     </Filter>
     <Filter Include="40_Gameplay\Actors\Player\State\Walk">
@@ -381,8 +381,8 @@
     <ClInclude Include="PlayerNeutralJumpState.h">
       <Filter>40_Gameplay\Actors\Player\State\NeutralJump</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerKedukuroiState.h">
-      <Filter>40_Gameplay\Actors\Player\State\Kedukuroi</Filter>
+    <ClInclude Include="PlayerGroomingState.h">
+      <Filter>40_Gameplay\Actors\Player\State\Grooming</Filter>
     </ClInclude>
     <ClInclude Include="PlayerWalkState.h">
       <Filter>40_Gameplay\Actors\Player\State\Walk</Filter>
@@ -731,8 +731,8 @@
     <ClCompile Include="PlayerNeutralJumpState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\NeutralJump</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerKedukuroiState.cpp">
-      <Filter>40_Gameplay\Actors\Player\State\Kedukuroi</Filter>
+    <ClCompile Include="PlayerGroomingState.cpp">
+      <Filter>40_Gameplay\Actors\Player\State\Grooming</Filter>
     </ClCompile>
     <ClCompile Include="PlayerWalkState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Walk</Filter>

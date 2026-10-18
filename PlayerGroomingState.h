@@ -1,10 +1,10 @@
 #pragma once
 #include "PlayerBaseState.h"
 
-class PlayerKedukuroiState : public PlayerBaseState
+class PlayerGroomingState : public PlayerBaseState
 {
 public:
-	PlayerKedukuroiState(PlayerStateMachine& stateMachine, Player& player);
+	PlayerGroomingState(PlayerStateMachine& stateMachine, Player& player);
 
 	void Enter() override;
 	void Tick(float deltaTime) override;

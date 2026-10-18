@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 namespace PlayerAnimType
 {
@@ -6,11 +6,11 @@ namespace PlayerAnimType
     {
         Idle = 0,         //
         Walk,             //
-		Kedukuroi,        // ‚¯‚Ã‚­‚ë‚¢iGroomingj                    EE
-		Neutral_Jump,     // ƒjƒ…[ƒgƒ‰ƒ‹ƒWƒƒƒ“ƒviNeutral Jumpj       Espace
-		Lunging_Jump,     //@ƒ‰ƒ“ƒWƒWƒƒƒ“ƒviLunging Jumpj           EWorAorSorD+Space
-		Attack,           // UŒ‚iAttackj                           Eleft mouse button
-		Ult_Attack,       // •KE‹ZiUltimate Attackj                Eright mouse button
-		Die,              // €–SiDiej
+		Grooming,        // ã‘ã¥ãã‚ã„ï¼ˆGroomingï¼‰                    ãƒ»E
+		Neutral_Jump,     // ãƒ‹ãƒ¥ãƒ¼ãƒˆãƒ©ãƒ«ã‚¸ãƒ£ãƒ³ãƒ—ï¼ˆNeutral Jumpï¼‰       ãƒ»space
+		Lunging_Jump,     //ã€€ãƒ©ãƒ³ã‚¸ã‚¸ãƒ£ãƒ³ãƒ—ï¼ˆLunging Jumpï¼‰           ãƒ»WorAorSorD+Space
+		Attack,           // æ”»æ’ƒï¼ˆAttackï¼‰                           ãƒ»left mouse button
+		Ult_Attack,       // å¿…æ®ºæŠ€ï¼ˆUltimate Attackï¼‰                ãƒ»right mouse button
+		Die,              // æ­»äº¡ï¼ˆDieï¼‰
     };
 }

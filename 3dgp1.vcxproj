@@ -261,7 +261,7 @@
     <ClInclude Include="PlayerAnimType.h" />
     <ClInclude Include="PlayerBaseState.h" />
     <ClInclude Include="PlayerIdleState.h" />
-    <ClInclude Include="PlayerKedukuroiState.h" />
+    <ClInclude Include="PlayerGroomingState.h" />
     <ClInclude Include="PlayerNeutralJumpState.h" />
     <ClInclude Include="PlayerLungingJumpState.h" />
     <ClInclude Include="PlayerAttackState.h" />
@@ -362,7 +362,7 @@
     <ClCompile Include="OutlineSettings.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerIdleState.cpp" />
-    <ClCompile Include="PlayerKedukuroiState.cpp" />
+    <ClCompile Include="PlayerGroomingState.cpp" />
     <ClCompile Include="PlayerNeutralJumpState.cpp" />
     <ClCompile Include="PlayerLungingJumpState.cpp" />
     <ClCompile Include="PlayerAttackState.cpp" />

@@ -1,4 +1,4 @@
-#include "PlayerWalkState.h"
+ï»¿#include "PlayerWalkState.h"
 #include "DxPlus/Debug.h"
 #include "Player.h"
 #include "PlayerInput.h"
@@ -16,33 +16,33 @@ void PlayerWalkState::Enter()
 void PlayerWalkState::Tick(float)
 {
 	const PlayerInput& move = player_.GetInput();
-    // ƒQ[ƒW100‚Å‰EƒNƒŠƒbƒN‚·‚é‚Æ•KE‹Z
+    // ã‚²ãƒ¼ã‚¸100ã§å³ã‚¯ãƒªãƒƒã‚¯ã™ã‚‹ã¨å¿…æ®ºæŠ€
     if (move.ultimatePressed && player_.CanUseUltimate())
     {
         stateMachine_.ChangeState(PlayerStateType::UltimateAttack);
         return;
     }
-    // ¶ƒNƒŠƒbƒN‚Å’ÊíUŒ‚
+    // å·¦ã‚¯ãƒªãƒƒã‚¯ã§é€šå¸¸æ”»æ’ƒ
     if (move.attackPressed)
     {
         stateMachine_.ChangeState(PlayerStateType::Attack);
         return;
     }
-    // WASD+Space@“ü—Í•ûŒü‚Ö“ËiƒWƒƒƒ“ƒv
+    // WASD+Spaceã€€å…¥åŠ›æ–¹å‘ã¸çªé€²ã‚¸ãƒ£ãƒ³ãƒ—
     if (move.jumpPressed && move.isMoving && player_.IsGrounded() && player_.IsGravityEnabled())
     {
         stateMachine_.ChangeState(PlayerStateType::LungingJump);
         return;
     }
-    // Space‚¾‚¯‚Å^ã‚ÉƒWƒƒƒ“ƒv
+    // Spaceã ã‘ã§çœŸä¸Šã«ã‚¸ãƒ£ãƒ³ãƒ—
     if (move.jumpPressed && !move.isMoving && player_.IsGrounded() && player_.IsGravityEnabled())
     {
         stateMachine_.ChangeState(PlayerStateType::NeutralJump);
         return;
     }
-	if (move.kedukuroiPressed)
+	if (move.groomingPressed)
 	{
-		stateMachine_.ChangeState(PlayerStateType::Kedukuroi);
+		stateMachine_.ChangeState(PlayerStateType::Grooming);
 		return;
 	}
 	if (!move.isMoving)

@@ -1,4 +1,4 @@
-#include "PlayerInput.h"
+ï»¿#include "PlayerInput.h"
 #include "DxPlus/DxPlus.h"
 
 void PlayerInput::Update()
@@ -8,7 +8,7 @@ void PlayerInput::Update()
 	int button = GetButton(PLAYER1);
 	int buttonDown = GetButtonDown(PLAYER1);
 
-	// ˆÚ“®•ûŒü
+	// ç§»å‹•æ–¹å‘
 	moveDir = Vec3(0.0f, 0.0f, 0.0f);
 	if (button & BUTTON_UP) moveDir.z += 1.0f;
 	if (button & BUTTON_DOWN) moveDir.z -= 1.0f;
@@ -16,10 +16,10 @@ void PlayerInput::Update()
 	if (button & BUTTON_RIGHT) moveDir.x += 1.0f;
 
 	jumpPressed = (buttonDown & BUTTON_TRIGGER1) != 0;
-	// ¶ƒNƒŠƒbƒN‚ÌUŒ‚“ü—Í
+	// å·¦ã‚¯ãƒªãƒƒã‚¯ã®æ”»æ’ƒå…¥åŠ›
 	attackPressed = (buttonDown & BUTTON_TRIGGER3) != 0;
 	ultimatePressed = (buttonDown & BUTTON_TRIGGER4) != 0;
-	kedukuroiPressed = (buttonDown & BUTTON_R1) != 0;
+	groomingPressed = (buttonDown & BUTTON_R1) != 0;
 
 	isMoving = (moveDir.LengthSq() > 0.0f);
 }

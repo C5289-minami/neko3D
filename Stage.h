@@ -1,4 +1,4 @@
-// =============================
+ï»¿// =============================
 // Gameplay/Actors/Stage.h
 // =============================
 #pragma once
@@ -27,10 +27,11 @@ public:
 	const std::array<ModelObject, 2>& GetStageModelObjects() const { return stageModels_; }
 	ModelObject GetAlphaModelObject() const { return alphaModel_; }
 
-    void GetCollisionModelHandles(std::vector<int>& handles) const;//model‚Ì”»’è‚ğ‚Ü‚Æ‚ß‚Ä‚â‚é
+    void GetCollisionModelHandles(std::vector<int>& handles) const;//modelã®åˆ¤å®šã‚’ã¾ã¨ã‚ã¦ã‚„ã‚‹
 
-    // ƒvƒŒƒCƒ„[‚ÌƒJƒvƒZƒ‹‚Æ’ŒLEMES‚ÌƒƒbƒVƒ…‚ğ”»’è‚·‚éB
+    // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ã‚«ãƒ—ã‚»ãƒ«ã¨æŸ±Lãƒ»Mãƒ»Sã®ãƒ¡ãƒƒã‚·ãƒ¥ã‚’åˆ¤å®šã™ã‚‹ã€‚
     bool IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float radius) const;
+    Vec3 SlideAlongPillars(const Vec3& oldPosition, const Vec3& desiredPosition, bool& touched) const;
 
     void DrawDebugUI();
 
@@ -55,7 +56,7 @@ private:
 
  
     std::array<ModelObject, 2> stageModels_{};
-    // “–‚½‚è”»’è‚Ég‚¦‚éƒ‚ƒfƒ‹ƒnƒ“ƒhƒ‹B–¢€”õE¸”s‚Í -1B
+    // å½“ãŸã‚Šåˆ¤å®šã«ä½¿ãˆã‚‹ãƒ¢ãƒ‡ãƒ«ãƒãƒ³ãƒ‰ãƒ«ã€‚æœªæº–å‚™ãƒ»å¤±æ•—æ™‚ã¯ -1ã€‚
     std::array<int, 2> stageCollisionHandles_{ -1, -1 };
     int groundCollisionHandle_{ -1 };
     std::string modelSettingsStatus_;

@@ -1,11 +1,11 @@
-#pragma once
+Ôªø#pragma once
 #include "StateMachine.h"
 #include "PlayerStateType.h"
 
 // State
 #include "PlayerIdleState.h"
 #include "PlayerWalkState.h"
-#include "PlayerKedukuroiState.h"
+#include "PlayerGroomingState.h"
 #include "PlayerNeutralJumpState.h"
 #include "PlayerLungingJumpState.h"
 #include "PlayerAttackState.h"
@@ -36,12 +36,12 @@ private:
 
 	PlayerIdleState idleState_;
 	PlayerWalkState walkState_;
-	PlayerKedukuroiState kedukuroiState_;
+	PlayerGroomingState groomingState_;
 	PlayerNeutralJumpState neutralJumpState_;
 	PlayerLungingJumpState lungingJumpState_;
 	PlayerAttackState attackState_;
 	PlayerUltimateAttackState ultimateAttackState_;
 	PlayerDamagingState damagingState_;
 	PlayerDieState dieState_;
-	// ëºÇÇ±Ç±Ç…í«â¡
+	// ‰ªñ„Çí„Åì„Åì„Å´ËøΩÂä†
 };

@@ -5,7 +5,7 @@ enum class PlayerStateType
 {
     Idle = 0,       // 待機
     Walk,           // 歩行
-    Kedukuroi,      // 毛づくろい
+    Grooming,      // 毛づくろい
     NeutralJump,    // その場でジャンプ
     LungingJump,    // 移動しながらジャンプ
     Attack,         // 通常攻撃

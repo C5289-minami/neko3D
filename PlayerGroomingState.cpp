@@ -1,43 +1,43 @@
-#include "PlayerKedukuroiState.h"
+ï»¿#include "PlayerGroomingState.h"
 #include "DxPlus/Debug.h"
 #include "Player.h"
 #include "PlayerInput.h"
 
-PlayerKedukuroiState::PlayerKedukuroiState(PlayerStateMachine& stateMachine, Player& player)
+PlayerGroomingState::PlayerGroomingState(PlayerStateMachine& stateMachine, Player& player)
     : PlayerBaseState(stateMachine, player)
 {
 }
 
-void PlayerKedukuroiState::Enter()
+void PlayerGroomingState::Enter()
 {
     player_.StopMove();
-    player_.SetAnimation(PlayerAnimType::Kedukuroi, true);
+    player_.SetAnimation(PlayerAnimType::Grooming, true);
 
-    DxPlus::Debug::SetFormatString(L"PlayerKedukuroiState::Enter");
+    DxPlus::Debug::SetFormatString(L"PlayerGroomingState::Enter");
 }
 
-void PlayerKedukuroiState::Tick(float)
+void PlayerGroomingState::Tick(float)
 {
     const PlayerInput& input = player_.GetInput();
-    // ƒQ[ƒW100‚Å‰EƒNƒŠƒbƒN‚·‚é‚Æ•KE‹Z
+    // ã‚²ãƒ¼ã‚¸100ã§å³ã‚¯ãƒªãƒƒã‚¯ã™ã‚‹ã¨å¿…æ®ºæŠ€
     if (input.ultimatePressed && player_.CanUseUltimate())
     {
         stateMachine_.ChangeState(PlayerStateType::UltimateAttack);
         return;
     }
-    // ¶ƒNƒŠƒbƒN‚Å’ÊíUŒ‚
+    // å·¦ã‚¯ãƒªãƒƒã‚¯ã§é€šå¸¸æ”»æ’ƒ
     if (input.attackPressed)
     {
         stateMachine_.ChangeState(PlayerStateType::Attack);
         return;
     }
-    // WASD+Space@“ü—Í•ûŒü‚Ö“ËiƒWƒƒƒ“ƒv
+    // WASD+Spaceã€€å…¥åŠ›æ–¹å‘ã¸çªé€²ã‚¸ãƒ£ãƒ³ãƒ—
     if (input.jumpPressed && input.isMoving && player_.IsGrounded() && player_.IsGravityEnabled())
     {
         stateMachine_.ChangeState(PlayerStateType::LungingJump);
         return;
     }
-    // Space‚¾‚¯‚Å^ã‚ÉƒWƒƒƒ“ƒv
+    // Spaceã ã‘ã§çœŸä¸Šã«ã‚¸ãƒ£ãƒ³ãƒ—
     if (input.jumpPressed && !input.isMoving && player_.IsGrounded() && player_.IsGravityEnabled())
     {
         stateMachine_.ChangeState(PlayerStateType::NeutralJump);
@@ -49,18 +49,18 @@ void PlayerKedukuroiState::Tick(float)
         return;
     }
 
-    if (input.kedukuroiPressed)
+    if (input.groomingPressed)
     {
         stateMachine_.ChangeState(PlayerStateType::Idle);
         return;
     }
 
-    DxPlus::Debug::SetFormatString(L"state:kedukuroi");
+    DxPlus::Debug::SetFormatString(L"state:grooming");
 }
 
-void PlayerKedukuroiState::Exit()
+void PlayerGroomingState::Exit()
 {
     player_.StopMove();
 
-    DxPlus::Debug::SetFormatString(L"PlayerKedukuroiState::Exit");
+    DxPlus::Debug::SetFormatString(L"PlayerGroomingState::Exit");
 }

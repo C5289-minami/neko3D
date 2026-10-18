@@ -1,4 +1,4 @@
-// =============================
+﻿// =============================
 // DebugUI/DebugUI.h
 // =============================
 #pragma once
@@ -16,6 +16,9 @@ public:
     void EndFrame();
 
 private:
+    void DrawScreenSizeControls();
+    int screenSize_[2]{};
+    std::string screenSizeStatus_;
     std::string transformStatus_;
     std::string transformScope_;
     std::string selectedTargetId_;

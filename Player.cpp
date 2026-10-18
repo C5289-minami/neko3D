@@ -1,4 +1,4 @@
-#include "Player.h"
+ï»¿#include "Player.h"
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
 #include "Consts.h"
@@ -40,7 +40,7 @@ void Player::Reset()
 	wasTouchingPillar_ = false;
 	model_.collisionHighlighted = false;
 	ultimateGauge_ = 0.0f;
-	// ‰ŠúˆÊ’uE‰ñ“]EŠg‘å—¦‚ÍŠù’è’l‚ğİ’è‚µ‚½Œã‚ÉJSON‚©‚ç“Ç‚İ‚Ş
+	// åˆæœŸä½ç½®ãƒ»å›è»¢ãƒ»æ‹¡å¤§ç‡ã¯æ—¢å®šå€¤ã‚’è¨­å®šã—ãŸå¾Œã«JSONã‹ã‚‰èª­ã¿è¾¼ã‚€
 	MObjs().LoadActorTransform(*this);
 	model_.Load();
 
@@ -48,13 +48,13 @@ void Player::Reset()
 	moveInput_ = {};
 	velocity_ = { 0.0f, 0.0f, 0.0f };
 
-	// ‹ó’†‚©‚çŠJn‚µAƒXƒe[ƒW‚Ö‚ÌƒŒƒCƒLƒƒƒXƒg‚ÅÚ’n‚³‚¹‚éB
+	// ç©ºä¸­ã‹ã‚‰é–‹å§‹ã—ã€ã‚¹ãƒ†ãƒ¼ã‚¸ã¸ã®ãƒ¬ã‚¤ã‚­ãƒ£ã‚¹ãƒˆã§æ¥åœ°ã•ã›ã‚‹ã€‚
 	isGrounded_ = false;
 	animation_.Reset();
 	SetAnimation(PlayerAnimType::Idle, true);
 
 	stateMachine_.Initialize();
-	// XV‚ğ~‚ß‚Ä‚à•`‰æ‚Å‚«‚é‚æ‚¤‚É‰Šúƒ|[ƒY‚ğ—pˆÓ‚·‚é
+	// æ›´æ–°ã‚’æ­¢ã‚ã¦ã‚‚æç”»ã§ãã‚‹ã‚ˆã†ã«åˆæœŸãƒãƒ¼ã‚ºã‚’ç”¨æ„ã™ã‚‹
 	animation_.Play3D(RM().GetModel(model_.modelKey), currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
 	animation_.Update(0.0f);
 }
@@ -66,9 +66,9 @@ void Player::Update(float deltaTime)
 
 	stateMachine_.Tick(deltaTime);
 
-	// ’†S‚ª‚Ç‚Á‚¿‚É‚ ‚é‚©’²‚×‚éB‚‚³‚Í‚±‚±‚Å‚Íl‚¦‚È‚¢
+	// ä¸­å¿ƒãŒã©ã£ã¡ã«ã‚ã‚‹ã‹èª¿ã¹ã‚‹ã€‚é«˜ã•ã¯ã“ã“ã§ã¯è€ƒãˆãªã„
 	PlayerDiagonalMove(deltaTime, position_, movementCenter_);
-	// ‰¡ˆÚ“®‚Í PlayerDiagonalMoveAã‰ºˆÚ“®‚Í velocity_.y ‚É‚Ü‚Æ‚ß‚éB
+	// æ¨ªç§»å‹•ã¯ PlayerDiagonalMoveã€ä¸Šä¸‹ç§»å‹•ã¯ velocity_.y ã«ã¾ã¨ã‚ã‚‹ã€‚
 
 	if (gravityEnabled_)
 	{
@@ -85,11 +85,15 @@ void Player::Update(float deltaTime)
 void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCenter)
 {
 	movementCenter_ = movementCenter;
-	const float previousY = GetPosition().y;
+	const Vec3 oldPosition = GetPosition();
+	const float previousY = oldPosition.y;
 
 	Update(deltaTime);
 
-	// —‰º’†‚Ì‚İ°–Ê‚É‡‚í‚¹A‚±‚ÌƒtƒŒ[ƒ€‚Ì—‰º‹——£‚àƒŒƒC‚Ì’·‚³‚ÉŠÜ‚ß‚éB
+	// ã‚¹ãƒ†ãƒ¼ã‚¸ã®æŸ±ã«æ²¿ã£ã¦ã‚¹ãƒ©ã‚¤ãƒ‰ã•ã›ã‚‹
+    position_ = stage.SlideAlongPillars(oldPosition, position_, touchingPillar);
+
+	// è½ä¸‹ä¸­ã®ã¿åºŠé¢ã«åˆã‚ã›ã€ã“ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã®è½ä¸‹è·é›¢ã‚‚ãƒ¬ã‚¤ã®é•·ã•ã«å«ã‚ã‚‹ã€‚
 	if (velocity_.y <= 0.0f)
 	{
 		Physics::RayHit hit{};
@@ -120,16 +124,16 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 		}
 	}
 
-	// ‘«Œ³‚©‚ç‚‚³E”¼Œa‚ğg‚Á‚ÄAƒvƒŒƒCƒ„[‚ÌƒJƒvƒZƒ‹‚ğì‚éB
-	const Vec3 capsuleStart = GetPosition() + Vec3::Up() * Const::PLAYER_RADIUS;
-	const Vec3 capsuleEnd = GetPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
-	const bool touchingPillar = stage.IsHitPillar(capsuleStart, capsuleEnd, Const::PLAYER_RADIUS);
-	if (touchingPillar && !wasTouchingPillar_)
-	{
-		std::cout << "Hit: Player touched a pillar." << std::endl;
-		OutputDebugStringA("Hit: Player touched a pillar.\n");
-	}
-	wasTouchingPillar_ = touchingPillar;
+    // è¶³å…ƒã‚’åŸºæº–ã«ã—ãŸã‚«ãƒ—ã‚»ãƒ«ã§ã€è£œæ­£å¾Œã®æ¥è§¦ã‚‚ç¢ºèªã™ã‚‹ã€‚
+    const Vec3 capsuleStart = GetPosition() + Vec3::Up() * Const::PLAYER_RADIUS;
+    const Vec3 capsuleEnd = GetPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
+    touchingPillar |= stage.IsHitPillar(capsuleStart, capsuleEnd, Const::PLAYER_RADIUS);
+    if (touchingPillar && !wasTouchingPillar_)
+    {
+        std::cout << "Hit: Player touched a pillar." << std::endl;
+        OutputDebugStringA("Hit: Player touched a pillar.\n");
+    }
+    wasTouchingPillar_ = touchingPillar;
 
 	Sound3D::SetListener(
 		GetPosition(),
@@ -172,13 +176,13 @@ void Player::SetAnimation(PlayerAnimType::Type type, bool loop)
 }
 
 
-void Player::SetUltimateGauge(float value)//Ult‚Ìƒ}ƒbƒNƒXƒQ[ƒW‚ğ’´‚¦‚È‚¢‚æ‚¤‚É‚·‚é
+void Player::SetUltimateGauge(float value)//Ultã®ãƒãƒƒã‚¯ã‚¹ã‚²ãƒ¼ã‚¸ã‚’è¶…ãˆãªã„ã‚ˆã†ã«ã™ã‚‹
 {
 	if (!std::isfinite(value)) return;
 	ultimateGauge_ = std::clamp(value, 0.0f, UltimateGaugeMax);
 }
 
-void Player::AddUltimateGauge(float amount)//UltƒQ[ƒW‚ğ‘‚â‚·
+void Player::AddUltimateGauge(float amount)//Ultã‚²ãƒ¼ã‚¸ã‚’å¢—ã‚„ã™
 {
 	if (!std::isfinite(amount) || amount <= 0.0f) return;
 	SetUltimateGauge(ultimateGauge_ + amount);
@@ -193,7 +197,7 @@ bool Player::TryUseUltimateGauge()
 
 void Player::SetMoveDirection(const Vec3& moveDir)
 {
-	// ‰Ÿ‚µ‚Ä‚¢‚é•ûŒü‚ğŠo‚¦‚Ä‚¨‚­BÀÛ‚É“®‚©‚·‚Ì‚ÍUpdate
+	// æŠ¼ã—ã¦ã„ã‚‹æ–¹å‘ã‚’è¦šãˆã¦ãŠãã€‚å®Ÿéš›ã«å‹•ã‹ã™ã®ã¯Update
 	moveInput_ = { moveDir.x, 0.0f, moveDir.z };
 }
 
@@ -215,8 +219,8 @@ void Player::Turn(float direction, float speed, float deltaTime)
 }
 
 
-// “ü—Í•ûŒü‚©‚çŠp“x‚ğ‹‚ßA
-// ƒvƒŒƒCƒ„[‚ÌŒü‚«‚ğŠŠ‚ç‚©‚É•ÏX‚·‚é
+// å…¥åŠ›æ–¹å‘ã‹ã‚‰è§’åº¦ã‚’æ±‚ã‚ã€
+// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®å‘ãã‚’æ»‘ã‚‰ã‹ã«å¤‰æ›´ã™ã‚‹
 void Player::TurnTowards(
 	const Vec3& moveDir,
 	float deltaTime)
@@ -240,7 +244,7 @@ void Player::TurnTowards(
 	float diff =
 		targetAngle - GetYaw();
 
-	// ‹ß‚¢‚Ù‚¤‚É‰ñ‚é
+	// è¿‘ã„ã»ã†ã«å›ã‚‹
 	if (diff > pi)
 	{
 		diff -= pi * 2.0f;
@@ -257,8 +261,8 @@ void Player::TurnTowards(
 	const float angle =
 		std::abs(diff);
 
-	// 90“x‚ğ’´‚¦‚½‚çA
-	// Šp“x‚ª‘å‚«‚¢‚Ù‚Ç‰ñ“]‘¬“x‚ğã‚°‚é
+	// 90åº¦ã‚’è¶…ãˆãŸã‚‰ã€
+	// è§’åº¦ãŒå¤§ãã„ã»ã©å›è»¢é€Ÿåº¦ã‚’ä¸Šã’ã‚‹
 	if (angle > pi * 0.5f)
 	{
 		const float t =
@@ -301,7 +305,7 @@ void Player::PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& mo
 		return;
 	}
 
-	//ƒZƒ“ƒ^[‚ğ’†S‚É‚µ‚ÄAƒvƒŒƒCƒ„[‚ÌˆÊ’u‚©‚ç‘O•ûŒü‚ğ‹‚ß‚é
+	//ã‚»ãƒ³ã‚¿ãƒ¼ã‚’ä¸­å¿ƒã«ã—ã¦ã€ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ä½ç½®ã‹ã‚‰å‰æ–¹å‘ã‚’æ±‚ã‚ã‚‹
 	Vec3 forward = movementCenter - playerPos;
 	forward.y = 0.0f;
 	const float radius = forward.Length();
@@ -360,7 +364,7 @@ void Player::StartLungingJump(const Vec3& moveDir)
 	}
 
 	StopMove();
-	// ‰¡ˆÚ“®‚Ì“ü—Í‚ğ•Û‘¶‚µAƒWƒƒƒ“ƒv‚Å‚ÍãŒü‚«‚Ì‘¬“x‚¾‚¯İ’è‚·‚éB
+	// æ¨ªç§»å‹•ã®å…¥åŠ›ã‚’ä¿å­˜ã—ã€ã‚¸ãƒ£ãƒ³ãƒ—ã§ã¯ä¸Šå‘ãã®é€Ÿåº¦ã ã‘è¨­å®šã™ã‚‹ã€‚
 	SetMoveDirection(moveDir);
 	velocity_.y = lungingJumpSpeed_;
 	isGrounded_ = false;
