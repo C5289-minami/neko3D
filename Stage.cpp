@@ -38,6 +38,10 @@ void Stage::Init()
     // 地面の当たり判定に使うモデル
     stageModel_.modelKey = ResourceKeys::Model_StageFbx;
 
+    for (auto& model : stagePillars_) model.SetOwner(*this);
+    for (auto& model : stageModels_) model.SetOwner(*this);
+    stageModel_.SetOwner(*this);
+
     SetupCollisionInfo();
     Reset();
 }

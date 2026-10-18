@@ -39,16 +39,31 @@ public:
 	// alpha
   void SetAlpha(int targetAlpha) { finAlpha = std::clamp(targetAlpha, 0, 255); }
 	int GetAlpha() const { return alpha; }
+	void FadeOut(float duration = -1.0f);
+	void FadeIn(float duration = -1.0f);
+	void Shake(float intensity = 8.0f, float duration = 0.25f, float frequency = 25.0f);
 
 	virtual void SetScale(float targetScale) { scale = targetScale; }
 	float GetScale() const { return scale; }
+ void SetPosition(DxPlus::Vec2 targetPosition)
+	{
+		basePosition = targetPosition;
+		if (state == State::Do || state == State::Hide)
+			UpdateStartMotion();
+		else
+			position = targetPosition;
+	}
+	DxPlus::Vec2 GetPosition() const { return basePosition; }
+ const std::wstring& GetKey() const { return key; }
 	bool IsActive() const { return state != State::False; }
-	void SetFalse() { state = State::False; }
+   void SetVisible(bool visible) { isVisible = visible; fadeOnlyMotion = false; }
+	bool IsVisible() const { return isVisible; }
+	void SetFalse() { isVisible = false; state = State::False; }
 
 	// 表示条件を設定する関数
     void SetDisplayCondition(std::function<bool()> condition)
 	{
-		displayCondition = condition ? std::move(condition) : [this]() { return state != State::False; };
+       displayCondition = condition ? std::move(condition) : []() { return true; };
 	}
 
 	// Zオーダー(描画順)を設定する関数
@@ -72,7 +87,14 @@ protected:
 	};
 	State state{ State::Normal };
 	//表示する条件
-	std::function<bool()> displayCondition = [this]() { return state != State::False; };
+    std::function<bool()> displayCondition = []() { return true; };
+	bool isVisible{ true };
+	bool fadeOnlyMotion{};
+	float shakeElapsed{};
+	float shakeDuration{};
+	float shakeIntensity{};
+	float shakeFrequency{};
+	DxPlus::Vec2 shakeOffset{};
 
 	// ===============
 	// 実行時間関連

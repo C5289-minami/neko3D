@@ -59,6 +59,7 @@ public:
     int GetModel(const std::wstring& key) const;
     int GetEffect(const std::wstring& key) const;
     ss::Player* GetSpriteStudioPlayer(const std::wstring& key) const;
+    std::unique_ptr<ss::Player> CreateSpriteStudioPlayerInstance(const std::wstring& key) const;
 
 
 
@@ -220,6 +221,7 @@ private:
     std::unordered_map<std::wstring, int> models;
     std::unordered_map<std::wstring, int> effects;
     std::unordered_map<std::wstring, std::unique_ptr<ss::Player>> spriteStudioPlayers;
+    std::unordered_map<std::wstring, std::string> spriteStudioDataKeyByPlayerKey;
    std::unordered_set<std::string> spriteStudioDataKeys;
     ss::ResourceManager* ssResMan{ nullptr }; // SS6Player用のリソースマネージャ
     std::map<std::wstring, std::vector<std::string>>

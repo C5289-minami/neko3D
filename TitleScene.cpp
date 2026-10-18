@@ -5,16 +5,16 @@
 #include "ResourceManager.h"
 #include "SceneManager.h"
 #include "ResourceKeys.h"
+#ifndef NDEBUG
+#include "imgui.h"
+#endif // !NDEBUG
+
 
 void TitleScene::Init()
 {
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
-	//    frameCount = 0;
-	fontHandle = RM().GetFont(ResourceKeys::Font_Title);
-	StartFadeIn();
 
-	blinkTimer = BLINK_INTERVAL;
-	isPushEnterVisible = false;
+	StartFadeIn();
 }
 
 void TitleScene::Update(float deltaTime)
@@ -51,62 +51,43 @@ void TitleScene::Update(float deltaTime)
 		StartFadeOut();
 		return;
 	}
-#endif
-
 	using namespace DxPlus::Input;
 	if (GetButtonDown(PLAYER1) & BUTTON_START)
 	{
 		Scene* gameScene = nullptr;
-#ifndef NDEBUG
 		gameScene = SceneManager::GetInstance().GetScene(SceneID::GameTest);
-#else
-		gameScene = SceneManager::GetInstance().GetScene(SceneID::Game);
-#endif // !NDEBUG
 		if (gameScene)
 			SetNextScene(gameScene);
 		StartFadeOut();
 		return;
 	}
-
-	// PushEnterの点滅
-	blinkTimer -= deltaTime;
-	if (blinkTimer <= 0.0f)
-	{
-		blinkTimer += BLINK_INTERVAL;
-		isPushEnterVisible = !isPushEnterVisible;
-	}
+#endif
 }
 
 void TitleScene::Render() const
 {
-	const int white = DxLib::GetColor(255, 255, 255);
-	DxPlus::Text::DrawString(L"バカみたいなカオスなえほんだお！",
-		{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.25f },
-		white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 2, 2 }, 0);
 
-	const int yellow = DxLib::GetColor(255, 255, 0);
-	if (isPushEnterVisible)
-	{
-		DxPlus::Text::DrawString(L"Push Enter TO MAINGAME",
-			{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.65f },
-			yellow, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 1,1 }, 0, fontHandle);
-	}
+}
 
 #ifndef NDEBUG
-	DxPlus::Text::DrawString(L"F1: スプスタテストシーン",
-		{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.75f },
-		white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
-	DxPlus::Text::DrawString(L"F2:シェーダーテストシーン",
-		{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.8f },
-		white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
-	DxPlus::Text::DrawString(L"F3: 部屋テストシーン",
-		{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.85f },
-		white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
-	DxPlus::Text::DrawString(L"F4: キャラテストシーン",
-		{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.9f },
-		white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
-	DxPlus::Text::DrawString(L"F5: Model Config",
-		{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.95f },
-		white, DxPlus::Text::TextAlign::MIDDLE_CENTER, { 0.8f, 0.8f }, 0);
-#endif
+void TitleScene::DrawImGui()
+{
+	const char* f1 = u8"F1: スプスタテストシーン";
+	const char* f2 = u8"F2: シェーダーテストシーン";
+	const char* f3 = u8"F3: 部屋テストシーン";
+	const char* f4 = u8"F4: キャラテストシーン";
+	const char* f5 = u8"F5: Model Config";
+	const char* Enter = u8"Enter: ゲームシーンへ遷移";
+
+	ImGui::Begin("TitleScene Debug Menu");
+
+	ImGui::TextWrapped(f1);
+	ImGui::TextWrapped(f2);
+	ImGui::TextWrapped(f3);
+	ImGui::TextWrapped(f4);
+	ImGui::TextWrapped(f5);
+	ImGui::TextWrapped(Enter);
+
+	ImGui::End();
 }
+#endif

@@ -75,8 +75,8 @@ void ShaderTest::Update(float deltaTime)
 	const bool updateActors = !actorsPaused && !keyboardCaptured;
 	if (updateActors)
 	{
-		gameContext->GetPlayer().Update(deltaTime, gameContext->GetStage());
-		gameContext->GetBoss().Update(deltaTime);
+		//gameContext->GetPlayer().Update(deltaTime, gameContext->GetStage());
+		//gameContext->GetBoss().Update(deltaTime);
 	}
 
 	// --- スキル入力処理 ---
@@ -479,8 +479,7 @@ void ShaderTest::DrawScene(bool toonEnabled) const
 			}
 		};
 	const auto& player = gameContext->GetPlayer();
-	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
-		player.GetPosition(), player.GetRotation());
+    const ModelObject& playerModel = player.GetModelObject();
 	drawActor(playerModel, ModelType::Bone);
 	drawActor(gameContext->GetBoss().GetModelObject(), ModelType::Model);
 	drawActor(gameContext->GetStage().GetModelObject(), ModelType::Model);

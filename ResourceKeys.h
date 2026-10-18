@@ -48,3 +48,8 @@ namespace ResourceKeys
     // ===== Fonts =====
     inline constexpr const wchar_t* Font_Title      = L"Bitcount Light";
 }
+
+namespace UIIds
+{
+    inline constexpr const wchar_t* TitleCharacter = L"Title.Character";
+}
