@@ -146,46 +146,63 @@ bool Stage::IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float 
 
 Vec3 Stage::SlideAlongPillars(const Vec3& oldPosition, const Vec3& desiredPosition, bool& touched) const
 {
+   
     Vec3 move{ desiredPosition.x - oldPosition.x, 0.0f, desiredPosition.z - oldPosition.z };
     Vec3 candidate = desiredPosition;
     touched = false;
-    // Recheck a few times for neighbouring cylinder faces. No speed boost or steering.
+    // 隣接する柱の側面も考慮して、数回判定し直す。移動速度の増加や進行方向の自動補正は行わない。
     for (int attempt = 0; attempt < 4; ++attempt)
     {
+        //移動してもPlayerの当たり判定を置いてる
         const Vec3 start = candidate + Vec3::Up() * Const::PLAYER_RADIUS;
         const Vec3 end = candidate + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
+
         Vec3 wallNormal{};
         float mostInward = -0.0001f;
+
         for (int handle : pillarCollisionHandles_)
         {
             if (handle < 0) continue;
+
             const auto result = MV1CollCheck_Capsule(handle, -1,
                 DxConv::ToVECTOR(start), DxConv::ToVECTOR(end), Const::PLAYER_RADIUS);
+
             for (int i = 0; i < result.HitNum; ++i)
             {
                 const auto& poly = result.Dim[i];
                 Vec3 normal = DxConv::ToVec3(poly.Normal).Normalized();
-                if (std::abs(normal.y) > 0.01f) continue; // Ignore caps and slopes.
-                const float top = (std::max)(poly.Position[0].y,
+
+                if (std::abs(normal.y) > 0.01f) continue; // 柱の上下面と斜面は対象外にする。
+
+                float top = (std::max)(poly.Position[0].y,
                     (std::max)(poly.Position[1].y, poly.Position[2].y));
-                if (candidate.y >= top - Const::PLAYER_SKIN) continue; // Walking on top.
+
+                if (candidate.y >= top - Const::PLAYER_SKIN) continue; // 柱の上にいる場合は側面との衝突を処理しない。
+
                 normal.y = 0.0f;
                 normal = normal.Normalized();
-                const float inward = Vec3::Dot(move, normal);
-                if (inward < mostInward) { mostInward = inward; wallNormal = normal; }
+				//壁に向かう移動の際に、最も壁に向かう法線を採用する。
+                float inward = Vec3::Dot(move, normal);
+
+                if (inward < mostInward)
+                { mostInward = inward; wallNormal = normal; }
             }
             MV1CollResultPolyDimTerminate(result);
         }
-        if (wallNormal.LengthSq() == 0.0f) return candidate; // Includes moving away.
+        if (wallNormal.LengthSq() == 0.0f) return candidate; // 壁から離れる移動も含む。
         touched = true;
-        const VECTOR normal = DxConv::ToVECTOR(wallNormal);
-        const VECTOR crossDirection = VCross(DxConv::ToVECTOR(move), normal);
-        const VECTOR slideVector = VCross(normal, crossDirection);
+
+         VECTOR normal = DxConv::ToVECTOR(wallNormal);
+         VECTOR crossDirection = VCross(DxConv::ToVECTOR(move), normal);
+         VECTOR slideVector = VCross(normal, crossDirection);
+
         move = DxConv::ToVec3(slideVector);
-        const VECTOR slidePosition = VAdd(DxConv::ToVECTOR(oldPosition), slideVector);
+
+        VECTOR slidePosition = VAdd(DxConv::ToVECTOR(oldPosition), slideVector);
+
         candidate = { slidePosition.x, desiredPosition.y, slidePosition.z };
     }
-    // If still blocked after the last recheck, keep this frame's horizontal origin.
+    // 最後の再判定でも移動できなければ、このフレームの移動前の水平位置を維持する。
     return { oldPosition.x, desiredPosition.y, oldPosition.z };
 }
 

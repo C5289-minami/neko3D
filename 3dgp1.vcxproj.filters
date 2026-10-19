@@ -109,6 +109,9 @@
     <Filter Include="40_Gameplay\Actors\Player\State\Walk">
       <UniqueIdentifier>{6c0d4e4b-0114-4f9f-a8c2-d512e6eed8c0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="40_Gameplay\Actors\Player\State\Climbing">
+      <UniqueIdentifier>{e4c6ba41-9b91-45e4-8c1d-62a35f9426b8}</UniqueIdentifier>
+    </Filter>
     <Filter Include="SSPlayer">
       <UniqueIdentifier>{448f3549-980d-4c84-9e08-7e1ba277bff7}</UniqueIdentifier>
     </Filter>
@@ -392,6 +395,9 @@
     </ClInclude>
     <ClInclude Include="PlayerGroomingState.h">
       <Filter>40_Gameplay\Actors\Player\State\Grooming</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerClimbingState.h">
+      <Filter>40_Gameplay\Actors\Player\State\Climbing</Filter>
     </ClInclude>
     <ClInclude Include="PlayerWalkState.h">
       <Filter>40_Gameplay\Actors\Player\State\Walk</Filter>
@@ -751,6 +757,9 @@
     </ClCompile>
     <ClCompile Include="PlayerGroomingState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Grooming</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerClimbingState.cpp">
+      <Filter>40_Gameplay\Actors\Player\State\Climbing</Filter>
     </ClCompile>
     <ClCompile Include="PlayerWalkState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Walk</Filter>

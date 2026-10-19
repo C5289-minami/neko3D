@@ -156,7 +156,7 @@ bool ResourceManager::PlaySpriteStudioAnimation(
 
     const std::string& animationName = namesIt->second[animationIndex];
     player->play(animationName, loopCount, 0);
-    // play() resets the step to 1.0f, so set the requested speed afterward.
+    // play() は再生速度を 1.0f に戻すため、呼び出し後に指定された速度を設定する。
     player->setStep(speed);
     return true;
 }
@@ -261,7 +261,7 @@ int ResourceManager::LoadSound(
 int ResourceManager::LoadModel(
     const std::wstring& key, const std::wstring& path)
 {
-    // Do not use C++17 if-initializer syntax so this also builds under C++14.
+    // C++14 でもビルドできるように、C++17 の初期化文付き if 構文は使わない。
     auto it = models.find(key);
     if (it != models.end()) return it->second;
 
@@ -286,14 +286,14 @@ ss::Player* ResourceManager::LoadSpriteStudioPlayer(
         Initialize();
     }
 
-    // Do not use C++17 if-initializer syntax.
+    // C++17 の初期化文付き if 構文は使わない。
     auto existingPlayer = spriteStudioPlayers.find(key);
     if (existingPlayer != spriteStudioPlayers.end())
     {
         return existingPlayer->second.get();
     }
 
-    // Register each SSBP data key only once.
+    // 各 SSBP データのキーは一度だけ登録する。
     if (spriteStudioDataKeys.insert(dataKey).second)
     {
         ssResMan->addDataWithKey(dataKey, path);
@@ -309,10 +309,10 @@ ss::Player* ResourceManager::LoadSpriteStudioPlayer(
 
     player->setData(dataKey);
 
-    // Automatically cache the animation names returned by the SS player.
+    // SS プレイヤーから取得したアニメーション名を自動的にキャッシュする。
     spriteStudioAnimationNames[key] = ssResMan->getAnimeName(dataKey);
 
-    // Play an initial animation only when one was explicitly supplied.
+    // 初期アニメーションが明示的に指定されている場合だけ再生する。
     if (!animation.empty())
     {
         player->play(animation);

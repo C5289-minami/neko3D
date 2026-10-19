@@ -12,4 +12,5 @@ enum class PlayerStateType
     UltimateAttack, // 必殺技
     Die,            // 死亡
     Damaging,       // 被弾中
+    Climbing,       // 壁登り
 };
