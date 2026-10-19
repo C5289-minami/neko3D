@@ -92,7 +92,12 @@ namespace Camera
         DxLib::SetupCamera_Perspective(
             fieldOfView * DxPlus::Deg2Rad);
 
-        // DxLibへカメラ姿勢を反映
+        // Near / Farを設定
+        DxLib::SetCameraNearFar(
+            nearClipDistance_,
+            farClipDistance_);
+
+        // カメラの位置・向き・上方向を設定
         DxLib::SetCameraPositionAndTargetAndUpVec(
             DxConv::ToVECTOR(pose.position),
             DxConv::ToVECTOR(pose.position + forward),
@@ -124,6 +129,33 @@ namespace Camera
         pose.fieldOfViewDegrees = GetFieldOfView();
 
         return pose;
+    }
+    float Camera::GetNearClipDistance()
+    {
+        return nearClipDistance_;
+    }
+
+    float Camera::GetFarClipDistance()
+    {
+        return farClipDistance_;
+    }
+
+    bool Camera::SetNearFar(
+        float nearDistance,
+        float farDistance)
+    {
+        if (!std::isfinite(nearDistance) ||
+            !std::isfinite(farDistance) ||
+            nearDistance <= 0.0f ||
+            farDistance <= nearDistance)
+        {
+            return false;
+        }
+
+        nearClipDistance_ = nearDistance;
+        farClipDistance_ = farDistance;
+
+        return true;
     }
     void Camera::ApplyView(const Vec3& target) const
     {

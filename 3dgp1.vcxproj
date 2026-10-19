@@ -333,7 +333,6 @@
     <ClCompile Include="GameTestScene.cpp" />
     <ClCompile Include="ModelConfigScene.cpp" />
     <ClCompile Include="ModelObjectManager.cpp" />
-    <ClCompile Include="Scenes\Base\SceneManager.cpp" />
     <ClCompile Include="ShaderTestScene.cpp" />
     <ClCompile Include="BossWalkState.cpp" />
     <ClCompile Include="DebugScene.cpp" />
