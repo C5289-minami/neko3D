@@ -346,8 +346,7 @@ void RoomTestScene::DrawScene(bool toonEnabled) const
 			}
 		};
 	const auto& player = gameContext->GetPlayer();
-	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
-		player.GetPosition(), player.GetRotation());
+	const ModelObject playerModel = player.GetModelObject();
 	drawActor(playerModel, ModelType::Bone);
 	drawActor(room.GetModelObject(), ModelType::Model);
 	drawActor(gameContext->GetStage().GetModelObject(), ModelType::Model);

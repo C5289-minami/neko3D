@@ -45,7 +45,7 @@ public:
 
     [[nodiscard]] const DxPlus::Sprite::SpriteBase* GridAt(const std::wstring& key, int x = 0, int y = 0) const;
     [[nodiscard]] const DxPlus::Sprite::SpriteBase* GetSprite(const std::wstring& key) const;
-    const DxPlus::Sprite::SpriteBase* LoadUISprite(const std::wstring& key, const std::wstring& path);
+    const DxPlus::Sprite::SpriteBase* LoadSprite(const std::wstring& key, const std::wstring& path);
     /// <summary>
     /// 指定したフォント名に対応するフォントハンドルを取得します。
     /// </summary>
