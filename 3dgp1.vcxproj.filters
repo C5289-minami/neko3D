@@ -630,6 +630,9 @@
     <ClInclude Include="CameraPose.h">
       <Filter>10_Core\Camera\Pose</Filter>
     </ClInclude>
+    <ClInclude Include="GameState.h">
+      <Filter>15_System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">

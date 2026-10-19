@@ -3,15 +3,48 @@
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
 
+// kesu
+#include "CameraPose.h"
+
+namespace
+{
+	const Camera::CameraPose tutorialPose{
+		{ -1882.289f, -414.686f, -1766.129f },
+		-0.361f,
+		-0.042f,
+		0.0f,
+		60.0f
+	};
+
+	const Camera::CameraPose selectPose{
+		{ -1630.914f, -447.778f, -1716.013f },
+		-0.046f,
+		-2.384f,
+		0.0f,
+		60.0f
+	};
+
+	const Camera::CameraPose bossPose{
+		{ -1882.289f, -414.686f, -1766.129f },
+		-0.361f,
+		-0.042f,
+		0.0f,
+		60.0f
+	};
+
+	const Camera::CameraPose titlePose{
+		{ -2801.856f, -590.650f,-2046.028f },
+		-0.23f,
+		-1.32f,
+		0.0f,
+		83.0f
+	};
+
+}
+
 void GameScene::Init()
 {
 	gameContext->Reset();
-	playerCamera_.Reset();
-#ifndef NDEBUG
-	activeCamera_ = nullptr;
-	freeCamera_.Reset();
-	wasFreeCameraToggleDown_ = false;
-#endif
 
 	// トゥーン描画とアウトライン描画を有効にする
 	{
@@ -27,6 +60,22 @@ void GameScene::Init()
 		// toon描画とアウトライン描画を有効にする
 		shaderEffects_.GetSettings().toonEnabled = true;
 		shaderEffects_.GetSettings().outlineEnabled = true;
+	}
+
+
+	// camera
+	{
+		camera_.Initialize(titlePose);
+		
+		
+		cameraDirector_.Reset();
+
+		cameraDirector_.RegisterShot("Select", selectPose);
+
+		cameraDirector_.PlayShot("Select", 0.8f, Motion::Easing::EaseInOut);
+
+		cameraDirector_.RegisterShot("Tutorial", tutorialPose);
+
 	}
 
 	StartFadeIn();
@@ -59,7 +108,10 @@ void GameScene::Update(float deltaTime)
 			player.TakeDamage();
 		}
 
-		playerCamera_.Update(player.GetPosition(), boss.GetPosition(), deltaTime);
+		if (cameraDirector_.Update(deltaTime))
+		{
+			cameraDirector_.PlayShot("Tutorial", 1.2f, Motion::Easing::EaseInOut);
+		}
 
 		gameContext->GetEffectManager().Update(deltaTime);
 	}
@@ -88,11 +140,7 @@ void GameScene::Render() const
 
 void GameScene::RenderDepth() const
 {
-#ifndef NDEBUG
-	(activeCamera_ ? activeCamera_ : &playerCamera_)->ApplyCamera();
-#else
-	playerCamera_.ApplyCamera();
-#endif
+	cameraDirector_.GetActiveCamera()->ApplyPose(cameraDirector_.GetCurrentPose());
 
 	const auto& boss = gameContext->GetBoss();
 	const auto& player = gameContext->GetPlayer();
@@ -117,11 +165,7 @@ void GameScene::RenderDepth() const
 
 void GameScene::DrawScene(bool toonEnabled) const
 {
-#ifndef NDEBUG
-	(activeCamera_ ? activeCamera_ : &playerCamera_)->ApplyCamera();
-#else
-	playerCamera_.ApplyCamera();
-#endif
+	cameraDirector_.GetActiveCamera()->ApplyPose(cameraDirector_.GetCurrentPose());
 
 	const auto& boss = gameContext->GetBoss();
 	const auto& player = gameContext->GetPlayer();

@@ -42,6 +42,7 @@ void GameContext::Reset()
     boss.Reset();
 	room_.Reset();
 
+	gameState_ = GameState::Title;
 
     debugActorsPaused_ = false;
     //TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);

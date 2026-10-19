@@ -28,9 +28,9 @@ public:
 
     void SetTriggerMode(TriggerMode mode) { triggerMode = mode; }
 
-    void Update(const DxPlus::Vec2& mousePos, bool mousePush)
+    bool Update(const DxPlus::Vec2& mousePos, bool mousePush)
     {
-        if (!isDraw) return;
+        if (!isDraw) return false;
 
         const float halfWidth = center.x * scale;
         const float halfHeight = center.y * scale;
@@ -61,6 +61,7 @@ public:
         const bool hasHoverSprite = !hoverSpriteKey.empty() && RM().GetSprite(hoverSpriteKey);
         alpha = baseAlpha * ((isHovered && !hasHoverSprite) ? 128 : 255) / 255;
         if (triggered && onClick) onClick();
+        return triggered;
     }
 
     void Draw() const
