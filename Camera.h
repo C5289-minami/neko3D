@@ -53,15 +53,10 @@ namespace Camera
 		virtual void ApplyCamera() const;
 
 		void SetYaw(float yaw) { yaw_ = yaw; }
-
 		void SetPitch(float pitch) { pitch_ = pitch; }
-
 		const Vec3& GetPosition() const { return position_; }
-
 		void SetPosition(const Vec3& position) { position_ = position; }
-
 		float GetYaw() const { return yaw_; }
-
 		float GetPitch() const { return pitch_; }
 
 		// カメラの角度を度数で取得する
@@ -93,10 +88,19 @@ namespace Camera
 				angles.z, 360.0f) * DxPlus::Deg2Rad;
 		}
 
+		// カメラの描画範囲
+		static float GetNearClipDistance();
+		static float GetFarClipDistance();
+
+		static bool SetNearFar(
+			float nearDistance,
+			float farDistance);
 	protected:
 		// 注視点を指定してカメラを適用する
 		void ApplyView(const Vec3& target) const;
 
+		inline static float nearClipDistance_{ 10.0f };
+		inline static float farClipDistance_{ 20000.0f };
 		inline static float fieldOfViewDegrees_{ DefaultFieldOfView };
 
 		Vec3 position_{};

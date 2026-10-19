@@ -26,9 +26,9 @@ private:
 	void RenderDepth() const;
 
 
-	// メンバー変数
 	Camera::FreeCamera camera_;
-	Camera::CameraDirector cameraDirector_{ camera_ };
+	Camera::TargetCamera targetCamera_;
+	Camera::CameraDirector cameraDirector_{ camera_ }; // カメラの遷移と演出を管理する
 
 };
 

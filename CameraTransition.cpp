@@ -1,13 +1,13 @@
 
 #include "CameraTransition.h"
-#include "DxLib.h"
+
 #include <cmath>
 
 namespace Camera
 {
     namespace
     {
-        constexpr float TwoPi = DX_PI_F * 2.0f;
+        constexpr float TwoPi = 6.2831853071795864769f;
     }
 
     void CameraTransition::Start(
