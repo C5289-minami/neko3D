@@ -1,6 +1,9 @@
 #include "RoomTestScene.h"
 #include "GameContext.h"
 
+#ifndef NDEBUG
+
+
 namespace
 {
 	// ImGui‚ÅVec3‚ğ•ÒW‚·‚é‚½‚ß‚Ìƒwƒ‹ƒp[ŠÖ”
@@ -12,6 +15,7 @@ namespace
 		return true;
 	}
 }
+#endif // !NDEBUG
 
 void RoomTestScene::Init()
 {
