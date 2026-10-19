@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <utility>
 
 namespace Camera
 {
@@ -40,18 +39,6 @@ namespace Camera
         return true;
     }
 
-    bool CameraDirector::UnregisterShot(
-        const std::string& name)
-    {
-        return shots_.erase(name) > 0;
-    }
-
-    bool CameraDirector::HasShot(
-        const std::string& name) const
-    {
-        return shots_.find(name) != shots_.end();
-    }
-
     bool CameraDirector::PlayShot(
         const std::string& name,
         float duration,
@@ -82,8 +69,7 @@ namespace Camera
             return;
         }
 
-        // 通常状態なら、カメラの最新姿勢を開始点にする。
-        // 遷移中や固定姿勢中なら、直前の表示姿勢から開始する。
+        // 通常状態なら、カメラの最新姿勢を開始点にする
         if (mode_ == Mode::FollowingCamera)
         {
             currentPose_ = GetBasePose();
@@ -100,26 +86,6 @@ namespace Camera
             easing);
 
         mode_ = Mode::MovingToPose;
-    }
-
-    // =========================================================
-    // SetPose
-    // =========================================================
-
-    void CameraDirector::SetPose(const CameraPose& pose)
-    {
-        if (!activeCamera_ || !IsFinitePose(pose))
-        {
-            return;
-        }
-
-        transition_.Reset();
-        followMotion_.Reset();
-
-        currentPose_ = pose;
-        mode_ = Mode::HoldingPose;
-
-        activeCamera_->ApplyPose(currentPose_);
     }
 
     // =========================================================
@@ -182,8 +148,7 @@ namespace Camera
         float duration,
         Motion::Easing easing)
     {
-        // 固定姿勢の演出中なら、
-        // 現在選択中のカメラ本来の姿勢に戻す。
+        // 演出中なら、現在選択中のカメラ本来の姿勢に戻る
         if (mode_ == Mode::MovingToPose ||
             mode_ == Mode::HoldingPose)
         {
@@ -191,9 +156,7 @@ namespace Camera
             return;
         }
 
-        // カメラ本来の姿勢を使用中、
-        // またはカメラ切り替え中なら、
-        // 直前に使っていたカメラへ戻す。
+        // 直前に使用していたカメラがあれば戻る
         if (previousCamera_ &&
             previousCamera_ != activeCamera_)
         {
@@ -223,6 +186,7 @@ namespace Camera
 
         transition_.Reset();
 
+        // 即時切り替え
         if (duration <= 0.0f)
         {
             followMotion_.Reset();
@@ -234,6 +198,7 @@ namespace Camera
             return;
         }
 
+        // 遷移開始時の姿勢を保存
         followStartPose_ = currentPose_;
 
         followMotion_.Start(
@@ -269,9 +234,7 @@ namespace Camera
         case Mode::MovingToPose:
         {
             const bool finished =
-                transition_.Update(
-                    deltaTime,
-                    currentPose_);
+                transition_.Update(deltaTime, currentPose_);
 
             activeCamera_->ApplyPose(currentPose_);
 
@@ -285,20 +248,19 @@ namespace Camera
 
         case Mode::HoldingPose:
         {
+            // 演出完了後も姿勢を維持
             activeCamera_->ApplyPose(currentPose_);
             return false;
         }
 
         case Mode::BlendingToCamera:
         {
-            // 追従カメラの目標姿勢は毎フレーム変化する。
-            // 固定された開始姿勢から、最新の姿勢へ補間する。
+            // 最新のカメラ本来の姿勢を取得
             const CameraPose targetPose = GetBasePose();
 
             followMotion_.Update(deltaTime);
 
-            const float t =
-                followMotion_.GetValue();
+            const float t = followMotion_.GetValue();
 
             currentPose_ = InterpolatePose(
                 followStartPose_,
@@ -369,11 +331,6 @@ namespace Camera
         return mode_ == Mode::FollowingCamera;
     }
 
-    bool CameraDirector::IsHoldingPose() const
-    {
-        return mode_ == Mode::HoldingPose;
-    }
-
     // =========================================================
     // GetBasePose
     // =========================================================
@@ -401,24 +358,29 @@ namespace Camera
 
         CameraPose pose{};
 
+        // 位置
         pose.position =
             from.position +
             (to.position - from.position) * t;
 
+        // 上下角度
         pose.pitch =
             from.pitch +
             (to.pitch - from.pitch) * t;
 
+        // 左右角度（最短経路）
         pose.yaw = LerpAngle(
             from.yaw,
             to.yaw,
             t);
 
+        // 傾き（最短経路）
         pose.roll = LerpAngle(
             from.roll,
             to.roll,
             t);
 
+        // 画角
         pose.fieldOfViewDegrees =
             from.fieldOfViewDegrees +
             (to.fieldOfViewDegrees -

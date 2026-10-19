@@ -9,7 +9,8 @@ struct ToonSettings
 
     float thresholds[4] = { 0.9f, 0.7f, 0.3f, 0.0f };
 
-    float shadow[4] = { 0.45f, 0.6f, 0.0f, 0.0f };
+	// [2]‚ğ1.0‚É‚·‚é‚Æ‰e‚ğƒg[ƒ“‚Å•\Œ»‚·‚é
+    float shadow[4] = { 0.45f, 0.6f, 1.0f, 0.0f };
 
     float LightDirection[4] = {};
 
