@@ -65,6 +65,8 @@ void Player::Update(float deltaTime)
 {
 	input_.Update();
 
+
+
 	stateMachine_.Tick(deltaTime);
 
 	// 中心がどっちにあるか調べる。高さはここでは考えない
@@ -129,12 +131,24 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
     const Vec3 capsuleStart = GetPosition() + Vec3::Up() * Const::PLAYER_RADIUS;
     const Vec3 capsuleEnd = GetPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
     touchingPillar |= stage.IsHitPillar(capsuleStart, capsuleEnd, Const::PLAYER_RADIUS);
+
     if (touchingPillar && !wasTouchingPillar_)
     {
         std::cout << "Hit: Player touched a pillar." << std::endl;
-        OutputDebugStringA("Hit: Player touched a pillar.\n");
     }
     wasTouchingPillar_ = touchingPillar;
+
+		//Climingのためのもの
+	CanCliming = stage.IsHitPillar(capsuleStart, capsuleEnd, Const::PLAYER_RADIUS + excessSize);
+	/*	if (IsCanJump&&input_.jumpPressing)
+		{
+			position_.y += Const::PLAYER_CLIMING_SPEED;
+		}*/
+	if (CanCliming && input_.jumpPressing)
+	{
+		stateMachine_.ChangeState(PlayerStateType::Climbing);
+	}
+		
 
 	Sound3D::SetListener(
 		GetPosition(),

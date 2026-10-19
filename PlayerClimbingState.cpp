@@ -17,8 +17,17 @@ void PlayerClimbingState::Enter()
 
 void PlayerClimbingState::Tick(float)
 {
-    // 壁登りの許可判定、ジャンプボタンの長押し判定、上下移動は後で追加する。
+    const PlayerInput& input = player_.GetInput();
+	Vec3 playerPos = player_.GetPosition();
+
+    // ジャンプボタンを押している間、変更した座標をプレイヤーに反映する。
     DxPlus::Debug::SetFormatString(L"state:climbing");
+    if(input.jumpPressing)
+    {
+		playerPos.y += 100.f/2.0f; // 上昇
+        player_.SetPosition(playerPos);
+    }
+
 }
 
 void PlayerClimbingState::Exit()

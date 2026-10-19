@@ -108,5 +108,9 @@ private:
     bool touchingPillar = false;
 	bool isGrounded_{ false };
     bool wasTouchingPillar_{ false };
-  bool gravityEnabled_{ true };
+    bool gravityEnabled_{ true };
+
+
+    bool CanCliming{false};
+    float excessSize{20.f};
 };

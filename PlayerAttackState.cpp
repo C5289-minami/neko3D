@@ -34,6 +34,7 @@ void PlayerAttackState::Tick(float)
         stateMachine_.ChangeState(PlayerStateType::Idle);
         return;
     }
+
     DxPlus::Debug::SetFormatString(L"state:attack");
 }
 
