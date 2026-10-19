@@ -144,6 +144,66 @@ bool Stage::IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float 
     return false;
 }
 
+bool Stage::FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal) const
+{
+    wallNormal = {};
+
+    // 猫の体をカプセルで調べる。
+    const Vec3 start = feetPosition + Vec3::Up() * Const::PLAYER_RADIUS;
+    const Vec3 end = feetPosition + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
+    const float headY = feetPosition.y + Const::PLAYER_HEIGHT;
+
+    for (int handle : pillarCollisionHandles_)
+    {
+        if (handle < 0) continue;
+
+        const auto result = MV1CollCheck_Capsule(handle, -1,
+            DxConv::ToVECTOR(start),
+            DxConv::ToVECTOR(end),
+            Const::PLAYER_RADIUS + Const::PLAYER_SKIN);
+
+        bool foundWall = false;
+
+        for (int i = 0; i < result.HitNum; ++i)
+        {
+            const auto& poly = result.Dim[i];
+            const Vec3 normal = DxConv::ToVec3(poly.Normal).Normalized();
+
+            // 向きがない面や、上下を向いた面・斜面は使わない。
+            if (normal.LengthSq() == 0.0f || std::abs(normal.y) > 0.01f)
+            {
+                continue;
+            }
+
+            float top = (std::max)({ poly.Position[0].y, poly.Position[1].y, poly.Position[2].y });
+            float bottom = (std::min)({ poly.Position[0].y, poly.Position[1].y, poly.Position[2].y });
+
+
+            // 足元が面の上端に達していたら、その面は使わない。
+            if (feetPosition.y >= top - Const::PLAYER_SKIN)
+            {
+                continue;
+            }
+
+            // 頭が面の下端以下なら、その面は使わない。
+            // 使う
+            //if (headY <= bottom)
+            //{
+            //    continue;
+            //}
+
+            wallNormal = Vec3(normal.x, 0.0f, normal.z).Normalized();
+            foundWall = true;
+            break;
+        }
+
+        // 判定結果を解放してから、見つかったかどうかを返す。
+        MV1CollResultPolyDimTerminate(result);
+        if (foundWall) return true;
+    }
+    return false;
+}
+
 Vec3 Stage::SlideAlongPillars(const Vec3& oldPosition, const Vec3& desiredPosition, bool& touched) const
 {
    
@@ -192,15 +252,9 @@ Vec3 Stage::SlideAlongPillars(const Vec3& oldPosition, const Vec3& desiredPositi
         if (wallNormal.LengthSq() == 0.0f) return candidate; // 壁から離れる移動も含む。
         touched = true;
 
-         VECTOR normal = DxConv::ToVECTOR(wallNormal);
-         VECTOR crossDirection = VCross(DxConv::ToVECTOR(move), normal);
-         VECTOR slideVector = VCross(normal, crossDirection);
-
-        move = DxConv::ToVec3(slideVector);
-
-        VECTOR slidePosition = VAdd(DxConv::ToVECTOR(oldPosition), slideVector);
-
-        candidate = { slidePosition.x, desiredPosition.y, slidePosition.z };
+        // 壁へ入り込む成分だけを取り除き、横方向に弾き飛ばさない。
+        move -= wallNormal * Vec3::Dot(move, wallNormal);
+        candidate = { oldPosition.x + move.x, desiredPosition.y, oldPosition.z + move.z };
     }
     // 最後の再判定でも移動できなければ、このフレームの移動前の水平位置を維持する。
     return { oldPosition.x, desiredPosition.y, oldPosition.z };

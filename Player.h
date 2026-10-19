@@ -40,6 +40,10 @@ public:
 	// 移動
 	void SetMoveDirection(const Vec3& moveDir);
 	void StopMove();
+    void SetVerticalSpeed(float speed) { velocity_.y = speed; }
+    bool IsTouchingWall() const { return touchingWall_; }
+    const Vec3& GetWallNormal() const { return wallNormal_; }
+    Vec3 GetWorldMoveDirection(const Vec3& moveDir) const;
 
 	// 回転
 	void Turn(float direction, float speed, float deltaTime);
@@ -111,6 +115,6 @@ private:
     bool gravityEnabled_{ true };
 
 
-    bool CanCliming{false};
-    float excessSize{20.f};
+    bool touchingWall_{ false };
+    Vec3 wallNormal_{};
 };
