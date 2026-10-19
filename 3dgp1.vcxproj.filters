@@ -884,7 +884,6 @@
     <ClCompile Include="CameraTransition.cpp">
       <Filter>10_Core\Camera\Pose</Filter>
     </ClCompile>
-    <ClCompile Include="Scenes\Base\SceneManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Config\toon.json">
