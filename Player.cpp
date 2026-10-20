@@ -365,7 +365,12 @@ void Player::StartLungingJump(const Vec3& moveDir)
 
 	StopMove();
 	// 横移動の入力を保存し、ジャンプでは上向きの速度だけ設定する。
-	SetMoveDirection(moveDir);
+	Vec3 moveInput = moveDir;
+	// 左右と前後が同時に入力された場合、左右を優先して斜め移動を防ぐ
+	if (moveInput.x != 0.0f)
+		moveInput.z = 0.0f;
+
+	SetMoveDirection(moveInput);
 	velocity_.y = lungingJumpSpeed_;
 	isGrounded_ = false;
 }
