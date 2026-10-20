@@ -148,7 +148,8 @@ bool Stage::FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal, const Vec
 {
     wallNormal = {};
 
-    // 猫の体をカプセルで調べる。
+    // 移動の衝突判定より少し広い範囲で側面を拾う。体の高さは変えない。
+    const float detectionRadius = Const::PLAYER_RADIUS + Const::PLAYER_CLIMB_DETECTION_MARGIN;
     const Vec3 start = feetPosition + Vec3::Up() * Const::PLAYER_RADIUS;
     const Vec3 end = feetPosition + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
     const float headY = feetPosition.y + Const::PLAYER_HEIGHT;
@@ -156,7 +157,7 @@ bool Stage::FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal, const Vec
     const Vec3 direction = Vec3(moveDirection.x, 0.0f, moveDirection.z).Normalized();
     bool foundWall = false;
     float bestDirection = 2.0f;
-    float bestDistance = Const::PLAYER_RADIUS + Const::PLAYER_SKIN;
+    float bestDistance = detectionRadius;
 
     for (int handle : pillarCollisionHandles_)
     {
@@ -165,7 +166,7 @@ bool Stage::FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal, const Vec
         const auto result = MV1CollCheck_Capsule(handle, -1,
             DxConv::ToVECTOR(start),
             DxConv::ToVECTOR(end),
-            Const::PLAYER_RADIUS + Const::PLAYER_SKIN);
+            detectionRadius);
 
         for (int i = 0; i < result.HitNum; ++i)
         {

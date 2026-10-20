@@ -21,6 +21,7 @@ public:
 	int GetModelHandle() const { return RM().GetModel(stageModel_.modelKey); }
   ModelObject& GetModelObject() { return stageModel_; }
 	const ModelObject& GetModelObject() const { return stageModel_; }
+	const ModelObject& GetModelSize() const { return stageModel_; }
 	std::array<ModelObject, 3>& GetPillarModelObjects() { return stagePillars_; }
 	const std::array<ModelObject, 3>& GetPillarModelObjects() const { return stagePillars_; }
 	std::array<ModelObject, 2>& GetStageModelObjects() { return stageModels_; }
@@ -61,6 +62,8 @@ private:
     std::array<int, 2> stageCollisionHandles_{ -1, -1 };
     int groundCollisionHandle_{ -1 };
     std::string modelSettingsStatus_;
+
+	float HightSize{ 0.0f };
 
 	ModelObject alphaModel_;
 	ModelObject stageModel_;

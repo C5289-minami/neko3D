@@ -23,6 +23,8 @@ namespace Const
     constexpr float PLAYER_HEIGHT = 180.0f;
     constexpr float PLAYER_SKIN = 1.0f;
     constexpr float PLAYER_RADIUS = 60.0f;
+    // 壁登りの検出専用。移動を止めるカプセルの半径は変えない。
+    constexpr float PLAYER_CLIMB_DETECTION_MARGIN = 10.0f;
 
     // ===== 敵関連 =====
     constexpr float BOSS_MODEL_SCALE = 1.0f;
