@@ -910,5 +910,8 @@
     <None Include="Data\Config\outline.json">
       <Filter>JSON</Filter>
     </None>
+    <None Include="Data\Config\camera_shots.json">
+      <Filter>JSON</Filter>
+    </None>
   </ItemGroup>
 </Project>

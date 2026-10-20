@@ -408,6 +408,7 @@
     <ClCompile Include="UIManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Data\Config\camera_shots.json" />
     <None Include="Data\Config\charData.json" />
     <None Include="Data\Config\model_objects.json" />
     <None Include="Data\Config\outline.json" />

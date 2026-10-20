@@ -2,45 +2,7 @@
 #include "GameContext.h"
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
-
-// kesu
-#include "CameraPose.h"
-
-namespace
-{
-	const Camera::CameraPose tutorialPose{
-		{ -1882.289f, -414.686f, -1766.129f },
-		-0.361f,
-		-0.042f,
-		0.0f,
-		60.0f
-	};
-
-	const Camera::CameraPose selectPose{
-		{ -1630.914f, -447.778f, -1716.013f },
-		-0.046f,
-		-2.384f,
-		0.0f,
-		60.0f
-	};
-
-	const Camera::CameraPose bossPose{
-		{ -1882.289f, -414.686f, -1766.129f },
-		-0.361f,
-		-0.042f,
-		0.0f,
-		60.0f
-	};
-
-	const Camera::CameraPose titlePose{
-		{ -2801.856f, -590.650f,-2046.028f },
-		-0.23f,
-		-1.32f,
-		0.0f,
-		83.0f
-	};
-
-}
+#include "CameraObjectManager.h"
 
 void GameScene::Init()
 {
@@ -65,17 +27,12 @@ void GameScene::Init()
 
 	// camera
 	{
-		camera_.Initialize(titlePose);
+		camera_.Initialize(CObjs().GetCameraPose("Title"));
 		
 		
 		cameraDirector_.Reset();
 
-		cameraDirector_.RegisterShot("Select", selectPose);
-
 		cameraDirector_.PlayShot("Select", 0.8f, Motion::Easing::EaseInOut);
-
-		cameraDirector_.RegisterShot("Tutorial", tutorialPose);
-
 	}
 
 	StartFadeIn();

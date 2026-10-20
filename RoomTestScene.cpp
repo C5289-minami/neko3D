@@ -252,27 +252,6 @@ void RoomTestScene::DrawImGui()
 			Motion::Easing::EaseInOut);
 	}
 
-
-	for (const auto& saved : CObjs().GetCameras())
-	{
-		if (ImGui::Button(saved.name.c_str()))
-			cameraDirector_.MoveTo(saved.pose, 0.5f, Motion::Easing::EaseInOut);
-	}
-	if (ImGui::Button(u8"演出用アングルA"))
-	{
-
-		cameraDirector_.PlayShot(
-			"LookUp",
-			0.8f,
-			Motion::Easing::EaseInOut);
-	}
-	if (ImGui::Button(u8"演出用アングルB"))
-	{
-		cameraDirector_.PlayShot(
-			"CloseUp",
-			0.5f,
-			Motion::Easing::EaseInOut);
-	}
 	if (ImGui::Button(u8"FreeCameraに戻る"))
 	{
 		cameraDirector_.ReturnToPreviousCamera(
@@ -296,16 +275,36 @@ void RoomTestScene::DrawImGui()
 	for (const auto& saved : CObjs().GetCameras())
 	{
 		ImGui::PushID(saved.name.c_str());
-		if (ImGui::Selectable(saved.name.c_str(), false, 0, ImVec2(180.0f, 0.0f)))
-			cameraDirector_.MoveTo(saved.pose, 0.5f, Motion::Easing::EaseInOut);
-		ImGui::SameLine();
-		if (ImGui::SmallButton(u8"削除"))
+		const bool expanded = ImGui::TreeNodeEx(saved.name.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
+
+		if (expanded)
 		{
-			cameraStatus_ = CObjs().RemoveCamera(saved.name)
-				? u8"カメラを削除しました。"
-				: u8"カメラを削除できませんでした。";
-			ImGui::PopID();
-			break;
+			if (ImGui::Selectable("toMove", false, 0, ImVec2(180.0f, 0.0f)))
+			cameraDirector_.MoveTo(saved.pose, 0.5f, Motion::Easing::EaseInOut);
+			
+			if (ImGui::SmallButton(u8"上書き"))
+			{
+               cameraStatus_ = CObjs().UpdateCameraPose(
+					saved.name,
+					cameraDirector_.GetCurrentPose())
+					? u8"カメラ位置を上書きしました。"
+					: u8"カメラ位置を上書きできませんでした。";
+			}
+			ImGui::SameLine();
+			 bool cameraRemoved = false;
+			if (ImGui::SmallButton(u8"削除"))
+			{
+				cameraStatus_ = CObjs().RemoveCamera(saved.name)
+					? u8"カメラを削除しました。"
+					: u8"カメラを削除できませんでした。";
+             cameraRemoved = true;
+			}
+           ImGui::TreePop();
+			if (cameraRemoved)
+			{
+				ImGui::PopID();
+				break;
+			}
 		}
 		ImGui::PopID();
 	}
