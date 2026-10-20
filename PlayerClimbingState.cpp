@@ -1,6 +1,7 @@
 ﻿#include "PlayerClimbingState.h"
 #include "DxPlus/Debug.h"
 #include "Player.h"
+#include <algorithm>
 
 PlayerClimbingState::PlayerClimbingState(PlayerStateMachine& stateMachine, Player& player)
     : PlayerBaseState(stateMachine, player)
@@ -63,10 +64,20 @@ void PlayerClimbingState::Tick(float deltaTime)
         pushDirection_ = {};
     }
 
-    // 地上では待機し、空中で入力をやめたときは滑り落ちる。
-    player_.SetVerticalSpeed(pushTime_ >= Const::PLAYER_WALL_CLIMB_WAIT
-        ? Const::PLAYER_CLIMBING_SPEED
-        : (player_.IsGrounded() ? 0.0f : -Const::PLAYER_WALL_SLIDE_SPEED));
+    //bool ClimbingSpeed = player_.IsGrounded() || player_.IsNearWallTop()
+    //                            ? 0.0f : -Const::PLAYER_WALL_SLIDE_SPEED;
+  
+    // 頂上付近では入力を離しても高さを保つ。押し続けても上端を越えて上昇しない。
+    if(player_.IsGrounded() || player_.IsNearWallTop())
+    {
+        float ClimbingSpeed = Const::PLAYER_CLIMBING_SPEED;
+        if (pushTime_ >= Const::PLAYER_WALL_CLIMB_WAIT && deltaTime > 0.0f)
+        {
+            float MAXHeight = (std::max)(0.0f, player_.GetWallTopY() - player_.GetPosition().y);
+            ClimbingSpeed = (std::min)(Const::PLAYER_CLIMBING_SPEED, MAXHeight / deltaTime);
+        }
+        player_.SetVerticalSpeed(ClimbingSpeed);
+	}
     DxPlus::Debug::SetFormatString(L"state:climbing");
 }
 

@@ -144,13 +144,17 @@ bool Stage::IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float 
     return false;
 }
 
-bool Stage::FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal, const Vec3& moveDirection) const
+bool Stage::FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal, const Vec3& moveDirection,
+    float* wallTopY, bool keepTopContact) const
 {
     wallNormal = {};
+    if (wallTopY) *wallTopY = 0.0f;
 
     // 移動の衝突判定より少し広い範囲で側面を拾う。体の高さは変えない。
     const float detectionRadius = Const::PLAYER_RADIUS + Const::PLAYER_CLIMB_DETECTION_MARGIN;
-    const Vec3 start = feetPosition + Vec3::Up() * Const::PLAYER_RADIUS;
+    // Climbingの時足元が上にあるかの判定「
+    const float lowerReach = keepTopContact ? Const::PLAYER_CLIMB_TOP_HOLD_DISTANCE : 0.0f;
+    const Vec3 start = feetPosition + Vec3::Up() * (Const::PLAYER_RADIUS - lowerReach);
     const Vec3 end = feetPosition + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
     const float headY = feetPosition.y + Const::PLAYER_HEIGHT;
 
@@ -183,10 +187,22 @@ bool Stage::FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal, const Vec
             float bottom = (std::min)({ poly.Position[0].y, poly.Position[1].y, poly.Position[2].y });
 
 
-            // 足元が面の上端に達していたら、その面は使わない。
-            if (feetPosition.y >= top - Const::PLAYER_SKIN)
+            // 足元が上端付近に達しているか
+            const bool atTop = feetPosition.y >= top - Const::PLAYER_SKIN;
+            if (atTop)
             {
-                continue;
+                // 通常時は、この側面を壁として扱わん
+                if (!keepTopContact)
+                {
+                    continue;
+                }
+
+                // climbingで上まで言ったら
+                const bool aboveTop = feetPosition.y > top + Const::PLAYER_SKIN;
+                if (aboveTop)
+                {
+                    continue;
+                }
             }
 
             // 体の高さと重ならない側面は使わない。
@@ -207,6 +223,7 @@ bool Stage::FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal, const Vec
 				wallNormal = outward;           // 壁の法線は、プレイヤーの進行方向に向かうようにそろえる。
 				bestDirection = wallDirection;  // 壁の法線と進行方向の内積が最も小さい面を優先する。
                 bestDistance = distance;        // 壁までの距離が最も近い面を優先する。
+                if (wallTopY) *wallTopY = top;
 				foundWall = true;               //  壁の法線が見つかったことを記録する。
             }
         }
