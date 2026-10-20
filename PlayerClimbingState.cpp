@@ -21,23 +21,31 @@ void PlayerClimbingState::Enter()
 void PlayerClimbingState::Tick(float deltaTime)
 {
     const PlayerInput& input = player_.GetInput();
+    if (input.jumpPressed && player_.IsTouchingWall() && player_.IsGravityEnabled())
+    {
+        stateMachine_.ChangeState(PlayerStateType::WallJump);
+        return;
+    }
+
     const float wallDirection = Vec3::Dot(
         player_.GetWorldMoveDirection(input.moveDir),
         player_.GetWallNormal());
-	// 壁に触れていない、重力が無効、壁と逆方向に移動している、地面に着地しているのに移動していない場合は状態を切り替える。
+    const bool pushingWall = input.isMoving && wallDirection < -0.25f;
+    // 地上でも壁を押している間は、登り始めるまでの時間を数え続ける。
     
     if (!player_.IsTouchingWall() || !player_.IsGravityEnabled() ||
-        (input.isMoving && wallDirection > 0.25f) || (player_.IsGrounded() ))
+        (input.isMoving && wallDirection > 0.5f) || (player_.IsGrounded() && !pushingWall))
     {
         stateMachine_.ChangeState(player_.IsGrounded() || !player_.IsGravityEnabled()
             ? (input.isMoving ? PlayerStateType::Walk : PlayerStateType::Idle)
             : PlayerStateType::NeutralJump);
+
         return;
     }
 
     // 入力は方向と時間の判定に使い、カウント中も横移動は加えない。
     player_.StopMove();
-    if (input.isMoving && wallDirection < -0.25f)
+    if (pushingWall)
     {
         const Vec3 direction = input.moveDir.Normalized();
         // 約60度以内の違いは同じ方向として扱う。
@@ -55,8 +63,10 @@ void PlayerClimbingState::Tick(float deltaTime)
         pushDirection_ = {};
     }
 
-    player_.SetVerticalSpeed(pushTime_ >= Const::PLAYER_WALL_CLIMB_WAIT//0.2秒超えたら
-        ? Const::PLAYER_CLIMBING_SPEED : -Const::PLAYER_WALL_SLIDE_SPEED);
+    // 地上では待機し、空中で入力をやめたときは滑り落ちる。
+    player_.SetVerticalSpeed(pushTime_ >= Const::PLAYER_WALL_CLIMB_WAIT
+        ? Const::PLAYER_CLIMBING_SPEED
+        : (player_.IsGrounded() ? 0.0f : -Const::PLAYER_WALL_SLIDE_SPEED));
     DxPlus::Debug::SetFormatString(L"state:climbing");
 }
 

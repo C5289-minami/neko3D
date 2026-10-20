@@ -68,12 +68,16 @@ void Player::Reset()
 void Player::Update(float deltaTime)
 {
 	input_.Update();
+	UpdateMovement(deltaTime);
+}
 
+void Player::UpdateMovement(float deltaTime)
+{
 	bool NearTheWall = false;
 	if (input_.isMoving)
 	{
 		Vec3 moveDirection = GetWorldMoveDirection(input_.moveDir);
-		float wallDirection = Vec3::Dot(moveDirection, wallNormal_);
+		float wallDirection = Vec3::Dot(moveDirection, wallNormal_);//壁の法線と移動方向の内積を計算して、壁に対してどの方向に向かっているかを判定する
 
 		if (wallDirection < -0.25f)
 		{
@@ -81,6 +85,7 @@ void Player::Update(float deltaTime)
 		}
 	}
 	if (touchingWall_ && gravityEnabled_ && !IsDead() && !IsDamaging() &&
+        GetCurrentState() != PlayerStateType::WallJump &&
 		(NearTheWall || (!isGrounded_ && !input_.isMoving)))
 	{
 		stateMachine_.ChangeState(PlayerStateType::Climbing);
@@ -110,8 +115,10 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 	const Vec3 oldPosition = GetPosition();
 	const float previousY = oldPosition.y;
 
-	touchingWall_ = stage.FindPillarWall(GetPosition(), wallNormal_);//	壁に接触しているかどうかを確認する
-	Update(deltaTime);
+	input_.Update();
+	// 今フレームの入力に合う側面を選び、柱のどの方向からでも登れるようにする。
+	touchingWall_ = stage.FindPillarWall(GetPosition(), wallNormal_, GetWorldMoveDirection(input_.moveDir));
+	UpdateMovement(deltaTime);
 
 	// ステージの柱に沿ってスライドさせる
     position_ = stage.SlideAlongPillars(oldPosition, position_, touchingPillar);
@@ -338,7 +345,17 @@ void Player::TurnTowards(
 
 void Player::PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& movementCenter)
 {
-	if (deltaTime <= 0.0f || moveInput_.LengthSq() == 0.0f)
+	if (deltaTime <= 0.0f) return;
+
+    if (GetCurrentState() == PlayerStateType::WallJump)
+    {
+        // 壁を蹴った方向を保ち、入力や足場の中心に左右されず壁から離れる。
+        playerPos.x += velocity_.x * deltaTime;
+        playerPos.z += velocity_.z * deltaTime;
+        TurnTowards(Vec3(velocity_.x, 0.0f, velocity_.z), deltaTime);
+        return;
+    }
+	if (moveInput_.LengthSq() == 0.0f)
 	{
 		return;
 	}
@@ -411,6 +428,19 @@ void Player::StartLungingJump(const Vec3& moveDir)
 	SetMoveDirection(moveInput);
 	velocity_.y = lungingJumpSpeed_;
 	isGrounded_ = false;
+}
+
+void Player::StartWallJump()
+{
+    const Vec3 direction = Vec3(wallNormal_.x, 0.0f, wallNormal_.z).Normalized();
+    if (!gravityEnabled_ || !touchingWall_ || direction.LengthSq() == 0.0f) return;
+
+    StopMove();
+    // LungingJumpと同じ強さで、接触中の壁から外向きに跳ぶ。
+    velocity_.x = direction.x * lungingMoveSpeed_;
+    velocity_.z = direction.z * lungingMoveSpeed_;
+    velocity_.y = lungingJumpSpeed_;
+    isGrounded_ = false;
 }
 
 void Player::JumpAction()

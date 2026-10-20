@@ -112,6 +112,9 @@
     <Filter Include="40_Gameplay\Actors\Player\State\Climbing">
       <UniqueIdentifier>{e4c6ba41-9b91-45e4-8c1d-62a35f9426b8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="40_Gameplay\Actors\Player\State\WallJump">
+      <UniqueIdentifier>{194dcd93-578f-459a-b9b5-5fa3b7feb760}</UniqueIdentifier>
+    </Filter>
     <Filter Include="SSPlayer">
       <UniqueIdentifier>{448f3549-980d-4c84-9e08-7e1ba277bff7}</UniqueIdentifier>
     </Filter>
@@ -398,6 +401,9 @@
     </ClInclude>
     <ClInclude Include="PlayerClimbingState.h">
       <Filter>40_Gameplay\Actors\Player\State\Climbing</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerWallJump.h">
+      <Filter>40_Gameplay\Actors\Player\State\WallJump</Filter>
     </ClInclude>
     <ClInclude Include="PlayerWalkState.h">
       <Filter>40_Gameplay\Actors\Player\State\Walk</Filter>
@@ -763,6 +769,9 @@
     </ClCompile>
     <ClCompile Include="PlayerClimbingState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Climbing</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerWallJump.cpp">
+      <Filter>40_Gameplay\Actors\Player\State\WallJump</Filter>
     </ClCompile>
     <ClCompile Include="PlayerWalkState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Walk</Filter>
