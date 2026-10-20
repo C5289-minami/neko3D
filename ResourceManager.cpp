@@ -27,6 +27,11 @@ void ResourceManager::LoadAll()
     LoadFont(ResourceKeys::Font_Title,
         L"./Data/Fonts/Bitcount/static/Bitcount-Light.ttf");
 
+	// UI用スプライトの読み込み
+    LoadSprite(ResourceKeys::UI_Logo, L"./Data/Images/TitleUI/logo.png");
+    LoadSprite(ResourceKeys::UI_StartButton, L"./Data/Images/TitleUI/play.png");
+	LoadSprite(ResourceKeys::UI_ExitButton, L"./Data/Images/TitleUI/exit.png");
+
     // モデルの読み込み
     LoadModel(ResourceKeys::Model_Stage,      L"./Data/Models/field.mv1");
     LoadModel(ResourceKeys::Model_StageAlpha, L"./Data/Models/field.mv1");
@@ -104,7 +109,7 @@ const DxPlus::Sprite::SpriteBase* ResourceManager::GetSprite(
     return GridAt(key);
 }
 
-const DxPlus::Sprite::SpriteBase* ResourceManager::LoadUISprite(
+const DxPlus::Sprite::SpriteBase* ResourceManager::LoadSprite(
     const std::wstring& key, const std::wstring& path)
 {
     return LoadTextureAsSpriteCenter(key, path);

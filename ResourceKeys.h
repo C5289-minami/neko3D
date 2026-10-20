@@ -2,15 +2,14 @@
 // Resources/ResourceKeys.h
 // =============================
 #pragma once
+
+
 namespace ResourceKeys
 {
     // ===== UI =====
     inline constexpr const wchar_t* UI_Logo = L"UILogo";
     inline constexpr const wchar_t* UI_StartButton = L"UIStartButton";
-    inline constexpr const wchar_t* UI_CreditButton = L"UICreditButton";
-    inline constexpr const wchar_t* UI_NameInputButton = L"UINameInputButton";
-    inline constexpr const wchar_t* UI_CollectionButton = L"UICollectionButton";
-    inline constexpr const wchar_t* UI_Credit = L"UICredit";
+    inline constexpr const wchar_t* UI_ExitButton = L"UIExitButton";
     inline constexpr const wchar_t* UI_ToBack = L"UIToBack";
     inline constexpr const wchar_t* UI_TestCharacter = L"UITestCharacter";
 
@@ -47,9 +46,4 @@ namespace ResourceKeys
 
     // ===== Fonts =====
     inline constexpr const wchar_t* Font_Title      = L"Bitcount Light";
-}
-
-namespace UIIds
-{
-    inline constexpr const wchar_t* TitleCharacter = L"Title.Character";
 }

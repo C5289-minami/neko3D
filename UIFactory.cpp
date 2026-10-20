@@ -5,9 +5,7 @@
 #include "UIBase.h"
 #include <string>
 
-#include "TitleScene.h"
-#include "ResourceManager.h"
-#include "SpriteStudioUI.h"
+#include "SceneManager.h"
 /*
 if (auto* hp = UIM().GetSpriteStudioUI(L"Game.PlayerHP"))
 {
@@ -15,25 +13,6 @@ if (auto* hp = UIM().GetSpriteStudioUI(L"Game.PlayerHP"))
 	hp->Shake(); // ”í’eŽž‚È‚Ç
 }
 */
-void UIFactory::CreateTitleUI(UIManager& manager)
-{
-	// Test
-	{
-		const std::wstring key = ResourceKeys::SpriteStudio_TitleCharacter;
-		const DxPlus::Vec2 testPos(DxPlus::CLIENT_WIDTH * 0.9f, DxPlus::CLIENT_HEIGHT * 0.68f);
-		const DxPlus::Vec2 fromBelow(0.8f, 0.2f);// •ûŒü
-		const float motionDuration = 1.0f; // o‚Ä‚­‚é‘ŽžŠÔ‚ðŽw’è
-        auto* testUI = manager.CreateSpriteStudioUI(
-			UIIds::TitleCharacter, key, testPos, "walk", fromBelow, motionDuration);
-		if (!testUI) return;
-		testUI->SetShowEasing(Motion::Easing::EaseOut);
-		testUI->SetMoveDistance(1000.0f);
-		testUI->SetScale(0.5f);
-	}
-}
-
-
-
 void UIFactory::CreateGameUI(UIManager& manager)
 {
 	

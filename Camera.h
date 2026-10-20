@@ -151,6 +151,15 @@ namespace Camera
 
 			active_ = false;
 		}
+		void Initialize(const CameraPose& pose)
+		{
+			Vec3 direction{};
+			direction.x = std::sin(pose.yaw) * std::cos(pose.pitch);
+			direction.y = std::sin(pose.pitch);
+			direction.z = std::cos(pose.yaw) * std::cos(pose.pitch);
+
+			Initialize(pose.position, direction);
+		}
 
 		void Update(float deltaTime) override
 		{

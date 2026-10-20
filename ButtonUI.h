@@ -18,6 +18,7 @@ class ButtonUI : public UIBase
 	}
 	void Update(float deltaTime) override
 	{
+      pressed = false;
 		UIBase::Update(deltaTime);
        button.SetPosition(position);
 		button.SetAlpha(this->alpha);
@@ -28,9 +29,10 @@ class ButtonUI : public UIBase
 		}
 		DxPlus::Vec2 mousePos = DxPlus::Input::GetMousePositionF();
 		bool clicked = (DxLib::GetMouseInput() & MOUSE_INPUT_LEFT) != 0;
-		button.Update(mousePos, clicked);
+       pressed = button.Update(mousePos, clicked);
 
 	}
+    bool IsPressed() const { return pressed; }
 	void Draw() override
 	{
 		if (state == State::False) return;
@@ -51,4 +53,5 @@ class ButtonUI : public UIBase
 	};
 private:
 	Button button;
+  bool pressed{ false };
 };

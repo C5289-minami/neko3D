@@ -58,6 +58,6 @@ namespace DxPlus::Utils
     void FatalError(const TCHAR* message)
     {
         MessageBox(NULL, message, _T("DxLib"), MB_OK);
-        exit(-1);
+        PostQuitMessage(0);
     }
 }

@@ -83,10 +83,7 @@ void UIManager::Init()
     Clear();
 	SceneID type = SM().GetCurrentSceneID();
 
-	if (type == SceneID::Title) {
-		UIFactory::CreateTitleUI(*this);
-	}
-	else if (type == SceneID::Game) {
+   if (type == SceneID::Game) {
 		UIFactory::CreateGameUI(*this);
 	}
 	else if (type == SceneID::Result) {
