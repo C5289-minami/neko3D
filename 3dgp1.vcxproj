@@ -206,6 +206,7 @@
     <ClInclude Include="BossStateType.h" />
     <ClInclude Include="BossTailWhipSkill.h" />
     <ClInclude Include="CameraDirector.h" />
+    <ClInclude Include="CameraObjectManager.h" />
     <ClInclude Include="CameraPose.h" />
     <ClInclude Include="CameraTransition.h" />
     <ClInclude Include="GameState.h" />
@@ -315,7 +316,6 @@
     <ClInclude Include="TitleScene.h" />
     <ClInclude Include="ToonSettings.h" />
     <ClInclude Include="UIBase.h" />
-    <ClInclude Include="UIFactory.h" />
     <ClInclude Include="UIManager.h" />
     <ClInclude Include="Vector3.h" />
     <ClInclude Include="Volume.h" />
@@ -323,6 +323,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraDirector.cpp" />
+    <ClCompile Include="CameraObjectManager.cpp" />
     <ClCompile Include="CameraTransition.cpp" />
     <ClCompile Include="CharSettings.cpp" />
     <ClCompile Include="AnimationDraw.cpp" />
@@ -404,10 +405,10 @@
     <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="ToonSettings.cpp" />
     <ClCompile Include="UIBase.cpp" />
-    <ClCompile Include="UIFactory.cpp" />
     <ClCompile Include="UIManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Data\Config\camera_shots.json" />
     <None Include="Data\Config\charData.json" />
     <None Include="Data\Config\model_objects.json" />
     <None Include="Data\Config\outline.json" />

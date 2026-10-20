@@ -240,6 +240,9 @@ int ResourceManager::GetEffect(const std::wstring& key) const
 int ResourceManager::LoadMusic(
     const std::wstring& key, const std::wstring& path)
 {
+    auto existing = musics.find(key);
+    if (existing != musics.end()) return existing->second;
+
     const int music = DxLib::LoadSoundMem(path.c_str());
     if (music == -1)
     {
@@ -253,6 +256,9 @@ int ResourceManager::LoadMusic(
 int ResourceManager::LoadSound(
     const std::wstring& key, const std::wstring& path)
 {
+    auto existing = sounds.find(key);
+    if (existing != sounds.end()) return existing->second;
+
     const int sound = DxLib::LoadSoundMem(path.c_str());
     if (sound == -1)
     {
@@ -338,7 +344,7 @@ int ResourceManager::LoadEffect(const std::wstring& key, const std::wstring& pat
         return it->second;
 
     int h = LoadEffekseerEffect(path.c_str(), scale);
-    if (h == -1) DxPlus::Utils::FatalError((L"Failed to load model " + path).c_str());
+    if (h == -1) DxPlus::Utils::FatalError((L"Failed to load effect " + path).c_str());
 
     effects[key] = h;
     return h;
@@ -383,7 +389,7 @@ void ResourceManager::UnloadEffects()
 {
     for (auto& e : effects)
     {
-        if (e.second >= 0) DxLib::MV1DeleteModel(e.second);
+        if (e.second >= 0) DeleteEffekseerEffect(e.second);
     }
     effects.clear();
 }
@@ -403,6 +409,9 @@ int ResourceManager::GetFont(const std::wstring& fontName) const
 int ResourceManager::LoadFont(
     const std::wstring& fontName, const std::wstring& path)
 {
+    auto existing = fonts.find(fontName);
+    if (existing != fonts.end()) return existing->second.handle;
+
     if (AddFontResourceExW(path.c_str(), FR_PRIVATE, 0) == 0)
     {
         DxPlus::Utils::FatalError(
@@ -412,6 +421,7 @@ int ResourceManager::LoadFont(
     const int handle = DxPlus::Text::InitializeFont(fontName.c_str(), 40, 2);
     if (handle == -1)
     {
+        RemoveFontResourceExW(path.c_str(), FR_PRIVATE, 0);
         DxPlus::Utils::FatalError(
             (std::wstring(L"Failed to init font: ") + fontName).c_str());
     }

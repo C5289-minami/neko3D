@@ -1,9 +1,9 @@
 #include "RoomTestScene.h"
 #include "GameContext.h"
+#include "CameraObjectManager.h"
+
 
 #ifndef NDEBUG
-
-
 namespace
 {
 	// ImGuiでVec3を編集するためのヘルパー関数
@@ -71,6 +71,8 @@ void RoomTestScene::Init()
 		shaderEffects_.GetSettings().toonEnabled = true;
 		shaderEffects_.GetSettings().outlineEnabled = true;
 	}
+
+	CObjs().LoadCameras();
 
 	StartFadeIn();
 }
@@ -250,30 +252,63 @@ void RoomTestScene::DrawImGui()
 			Motion::Easing::EaseInOut);
 	}
 
-
-
-
-	if (ImGui::Button(u8"演出用アングルA"))
-	{
-
-		cameraDirector_.PlayShot(
-			"LookUp",
-			0.8f,
-			Motion::Easing::EaseInOut);
-	}
-	if (ImGui::Button(u8"演出用アングルB"))
-	{
-		cameraDirector_.PlayShot(
-			"CloseUp",
-			0.5f,
-			Motion::Easing::EaseInOut);
-	}
 	if (ImGui::Button(u8"FreeCameraに戻る"))
 	{
 		cameraDirector_.ReturnToPreviousCamera(
 			0.6f,
 			Motion::Easing::EaseInOut);
 	}
+
+	ImGui::End();
+
+	ImGui::Begin("Camera Settings");
+
+	ImGui::InputText(u8"カメラ名", savedCameraName_, sizeof(savedCameraName_));
+	if (ImGui::Button(u8"現在の位置を保存"))
+	{
+		const bool saved = CObjs().AddCamera(savedCameraName_, cameraDirector_.GetCurrentPose());
+		cameraStatus_ = saved
+			? u8"カメラ位置を保存しました。"
+			: u8"保存できません。名前が空か、同じ名前が既にあります。";
+	}
+
+	for (const auto& saved : CObjs().GetCameras())
+	{
+		ImGui::PushID(saved.name.c_str());
+		const bool expanded = ImGui::TreeNodeEx(saved.name.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
+
+		if (expanded)
+		{
+			if (ImGui::Selectable("toMove", false, 0, ImVec2(180.0f, 0.0f)))
+			cameraDirector_.MoveTo(saved.pose, 0.5f, Motion::Easing::EaseInOut);
+			
+			if (ImGui::SmallButton(u8"上書き"))
+			{
+               cameraStatus_ = CObjs().UpdateCameraPose(
+					saved.name,
+					cameraDirector_.GetCurrentPose())
+					? u8"カメラ位置を上書きしました。"
+					: u8"カメラ位置を上書きできませんでした。";
+			}
+			ImGui::SameLine();
+			 bool cameraRemoved = false;
+			if (ImGui::SmallButton(u8"削除"))
+			{
+				cameraStatus_ = CObjs().RemoveCamera(saved.name)
+					? u8"カメラを削除しました。"
+					: u8"カメラを削除できませんでした。";
+             cameraRemoved = true;
+			}
+           ImGui::TreePop();
+			if (cameraRemoved)
+			{
+				ImGui::PopID();
+				break;
+			}
+		}
+		ImGui::PopID();
+	}
+	if (!cameraStatus_.empty()) ImGui::TextWrapped("%s", cameraStatus_.c_str());
 
 	ImGui::End();
 
