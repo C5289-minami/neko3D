@@ -34,7 +34,7 @@ void PlayerClimbingState::Tick(float deltaTime)
     // 地上でも壁を押している間は、登り始めるまでの時間を数え続ける。
     
     if (!player_.IsTouchingWall() || !player_.IsGravityEnabled() ||
-        (input.isMoving && wallDirection > 0.25f) || (player_.IsGrounded() && !pushingWall))
+        (input.isMoving && wallDirection > 0.5f) || (player_.IsGrounded() && !pushingWall))
     {
         stateMachine_.ChangeState(player_.IsGrounded() || !player_.IsGravityEnabled()
             ? (input.isMoving ? PlayerStateType::Walk : PlayerStateType::Idle)
