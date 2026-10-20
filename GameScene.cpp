@@ -3,6 +3,10 @@
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
 #include "CameraObjectManager.h"
+#include "UIManager.h"
+
+
+#include "DxPlus/DxPlus.h"
 
 void GameScene::Init()
 {
@@ -27,12 +31,62 @@ void GameScene::Init()
 
 	// camera
 	{
-		camera_.Initialize(CObjs().GetCameraPose("Title"));
-		
-		
 		cameraDirector_.Reset();
+		activeCameraShot_.clear();
+		if (!CObjs().LoadCameras())DxPlus::Utils::FatalError(L"カメラのロードに失敗");
+		if (CObjs().LoadCameras())
+		{
+			for (const auto& shot : CObjs().GetCameras())
+			{
+				cameraDirector_.RegisterShot(shot.name, shot.pose);
+			}
+		}
+		camera_.Initialize(CObjs().GetCameraPose("Title"));
+		cameraDirector_.Update(0);
+	}
 
-		cameraDirector_.PlayShot("Select", 0.8f, Motion::Easing::EaseInOut);
+	// UI
+	{
+		// logoのUIを作成
+		const DxPlus::Vec2 logoPos(DxPlus::CLIENT_WIDTH * 0.3f, DxPlus::CLIENT_HEIGHT * 0.3f);
+		const std::wstring logoKey = ResourceKeys::UI_Logo;
+		UIM().CreateImageUI(L"Game.Logo", logoKey, logoPos, {},0.5f);
+		UIM().GetUI(L"Game.Logo")->SetDisplayCondition(
+			[this]() -> bool
+			{
+				return gameContext->GetGameState() == GameState::Title;
+			}
+		);
+
+		// スタートボタンのUIを作成
+		const DxPlus::Vec2 startPos(DxPlus::CLIENT_WIDTH * 0.2f, DxPlus::CLIENT_HEIGHT * 0.6f);
+		const std::wstring key = ResourceKeys::UI_StartButton;
+		UIM().CreateButtonUI(L"Game.StartButton", key, startPos,
+			[this]() { gameContext->GetGameState() = GameState::Select; },
+			{ -1,0 },
+			0.5f
+		);
+		UIM().GetUI(L"Game.StartButton")->SetDisplayCondition(
+			[this]() -> bool
+			{
+				return gameContext->GetGameState() == GameState::Title;
+			}
+		);
+
+		// 終了ボタンのUIを作成
+		const DxPlus::Vec2 exitPos(DxPlus::CLIENT_WIDTH * 0.2f, DxPlus::CLIENT_HEIGHT * 0.75f);
+		const std::wstring exitKey = ResourceKeys::UI_ExitButton;
+		UIM().CreateButtonUI(L"Game.ExitButton", exitKey, exitPos,
+			[]() { PostQuitMessage(0); },
+			{-1,0},
+			0.5f
+		);
+		UIM().GetUI(L"Game.ExitButton")->SetDisplayCondition(
+			[this]() -> bool
+			{
+				return gameContext->GetGameState() == GameState::Title;
+			}
+		);
 	}
 
 	StartFadeIn();
@@ -41,7 +95,7 @@ void GameScene::Init()
 void GameScene::Update(float deltaTime)
 {
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
-
+	// actors
 	{
 		auto& player = gameContext->GetPlayer();
 		auto& boss = gameContext->GetBoss();
@@ -56,7 +110,7 @@ void GameScene::Update(float deltaTime)
 		// playerの位置
 		ModelObject playerModel = player.GetModelObject().WithParentTransform(
 			player.GetPosition(), player.GetRotation());
-		
+
 		// playerとbossの衝突判定
 		const bool touching = Collision::UpdateModelContact(playerModel, boss.GetModelObject());
 		player.GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
@@ -65,13 +119,52 @@ void GameScene::Update(float deltaTime)
 			player.TakeDamage();
 		}
 
+	}
+	// camera
+	{
+		// おわったら次のステートに遷移する
 		if (cameraDirector_.Update(deltaTime))
 		{
-			cameraDirector_.PlayShot("Tutorial", 1.2f, Motion::Easing::EaseInOut);
+			switch (gameContext->GetGameState())
+			{
+			case GameState::Select:
+				gameContext->GetGameState() = GameState::Tutorial;
+				break;
+			case GameState::Tutorial:
+				gameContext->GetGameState() = GameState::Battle;
+				break;
+			case GameState::Battle:
+				gameContext->GetGameState() = GameState::Title;
+				break;
+			}
 		}
 
-		gameContext->GetEffectManager().Update(deltaTime);
+		// 今のゲームステートに応じたショット名を決定する
+		std::string requestedShot;
+		switch (gameContext->GetGameState())
+		{
+		case GameState::Select:
+			requestedShot = "Select";
+			break;
+		case GameState::Tutorial:
+			requestedShot = "Tutorial";
+			break;
+		case GameState::Battle:
+			requestedShot = "Battle";
+			break;
+		}
+
+		// 遷移中でなく、かつ現在のショットと異なる場合にのみ切り替える
+		if (!requestedShot.empty() && requestedShot != activeCameraShot_ && !cameraDirector_.IsTransitioning())
+		{
+			if (cameraDirector_.PlayShot(requestedShot, 1.2f, Motion::Easing::EaseInOut))
+			{
+				activeCameraShot_ = requestedShot;
+			}
+		}
 	}
+
+	gameContext->GetEffectManager().Update(deltaTime);
 }
 
 void GameScene::Render() const

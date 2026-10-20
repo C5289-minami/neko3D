@@ -31,5 +31,6 @@ private:
 	Camera::FreeCamera camera_;
 	Camera::TargetCamera targetCamera_;
 	Camera::CameraDirector cameraDirector_{ camera_ }; // ƒJƒƒ‰‚Ì‘JˆÚ‚Æ‰‰o‚ğŠÇ—‚·‚é
+	std::string activeCameraShot_{};
 
 };

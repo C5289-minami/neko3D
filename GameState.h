@@ -6,7 +6,7 @@ enum class GameState
 	Title,
 	Select,
 	Tutorial,
-	Play,
+	Battle,
 	Results,
 };
 
