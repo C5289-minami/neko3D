@@ -471,9 +471,6 @@
     <ClInclude Include="UIBase.h">
       <Filter>10_Core\UI</Filter>
     </ClInclude>
-    <ClInclude Include="UIFactory.h">
-      <Filter>10_Core\UI</Filter>
-    </ClInclude>
     <ClInclude Include="Button.h">
       <Filter>10_Core</Filter>
     </ClInclude>
@@ -639,6 +636,9 @@
     <ClInclude Include="GameState.h">
       <Filter>15_System</Filter>
     </ClInclude>
+    <ClInclude Include="CameraObjectManager.h">
+      <Filter>40_Gameplay\Debug</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -797,9 +797,6 @@
     <ClCompile Include="UIManager.cpp">
       <Filter>10_Core\UI</Filter>
     </ClCompile>
-    <ClCompile Include="UIFactory.cpp">
-      <Filter>10_Core\UI</Filter>
-    </ClCompile>
     <ClCompile Include="AnimationDraw.cpp">
       <Filter>10_Core\Animation</Filter>
     </ClCompile>
@@ -895,6 +892,9 @@
     </ClCompile>
     <ClCompile Include="CameraTransition.cpp">
       <Filter>10_Core\Camera\Pose</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraObjectManager.cpp">
+      <Filter>40_Gameplay\Debug</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

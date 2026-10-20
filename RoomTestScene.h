@@ -7,6 +7,8 @@
 #include "Camera.h"
 #include "CameraDirector.h"
 
+#include <string>
+
 class RoomTestScene final: public Scene
 {
 public:
@@ -29,6 +31,8 @@ private:
 	Camera::FreeCamera camera_;
 	Camera::TargetCamera targetCamera_;
 	Camera::CameraDirector cameraDirector_{ camera_ }; // ƒJƒƒ‰‚Ì‘JˆÚ‚Æ‰‰o‚ğŠÇ—‚·‚é
+	char savedCameraName_[128]{ "Camera" };
+	std::string cameraStatus_;
 
 };
 
