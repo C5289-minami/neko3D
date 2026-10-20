@@ -7,6 +7,8 @@
 #include "Camera.h"
 #include "CameraDirector.h"
 
+#include <string>
+
 class RoomTestScene final: public Scene
 {
 public:
@@ -26,9 +28,11 @@ private:
 	void RenderDepth() const;
 
 
-	// メンバー変数
 	Camera::FreeCamera camera_;
-	Camera::CameraDirector cameraDirector_{ camera_ };
+	Camera::TargetCamera targetCamera_;
+	Camera::CameraDirector cameraDirector_{ camera_ }; // カメラの遷移と演出を管理する
+	char savedCameraName_[128]{ "Camera" };
+	std::string cameraStatus_;
 
 };
 

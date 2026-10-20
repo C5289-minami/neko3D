@@ -1,5 +1,21 @@
 #include "RoomTestScene.h"
 #include "GameContext.h"
+#include "CameraObjectManager.h"
+
+
+#ifndef NDEBUG
+namespace
+{
+	// ImGuiでVec3を編集するためのヘルパー関数
+	bool EditVector3(const char* label, Vec3& value, float speed)
+	{
+		float components[] = { value.x, value.y, value.z };
+		if (!ImGui::DragFloat3(label, components, speed)) return false;
+		value = { components[0], components[1], components[2] };
+		return true;
+	}
+}
+#endif // !NDEBUG
 
 void RoomTestScene::Init()
 {
@@ -14,15 +30,14 @@ void RoomTestScene::Init()
 			{ 0.0f, 100.0f, 0.0f });
 
 		// カメラ初期化後にDirectorの姿勢を同期
+		targetCamera_.Reset();
 		cameraDirector_.Reset();
 
-		// 演出用アングルA：右後ろから見上げる
+		// 演出用アングルA：プレイヤーの右後ろから見上げる
+		auto& player = gameContext->GetPlayer();
+
 		Camera::CameraPose shotA{};
-		shotA.position = { 300.0f, 600.0f, -400.0f };
-		shotA.pitch = -0.35f;
-		shotA.yaw = 0.7f;
-		shotA.roll = 0.0f;
-		shotA.fieldOfViewDegrees = 50.0f;
+		shotA.fieldOfViewDegrees = 150.0f;
 
 		// 演出用アングルB：近距離の別アングル
 		Camera::CameraPose shotB{};
@@ -35,6 +50,7 @@ void RoomTestScene::Init()
 		// 登録
 		cameraDirector_.RegisterShot("LookUp", shotA);
 		cameraDirector_.RegisterShot("CloseUp", shotB);
+
 	}
 
 	{
@@ -56,6 +72,8 @@ void RoomTestScene::Init()
 		shaderEffects_.GetSettings().outlineEnabled = true;
 	}
 
+	CObjs().LoadCameras();
+
 	StartFadeIn();
 }
 void RoomTestScene::Update(float deltaTime)
@@ -66,17 +84,12 @@ void RoomTestScene::Update(float deltaTime)
 	auto& player = gameContext->GetPlayer();
 	auto& stage = gameContext->GetStage();
 
-	player.Update(0);
+	float posY = player.GetPosition().y;
+	player.Update(deltaTime * 0.5f);
+	player.SetPosition({ player.GetPosition().x, posY, player.GetPosition().z });
 	room.Update(deltaTime);
 	stage.UpdateAlphaModel(deltaTime, gameContext->GetPlayer());
 
-	// --- 右クリックを押している間のみカメラ操作 ---
-	if ((DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
-	{
-		SetMouseDispFlag(FALSE);
-		camera_.Update(deltaTime);
-	}
-	else SetMouseDispFlag(TRUE);
 
 	// --- F2 でシェーダー全体のON/OFFを切り替える ---
 	static bool shaderToggleWasDown = false;
@@ -93,37 +106,47 @@ void RoomTestScene::Update(float deltaTime)
 	shaderToggleWasDown = shaderToggleDown;
 
 
-	// camera
-
-	// --- 右クリックを押している間のみカメラ操作 ---
-	if ((DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
 	{
-		SetMouseDispFlag(FALSE);
-		camera_.Update(deltaTime);
-	}
-	else
-	{
-		SetMouseDispFlag(TRUE);
-	}
+		// プレイヤーの前方向
+		const Vec3 playerForward{
+			std::sin(player.GetYaw()),
+			0.0f,
+			std::cos(player.GetYaw())
+		};
 
-	// --- カメラ遷移・姿勢の保持・最終適用 ---
+		// 仮の注視対象：プレイヤーの前方500の地点
+		// ボスが用意できたら、ここをボスの位置に置き換える
+		const Vec3 focusPosition =
+			player.GetPosition() + playerForward * 500.0f;
 
-	// 通常のFreeCamera使用中のみ手動操作を許可
-	const bool isRightClick =
-		(DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0;
+		// TargetCameraの追従姿勢を更新
+		targetCamera_.Update(
+			player.GetPosition(),
+			focusPosition,
+			deltaTime);
 
-	if (cameraDirector_.IsFollowing() && isRightClick)
-	{
-		SetMouseDispFlag(FALSE);
-		camera_.Update(deltaTime);
+		// FreeCameraが選択され、追従モードのときだけ手動操作
+		const bool isFreeCameraActive =
+			cameraDirector_.GetActiveCamera() == &camera_;
+
+		const bool isRightClick =
+			(DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0;
+
+		if (cameraDirector_.IsFollowing() &&
+			isFreeCameraActive &&
+			isRightClick)
+		{
+			SetMouseDispFlag(FALSE);
+			camera_.Update(deltaTime);
+		}
+		else
+		{
+			SetMouseDispFlag(TRUE);
+		}
+
+		// カメラの遷移を更新
+		cameraDirector_.Update(deltaTime);
 	}
-	else
-	{
-		SetMouseDispFlag(TRUE);
-	}
-
-	// --- カメラの遷移と最終適用 ---
-	cameraDirector_.Update(deltaTime);
 
 }
 
@@ -145,8 +168,11 @@ void RoomTestScene::Render() const
 	{
 		DrawScene(false);
 	}
-	camera_.ApplyPose(cameraDirector_.GetCurrentPose());
-	gameContext->GetGrid().Draw();
+	if (auto* activeCamera = cameraDirector_.GetActiveCamera())
+	{
+		activeCamera->ApplyPose(
+			cameraDirector_.GetCurrentPose());
+	}	gameContext->GetGrid().Draw();
 }
 
 void RoomTestScene::DrawImGui()
@@ -154,26 +180,135 @@ void RoomTestScene::DrawImGui()
 #ifndef  NDEBUG
 	ImGui::Begin("RoomTestScene Debug");
 
-  if (ImGui::Button(u8"演出用アングルA"))
+
+	if (ImGui::Button(u8"TargetCameraへ切り替え"))
 	{
-		cameraDirector_.PlayShot(
-			"LookUp",
+		cameraDirector_.SwitchCamera(
+			targetCamera_,
 			0.8f,
 			Motion::Easing::EaseInOut);
 	}
-	if (ImGui::Button(u8"演出用アングルB"))
+
+	if (ImGui::Button(u8"FreeCameraへ切り替え"))
 	{
-		cameraDirector_.PlayShot(
-			"CloseUp",
-			0.5f,
+		cameraDirector_.SwitchCamera(
+			camera_,
+			0.8f,
 			Motion::Easing::EaseInOut);
 	}
+
+	ImGui::Text("CameraPose");
+
+	Camera::CameraPose pose =
+		cameraDirector_.GetCurrentPose();
+
+	bool poseChanged = false;
+
+	if (EditVector3("Position", pose.position, 1.0f))
+		poseChanged = true;
+
+	if (ImGui::SliderFloat(
+		"Pitch",
+		&pose.pitch,
+		-89.0f * DxPlus::Deg2Rad,
+		89.0f * DxPlus::Deg2Rad))
+	{
+		poseChanged = true;
+	}
+
+	if (ImGui::SliderFloat(
+		"Yaw",
+		&pose.yaw,
+		-DxPlus::PI,
+		DxPlus::PI))
+	{
+		poseChanged = true;
+	}
+
+	if (ImGui::SliderFloat(
+		"Roll",
+		&pose.roll,
+		-DxPlus::PI,
+		DxPlus::PI))
+	{
+		poseChanged = true;
+	}
+
+	if (ImGui::SliderFloat(
+		"FieldOfView",
+		&pose.fieldOfViewDegrees,
+		10.0f,
+		150.0f))
+	{
+		poseChanged = true;
+	}
+
+	// 実際に値を編集したときだけ姿勢を更新する
+	if (poseChanged)
+	{
+		cameraDirector_.MoveTo(
+			pose,
+			0.0f,
+			Motion::Easing::EaseInOut);
+	}
+
 	if (ImGui::Button(u8"FreeCameraに戻る"))
 	{
 		cameraDirector_.ReturnToPreviousCamera(
 			0.6f,
 			Motion::Easing::EaseInOut);
 	}
+
+	ImGui::End();
+
+	ImGui::Begin("Camera Settings");
+
+	ImGui::InputText(u8"カメラ名", savedCameraName_, sizeof(savedCameraName_));
+	if (ImGui::Button(u8"現在の位置を保存"))
+	{
+		const bool saved = CObjs().AddCamera(savedCameraName_, cameraDirector_.GetCurrentPose());
+		cameraStatus_ = saved
+			? u8"カメラ位置を保存しました。"
+			: u8"保存できません。名前が空か、同じ名前が既にあります。";
+	}
+
+	for (const auto& saved : CObjs().GetCameras())
+	{
+		ImGui::PushID(saved.name.c_str());
+		const bool expanded = ImGui::TreeNodeEx(saved.name.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
+
+		if (expanded)
+		{
+			if (ImGui::Selectable("toMove", false, 0, ImVec2(180.0f, 0.0f)))
+			cameraDirector_.MoveTo(saved.pose, 0.5f, Motion::Easing::EaseInOut);
+			
+			if (ImGui::SmallButton(u8"上書き"))
+			{
+               cameraStatus_ = CObjs().UpdateCameraPose(
+					saved.name,
+					cameraDirector_.GetCurrentPose())
+					? u8"カメラ位置を上書きしました。"
+					: u8"カメラ位置を上書きできませんでした。";
+			}
+			ImGui::SameLine();
+			 bool cameraRemoved = false;
+			if (ImGui::SmallButton(u8"削除"))
+			{
+				cameraStatus_ = CObjs().RemoveCamera(saved.name)
+					? u8"カメラを削除しました。"
+					: u8"カメラを削除できませんでした。";
+             cameraRemoved = true;
+			}
+           ImGui::TreePop();
+			if (cameraRemoved)
+			{
+				ImGui::PopID();
+				break;
+			}
+		}
+		ImGui::PopID();
+	}
+	if (!cameraStatus_.empty()) ImGui::TextWrapped("%s", cameraStatus_.c_str());
 
 	ImGui::End();
 
@@ -188,7 +323,11 @@ void RoomTestScene::RenderDepth() const
 	auto& stage = gameContext->GetStage();
 
 	// シーンのカメラを設定する
-	camera_.ApplyPose(cameraDirector_.GetCurrentPose());
+	if (auto* activeCamera = cameraDirector_.GetActiveCamera())
+	{
+		activeCamera->ApplyPose(
+			cameraDirector_.GetCurrentPose());
+	}
 	// Boneなしシェーダー
 	modelToonRenderer_.SetVertexShader(ModelType::Model);
 	room.Draw();
@@ -205,7 +344,11 @@ void RoomTestScene::DrawScene(bool toonEnabled) const
 {
 	auto& room = gameContext->GetRoom();
 	// カメラを設定する
-	camera_.ApplyPose(cameraDirector_.GetCurrentPose());
+	if (auto* activeCamera = cameraDirector_.GetActiveCamera())
+	{
+		activeCamera->ApplyPose(
+			cameraDirector_.GetCurrentPose());
+	}
 	// トゥーンシェーダーを使わない場合
 	if (!toonEnabled)
 	{
@@ -238,8 +381,7 @@ void RoomTestScene::DrawScene(bool toonEnabled) const
 			}
 		};
 	const auto& player = gameContext->GetPlayer();
-	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
-		player.GetPosition(), player.GetRotation());
+	const ModelObject playerModel = player.GetModelObject();
 	drawActor(playerModel, ModelType::Bone);
 	drawActor(room.GetModelObject(), ModelType::Model);
 	drawActor(gameContext->GetStage().GetModelObject(), ModelType::Model);

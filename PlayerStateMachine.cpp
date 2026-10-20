@@ -11,7 +11,9 @@ PlayerStateMachine::PlayerStateMachine(Player& player)
 	attackState_(*this, player),
 	ultimateAttackState_(*this, player),
 	damagingState_(*this, player),
-	dieState_(*this, player)
+	dieState_(*this, player),
+	climbingState_(*this, player),
+	wallJumpState_(*this, player)
 {
 
 }
@@ -58,6 +60,10 @@ State* PlayerStateMachine::FindState(PlayerStateType type)
         return &damagingState_;
     case PlayerStateType::Die:
         return &dieState_;
+    case PlayerStateType::Climbing:
+        return &climbingState_;
+    case PlayerStateType::WallJump:
+        return &wallJumpState_;
     default:
         return nullptr;
     }

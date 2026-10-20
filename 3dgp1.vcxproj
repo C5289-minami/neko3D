@@ -206,8 +206,10 @@
     <ClInclude Include="BossStateType.h" />
     <ClInclude Include="BossTailWhipSkill.h" />
     <ClInclude Include="CameraDirector.h" />
+    <ClInclude Include="CameraObjectManager.h" />
     <ClInclude Include="CameraPose.h" />
     <ClInclude Include="CameraTransition.h" />
+    <ClInclude Include="GameState.h" />
     <ClInclude Include="GameTestScene.h" />
     <ClInclude Include="ModelConfigScene.h" />
     <ClInclude Include="ModelObjectManager.h" />
@@ -265,6 +267,7 @@
     <ClInclude Include="PlayerBaseState.h" />
     <ClInclude Include="PlayerIdleState.h" />
     <ClInclude Include="PlayerGroomingState.h" />
+    <ClInclude Include="PlayerClimbingState.h" />
     <ClInclude Include="PlayerNeutralJumpState.h" />
     <ClInclude Include="PlayerLungingJumpState.h" />
     <ClInclude Include="PlayerAttackState.h" />
@@ -313,14 +316,15 @@
     <ClInclude Include="TitleScene.h" />
     <ClInclude Include="ToonSettings.h" />
     <ClInclude Include="UIBase.h" />
-    <ClInclude Include="UIFactory.h" />
     <ClInclude Include="UIManager.h" />
     <ClInclude Include="Vector3.h" />
     <ClInclude Include="Volume.h" />
+    <ClInclude Include="PlayerWallJump.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraDirector.cpp" />
+    <ClCompile Include="CameraObjectManager.cpp" />
     <ClCompile Include="CameraTransition.cpp" />
     <ClCompile Include="CharSettings.cpp" />
     <ClCompile Include="AnimationDraw.cpp" />
@@ -333,7 +337,7 @@
     <ClCompile Include="GameTestScene.cpp" />
     <ClCompile Include="ModelConfigScene.cpp" />
     <ClCompile Include="ModelObjectManager.cpp" />
-    <ClCompile Include="Scenes\Base\SceneManager.cpp" />
+    <ClCompile Include="PlayerWallJump.cpp" />
     <ClCompile Include="ShaderTestScene.cpp" />
     <ClCompile Include="BossWalkState.cpp" />
     <ClCompile Include="DebugScene.cpp" />
@@ -370,6 +374,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerIdleState.cpp" />
     <ClCompile Include="PlayerGroomingState.cpp" />
+    <ClCompile Include="PlayerClimbingState.cpp" />
     <ClCompile Include="PlayerNeutralJumpState.cpp" />
     <ClCompile Include="PlayerLungingJumpState.cpp" />
     <ClCompile Include="PlayerAttackState.cpp" />
@@ -402,10 +407,10 @@
     <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="ToonSettings.cpp" />
     <ClCompile Include="UIBase.cpp" />
-    <ClCompile Include="UIFactory.cpp" />
     <ClCompile Include="UIManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Data\Config\camera_shots.json" />
     <None Include="Data\Config\charData.json" />
     <None Include="Data\Config\model_objects.json" />
     <None Include="Data\Config\outline.json" />

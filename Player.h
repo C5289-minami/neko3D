@@ -40,6 +40,10 @@ public:
 	// 移動
 	void SetMoveDirection(const Vec3& moveDir);
 	void StopMove();
+    void SetVerticalSpeed(float speed) { velocity_.y = speed; }
+    bool IsTouchingWall() const { return touchingWall_; }
+    const Vec3& GetWallNormal() const { return wallNormal_; }
+    Vec3 GetWorldMoveDirection(const Vec3& moveDir) const;
 
 	// 回転
 	void Turn(float direction, float speed, float deltaTime);
@@ -50,6 +54,7 @@ public:
 	// ジャンプ
 	void JumpAction();
 	void StartLungingJump(const Vec3& moveDir);
+    void StartWallJump();
     float GetLungingMoveSpeed() const { return lungingMoveSpeed_; }
     float GetLungingJumpSpeed() const { return lungingJumpSpeed_; }
     void SetLungingMoveSpeed(float value);
@@ -88,6 +93,8 @@ public:
     bool TryUseUltimateGauge();
 
 private:
+    void UpdateMovement(float deltaTime);
+
     int health_{ MaxHealth };
 	ModelObject model_;
 	AnimationDraw animation_;
@@ -108,5 +115,9 @@ private:
     bool touchingPillar = false;
 	bool isGrounded_{ false };
     bool wasTouchingPillar_{ false };
-  bool gravityEnabled_{ true };
+    bool gravityEnabled_{ true };
+
+
+    bool touchingWall_{ false };
+    Vec3 wallNormal_{};
 };

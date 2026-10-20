@@ -27,6 +27,12 @@ void ResourceManager::LoadAll()
     LoadFont(ResourceKeys::Font_Title,
         L"./Data/Fonts/Bitcount/static/Bitcount-Light.ttf");
 
+
+	// UI用スプライトの読み込み
+    LoadSprite(ResourceKeys::UI_Logo, L"./Data/Images/TitleUI/logo.png");
+    LoadSprite(ResourceKeys::UI_StartButton, L"./Data/Images/TitleUI/play.png");
+	LoadSprite(ResourceKeys::UI_ExitButton, L"./Data/Images/TitleUI/exit.png");
+
     // モデルの読み込み
     LoadModel(ResourceKeys::Model_Stage,      L"./Data/Models/field.mv1");
     LoadModel(ResourceKeys::Model_StageAlpha, L"./Data/Models/field.mv1");
@@ -53,13 +59,13 @@ void ResourceManager::LoadAll()
         "UI",
         "./Data/UI/UI.ssbp");
         
-	// サウンドの読み込み
-    SetCreate3DSoundFlag(TRUE);
+	//// サウンドの読み込み
+   SetCreate3DSoundFlag(TRUE);
     LoadSound(ResourceKeys::Sound_BossBite, L"./Data/Sounds/Explosion.mp3");
     SetCreate3DSoundFlag(FALSE);
 
 
-    // Effect
+   // Effect
 	LoadEffect(ResourceKeys::Effect_Test, L"./Data/Effects/shabondama.efkefc",30.0f);
 }
 
@@ -76,6 +82,9 @@ void ResourceManager::UnloadAll()
     if (ssResMan != nullptr)
     {
         ssResMan->removeAllData();
+
+        delete ssResMan;
+        ssResMan = nullptr;
     }
 
     spriteStudioDataKeys.clear();
@@ -104,7 +113,7 @@ const DxPlus::Sprite::SpriteBase* ResourceManager::GetSprite(
     return GridAt(key);
 }
 
-const DxPlus::Sprite::SpriteBase* ResourceManager::LoadUISprite(
+const DxPlus::Sprite::SpriteBase* ResourceManager::LoadSprite(
     const std::wstring& key, const std::wstring& path)
 {
     return LoadTextureAsSpriteCenter(key, path);
@@ -156,7 +165,7 @@ bool ResourceManager::PlaySpriteStudioAnimation(
 
     const std::string& animationName = namesIt->second[animationIndex];
     player->play(animationName, loopCount, 0);
-    // play() resets the step to 1.0f, so set the requested speed afterward.
+    // play() は再生速度を 1.0f に戻すため、呼び出し後に指定された速度を設定する。
     player->setStep(speed);
     return true;
 }
@@ -235,6 +244,9 @@ int ResourceManager::GetEffect(const std::wstring& key) const
 int ResourceManager::LoadMusic(
     const std::wstring& key, const std::wstring& path)
 {
+    auto existing = musics.find(key);
+    if (existing != musics.end()) return existing->second;
+
     const int music = DxLib::LoadSoundMem(path.c_str());
     if (music == -1)
     {
@@ -248,6 +260,9 @@ int ResourceManager::LoadMusic(
 int ResourceManager::LoadSound(
     const std::wstring& key, const std::wstring& path)
 {
+    auto existing = sounds.find(key);
+    if (existing != sounds.end()) return existing->second;
+
     const int sound = DxLib::LoadSoundMem(path.c_str());
     if (sound == -1)
     {
@@ -261,7 +276,7 @@ int ResourceManager::LoadSound(
 int ResourceManager::LoadModel(
     const std::wstring& key, const std::wstring& path)
 {
-    // Do not use C++17 if-initializer syntax so this also builds under C++14.
+    // C++14 でもビルドできるように、C++17 の初期化文付き if 構文は使わない。
     auto it = models.find(key);
     if (it != models.end()) return it->second;
 
@@ -286,14 +301,14 @@ ss::Player* ResourceManager::LoadSpriteStudioPlayer(
         Initialize();
     }
 
-    // Do not use C++17 if-initializer syntax.
+    // C++17 の初期化文付き if 構文は使わない。
     auto existingPlayer = spriteStudioPlayers.find(key);
     if (existingPlayer != spriteStudioPlayers.end())
     {
         return existingPlayer->second.get();
     }
 
-    // Register each SSBP data key only once.
+    // 各 SSBP データのキーは一度だけ登録する。
     if (spriteStudioDataKeys.insert(dataKey).second)
     {
         ssResMan->addDataWithKey(dataKey, path);
@@ -309,10 +324,10 @@ ss::Player* ResourceManager::LoadSpriteStudioPlayer(
 
     player->setData(dataKey);
 
-    // Automatically cache the animation names returned by the SS player.
+    // SS プレイヤーから取得したアニメーション名を自動的にキャッシュする。
     spriteStudioAnimationNames[key] = ssResMan->getAnimeName(dataKey);
 
-    // Play an initial animation only when one was explicitly supplied.
+    // 初期アニメーションが明示的に指定されている場合だけ再生する。
     if (!animation.empty())
     {
         player->play(animation);
@@ -333,7 +348,7 @@ int ResourceManager::LoadEffect(const std::wstring& key, const std::wstring& pat
         return it->second;
 
     int h = LoadEffekseerEffect(path.c_str(), scale);
-    if (h == -1) DxPlus::Utils::FatalError((L"Failed to load model " + path).c_str());
+    if (h == -1) DxPlus::Utils::FatalError((L"Failed to load effect " + path).c_str());
 
     effects[key] = h;
     return h;
@@ -378,7 +393,7 @@ void ResourceManager::UnloadEffects()
 {
     for (auto& e : effects)
     {
-        if (e.second >= 0) DxLib::MV1DeleteModel(e.second);
+        if (e.second >= 0) DeleteEffekseerEffect(e.second);
     }
     effects.clear();
 }
@@ -398,6 +413,9 @@ int ResourceManager::GetFont(const std::wstring& fontName) const
 int ResourceManager::LoadFont(
     const std::wstring& fontName, const std::wstring& path)
 {
+    auto existing = fonts.find(fontName);
+    if (existing != fonts.end()) return existing->second.handle;
+
     if (AddFontResourceExW(path.c_str(), FR_PRIVATE, 0) == 0)
     {
         DxPlus::Utils::FatalError(
@@ -407,6 +425,7 @@ int ResourceManager::LoadFont(
     const int handle = DxPlus::Text::InitializeFont(fontName.c_str(), 40, 2);
     if (handle == -1)
     {
+        RemoveFontResourceExW(path.c_str(), FR_PRIVATE, 0);
         DxPlus::Utils::FatalError(
             (std::wstring(L"Failed to init font: ") + fontName).c_str());
     }

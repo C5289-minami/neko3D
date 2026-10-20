@@ -109,6 +109,12 @@
     <Filter Include="40_Gameplay\Actors\Player\State\Walk">
       <UniqueIdentifier>{6c0d4e4b-0114-4f9f-a8c2-d512e6eed8c0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="40_Gameplay\Actors\Player\State\Climbing">
+      <UniqueIdentifier>{e4c6ba41-9b91-45e4-8c1d-62a35f9426b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Player\State\WallJump">
+      <UniqueIdentifier>{194dcd93-578f-459a-b9b5-5fa3b7feb760}</UniqueIdentifier>
+    </Filter>
     <Filter Include="SSPlayer">
       <UniqueIdentifier>{448f3549-980d-4c84-9e08-7e1ba277bff7}</UniqueIdentifier>
     </Filter>
@@ -393,6 +399,12 @@
     <ClInclude Include="PlayerGroomingState.h">
       <Filter>40_Gameplay\Actors\Player\State\Grooming</Filter>
     </ClInclude>
+    <ClInclude Include="PlayerClimbingState.h">
+      <Filter>40_Gameplay\Actors\Player\State\Climbing</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerWallJump.h">
+      <Filter>40_Gameplay\Actors\Player\State\WallJump</Filter>
+    </ClInclude>
     <ClInclude Include="PlayerWalkState.h">
       <Filter>40_Gameplay\Actors\Player\State\Walk</Filter>
     </ClInclude>
@@ -463,9 +475,6 @@
       <Filter>10_Core\UI</Filter>
     </ClInclude>
     <ClInclude Include="UIBase.h">
-      <Filter>10_Core\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="UIFactory.h">
       <Filter>10_Core\UI</Filter>
     </ClInclude>
     <ClInclude Include="Button.h">
@@ -630,6 +639,12 @@
     <ClInclude Include="CameraPose.h">
       <Filter>10_Core\Camera\Pose</Filter>
     </ClInclude>
+    <ClInclude Include="GameState.h">
+      <Filter>15_System</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraObjectManager.h">
+      <Filter>40_Gameplay\Debug</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -752,6 +767,12 @@
     <ClCompile Include="PlayerGroomingState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Grooming</Filter>
     </ClCompile>
+    <ClCompile Include="PlayerClimbingState.cpp">
+      <Filter>40_Gameplay\Actors\Player\State\Climbing</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerWallJump.cpp">
+      <Filter>40_Gameplay\Actors\Player\State\WallJump</Filter>
+    </ClCompile>
     <ClCompile Include="PlayerWalkState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Walk</Filter>
     </ClCompile>
@@ -783,9 +804,6 @@
       <Filter>SSPlayer\common\Helper</Filter>
     </ClCompile>
     <ClCompile Include="UIManager.cpp">
-      <Filter>10_Core\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="UIFactory.cpp">
       <Filter>10_Core\UI</Filter>
     </ClCompile>
     <ClCompile Include="AnimationDraw.cpp">
@@ -884,7 +902,9 @@
     <ClCompile Include="CameraTransition.cpp">
       <Filter>10_Core\Camera\Pose</Filter>
     </ClCompile>
-    <ClCompile Include="Scenes\Base\SceneManager.cpp" />
+    <ClCompile Include="CameraObjectManager.cpp">
+      <Filter>40_Gameplay\Debug</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Config\toon.json">
@@ -897,6 +917,9 @@
       <Filter>JSON</Filter>
     </None>
     <None Include="Data\Config\outline.json">
+      <Filter>JSON</Filter>
+    </None>
+    <None Include="Data\Config\camera_shots.json">
       <Filter>JSON</Filter>
     </None>
   </ItemGroup>

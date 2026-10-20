@@ -3,9 +3,11 @@
 // =============================
 #pragma once
 #include "Scene.h"
-#include "Camera.h"
 #include "ModelToonRenderer.h"
 #include "ShaderEffectController.h"
+// camera
+#include "Camera.h"
+#include "CameraDirector.h"
 
 class GameScene final : public Scene
 {
@@ -15,14 +17,7 @@ public:
 	void Update(float deltaTime) override;
 	void Render() const override;
 
-	void SetActiveCamera(Camera::Camera* camera) { activeCamera_ = camera; }
 private:
-    Camera::Camera* activeCamera_{ nullptr };
-    Camera::TargetCamera playerCamera_;
-#ifndef NDEBUG
-    Camera::FreeCamera freeCamera_;
-    bool wasFreeCameraToggleDown_{};
-#endif
 
     ModelToonRenderer modelToonRenderer_{};
     ShaderEffectController shaderEffects_{};
@@ -31,4 +26,11 @@ private:
 
     std::string transformInitialStatus_;
     bool debugActorsPaused_{};
+
+	// ƒJƒƒ‰
+	Camera::FreeCamera camera_;
+	Camera::TargetCamera targetCamera_;
+	Camera::CameraDirector cameraDirector_{ camera_ }; // ƒJƒƒ‰‚Ì‘JˆÚ‚Æ‰‰o‚ğŠÇ—‚·‚é
+	std::string activeCameraShot_{};
+
 };

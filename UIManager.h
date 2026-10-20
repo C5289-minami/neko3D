@@ -10,13 +10,6 @@
 #include "ButtonUI.h"
 #include "SpriteStudioUI.h"
 
-enum class GameUIType
-{
-	Default,		// デフォルトのUI（ゲーム中のUI）
-	Pause,			// ポーズUI
-	GameOver,		// ゲームオーバーUI
-	None,			// UIなし
-};
 
 class UIManager
 {
@@ -49,9 +42,6 @@ public:
 	void Clear();
 	std::size_t GetUICount() const { return UIs.size(); }
 
-	GameUIType GetCurrentUIType() const { return currentUIType; }
-	void SetCurrentUIType(GameUIType type) { currentUIType = type; }
-
 
 private:
 	struct UIEntry
@@ -60,7 +50,6 @@ private:
 		std::unique_ptr<UIBase> object;
 	};
 	std::vector<UIEntry> UIs;
-	GameUIType currentUIType{ GameUIType::None };
 };
 
 inline UIManager& UIM()

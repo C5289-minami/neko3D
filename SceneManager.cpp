@@ -106,8 +106,8 @@ void SceneManager::Run()
 {
 	if (scene)
 	{
+      UIM().Init();
 		scene->Init();
-		UIM().Init();
 	}
 	while (DxPlus::GameLoop(true))
 	{
@@ -141,8 +141,8 @@ void SceneManager::Run()
 
 				if (!next) { DxLib::ScreenFlip(); break; }
 				SetScene(next);
+               UIM().Init();
 				next->Init();
-				UIM().Init();
 			}
 
 			DxPlus::Debug::Draw();

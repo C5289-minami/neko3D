@@ -14,6 +14,7 @@
 namespace Camera
 {
 	// カメラ遷移を管理するクラス
+    // このクラスはposeからposeまでの補完のみ管理
     class CameraTransition
     {
     public:

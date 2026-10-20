@@ -3,7 +3,6 @@
 #include "ResourceKeys.h"
 #include "Button.h"
 #include "DxPlus/DxPlus.h"
-#include "UIFactory.h"
 #include <algorithm>
 
 UIBase* UIManager::CreateImageUI(const std::wstring& id, const std::wstring& resourceKey,
@@ -81,23 +80,6 @@ void UIManager::Clear()
 void UIManager::Init()
 {
     Clear();
-	SceneID type = SM().GetCurrentSceneID();
-
-	if (type == SceneID::Title) {
-		UIFactory::CreateTitleUI(*this);
-	}
-	else if (type == SceneID::Game) {
-		UIFactory::CreateGameUI(*this);
-	}
-	else if (type == SceneID::Result) {
-		UIFactory::CreateResultUI(*this);
-	}
-	else {
-		// ëºÇÃÉVÅ[ÉìÇ≈ÇÕUIÇçÏê¨ÇµÇ»Ç¢
-	}
-	
-
-
 }
 
 void UIManager::Update(float deltaTime)

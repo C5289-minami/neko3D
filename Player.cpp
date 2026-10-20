@@ -39,6 +39,10 @@ void Player::Reset()
 
 	health_ = MaxHealth;
 	wasTouchingPillar_ = false;
+
+	touchingWall_ = false;
+	wallNormal_ = {};
+
 	model_.collisionHighlighted = false;
 	ultimateGauge_ = 0.0f;
 	// 初期位置・回転・拡大率は既定値を設定した後にJSONから読み込む
@@ -64,6 +68,28 @@ void Player::Reset()
 void Player::Update(float deltaTime)
 {
 	input_.Update();
+	UpdateMovement(deltaTime);
+}
+
+void Player::UpdateMovement(float deltaTime)
+{
+	bool NearTheWall = false;
+	if (input_.isMoving)
+	{
+		Vec3 moveDirection = GetWorldMoveDirection(input_.moveDir);
+		float wallDirection = Vec3::Dot(moveDirection, wallNormal_);//壁の法線と移動方向の内積を計算して、壁に対してどの方向に向かっているかを判定する
+
+		if (wallDirection < -0.25f)
+		{
+			NearTheWall = true;
+		}
+	}
+	if (touchingWall_ && gravityEnabled_ && !IsDead() && !IsDamaging() &&
+        GetCurrentState() != PlayerStateType::WallJump &&
+		(NearTheWall || (!isGrounded_ && !input_.isMoving)))
+	{
+		stateMachine_.ChangeState(PlayerStateType::Climbing);
+	}
 
 	stateMachine_.Tick(deltaTime);
 
@@ -71,7 +97,7 @@ void Player::Update(float deltaTime)
 	PlayerDiagonalMove(deltaTime, position_, movementCenter_);
 	// 横移動は PlayerDiagonalMove、上下移動は velocity_.y にまとめる。
 
-	if (gravityEnabled_)
+	if (gravityEnabled_ && GetCurrentState() != PlayerStateType::Climbing)
 	{
 		velocity_.y -= Const::GRAVITY * deltaTime;
 	}
@@ -89,7 +115,10 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 	const Vec3 oldPosition = GetPosition();
 	const float previousY = oldPosition.y;
 
-	Update(deltaTime);
+	input_.Update();
+	// 今フレームの入力に合う側面を選び、柱のどの方向からでも登れるようにする。
+	touchingWall_ = stage.FindPillarWall(GetPosition(), wallNormal_, GetWorldMoveDirection(input_.moveDir));
+	UpdateMovement(deltaTime);
 
 	// ステージの柱に沿ってスライドさせる
     position_ = stage.SlideAlongPillars(oldPosition, position_, touchingPillar);
@@ -129,10 +158,10 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
     const Vec3 capsuleStart = GetPosition() + Vec3::Up() * Const::PLAYER_RADIUS;
     const Vec3 capsuleEnd = GetPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
     touchingPillar |= stage.IsHitPillar(capsuleStart, capsuleEnd, Const::PLAYER_RADIUS);
+
     if (touchingPillar && !wasTouchingPillar_)
     {
         std::cout << "Hit: Player touched a pillar." << std::endl;
-        OutputDebugStringA("Hit: Player touched a pillar.\n");
     }
     wasTouchingPillar_ = touchingPillar;
 
@@ -210,6 +239,21 @@ void Player::StopMove()
 	velocity_.z = 0.0f;
 }
 
+
+Vec3 Player::GetWorldMoveDirection(const Vec3& moveDir) const//Plyaerがどこを向いているかのワールド座標系での移動方向を取得する
+{
+    Vec3 forward = movementCenter_ - GetPosition();
+    forward.y = 0.0f;
+
+    if (forward.LengthSq() < 0.000001f)
+        forward = Vec3(std::sin(GetYaw()), 0.0f, std::cos(GetYaw()));
+    else
+        forward = forward.Normalized();
+    const Vec3 right{ forward.z, 0.0f, -forward.x };
+
+	return (forward * moveDir.z + right * moveDir.x).Normalized();
+	//プレイヤーの移動方向をワールド座標系で取得するための関数です。
+}
 
 void Player::Turn(float direction, float speed, float deltaTime)
 {
@@ -301,7 +345,17 @@ void Player::TurnTowards(
 
 void Player::PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& movementCenter)
 {
-	if (deltaTime <= 0.0f || moveInput_.LengthSq() == 0.0f)
+	if (deltaTime <= 0.0f) return;
+
+    if (GetCurrentState() == PlayerStateType::WallJump)
+    {
+        // 壁を蹴った方向を保ち、入力や足場の中心に左右されず壁から離れる。
+        playerPos.x += velocity_.x * deltaTime;
+        playerPos.z += velocity_.z * deltaTime;
+        TurnTowards(Vec3(velocity_.x, 0.0f, velocity_.z), deltaTime);
+        return;
+    }
+	if (moveInput_.LengthSq() == 0.0f)
 	{
 		return;
 	}
@@ -366,9 +420,27 @@ void Player::StartLungingJump(const Vec3& moveDir)
 
 	StopMove();
 	// 横移動の入力を保存し、ジャンプでは上向きの速度だけ設定する。
-	SetMoveDirection(moveDir);
+	Vec3 moveInput = moveDir;
+	// 左右と前後が同時に入力された場合、左右を優先して斜め移動を防ぐ
+	if (moveInput.x != 0.0f)
+		moveInput.z = 0.0f;
+
+	SetMoveDirection(moveInput);
 	velocity_.y = lungingJumpSpeed_;
 	isGrounded_ = false;
+}
+
+void Player::StartWallJump()
+{
+    const Vec3 direction = Vec3(wallNormal_.x, 0.0f, wallNormal_.z).Normalized();
+    if (!gravityEnabled_ || !touchingWall_ || direction.LengthSq() == 0.0f) return;
+
+    StopMove();
+    // LungingJumpと同じ強さで、接触中の壁から外向きに跳ぶ。
+    velocity_.x = direction.x * lungingMoveSpeed_;
+    velocity_.z = direction.z * lungingMoveSpeed_;
+    velocity_.y = lungingJumpSpeed_;
+    isGrounded_ = false;
 }
 
 void Player::JumpAction()
