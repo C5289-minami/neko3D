@@ -27,6 +27,11 @@ void ResourceManager::LoadAll()
     LoadFont(ResourceKeys::Font_Title,
         L"./Data/Fonts/Bitcount/static/Bitcount-Light.ttf");
 
+	// UI用スプライトの読み込み
+    LoadSprite(ResourceKeys::UI_Logo, L"./Data/Images/TitleUI/logo.png");
+    LoadSprite(ResourceKeys::UI_StartButton, L"./Data/Images/TitleUI/play.png");
+	LoadSprite(ResourceKeys::UI_ExitButton, L"./Data/Images/TitleUI/exit.png");
+
     // モデルの読み込み
     LoadModel(ResourceKeys::Model_Stage,      L"./Data/Models/field.mv1");
     LoadModel(ResourceKeys::Model_StageAlpha, L"./Data/Models/field.mv1");
@@ -104,7 +109,7 @@ const DxPlus::Sprite::SpriteBase* ResourceManager::GetSprite(
     return GridAt(key);
 }
 
-const DxPlus::Sprite::SpriteBase* ResourceManager::LoadUISprite(
+const DxPlus::Sprite::SpriteBase* ResourceManager::LoadSprite(
     const std::wstring& key, const std::wstring& path)
 {
     return LoadTextureAsSpriteCenter(key, path);
@@ -116,6 +121,21 @@ ss::Player* ResourceManager::GetSpriteStudioPlayer(
     auto it = spriteStudioPlayers.find(key);
     if (it == spriteStudioPlayers.end()) return nullptr;
     return it->second.get();
+}
+
+std::unique_ptr<ss::Player> ResourceManager::CreateSpriteStudioPlayerInstance(
+    const std::wstring& key) const
+{
+    if (ssResMan == nullptr) return nullptr;
+    auto dataKey = spriteStudioDataKeyByPlayerKey.find(key);
+    if (dataKey == spriteStudioDataKeyByPlayerKey.end()) return nullptr;
+
+    std::unique_ptr<ss::Player> player(ss::Player::create(ssResMan));
+    if (!player) return nullptr;
+    player->setData(dataKey->second);
+    player->setAlpha(255);
+    player->setFlip(false, false);
+    return player;
 }
 
 std::vector<std::string> ResourceManager::GetSpriteStudioAnimationNames(
@@ -283,6 +303,7 @@ ss::Player* ResourceManager::LoadSpriteStudioPlayer(
     {
         ssResMan->addDataWithKey(dataKey, path);
     }
+    spriteStudioDataKeyByPlayerKey[key] = dataKey;
 
     std::unique_ptr<ss::Player> player(ss::Player::create(ssResMan));
     if (!player)
@@ -355,6 +376,7 @@ void ResourceManager::UnloadSpriteStudioPlayers()
 {
     spriteStudioPlayers.clear();
     spriteStudioAnimationNames.clear();
+    spriteStudioDataKeyByPlayerKey.clear();
 }
 
 void ResourceManager::UnloadEffects()

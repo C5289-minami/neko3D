@@ -1,11 +1,14 @@
 #pragma once
+#pragma once
 #include <functional>
+#include <cstddef>
+#include <memory>
+#include <string>
 #include <vector> 
 #include "DxPlus/DxPlus.h"
-#include "ResourceKeys.h"
-#include "Scene.h"
-#include "Button.h"
 #include "UIBase.h"
+#include "ButtonUI.h"
+#include "SpriteStudioUI.h"
 
 enum class GameUIType
 {
@@ -28,23 +31,35 @@ public:
 	void Init();
 	void Update(float deltaTime);
 	void Draw(int drawZOrder = -1);
+	UIBase* CreateImageUI(const std::wstring& id, const std::wstring& resourceKey,
+		DxPlus::Vec2 position, DxPlus::Vec2 moveDirection = DxPlus::Vec2(0, 0),
+		float motionDuration = 0.0f);
+	ButtonUI* CreateButtonUI(const std::wstring& id, const std::wstring& resourceKey,
+		DxPlus::Vec2 position, std::function<void()> onClick,
+		DxPlus::Vec2 moveDirection = DxPlus::Vec2(0, 0), float motionDuration = 0.0f);
+	SpriteStudioUI* CreateSpriteStudioUI(const std::wstring& id,
+		const std::wstring& resourceKey, DxPlus::Vec2 position,
+		const std::string& animationName = "",
+		DxPlus::Vec2 moveDirection = DxPlus::Vec2(0, 0), float motionDuration = 0.0f);
+	UIBase* GetUI(const std::wstring& id);
+	ButtonUI* GetButtonUI(const std::wstring& id);
+	SpriteStudioUI* GetSpriteStudioUI(const std::wstring& id);
+	bool RegisterUI(const std::wstring& id, std::unique_ptr<UIBase> ui);
+	bool RemoveUI(const std::wstring& id);
+	void Clear();
+	std::size_t GetUICount() const { return UIs.size(); }
 
-	void AddUI(std::unique_ptr<UIBase> ui)
-	{
-       if (!ui) return;
-		UIs.push_back(std::move(ui));
-	}
-	/*void AddButton(std::unique_ptr<Button> button)
-	{
-		buttons.push_back(std::move(button));
-	}*/
 	GameUIType GetCurrentUIType() const { return currentUIType; }
 	void SetCurrentUIType(GameUIType type) { currentUIType = type; }
 
 
 private:
-	std::vector<std::unique_ptr<UIBase>> UIs;
-	//std::vector<std::unique_ptr<Button>> buttons;
+	struct UIEntry
+	{
+		std::wstring id;
+		std::unique_ptr<UIBase> object;
+	};
+	std::vector<UIEntry> UIs;
 	GameUIType currentUIType{ GameUIType::None };
 };
 

@@ -28,7 +28,9 @@ bool ToonSettingsManager::Save(const std::string& filePath)
 
     json["shadow"] = {
         g_toonSettings.shadow[0],
-        g_toonSettings.shadow[1]
+        g_toonSettings.shadow[1],
+		g_toonSettings.shadow[2],
+		g_toonSettings.shadow[3]
     };
 
     json["LightDirection"] = {

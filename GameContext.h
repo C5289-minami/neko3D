@@ -5,6 +5,9 @@
 #include <string>
 
 #include "Vector3.h"
+#include "GameState.h"
+
+
 #include "Grid.h"
 #include "Stage.h"
 #include "Player.h"
@@ -75,4 +78,6 @@ private:
 
     bool debugActorsPaused_{};
     std::string transformInitialStatus_;
+
+    GameState gameState_{ GameState::Title };
 };

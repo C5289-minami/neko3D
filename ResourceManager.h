@@ -45,7 +45,7 @@ public:
 
     [[nodiscard]] const DxPlus::Sprite::SpriteBase* GridAt(const std::wstring& key, int x = 0, int y = 0) const;
     [[nodiscard]] const DxPlus::Sprite::SpriteBase* GetSprite(const std::wstring& key) const;
-    const DxPlus::Sprite::SpriteBase* LoadUISprite(const std::wstring& key, const std::wstring& path);
+    const DxPlus::Sprite::SpriteBase* LoadSprite(const std::wstring& key, const std::wstring& path);
     /// <summary>
     /// 指定したフォント名に対応するフォントハンドルを取得します。
     /// </summary>
@@ -59,6 +59,7 @@ public:
     int GetModel(const std::wstring& key) const;
     int GetEffect(const std::wstring& key) const;
     ss::Player* GetSpriteStudioPlayer(const std::wstring& key) const;
+    std::unique_ptr<ss::Player> CreateSpriteStudioPlayerInstance(const std::wstring& key) const;
 
 
 
@@ -220,6 +221,7 @@ private:
     std::unordered_map<std::wstring, int> models;
     std::unordered_map<std::wstring, int> effects;
     std::unordered_map<std::wstring, std::unique_ptr<ss::Player>> spriteStudioPlayers;
+    std::unordered_map<std::wstring, std::string> spriteStudioDataKeyByPlayerKey;
    std::unordered_set<std::string> spriteStudioDataKeys;
     ss::ResourceManager* ssResMan{ nullptr }; // SS6Player用のリソースマネージャ
     std::map<std::wstring, std::vector<std::string>>

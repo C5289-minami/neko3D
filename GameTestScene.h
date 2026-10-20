@@ -5,10 +5,10 @@
 #include "ShaderEffectController.h"
 #include "Camera.h"
 
-class GameTest final : public Scene
+class GameTestScene final : public Scene
 {
 public:
-    explicit GameTest(GameContext* context) : Scene(context) {}
+    explicit GameTestScene(GameContext* context) : Scene(context) {}
     void Init() override;
     void Update(float deltaTime) override;
     void Render() const override;
@@ -18,7 +18,7 @@ public:
 
 private:
     Camera::Camera* activeCamera_{ nullptr };
-    Camera::HomingCamera playerCamera_;
+    Camera::TargetCamera playerCamera_;
 #ifndef NDEBUG
     Camera::FreeCamera freeCamera_;
     bool wasFreeCameraToggleDown_{};

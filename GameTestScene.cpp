@@ -11,32 +11,7 @@
 #endif
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
-#ifndef NDEBUG
-#include "ModelObjectManager.h"
-
-void GameScene::SetModelEditTargets()
-{
-	auto& player = gameContext->GetPlayer();
-	auto& stage = gameContext->GetStage();
-	auto& boss = gameContext->GetBoss();
-
-	MObjs().AddActor("Player", player);
-	MObjs().Add(player.GetModelObject(), player);
-	MObjs().AddActor("Stage", stage);
-	for (auto& model : stage.GetPillarModelObjects())
-		MObjs().Add(model, stage);
-	for (auto& model : stage.GetStageModelObjects())
-		MObjs().Add(model, stage);
-	MObjs().Add(stage.GetModelObject(), stage);
-
-	MObjs().AddActor("Boss", boss);
-	MObjs().Add(boss.GetModelObject(), boss);
-}
-#endif
-
-
-
-void GameTest::Init()
+void GameTestScene::Init()
 {
 
 
@@ -67,7 +42,7 @@ void GameTest::Init()
     StartFadeIn();
 }
 
-void GameTest::Update(float deltaTime)
+void GameTestScene::Update(float deltaTime)
 {
     DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
@@ -154,7 +129,7 @@ void GameTest::Update(float deltaTime)
     }
 }
 
-void GameTest::Render() const
+void GameTestScene::Render() const
 {
 
 	DxLib::ClearDrawScreen();
@@ -175,11 +150,11 @@ void GameTest::Render() const
 	}
 }
 
-void GameTest::End()
+void GameTestScene::End()
 {
 }
 
-void GameTest::RenderDepth() const
+void GameTestScene::RenderDepth() const
 {
 #ifndef NDEBUG
 	(activeCamera_ ? activeCamera_ : &playerCamera_)->ApplyCamera();
@@ -208,7 +183,7 @@ void GameTest::RenderDepth() const
 
 }
 
-void GameTest::DrawScene(bool toonEnabled) const
+void GameTestScene::DrawScene(bool toonEnabled) const
 {
 #ifndef NDEBUG
 	(activeCamera_ ? activeCamera_ : &playerCamera_)->ApplyCamera();

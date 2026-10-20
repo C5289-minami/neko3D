@@ -229,6 +229,15 @@
     <Filter Include="30_Scenes\Test\Status">
       <UniqueIdentifier>{c0fbb9b4-adcd-48a7-ba83-374c381ce04a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="10_Core\Camera\Base">
+      <UniqueIdentifier>{97497ee1-d873-4b5c-85fa-619c7c5b8a25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="10_Core\Camera\Director">
+      <UniqueIdentifier>{58706966-90c4-4c4c-af54-28588420898b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="10_Core\Camera\Pose">
+      <UniqueIdentifier>{566a1ae2-de19-403d-a9c0-85e414d48646}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -576,9 +585,6 @@
     <ClInclude Include="EffectManager.h">
       <Filter>40_Gameplay\Effects</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>10_Core\Camera</Filter>
-    </ClInclude>
     <ClInclude Include="CharSettings.h">
       <Filter>40_Gameplay\Actors\Player\Character</Filter>
     </ClInclude>
@@ -611,6 +617,21 @@
     </ClInclude>
     <ClInclude Include="ModelType.h">
       <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>10_Core\Camera\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraDirector.h">
+      <Filter>10_Core\Camera\Director</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraTransition.h">
+      <Filter>10_Core\Camera\Pose</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraPose.h">
+      <Filter>10_Core\Camera\Pose</Filter>
+    </ClInclude>
+    <ClInclude Include="GameState.h">
+      <Filter>15_System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -856,6 +877,15 @@
     </ClCompile>
     <ClCompile Include="DrawableObject.cpp">
       <Filter>40_Gameplay\Actors\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>10_Core\Camera\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraDirector.cpp">
+      <Filter>10_Core\Camera\Director</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraTransition.cpp">
+      <Filter>10_Core\Camera\Pose</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

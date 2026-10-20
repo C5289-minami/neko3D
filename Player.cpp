@@ -15,8 +15,9 @@
 
 
 Player::Player()
-	: stateMachine_(*this)
+  : ActorBase("Player"), stateMachine_(*this)
 {
+   model_.SetOwner(*this);
 }
 
 

@@ -10,6 +10,8 @@
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
 
+#include <vector>
+
 void SceneManager::Init()
 {
 	const int w = DxPlus::CLIENT_WIDTH;
@@ -27,25 +29,30 @@ void SceneManager::Init()
 	DxLib::SetWindowSize(w * 0.7f, h * 0.7f);
 #else
 	DxLib::SetWindowSize(w, h);
+	// フルスク調べてここに書いて
 #endif
 	DxPlus::DxWrapper::GetInstance().SetFpsCap(runConfig.fpsCap);
 
 	ResourceManager::GetInstance().LoadAll();
 	gameContext.Init();
 
-	titleScene.SetGameContext(&gameContext);
-	gameScene.SetGameContext(&gameContext);
-	resultScene.SetGameContext(&gameContext);
+    std::vector<Scene*> scenes{
+		&titleScene,
+		&gameScene,
+		&resultScene
+	};
 #ifndef NDEBUG
-	shaderTestScene.SetGameContext(&gameContext);
-	ssFlipTestScene.SetGameContext(&gameContext);
-	roomTestScene.SetGameContext(&gameContext);
-	statusTestScene.SetGameContext(&gameContext);
-	modelConfigScene.SetGameContext(&gameContext);
-	gameTestScene.SetGameContext(&gameContext);
-  gameScene.SetModelEditTargets();
-	roomTestScene.SetModelEditTargets();
+   scenes.insert(scenes.end(), {
+		&shaderTestScene,
+		&ssFlipTestScene,
+		&roomTestScene,
+		&statusTestScene,
+		&modelConfigScene,
+		&gameTestScene
+	});
 #endif
+	for (Scene* currentScene : scenes)
+		currentScene->SetGameContext(&gameContext);
 
 	scene = &titleScene; // 最初のシーン
 
@@ -56,6 +63,8 @@ void SceneManager::Init()
 
 void SceneManager::Shutdown()
 {
+	// UI が所有する SpriteStudio Player を、参照先リソースより先に破棄する。
+	UIM().Clear();
 	ResourceManager::GetInstance().UnloadAll();
 
 #ifndef NDEBUG
@@ -97,8 +106,8 @@ void SceneManager::Run()
 {
 	if (scene)
 	{
+      UIM().Init();
 		scene->Init();
-		UIM().Init();
 	}
 	while (DxPlus::GameLoop(true))
 	{
@@ -132,8 +141,8 @@ void SceneManager::Run()
 
 				if (!next) { DxLib::ScreenFlip(); break; }
 				SetScene(next);
+               UIM().Init();
 				next->Init();
-				UIM().Init();
 			}
 
 			DxPlus::Debug::Draw();

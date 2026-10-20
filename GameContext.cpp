@@ -4,6 +4,7 @@
 #include "GameContext.h"
 #include "DxConv.h"
 #include "DxPlus/DxPlus.h"
+#include "ModelObjectManager.h"
 #ifndef NDEBUG
 #include "imgui.h"
 #endif
@@ -11,10 +12,20 @@
 
 void GameContext::Init()
 {
+    auto& modelObjects = MObjs();
+    modelObjects.Add(player.GetModelObject(), player);
+    modelObjects.Add(stage.GetModelObject(), stage);
+    for (auto& model : stage.GetPillarModelObjects())
+        modelObjects.Add(model, stage);
+    for (auto& model : stage.GetStageModelObjects())
+        modelObjects.Add(model, stage);
+    modelObjects.Add(boss.GetModelObject(), boss);
+    modelObjects.Add(room_.GetModelObject(), room_);
+
     stage.Init();
     player.Init();
     boss.Init();
-	room_.Init();
+   room_.Init();
 }
 
 void GameContext::Reset()
@@ -31,6 +42,7 @@ void GameContext::Reset()
     boss.Reset();
 	room_.Reset();
 
+	gameState_ = GameState::Title;
 
     debugActorsPaused_ = false;
     //TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);

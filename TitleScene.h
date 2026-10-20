@@ -13,10 +13,8 @@ public:
     void Update(float deltaTime) override;
     void Render() const override;
 
+#ifndef NDEBUG
+	void DrawImGui() override;
+#endif 
 private:
-    int fontHandle{ -1 };
-
-    static constexpr float BLINK_INTERVAL = 0.5f;
-    float blinkTimer{ BLINK_INTERVAL };
-    bool isPushEnterVisible{ false };
 };

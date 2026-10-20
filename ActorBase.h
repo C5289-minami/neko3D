@@ -1,11 +1,14 @@
 #pragma once
+#include <string>
+#include <utility>
+
 #include "Vector3.h"
 
 
 class ActorBase
 {
 public:
-	ActorBase() = default;
+    explicit ActorBase(std::string id) : actorID_(std::move(id)) {}
 	virtual ~ActorBase() = default;
 	virtual void Init() = 0;
 	virtual void Reset() = 0;
@@ -20,7 +23,9 @@ public:
 	float GetPitch() const { return pitch_; }
 	void SetPitch(float pitch) { pitch_ = pitch; }
    Vec3 GetRotation() const { return { pitch_, yaw_, 0.0f }; }
+   const std::string& GetIdentifier() const { return actorID_; }
 protected:
+   const std::string actorID_;
 	Vec3 position_{ 0.0f, 0.0f, 0.0f };
 	float yaw_{ 0.0f };
 	float pitch_{ 0.0f };
