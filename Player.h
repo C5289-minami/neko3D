@@ -92,6 +92,8 @@ public:
     bool TryUseUltimateGauge();
 
 private:
+    void UpdateMovement(float deltaTime);
+
     int health_{ MaxHealth };
 	ModelObject model_;
 	AnimationDraw animation_;

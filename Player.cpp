@@ -68,7 +68,11 @@ void Player::Reset()
 void Player::Update(float deltaTime)
 {
 	input_.Update();
+	UpdateMovement(deltaTime);
+}
 
+void Player::UpdateMovement(float deltaTime)
+{
 	bool NearTheWall = false;
 	if (input_.isMoving)
 	{
@@ -110,8 +114,10 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 	const Vec3 oldPosition = GetPosition();
 	const float previousY = oldPosition.y;
 
-	touchingWall_ = stage.FindPillarWall(GetPosition(), wallNormal_);//	壁に接触しているかどうかを確認する
-	Update(deltaTime);
+	input_.Update();
+	// 今フレームの入力に合う側面を選び、柱のどの方向からでも登れるようにする。
+	touchingWall_ = stage.FindPillarWall(GetPosition(), wallNormal_, GetWorldMoveDirection(input_.moveDir));
+	UpdateMovement(deltaTime);
 
 	// ステージの柱に沿ってスライドさせる
     position_ = stage.SlideAlongPillars(oldPosition, position_, touchingPillar);

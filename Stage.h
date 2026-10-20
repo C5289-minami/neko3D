@@ -31,7 +31,7 @@ public:
 
     // プレイヤーのカプセルと柱L・M・Sのメッシュを判定する。
     bool IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float radius) const;
-    bool FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal) const;
+    bool FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal, const Vec3& moveDirection = Vec3{}) const;
     Vec3 SlideAlongPillars(const Vec3& oldPosition, const Vec3& desiredPosition, bool& touched) const;
 
     void DrawDebugUI();

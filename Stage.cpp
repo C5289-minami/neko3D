@@ -144,7 +144,7 @@ bool Stage::IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float 
     return false;
 }
 
-bool Stage::FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal) const
+bool Stage::FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal, const Vec3& moveDirection) const
 {
     wallNormal = {};
 
@@ -152,6 +152,11 @@ bool Stage::FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal) const
     const Vec3 start = feetPosition + Vec3::Up() * Const::PLAYER_RADIUS;
     const Vec3 end = feetPosition + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
     const float headY = feetPosition.y + Const::PLAYER_HEIGHT;
+
+    const Vec3 direction = Vec3(moveDirection.x, 0.0f, moveDirection.z).Normalized();
+    bool foundWall = false;
+    float bestDirection = 2.0f;
+    float bestDistance = Const::PLAYER_RADIUS + Const::PLAYER_SKIN;
 
     for (int handle : pillarCollisionHandles_)
     {
@@ -161,8 +166,6 @@ bool Stage::FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal) const
             DxConv::ToVECTOR(start),
             DxConv::ToVECTOR(end),
             Const::PLAYER_RADIUS + Const::PLAYER_SKIN);
-
-        bool foundWall = false;
 
         for (int i = 0; i < result.HitNum; ++i)
         {
@@ -185,23 +188,32 @@ bool Stage::FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal) const
                 continue;
             }
 
-            // 頭が面の下端以下なら、その面は使わない。
-            // 使う
-            //if (headY <= bottom)
-            //{
-            //    continue;
-            //}
+            // 体の高さと重ならない側面は使わない。
+            if (headY <= bottom) continue;
 
-            wallNormal = Vec3(normal.x, 0.0f, normal.z).Normalized();
-            foundWall = true;
-            break;
+            Vec3 outward = Vec3(normal.x, 0.0f, normal.z).Normalized();
+            const float signedDistance = Vec3::Dot(feetPosition - DxConv::ToVec3(poly.Position[0]), outward);
+            // モデルの面の表裏によらず、壁からプレイヤーへ向く法線にそろえる。
+            if (signedDistance < 0.0f) outward = -outward;
+
+            const float wallDirection = Vec3::Dot(direction, outward);
+            const float distance = std::abs(signedDistance);
+            // 角で複数の面に触れた場合も、入力が向かっている面を優先する。
+            if (!foundWall || wallDirection < bestDirection - 0.0001f ||
+                (std::abs(wallDirection - bestDirection) <= 0.0001f &&
+                    distance < bestDistance))
+            {
+				wallNormal = outward;           // 壁の法線は、プレイヤーの進行方向に向かうようにそろえる。
+				bestDirection = wallDirection;  // 壁の法線と進行方向の内積が最も小さい面を優先する。
+                bestDistance = distance;        // 壁までの距離が最も近い面を優先する。
+				foundWall = true;               //  壁の法線が見つかったことを記録する。
+            }
         }
 
         // 判定結果を解放してから、見つかったかどうかを返す。
         MV1CollResultPolyDimTerminate(result);
-        if (foundWall) return true;
     }
-    return false;
+    return foundWall;
 }
 
 Vec3 Stage::SlideAlongPillars(const Vec3& oldPosition, const Vec3& desiredPosition, bool& touched) const
