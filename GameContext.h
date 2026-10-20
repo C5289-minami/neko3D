@@ -50,6 +50,7 @@ public:
 	Stage& GetStage() { return stage; }
 	EffectManager& GetEffectManager() { return effectManager; }
 	Room& GetRoom() { return room_; }
+	GameState& GetGameState() { return gameState_; }
 
     // ---- lifecycle ----
     void Init();

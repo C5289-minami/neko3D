@@ -27,6 +27,7 @@ void ResourceManager::LoadAll()
     LoadFont(ResourceKeys::Font_Title,
         L"./Data/Fonts/Bitcount/static/Bitcount-Light.ttf");
 
+
 	// UI用スプライトの読み込み
     LoadSprite(ResourceKeys::UI_Logo, L"./Data/Images/TitleUI/logo.png");
     LoadSprite(ResourceKeys::UI_StartButton, L"./Data/Images/TitleUI/play.png");
@@ -58,13 +59,13 @@ void ResourceManager::LoadAll()
         "UI",
         "./Data/UI/UI.ssbp");
         
-	// サウンドの読み込み
-    SetCreate3DSoundFlag(TRUE);
+	//// サウンドの読み込み
+   SetCreate3DSoundFlag(TRUE);
     LoadSound(ResourceKeys::Sound_BossBite, L"./Data/Sounds/Explosion.mp3");
     SetCreate3DSoundFlag(FALSE);
 
 
-    // Effect
+   // Effect
 	LoadEffect(ResourceKeys::Effect_Test, L"./Data/Effects/shabondama.efkefc",30.0f);
 }
 
@@ -81,6 +82,9 @@ void ResourceManager::UnloadAll()
     if (ssResMan != nullptr)
     {
         ssResMan->removeAllData();
+
+        delete ssResMan;
+        ssResMan = nullptr;
     }
 
     spriteStudioDataKeys.clear();
