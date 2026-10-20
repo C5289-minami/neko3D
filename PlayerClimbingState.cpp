@@ -21,6 +21,12 @@ void PlayerClimbingState::Enter()
 void PlayerClimbingState::Tick(float deltaTime)
 {
     const PlayerInput& input = player_.GetInput();
+    if (input.jumpPressed && player_.IsTouchingWall() && player_.IsGravityEnabled())
+    {
+        stateMachine_.ChangeState(PlayerStateType::WallJump);
+        return;
+    }
+
     const float wallDirection = Vec3::Dot(
         player_.GetWorldMoveDirection(input.moveDir),
         player_.GetWallNormal());
@@ -33,6 +39,7 @@ void PlayerClimbingState::Tick(float deltaTime)
         stateMachine_.ChangeState(player_.IsGrounded() || !player_.IsGravityEnabled()
             ? (input.isMoving ? PlayerStateType::Walk : PlayerStateType::Idle)
             : PlayerStateType::NeutralJump);
+
         return;
     }
 

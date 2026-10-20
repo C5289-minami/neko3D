@@ -54,6 +54,7 @@ public:
 	// ジャンプ
 	void JumpAction();
 	void StartLungingJump(const Vec3& moveDir);
+    void StartWallJump();
     float GetLungingMoveSpeed() const { return lungingMoveSpeed_; }
     float GetLungingJumpSpeed() const { return lungingJumpSpeed_; }
     void SetLungingMoveSpeed(float value);

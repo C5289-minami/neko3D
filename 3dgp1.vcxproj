@@ -319,6 +319,7 @@
     <ClInclude Include="UIManager.h" />
     <ClInclude Include="Vector3.h" />
     <ClInclude Include="Volume.h" />
+    <ClInclude Include="PlayerWallJump.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
@@ -335,6 +336,7 @@
     <ClCompile Include="GameTestScene.cpp" />
     <ClCompile Include="ModelConfigScene.cpp" />
     <ClCompile Include="ModelObjectManager.cpp" />
+    <ClCompile Include="PlayerWallJump.cpp" />
     <ClCompile Include="ShaderTestScene.cpp" />
     <ClCompile Include="BossWalkState.cpp" />
     <ClCompile Include="DebugScene.cpp" />

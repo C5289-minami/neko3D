@@ -13,4 +13,5 @@ enum class PlayerStateType
     Die,            // 死亡
     Damaging,       // 被弾中
     Climbing,       // 壁登り
+    WallJump,       // 壁から離れる方向へのジャンプ
 };
