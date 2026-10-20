@@ -16,6 +16,7 @@ void PlayerInput::Update()
 	if (button & BUTTON_RIGHT) moveDir.x += 1.0f;
 
 	jumpPressed = (buttonDown & BUTTON_TRIGGER1) != 0;
+	jumpPressing = (button & BUTTON_TRIGGER1) != 0;
 	// 左クリックの攻撃入力
 	attackPressed = (buttonDown & BUTTON_TRIGGER3) != 0;
 	ultimatePressed = (buttonDown & BUTTON_TRIGGER4) != 0;

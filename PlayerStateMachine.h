@@ -12,6 +12,7 @@
 #include "PlayerUltimateAttackState.h"
 #include "PlayerDamagingState.h"
 #include "PlayerDieState.h"
+#include "PlayerClimbingState.h"
 
 class Player;
 
@@ -43,5 +44,6 @@ private:
 	PlayerUltimateAttackState ultimateAttackState_;
 	PlayerDamagingState damagingState_;
 	PlayerDieState dieState_;
+	PlayerClimbingState climbingState_;
 	// 他をここに追加
 };

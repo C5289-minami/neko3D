@@ -10,6 +10,7 @@ struct PlayerInput
 	bool isMoving{ false };
 	bool run{ false };
 	bool jumpPressed{ false };
+	bool jumpPressing{ false };
 	bool attackPressed{ false };
 	bool ultimatePressed{ false };
 	bool groomingPressed{ false };

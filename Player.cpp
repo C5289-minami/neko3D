@@ -39,6 +39,10 @@ void Player::Reset()
 
 	health_ = MaxHealth;
 	wasTouchingPillar_ = false;
+
+	touchingWall_ = false;
+	wallNormal_ = {};
+
 	model_.collisionHighlighted = false;
 	ultimateGauge_ = 0.0f;
 	// 初期位置・回転・拡大率は既定値を設定した後にJSONから読み込む
@@ -65,13 +69,30 @@ void Player::Update(float deltaTime)
 {
 	input_.Update();
 
+	bool NearTheWall = false;
+	if (input_.isMoving)
+	{
+		Vec3 moveDirection = GetWorldMoveDirection(input_.moveDir);
+		float wallDirection = Vec3::Dot(moveDirection, wallNormal_);
+
+		if (wallDirection < -0.25f)
+		{
+			NearTheWall = true;
+		}
+	}
+	if (touchingWall_ && gravityEnabled_ && !IsDead() && !IsDamaging() &&
+		(NearTheWall || (!isGrounded_ && !input_.isMoving)))
+	{
+		stateMachine_.ChangeState(PlayerStateType::Climbing);
+	}
+
 	stateMachine_.Tick(deltaTime);
 
 	// 中心がどっちにあるか調べる。高さはここでは考えない
 	PlayerDiagonalMove(deltaTime, position_, movementCenter_);
 	// 横移動は PlayerDiagonalMove、上下移動は velocity_.y にまとめる。
 
-	if (gravityEnabled_)
+	if (gravityEnabled_ && GetCurrentState() != PlayerStateType::Climbing)
 	{
 		velocity_.y -= Const::GRAVITY * deltaTime;
 	}
@@ -89,6 +110,7 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 	const Vec3 oldPosition = GetPosition();
 	const float previousY = oldPosition.y;
 
+	touchingWall_ = stage.FindPillarWall(GetPosition(), wallNormal_);//	壁に接触しているかどうかを確認する
 	Update(deltaTime);
 
 	// ステージの柱に沿ってスライドさせる
@@ -129,10 +151,10 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
     const Vec3 capsuleStart = GetPosition() + Vec3::Up() * Const::PLAYER_RADIUS;
     const Vec3 capsuleEnd = GetPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
     touchingPillar |= stage.IsHitPillar(capsuleStart, capsuleEnd, Const::PLAYER_RADIUS);
+
     if (touchingPillar && !wasTouchingPillar_)
     {
         std::cout << "Hit: Player touched a pillar." << std::endl;
-        OutputDebugStringA("Hit: Player touched a pillar.\n");
     }
     wasTouchingPillar_ = touchingPillar;
 
@@ -210,6 +232,21 @@ void Player::StopMove()
 	velocity_.z = 0.0f;
 }
 
+
+Vec3 Player::GetWorldMoveDirection(const Vec3& moveDir) const//Plyaerがどこを向いているかのワールド座標系での移動方向を取得する
+{
+    Vec3 forward = movementCenter_ - GetPosition();
+    forward.y = 0.0f;
+
+    if (forward.LengthSq() < 0.000001f)
+        forward = Vec3(std::sin(GetYaw()), 0.0f, std::cos(GetYaw()));
+    else
+        forward = forward.Normalized();
+    const Vec3 right{ forward.z, 0.0f, -forward.x };
+
+	return (forward * moveDir.z + right * moveDir.x).Normalized();
+	//プレイヤーの移動方向をワールド座標系で取得するための関数です。
+}
 
 void Player::Turn(float direction, float speed, float deltaTime)
 {
