@@ -8,6 +8,12 @@
 
 #include "DxPlus/DxPlus.h"
 
+namespace
+{
+	const Vec3 tutorialPlayerStartPos{ -1882.3f, -783.7f, -1373.0f };
+}
+
+
 void GameScene::Init()
 {
 	gameContext->Reset();
@@ -50,7 +56,7 @@ void GameScene::Init()
 		// logoのUIを作成
 		const DxPlus::Vec2 logoPos(DxPlus::CLIENT_WIDTH * 0.3f, DxPlus::CLIENT_HEIGHT * 0.3f);
 		const std::wstring logoKey = ResourceKeys::UI_Logo;
-		UIM().CreateImageUI(L"Game.Logo", logoKey, logoPos, {},0.5f);
+		UIM().CreateImageUI(L"Game.Logo", logoKey, logoPos, {}, 0.5f);
 		UIM().GetUI(L"Game.Logo")->SetDisplayCondition(
 			[this]() -> bool
 			{
@@ -78,7 +84,7 @@ void GameScene::Init()
 		const std::wstring exitKey = ResourceKeys::UI_ExitButton;
 		UIM().CreateButtonUI(L"Game.ExitButton", exitKey, exitPos,
 			[]() { PostQuitMessage(0); },
-			{-1,0},
+			{ -1,0 },
 			0.5f
 		);
 		UIM().GetUI(L"Game.ExitButton")->SetDisplayCondition(
@@ -95,21 +101,28 @@ void GameScene::Init()
 void GameScene::Update(float deltaTime)
 {
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
+
+	// Actor取得
+	auto& player = gameContext->GetPlayer();
+	auto& boss = gameContext->GetBoss();
+	auto& stage = gameContext->GetStage();
+	// モデル取得
+	ModelObject& playerModel = player.GetModelObject();
+	ModelObject& bossModel = boss.GetModelObject();
+
 	// actors
 	{
-		// Actor取得
-		auto& player = gameContext->GetPlayer();
-		auto& boss = gameContext->GetBoss();
-		auto& stage = gameContext->GetStage();
-		// モデル取得
-		ModelObject& playerModel = player.GetModelObject();
-		ModelObject& bossModel = boss.GetModelObject();
 
 		// stageの中心座標を取得して、playerの更新に渡す
 		const Vec3 stageCenterPosition = stage.GetPosition();
 
-		// 更新
-		player.Update(deltaTime, stage, stageCenterPosition);
+       // チュートリアルは通常の前後左右移動、バトルはステージ中心を基準にした移動を使う。
+		const bool tutorial = gameContext->GetGameState() == GameState::Tutorial;
+		player.SetDefMove(tutorial);
+		if (tutorial)
+			player.Update(deltaTime);
+		else
+			player.Update(deltaTime, stage, stageCenterPosition);
 		stage.UpdateAlphaModel(deltaTime, player);
 		boss.Update(deltaTime);
 
@@ -119,27 +132,65 @@ void GameScene::Update(float deltaTime)
 		{
 			player.TakeDamage();
 		}
+		const bool stageTouching = Collision::UpdateModelContact(playerModel, gameContext->GetRoom().GetModelObject());
+		if (stageTouching)
+		{
+			// プレイヤーがステージに接触している場合の処理
+			player.SetGravityEnabled(false);
+			player.SetGround(true);
+		}
 
 	}
-	// camera
+
+	// ステートマシーンに移行する
+	// update
 	{
-		// おわったら次のステートに遷移する
+		switch (gameContext->GetGameState())
+		{
+		case GameState::Select:
+			// 選択画面の更新
+
+			break;
+		case GameState::Tutorial:
+			// チュートリアルの更新
+			if (DxLib::CheckHitKey(KEY_INPUT_F2))
+			{
+				gameContext->GetGameState() = GameState::Battle;
+			}
+			break;
+		case GameState::Battle:
+			// バトルの更新
+			break;
+		case GameState::Results:
+			// リザルトの更新
+			break;
+		default:
+			break;
+		}
+
+		// おわったら
 		if (cameraDirector_.Update(deltaTime))
 		{
 			switch (gameContext->GetGameState())
 			{
 			case GameState::Select:
+			
 				gameContext->GetGameState() = GameState::Tutorial;
 				break;
 			case GameState::Tutorial:
-				gameContext->GetGameState() = GameState::Battle;
+				player.SetPosition(tutorialPlayerStartPos);
+				player.SetDefMove(true);
+			
 				break;
 			case GameState::Battle:
 				gameContext->GetGameState() = GameState::Title;
 				break;
 			}
 		}
+	}
 
+	// camera
+	{
 		// 今のゲームステートに応じたショット名を決定する
 		std::string requestedShot;
 		switch (gameContext->GetGameState())

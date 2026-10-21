@@ -44,6 +44,7 @@ public:
     bool IsTouchingWall() const { return touchingWall_; }
     const Vec3& GetWallNormal() const { return wallNormal_; }
     Vec3 GetWorldMoveDirection(const Vec3& moveDir) const;
+    void SetDefMove(bool defMove) { isdefMove_ = defMove; }
 
 	// 回転
 	void Turn(float direction, float speed, float deltaTime);
@@ -120,4 +121,6 @@ private:
 
     bool touchingWall_{ false };
     Vec3 wallNormal_{};
+
+	bool isdefMove_{ false };// デフォルトの移動をするかどうか
 };
