@@ -17,6 +17,13 @@ void SceneManager::Init()
 	const int w = DxPlus::CLIENT_WIDTH;
 	const int h = DxPlus::CLIENT_HEIGHT;
 
+	// ウィンドウを作成する前に表示サイズを設定する。
+#ifndef NDEBUG
+	DxLib::SetWindowSize(static_cast<int>(w * 0.7f), static_cast<int>(h * 0.7f));
+#else
+	DxLib::SetWindowSize(w, h);
+#endif
+
 	DxPlus::Initialize(w, h, runConfig.windowed);
 	DxLib::SetMouseDispFlag(TRUE);
 
@@ -26,10 +33,6 @@ void SceneManager::Init()
 	{
 		debugUI.Init();
 	}
-	DxLib::SetWindowSize(w * 0.7f, h * 0.7f);
-#else
-	DxLib::SetWindowSize(w, h);
-	// フルスク調べてここに書いて
 #endif
 	DxPlus::DxWrapper::GetInstance().SetFpsCap(runConfig.fpsCap);
 
