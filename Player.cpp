@@ -23,12 +23,12 @@ Player::Player()
 
 void Player::Init()
 {
-	model_.modelKey = ResourceKeys::Model_Paladin;
-	const int modelHandle = RM().GetModel(model_.modelKey);
+  model_.SetModelKey(ResourceKeys::Model_Paladin);
+	const int modelHandle = RM().GetModel(model_.GetModelKey());
 	if (modelHandle < 0) return;
 
-	model_.modelType_ = ModelType::Bone;
-	model_.scale = { 100.0f, 100.0f, 100.0f };
+    model_.SetModelType(ModelType::Bone);
+	model_.SetScale({ 100.0f, 100.0f, 100.0f });
 
 	Reset();
 }
@@ -60,7 +60,7 @@ void Player::Reset()
 
 	stateMachine_.Initialize();
 	// 更新を止めても描画できるように初期ポーズを用意する
-	animation_.Play3D(RM().GetModel(model_.modelKey), currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
+    animation_.Play3D(RM().GetModel(model_.GetModelKey()), currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
 	animation_.Update(0.0f);
 }
 
@@ -104,7 +104,7 @@ void Player::UpdateMovement(float deltaTime)
 	position_.y += velocity_.y * deltaTime;
 	isGrounded_ = false;
 
-	const int modelHandle = RM().GetModel(model_.modelKey);
+ const int modelHandle = RM().GetModel(model_.GetModelKey());
 	animation_.Play3D(modelHandle, currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
 	animation_.Update(deltaTime);
 }
@@ -179,7 +179,7 @@ void Player::Draw() const
 {
 	const ModelObject worldModel = model_.WithParentTransform(GetPosition(), GetRotation());
 	worldModel.ApplyCollisionColor();
-	animation_.Draw3D(worldModel.position, worldModel.scale, worldModel.rotation);
+  animation_.Draw3D(worldModel.GetPosition(), worldModel.GetScale(), worldModel.GetRotation());
 }
 
 

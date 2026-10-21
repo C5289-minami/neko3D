@@ -71,14 +71,14 @@ public:
     }
     ObjectTransform GetTransform() const
     {
-        return { model_.scale, GetPosition(), GetRotation() };
+        return { model_.GetScale(), GetPosition(), GetRotation() };
     }
     void SetTransform(const ObjectTransform& transform)
     {
         SetPosition(transform.position);
         SetPitch(transform.rotation.x);
         SetYaw(transform.rotation.y);
-        model_.scale = transform.scale;
+        model_.SetScale(transform.scale);
     }
     ModelObject& GetModelObject() { return model_; }
     const ModelObject& GetModelObject() const { return model_; }

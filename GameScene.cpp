@@ -97,23 +97,24 @@ void GameScene::Update(float deltaTime)
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 	// actors
 	{
+		// Actor取得
 		auto& player = gameContext->GetPlayer();
 		auto& boss = gameContext->GetBoss();
 		auto& stage = gameContext->GetStage();
+		// モデル取得
+		ModelObject& playerModel = player.GetModelObject();
+		ModelObject& bossModel = boss.GetModelObject();
+
+		// stageの中心座標を取得して、playerの更新に渡す
 		const Vec3 stageCenterPosition = stage.GetPosition();
 
-
+		// 更新
 		player.Update(deltaTime, stage, stageCenterPosition);
 		stage.UpdateAlphaModel(deltaTime, player);
 		boss.Update(deltaTime);
 
-		// playerの位置
-		ModelObject playerModel = player.GetModelObject().WithParentTransform(
-			player.GetPosition(), player.GetRotation());
-
 		// playerとbossの衝突判定
-		const bool touching = Collision::UpdateModelContact(playerModel, boss.GetModelObject());
-		player.GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
+		const bool touching = Collision::UpdateModelContact(playerModel, bossModel);
 		if (touching)
 		{
 			player.TakeDamage();

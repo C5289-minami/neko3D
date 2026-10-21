@@ -12,7 +12,7 @@ Boss::Boss()
   : ActorBase("Boss"), stateMachine_(*this)
 {
  model_.SetOwner(*this);
-	model_.modelKey = ResourceKeys::Model_Boss;
+ model_.SetModelKey(ResourceKeys::Model_Boss);
 	currentAnimIndex_ = 0;
 }
 
@@ -38,7 +38,7 @@ void Boss::Reset()
 	stateMachine_.Initialize();
 
 	// 更新を止めても描画できるように初期ポーズを用意する
-	animation_.Play3D(RM().GetModel(model_.modelKey), currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
+    animation_.Play3D(RM().GetModel(model_.GetModelKey()), currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
 	animation_.Update(0.0f);
 }
 
@@ -48,7 +48,7 @@ void Boss::Update(float deltaTime)
 	stateMachine_.Tick(deltaTime);
 	position_ += velocity_ * deltaTime;
 
-	const int modelHandle = RM().GetModel(model_.modelKey);
+ const int modelHandle = RM().GetModel(model_.GetModelKey());
 	animation_.Play3D(modelHandle, currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
 	animation_.Update(deltaTime);
 
@@ -59,7 +59,7 @@ void Boss::Draw() const
 {
     const ModelObject worldModel = model_.WithParentTransform(GetPosition(), GetRotation());
 	worldModel.ApplyCollisionColor();
-	animation_.Draw3D(worldModel.position, worldModel.scale, worldModel.rotation);
+  animation_.Draw3D(worldModel.GetPosition(), worldModel.GetScale(), worldModel.GetRotation());
 }
 
 void Boss::SetMoveDirection(const Vec3& moveDirection, float speed)
@@ -86,14 +86,14 @@ void Boss::StopMove()
 	}
 }
 
-const int Boss::GetModelHandle() const { return RM().GetModel(model_.modelKey); }
+const int Boss::GetModelHandle() const { return RM().GetModel(model_.GetModelKey()); }
 
 float Boss::GetAnimTotalTime(BossAnimType::Type type) const
 {
 	float totalTime{};
 	float totalFlame{};
 	int index = static_cast<int>(type);
-	int modelHandle = RM().GetModel(model_.modelKey);
+   int modelHandle = RM().GetModel(model_.GetModelKey());
 
 	totalFlame = DxLib::MV1GetAnimTotalTime(modelHandle, index);
 	totalTime = totalFlame / Const::ANIM_FPS; // 秒数に変換

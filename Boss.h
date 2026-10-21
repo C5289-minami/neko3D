@@ -26,12 +26,12 @@ public:
 	void SetMoveDirection(const Vec3& moveDirection, float speed);
 	void StopMove();
 	IAttackSkill* GetActiveSkill() const { return activeSkill_; }
-	ObjectTransform GetTransform() const { return { model_.scale, model_.position, model_.rotation }; }
+ ObjectTransform GetTransform() const { return { model_.GetScale(), model_.GetPosition(), model_.GetRotation() }; }
     void SetTransform(const ObjectTransform& transform)
     {
-        model_.scale = transform.scale;
-        model_.position = transform.position;
-        model_.rotation = transform.rotation;
+        model_.SetScale(transform.scale);
+		model_.SetPosition(transform.position);
+		model_.SetRotation(transform.rotation);
     }
 	BossStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }
 	ModelObject& GetModelObject() { return model_; }

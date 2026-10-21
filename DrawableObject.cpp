@@ -100,6 +100,8 @@ void ModelObject::Init()
         scale = { 1.0f, 1.0f, 1.0f };
         rotation = {};
 	}
+    // çsóÒìKâû
+	ApplyTransform();
 }
 
 bool ModelObject::Load(const std::string& filePath)
@@ -224,17 +226,17 @@ void ModelObject::ApplyTransform(Vec3 masterPos) const
     const int handle = RM().GetModel(modelKey);
     if (handle < 0) return;
 
+    const Vec3 modelPosition = position + masterPos - RotateXYZ(center, rotation);
+
+    MV1SetPosition(handle, DxConv::ToVECTOR(modelPosition));
+    MV1SetScale(handle, DxConv::ToVECTOR(scale));
+    MV1SetRotationXYZ(handle, DxConv::ToVECTOR(rotation));
     if (owner_)
     {
         WithParentTransform(owner_->GetPosition(), owner_->GetRotation()).ApplyTransform(masterPos);
         return;
     }
 
-    const Vec3 modelPosition = position + masterPos - RotateXYZ(center, rotation);
-
-    MV1SetPosition(handle, DxConv::ToVECTOR(modelPosition));
-    MV1SetScale(handle, DxConv::ToVECTOR(scale));
-    MV1SetRotationXYZ(handle, DxConv::ToVECTOR(rotation));
 }
 
 void ModelObject::Draw(Vec3 masterPos) const
@@ -256,7 +258,6 @@ ModelObject ModelObject::WithParentTransform(const Vec3& parentPosition, const V
     world.rotation = ToRotationXYZ(Multiply(MakeRotationMatrix(parentRotation), MakeRotationMatrix(rotation)));
     return world;
 }
-
 void ModelObject::FadeTo(const ActorBase& player, float speed, float deltaTime)
 {
     if (player.GetPosition().y >= position.y)
