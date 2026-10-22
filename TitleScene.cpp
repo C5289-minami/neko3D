@@ -21,7 +21,7 @@ void TitleScene::Init()
 		// キャラクターのスプライトスタジオUIを作成
 		{
 			const std::wstring key = ResourceKeys::SpriteStudio_TitleCharacter;
-			const DxPlus::Vec2 testPos(DxPlus::CLIENT_WIDTH * 0.9f, DxPlus::CLIENT_HEIGHT * 0.68f);
+			const DxPlus::Vec2 testPos(1000, 500);
 			const DxPlus::Vec2 fromBelow(0.8f, 0.2f);
 			const float motionDuration = 1.0f;
 			auto* testUI = UIM().CreateSpriteStudioUI(

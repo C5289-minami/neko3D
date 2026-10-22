@@ -137,6 +137,7 @@ void GameScene::Update(float deltaTime)
 		{
 			// プレイヤーがステージに接触している場合の処理
 			player.SetGravityEnabled(false);
+			player.SetVerticalSpeed(0.0f);
 			player.SetGround(true);
 		}
 
@@ -157,6 +158,7 @@ void GameScene::Update(float deltaTime)
 			{
 				gameContext->GetGameState() = GameState::Battle;
 			}
+			targetCamera_.FocusAt(player.GetPosition() + Vec3::Up() * 100.0f);
 			break;
 		case GameState::Battle:
 			// バトルの更新
@@ -174,13 +176,13 @@ void GameScene::Update(float deltaTime)
 			switch (gameContext->GetGameState())
 			{
 			case GameState::Select:
-			
 				gameContext->GetGameState() = GameState::Tutorial;
 				break;
 			case GameState::Tutorial:
 				player.SetPosition(tutorialPlayerStartPos);
 				player.SetDefMove(true);
-			
+				targetCamera_.Initialize(cameraDirector_.GetCurrentPose());
+				cameraDirector_.SwitchCamera(targetCamera_, 1.0f, Motion::Easing::EaseInOut);
 				break;
 			case GameState::Battle:
 				gameContext->GetGameState() = GameState::Title;
