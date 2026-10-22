@@ -6,6 +6,13 @@
 
 // Playerを三体用意、でも移動はできないやつ。
 // 選択してしたキャラクターをgameContextにセットする。選択後はTutorialStateに遷移する。
+namespace
+{
+	const Vec3 kagoPos{ -1882.3f, -783.7f, -1073.0f };
+	ModelObject player1Model;
+	ModelObject player2Model;
+	ModelObject player3Model;
+}
 
 GameSceneSelectState::GameSceneSelectState(GameStateMachine& gameStateMachine, GameScene& gameScene)
 	:GameBaseState(gameStateMachine, gameScene)

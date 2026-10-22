@@ -28,7 +28,7 @@ void Player::Init()
 	if (modelHandle < 0) return;
 
 	model_.SetModelType(ModelType::Bone);
-	model_.SetScale({ 100.0f, 100.0f, 100.0f });
+
 
 	Reset();
 }

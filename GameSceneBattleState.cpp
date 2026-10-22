@@ -1,5 +1,4 @@
 #include "GameSceneBattleState.h"
-#include "GameSceneBattleState.h"
 #include "GameScene.h"
 #include "GameStateMachine.h"
 #include "DxPlus/Debug.h"
@@ -16,7 +15,7 @@ void GameSceneBattleState::Enter()
 
 void GameSceneBattleState::Tick(float deltaTime)
 {
-	DxPlus::Debug::SetFormatString(L"GameSceneBattleState::Enter");
+	DxPlus::Debug::SetFormatString(L"GameSceneBattleState::Tick");
    if (gameScene_.UpdateStateCamera(deltaTime, "Battle"))
 	{
 		stateMachine_.ChangeState(GameStateType::Title);
@@ -25,5 +24,5 @@ void GameSceneBattleState::Tick(float deltaTime)
 
 void GameSceneBattleState::Exit()
 {
-	DxPlus::Debug::SetFormatString(L"GameSceneBattleState::Enter");
+	DxPlus::Debug::SetFormatString(L"GameSceneBattleState::Exit");
 }
