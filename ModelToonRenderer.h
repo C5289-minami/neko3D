@@ -39,9 +39,10 @@ public:
     // 深度・法線の描画中にも使用する
     void SetVertexShader(ModelType type) const;
 
+
 private:
     // 頂点タイプを判定し、リストごとに描画する
-    void DrawTriangleLists(const ModelObject& model) const;
+    void DrawTriangleLists(const ModelObject& model, ModelType type) const;
 
     // トゥーンの色を計算するピクセルシェーダー
     int pixelShader_{ -1 };
@@ -49,6 +50,8 @@ private:
     int vertexShader_{ -1 };
     // ボーン変形対応の頂点シェーダー
     int vertexShaderBone_{ -1 };
+	// ボーン変形＋法線マップ対応の頂点シェーダー
+	int vertexShaderBoneNMap_{ -1 };
     // 8FRAME対応の頂点シェーダー
     int vertexShaderBone8Frame_{ -1 };
     // トゥーン設定をGPUへ渡すための定数バッファー

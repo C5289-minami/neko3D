@@ -18,6 +18,9 @@ namespace
     constexpr const wchar_t* BoneVertexShaderPath =
         L"./Data/Shader/Bin/ModelVS_Bone.vso";
 
+    constexpr const wchar_t* BoneVertexShaderNMapPath =
+		L"./Data/Shader/Bin/ModelVS_BoneNMap.vso";
+
     constexpr const wchar_t* BoneVertexShader8FramePath =
         L"./Data/Shader/Bin/ModelVS_Bone8Frame.vso";
 }
@@ -44,8 +47,10 @@ bool ModelToonRenderer::Init()
     pixelShader_ = LoadPixelShader(PixelShaderPath);
     vertexShader_ = LoadVertexShader(VertexShaderPath);
     vertexShaderBone_ = LoadVertexShader(BoneVertexShaderPath);
+	vertexShaderBoneNMap_ = LoadVertexShader(BoneVertexShaderNMapPath);
     vertexShaderBone8Frame_ =
         LoadVertexShader(BoneVertexShader8FramePath);
+
 
     toonConstantBuffer_ =
         CreateShaderConstantBuffer(sizeof(ToonSettings));
@@ -53,6 +58,7 @@ bool ModelToonRenderer::Init()
     if (pixelShader_ < 0 ||
         vertexShader_ < 0 ||
         vertexShaderBone_ < 0 ||
+		vertexShaderBoneNMap_ < 0 ||
         vertexShaderBone8Frame_ < 0 ||
         toonConstantBuffer_ < 0)
     {
@@ -93,6 +99,12 @@ void ModelToonRenderer::Release() noexcept
         DeleteShader(vertexShaderBone_);
         vertexShaderBone_ = -1;
     }
+
+    if (vertexShaderBoneNMap_ >= 0)
+    {
+        DeleteShader(vertexShaderBoneNMap_);
+        vertexShaderBoneNMap_ = -1;
+	}
 
     if (vertexShaderBone8Frame_ >= 0)
     {
@@ -169,14 +181,14 @@ void ModelToonRenderer::Draw(
 
     SetUsePixelShader(pixelShader_);
 
-    DrawTriangleLists(model);
+    DrawTriangleLists(model, type);
 }
 
 void ModelToonRenderer::DrawDepth(
     const ModelObject& model
 ) const
 {
-    DrawTriangleLists(model);
+    DrawTriangleLists(model, model.GetModelType());
 }
 
 
@@ -204,7 +216,8 @@ void ModelToonRenderer::SetVertexShader(ModelType type) const
 // ============================================================
 
 void ModelToonRenderer::DrawTriangleLists(
-    const ModelObject& model
+    const ModelObject& model,
+    ModelType type
 ) const
 {
     const int handle = RM().GetModel(model.GetModelKey());
@@ -234,8 +247,11 @@ void ModelToonRenderer::DrawTriangleLists(
             break;
 
         case DX_MV1_VERTEX_TYPE_4FRAME:
-        case DX_MV1_VERTEX_TYPE_NMAP_4FRAME:
             shader = vertexShaderBone_;
+            break;
+
+        case DX_MV1_VERTEX_TYPE_NMAP_4FRAME:
+            shader = vertexShaderBoneNMap_;
             break;
 
         case DX_MV1_VERTEX_TYPE_8FRAME:
