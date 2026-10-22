@@ -321,6 +321,7 @@ void RoomTestScene::RenderDepth() const
 	auto& room = gameContext->GetRoom();
 	auto& player = gameContext->GetPlayer();
 	auto& stage = gameContext->GetStage();
+	auto& boss = gameContext->GetBoss();
 
 	// シーンのカメラを設定する
 	if (auto* activeCamera = cameraDirector_.GetActiveCamera())
@@ -332,6 +333,7 @@ void RoomTestScene::RenderDepth() const
 	modelToonRenderer_.SetVertexShader(ModelType::Model);
 	room.Draw();
 	gameContext->GetStage().Draw();
+	boss.Draw();
 
 	// Bone対応の頂点シェーダー
 	modelToonRenderer_.SetVertexShader(ModelType::Bone);

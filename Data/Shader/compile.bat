@@ -11,6 +11,12 @@ if errorlevel 1 goto :error
 ShaderCompiler.exe /Tvs_4_0 /FoBin\ModelVS_Bone.vso Src\ModelVS_Bone.hlsl
 if errorlevel 1 goto :error
 
+ShaderCompiler.exe /Tvs_4_0 /FoBin\ModelVS_BoneNMap.vso Src\ModelVS_BoneNMap.hlsl
+if errorlevel 1 goto :error
+
+ShaderCompiler.exe /Tvs_4_0 /FoBin\ModelVS_Bone8Frame.vso Src\ModelVS_Bone8Frame.hlsl
+if errorlevel 1 goto :error
+
 rem --- ピクセルシェーダー ---
 ShaderCompiler.exe /Tps_4_0 /FoBin\ModelToonPS.pso Src\ModelToonPS.hlsl
 if errorlevel 1 goto :error
