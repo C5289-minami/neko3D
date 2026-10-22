@@ -5,7 +5,6 @@
 #include <string>
 
 #include "Vector3.h"
-#include "GameState.h"
 
 
 #include "Grid.h"
@@ -50,7 +49,6 @@ public:
 	Stage& GetStage() { return stage; }
 	EffectManager& GetEffectManager() { return effectManager; }
 	Room& GetRoom() { return room_; }
-	GameState& GetGameState() { return gameState_; }
 
     // ---- lifecycle ----
     void Init();
@@ -80,5 +78,4 @@ private:
     bool debugActorsPaused_{};
     std::string transformInitialStatus_;
 
-    GameState gameState_{ GameState::Title };
 };

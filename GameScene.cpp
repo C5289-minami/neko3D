@@ -1,4 +1,5 @@
 #include "GameScene.h"
+#include "GameScene.h"
 #include "GameContext.h"
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
@@ -13,6 +14,9 @@ namespace
 	const Vec3 tutorialPlayerStartPos{ -1882.3f, -783.7f, -1373.0f };
 }
 
+
+GameScene::GameScene(GameContext* context) 
+	: Scene(context), stateMachine_(*this) {}
 
 void GameScene::Init()
 {
@@ -60,7 +64,7 @@ void GameScene::Init()
 		UIM().GetUI(L"Game.Logo")->SetDisplayCondition(
 			[this]() -> bool
 			{
-				return gameContext->GetGameState() == GameState::Title;
+             return GetCurrentGameState() == GameStateType::Title;
 			}
 		);
 
@@ -68,14 +72,14 @@ void GameScene::Init()
 		const DxPlus::Vec2 startPos(DxPlus::CLIENT_WIDTH * 0.2f, DxPlus::CLIENT_HEIGHT * 0.6f);
 		const std::wstring key = ResourceKeys::UI_StartButton;
 		UIM().CreateButtonUI(L"Game.StartButton", key, startPos,
-			[this]() { gameContext->GetGameState() = GameState::Select; },
+          [this]() { stateMachine_.ChangeState(GameStateType::Select); },
 			{ -1,0 },
 			0.5f
 		);
 		UIM().GetUI(L"Game.StartButton")->SetDisplayCondition(
 			[this]() -> bool
 			{
-				return gameContext->GetGameState() == GameState::Title;
+             return GetCurrentGameState() == GameStateType::Title;
 			}
 		);
 
@@ -90,12 +94,41 @@ void GameScene::Init()
 		UIM().GetUI(L"Game.ExitButton")->SetDisplayCondition(
 			[this]() -> bool
 			{
-				return gameContext->GetGameState() == GameState::Title;
+             return GetCurrentGameState() == GameStateType::Title;
 			}
 		);
 	}
 
+	stateMachine_.Initialize();
+	
 	StartFadeIn();
+}
+
+bool GameScene::UpdateStateCamera(float deltaTime, const std::string& requestedShot)
+{
+	const bool transitionCompleted = cameraDirector_.Update(deltaTime);
+	if (!requestedShot.empty() && requestedShot != activeCameraShot_ && !cameraDirector_.IsTransitioning())
+	{
+		if (cameraDirector_.PlayShot(requestedShot, 1.2f, Motion::Easing::EaseInOut))
+		{
+			activeCameraShot_ = requestedShot;
+		}
+	}
+	return transitionCompleted;
+}
+
+void GameScene::FocusTutorialCamera()
+{
+	targetCamera_.FocusAt(gameContext->GetPlayer().GetPosition() + Vec3::Up() * 100.0f);
+}
+
+void GameScene::OnTutorialCameraTransitionCompleted()
+{
+	auto& player = gameContext->GetPlayer();
+	player.SetPosition(tutorialPlayerStartPos);
+	player.SetDefMove(true);
+	targetCamera_.Initialize(cameraDirector_.GetCurrentPose());
+	cameraDirector_.SwitchCamera(targetCamera_, 1.0f, Motion::Easing::EaseInOut);
 }
 
 void GameScene::Update(float deltaTime)
@@ -116,8 +149,8 @@ void GameScene::Update(float deltaTime)
 		// stageの中心座標を取得して、playerの更新に渡す
 		const Vec3 stageCenterPosition = stage.GetPosition();
 
-       // チュートリアルは通常の前後左右移動、バトルはステージ中心を基準にした移動を使う。
-		const bool tutorial = gameContext->GetGameState() == GameState::Tutorial;
+      // チュートリアルは通常の前後左右移動、バトルはステージ中心を基準にした移動を使う。
+		const bool tutorial = GetCurrentGameState() == GameStateType::Tutorial;
 		player.SetDefMove(tutorial);
 		if (tutorial)
 			player.Update(deltaTime);
@@ -143,80 +176,7 @@ void GameScene::Update(float deltaTime)
 
 	}
 
-	// ステートマシーンに移行する
-	// update
-	{
-		switch (gameContext->GetGameState())
-		{
-		case GameState::Select:
-			// 選択画面の更新
-
-			break;
-		case GameState::Tutorial:
-			// チュートリアルの更新
-			if (DxLib::CheckHitKey(KEY_INPUT_F2))
-			{
-				gameContext->GetGameState() = GameState::Battle;
-			}
-			targetCamera_.FocusAt(player.GetPosition() + Vec3::Up() * 100.0f);
-			break;
-		case GameState::Battle:
-			// バトルの更新
-			break;
-		case GameState::Results:
-			// リザルトの更新
-			break;
-		default:
-			break;
-		}
-
-		// おわったら
-		if (cameraDirector_.Update(deltaTime))
-		{
-			switch (gameContext->GetGameState())
-			{
-			case GameState::Select:
-				gameContext->GetGameState() = GameState::Tutorial;
-				break;
-			case GameState::Tutorial:
-				player.SetPosition(tutorialPlayerStartPos);
-				player.SetDefMove(true);
-				targetCamera_.Initialize(cameraDirector_.GetCurrentPose());
-				cameraDirector_.SwitchCamera(targetCamera_, 1.0f, Motion::Easing::EaseInOut);
-				break;
-			case GameState::Battle:
-				gameContext->GetGameState() = GameState::Title;
-				break;
-			}
-		}
-	}
-
-	// camera
-	{
-		// 今のゲームステートに応じたショット名を決定する
-		std::string requestedShot;
-		switch (gameContext->GetGameState())
-		{
-		case GameState::Select:
-			requestedShot = "Select";
-			break;
-		case GameState::Tutorial:
-			requestedShot = "Tutorial";
-			break;
-		case GameState::Battle:
-			requestedShot = "Battle";
-			break;
-		}
-
-		// 遷移中でなく、かつ現在のショットと異なる場合にのみ切り替える
-		if (!requestedShot.empty() && requestedShot != activeCameraShot_ && !cameraDirector_.IsTransitioning())
-		{
-			if (cameraDirector_.PlayShot(requestedShot, 1.2f, Motion::Easing::EaseInOut))
-			{
-				activeCameraShot_ = requestedShot;
-			}
-		}
-	}
+    stateMachine_.Tick(deltaTime);
 
 	gameContext->GetEffectManager().Update(deltaTime);
 }

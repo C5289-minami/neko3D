@@ -73,9 +73,6 @@
     <Filter Include="40_Gameplay\Actors\Player">
       <UniqueIdentifier>{2e678726-763d-426d-9f27-117e51c5a06b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="40_Gameplay\StateMachine">
-      <UniqueIdentifier>{3337dab1-827a-4bf2-bccf-474c8ea649bc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="40_Gameplay\Lab">
       <UniqueIdentifier>{32cd986e-24fa-46d9-aa64-57ccad23d217}</UniqueIdentifier>
     </Filter>
@@ -244,6 +241,27 @@
     <Filter Include="10_Core\Camera\Pose">
       <UniqueIdentifier>{566a1ae2-de19-403d-a9c0-85e414d48646}</UniqueIdentifier>
     </Filter>
+    <Filter Include="10_Core\StateMachine">
+      <UniqueIdentifier>{3337dab1-827a-4bf2-bccf-474c8ea649bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes\Game\StateMashine">
+      <UniqueIdentifier>{6989a868-007e-4683-b699-9bc170630d16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes\Game\StateMashine\GameSceneTitleState">
+      <UniqueIdentifier>{861bddcd-486d-48af-9d95-6e1c7e0fe356}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes\Game\StateMashine\GameSceneSelectState">
+      <UniqueIdentifier>{00177d9f-5ac9-4489-985b-2534974cae2f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes\Game\StateMashine\GameSceneTutorialState">
+      <UniqueIdentifier>{0794790f-0493-4d1d-9d91-bf24adb2fedc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes\Game\StateMashine\GameSceneBattleState">
+      <UniqueIdentifier>{4276574e-d1eb-465c-8e21-1bd9e6808560}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes\Game\StateMashine\GameSceneResultsState">
+      <UniqueIdentifier>{cfaf73d7-a10c-484e-9714-51762bf76fd6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -370,10 +388,10 @@
       <Filter>40_Gameplay\Actors\Player</Filter>
     </ClInclude>
     <ClInclude Include="StateMachine.h">
-      <Filter>40_Gameplay\StateMachine</Filter>
+      <Filter>10_Core\StateMachine</Filter>
     </ClInclude>
     <ClInclude Include="State.h">
-      <Filter>40_Gameplay\StateMachine</Filter>
+      <Filter>10_Core\StateMachine</Filter>
     </ClInclude>
     <ClInclude Include="PlayerIdleState.h">
       <Filter>40_Gameplay\Actors\Player\State\Idle</Filter>
@@ -639,11 +657,32 @@
     <ClInclude Include="CameraPose.h">
       <Filter>10_Core\Camera\Pose</Filter>
     </ClInclude>
-    <ClInclude Include="GameState.h">
-      <Filter>15_System</Filter>
-    </ClInclude>
     <ClInclude Include="CameraObjectManager.h">
       <Filter>40_Gameplay\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="GameBaseState.h">
+      <Filter>30_Scenes\Game\StateMashine</Filter>
+    </ClInclude>
+    <ClInclude Include="GameStateMachine.h">
+      <Filter>30_Scenes\Game\StateMashine</Filter>
+    </ClInclude>
+    <ClInclude Include="GameStateType.h">
+      <Filter>30_Scenes\Game\StateMashine</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSceneTitleState.h">
+      <Filter>30_Scenes\Game\StateMashine\GameSceneTitleState</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSceneTutorialState.h">
+      <Filter>30_Scenes\Game\StateMashine\GameSceneTutorialState</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSceneSelectState.h">
+      <Filter>30_Scenes\Game\StateMashine\GameSceneSelectState</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSceneResultsState.h">
+      <Filter>30_Scenes\Game\StateMashine\GameSceneResultsState</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSceneBattleState.h">
+      <Filter>30_Scenes\Game\StateMashine\GameSceneBattleState</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -741,7 +780,7 @@
       <Filter>40_Gameplay\Actors\Player</Filter>
     </ClCompile>
     <ClCompile Include="StateMachine.cpp">
-      <Filter>40_Gameplay\StateMachine</Filter>
+      <Filter>10_Core\StateMachine</Filter>
     </ClCompile>
     <ClCompile Include="PlayerIdleState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Idle</Filter>
@@ -904,6 +943,24 @@
     </ClCompile>
     <ClCompile Include="CameraObjectManager.cpp">
       <Filter>40_Gameplay\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GameStateMachine.cpp">
+      <Filter>30_Scenes\Game\StateMashine</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSceneTitleState.cpp">
+      <Filter>30_Scenes\Game\StateMashine\GameSceneTitleState</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSceneTutorialState.cpp">
+      <Filter>30_Scenes\Game\StateMashine\GameSceneTutorialState</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSceneSelectState.cpp">
+      <Filter>30_Scenes\Game\StateMashine\GameSceneSelectState</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSceneResultsState.cpp">
+      <Filter>30_Scenes\Game\StateMashine\GameSceneResultsState</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSceneBattleState.cpp">
+      <Filter>30_Scenes\Game\StateMashine\GameSceneBattleState</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
