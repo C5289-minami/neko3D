@@ -32,7 +32,7 @@ void StatusTest::Init()
 
  testModel_.SetModelKey(ResourceKeys::Model_Test);
 
- gameContext->GetPlayer().Init();
+	gameContext->GetPlayer().Init();
 	gameContext->GetPlayer().Reset();
 	gameContext->GetPlayer().SetPosition({ 0.0f, 100.0f, 0.0f });
 
@@ -209,7 +209,7 @@ void StatusTest::DrawScene(bool toonEnabled) const
 	// ƒgƒD[ƒ“•`‰æŠJŽn
 	modelToonRenderer_.BeginPass();
 
-	const auto drawActor = [this](const ModelObject& model, ModelType type)
+	const auto drawActor = [this](const ModelObject& model)
 		{
 			if (model.collisionHighlighted)
 			{
@@ -221,14 +221,14 @@ void StatusTest::DrawScene(bool toonEnabled) const
 			}
 			else
 			{
-				modelToonRenderer_.Draw(model, type);
+				modelToonRenderer_.Draw(model);
 			}
 		};
-	drawActor(testModel_, ModelType::Model);
-   const auto& player = gameContext->GetPlayer();
+	drawActor(testModel_);
+    const auto& player = gameContext->GetPlayer();
 	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
 		player.GetPosition(), player.GetRotation());
-	drawActor(playerModel, ModelType::Bone);
+	drawActor(playerModel);
 
 
 	modelToonRenderer_.EndPass();

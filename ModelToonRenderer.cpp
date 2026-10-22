@@ -166,8 +166,7 @@ void ModelToonRenderer::EndPass() const
 // ============================================================
 
 void ModelToonRenderer::Draw(
-    const ModelObject& model,
-    ModelType type
+    const ModelObject& model
 ) const
 {
     if (pixelShader_ < 0)
@@ -175,20 +174,16 @@ void ModelToonRenderer::Draw(
         return;
     }
 
-    // 頂点シェーダーはモデル全体の種類ではなく、
-    // トライアングルリストごとの頂点タイプで選択する。
-    (void)type;
-
     SetUsePixelShader(pixelShader_);
 
-    DrawTriangleLists(model, type);
+    DrawTriangleLists(model);
 }
 
 void ModelToonRenderer::DrawDepth(
     const ModelObject& model
 ) const
 {
-    DrawTriangleLists(model, model.GetModelType());
+    DrawTriangleLists(model);
 }
 
 
@@ -216,8 +211,7 @@ void ModelToonRenderer::SetVertexShader(ModelType type) const
 // ============================================================
 
 void ModelToonRenderer::DrawTriangleLists(
-    const ModelObject& model,
-    ModelType type
+    const ModelObject& model
 ) const
 {
     const int handle = RM().GetModel(model.GetModelKey());
