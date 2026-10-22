@@ -89,18 +89,10 @@ void GameTestScene::Update(float deltaTime)
 		const Vec3 stageCenterPosition = stage.GetPosition();
 
 
-		player.Update(deltaTime, stage, stageCenterPosition);
+		// player.Update(deltaTime, stage, stageCenterPosition);
+		
+		player.Update(deltaTime, stage.GetCollision(), stageCenterPosition);
 		stage.UpdateAlphaModel(deltaTime, player);
-		boss.Update(deltaTime);
-      ModelObject playerModel = player.GetModelObject().WithParentTransform(
-		  player.GetPosition(), player.GetRotation());
-	  const bool touching = Collision::UpdateModelContact(playerModel, boss.GetModelObject());
-	  player.GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
-      if (touching)
-		{
-			player.TakeDamage();
-		}
-
 		playerCamera_.Update(player.GetPosition(), boss.GetPosition(), deltaTime);
 
 		using namespace DxPlus::Input;

@@ -4,13 +4,13 @@
 #include "Consts.h"
 #include "Raycast.h"
 #include "DxLib.h"
-#include "Stage.h"
+// #include "Stage.h"
 #include "ModelObjectManager.h"
 
 #include <cmath>
 #include "Sound3D.h"
 #include <algorithm>
-#include <vector>
+// #include <vector>
 #include <iostream>
 
 
@@ -38,7 +38,8 @@ void Player::Reset()
 {
 
 	health_ = MaxHealth;
-	wasTouchingPillar_ = false;
+	// wasTouchingPillar_ = false;
+	wasTouchingModel_ = false;
 
 	touchingWall_ = false;
 	wallNormal_ = {};
@@ -124,20 +125,29 @@ void Player::UpdateMovement(float deltaTime)
 	animation_.Update(deltaTime);
 }
 
-void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCenter)
+// void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCenter)
+void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& movementCenter)
 {
+    // 体の形はプレイヤーが渡す。判定対象の形・配置は ModelCollision が管理する。
+    const ModelCollision::ModelOb modelOb{ Const::PLAYER_RADIUS, Const::PLAYER_HEIGHT, Const::PLAYER_SKIN };
+    collision.Refresh();
 	movementCenter_ = movementCenter;
 	const Vec3 oldPosition = GetPosition();
 	const float previousY = oldPosition.y;
 
 	input_.Update();
 	// 今フレームの入力に合う側面を選び、柱のどの方向からでも登れるようにする。
-	touchingWall_ = stage.FindPillarWall(GetPosition(), wallNormal_, GetWorldMoveDirection(input_.moveDir),
-        &wallTopY_, GetCurrentState() == PlayerStateType::Climbing);
+	// touchingWall_ = stage.FindPillarWall(GetPosition(), wallNormal_, GetWorldMoveDirection(input_.moveDir),
+        // &wallTopY_, GetCurrentState() == PlayerStateType::Climbing);
+	touchingWall_ = collision.FindWall(GetPosition(), modelOb, wallNormal_, GetWorldMoveDirection(input_.moveDir),
+        &wallTopY_, Const::PLAYER_CLIMB_DETECTION_MARGIN,
+        GetCurrentState() == PlayerStateType::Climbing ? Const::PLAYER_CLIMB_TOP_HOLD_DISTANCE : 0.0f);
 	UpdateMovement(deltaTime);
 
-	// ステージの柱に沿ってスライドさせる
-	position_ = stage.SlideAlongPillars(oldPosition, position_, touchingPillar);
+	// // ステージの柱に沿ってスライドさせる
+	// position_ = stage.SlideAlongPillars(oldPosition, position_, touchingPillar);
+	// 登録されたモデルの壁に沿ってスライドさせる
+	position_ = collision.SlideAlongWalls(oldPosition, position_, modelOb, touchingModel_);
 
 	// 落下中のみ床面に合わせ、このフレームの落下距離もレイの長さに含める。
 	if (velocity_.y <= 0.0f)
@@ -148,11 +158,12 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 		const float rayDistance =
 			fallDistance + groundSnapDistance + Const::PLAYER_SKIN;
 
-		std::vector<int> handles;
-		stage.GetCollisionModelHandles(handles);
+		// std::vector<int> handles;
+		// stage.GetCollisionModelHandles(handles);
 
-		if (Physics::RaycastDown(
-			handles,
+		// if (Physics::RaycastDown(
+			// handles,
+		if (collision.RaycastDown(
 			Vec3(
 				GetPosition().x,
 				previousY + Const::PLAYER_SKIN,
@@ -174,15 +185,19 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 	}
 
 	// 足元を基準にしたカプセルで、補正後の接触も確認する。
-	const Vec3 capsuleStart = GetPosition() + Vec3::Up() * Const::PLAYER_RADIUS;
-	const Vec3 capsuleEnd = GetPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
-	touchingPillar |= stage.IsHitPillar(capsuleStart, capsuleEnd, Const::PLAYER_RADIUS);
+	// const Vec3 capsuleStart = GetPosition() + Vec3::Up() * Const::PLAYER_RADIUS;
+	// const Vec3 capsuleEnd = GetPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
+	// touchingPillar |= stage.IsHitPillar(capsuleStart, capsuleEnd, Const::PLAYER_RADIUS);
+	touchingModel_ |= collision.IsTouchingWalls(GetPosition(), modelOb);
 
-	if (touchingPillar && !wasTouchingPillar_)
+	// if (touchingPillar && !wasTouchingPillar_)
+	if (touchingModel_ && !wasTouchingModel_)
 	{
-		std::cout << "Hit: Player touched a pillar." << std::endl;
+		// std::cout << "Hit: Player touched a pillar." << std::endl;
+		std::cout << "Hit: Player touched a collision model." << std::endl;
 	}
-	wasTouchingPillar_ = touchingPillar;
+	// wasTouchingPillar_ = touchingPillar;
+	wasTouchingModel_ = touchingModel_;
 
 	Sound3D::SetListener(
 		GetPosition(),

@@ -2,6 +2,7 @@
 // Gameplay/Actors/Stage.cpp
 // =============================
 #include "Stage.h"
+#include "Player.h"
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
 #include "DxConv.h"
@@ -42,253 +43,254 @@ void Stage::Init()
     for (auto& model : stageModels_) model.SetOwner(*this);
     stageModel_.SetOwner(*this);
 
-    SetupCollisionInfo();
+    // SetupCollisionInfo();
     Reset();
 }
-void Stage::SetupCollisionInfo()//当たり判定のセットアップ
-{
-    const auto setup = [this](const ModelObject& model)//ラムダ式で書き換えれるように
-    {
-        int handle = RM().GetModel(model.GetModelKey());
-        if (handle < 0) return -1;
+// 旧：Stage 専用だった判定処理。現在の処理は ModelCollision.cpp にある。
+// void Stage::SetupCollisionInfo()//当たり判定のセットアップ
+// {
+    // const auto setup = [this](const ModelObject& model)//ラムダ式で書き換えれるように
+    // {
+        // int handle = RM().GetModel(model.GetModelKey());
+        // if (handle < 0) return -1;
 
-        // 描画前でも、保存済みの配置・回転・拡大率で判定できるようにする。
-        model.WithParentTransform(GetPosition(), GetRotation()).Draw();
+        // // 描画前でも、保存済みの配置・回転・拡大率で判定できるようにする。
+        // model.WithParentTransform(GetPosition(), GetRotation()).Draw();
 
-        int result = MV1SetupCollInfo(handle, -1, 8, 8, 8);
-        if (result < 0) return -1;
+        // int result = MV1SetupCollInfo(handle, -1, 8, 8, 8);
+        // if (result < 0) return -1;
 
-        return handle;
-    };
+        // return handle;
+    // };
 
-    groundCollisionHandle_ = setup(stageModel_);
-    for (int i = 0; i < stagePillars_.size(); ++i)
-    {
-        pillarCollisionHandles_[i] = setup(stagePillars_[i]);
-    }
-    for (int i = 0; i < stageModels_.size(); ++i)
-    {
-        stageCollisionHandles_[i] = setup(stageModels_[i]);
-    }
-    // コリジョン情報はRMによるMV1DeleteModel時にモデルと一緒に解放される。
-}
+    // groundCollisionHandle_ = setup(stageModel_);
+    // for (int i = 0; i < stagePillars_.size(); ++i)
+    // {
+        // pillarCollisionHandles_[i] = setup(stagePillars_[i]);
+    // }
+    // for (int i = 0; i < stageModels_.size(); ++i)
+    // {
+        // stageCollisionHandles_[i] = setup(stageModels_[i]);
+    // }
+    // // コリジョン情報はRMによるMV1DeleteModel時にモデルと一緒に解放される。
+// }
 
-void Stage::RefreshCollisionInfo()
-{
-    const auto refresh = [this](const ModelObject& model, int handle)
-    {
-        if (handle < 0) return -1;
-        // モデルが解放・差し替えされていたら、古いハンドルは使わない。
-        if (RM().GetModel(model.GetModelKey()) != handle) return -1;
+// void Stage::RefreshCollisionInfo()
+// {
+    // const auto refresh = [this](const ModelObject& model, int handle)
+    // {
+        // if (handle < 0) return -1;
+        // // モデルが解放・差し替えされていたら、古いハンドルは使わない。
+        // if (RM().GetModel(model.GetModelKey()) != handle) return -1;
 
-        model.WithParentTransform(GetPosition(), GetRotation()).Draw();
+        // model.WithParentTransform(GetPosition(), GetRotation()).Draw();
 
-		int result = MV1RefreshCollInfo(handle, -1);// コリジョン情報を更新する
-        if (result < 0) return -1;
+		// int result = MV1RefreshCollInfo(handle, -1);// コリジョン情報を更新する
+        // if (result < 0) return -1;
 
-        return handle;
-    };
+        // return handle;
+    // };
 
-    groundCollisionHandle_ = refresh(stageModel_, groundCollisionHandle_);
-    for (int i = 0; i < stagePillars_.size(); ++i)
-    {
-        pillarCollisionHandles_[i] = refresh(stagePillars_[i], pillarCollisionHandles_[i]);
-    }
-    for (int i = 0; i < stageModels_.size(); ++i)
-    {
-        stageCollisionHandles_[i] = refresh(stageModels_[i], stageCollisionHandles_[i]);
-    }
-}
+    // groundCollisionHandle_ = refresh(stageModel_, groundCollisionHandle_);
+    // for (int i = 0; i < stagePillars_.size(); ++i)
+    // {
+        // pillarCollisionHandles_[i] = refresh(stagePillars_[i], pillarCollisionHandles_[i]);
+    // }
+    // for (int i = 0; i < stageModels_.size(); ++i)
+    // {
+        // stageCollisionHandles_[i] = refresh(stageModels_[i], stageCollisionHandles_[i]);
+    // }
+// }
 
-void Stage::GetCollisionModelHandles(std::vector<int>& handles) const
-{
-    // 呼び出し元の配列を、現在使えるハンドルの一覧に更新する。
-    handles.clear();
-    handles.reserve(pillarCollisionHandles_.size() + stageCollisionHandles_.size() + 1);
+// void Stage::GetCollisionModelHandles(std::vector<int>& handles) const
+// {
+    // // 呼び出し元の配列を、現在使えるハンドルの一覧に更新する。
+    // handles.clear();
+    // handles.reserve(pillarCollisionHandles_.size() + stageCollisionHandles_.size() + 1);
 
-    if (groundCollisionHandle_ >= 0)
-    {
-        handles.emplace_back(groundCollisionHandle_);
-    }
-    for (int handle : pillarCollisionHandles_)
-    {
-        if (handle >= 0)
-        {
-            handles.emplace_back(handle);
-        }
-    }
-    for (int handle : stageCollisionHandles_)
-    {
-        if (handle >= 0)
-        {
-            handles.emplace_back(handle);
-        }
-    }
-}
+    // if (groundCollisionHandle_ >= 0)
+    // {
+        // handles.emplace_back(groundCollisionHandle_);
+    // }
+    // for (int handle : pillarCollisionHandles_)
+    // {
+        // if (handle >= 0)
+        // {
+            // handles.emplace_back(handle);
+        // }
+    // }
+    // for (int handle : stageCollisionHandles_)
+    // {
+        // if (handle >= 0)
+        // {
+            // handles.emplace_back(handle);
+        // }
+    // }
+// }
 
-bool Stage::IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float radius) const
-{
-    if (radius <= 0.0f) return false;
+// bool Stage::IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float radius) const
+// {
+    // if (radius <= 0.0f) return false;
 
-    for (int handle : pillarCollisionHandles_)
-    {
-        if (handle < 0) continue;
+    // for (int handle : pillarCollisionHandles_)
+    // {
+        // if (handle < 0) continue;
 
-        const auto result = MV1CollCheck_Capsule(
-            handle, -1, DxConv::ToVECTOR(capsuleStart), DxConv::ToVECTOR(capsuleEnd), radius);
-        const bool hit = result.HitNum > 0;
-        // 判定結果の配列は、当たった場合も当たらない場合も解放する。
-        MV1CollResultPolyDimTerminate(result);
-        if (hit) return true;
-    }
-    return false;
-}
+        // const auto result = MV1CollCheck_Capsule(
+            // handle, -1, DxConv::ToVECTOR(capsuleStart), DxConv::ToVECTOR(capsuleEnd), radius);
+        // const bool hit = result.HitNum > 0;
+        // // 判定結果の配列は、当たった場合も当たらない場合も解放する。
+        // MV1CollResultPolyDimTerminate(result);
+        // if (hit) return true;
+    // }
+    // return false;
+// }
 
-bool Stage::FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal, const Vec3& moveDirection,
-    float* wallTopY, bool keepTopContact) const
-{
-    wallNormal = {};
-    if (wallTopY) *wallTopY = 0.0f;
+// bool Stage::FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal, const Vec3& moveDirection,
+    // float* wallTopY, bool keepTopContact) const
+// {
+    // wallNormal = {};
+    // if (wallTopY) *wallTopY = 0.0f;
 
-    // 移動の衝突判定より少し広い範囲で側面を拾う。体の高さは変えない。
-    const float detectionRadius = Const::PLAYER_RADIUS + Const::PLAYER_CLIMB_DETECTION_MARGIN;
-    // Climbingの時足元が上にあるかの判定「
-    const float lowerReach = keepTopContact ? Const::PLAYER_CLIMB_TOP_HOLD_DISTANCE : 0.0f;
-    const Vec3 start = feetPosition + Vec3::Up() * (Const::PLAYER_RADIUS - lowerReach);
-    const Vec3 end = feetPosition + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
-    const float headY = feetPosition.y + Const::PLAYER_HEIGHT;
+    // // 移動の衝突判定より少し広い範囲で側面を拾う。体の高さは変えない。
+    // const float detectionRadius = Const::PLAYER_RADIUS + Const::PLAYER_CLIMB_DETECTION_MARGIN;
+    // // Climbingの時足元が上にあるかの判定「
+    // const float lowerReach = keepTopContact ? Const::PLAYER_CLIMB_TOP_HOLD_DISTANCE : 0.0f;
+    // const Vec3 start = feetPosition + Vec3::Up() * (Const::PLAYER_RADIUS - lowerReach);
+    // const Vec3 end = feetPosition + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
+    // const float headY = feetPosition.y + Const::PLAYER_HEIGHT;
 
-    const Vec3 direction = Vec3(moveDirection.x, 0.0f, moveDirection.z).Normalized();
-    bool foundWall = false;
-    float bestDirection = 2.0f;
-    float bestDistance = detectionRadius;
+    // const Vec3 direction = Vec3(moveDirection.x, 0.0f, moveDirection.z).Normalized();
+    // bool foundWall = false;
+    // float bestDirection = 2.0f;
+    // float bestDistance = detectionRadius;
 
-    for (int handle : pillarCollisionHandles_)
-    {
-        if (handle < 0) continue;
+    // for (int handle : pillarCollisionHandles_)
+    // {
+        // if (handle < 0) continue;
 
-        const auto result = MV1CollCheck_Capsule(handle, -1,
-            DxConv::ToVECTOR(start),
-            DxConv::ToVECTOR(end),
-            detectionRadius);
+        // const auto result = MV1CollCheck_Capsule(handle, -1,
+            // DxConv::ToVECTOR(start),
+            // DxConv::ToVECTOR(end),
+            // detectionRadius);
 
-        for (int i = 0; i < result.HitNum; ++i)
-        {
-            const auto& poly = result.Dim[i];
-            const Vec3 normal = DxConv::ToVec3(poly.Normal).Normalized();
+        // for (int i = 0; i < result.HitNum; ++i)
+        // {
+            // const auto& poly = result.Dim[i];
+            // const Vec3 normal = DxConv::ToVec3(poly.Normal).Normalized();
 
-            // 向きがない面や、上下を向いた面・斜面は使わない。
-            if (normal.LengthSq() == 0.0f || std::abs(normal.y) > 0.01f)
-            {
-                continue;
-            }
+            // // 向きがない面や、上下を向いた面・斜面は使わない。
+            // if (normal.LengthSq() == 0.0f || std::abs(normal.y) > 0.01f)
+            // {
+                // continue;
+            // }
 
-            float top = (std::max)({ poly.Position[0].y, poly.Position[1].y, poly.Position[2].y });
-            float bottom = (std::min)({ poly.Position[0].y, poly.Position[1].y, poly.Position[2].y });
+            // float top = (std::max)({ poly.Position[0].y, poly.Position[1].y, poly.Position[2].y });
+            // float bottom = (std::min)({ poly.Position[0].y, poly.Position[1].y, poly.Position[2].y });
 
 
-            // 足元が上端付近に達しているか
-            const bool atTop = feetPosition.y >= top - Const::PLAYER_SKIN;
-            if (atTop)
-            {
-                // 通常時は、この側面を壁として扱わん
-                if (!keepTopContact)
-                {
-                    continue;
-                }
+            // // 足元が上端付近に達しているか
+            // const bool atTop = feetPosition.y >= top - Const::PLAYER_SKIN;
+            // if (atTop)
+            // {
+                // // 通常時は、この側面を壁として扱わん
+                // if (!keepTopContact)
+                // {
+                    // continue;
+                // }
 
-                // climbingで上まで言ったら
-                const bool aboveTop = feetPosition.y > top + Const::PLAYER_SKIN;
-                if (aboveTop)
-                {
-                    continue;
-                }
-            }
+                // // climbingで上まで言ったら
+                // const bool aboveTop = feetPosition.y > top + Const::PLAYER_SKIN;
+                // if (aboveTop)
+                // {
+                    // continue;
+                // }
+            // }
 
-            // 体の高さと重ならない側面は使わない。
-            if (headY <= bottom) continue;
+            // // 体の高さと重ならない側面は使わない。
+            // if (headY <= bottom) continue;
 
-            Vec3 outward = Vec3(normal.x, 0.0f, normal.z).Normalized();
-            const float signedDistance = Vec3::Dot(feetPosition - DxConv::ToVec3(poly.Position[0]), outward);
-            // モデルの面の表裏によらず、壁からプレイヤーへ向く法線にそろえる。
-            if (signedDistance < 0.0f) outward = -outward;
+            // Vec3 outward = Vec3(normal.x, 0.0f, normal.z).Normalized();
+            // const float signedDistance = Vec3::Dot(feetPosition - DxConv::ToVec3(poly.Position[0]), outward);
+            // // モデルの面の表裏によらず、壁からプレイヤーへ向く法線にそろえる。
+            // if (signedDistance < 0.0f) outward = -outward;
 
-            const float wallDirection = Vec3::Dot(direction, outward);
-            const float distance = std::abs(signedDistance);
-            // 角で複数の面に触れた場合も、入力が向かっている面を優先する。
-            if (!foundWall || wallDirection < bestDirection - 0.0001f ||
-                (std::abs(wallDirection - bestDirection) <= 0.0001f &&
-                    distance < bestDistance))
-            {
-				wallNormal = outward;           // 壁の法線は、プレイヤーの進行方向に向かうようにそろえる。
-				bestDirection = wallDirection;  // 壁の法線と進行方向の内積が最も小さい面を優先する。
-                bestDistance = distance;        // 壁までの距離が最も近い面を優先する。
-                if (wallTopY) *wallTopY = top;
-				foundWall = true;               //  壁の法線が見つかったことを記録する。
-            }
-        }
+            // const float wallDirection = Vec3::Dot(direction, outward);
+            // const float distance = std::abs(signedDistance);
+            // // 角で複数の面に触れた場合も、入力が向かっている面を優先する。
+            // if (!foundWall || wallDirection < bestDirection - 0.0001f ||
+                // (std::abs(wallDirection - bestDirection) <= 0.0001f &&
+                    // distance < bestDistance))
+            // {
+				// wallNormal = outward;           // 壁の法線は、プレイヤーの進行方向に向かうようにそろえる。
+				// bestDirection = wallDirection;  // 壁の法線と進行方向の内積が最も小さい面を優先する。
+                // bestDistance = distance;        // 壁までの距離が最も近い面を優先する。
+                // if (wallTopY) *wallTopY = top;
+				// foundWall = true;               //  壁の法線が見つかったことを記録する。
+            // }
+        // }
 
-        // 判定結果を解放してから、見つかったかどうかを返す。
-        MV1CollResultPolyDimTerminate(result);
-    }
-    return foundWall;
-}
+        // // 判定結果を解放してから、見つかったかどうかを返す。
+        // MV1CollResultPolyDimTerminate(result);
+    // }
+    // return foundWall;
+// }
 
-Vec3 Stage::SlideAlongPillars(const Vec3& oldPosition, const Vec3& desiredPosition, bool& touched) const
-{
+// Vec3 Stage::SlideAlongPillars(const Vec3& oldPosition, const Vec3& desiredPosition, bool& touched) const
+// {
    
-    Vec3 move{ desiredPosition.x - oldPosition.x, 0.0f, desiredPosition.z - oldPosition.z };
-    Vec3 candidate = desiredPosition;
-    touched = false;
-    // 隣接する柱の側面も考慮して、数回判定し直す。移動速度の増加や進行方向の自動補正は行わない。
-    for (int attempt = 0; attempt < 4; ++attempt)
-    {
-        //移動してもPlayerの当たり判定を置いてる
-        const Vec3 start = candidate + Vec3::Up() * Const::PLAYER_RADIUS;
-        const Vec3 end = candidate + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
+    // Vec3 move{ desiredPosition.x - oldPosition.x, 0.0f, desiredPosition.z - oldPosition.z };
+    // Vec3 candidate = desiredPosition;
+    // touched = false;
+    // // 隣接する柱の側面も考慮して、数回判定し直す。移動速度の増加や進行方向の自動補正は行わない。
+    // for (int attempt = 0; attempt < 4; ++attempt)
+    // {
+        // //移動してもPlayerの当たり判定を置いてる
+        // const Vec3 start = candidate + Vec3::Up() * Const::PLAYER_RADIUS;
+        // const Vec3 end = candidate + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
 
-        Vec3 wallNormal{};
-        float mostInward = -0.0001f;
+        // Vec3 wallNormal{};
+        // float mostInward = -0.0001f;
 
-        for (int handle : pillarCollisionHandles_)
-        {
-            if (handle < 0) continue;
+        // for (int handle : pillarCollisionHandles_)
+        // {
+            // if (handle < 0) continue;
 
-            const auto result = MV1CollCheck_Capsule(handle, -1,
-                DxConv::ToVECTOR(start), DxConv::ToVECTOR(end), Const::PLAYER_RADIUS);
+            // const auto result = MV1CollCheck_Capsule(handle, -1,
+                // DxConv::ToVECTOR(start), DxConv::ToVECTOR(end), Const::PLAYER_RADIUS);
 
-            for (int i = 0; i < result.HitNum; ++i)
-            {
-                const auto& poly = result.Dim[i];
-                Vec3 normal = DxConv::ToVec3(poly.Normal).Normalized();
+            // for (int i = 0; i < result.HitNum; ++i)
+            // {
+                // const auto& poly = result.Dim[i];
+                // Vec3 normal = DxConv::ToVec3(poly.Normal).Normalized();
 
-                if (std::abs(normal.y) > 0.01f) continue; // 柱の上下面と斜面は対象外にする。
+                // if (std::abs(normal.y) > 0.01f) continue; // 柱の上下面と斜面は対象外にする。
 
-                float top = (std::max)(poly.Position[0].y,
-                    (std::max)(poly.Position[1].y, poly.Position[2].y));
+                // float top = (std::max)(poly.Position[0].y,
+                    // (std::max)(poly.Position[1].y, poly.Position[2].y));
 
-                if (candidate.y >= top - Const::PLAYER_SKIN) continue; // 柱の上にいる場合は側面との衝突を処理しない。
+                // if (candidate.y >= top - Const::PLAYER_SKIN) continue; // 柱の上にいる場合は側面との衝突を処理しない。
 
-                normal.y = 0.0f;
-                normal = normal.Normalized();
-				//壁に向かう移動の際に、最も壁に向かう法線を採用する。
-                float inward = Vec3::Dot(move, normal);
+                // normal.y = 0.0f;
+                // normal = normal.Normalized();
+				// //壁に向かう移動の際に、最も壁に向かう法線を採用する。
+                // float inward = Vec3::Dot(move, normal);
 
-                if (inward < mostInward)
-                { mostInward = inward; wallNormal = normal; }
-            }
-            MV1CollResultPolyDimTerminate(result);
-        }
-        if (wallNormal.LengthSq() == 0.0f) return candidate; // 壁から離れる移動も含む。
-        touched = true;
+                // if (inward < mostInward)
+                // { mostInward = inward; wallNormal = normal; }
+            // }
+            // MV1CollResultPolyDimTerminate(result);
+        // }
+        // if (wallNormal.LengthSq() == 0.0f) return candidate; // 壁から離れる移動も含む。
+        // touched = true;
 
-        // 壁へ入り込む成分だけを取り除き、横方向に弾き飛ばさない。
-        move -= wallNormal * Vec3::Dot(move, wallNormal);
-        candidate = { oldPosition.x + move.x, desiredPosition.y, oldPosition.z + move.z };
-    }
-    // 最後の再判定でも移動できなければ、このフレームの移動前の水平位置を維持する。
-    return { oldPosition.x, desiredPosition.y, oldPosition.z };
-}
+        // // 壁へ入り込む成分だけを取り除き、横方向に弾き飛ばさない。
+        // move -= wallNormal * Vec3::Dot(move, wallNormal);
+        // candidate = { oldPosition.x + move.x, desiredPosition.y, oldPosition.z + move.z };
+    // }
+    // // 最後の再判定でも移動できなければ、このフレームの移動前の水平位置を維持する。
+    // return { oldPosition.x, desiredPosition.y, oldPosition.z };
+// }
 
 
 void Stage::Reset()
@@ -308,7 +310,20 @@ void Stage::Reset()
 
 
 
-    RefreshCollisionInfo();
+    // RefreshCollisionInfo();
+   
+    // モデルごとに判定の役割を登録する。形・大きさはモデルから取得される。
+    collision_.Clear();
+    collision_.AddModel(stageModel_, ModelCollision::Surface::Ground);
+   
+    for (const auto& model : stagePillars_)
+        collision_.AddModel(model, ModelCollision::Surface::ClimbableWall);
+    
+    for (const auto& model : stageModels_)
+        collision_.AddModel(model, ModelCollision::Surface::Ground);
+    
+    collision_.Refresh();
+    
     // 透過モデルの配置情報は毎回リセット
     alphaModelReady_ = false;
     // リセット直後は透過効果が残らないように不透明度を初期値へ
