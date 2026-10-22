@@ -15,7 +15,7 @@ void GameTestScene::Init()
 {
 
 
-    gameContext->Reset();
+	gameContext->Reset();
 	playerCamera_.Reset();
 #ifndef NDEBUG
 	activeCamera_ = nullptr;
@@ -27,24 +27,24 @@ void GameTestScene::Init()
 	ToonSettingsManager::Load();
 	OutlineSettingsManager::Load();
 
-	// ƒgƒD[ƒ“•`‰æ‚É•K—v‚ÈƒVƒF[ƒ_[‚Æİ’èƒoƒbƒtƒ@[‚ğ‰Šú‰»
+	// ï¿½gï¿½Dï¿½[ï¿½ï¿½ï¿½`ï¿½ï¿½É•Kï¿½vï¿½ÈƒVï¿½Fï¿½[ï¿½_ï¿½[ï¿½Æİ’ï¿½oï¿½bï¿½tï¿½@ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (!modelToonRenderer_.Init())
-		DxPlus::Utils::FatalError(L"modelToonRenderer‚Ì‰Šú‰»¸”s");
+		DxPlus::Utils::FatalError(L"modelToonRendererï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½s");
 	if (!shaderEffects_.Init(DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT))
-		DxPlus::Utils::FatalError(L"shaderEffects‚Ì‰Šú‰»¸”s");
+		DxPlus::Utils::FatalError(L"shaderEffectsï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½s");
 
-	// toon•`‰æ‚ÆƒAƒEƒgƒ‰ƒCƒ“•`‰æ‚ğ—LŒø‚É‚·‚é
+	// toonï¿½`ï¿½ï¿½ÆƒAï¿½Eï¿½gï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½`ï¿½ï¿½ï¿½Lï¿½ï¿½ï¿½É‚ï¿½ï¿½ï¿½
 	shaderEffects_.GetSettings().toonEnabled = true;
 	shaderEffects_.GetSettings().outlineEnabled = true;
 
 
-	
-    StartFadeIn();
+
+	StartFadeIn();
 }
 
 void GameTestScene::Update(float deltaTime)
 {
-    DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
+	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
 #ifndef NDEBUG
 	const bool toggleDown = DxLib::CheckHitKey(KEY_INPUT_LALT) != 0 &&
@@ -65,11 +65,11 @@ void GameTestScene::Update(float deltaTime)
 	{
 		freeCamera_.ResetView();
 	}
-	if( DxLib::CheckHitKey(KEY_INPUT_F) != 0)
+	if (DxLib::CheckHitKey(KEY_INPUT_F) != 0)
 	{
 		freeCamera_.FocusAt(gameContext->GetPlayer().GetPosition());
 	}
-	DxPlus::Debug::SetString(L" R: TransformƒŠƒZƒbƒg, F: FreeCamera‚ğƒvƒŒƒCƒ„[‚ÉƒtƒH[ƒJƒX");
+	DxPlus::Debug::SetString(L" R: Transformï¿½ï¿½ï¿½Zï¿½bï¿½g, F: FreeCameraï¿½ï¿½ï¿½vï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½[ï¿½Éƒtï¿½Hï¿½[ï¿½Jï¿½X");
 
 
 
@@ -93,6 +93,18 @@ void GameTestScene::Update(float deltaTime)
 		
 		player.Update(deltaTime, stage.GetCollision(), stageCenterPosition);
 		stage.UpdateAlphaModel(deltaTime, player);
+
+		boss.Update(deltaTime);
+		ModelObject playerModel = player.GetModelObject().WithParentTransform(
+			player.GetPosition(), player.GetRotation());
+		const bool touching = Collision::UpdateModelContact(playerModel, boss.GetModelObject());
+		player.GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
+		if (touching)
+		{
+			player.TakeDamage();
+		}
+
+
 		playerCamera_.Update(player.GetPosition(), boss.GetPosition(), deltaTime);
 
 		using namespace DxPlus::Input;
@@ -106,19 +118,19 @@ void GameTestScene::Update(float deltaTime)
 	}
 
 #ifndef NDEBUG
-    // ”’l“ü—Í’†‚ÍƒV[ƒ“Ø‚è‘Ö‚¦‚ÌƒL[‚ğ–³‹‚·‚é
-    if (ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard) return;
+	// ï¿½ï¿½ï¿½lï¿½ï¿½ï¿½Í’ï¿½ï¿½ÍƒVï¿½[ï¿½ï¿½ï¿½Ø‚ï¿½Ö‚ï¿½ï¿½ÌƒLï¿½[ï¿½ğ–³ï¿½ï¿½ï¿½ï¿½ï¿½
+	if (ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard) return;
 #endif
 
-    using namespace DxPlus::Input;
-    int buttonDown = GetButtonDown(PLAYER1);
-    if (buttonDown & BUTTON_SELECT)
-    {
-        Scene* resultScene = SceneManager::GetInstance().GetScene(SceneID::Result);
-        SetNextScene(resultScene);
-        finished = true;    // ƒtƒF[ƒh–³‚µ‚Ìê‡‚Í finished ‚ğ true ‚É‚µ‚Ä‚¨‚­•K—v‚ ‚è
-        return;
-    }
+	using namespace DxPlus::Input;
+	int buttonDown = GetButtonDown(PLAYER1);
+	if (buttonDown & BUTTON_SELECT)
+	{
+		Scene* resultScene = SceneManager::GetInstance().GetScene(SceneID::Result);
+		SetNextScene(resultScene);
+		finished = true;    // ï¿½tï¿½Fï¿½[ï¿½hï¿½ï¿½ï¿½ï¿½ï¿½Ìê‡ï¿½ï¿½ finished ï¿½ï¿½ true ï¿½É‚ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½ï¿½Kï¿½vï¿½ï¿½ï¿½ï¿½
+		return;
+	}
 }
 
 void GameTestScene::Render() const
@@ -157,22 +169,33 @@ void GameTestScene::RenderDepth() const
 	const auto& boss = gameContext->GetBoss();
 	const auto& player = gameContext->GetPlayer();
 	const auto& stage = gameContext->GetStage();
-	const auto& effectManager = gameContext->GetEffectManager();
+	const auto& room = gameContext->GetRoom();
 
-	// Bone‚È‚µƒVƒF[ƒ_[
-	modelToonRenderer_.SetVertexShader(ModelType::Model);
+	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
+		player.GetPosition(), player.GetRotation());
+	const ModelObject bossModel = boss.GetModelObject().WithParentTransform(
+		boss.GetPosition(), boss.GetRotation());
+	const ModelObject stageModel = stage.GetModelObject().WithParentTransform(
+		stage.GetPosition(), stage.GetRotation());
 
-	boss.Draw();
-	stage.Draw();
-	stage.DrawAlphaModel();
-	gameContext->GetRoom().Draw();
+	modelToonRenderer_.DrawDepth(bossModel);
+	modelToonRenderer_.DrawDepth(stageModel);
+	modelToonRenderer_.DrawDepth(stage.GetAlphaModelObject());
 
-	// Bone‘Î‰‚Ì’¸“_ƒVƒF[ƒ_[
-	modelToonRenderer_.SetVertexShader(ModelType::Bone);
+	for (const auto& pillar : stage.GetPillarModelObjects())
+	{
+		modelToonRenderer_.DrawDepth(
+			pillar.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
+	}
 
-	player.Draw();
+	for (const auto& model : stage.GetStageModelObjects())
+	{
+		modelToonRenderer_.DrawDepth(
+			model.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
+	}
 
-
+	modelToonRenderer_.DrawDepth(playerModel);
+	modelToonRenderer_.DrawDepth(room.GetModelObject());
 }
 
 void GameTestScene::DrawScene(bool toonEnabled) const
@@ -190,7 +213,7 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	const auto& grid = gameContext->GetGrid();
 	const auto& room = gameContext->GetRoom();
 
-	// ƒgƒD[ƒ“ƒVƒF[ƒ_[‚ğg‚í‚È‚¢ê‡
+	// ï¿½gï¿½Dï¿½[ï¿½ï¿½ï¿½Vï¿½Fï¿½[ï¿½_ï¿½[ï¿½ï¿½ï¿½gï¿½ï¿½È‚ï¿½ï¿½ê‡
 	if (!toonEnabled)
 	{
 		SetUsePixelShader(-1);
@@ -205,10 +228,10 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 		return;
 	}
 
-	// ƒgƒD[ƒ“•`‰æŠJn
+	// ï¿½gï¿½Dï¿½[ï¿½ï¿½ï¿½`ï¿½ï¿½Jï¿½n
 	modelToonRenderer_.BeginPass();
 
-	const auto drawActor = [this](const ModelObject& model, ModelType type)
+	const auto drawActor = [this](const ModelObject& model)
 		{
 			if (model.collisionHighlighted)
 			{
@@ -220,30 +243,30 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 			}
 			else
 			{
-				modelToonRenderer_.Draw(model, type);
+				modelToonRenderer_.Draw(model);
 			}
 		};
-   const ModelObject playerModel = player.GetModelObject().WithParentTransform(
+	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
 		player.GetPosition(), player.GetRotation());
-	drawActor(playerModel, ModelType::Bone);
-	// boss‚Ìƒ‚ƒfƒ‹‚Éboss©‘Ì‚ÌˆÊ’u‚Æ‰ñ“]‚ğ“K—p‚µ‚Ä•`‰æ‚·‚é
+	drawActor(playerModel);
+	// bossï¿½Ìƒï¿½ï¿½fï¿½ï¿½ï¿½ï¿½bossï¿½ï¿½ï¿½Ì‚ÌˆÊ’uï¿½Æ‰ï¿½]ï¿½ï¿½Kï¿½pï¿½ï¿½ï¿½Ä•`ï¿½æ‚·ï¿½ï¿½
 	drawActor(boss.GetModelObject().WithParentTransform(
-		boss.GetPosition(), boss.GetRotation()), ModelType::Model);
-    drawActor(stage.GetModelObject().WithParentTransform(
-		stage.GetPosition(), stage.GetRotation()), ModelType::Model);
-	drawActor(stage.GetAlphaModelObject(), ModelType::Model);
- for (const auto& pillar : stage.GetPillarModelObjects())
+		boss.GetPosition(), boss.GetRotation()));
+	drawActor(stage.GetModelObject().WithParentTransform(
+		stage.GetPosition(), stage.GetRotation()));
+	drawActor(stage.GetAlphaModelObject());
+	for (const auto& pillar : stage.GetPillarModelObjects())
 	{
-        drawActor(pillar.WithParentTransform(stage.GetPosition(), stage.GetRotation()), ModelType::Model);
+		drawActor(pillar.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
 	}
-  for (const auto& model : stage.GetStageModelObjects())
+	for (const auto& model : stage.GetStageModelObjects())
 	{
-        drawActor(model.WithParentTransform(stage.GetPosition(), stage.GetRotation()), ModelType::Model);
+		drawActor(model.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
 	}
 	effectManager.Draw();
 	grid.Draw();
 
-	drawActor(room.GetModelObject(), ModelType::Model);
+	drawActor(room.GetModelObject());
 	modelToonRenderer_.EndPass();
 }
 

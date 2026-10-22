@@ -268,7 +268,7 @@ void GameScene::DrawScene(bool toonEnabled) const
 	// トゥーン描画開始
 	modelToonRenderer_.BeginPass();
 
-	const auto drawActor = [this](const ModelObject& model, ModelType type)
+	const auto drawActor = [this](const ModelObject& model)
 		{
 			if (model.collisionHighlighted)
 			{
@@ -280,30 +280,30 @@ void GameScene::DrawScene(bool toonEnabled) const
 			}
 			else
 			{
-				modelToonRenderer_.Draw(model, type);
+				modelToonRenderer_.Draw(model);
 			}
 		};
 	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
 		player.GetPosition(), player.GetRotation());
-	drawActor(playerModel, ModelType::Bone);
+	drawActor(playerModel);
 	// bossのモデルにboss自体の位置と回転を適用して描画する
 	drawActor(boss.GetModelObject().WithParentTransform(
-		boss.GetPosition(), boss.GetRotation()), ModelType::Model);
+		boss.GetPosition(), boss.GetRotation()));
 	drawActor(stage.GetModelObject().WithParentTransform(
-		stage.GetPosition(), stage.GetRotation()), ModelType::Model);
-	drawActor(stage.GetAlphaModelObject(), ModelType::Model);
+		stage.GetPosition(), stage.GetRotation()));
+	drawActor(stage.GetAlphaModelObject());
 	for (const auto& pillar : stage.GetPillarModelObjects())
 	{
-		drawActor(pillar.WithParentTransform(stage.GetPosition(), stage.GetRotation()), ModelType::Model);
+		drawActor(pillar.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
 	}
 	for (const auto& model : stage.GetStageModelObjects())
 	{
-		drawActor(model.WithParentTransform(stage.GetPosition(), stage.GetRotation()), ModelType::Model);
+		drawActor(model.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
 	}
 	effectManager.Draw();
 	grid.Draw();
 
-	drawActor(room.GetModelObject(), ModelType::Model);
+	drawActor(room.GetModelObject());
 	modelToonRenderer_.EndPass();
 }
 

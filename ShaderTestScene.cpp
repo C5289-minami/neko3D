@@ -435,17 +435,21 @@ void ShaderTest::RenderDepth() const
 {
 	// シーンのカメラを設定する
 	camera_.ApplyCamera();
-	// Boneなしシェーダー
-	modelToonRenderer_.SetVertexShader(ModelType::Model);
 
-	gameContext->GetStage().GetModelObject().Draw();
-	gameContext->GetBoss().Draw();
+	const auto& player = gameContext->GetPlayer();
+	const auto& boss = gameContext->GetBoss();
+	const auto& stage = gameContext->GetStage();
 
-	// Bone対応の頂点シェーダー
-	modelToonRenderer_.SetVertexShader(ModelType::Bone);
+	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
+		player.GetPosition(), player.GetRotation());
+	const ModelObject bossModel = boss.GetModelObject().WithParentTransform(
+		boss.GetPosition(), boss.GetRotation());
+	const ModelObject stageModel = stage.GetModelObject().WithParentTransform(
+		stage.GetPosition(), stage.GetRotation());
 
-	gameContext->GetPlayer().Draw();
-
+	modelToonRenderer_.DrawDepth(stageModel);
+	modelToonRenderer_.DrawDepth(bossModel);
+	modelToonRenderer_.DrawDepth(playerModel);
 }
 
 void ShaderTest::DrawScene(bool toonEnabled) const
@@ -468,7 +472,7 @@ void ShaderTest::DrawScene(bool toonEnabled) const
 	// トゥーン描画開始
 	modelToonRenderer_.BeginPass();
 
-	const auto drawActor = [this](const ModelObject& model, ModelType type)
+	const auto drawActor = [this](const ModelObject& model)
 		{
 			if (model.collisionHighlighted)
 			{
@@ -480,14 +484,14 @@ void ShaderTest::DrawScene(bool toonEnabled) const
 			}
 			else
 			{
-				modelToonRenderer_.Draw(model, type);
+				modelToonRenderer_.Draw(model);
 			}
 		};
 	const auto& player = gameContext->GetPlayer();
     const ModelObject& playerModel = player.GetModelObject();
-	drawActor(playerModel, ModelType::Bone);
-	drawActor(gameContext->GetBoss().GetModelObject(), ModelType::Model);
-	drawActor(gameContext->GetStage().GetModelObject(), ModelType::Model);
+	drawActor(playerModel);
+	drawActor(gameContext->GetBoss().GetModelObject());
+	drawActor(gameContext->GetStage().GetModelObject());
 
 	modelToonRenderer_.EndPass();
 }

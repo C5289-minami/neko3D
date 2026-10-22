@@ -1,0 +1,98 @@
+#include "ModelVS_Common.hlsli"
+
+// 8FRAME対応ボーン頂点シェーダー
+cbuffer TestBuffer : register(b3)
+{
+    float4 Bone[162];
+};
+
+struct VS_INPUT
+{
+    float3 Position : POSITION;
+    float3 Normal : NORMAL;
+    float4 Diffuse : COLOR0;
+    float4 Specular : COLOR1;
+    float4 TexCoords0 : TEXCOORD0;
+    float4 TexCoords1 : TEXCOORD1;
+
+    int4 BlendIndices0 : BLENDINDICES0;
+    float4 BlendWeight0 : BLENDWEIGHT0;
+    int4 BlendIndices1 : BLENDINDICES1;
+    float4 BlendWeight1 : BLENDWEIGHT1;
+};
+struct VS_OUTPUT
+{
+    float4 Position : SV_POSITION;
+    float3 Normal : TEXCOORD0;
+    float2 UV : TEXCOORD1;
+};
+
+VS_OUTPUT main(VS_INPUT v)
+{
+    VS_OUTPUT o;
+    float4 localPosition = float4(v.Position, 1.0f);
+    // 8個のボーンウェイトをまとめて変換行列を計算
+    float4 bone0 =
+        Bone[v.BlendIndices0.x + 0] * v.BlendWeight0.x +
+        Bone[v.BlendIndices0.y + 0] * v.BlendWeight0.y +
+        Bone[v.BlendIndices0.z + 0] * v.BlendWeight0.z +
+        Bone[v.BlendIndices0.w + 0] * v.BlendWeight0.w +
+        Bone[v.BlendIndices1.x + 0] * v.BlendWeight1.x +
+        Bone[v.BlendIndices1.y + 0] * v.BlendWeight1.y +
+        Bone[v.BlendIndices1.z + 0] * v.BlendWeight1.z +
+        Bone[v.BlendIndices1.w + 0] * v.BlendWeight1.w;
+
+    float4 bone1 =
+        Bone[v.BlendIndices0.x + 1] * v.BlendWeight0.x +
+        Bone[v.BlendIndices0.y + 1] * v.BlendWeight0.y +
+        Bone[v.BlendIndices0.z + 1] * v.BlendWeight0.z +
+        Bone[v.BlendIndices0.w + 1] * v.BlendWeight0.w +
+        Bone[v.BlendIndices1.x + 1] * v.BlendWeight1.x +
+        Bone[v.BlendIndices1.y + 1] * v.BlendWeight1.y +
+        Bone[v.BlendIndices1.z + 1] * v.BlendWeight1.z +
+        Bone[v.BlendIndices1.w + 1] * v.BlendWeight1.w;
+
+    float4 bone2 =
+        Bone[v.BlendIndices0.x + 2] * v.BlendWeight0.x +
+        Bone[v.BlendIndices0.y + 2] * v.BlendWeight0.y +
+        Bone[v.BlendIndices0.z + 2] * v.BlendWeight0.z +
+        Bone[v.BlendIndices0.w + 2] * v.BlendWeight0.w +
+        Bone[v.BlendIndices1.x + 2] * v.BlendWeight1.x +
+        Bone[v.BlendIndices1.y + 2] * v.BlendWeight1.y +
+        Bone[v.BlendIndices1.z + 2] * v.BlendWeight1.z +
+        Bone[v.BlendIndices1.w + 2] * v.BlendWeight1.w;
+
+    // ボーン変換
+    float4 world;
+
+    world.x = dot(localPosition, bone0);
+    world.y = dot(localPosition, bone1);
+    world.z = dot(localPosition, bone2);
+    world.w = 1.0f;
+
+    // ビュー変換
+    float4 view;
+
+    view.x = dot(world, g_Base.ViewMatrix[0]);
+    view.y = dot(world, g_Base.ViewMatrix[1]);
+    view.z = dot(world, g_Base.ViewMatrix[2]);
+    view.w = 1.0f;
+
+    // 射影変換
+    o.Position.x = dot(view, g_Base.ProjectionMatrix[0]);
+    o.Position.y = dot(view, g_Base.ProjectionMatrix[1]);
+    o.Position.z = dot(view, g_Base.ProjectionMatrix[2]);
+    o.Position.w = dot(view, g_Base.ProjectionMatrix[3]);
+
+    // 法線変換
+    float3 normal;
+
+    normal.x = dot(v.Normal, bone0.xyz);
+    normal.y = dot(v.Normal, bone1.xyz);
+    normal.z = dot(v.Normal, bone2.xyz);
+
+    o.Normal = normalize(normal);
+    o.UV = v.TexCoords0.xy;
+
+    return o;
+}

@@ -3,13 +3,12 @@
 #include "DrawableObject.h"
 #include "DxLib.h"
 #include "ToonSettings.h"
+#include "ResourceManager.h"
 
 namespace
 {
-    // ModelToonPS.hlsl の ToonSettings は b5 を使用している
     constexpr int ToonSettingsSlot = 5;
 
-    // シェーダーの読み込み先
     constexpr const wchar_t* PixelShaderPath =
         L"./Data/Shader/Bin/ModelToonPS.pso";
 
@@ -18,10 +17,19 @@ namespace
 
     constexpr const wchar_t* BoneVertexShaderPath =
         L"./Data/Shader/Bin/ModelVS_Bone.vso";
+
+    constexpr const wchar_t* BoneVertexShaderNMapPath =
+		L"./Data/Shader/Bin/ModelVS_BoneNMap.vso";
+
+    constexpr const wchar_t* BoneVertexShader8FramePath =
+        L"./Data/Shader/Bin/ModelVS_Bone8Frame.vso";
 }
 
 
-// オブジェクト破棄時にGPUリソースを解放する
+// ============================================================
+// 生成・破棄
+// ============================================================
+
 ModelToonRenderer::~ModelToonRenderer()
 {
     Release();
@@ -34,28 +42,31 @@ ModelToonRenderer::~ModelToonRenderer()
 
 bool ModelToonRenderer::Init()
 {
-    // 再初期化にも対応できるよう、既存リソースを解放する
     Release();
 
-    // シェーダーを読み込む
     pixelShader_ = LoadPixelShader(PixelShaderPath);
     vertexShader_ = LoadVertexShader(VertexShaderPath);
     vertexShaderBone_ = LoadVertexShader(BoneVertexShaderPath);
+	vertexShaderBoneNMap_ = LoadVertexShader(BoneVertexShaderNMapPath);
+    vertexShaderBone8Frame_ =
+        LoadVertexShader(BoneVertexShader8FramePath);
 
-    // ToonSettings をGPUへ渡す定数バッファーを作成する
+
     toonConstantBuffer_ =
         CreateShaderConstantBuffer(sizeof(ToonSettings));
 
-    // 必要なリソースが作成できなければ初期化を中断する
     if (pixelShader_ < 0 ||
         vertexShader_ < 0 ||
         vertexShaderBone_ < 0 ||
+		vertexShaderBoneNMap_ < 0 ||
+        vertexShaderBone8Frame_ < 0 ||
         toonConstantBuffer_ < 0)
     {
         Release();
         return false;
     }
-	return true;
+
+    return true;
 }
 
 
@@ -88,11 +99,23 @@ void ModelToonRenderer::Release() noexcept
         DeleteShader(vertexShaderBone_);
         vertexShaderBone_ = -1;
     }
+
+    if (vertexShaderBoneNMap_ >= 0)
+    {
+        DeleteShader(vertexShaderBoneNMap_);
+        vertexShaderBoneNMap_ = -1;
+	}
+
+    if (vertexShaderBone8Frame_ >= 0)
+    {
+        DeleteShader(vertexShaderBone8Frame_);
+        vertexShaderBone8Frame_ = -1;
+    }
 }
 
 
 // ============================================================
-// トゥーン描画開始
+// トゥーン描画開始・終了
 // ============================================================
 
 void ModelToonRenderer::BeginPass() const
@@ -102,7 +125,6 @@ void ModelToonRenderer::BeginPass() const
         return;
     }
 
-    // 定数バッファーのメモリを取得する
     auto* settings = static_cast<ToonSettings*>(
         GetBufferShaderConstantBuffer(toonConstantBuffer_)
         );
@@ -112,10 +134,8 @@ void ModelToonRenderer::BeginPass() const
         return;
     }
 
-    // 最新のトゥーン設定を反映する
     *settings = g_toonSettings;
 
-    // 現在のライト方向も反映する
     const VECTOR lightDirection = GetLightDirection();
 
     settings->LightDirection[0] = lightDirection.x;
@@ -123,28 +143,19 @@ void ModelToonRenderer::BeginPass() const
     settings->LightDirection[2] = lightDirection.z;
     settings->LightDirection[3] = 0.0f;
 
-    // GPU側の定数バッファーを更新する
     UpdateShaderConstantBuffer(toonConstantBuffer_);
 
-    // HLSL の register(b5) に対応する場所へ設定値を渡す
     SetShaderConstantBuffer(
         toonConstantBuffer_,
         DX_SHADERTYPE_PIXEL,
         ToonSettingsSlot
     );
 
-    // トゥーンの色を計算するピクセルシェーダーを設定する
     SetUsePixelShader(pixelShader_);
 }
 
-
-// ============================================================
-// トゥーン描画終了
-// ============================================================
-
 void ModelToonRenderer::EndPass() const
 {
-    // このクラスで設定したシェーダーを解除する
     SetUsePixelShader(-1);
     SetUseVertexShader(-1);
 }
@@ -155,15 +166,24 @@ void ModelToonRenderer::EndPass() const
 // ============================================================
 
 void ModelToonRenderer::Draw(
-    const ModelObject& model,
-    ModelType type
+    const ModelObject& model
 ) const
 {
-    // モデルに合った頂点シェーダーを選択する
-    SetVertexShader(type);
+    if (pixelShader_ < 0)
+    {
+        return;
+    }
 
-    // 実際のモデル描画
-    model.Draw();
+    SetUsePixelShader(pixelShader_);
+
+    DrawTriangleLists(model);
+}
+
+void ModelToonRenderer::DrawDepth(
+    const ModelObject& model
+) const
+{
+    DrawTriangleLists(model);
 }
 
 
@@ -171,9 +191,7 @@ void ModelToonRenderer::Draw(
 // 頂点シェーダー切り替え
 // ============================================================
 
-void ModelToonRenderer::SetVertexShader(
-    ModelType type
-) const
+void ModelToonRenderer::SetVertexShader(ModelType type) const
 {
     switch (type)
     {
@@ -184,5 +202,69 @@ void ModelToonRenderer::SetVertexShader(
     case ModelType::Bone:
         SetUseVertexShader(vertexShaderBone_);
         break;
+    }
+}
+
+
+// ============================================================
+// トライアングルリスト描画
+// ============================================================
+
+void ModelToonRenderer::DrawTriangleLists(
+    const ModelObject& model
+) const
+{
+    const int handle = RM().GetModel(model.GetModelKey());
+
+    if (handle < 0)
+    {
+        return;
+    }
+
+    model.ApplyTransform();
+    model.ApplyCollisionColor();
+
+    const int listCount = MV1GetTriangleListNum(handle);
+
+    for (int i = 0; i < listCount; ++i)
+    {
+        const int vertexType =
+            MV1GetTriangleListVertexType(handle, i);
+
+        int shader = -1;
+
+        switch (vertexType)
+        {
+        case DX_MV1_VERTEX_TYPE_1FRAME:
+        case DX_MV1_VERTEX_TYPE_NMAP_1FRAME:
+            shader = vertexShader_;
+            break;
+
+        case DX_MV1_VERTEX_TYPE_4FRAME:
+            shader = vertexShaderBone_;
+            break;
+
+        case DX_MV1_VERTEX_TYPE_NMAP_4FRAME:
+            shader = vertexShaderBoneNMap_;
+            break;
+
+        case DX_MV1_VERTEX_TYPE_8FRAME:
+        case DX_MV1_VERTEX_TYPE_NMAP_8FRAME:
+            shader = vertexShaderBone8Frame_;
+            break;
+
+        default:
+            // 対応していない頂点タイプはスキップする。
+            continue;
+        }
+
+        if (shader < 0)
+        {
+            continue;
+        }
+
+        SetUseVertexShader(shader);
+
+        MV1DrawTriangleList(handle, i);
     }
 }

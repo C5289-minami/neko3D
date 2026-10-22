@@ -1,5 +1,4 @@
-﻿
-#include "ModelConfigScene.h"
+﻿#include "ModelConfigScene.h"
 
 #include "ModelObjectManager.h"
 #include "SceneManager.h"
@@ -58,16 +57,6 @@ void ModelConfigScene::Init()
 
 void ModelConfigScene::Update(float deltaTime)
 {
-	Vec3 focus{};
-	if (selectedActor_)
-		focus = selectedActor_->GetPosition();
-	else if (selected_)
-	{
-		const auto* owner = MObjs().GetOwner(*selected_);
-		focus = owner
-           ? selected_->WithParentTransform(owner->GetPosition(), owner->GetRotation()).GetPosition()
-			: selected_->GetPosition();
-	}
 
 	// --- 右クリックを押している間のみカメラ操作 ---
 	if (!camera_.IsSceneViewActive() && (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
@@ -243,25 +232,24 @@ void ModelConfigScene::DrawImGui()
 void ModelConfigScene::RenderDepth() const
 {
 	const auto& objects = MObjs().GetObjects();
-	// シーンのカメラを設定する
+
 	camera_.ApplyCamera();
 
 	for (const auto* object : objects)
 	{
 		if (!object) continue;
 
-      if (object->GetModelType() == ModelType::Bone)
-			modelToonRenderer_.SetVertexShader(ModelType::Bone);
-		else
-			modelToonRenderer_.SetVertexShader(ModelType::Model);
-
 		const auto* owner = MObjs().GetOwner(*object);
-		if (owner)
-			object->WithParentTransform(owner->GetPosition(), owner->GetRotation()).Draw();
-		else
-			object->Draw();
-	}
 
+		const ModelObject drawObject = owner
+			? object->WithParentTransform(
+				owner->GetPosition(),
+				owner->GetRotation())
+			: *object;
+
+		// トライアングルリストごとに
+		modelToonRenderer_.DrawDepth(drawObject);
+	}
 }
 
 void ModelConfigScene::DrawScene(bool toonEnabled) const
@@ -292,7 +280,7 @@ void ModelConfigScene::DrawScene(bool toonEnabled) const
 	// トゥーン描画開始
 	modelToonRenderer_.BeginPass();
 
-	const auto drawActor = [this](const ModelObject& model, ModelType type)
+	const auto drawActor = [this](const ModelObject& model)
 		{
 			if (model.collisionHighlighted)
 			{
@@ -304,7 +292,7 @@ void ModelConfigScene::DrawScene(bool toonEnabled) const
 			}
 			else
 			{
-				modelToonRenderer_.Draw(model, type);
+				modelToonRenderer_.Draw(model);
 			}
 		};
 
@@ -315,7 +303,7 @@ void ModelConfigScene::DrawScene(bool toonEnabled) const
 		const ModelObject drawObject = owner
 			? object->WithParentTransform(owner->GetPosition(), owner->GetRotation())
 			: *object;
-       drawActor(drawObject, drawObject.GetModelType());
+		drawActor(drawObject);
 	}
 
 	modelToonRenderer_.EndPass();
