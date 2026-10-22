@@ -43,6 +43,13 @@ public:
     void SetVerticalSpeed(float speed) { velocity_.y = speed; }
     bool IsTouchingWall() const { return touchingWall_; }
     const Vec3& GetWallNormal() const { return wallNormal_; }
+    float GetWallTopY() const { return wallTopY_; }
+    bool IsNearWallTop() const//
+    {
+        const float distance = wallTopY_ - GetPosition().y;
+        return touchingWall_ && distance >= -Const::PLAYER_SKIN &&
+            distance <= Const::PLAYER_CLIMB_TOP_HOLD_DISTANCE;
+    }
     Vec3 GetWorldMoveDirection(const Vec3& moveDir) const;
 
 	// 回転
@@ -120,4 +127,5 @@ private:
 
     bool touchingWall_{ false };
     Vec3 wallNormal_{};
+    float wallTopY_{ 0.0f };
 };
