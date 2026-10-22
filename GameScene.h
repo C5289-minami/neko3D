@@ -25,8 +25,10 @@ public:
 
 	GameStateType GetCurrentGameState() const { return stateMachine_.GetCurrentType(); }
 	bool UpdateStateCamera(float deltaTime, const std::string& requestedShot);
-	void FocusTutorialCamera();
-	void OnTutorialCameraTransitionCompleted();
+ void FocusTutorialCamera(float deltaTime, const Vec3& cameraPositionOffset);
+	Camera::FreeCamera& GetFreeCamera() { return camera_; }
+	Camera::TargetCamera& GetTargetCamera() { return targetCamera_; }
+	Camera::CameraDirector& GetCameraDirector() { return cameraDirector_; }
 
 private:
 

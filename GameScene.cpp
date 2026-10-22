@@ -6,13 +6,10 @@
 #include "CameraObjectManager.h"
 #include "UIManager.h"
 
+#include <algorithm>
 
 #include "DxPlus/DxPlus.h"
 
-namespace
-{
-	const Vec3 tutorialPlayerStartPos{ -1882.3f, -783.7f, -1373.0f };
-}
 
 
 GameScene::GameScene(GameContext* context) 
@@ -117,19 +114,24 @@ bool GameScene::UpdateStateCamera(float deltaTime, const std::string& requestedS
 	return transitionCompleted;
 }
 
-void GameScene::FocusTutorialCamera()
+void GameScene::FocusTutorialCamera(float deltaTime, const Vec3& cameraPositionOffset)
 {
-	targetCamera_.FocusAt(gameContext->GetPlayer().GetPosition() + Vec3::Up() * 100.0f);
+    const Vec3 playerPosition = gameContext->GetPlayer().GetPosition();
+	const float followAmount = std::clamp(
+		targetCamera_.GetSettings().followSpeed * deltaTime,
+		0.0f,
+		1.0f);
+	const Vec3 desiredPosition = playerPosition + cameraPositionOffset;
+	const Vec3 desiredTarget = playerPosition + Vec3::Up() * 100.0f;
+
+	targetCamera_.SetPosition(
+		targetCamera_.GetPosition() +
+		(desiredPosition - targetCamera_.GetPosition()) * followAmount);
+	targetCamera_.SetTarget(
+		targetCamera_.GetTarget() +
+		(desiredTarget - targetCamera_.GetTarget()) * followAmount);
 }
 
-void GameScene::OnTutorialCameraTransitionCompleted()
-{
-	auto& player = gameContext->GetPlayer();
-	player.SetPosition(tutorialPlayerStartPos);
-	player.SetDefMove(true);
-	targetCamera_.Initialize(cameraDirector_.GetCurrentPose());
-	cameraDirector_.SwitchCamera(targetCamera_, 1.0f, Motion::Easing::EaseInOut);
-}
 
 void GameScene::Update(float deltaTime)
 {

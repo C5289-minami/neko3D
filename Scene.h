@@ -30,6 +30,7 @@ public:
     void SetGameContext(class GameContext* context) { gameContext = context; }
     void DrawFadeOverlay() const;
 
+	GameContext* GetGameContext() const { return gameContext; }
 protected:
     // フェード（今は使わない）
     void UpdateFadeController(float deltaTime);

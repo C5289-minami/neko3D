@@ -1,5 +1,4 @@
 #include "GameSceneTitleState.h"
-#include "GameSceneTitleState.h"
 #include "GameScene.h"
 #include "GameStateMachine.h"
 #include "DxPlus/Debug.h"
@@ -18,7 +17,7 @@ void GameSceneTitleState::Tick(float deltaTime)
 {
 	// タイトル画面の更新処理
 	DxPlus::Debug::SetFormatString(L"GameSceneTitleState::Tick");
-   gameScene_.UpdateStateCamera(deltaTime, "");
+	gameScene_.UpdateStateCamera(deltaTime, "");
 }
 
 void GameSceneTitleState::Exit()
