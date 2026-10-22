@@ -37,6 +37,7 @@ void ResourceManager::LoadAll()
     LoadModel(ResourceKeys::Model_Stage,      L"./Data/Models/field.mv1");
     LoadModel(ResourceKeys::Model_StageAlpha, L"./Data/Models/field.mv1");
     LoadModel(ResourceKeys::Model_Paladin,    L"./Data/Models/Paladin.mv1");
+    LoadModel(ResourceKeys::Model_Player,    L"./Data/Models/player.mv1");
     LoadModel(ResourceKeys::Model_Boss,       L"./Data/Models/Boss/boss_test.mv1");
     LoadModel(ResourceKeys::Model_hashira_l, L"./Data/Models/stage/hashira_l.mv1");
     LoadModel(ResourceKeys::Model_hashira_m, L"./Data/Models/stage/hashira_m.mv1");

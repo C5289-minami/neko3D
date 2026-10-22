@@ -20,11 +20,11 @@ namespace ResourceKeys
     // ===== Models =====
     inline constexpr const wchar_t* Model_Stage     = L"ModelStage";
     inline constexpr const wchar_t* Model_StageAlpha = L"ModelStageAlpha";
-    inline constexpr const wchar_t* Model_Paladin    = L"ModelPlayer";
+    inline constexpr const wchar_t* Model_Paladin    = L"ModelPaladin";
+    inline constexpr const wchar_t* Model_Player    = L"ModelPlayer";
     inline constexpr const wchar_t* Model_Boss    = L"ModelBoss";
-	inline constexpr const wchar_t* Model_Test = L"ModelTest";
-    // room
 	inline constexpr const wchar_t* Model_Room = L"ModelRoom";
+	inline constexpr const wchar_t* Model_Test = L"ModelTest";
 
     // ===== Stage Models =====
     inline constexpr const wchar_t* Model_hashira_l = L"hashira_l";
