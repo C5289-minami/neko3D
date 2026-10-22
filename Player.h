@@ -51,6 +51,7 @@ public:
             distance <= Const::PLAYER_CLIMB_TOP_HOLD_DISTANCE;
     }
     Vec3 GetWorldMoveDirection(const Vec3& moveDir) const;
+    void SetDefMove(bool defMove) { isdefMove_ = defMove; }
 
 	// 回転
 	void Turn(float direction, float speed, float deltaTime);
@@ -78,14 +79,14 @@ public:
     }
     ObjectTransform GetTransform() const
     {
-        return { model_.scale, GetPosition(), GetRotation() };
+        return { model_.GetScale(), GetPosition(), GetRotation() };
     }
     void SetTransform(const ObjectTransform& transform)
     {
         SetPosition(transform.position);
         SetPitch(transform.rotation.x);
         SetYaw(transform.rotation.y);
-        model_.scale = transform.scale;
+        model_.SetScale(transform.scale);
     }
     ModelObject& GetModelObject() { return model_; }
     const ModelObject& GetModelObject() const { return model_; }
@@ -127,5 +128,6 @@ private:
 
     bool touchingWall_{ false };
     Vec3 wallNormal_{};
+	bool isdefMove_{ false };// デフォルトの移動をするかどうか
     float wallTopY_{ 0.0f };
 };

@@ -32,6 +32,31 @@ namespace Camera
 				std::clamp(degrees, 10.0f, 150.0f);
 		}
 
+		virtual void Initialize(const Vec3& eye, const Vec3& target)
+		{
+			position_ = eye;
+			roll_ = 0.0f;
+
+			const Vec3 direction =
+				(target - eye).Normalized();
+
+			pitch_ = std::asin(
+				std::clamp(direction.y, -1.0f, 1.0f));
+
+			yaw_ = std::atan2(
+				direction.x, direction.z);
+
+		}
+		virtual void Initialize(const CameraPose& pose)
+		{
+			Vec3 direction{};
+			direction.x = std::sin(pose.yaw) * std::cos(pose.pitch);
+			direction.y = std::sin(pose.pitch);
+			direction.z = std::cos(pose.yaw) * std::cos(pose.pitch);
+
+			Initialize(pose.position, direction);
+		}
+
 		virtual void Reset()
 		{
 			position_ = {};
@@ -44,6 +69,7 @@ namespace Camera
 
 		// 現在のカメラ姿勢を取得
 		virtual CameraPose GetPose() const;
+		
 
 		// 指定された姿勢をDxLibの描画用カメラに適用する
 		// カメラ内部の状態は変更しない
@@ -132,34 +158,15 @@ namespace Camera
 			wasFocusDown_ = false;
 		}
 
-		void Initialize(const Vec3& eye, const Vec3& target)
+		void Initialize(const Vec3& eye, const Vec3& target) override
 		{
-			position_ = eye;
-			roll_ = 0.0f;
-
-			const Vec3 direction =
-				(target - eye).Normalized();
-
-			pitch_ = std::asin(
-				std::clamp(direction.y, -1.0f, 1.0f));
-
-			yaw_ = std::atan2(
-				direction.x, direction.z);
-
+			Camera::Initialize(eye, target);
 			homeEye_ = eye;
 			homeTarget_ = target;
 
 			active_ = false;
 		}
-		void Initialize(const CameraPose& pose)
-		{
-			Vec3 direction{};
-			direction.x = std::sin(pose.yaw) * std::cos(pose.pitch);
-			direction.y = std::sin(pose.pitch);
-			direction.z = std::cos(pose.yaw) * std::cos(pose.pitch);
-
-			Initialize(pose.position, direction);
-		}
+		using Camera::Initialize;
 
 		void Update(float deltaTime) override
 		{

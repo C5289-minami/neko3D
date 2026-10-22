@@ -19,7 +19,7 @@ public:
     void Reset()
     {
         basePosition_ = boss_.GetPosition();
-        baseRotation_ = boss_.GetModelObject().rotation;
+        baseRotation_ = boss_.GetModelObject().GetRotation();
         preActionMotion_.Reset();
         aimingMotion_.Reset();
         attackMotion_.Reset();
@@ -74,7 +74,7 @@ protected:
     void ApplyPose(const Vec3& positionOffset, const Vec3& rotationOffset)
     {
         boss_.SetPosition(basePosition_ + positionOffset);
-        boss_.GetModelObject().rotation = baseRotation_ + rotationOffset;
+        boss_.GetModelObject().SetRotation(baseRotation_ + rotationOffset);
     }
 
     void SetMotionDuration(AttackStateType phase, float duration)

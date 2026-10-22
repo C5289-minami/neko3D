@@ -18,7 +18,7 @@ public:
 	~Stage() = default;
 
 	// accessor
-	int GetModelHandle() const { return RM().GetModel(stageModel_.modelKey); }
+  int GetModelHandle() const { return RM().GetModel(stageModel_.GetModelKey()); }
   ModelObject& GetModelObject() { return stageModel_; }
 	const ModelObject& GetModelObject() const { return stageModel_; }
 	const ModelObject& GetModelSize() const { return stageModel_; }

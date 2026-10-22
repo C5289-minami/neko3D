@@ -1,0 +1,33 @@
+#include "GameSceneSelectState.h"
+#include "GameScene.h"
+#include "GameStateMachine.h"
+#include "GameContext.h"
+#include "DxPlus/Debug.h"
+
+// Playerを三体用意、でも移動はできないやつ。
+// 選択してしたキャラクターをgameContextにセットする。選択後はTutorialStateに遷移する。
+
+GameSceneSelectState::GameSceneSelectState(GameStateMachine& gameStateMachine, GameScene& gameScene)
+	:GameBaseState(gameStateMachine, gameScene)
+{
+}
+
+void GameSceneSelectState::Enter()
+{
+	DxPlus::Debug::SetFormatString(L"GameSceneSelectState::Enter");
+	gameScene_.GetGameContext()->GetPlayer().SetPosition({ -2169.332763671875,317.12353515625,-1188.287109375 });
+}
+
+void GameSceneSelectState::Tick(float deltaTime)
+{
+	DxPlus::Debug::SetFormatString(L"GameSceneSelectState::Enter");
+	if (gameScene_.UpdateStateCamera(deltaTime, "Select"))
+	{
+		stateMachine_.ChangeState(GameStateType::Tutorial);
+	}
+}
+
+void GameSceneSelectState::Exit()
+{
+	DxPlus::Debug::SetFormatString(L"GameSceneSelectState::Enter");
+}

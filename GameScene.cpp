@@ -1,12 +1,19 @@
 #include "GameScene.h"
+#include "GameScene.h"
 #include "GameContext.h"
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
 #include "CameraObjectManager.h"
 #include "UIManager.h"
 
+#include <algorithm>
 
 #include "DxPlus/DxPlus.h"
+
+
+
+GameScene::GameScene(GameContext* context) 
+	: Scene(context), stateMachine_(*this) {}
 
 void GameScene::Init()
 {
@@ -50,11 +57,11 @@ void GameScene::Init()
 		// logoのUIを作成
 		const DxPlus::Vec2 logoPos(DxPlus::CLIENT_WIDTH * 0.3f, DxPlus::CLIENT_HEIGHT * 0.3f);
 		const std::wstring logoKey = ResourceKeys::UI_Logo;
-		UIM().CreateImageUI(L"Game.Logo", logoKey, logoPos, {},0.5f);
+		UIM().CreateImageUI(L"Game.Logo", logoKey, logoPos, {}, 0.5f);
 		UIM().GetUI(L"Game.Logo")->SetDisplayCondition(
 			[this]() -> bool
 			{
-				return gameContext->GetGameState() == GameState::Title;
+             return GetCurrentGameState() == GameStateType::Title;
 			}
 		);
 
@@ -62,14 +69,14 @@ void GameScene::Init()
 		const DxPlus::Vec2 startPos(DxPlus::CLIENT_WIDTH * 0.2f, DxPlus::CLIENT_HEIGHT * 0.6f);
 		const std::wstring key = ResourceKeys::UI_StartButton;
 		UIM().CreateButtonUI(L"Game.StartButton", key, startPos,
-			[this]() { gameContext->GetGameState() = GameState::Select; },
+          [this]() { stateMachine_.ChangeState(GameStateType::Select); },
 			{ -1,0 },
 			0.5f
 		);
 		UIM().GetUI(L"Game.StartButton")->SetDisplayCondition(
 			[this]() -> bool
 			{
-				return gameContext->GetGameState() == GameState::Title;
+             return GetCurrentGameState() == GameStateType::Title;
 			}
 		);
 
@@ -78,91 +85,100 @@ void GameScene::Init()
 		const std::wstring exitKey = ResourceKeys::UI_ExitButton;
 		UIM().CreateButtonUI(L"Game.ExitButton", exitKey, exitPos,
 			[]() { PostQuitMessage(0); },
-			{-1,0},
+			{ -1,0 },
 			0.5f
 		);
 		UIM().GetUI(L"Game.ExitButton")->SetDisplayCondition(
 			[this]() -> bool
 			{
-				return gameContext->GetGameState() == GameState::Title;
+             return GetCurrentGameState() == GameStateType::Title;
 			}
 		);
 	}
 
+	stateMachine_.Initialize();
+	
 	StartFadeIn();
 }
+
+bool GameScene::UpdateStateCamera(float deltaTime, const std::string& requestedShot)
+{
+	const bool transitionCompleted = cameraDirector_.Update(deltaTime);
+	if (!requestedShot.empty() && requestedShot != activeCameraShot_ && !cameraDirector_.IsTransitioning())
+	{
+		if (cameraDirector_.PlayShot(requestedShot, 1.2f, Motion::Easing::EaseInOut))
+		{
+			activeCameraShot_ = requestedShot;
+		}
+	}
+	return transitionCompleted;
+}
+
+void GameScene::FocusTutorialCamera(float deltaTime, const Vec3& cameraPositionOffset)
+{
+    const Vec3 playerPosition = gameContext->GetPlayer().GetPosition();
+	const float followAmount = std::clamp(
+		targetCamera_.GetSettings().followSpeed * deltaTime,
+		0.0f,
+		1.0f);
+	const Vec3 desiredPosition = playerPosition + cameraPositionOffset;
+	const Vec3 desiredTarget = playerPosition + Vec3::Up() * 100.0f;
+
+	targetCamera_.SetPosition(
+		targetCamera_.GetPosition() +
+		(desiredPosition - targetCamera_.GetPosition()) * followAmount);
+	targetCamera_.SetTarget(
+		targetCamera_.GetTarget() +
+		(desiredTarget - targetCamera_.GetTarget()) * followAmount);
+}
+
 
 void GameScene::Update(float deltaTime)
 {
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
+
+	// Actor取得
+	auto& player = gameContext->GetPlayer();
+	auto& boss = gameContext->GetBoss();
+	auto& stage = gameContext->GetStage();
+	// モデル取得
+	ModelObject& playerModel = player.GetModelObject();
+	ModelObject& bossModel = boss.GetModelObject();
+
 	// actors
 	{
-		auto& player = gameContext->GetPlayer();
-		auto& boss = gameContext->GetBoss();
-		auto& stage = gameContext->GetStage();
+
+		// stageの中心座標を取得して、playerの更新に渡す
 		const Vec3 stageCenterPosition = stage.GetPosition();
 
-
-		player.Update(deltaTime, stage, stageCenterPosition);
+      // チュートリアルは通常の前後左右移動、バトルはステージ中心を基準にした移動を使う。
+		const bool tutorial = GetCurrentGameState() == GameStateType::Tutorial;
+		player.SetDefMove(tutorial);
+		if (tutorial)
+			player.Update(deltaTime);
+		else
+			player.Update(deltaTime, stage, stageCenterPosition);
 		stage.UpdateAlphaModel(deltaTime, player);
 		boss.Update(deltaTime);
 
-		// playerの位置
-		ModelObject playerModel = player.GetModelObject().WithParentTransform(
-			player.GetPosition(), player.GetRotation());
-
 		// playerとbossの衝突判定
-		const bool touching = Collision::UpdateModelContact(playerModel, boss.GetModelObject());
-		player.GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
+		const bool touching = Collision::UpdateModelContact(playerModel, bossModel);
 		if (touching)
 		{
 			player.TakeDamage();
 		}
+		const bool stageTouching = Collision::UpdateModelContact(playerModel, gameContext->GetRoom().GetModelObject());
+		if (stageTouching)
+		{
+			// プレイヤーがステージに接触している場合の処理
+			player.SetGravityEnabled(false);
+			player.SetVerticalSpeed(0.0f);
+			player.SetGround(true);
+		}
 
 	}
-	// camera
-	{
-		// おわったら次のステートに遷移する
-		if (cameraDirector_.Update(deltaTime))
-		{
-			switch (gameContext->GetGameState())
-			{
-			case GameState::Select:
-				gameContext->GetGameState() = GameState::Tutorial;
-				break;
-			case GameState::Tutorial:
-				gameContext->GetGameState() = GameState::Battle;
-				break;
-			case GameState::Battle:
-				gameContext->GetGameState() = GameState::Title;
-				break;
-			}
-		}
 
-		// 今のゲームステートに応じたショット名を決定する
-		std::string requestedShot;
-		switch (gameContext->GetGameState())
-		{
-		case GameState::Select:
-			requestedShot = "Select";
-			break;
-		case GameState::Tutorial:
-			requestedShot = "Tutorial";
-			break;
-		case GameState::Battle:
-			requestedShot = "Battle";
-			break;
-		}
-
-		// 遷移中でなく、かつ現在のショットと異なる場合にのみ切り替える
-		if (!requestedShot.empty() && requestedShot != activeCameraShot_ && !cameraDirector_.IsTransitioning())
-		{
-			if (cameraDirector_.PlayShot(requestedShot, 1.2f, Motion::Easing::EaseInOut))
-			{
-				activeCameraShot_ = requestedShot;
-			}
-		}
-	}
+    stateMachine_.Tick(deltaTime);
 
 	gameContext->GetEffectManager().Update(deltaTime);
 }

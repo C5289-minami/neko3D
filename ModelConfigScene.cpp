@@ -65,8 +65,8 @@ void ModelConfigScene::Update(float deltaTime)
 	{
 		const auto* owner = MObjs().GetOwner(*selected_);
 		focus = owner
-			? selected_->WithParentTransform(owner->GetPosition(), owner->GetRotation()).position
-			: selected_->position;
+           ? selected_->WithParentTransform(owner->GetPosition(), owner->GetRotation()).GetPosition()
+			: selected_->GetPosition();
 	}
 
 	// --- 右クリックを押している間のみカメラ操作 ---
@@ -144,7 +144,8 @@ void ModelConfigScene::DrawImGui()
 			{
 				if (!object || MObjs().GetOwner(*object) != actor) continue;
 
-				const std::string modelName(object->modelKey.begin(), object->modelKey.end());
+              const auto& modelKey = object->GetModelKey();
+				const std::string modelName(modelKey.begin(), modelKey.end());
 				const std::string label = modelName + " (Local)";
 				ImGui::PushID(object);
 				if (ImGui::Selectable(label.c_str(), selected_ == object))
@@ -172,7 +173,8 @@ void ModelConfigScene::DrawImGui()
 		{
 			if (!object || MObjs().GetOwner(*object)) continue;
 			// modelKeyをUTF-8に変換して表示
-			const std::string modelName(object->modelKey.begin(), object->modelKey.end());
+          const auto& modelKey = object->GetModelKey();
+			const std::string modelName(modelKey.begin(), modelKey.end());
 			ImGui::PushID(object);
 			// 選択中のオブジェクトをハイライト
 			if (ImGui::Selectable(modelName.c_str(), !selectedActor_ && selected_ == object))
@@ -211,11 +213,18 @@ void ModelConfigScene::DrawImGui()
 		ImGui::Separator();
 		// 選択中のオブジェクトのプロパティを編集
 		const bool isLocalModel = MObjs().GetOwner(*selected_) != nullptr;
-		bool changed = EditVector3(isLocalModel ? u8"Local Position" : "Position", selected_->position, 1.0f);
-		changed |= EditVector3("Rotation (rad)", selected_->rotation, 0.01f);
-		changed |= EditVector3("Scale", selected_->scale, 0.1f);
+      Vec3 position = selected_->GetPosition();
+		Vec3 rotation = selected_->GetRotation();
+		Vec3 scale = selected_->GetScale();
+		const bool positionChanged = EditVector3(isLocalModel ? u8"Local Position" : "Position", position, 1.0f);
+		const bool rotationChanged = EditVector3("Rotation (rad)", rotation, 0.01f);
+		const bool scaleChanged = EditVector3("Scale", scale, 0.1f);
+		const bool changed = positionChanged || rotationChanged || scaleChanged;
+		if (positionChanged) selected_->SetPosition(position);
+		if (rotationChanged) selected_->SetRotation(rotation);
+		if (scaleChanged) selected_->SetScale(scale);
 		// Scaleが0以下になった場合は警告を表示
-		if (changed && (selected_->scale.x <= 0.0f || selected_->scale.y <= 0.0f || selected_->scale.z <= 0.0f))
+        if (changed && (scale.x <= 0.0f || scale.y <= 0.0f || scale.z <= 0.0f))
 			status_ = u8"Scaleは0より大きい値にしてください。";
 		// 保存ボタン
 		if (ImGui::Button(u8"選択中を保存"))
@@ -241,7 +250,7 @@ void ModelConfigScene::RenderDepth() const
 	{
 		if (!object) continue;
 
-		if (object->modelType_ == ModelType::Bone)
+      if (object->GetModelType() == ModelType::Bone)
 			modelToonRenderer_.SetVertexShader(ModelType::Bone);
 		else
 			modelToonRenderer_.SetVertexShader(ModelType::Model);
@@ -306,7 +315,7 @@ void ModelConfigScene::DrawScene(bool toonEnabled) const
 		const ModelObject drawObject = owner
 			? object->WithParentTransform(owner->GetPosition(), owner->GetRotation())
 			: *object;
-		drawActor(drawObject, drawObject.modelType_);
+       drawActor(drawObject, drawObject.GetModelType());
 	}
 
 	modelToonRenderer_.EndPass();

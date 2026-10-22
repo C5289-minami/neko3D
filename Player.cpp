@@ -15,20 +15,20 @@
 
 
 Player::Player()
-  : ActorBase("Player"), stateMachine_(*this)
+	: ActorBase("Player"), stateMachine_(*this)
 {
-   model_.SetOwner(*this);
+	model_.SetOwner(*this);
 }
 
 
 void Player::Init()
 {
-	model_.modelKey = ResourceKeys::Model_Paladin;
-	const int modelHandle = RM().GetModel(model_.modelKey);
+	model_.SetModelKey(ResourceKeys::Model_Paladin);
+	const int modelHandle = RM().GetModel(model_.GetModelKey());
 	if (modelHandle < 0) return;
 
-	model_.modelType_ = ModelType::Bone;
-	model_.scale = { 100.0f, 100.0f, 100.0f };
+	model_.SetModelType(ModelType::Bone);
+	model_.SetScale({ 100.0f, 100.0f, 100.0f });
 
 	Reset();
 }
@@ -61,10 +61,9 @@ void Player::Reset()
 
 	stateMachine_.Initialize();
 	// 更新を止めても描画できるように初期ポーズを用意する
-	animation_.Play3D(RM().GetModel(model_.modelKey), currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
+	animation_.Play3D(RM().GetModel(model_.GetModelKey()), currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
 	animation_.Update(0.0f);
 }
-
 
 void Player::Update(float deltaTime)
 {
@@ -86,7 +85,7 @@ void Player::UpdateMovement(float deltaTime)
 		}
 	}
 	if (touchingWall_ && gravityEnabled_ && !IsDead() && !IsDamaging() &&
-        GetCurrentState() != PlayerStateType::WallJump &&
+		GetCurrentState() != PlayerStateType::WallJump &&
 		(NearTheWall || (!isGrounded_ && !input_.isMoving)))
 	{
 		stateMachine_.ChangeState(PlayerStateType::Climbing);
@@ -94,8 +93,23 @@ void Player::UpdateMovement(float deltaTime)
 
 	stateMachine_.Tick(deltaTime);
 
-	// 中心がどっちにあるか調べる。高さはここでは考えない
-	PlayerDiagonalMove(deltaTime, position_, movementCenter_);
+ if (isdefMove_)
+	{
+		Vec3 moveDirection = input_.moveDir;
+		moveDirection.y = 0.0f;
+		if (moveDirection.LengthSq() > 0.0f)
+		{
+			moveDirection = moveDirection.Normalized();
+			position_.x += moveDirection.x * Const::PLAYER_MOVE_SPEED * deltaTime;
+			position_.z += moveDirection.z * Const::PLAYER_MOVE_SPEED * deltaTime;
+			TurnTowards(moveDirection, deltaTime);
+		}
+	}
+	else
+	{
+		// 中心がどっちにあるか調べる。高さはここでは考えない
+		PlayerDiagonalMove(deltaTime, position_, movementCenter_);
+	}
 	// 横移動は PlayerDiagonalMove、上下移動は velocity_.y にまとめる。
 
 	if (gravityEnabled_ && GetCurrentState() != PlayerStateType::Climbing)
@@ -105,7 +119,7 @@ void Player::UpdateMovement(float deltaTime)
 	position_.y += velocity_.y * deltaTime;
 	isGrounded_ = false;
 
-	const int modelHandle = RM().GetModel(model_.modelKey);
+	const int modelHandle = RM().GetModel(model_.GetModelKey());
 	animation_.Play3D(modelHandle, currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
 	animation_.Update(deltaTime);
 }
@@ -123,7 +137,7 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 	UpdateMovement(deltaTime);
 
 	// ステージの柱に沿ってスライドさせる
-    position_ = stage.SlideAlongPillars(oldPosition, position_, touchingPillar);
+	position_ = stage.SlideAlongPillars(oldPosition, position_, touchingPillar);
 
 	// 落下中のみ床面に合わせ、このフレームの落下距離もレイの長さに含める。
 	if (velocity_.y <= 0.0f)
@@ -159,16 +173,16 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 		}
 	}
 
-    // 足元を基準にしたカプセルで、補正後の接触も確認する。
-    const Vec3 capsuleStart = GetPosition() + Vec3::Up() * Const::PLAYER_RADIUS;
-    const Vec3 capsuleEnd = GetPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
-    touchingPillar |= stage.IsHitPillar(capsuleStart, capsuleEnd, Const::PLAYER_RADIUS);
+	// 足元を基準にしたカプセルで、補正後の接触も確認する。
+	const Vec3 capsuleStart = GetPosition() + Vec3::Up() * Const::PLAYER_RADIUS;
+	const Vec3 capsuleEnd = GetPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
+	touchingPillar |= stage.IsHitPillar(capsuleStart, capsuleEnd, Const::PLAYER_RADIUS);
 
-    if (touchingPillar && !wasTouchingPillar_)
-    {
-        std::cout << "Hit: Player touched a pillar." << std::endl;
-    }
-    wasTouchingPillar_ = touchingPillar;
+	if (touchingPillar && !wasTouchingPillar_)
+	{
+		std::cout << "Hit: Player touched a pillar." << std::endl;
+	}
+	wasTouchingPillar_ = touchingPillar;
 
 	Sound3D::SetListener(
 		GetPosition(),
@@ -184,7 +198,7 @@ void Player::Draw() const
 {
 	const ModelObject worldModel = model_.WithParentTransform(GetPosition(), GetRotation());
 	worldModel.ApplyCollisionColor();
-	animation_.Draw3D(worldModel.position, worldModel.scale, worldModel.rotation);
+	animation_.Draw3D(worldModel.GetPosition(), worldModel.GetScale(), worldModel.GetRotation());
 }
 
 
@@ -247,14 +261,14 @@ void Player::StopMove()
 
 Vec3 Player::GetWorldMoveDirection(const Vec3& moveDir) const//Plyaerがどこを向いているかのワールド座標系での移動方向を取得する
 {
-    Vec3 forward = movementCenter_ - GetPosition();
-    forward.y = 0.0f;
+	Vec3 forward = movementCenter_ - GetPosition();
+	forward.y = 0.0f;
 
-    if (forward.LengthSq() < 0.000001f)
-        forward = Vec3(std::sin(GetYaw()), 0.0f, std::cos(GetYaw()));
-    else
-        forward = forward.Normalized();
-    const Vec3 right{ forward.z, 0.0f, -forward.x };
+	if (forward.LengthSq() < 0.000001f)
+		forward = Vec3(std::sin(GetYaw()), 0.0f, std::cos(GetYaw()));
+	else
+		forward = forward.Normalized();
+	const Vec3 right{ forward.z, 0.0f, -forward.x };
 
 	return (forward * moveDir.z + right * moveDir.x).Normalized();
 	//プレイヤーの移動方向をワールド座標系で取得するための関数です。
@@ -352,14 +366,14 @@ void Player::PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& mo
 {
 	if (deltaTime <= 0.0f) return;
 
-    if (GetCurrentState() == PlayerStateType::WallJump)
-    {
-        // 壁を蹴った方向を保ち、入力や足場の中心に左右されず壁から離れる。
-        playerPos.x += velocity_.x * deltaTime;
-        playerPos.z += velocity_.z * deltaTime;
-        TurnTowards(Vec3(velocity_.x, 0.0f, velocity_.z), deltaTime);
-        return;
-    }
+	if (GetCurrentState() == PlayerStateType::WallJump)
+	{
+		// 壁を蹴った方向を保ち、入力や足場の中心に左右されず壁から離れる。
+		playerPos.x += velocity_.x * deltaTime;
+		playerPos.z += velocity_.z * deltaTime;
+		TurnTowards(Vec3(velocity_.x, 0.0f, velocity_.z), deltaTime);
+		return;
+	}
 	if (moveInput_.LengthSq() == 0.0f)
 	{
 		return;
@@ -390,6 +404,9 @@ void Player::PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& mo
 	}
 
 	const float distance = moveSpeed * deltaTime;
+
+
+
 	const float nextRadius = (std::max)(1.0f, radius - input.z * distance);
 	const float angle = input.x * distance / (std::max)(1.0f, radius);
 	const Vec3 outward = -forward * std::cos(angle) + right * std::sin(angle);
@@ -437,15 +454,15 @@ void Player::StartLungingJump(const Vec3& moveDir)
 
 void Player::StartWallJump()
 {
-    const Vec3 direction = Vec3(wallNormal_.x, 0.0f, wallNormal_.z).Normalized();
-    if (!gravityEnabled_ || !touchingWall_ || direction.LengthSq() == 0.0f) return;
+	const Vec3 direction = Vec3(wallNormal_.x, 0.0f, wallNormal_.z).Normalized();
+	if (!gravityEnabled_ || !touchingWall_ || direction.LengthSq() == 0.0f) return;
 
-    StopMove();
-    // LungingJumpと同じ強さで、接触中の壁から外向きに跳ぶ。
-    velocity_.x = direction.x * lungingMoveSpeed_;
-    velocity_.z = direction.z * lungingMoveSpeed_;
-    velocity_.y = lungingJumpSpeed_;
-    isGrounded_ = false;
+	StopMove();
+	// LungingJumpと同じ強さで、接触中の壁から外向きに跳ぶ。
+	velocity_.x = direction.x * lungingMoveSpeed_;
+	velocity_.z = direction.z * lungingMoveSpeed_;
+	velocity_.y = lungingJumpSpeed_;
+	isGrounded_ = false;
 }
 
 void Player::JumpAction()

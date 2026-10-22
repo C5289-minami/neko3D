@@ -30,7 +30,7 @@ void StatusTest::Init()
 	shaderEffects_.GetSettings().toonEnabled = true;
 	shaderEffects_.GetSettings().outlineEnabled = true;
 
-	testModel_.modelKey = ResourceKeys::Model_Test;
+ testModel_.SetModelKey(ResourceKeys::Model_Test);
 
  gameContext->GetPlayer().Init();
 	gameContext->GetPlayer().Reset();
@@ -46,7 +46,7 @@ void StatusTest::Update(float deltaTime)
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
 	float scale = 1.0f;
-	testModel_.scale = { scale, scale, scale };
+ testModel_.SetScale({ scale, scale, scale });
 
 	// --- 右クリックを押している間のみカメラ操作 ---
 	if ((DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)

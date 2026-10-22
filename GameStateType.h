@@ -1,7 +1,6 @@
 #pragma once
 
-// ¡‚ÌƒQ[ƒ€‚Ìó‘Ô
-enum class GameState
+enum class GameStateType
 {
 	Title,
 	Select,
@@ -9,4 +8,3 @@ enum class GameState
 	Battle,
 	Results,
 };
-

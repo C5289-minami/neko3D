@@ -28,15 +28,15 @@ namespace
 void Stage::Init()
 {
     //int modelHandle = DxLib::MV1DuplicateModel(RM().GetModel(ResourceKeys::Model_Stage));
-    stagePillars_[0].modelKey = ResourceKeys::Model_hashira_l;
-    stagePillars_[1].modelKey = ResourceKeys::Model_hashira_m;
-    stagePillars_[2].modelKey = ResourceKeys::Model_hashira_s;
+    stagePillars_[0].SetModelKey(ResourceKeys::Model_hashira_l);
+    stagePillars_[1].SetModelKey(ResourceKeys::Model_hashira_m);
+    stagePillars_[2].SetModelKey(ResourceKeys::Model_hashira_s);
 
-    stageModels_[0].modelKey = ResourceKeys::Model_stand_l;
-    stageModels_[1].modelKey = ResourceKeys::Model_stand_m;
+    stageModels_[0].SetModelKey(ResourceKeys::Model_stand_l);
+    stageModels_[1].SetModelKey(ResourceKeys::Model_stand_m);
 
     // 地面の当たり判定に使うモデル
-    stageModel_.modelKey = ResourceKeys::Model_StageFbx;
+    stageModel_.SetModelKey(ResourceKeys::Model_StageFbx);
 
     for (auto& model : stagePillars_) model.SetOwner(*this);
     for (auto& model : stageModels_) model.SetOwner(*this);
@@ -49,7 +49,7 @@ void Stage::SetupCollisionInfo()//当たり判定のセットアップ
 {
     const auto setup = [this](const ModelObject& model)//ラムダ式で書き換えれるように
     {
-        int handle = RM().GetModel(model.modelKey);
+        int handle = RM().GetModel(model.GetModelKey());
         if (handle < 0) return -1;
 
         // 描画前でも、保存済みの配置・回転・拡大率で判定できるようにする。
@@ -79,7 +79,7 @@ void Stage::RefreshCollisionInfo()
     {
         if (handle < 0) return -1;
         // モデルが解放・差し替えされていたら、古いハンドルは使わない。
-        if (RM().GetModel(model.modelKey) != handle) return -1;
+        if (RM().GetModel(model.GetModelKey()) != handle) return -1;
 
         model.WithParentTransform(GetPosition(), GetRotation()).Draw();
 
@@ -339,10 +339,10 @@ void Stage::ResetAlphaModel(const Vec3& playerPosition)
     alphaModelReady_ = false;
 
     // ResourceKeys
-    alphaModel_.modelKey = ResourceKeys::Model_StageAlpha;
-    alphaModel_.scale = { AlphaStageScale, AlphaStageScale, AlphaStageScale };
-    alphaModel_.rotation = {};
-    alphaModel_.center = {};
+    alphaModel_.SetModelKey(ResourceKeys::Model_StageAlpha);
+    alphaModel_.SetScale({ AlphaStageScale, AlphaStageScale, AlphaStageScale });
+    alphaModel_.SetRotation({});
+    alphaModel_.SetCenter({});
     alphaModel_.SetAlpha(1.0f);
 
     const int handle = RM().GetModel(ResourceKeys::Model_StageAlpha);
@@ -350,7 +350,7 @@ void Stage::ResetAlphaModel(const Vec3& playerPosition)
 
     MV1SetPosition(handle, VGet(0.0f, 0.0f, 0.0f));
     MV1SetRotationXYZ(handle, VGet(0.0f, 0.0f, 0.0f));
-    MV1SetScale(handle, DxConv::ToVECTOR(alphaModel_.scale));// スケールを適用してから範囲を取得するため、先にスケールをセットする。
+    MV1SetScale(handle, DxConv::ToVECTOR(alphaModel_.GetScale()));// スケールを適用してから範囲を取得するため、先にスケールをセットする。
     if (MV1SetupReferenceMesh(handle, -1, TRUE, TRUE) < 0) return;
 
     MV1RefreshReferenceMesh(handle, -1, TRUE, TRUE);
@@ -366,11 +366,11 @@ void Stage::ResetAlphaModel(const Vec3& playerPosition)
     if (!hasVertices) return;
 
    //Playerの頭の上に出てくる
-    alphaModel_.position = {
+    alphaModel_.SetPosition({
         playerPosition.x - (minimum.x + maximum.x) * 0.5f,
         playerPosition.y + Const::PLAYER_HEIGHT + AlphaStageHeadClearance - minimum.y,
         playerPosition.z - (minimum.z + maximum.z) * 0.5f
-    };
+    });
 
     alphaModelReady_ = true;
 }
