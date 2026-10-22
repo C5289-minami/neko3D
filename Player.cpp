@@ -42,6 +42,7 @@ void Player::Reset()
 
 	touchingWall_ = false;
 	wallNormal_ = {};
+    wallTopY_ = 0.0f;
 
 	model_.collisionHighlighted = false;
 	ultimateGauge_ = 0.0f;
@@ -131,7 +132,8 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 
 	input_.Update();
 	// 今フレームの入力に合う側面を選び、柱のどの方向からでも登れるようにする。
-	touchingWall_ = stage.FindPillarWall(GetPosition(), wallNormal_, GetWorldMoveDirection(input_.moveDir));
+	touchingWall_ = stage.FindPillarWall(GetPosition(), wallNormal_, GetWorldMoveDirection(input_.moveDir),
+        &wallTopY_, GetCurrentState() == PlayerStateType::Climbing);
 	UpdateMovement(deltaTime);
 
 	// ステージの柱に沿ってスライドさせる
@@ -159,7 +161,10 @@ void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCen
 			rayDistance,
 			hit))
 		{
-			if (position_.y - hit.point.y <= groundSnapDistance)
+            // 頂上で高さを保持している間は、下の足場への吸着でも位置を下げない。
+            const bool holdingClimbTop = GetCurrentState() == PlayerStateType::Climbing && IsNearWallTop();
+			if (position_.y - hit.point.y <= groundSnapDistance &&
+                (!holdingClimbTop || hit.point.y >= position_.y))
 			{
 				position_.y = hit.point.y;
 				velocity_.y = 0.0f;
