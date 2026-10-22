@@ -329,16 +329,13 @@ void RoomTestScene::RenderDepth() const
 		activeCamera->ApplyPose(
 			cameraDirector_.GetCurrentPose());
 	}
-	// Boneなしシェーダー
-	modelToonRenderer_.SetVertexShader(ModelType::Model);
-	room.Draw();
-	gameContext->GetStage().Draw();
-	boss.Draw();
 
-	// Bone対応の頂点シェーダー
-	modelToonRenderer_.SetVertexShader(ModelType::Bone);
+	modelToonRenderer_.DrawDepth(room.GetModelObject());
+	modelToonRenderer_.DrawDepth(stage.GetModelObject());
+	modelToonRenderer_.DrawDepth(stage.GetAlphaModelObject());
+	modelToonRenderer_.DrawDepth(player.GetModelObject());
+	modelToonRenderer_.DrawDepth(boss.GetModelObject());
 
-	gameContext->GetPlayer().Draw();
 
 }
 
@@ -367,7 +364,7 @@ void RoomTestScene::DrawScene(bool toonEnabled) const
 	// トゥーン描画開始
 	modelToonRenderer_.BeginPass();
 
-	const auto drawActor = [this](const ModelObject& model, ModelType type)
+	const auto drawActor = [this](const ModelObject& model)
 		{
 			if (model.collisionHighlighted)
 			{
@@ -379,21 +376,21 @@ void RoomTestScene::DrawScene(bool toonEnabled) const
 			}
 			else
 			{
-				modelToonRenderer_.Draw(model, type);
+				modelToonRenderer_.Draw(model);
 			}
 		};
 	const auto& player = gameContext->GetPlayer();
 	const ModelObject playerModel = player.GetModelObject();
-	drawActor(playerModel, ModelType::Bone);
-	drawActor(room.GetModelObject(), ModelType::Model);
-	drawActor(gameContext->GetStage().GetModelObject(), ModelType::Model);
+	drawActor(playerModel);
+	drawActor(room.GetModelObject());
+	drawActor(gameContext->GetStage().GetModelObject());
 	for (const auto& pillar : gameContext->GetStage().GetPillarModelObjects())
 	{
-		drawActor(pillar, ModelType::Model);
+		drawActor(pillar);
 	}
 	for (const auto& model : gameContext->GetStage().GetStageModelObjects())
 	{
-		drawActor(model, ModelType::Model);
+		drawActor(model);
 	}
 
 	modelToonRenderer_.EndPass();

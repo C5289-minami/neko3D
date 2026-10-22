@@ -1,5 +1,4 @@
-﻿
-#include "ModelConfigScene.h"
+﻿#include "ModelConfigScene.h"
 
 #include "ModelObjectManager.h"
 #include "SceneManager.h"
@@ -281,7 +280,7 @@ void ModelConfigScene::DrawScene(bool toonEnabled) const
 	// トゥーン描画開始
 	modelToonRenderer_.BeginPass();
 
-	const auto drawActor = [this](const ModelObject& model, ModelType type)
+	const auto drawActor = [this](const ModelObject& model)
 		{
 			if (model.collisionHighlighted)
 			{
@@ -293,7 +292,7 @@ void ModelConfigScene::DrawScene(bool toonEnabled) const
 			}
 			else
 			{
-				modelToonRenderer_.Draw(model, type);
+				modelToonRenderer_.Draw(model);
 			}
 		};
 
@@ -304,7 +303,7 @@ void ModelConfigScene::DrawScene(bool toonEnabled) const
 		const ModelObject drawObject = owner
 			? object->WithParentTransform(owner->GetPosition(), owner->GetRotation())
 			: *object;
-       drawActor(drawObject, drawObject.GetModelType());
+		drawActor(drawObject);
 	}
 
 	modelToonRenderer_.EndPass();
