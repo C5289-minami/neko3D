@@ -1,4 +1,4 @@
-// =============================
+﻿// =============================
 // Scenes/Game/GameTestScene.cpp
 // =============================
 #include "GameTestScene.h"
@@ -11,10 +11,10 @@
 #endif
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
+
+
 void GameTestScene::Init()
 {
-
-
 	gameContext->Reset();
 	playerCamera_.Reset();
 #ifndef NDEBUG
@@ -27,13 +27,13 @@ void GameTestScene::Init()
 	ToonSettingsManager::Load();
 	OutlineSettingsManager::Load();
 
-	// �g�D�[���`��ɕK�v�ȃV�F�[�_�[�Ɛݒ�o�b�t�@�[��������
+	// トゥーン描画に必要なシェーダーと設定バッファーを初期化
 	if (!modelToonRenderer_.Init())
-		DxPlus::Utils::FatalError(L"modelToonRenderer�̏��������s");
+		DxPlus::Utils::FatalError(L"modelToonRendererの初期化失敗");
 	if (!shaderEffects_.Init(DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT))
-		DxPlus::Utils::FatalError(L"shaderEffects�̏��������s");
+		DxPlus::Utils::FatalError(L"shaderEffectsの初期化失敗");
 
-	// toon�`��ƃA�E�g���C���`���L���ɂ���
+	// toon描画とアウトライン描画を有効にする
 	shaderEffects_.GetSettings().toonEnabled = true;
 	shaderEffects_.GetSettings().outlineEnabled = true;
 
@@ -69,7 +69,7 @@ void GameTestScene::Update(float deltaTime)
 	{
 		freeCamera_.FocusAt(gameContext->GetPlayer().GetPosition());
 	}
-	DxPlus::Debug::SetString(L" R: Transform���Z�b�g, F: FreeCamera���v���C���[�Ƀt�H�[�J�X");
+	DxPlus::Debug::SetString(L" R: Transformリセット, F: FreeCameraをプレイヤーにフォーカス");
 
 
 
@@ -118,7 +118,7 @@ void GameTestScene::Update(float deltaTime)
 	}
 
 #ifndef NDEBUG
-	// ���l���͒��̓V�[���؂�ւ��̃L�[�𖳎�����
+	// 数値入力中はシーン切り替えのキーを無視する
 	if (ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard) return;
 #endif
 
@@ -128,7 +128,7 @@ void GameTestScene::Update(float deltaTime)
 	{
 		Scene* resultScene = SceneManager::GetInstance().GetScene(SceneID::Result);
 		SetNextScene(resultScene);
-		finished = true;    // �t�F�[�h�����̏ꍇ�� finished �� true �ɂ��Ă����K�v����
+		finished = true;    // フェード無しの場合は finished を true にしておく必要あり
 		return;
 	}
 }
@@ -213,7 +213,7 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	const auto& grid = gameContext->GetGrid();
 	const auto& room = gameContext->GetRoom();
 
-	// �g�D�[���V�F�[�_�[���g��Ȃ��ꍇ
+	// トゥーンシェーダーを使わない場合
 	if (!toonEnabled)
 	{
 		SetUsePixelShader(-1);
@@ -228,7 +228,7 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 		return;
 	}
 
-	// �g�D�[���`��J�n
+	// トゥーン描画開始
 	modelToonRenderer_.BeginPass();
 
 	const auto drawActor = [this](const ModelObject& model)
@@ -249,7 +249,7 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
 		player.GetPosition(), player.GetRotation());
 	drawActor(playerModel);
-	// boss�̃��f����boss���̂̈ʒu�Ɖ�]��K�p���ĕ`�悷��
+	// bossのモデルにboss自体の位置と回転を適用して描画する
 	drawActor(boss.GetModelObject().WithParentTransform(
 		boss.GetPosition(), boss.GetRotation()));
 	drawActor(stage.GetModelObject().WithParentTransform(

@@ -466,16 +466,32 @@ void Player::StartLungingJump(const Vec3& moveDir)
 	isGrounded_ = false;
 }
 
+void Player::SetWallJumpMoveSpeed(float value)
+{
+    if (std::isfinite(value)) wallJumpMoveSpeed_ = (std::max)(0.0f, value);
+}
+
+void Player::SetWallJumpSpeed(float value)
+{
+    if (std::isfinite(value)) wallJumpSpeed_ = (std::max)(0.0f, value);
+}
+
+void Player::ResetWallJumpSpeeds()
+{
+    wallJumpMoveSpeed_ = Const::PLAYER_WALL_JUMP_MOVE_SPEED;
+    wallJumpSpeed_ = Const::PLAYER_WALL_JUMP_SPEED;
+}
+
 void Player::StartWallJump()
 {
 	const Vec3 direction = Vec3(wallNormal_.x, 0.0f, wallNormal_.z).Normalized();
 	if (!gravityEnabled_ || !touchingWall_ || direction.LengthSq() == 0.0f) return;
 
 	StopMove();
-	// LungingJumpと同じ強さで、接触中の壁から外向きに跳ぶ。
-	velocity_.x = direction.x * lungingMoveSpeed_;
-	velocity_.z = direction.z * lungingMoveSpeed_;
-	velocity_.y = lungingJumpSpeed_;
+	// WallJump専用の速度とジャンプ力で、接触中の壁から外向きに跳ぶ。
+	velocity_.x = direction.x * wallJumpMoveSpeed_;
+	velocity_.z = direction.z * wallJumpMoveSpeed_;
+	velocity_.y = wallJumpSpeed_;
 	isGrounded_ = false;
 }
 

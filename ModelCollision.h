@@ -10,15 +10,15 @@ struct ModelObject;
 class ModelCollision
 {
 public:
-    enum class Surface//表面
+    // 登録したモデルに使う判定を選ぶ。
+    enum class Surface
     {
-        Ground,        // 着地だけに使う床・足場。
-        Wall,          // 着地と、側面に沿う滑りに使う壁。
-        ClimbableWall  // 壁の判定に加えて、登る面も探せる柱など。
+        Floor,  // 床。着地用の判定。
+        Wall,   // 壁。側面で移動を止める・滑らせる。登れない。
+        Pillar  // 柱。側面を登ることができ、上にも乗れる。
     };
 
     // 動く側の体の大きさ。プレイヤー以外にも同じ判定を使える。
-    // 旧名: Body
     struct ModelOb
     {
         float radius{};
@@ -32,15 +32,18 @@ public:
     ModelCollision(const ModelCollision&) = delete;
     ModelCollision& operator=(const ModelCollision&) = delete;
 
-    // 1. モデルごとに、床・壁・登れる壁のどれとして使うか登録する。
-    void AddModel(const ModelObject& model, Surface surface = Surface::Wall);
+    // 判定の種類を1つ指定して登録する。同じモデル・同じ種類の重複登録はしない。
+    //  AddModel(floor, Surface::Floor);
+    //  AddModel(wall, Surface::Wall);
+    //  AddModel(pillar, Surface::Pillar);
+    void AddModel(const ModelObject& model, Surface surface);
     void Clear();
 
-    // 2. 判定前に位置・回転・拡大率を反映する。描画する必要はない。
+    // 判定前に位置・回転・拡大率を反映する。描画する必要はない。
     // Player::Update は、この更新もまとめて呼ぶ。
     bool Refresh();
 
-    // 3. 必要な判定を呼ぶ。座標の変更や登る状態への遷移は呼び出し側が行う。
+    //必要な判定を呼ぶ。座標の変更や登る状態への遷移は呼び出し側が行う。
     bool IsTouchingWalls(const Vec3& feetPosition, const ModelOb& modelOb) const;
     Vec3 SlideAlongWalls(const Vec3& oldPosition, const Vec3& desiredPosition,
         const ModelOb& modelOb, bool& touched) const;
@@ -48,16 +51,21 @@ public:
         const Vec3& moveDirection = {}, float* wallTopY = nullptr,
         float detectionMargin = 0.0f, float topHoldDistance = 0.0f) const;
 
+    // 種類を問わず全モデルを調べる、汎用のレイ判定。
     bool Raycast(const Vec3& start, const Vec3& end, Physics::RayHit& hit) const;
+    // 着地用。床と柱を調べる。壁は対象外。
     bool RaycastDown(const Vec3& origin, float maxDistance, Physics::RayHit& hit) const;
     // Refresh 後の、拡大縮小・回転を含めたモデルの幅・高さ・奥行き。
     Vec3 GetSize(const ModelObject& model) const;
 
 private:
+    bool RaycastModels(const Vec3& start, const Vec3& end, Physics::RayHit& hit,
+        bool forLanding) const;
+
     struct Entry
     {
         const ModelObject* model{};
-        Surface surface{ Surface::Wall };
+        Surface surface{ Surface::Floor };
         int sourceHandle{ -1 };
         int handle{ -1 }; // 同じモデルを複数配置しても混ざらない、判定専用の複製。
     };

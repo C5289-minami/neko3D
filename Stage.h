@@ -33,6 +33,7 @@ public:
     // void GetCollisionModelHandles(std::vector<int>& handles) const;//modelの判定をまとめてやる
 
     // プレイヤーのカプセルと柱L・M・Sのメッシュを判定する。
+	
     // bool IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float radius) const;
     // bool FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal, const Vec3& moveDirection = Vec3{},
     // float* wallTopY = nullptr, bool keepTopContact = false) const;

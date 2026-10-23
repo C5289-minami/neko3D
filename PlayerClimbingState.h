@@ -2,7 +2,7 @@
 #include "PlayerBaseState.h"
 #include "Vector3.h"
 
-// 壁を押し続けると登る。入力をやめると滑り落ちるが、頂上付近では高さを保つ。
+// 壁を押し続けると登る。移動入力を離すと、頂上付近でもゆっくり滑り落ちる。
 class PlayerClimbingState : public PlayerBaseState
 {
 public:

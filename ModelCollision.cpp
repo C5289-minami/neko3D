@@ -13,12 +13,11 @@ ModelCollision::~ModelCollision()
 
 void ModelCollision::AddModel(const ModelObject& model, Surface surface)
 {
-    // 同じオブジェクトの再登録は種類の変更として扱う。
+    // 同じモデルでも種類ごとに別登録し、同じ種類の重複だけを除く。
     for (auto& entry : models_)
     {
-        if (entry.model == &model)
+        if (entry.model == &model && entry.surface == surface)
         {
-            entry.surface = surface;
             return;
         }
     }
@@ -117,7 +116,7 @@ bool ModelCollision::IsTouchingWalls(const Vec3& feetPosition, const ModelOb& mo
 
     for (const auto& entry : models_)
     {
-        if (entry.handle < 0 || entry.surface == Surface::Ground) continue;
+        if (entry.handle < 0 || entry.surface == Surface::Floor) continue;
 		// 壁や登れる壁の判定は体のカプセルとモデルの衝突を調べる
         const auto result = MV1CollCheck_Capsule(entry.handle, -1,
             DxConv::ToVECTOR(start), DxConv::ToVECTOR(end), modelOb.radius);
@@ -129,13 +128,21 @@ bool ModelCollision::IsTouchingWalls(const Vec3& feetPosition, const ModelOb& mo
     return false;
 }
 
-bool ModelCollision::Raycast(const Vec3& start, const Vec3& end, Physics::RayHit& hit) const// すべての登録モデルに対してレイキャストを行い、最も近い衝突を返す
+bool ModelCollision::Raycast(const Vec3& start, const Vec3& end, Physics::RayHit& hit) const
+{
+    return RaycastModels(start, end, hit, false);
+}
+
+// 対象のモデルに絞ってから、最も近い衝突を選ぶ。
+bool ModelCollision::RaycastModels(const Vec3& start, const Vec3& end, Physics::RayHit& hit,
+    bool forLanding) const
 {
     bool found = false;
 
     for (const auto& entry : models_)
     {
         if (entry.handle < 0) continue;
+        if (forLanding && entry.surface == Surface::Wall) continue;
 
         Physics::RayHit modelHit{};
         
@@ -153,7 +160,7 @@ bool ModelCollision::Raycast(const Vec3& start, const Vec3& end, Physics::RayHit
 bool ModelCollision::RaycastDown(const Vec3& origin, float maxDistance, Physics::RayHit& hit) const
 {
     if (maxDistance <= 0.0f) return false;
-    return Raycast(origin, origin - Vec3::Up() * maxDistance, hit);
+    return RaycastModels(origin, origin - Vec3::Up() * maxDistance, hit, true);
 }
 
 Vec3 ModelCollision::GetSize(const ModelObject& model) const
@@ -215,7 +222,7 @@ bool ModelCollision::FindWall(const Vec3& feetPosition, const ModelOb& modelOb, 
 
     for (const auto& entry : models_)
     {
-        if (entry.handle < 0 || entry.surface != Surface::ClimbableWall) continue;
+        if (entry.handle < 0 || entry.surface != Surface::Pillar) continue;
         const int handle = entry.handle;
 
         const auto result = MV1CollCheck_Capsule(handle, -1,
@@ -306,7 +313,7 @@ Vec3 ModelCollision::SlideAlongWalls(const Vec3& oldPosition, const Vec3& desire
 
         for (const auto& entry : models_)
         {
-            if (entry.handle < 0 || entry.surface == Surface::Ground) continue;
+            if (entry.handle < 0 || entry.surface == Surface::Floor) continue;
             const int handle = entry.handle;
 
             const auto result = MV1CollCheck_Capsule(handle, -1,
