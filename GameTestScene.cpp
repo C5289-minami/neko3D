@@ -27,13 +27,13 @@ void GameTestScene::Init()
 	ToonSettingsManager::Load();
 	OutlineSettingsManager::Load();
 
-	// ƒgƒD[ƒ“•`‰æ‚É•K—v‚ÈƒVƒF[ƒ_[‚Æİ’èƒoƒbƒtƒ@[‚ğ‰Šú‰»
+	// ï¿½gï¿½Dï¿½[ï¿½ï¿½ï¿½`ï¿½ï¿½É•Kï¿½vï¿½ÈƒVï¿½Fï¿½[ï¿½_ï¿½[ï¿½Æİ’ï¿½oï¿½bï¿½tï¿½@ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (!modelToonRenderer_.Init())
-		DxPlus::Utils::FatalError(L"modelToonRenderer‚Ì‰Šú‰»¸”s");
+		DxPlus::Utils::FatalError(L"modelToonRendererï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½s");
 	if (!shaderEffects_.Init(DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT))
-		DxPlus::Utils::FatalError(L"shaderEffects‚Ì‰Šú‰»¸”s");
+		DxPlus::Utils::FatalError(L"shaderEffectsï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½s");
 
-	// toon•`‰æ‚ÆƒAƒEƒgƒ‰ƒCƒ“•`‰æ‚ğ—LŒø‚É‚·‚é
+	// toonï¿½`ï¿½ï¿½ÆƒAï¿½Eï¿½gï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½`ï¿½ï¿½ï¿½Lï¿½ï¿½ï¿½É‚ï¿½ï¿½ï¿½
 	shaderEffects_.GetSettings().toonEnabled = true;
 	shaderEffects_.GetSettings().outlineEnabled = true;
 
@@ -69,7 +69,7 @@ void GameTestScene::Update(float deltaTime)
 	{
 		freeCamera_.FocusAt(gameContext->GetPlayer().GetPosition());
 	}
-	DxPlus::Debug::SetString(L" R: TransformƒŠƒZƒbƒg, F: FreeCamera‚ğƒvƒŒƒCƒ„[‚ÉƒtƒH[ƒJƒX");
+	DxPlus::Debug::SetString(L" R: Transformï¿½ï¿½ï¿½Zï¿½bï¿½g, F: FreeCameraï¿½ï¿½ï¿½vï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½[ï¿½Éƒtï¿½Hï¿½[ï¿½Jï¿½X");
 
 
 
@@ -89,8 +89,11 @@ void GameTestScene::Update(float deltaTime)
 		const Vec3 stageCenterPosition = stage.GetPosition();
 
 
-		player.Update(deltaTime, stage, stageCenterPosition);
+		// player.Update(deltaTime, stage, stageCenterPosition);
+		
+		player.Update(deltaTime, stage.GetCollision(), stageCenterPosition);
 		stage.UpdateAlphaModel(deltaTime, player);
+
 		boss.Update(deltaTime);
 		ModelObject playerModel = player.GetModelObject().WithParentTransform(
 			player.GetPosition(), player.GetRotation());
@@ -100,6 +103,7 @@ void GameTestScene::Update(float deltaTime)
 		{
 			player.TakeDamage();
 		}
+
 
 		playerCamera_.Update(player.GetPosition(), boss.GetPosition(), deltaTime);
 
@@ -114,7 +118,7 @@ void GameTestScene::Update(float deltaTime)
 	}
 
 #ifndef NDEBUG
-	// ”’l“ü—Í’†‚ÍƒV[ƒ“Ø‚è‘Ö‚¦‚ÌƒL[‚ğ–³‹‚·‚é
+	// ï¿½ï¿½ï¿½lï¿½ï¿½ï¿½Í’ï¿½ï¿½ÍƒVï¿½[ï¿½ï¿½ï¿½Ø‚ï¿½Ö‚ï¿½ï¿½ÌƒLï¿½[ï¿½ğ–³ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard) return;
 #endif
 
@@ -124,7 +128,7 @@ void GameTestScene::Update(float deltaTime)
 	{
 		Scene* resultScene = SceneManager::GetInstance().GetScene(SceneID::Result);
 		SetNextScene(resultScene);
-		finished = true;    // ƒtƒF[ƒh–³‚µ‚Ìê‡‚Í finished ‚ğ true ‚É‚µ‚Ä‚¨‚­•K—v‚ ‚è
+		finished = true;    // ï¿½tï¿½Fï¿½[ï¿½hï¿½ï¿½ï¿½ï¿½ï¿½Ìê‡ï¿½ï¿½ finished ï¿½ï¿½ true ï¿½É‚ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½ï¿½Kï¿½vï¿½ï¿½ï¿½ï¿½
 		return;
 	}
 }
@@ -209,7 +213,7 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	const auto& grid = gameContext->GetGrid();
 	const auto& room = gameContext->GetRoom();
 
-	// ƒgƒD[ƒ“ƒVƒF[ƒ_[‚ğg‚í‚È‚¢ê‡
+	// ï¿½gï¿½Dï¿½[ï¿½ï¿½ï¿½Vï¿½Fï¿½[ï¿½_ï¿½[ï¿½ï¿½ï¿½gï¿½ï¿½È‚ï¿½ï¿½ê‡
 	if (!toonEnabled)
 	{
 		SetUsePixelShader(-1);
@@ -224,7 +228,7 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 		return;
 	}
 
-	// ƒgƒD[ƒ“•`‰æŠJn
+	// ï¿½gï¿½Dï¿½[ï¿½ï¿½ï¿½`ï¿½ï¿½Jï¿½n
 	modelToonRenderer_.BeginPass();
 
 	const auto drawActor = [this](const ModelObject& model)
@@ -245,7 +249,7 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
 		player.GetPosition(), player.GetRotation());
 	drawActor(playerModel);
-	// boss‚Ìƒ‚ƒfƒ‹‚Éboss©‘Ì‚ÌˆÊ’u‚Æ‰ñ“]‚ğ“K—p‚µ‚Ä•`‰æ‚·‚é
+	// bossï¿½Ìƒï¿½ï¿½fï¿½ï¿½ï¿½ï¿½bossï¿½ï¿½ï¿½Ì‚ÌˆÊ’uï¿½Æ‰ï¿½]ï¿½ï¿½Kï¿½pï¿½ï¿½ï¿½Ä•`ï¿½æ‚·ï¿½ï¿½
 	drawActor(boss.GetModelObject().WithParentTransform(
 		boss.GetPosition(), boss.GetRotation()));
 	drawActor(stage.GetModelObject().WithParentTransform(

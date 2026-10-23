@@ -8,8 +8,10 @@
 #include "ActorBase.h"
 #include "DrawableObject.h"
 #include "ResourceManager.h"
-#include <vector>
-#include "Player.h"
+// #include <vector>
+// #include "Player.h"
+#include "ModelCollision.h"
+class Player;
 
 class Stage : public ActorBase
 {
@@ -28,13 +30,16 @@ public:
 	const std::array<ModelObject, 2>& GetStageModelObjects() const { return stageModels_; }
 	ModelObject GetAlphaModelObject() const { return alphaModel_; }
 
-    void GetCollisionModelHandles(std::vector<int>& handles) const;//modelの判定をまとめてやる
+    // void GetCollisionModelHandles(std::vector<int>& handles) const;//modelの判定をまとめてやる
 
     // プレイヤーのカプセルと柱L・M・Sのメッシュを判定する。
-    bool IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float radius) const;
-    bool FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal, const Vec3& moveDirection = Vec3{},
-        float* wallTopY = nullptr, bool keepTopContact = false) const;
-    Vec3 SlideAlongPillars(const Vec3& oldPosition, const Vec3& desiredPosition, bool& touched) const;
+    // bool IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float radius) const;
+    // bool FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal, const Vec3& moveDirection = Vec3{},
+    // float* wallTopY = nullptr, bool keepTopContact = false) const;
+    // Vec3 SlideAlongPillars(const Vec3& oldPosition, const Vec3& desiredPosition, bool& touched) const;
+    
+	ModelCollision& GetCollision() { return collision_; }
+    const ModelCollision& GetCollision() const { return collision_; }
 
     void DrawDebugUI();
 
@@ -50,18 +55,23 @@ public:
 	float GetAlphaModelOpacity() const { return alphaModel_.GetAlpha(); }
 
 private:
-    void SetupCollisionInfo();
-    void RefreshCollisionInfo();
+    // void SetupCollisionInfo();
+    // void RefreshCollisionInfo();
+
+    ModelCollision collision_;
 
 
-    std::array<ModelObject, 3> stagePillars_{};				
-    std::array<int, 3> pillarCollisionHandles_{ -1, -1, -1 };
+    std::array<ModelObject, 3> stagePillars_{};	
+
+    // std::array<int, 3> pillarCollisionHandles_{ -1, -1, -1 };
+
 
  
     std::array<ModelObject, 2> stageModels_{};
     // 当たり判定に使えるモデルハンドル。未準備・失敗時は -1。
-    std::array<int, 2> stageCollisionHandles_{ -1, -1 };
-    int groundCollisionHandle_{ -1 };
+    // std::array<int, 2> stageCollisionHandles_{ -1, -1 };
+    // int groundCollisionHandle_{ -1 };
+
     std::string modelSettingsStatus_;
 
 	float HightSize{ 0.0f };

@@ -1,5 +1,9 @@
 # neko3D
 
+## コードの解説
+
+- [MATRIXの読み方と、このゲームでの使い方](README_MATRIX.md)
+
 ## 開発環境
 
 Visual Studio 2022 の「C++ によるデスクトップ開発」で `3dgp1.sln` を開き、

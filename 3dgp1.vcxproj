@@ -230,6 +230,7 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="ButtonUI.h" />
     <ClInclude Include="Collision.h" />
+    <ClInclude Include="ModelCollision.h" />
     <ClInclude Include="Consts.h" />
     <ClInclude Include="DebugUI.h" />
     <ClInclude Include="DrawableObject.h" />
@@ -355,6 +356,7 @@
     <ClCompile Include="BossWalkState.cpp" />
     <ClCompile Include="DebugScene.cpp" />
     <ClCompile Include="Collision.cpp" />
+    <ClCompile Include="ModelCollision.cpp" />
     <ClCompile Include="DebugUI.cpp" />
     <ClCompile Include="DrawableObject.cpp" />
     <ClCompile Include="DxPlus\Debug.cpp" />

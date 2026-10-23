@@ -381,6 +381,9 @@
     <ClInclude Include="Collision.h">
       <Filter>40_Gameplay\Collision</Filter>
     </ClInclude>
+    <ClInclude Include="ModelCollision.h">
+      <Filter>40_Gameplay\Collision</Filter>
+    </ClInclude>
     <ClInclude Include="MathUtil.h">
       <Filter>10_Core\Math</Filter>
     </ClInclude>
@@ -774,6 +777,9 @@
       <Filter>40_Gameplay\Physics</Filter>
     </ClCompile>
     <ClCompile Include="Collision.cpp">
+      <Filter>40_Gameplay\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelCollision.cpp">
       <Filter>40_Gameplay\Collision</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">

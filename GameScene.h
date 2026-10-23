@@ -4,6 +4,7 @@
 #pragma once
 #include "Scene.h"
 #include "GameStateMachine.h"
+#include "ModelCollision.h"
 
 
 // shader effects
@@ -21,6 +22,7 @@ public:
 	explicit GameScene(GameContext* context);
 	void Init() override;
 	void Update(float deltaTime) override;
+    void End() override;
 	void Render() const override;
 
 	GameStateType GetCurrentGameState() const { return stateMachine_.GetCurrentType(); }
@@ -32,6 +34,7 @@ public:
 
 private:
 
+    ModelCollision tutorialCollision_;
     ModelToonRenderer modelToonRenderer_{};
     ShaderEffectController shaderEffects_{};
     void DrawScene(bool toonEnabled) const;
