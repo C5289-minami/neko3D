@@ -14,49 +14,12 @@ Room::Room()
 
 	lowJumpStand_.jumpStandModel_.SetModelKey(
 		ResourceKeys::Model_JumpStand);
-	lowJumpStand_.pillarModel_.SetModelKey(
-		ResourceKeys::Model_hashira_s);
 
 	mediumJumpStand_.jumpStandModel_.SetModelKey(
 		ResourceKeys::Model_JumpStand);
-	mediumJumpStand_.pillarModel_.SetModelKey(
-		ResourceKeys::Model_hashira_m);
 
 	highJumpStand_.jumpStandModel_.SetModelKey(
 		ResourceKeys::Model_JumpStand);
-	highJumpStand_.pillarModel_.SetModelKey(
-		ResourceKeys::Model_hashira_l);
-
-	roomModel_.SetOwner(*this);
-	lowJumpStand_.jumpStandModel_.SetOwner(*this);
-	lowJumpStand_.pillarModel_.SetOwner(*this);
-	mediumJumpStand_.jumpStandModel_.SetOwner(*this);
-	mediumJumpStand_.pillarModel_.SetOwner(*this);
-	highJumpStand_.jumpStandModel_.SetOwner(*this);
-	highJumpStand_.pillarModel_.SetOwner(*this);
-
-
-	// 部屋
-	roomModel_.SetObjectId("room_model");
-	roomModel_.SetObjectName("Room");
-
-	// 低いジャンプ台
-	lowJumpStand_.jumpStandModel_.SetObjectId("low_jump_stand");
-	lowJumpStand_.jumpStandModel_.SetObjectName("Low Jump Stand");
-	lowJumpStand_.pillarModel_.SetObjectId("low_jump_stand_pillar");
-	lowJumpStand_.pillarModel_.SetObjectName("Low Jump Stand Pillar");
-
-	// 中くらいのジャンプ台
-	mediumJumpStand_.jumpStandModel_.SetObjectId("medium_jump_stand");
-	mediumJumpStand_.jumpStandModel_.SetObjectName("Medium Jump Stand");
-	mediumJumpStand_.pillarModel_.SetObjectId("medium_jump_stand_pillar");
-	mediumJumpStand_.pillarModel_.SetObjectName("Medium Jump Stand Pillar");
-
-	// 高いジャンプ台
-	highJumpStand_.jumpStandModel_.SetObjectId("high_jump_stand");
-	highJumpStand_.jumpStandModel_.SetObjectName("High Jump Stand");
-	highJumpStand_.pillarModel_.SetObjectId("high_jump_stand_pillar");
-	highJumpStand_.pillarModel_.SetObjectName("High Jump Stand Pillar");
 }
 void Room::Init()
 {
