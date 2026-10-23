@@ -19,6 +19,12 @@ void GameScene::Init()
 {
 	gameContext->Reset();
 
+    // チュートリアルも、使いたいモデルを登録するだけで同じ判定を利用できる。
+    tutorialCollision_.Clear();
+    tutorialCollision_.AddModel(gameContext->GetRoom().GetModelObject(), ModelCollision::Surface::Wall);
+    for (const auto& pillar : gameContext->GetStage().GetPillarModelObjects())
+        tutorialCollision_.AddModel(pillar, ModelCollision::Surface::ClimbableWall);
+
 	// トゥーン描画とアウトライン描画を有効にする
 	{
 		ToonSettingsManager::Load();
@@ -155,9 +161,11 @@ void GameScene::Update(float deltaTime)
 		const bool tutorial = GetCurrentGameState() == GameStateType::Tutorial;
 		player.SetDefMove(tutorial);
 		if (tutorial)
-			player.Update(deltaTime);
+			// player.Update(deltaTime);
+			player.Update(deltaTime, tutorialCollision_);
 		else
-			player.Update(deltaTime, stage, stageCenterPosition);
+			// player.Update(deltaTime, stage, stageCenterPosition);
+			player.Update(deltaTime, stage.GetCollision(), stageCenterPosition);
 		stage.UpdateAlphaModel(deltaTime, player);
 		boss.Update(deltaTime);
 
@@ -167,14 +175,16 @@ void GameScene::Update(float deltaTime)
 		{
 			player.TakeDamage();
 		}
-		const bool stageTouching = Collision::UpdateModelContact(playerModel, gameContext->GetRoom().GetModelObject());
-		if (stageTouching)
-		{
-			// プレイヤーがステージに接触している場合の処理
-			player.SetGravityEnabled(false);
-			player.SetVerticalSpeed(0.0f);
-			player.SetGround(true);
-		}
+		// 旧：部屋との接触で重力を止める処理。現在は ModelCollision の着地判定を使う。
+		// const bool stageTouching = Collision::UpdateModelContact(playerModel, gameContext->GetRoom().GetModelObject());
+		// if (stageTouching)
+		// {
+			// // プレイヤーがステージに接触している場合の処理
+			// player.SetGravityEnabled(false);
+			// player.SetVerticalSpeed(0.0f);
+			// player.SetGround(true);
+		// }
+
 
 	}
 
@@ -295,4 +305,9 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 	drawActor(room.GetModelObject());
 	modelToonRenderer_.EndPass();
+}
+
+void GameScene::End()
+{
+    tutorialCollision_.Clear();
 }

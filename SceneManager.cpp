@@ -68,6 +68,9 @@ void SceneManager::Shutdown()
 {
 	// UI が所有する SpriteStudio Player を、参照先リソースより先に破棄する。
 	UIM().Clear();
+    // 判定用の複製モデルを、元モデルと DxLib より先に解放する。
+    gameScene.End();
+    gameContext.GetStage().GetCollision().Clear();
 	ResourceManager::GetInstance().UnloadAll();
 
 #ifndef NDEBUG

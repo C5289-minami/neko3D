@@ -5,13 +5,14 @@
 #include "PlayerInput.h"
 #include "PlayerStateMachine.h"
 #include "Vector3.h"
-#include "Stage.h"
+// #include "Stage.h"
+#include "ModelCollision.h"
 #include "AnimationDraw.h"
 #include "PlayerAnimType.h"
 #include "ObjectTransform.h"
 #include "Consts.h"
 
-class Stage;
+// class Stage;
 
 class Player : public ActorBase
 {
@@ -34,8 +35,10 @@ public:
 
     void SetAnimation(PlayerAnimType::Type type, bool loop = true);
 
-	// ステージとの当たり判定込みの更新
-	void Update(float deltaTime, const Stage& stage, const Vec3& movementCenter = Vec3{});
+	// // ステージとの当たり判定込みの更新
+	// void Update(float deltaTime, const Stage& stage, const Vec3& movementCenter = Vec3{});
+	// シーンが登録したモデルとの当たり判定込みの更新
+	void Update(float deltaTime, ModelCollision& collision, const Vec3& movementCenter = Vec3{});
 
 	// 移動
 	void SetMoveDirection(const Vec3& moveDir);
@@ -120,9 +123,11 @@ private:
 	Vec3 moveInput_{};      // Xは左右、Zは前後の入力
 	Vec3 velocity_{ 0.0f, 0.0f, 0.0f };
 
-    bool touchingPillar = false;
+    // bool touchingPillar = false;
+    bool touchingModel_ = false;
 	bool isGrounded_{ false };
-    bool wasTouchingPillar_{ false };
+    // bool wasTouchingPillar_{ false };
+    bool wasTouchingModel_{ false };
     bool gravityEnabled_{ true };
 
 

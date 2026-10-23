@@ -50,7 +50,8 @@ void ShaderTest::Init()
 	// プレイヤーの初期設定
 	gameContext->GetPlayer().Init();
 	gameContext->GetPlayer().Reset();
-	gameContext->GetPlayer().Update(0, gameContext->GetStage());
+	// gameContext->GetPlayer().Update(0, gameContext->GetStage());
+	gameContext->GetPlayer().Update(0, gameContext->GetStage().GetCollision());
 	debugActorsPaused_ = false;
 	gameContext->GetStage().ResetAlphaModel(gameContext->GetPlayer().GetPosition());
 
@@ -76,7 +77,8 @@ void ShaderTest::Update(float deltaTime)
 	const bool updateActors = !actorsPaused && !keyboardCaptured;
 	if (updateActors)
 	{
-		//gameContext->GetPlayer().Update(deltaTime, gameContext->GetStage());
+		// //gameContext->GetPlayer().Update(deltaTime, gameContext->GetStage());
+		//gameContext->GetPlayer().Update(deltaTime, gameContext->GetStage().GetCollision());
 		//gameContext->GetBoss().Update(deltaTime);
 	}
 
