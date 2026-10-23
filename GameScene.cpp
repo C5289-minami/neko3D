@@ -222,21 +222,13 @@ void GameScene::RenderDepth() const
 	const auto& player = gameContext->GetPlayer();
 	const auto& stage = gameContext->GetStage();
 	const auto& effectManager = gameContext->GetEffectManager();
+	const auto& room = gameContext->GetRoom();
 
-	// Boneなしシェーダー
-	modelToonRenderer_.SetVertexShader(ModelType::Model);
-
-	boss.Draw();
-	stage.Draw();
-	stage.DrawAlphaModel();
-	gameContext->GetRoom().Draw();
-
-	// Bone対応の頂点シェーダー
-	modelToonRenderer_.SetVertexShader(ModelType::Bone);
-
-	player.Draw();
-
-
+	modelToonRenderer_.DrawDepth(room.GetModelObject());
+	modelToonRenderer_.DrawDepth(stage.GetModelObject());
+	modelToonRenderer_.DrawDepth(stage.GetAlphaModelObject());
+	modelToonRenderer_.DrawDepth(player.GetModelObject());
+	modelToonRenderer_.DrawDepth(boss.GetModelObject());
 }
 
 void GameScene::DrawScene(bool toonEnabled) const

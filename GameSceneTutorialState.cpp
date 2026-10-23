@@ -62,4 +62,7 @@ void GameSceneTutorialState::Tick(float deltaTime)
 void GameSceneTutorialState::Exit()
 {
 	DxPlus::Debug::SetFormatString(L"GameSceneTutorialState::Exit");
+	GameContext* gameContext = gameScene_.GetGameContext();
+	auto& player = gameContext->GetPlayer();
+	player.SetDefMove(false);
 }
