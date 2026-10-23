@@ -23,7 +23,7 @@ Player::Player()
 
 void Player::Init()
 {
-	model_.SetModelKey(ResourceKeys::Model_Paladin);
+	model_.SetModelKey(ResourceKeys::Model_Player);
 	const int modelHandle = RM().GetModel(model_.GetModelKey());
 	if (modelHandle < 0) return;
 
@@ -50,7 +50,6 @@ void Player::Reset()
 	// 初期位置・回転・拡大率は既定値を設定した後にJSONから読み込む
 	MObjs().LoadActorTransform(*this);
 	model_.Load();
-
 
 	moveInput_ = {};
 	velocity_ = { 0.0f, 0.0f, 0.0f };
