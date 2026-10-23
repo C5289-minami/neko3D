@@ -73,6 +73,12 @@ void Player::Update(float deltaTime)
 
 void Player::UpdateMovement(float deltaTime)
 {
+    // 移動入力を離している間は、壁登り用の接触状態を解除する。
+    if (!input_.isMoving)
+    {
+        touchingWall_ = false;
+    }
+
 	bool NearTheWall = false;
 	if (input_.isMoving)
 	{
@@ -86,7 +92,7 @@ void Player::UpdateMovement(float deltaTime)
 	}
 	if (touchingWall_ && gravityEnabled_ && !IsDead() && !IsDamaging() &&
 		GetCurrentState() != PlayerStateType::WallJump &&
-		(NearTheWall || (!isGrounded_ && !input_.isMoving)))
+		NearTheWall)
 	{
 		stateMachine_.ChangeState(PlayerStateType::Climbing);
 	}
