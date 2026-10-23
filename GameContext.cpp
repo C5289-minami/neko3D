@@ -22,10 +22,16 @@ void GameContext::Init()
     modelObjects.Add(boss.GetModelObject(), boss);
     modelObjects.Add(room_.GetModelObject(), room_);
 
+    for (auto& jumpStand : room_.GetJumpStands())
+    {
+        modelObjects.Add(jumpStand->jumpStandModel_, room_);
+        modelObjects.Add(jumpStand->pillarModel_, room_);
+	}
+
     stage.Init();
     player.Init();
     boss.Init();
-   room_.Init();
+    room_.Init();
 }
 
 void GameContext::Reset()

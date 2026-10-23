@@ -3,23 +3,44 @@
 #include "Resourcekeys.h"
 #include "ModelObjectManager.h"
 
+// エラーを解消しつつ
+// コピーせずに無理やりロードするかコピーを実装
+
+
 Room::Room()
 	: ActorBase("Room")
 {
- roomModel_.SetModelKey(ResourceKeys::Model_Room);
-}
+	roomModel_.SetModelKey(ResourceKeys::Model_Room);
 
+	lowJumpStand_.jumpStandModel_.SetModelKey(
+		ResourceKeys::Model_JumpStand);
+
+	mediumJumpStand_.jumpStandModel_.SetModelKey(
+		ResourceKeys::Model_JumpStand);
+
+	highJumpStand_.jumpStandModel_.SetModelKey(
+		ResourceKeys::Model_JumpStand);
+}
 void Room::Init()
 {
 	Reset();
-	roomModel_.Init();
+
 }
 
 void Room::Reset()
 {
- MObjs().LoadActorTransform(*this);
-	float scale = 1.0f;
- roomModel_.SetScale({ scale, scale, scale });
+	MObjs().LoadActorTransform(*this);
+
+	roomModel_.Load();
+
+	lowJumpStand_.jumpStandModel_.Load();
+	lowJumpStand_.pillarModel_.Load();
+
+	mediumJumpStand_.jumpStandModel_.Load();
+	mediumJumpStand_.pillarModel_.Load();
+
+	highJumpStand_.jumpStandModel_.Load();
+	highJumpStand_.pillarModel_.Load();
 }
 
 void Room::Update(float deltaTime)
