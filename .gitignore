@@ -449,3 +449,4 @@ FodyWeavers.xsd
 !/tools/effekseer/bin/**
 /Data/Config/imgui.ini
 /3dgp1_debug.exe
+/README_MATRIX.md

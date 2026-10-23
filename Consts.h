@@ -19,6 +19,8 @@ namespace Const
     // 突進ジャンプの仮の速度
     constexpr float PLAYER_LUNGING_MOVE_SPEED = 600.0f;
     constexpr float PLAYER_LUNGING_JUMP_SPEED = 800.0f;
+    constexpr float PLAYER_WALL_JUMP_MOVE_SPEED = 600.0f;
+    constexpr float PLAYER_WALL_JUMP_SPEED = 800.0f;
 
     constexpr float PLAYER_HEIGHT = 180.0f;
     constexpr float PLAYER_SKIN = 1.0f;

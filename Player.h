@@ -71,6 +71,11 @@ public:
     void SetLungingMoveSpeed(float value);
     void SetLungingJumpSpeed(float value);
     void ResetLungingSpeeds();
+    float GetWallJumpMoveSpeed() const { return wallJumpMoveSpeed_; }
+    float GetWallJumpSpeed() const { return wallJumpSpeed_; }
+    void SetWallJumpMoveSpeed(float value);
+    void SetWallJumpSpeed(float value);
+    void ResetWallJumpSpeeds();
 	bool IsGrounded() const { return isGrounded_; }
 	void SetGround(bool grounded) { isGrounded_ = grounded; }
 	bool IsGravityEnabled() const { return gravityEnabled_; }
@@ -117,6 +122,8 @@ private:
     float ultimateGauge_{ 0.0f };
     float lungingMoveSpeed_{ Const::PLAYER_LUNGING_MOVE_SPEED };
     float lungingJumpSpeed_{ Const::PLAYER_LUNGING_JUMP_SPEED };
+    float wallJumpMoveSpeed_{ Const::PLAYER_WALL_JUMP_MOVE_SPEED };
+    float wallJumpSpeed_{ Const::PLAYER_WALL_JUMP_SPEED };
 	float kari_max_jissou_ = UltimateGaugeMax;
 
 	Vec3 movementCenter_{}; // 足場の中心
