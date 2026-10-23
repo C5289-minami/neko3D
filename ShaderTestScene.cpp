@@ -149,6 +149,21 @@ void ShaderTest::Update(float deltaTime)
 
 	shaderToggleWasDown = shaderToggleDown;
 
+	// --- F3 でキャラを変える ---
+	static bool charToggleWasDown = false;
+	const bool charToggleDown =
+		DxLib::CheckHitKey(KEY_INPUT_F3) != 0;
+
+	if (charToggleDown && !charToggleWasDown)
+	{
+		if (gameContext->GetPlayer().GetModelObject().GetModelKey() == ResourceKeys::Model_Player)
+			gameContext->GetPlayer().GetModelObject().SetModelKey(ResourceKeys::Model_Paladin);
+		else
+			gameContext->GetPlayer().GetModelObject().SetModelKey(ResourceKeys::Model_Player);
+	}
+
+	charToggleWasDown = charToggleDown;
+
 
 }
 
@@ -434,20 +449,30 @@ void ShaderTest::RenderDepth() const
 	// シーンのカメラを設定する
 	camera_.ApplyCamera();
 
-	const auto& player = gameContext->GetPlayer();
-	const auto& boss = gameContext->GetBoss();
-	const auto& stage = gameContext->GetStage();
+	const auto& player = gameContext->GetPlayer().GetModelObject();
+	const auto& boss = gameContext->GetBoss().GetModelObject();
+	const auto& room = gameContext->GetRoom().GetModelObject();
 
-	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
-		player.GetPosition(), player.GetRotation());
-	const ModelObject bossModel = boss.GetModelObject().WithParentTransform(
-		boss.GetPosition(), boss.GetRotation());
-	const ModelObject stageModel = stage.GetModelObject().WithParentTransform(
-		stage.GetPosition(), stage.GetRotation());
+	//const ModelObject playerModel = player.GetModelObject().WithParentTransform(
+	//	player.GetPosition(), player.GetRotation());
+	//const ModelObject bossModel = boss.GetModelObject().WithParentTransform(
+	//	boss.GetPosition(), boss.GetRotation());
+	//const ModelObject stageModel = stage.GetModelObject().WithParentTransform(
+	//	stage.GetPosition(), stage.GetRotation());
 
-	modelToonRenderer_.DrawDepth(stageModel);
-	modelToonRenderer_.DrawDepth(bossModel);
-	modelToonRenderer_.DrawDepth(playerModel);
+	for (const auto& stages : gameContext->GetStage().GetStageModelObjects())
+	{
+		modelToonRenderer_.DrawDepth(stages);
+	}
+	for (const auto& pillar : gameContext->GetStage().GetPillarModelObjects())
+	{
+		modelToonRenderer_.DrawDepth(pillar);
+	}
+	modelToonRenderer_.DrawDepth(gameContext->GetStage().GetModelObject());
+
+	modelToonRenderer_.DrawDepth(boss);
+	modelToonRenderer_.DrawDepth(player);
+	modelToonRenderer_.DrawDepth(room);
 }
 
 void ShaderTest::DrawScene(bool toonEnabled) const
@@ -463,6 +488,7 @@ void ShaderTest::DrawScene(bool toonEnabled) const
 		gameContext->GetStage().Draw();
 		gameContext->GetBoss().Draw();
 		gameContext->GetPlayer().Draw();
+		gameContext->GetRoom().Draw();
 
 		return;
 	}
@@ -486,9 +512,20 @@ void ShaderTest::DrawScene(bool toonEnabled) const
 			}
 		};
 	const auto& player = gameContext->GetPlayer();
-    const ModelObject& playerModel = player.GetModelObject();
+	const ModelObject& playerModel = player.GetModelObject();
 	drawActor(playerModel);
 	drawActor(gameContext->GetBoss().GetModelObject());
+	drawActor(gameContext->GetRoom().GetModelObject());
+
+	for (const auto& stages : gameContext->GetStage().GetStageModelObjects())
+	{
+		drawActor(stages);
+	}
+	for (const auto& pillar : gameContext->GetStage().GetPillarModelObjects())
+	{
+		drawActor(pillar);
+	
+	}
 	drawActor(gameContext->GetStage().GetModelObject());
 
 	modelToonRenderer_.EndPass();
