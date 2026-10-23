@@ -12,10 +12,12 @@
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
 
-
 void GameTestScene::Init()
 {
 	gameContext->Reset();
+#ifdef _DEBUG
+    Collision::RegisterDebugCanWatch(this, gameContext->GetPlayer(), gameContext->GetBoss());
+#endif
 	playerCamera_.Reset();
 #ifndef NDEBUG
 	activeCamera_ = nullptr;
@@ -95,14 +97,6 @@ void GameTestScene::Update(float deltaTime)
 		stage.UpdateAlphaModel(deltaTime, player);
 
 		boss.Update(deltaTime);
-		ModelObject playerModel = player.GetModelObject().WithParentTransform(
-			player.GetPosition(), player.GetRotation());
-		const bool touching = Collision::UpdateModelContact(playerModel, boss.GetModelObject());
-		player.GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
-		if (touching)
-		{
-			player.TakeDamage();
-		}
 
 
 		playerCamera_.Update(player.GetPosition(), boss.GetPosition(), deltaTime);
@@ -191,6 +185,9 @@ void GameTestScene::DrawImGui()
 
 void GameTestScene::End()
 {
+#ifdef _DEBUG
+    Collision::UnregisterDebugCanWatch(this);
+#endif
 }
 
 void GameTestScene::RenderDepth() const
@@ -266,42 +263,27 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	// トゥーン描画開始
 	modelToonRenderer_.BeginPass();
 
-	const auto drawActor = [this](const ModelObject& model)
-		{
-			if (model.collisionHighlighted)
-			{
-				SetUsePixelShader(-1);
-				SetUseVertexShader(-1);
-				MV1SetUseOrigShader(FALSE);
-				model.Draw();
-				MV1SetUseOrigShader(TRUE);
-			}
-			else
-			{
-				modelToonRenderer_.Draw(model);
-			}
-		};
 	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
 		player.GetPosition(), player.GetRotation());
-	drawActor(playerModel);
+	modelToonRenderer_.Draw(playerModel);
 	// bossのモデルにboss自体の位置と回転を適用して描画する
-	drawActor(boss.GetModelObject().WithParentTransform(
+	modelToonRenderer_.Draw(boss.GetModelObject().WithParentTransform(
 		boss.GetPosition(), boss.GetRotation()));
-	drawActor(stage.GetModelObject().WithParentTransform(
+	modelToonRenderer_.Draw(stage.GetModelObject().WithParentTransform(
 		stage.GetPosition(), stage.GetRotation()));
-	drawActor(stage.GetAlphaModelObject());
+	modelToonRenderer_.Draw(stage.GetAlphaModelObject());
 	for (const auto& pillar : stage.GetPillarModelObjects())
 	{
-		drawActor(pillar.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
+		modelToonRenderer_.Draw(pillar.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
 	}
 	for (const auto& model : stage.GetStageModelObjects())
 	{
-		drawActor(model.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
+		modelToonRenderer_.Draw(model.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
 	}
 	effectManager.Draw();
 	grid.Draw();
 
-	drawActor(room.GetModelObject());
+	modelToonRenderer_.Draw(room.GetModelObject());
 	modelToonRenderer_.EndPass();
 }
 

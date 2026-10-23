@@ -114,6 +114,13 @@ private:
 template<typename SceneDraw, typename DepthDraw>
 inline void OutlineRenderer::Render(SceneDraw&& sceneDraw, DepthDraw&& depthDraw) const
 {
+	//Collisionsデバッグ描画のために、シーン描画後にカメラを初期化しないようにする。
+    // 合成中の描画先切り替えでカメラを初期化せず、後続の3D描画にも引き継ぐ。
+    const int resetSettings = GetUseSetDrawScreenSettingReset();
+    SetUseSetDrawScreenSettingReset(FALSE);
+	// ↑ これを FALSE にしないと、シーン描画後にカメラが初期化されてしまい、3D描画が正しく行われない。
+    //AIしか勝たん！  
+    
     // ① シーンの色をバッファーに保存する
     BeginScenePass();
     sceneDraw();
@@ -129,4 +136,7 @@ inline void OutlineRenderer::Render(SceneDraw&& sceneDraw, DepthDraw&& depthDraw
 
     // ③ フラグの組み合わせに応じて画像を加工する
     RenderPostProcess();
+
+    // 描画先を切り替えた際の設定を、呼び出し前の状態に戻す。
+    SetUseSetDrawScreenSettingReset(resetSettings);
 }
