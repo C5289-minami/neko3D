@@ -22,9 +22,11 @@ namespace Const
     constexpr float PLAYER_WALL_JUMP_MOVE_SPEED = 600.0f;
     constexpr float PLAYER_WALL_JUMP_SPEED = 800.0f;
 
-    constexpr float PLAYER_HEIGHT = 180.0f;
+    constexpr float PLAYER_HEIGHT = 60.0f;
     constexpr float PLAYER_SKIN = 1.0f;
-    constexpr float PLAYER_RADIUS = 60.0f;
+    constexpr float PLAYER_RADIUS = 30.0f;
+
+  
     // 壁登りの検出専用。移動を止めるカプセルの半径は変えない。
     constexpr float PLAYER_CLIMB_DETECTION_MARGIN = 10.0f;
     // 足元が柱の上端に近づいたとき、登り中の高さを保持する範囲。

@@ -55,6 +55,8 @@ public:
     bool Raycast(const Vec3& start, const Vec3& end, Physics::RayHit& hit) const;
     // 着地用。床と柱を調べる。壁は対象外。
     bool RaycastDown(const Vec3& origin, float maxDistance, Physics::RayHit& hit) const;
+    // 頭上用。床・柱・壁のすべてを調べる。
+    bool RaycastUp(const Vec3& origin, float maxDistance, Physics::RayHit& hit) const;
     // Refresh 後の、拡大縮小・回転を含めたモデルの幅・高さ・奥行き。
     Vec3 GetSize(const ModelObject& model) const;
 

@@ -12,6 +12,7 @@ public:
     void Init() override;
     void Update(float deltaTime) override;
     void Render() const override;
+    void DrawImGui() override;
     void End() override;
 
     void SetActiveCamera(Camera::Camera* camera) { activeCamera_ = camera; }

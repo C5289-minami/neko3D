@@ -71,6 +71,12 @@ public:
     void SetLungingMoveSpeed(float value);
     void SetLungingJumpSpeed(float value);
     void ResetLungingSpeeds();
+    // 壁登り・滑り落ち・壁キックは、それぞれ専用の速度を持つ。
+    float GetClimbingSpeed() const { return climbingSpeed_; }
+    float GetWallSlideSpeed() const { return wallSlideSpeed_; }
+    void SetClimbingSpeed(float value);
+    void SetWallSlideSpeed(float value);
+    void ResetClimbingSpeeds();
     float GetWallJumpMoveSpeed() const { return wallJumpMoveSpeed_; }
     float GetWallJumpSpeed() const { return wallJumpSpeed_; }
     void SetWallJumpMoveSpeed(float value);
@@ -122,6 +128,8 @@ private:
     float ultimateGauge_{ 0.0f };
     float lungingMoveSpeed_{ Const::PLAYER_LUNGING_MOVE_SPEED };
     float lungingJumpSpeed_{ Const::PLAYER_LUNGING_JUMP_SPEED };
+    float climbingSpeed_{ Const::PLAYER_CLIMBING_SPEED };
+    float wallSlideSpeed_{ Const::PLAYER_WALL_SLIDE_SPEED };
     float wallJumpMoveSpeed_{ Const::PLAYER_WALL_JUMP_MOVE_SPEED };
     float wallJumpSpeed_{ Const::PLAYER_WALL_JUMP_SPEED };
 	float kari_max_jissou_ = UltimateGaugeMax;
