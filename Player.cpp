@@ -149,8 +149,30 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 	// 登録されたモデルの壁に沿ってスライドさせる
 	position_ = collision.SlideAlongWalls(oldPosition, position_, modelOb, touchingModel_);
 
+	const float dy = position_.y - previousY;
+
+	if (dy > 0.0f)
+	{
+		// 移動前の頭から移動後の頭まで調べ、天井のすり抜けを防ぐ。
+		Physics::RayHit hit{};
+		const float rayDistance = dy + Const::PLAYER_SKIN * 2.0f;
+		if (collision.RaycastUp(
+			Vec3(
+				GetPosition().x,
+				previousY + Const::PLAYER_HEIGHT - Const::PLAYER_SKIN,
+				GetPosition().z
+			),
+			rayDistance,
+			hit))
+		{
+			position_.y = hit.point.y - Const::PLAYER_HEIGHT - Const::PLAYER_SKIN;
+			velocity_.y = 0.0f;
+		}
+	}	
+
+
 	// 落下中のみ床面に合わせ、このフレームの落下距離もレイの長さに含める。
-	if (velocity_.y <= 0.0f)
+	if (dy<= 0.0f)
 	{
 		Physics::RayHit hit{};
 		constexpr float groundSnapDistance = 30.0f;
