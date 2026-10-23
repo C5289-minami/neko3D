@@ -84,6 +84,7 @@ void Player::UpdateMovement(float deltaTime)
 			NearTheWall = true;
 		}
 	}
+	//か
 	if (touchingWall_ && gravityEnabled_ && !IsDead() && !IsDamaging() &&
 		GetCurrentState() != PlayerStateType::WallJump &&
 		(NearTheWall || (!isGrounded_ && !input_.isMoving)))
@@ -464,6 +465,22 @@ void Player::StartLungingJump(const Vec3& moveDir)
 	SetMoveDirection(moveInput);
 	velocity_.y = lungingJumpSpeed_;
 	isGrounded_ = false;
+}
+
+void Player::SetClimbingSpeed(float value)
+{
+    if (std::isfinite(value)) climbingSpeed_ = (std::max)(0.0f, value);
+}
+
+void Player::SetWallSlideSpeed(float value)
+{
+    if (std::isfinite(value)) wallSlideSpeed_ = (std::max)(0.0f, value);
+}
+
+void Player::ResetClimbingSpeeds()
+{
+    climbingSpeed_ = Const::PLAYER_CLIMBING_SPEED;
+    wallSlideSpeed_ = Const::PLAYER_WALL_SLIDE_SPEED;
 }
 
 void Player::SetWallJumpMoveSpeed(float value)

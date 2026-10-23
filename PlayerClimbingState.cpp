@@ -67,23 +67,23 @@ void PlayerClimbingState::Tick(float deltaTime)
     // 移動入力を離したら、頂上付近でも一定速度でゆっくり滑り落ちる。
     if (!input.isMoving)
     {
-        player_.SetVerticalSpeed(-Const::PLAYER_WALL_SLIDE_SPEED);
+        player_.SetVerticalSpeed(-player_.GetWallSlideSpeed());
     }
     // 入力中の登り方と、上端を越えない速度制限はこれまでどおり。
     else if (player_.IsGrounded() || player_.IsNearWallTop())
     {
-        float ClimbingSpeed = Const::PLAYER_CLIMBING_SPEED;
+        float ClimbingSpeed = player_.GetClimbingSpeed();
         if (pushTime_ >= Const::PLAYER_WALL_CLIMB_WAIT && deltaTime > 0.0f)
         {
             float MAXHeight = (std::max)(0.0f, player_.GetWallTopY() - player_.GetPosition().y);
-            ClimbingSpeed = (std::min)(Const::PLAYER_CLIMBING_SPEED, MAXHeight / deltaTime);
+            ClimbingSpeed = (std::min)(player_.GetClimbingSpeed(), MAXHeight / deltaTime);
         }
         player_.SetVerticalSpeed(ClimbingSpeed);
     }
     else if (pushingWall && pushTime_ >= Const::PLAYER_WALL_CLIMB_WAIT)
     {
         // 滑ったあとに壁を押し直したときも、待ち時間後に登りへ戻す。
-        player_.SetVerticalSpeed(Const::PLAYER_CLIMBING_SPEED);
+        player_.SetVerticalSpeed(player_.GetClimbingSpeed());
     }
     DxPlus::Debug::SetFormatString(L"state:climbing");
 }
