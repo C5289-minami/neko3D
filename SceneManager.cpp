@@ -4,7 +4,7 @@
 #include "SceneManager.h"
 #include "ResourceManager.h"
 #include "DxPlus/DxPlus.h"
-
+#include "Collision.h"
 #include "DebugUI.h"
 #include "UIManager.h"
 #include "ToonSettings.h"
@@ -14,6 +14,9 @@
 
 void SceneManager::Init()
 {
+#ifdef _DEBUG
+    Collision::ClearDebugCanWatch();
+#endif
 	const int w = DxPlus::CLIENT_WIDTH;
 	const int h = DxPlus::CLIENT_HEIGHT;
 
@@ -66,6 +69,10 @@ void SceneManager::Init()
 
 void SceneManager::Shutdown()
 {
+#ifdef _DEBUG
+    // 参照先のキャラクターやリソースを解放する前に登録を解除する。
+    Collision::ClearDebugCanWatch();
+#endif
 	// UI が所有する SpriteStudio Player を、参照先リソースより先に破棄する。
 	UIM().Clear();
     // 判定用の複製モデルを、元モデルと DxLib より先に解放する。
@@ -134,8 +141,14 @@ void SceneManager::Run()
 
 			float deltaTime = DxPlus::GetDeltaTime();
 			scene->Drive(deltaTime);
+#ifdef _DEBUG
+            Collision::UpdateDebug();
+#endif
 			UIM().Update(deltaTime);
 			scene->Render();
+#ifdef _DEBUG
+            Collision::DrawDebug();
+#endif
 			UIM().Draw();
 
 			if (scene->IsFinished())

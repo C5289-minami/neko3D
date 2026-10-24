@@ -82,18 +82,18 @@ void PlayerClimbingState::Tick(float deltaTime)
     // 入力中は、上端を越えないように登る速度を制限する。
     if (player_.IsGrounded() || player_.IsNearWallTop())
     {
-        float ClimbingSpeed = Const::PLAYER_CLIMBING_SPEED;
+        float ClimbingSpeed = player_.GetClimbingSpeed();
         if (pushTime_ >= Const::PLAYER_WALL_CLIMB_WAIT && deltaTime > 0.0f)
         {
             float MAXHeight = (std::max)(0.0f, player_.GetWallTopY() - player_.GetPosition().y);
-            ClimbingSpeed = (std::min)(Const::PLAYER_CLIMBING_SPEED, MAXHeight / deltaTime);
+            ClimbingSpeed = (std::min)(player_.GetClimbingSpeed(), MAXHeight / deltaTime);
         }
         player_.SetVerticalSpeed(ClimbingSpeed);
     }
     else if (pushingWall && pushTime_ >= Const::PLAYER_WALL_CLIMB_WAIT)
     {
         // 壁を押し続けたら、待ち時間後に登り始める。
-        player_.SetVerticalSpeed(Const::PLAYER_CLIMBING_SPEED);
+        player_.SetVerticalSpeed(player_.GetClimbingSpeed());
     }
     DxPlus::Debug::SetFormatString(L"state:climbing");
 }

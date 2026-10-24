@@ -163,6 +163,12 @@ bool ModelCollision::RaycastDown(const Vec3& origin, float maxDistance, Physics:
     return RaycastModels(origin, origin - Vec3::Up() * maxDistance, hit, true);
 }
 
+bool ModelCollision::RaycastUp(const Vec3& origin, float maxDistance, Physics::RayHit& hit) const
+{
+    if (maxDistance <= 0.0f) return false;
+    return RaycastModels(origin, origin + Vec3::Up() * maxDistance, hit, false);
+}
+
 Vec3 ModelCollision::GetSize(const ModelObject& model) const
 {
     for (const auto& entry : models_)
