@@ -13,5 +13,6 @@ public:
 
 private:
 	Vec3 cameraPositionOffset_{};
-  bool targetCameraSwitched_{};
+	bool targetCameraSwitched_{ false };
+	bool tutorialCameraMoved_{ false };
 };

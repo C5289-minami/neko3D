@@ -25,10 +25,16 @@ void GameScene::Init()
 	tutorialCollision_.AddModel(gameContext->GetRoom().GetRoomObject(), ModelCollision::Surface::Floor);
 	tutorialCollision_.AddModel(gameContext->GetRoom().GetRoomObject(), ModelCollision::Surface::Wall);
 
+	for (const auto& jumpStand : gameContext->GetRoom().GetJumpStands())
+	{
+		tutorialCollision_.AddModel(jumpStand->GetJumpStandModel(), ModelCollision::Surface::Floor);
+		tutorialCollision_.AddModel(jumpStand->GetPillarModel(), ModelCollision::Surface::Pillar);
+	}
+	for (const auto& pillar : gameContext->GetRoom().GetPillars())
+		tutorialCollision_.AddModel(*pillar, ModelCollision::Surface::Pillar);
 
-
-	for (const auto& pillar : gameContext->GetStage().GetPillarModelObjects())
-		tutorialCollision_.AddModel(pillar, ModelCollision::Surface::Pillar);
+	//for (const auto& pillar : gameContext->GetStage().GetPillarModelObjects())
+	//	tutorialCollision_.AddModel(pillar, ModelCollision::Surface::Pillar);
 
 	// トゥーン描画とアウトライン描画を有効にする
 	{
@@ -125,7 +131,44 @@ bool GameScene::UpdateStateCamera(float deltaTime, const std::string& requestedS
 	return transitionCompleted;
 }
 
+void GameScene::FocusTutorialCamera()
+{
+	const auto& player = gameContext->GetPlayer();
+	const auto& stage = gameContext->GetStage();
 
+	const Vec3 playerPosition = player.GetWorldPosition();
+	const Vec3 stagePosition = stage.GetWorldPosition();
+
+	// StageからPlayerへ向かう方向を求める
+	Vec3 direction = playerPosition - stagePosition;
+	direction.y = 0.0f;
+
+	const float lengthSq =
+		direction.x * direction.x +
+		direction.z * direction.z;
+
+	if (lengthSq < 0.0001f)
+		return;
+
+	direction = direction.Normalized();
+
+	Vec3 cameraPosition = stagePosition;
+	// カメラの高さ
+
+	// Playerを挟んでStageの反対側に配置する
+	cameraPosition = playerPosition + direction * 300.0f;
+
+	cameraPosition.y = playerPosition.y + 100.0f;
+	
+
+	auto pose = cameraDirector_.GetCurrentPose();
+	pose.position = cameraPosition;
+	pose.pitch = 0.1f; // 少し上を向く
+	pose.yaw = std::atan2(-direction.x, -direction.z);
+	pose.fieldOfViewDegrees = 40.0f;
+
+	cameraDirector_.MoveTo(pose, 0.1f, Motion::Easing::EaseInOut);
+}
 void GameScene::Update(float deltaTime)
 {
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
@@ -144,7 +187,7 @@ void GameScene::Update(float deltaTime)
 		// stageの中心座標を取得して、playerの更新に渡す
 		const Vec3 stageCenterPosition = stage.GetPosition();
 
-		// チュートリアルは通常の前後左右移動、バトルはステージ中心を基準にした移動を使う。
+		// チュートリアルは通常移動、バトルはステージ中心を基準にした移動を使う。
 		const bool tutorial = GetCurrentGameState() == GameStateType::Tutorial;
 		player.SetDefMove(tutorial);
 		if (tutorial)
@@ -153,6 +196,7 @@ void GameScene::Update(float deltaTime)
 		else
 			// player.Update(deltaTime, stage, stageCenterPosition);
 			player.Update(deltaTime, stage.GetCollision(), stageCenterPosition);
+
 		stage.UpdateAlphaModel(deltaTime, player);
 		boss.Update(deltaTime);
 
