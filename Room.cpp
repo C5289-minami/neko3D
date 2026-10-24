@@ -73,9 +73,11 @@ void Room::Reset()
 	roomModel_.Load();
 	pillar1_.Load();
 	pillar2_.Load();
+	
 
 	for (auto& stand : this->GetJumpStands())
 	{
+		MObjs().LoadActorTransform(*stand);
 		stand->GetJumpStandModel().Load();
 		stand->GetPillarModel().Load();
 	}

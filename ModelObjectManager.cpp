@@ -5,6 +5,9 @@
 #include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <string>
+#include <utility>
+#include <vector>
 
 ModelObjectManager& ModelObjectManager::GetInstance()
 {
@@ -33,6 +36,181 @@ std::vector<std::pair<std::string, ActorBase*>> ModelObjectManager::GetActors() 
         if (!key.empty()) actors.emplace_back(key, actor);
     }
     return actors;
+}
+
+namespace
+{
+    constexpr const char* TransformFilePath =
+        "./Data/Config/model_objects.json";
+
+    // モデルとActorの変換をまとめて保存する
+    bool SaveTransformData(
+        const std::vector<ModelObject*>& objects,
+        const std::vector<std::pair<std::string, ActorBase*>>& actors,
+        bool saveObjects,
+        bool saveActors)
+    {
+        try
+        {
+            nlohmann::json json = nlohmann::json::object();
+
+            // 既存データを読み込み、未更新のデータを保持する
+            std::ifstream input(TransformFilePath);
+
+            if (input)
+            {
+                input >> json;
+
+                if (!json.is_object())
+                {
+                    return false;
+                }
+            }
+
+            if (saveObjects)
+            {
+                if (!json.contains("objects")
+                    || !json["objects"].is_object())
+                {
+                    json["objects"] = nlohmann::json::object();
+                }
+
+                for (const auto* object : objects)
+                {
+                    if (!object || object->GetObjectId().empty())
+                    {
+                        continue;
+                    }
+
+                    const Vec3 position = object->GetPosition();
+                    const Vec3 rotation = object->GetRotation();
+                    const Vec3 scale = object->GetScale();
+
+                    if (!std::isfinite(position.x)
+                        || !std::isfinite(position.y)
+                        || !std::isfinite(position.z)
+                        || !std::isfinite(rotation.x)
+                        || !std::isfinite(rotation.y)
+                        || !std::isfinite(rotation.z)
+                        || !std::isfinite(scale.x)
+                        || !std::isfinite(scale.y)
+                        || !std::isfinite(scale.z)
+                        || scale.x <= 0.0f
+                        || scale.y <= 0.0f
+                        || scale.z <= 0.0f)
+                    {
+                        return false;
+                    }
+
+                    json["objects"][object->GetObjectId()] = {
+                        { "position", {
+                            position.x, position.y, position.z
+                        }},
+                        { "scale", {
+                            scale.x, scale.y, scale.z
+                        }},
+                        { "rotation", {
+                            rotation.x, rotation.y, rotation.z
+                        }}
+                    };
+                }
+            }
+
+            if (saveActors)
+            {
+                if (!json.contains("actors")
+                    || !json["actors"].is_object())
+                {
+                    json["actors"] = nlohmann::json::object();
+                }
+
+                for (const auto& [key, actor] : actors)
+                {
+                    if (!actor || key.empty())
+                    {
+                        continue;
+                    }
+
+                    const Vec3 position = actor->GetPosition();
+                    const Vec3 rotation = actor->GetRotation();
+
+                    if (!std::isfinite(position.x)
+                        || !std::isfinite(position.y)
+                        || !std::isfinite(position.z)
+                        || !std::isfinite(rotation.x)
+                        || !std::isfinite(rotation.y)
+                        || !std::isfinite(rotation.z))
+                    {
+                        return false;
+                    }
+
+                    json["actors"][key] = {
+                        { "position", {
+                            position.x, position.y, position.z
+                        }},
+                        { "rotation", {
+                            rotation.x, rotation.y, rotation.z
+                        }}
+                    };
+                }
+            }
+
+            const std::filesystem::path path(TransformFilePath);
+
+            if (!path.parent_path().empty())
+            {
+                std::filesystem::create_directories(
+                    path.parent_path()
+                );
+            }
+
+            // ファイルへの書き込みは最後の1回だけ
+            std::ofstream output(
+                TransformFilePath,
+                std::ios::trunc
+            );
+
+            if (!output)
+            {
+                return false;
+            }
+
+            output << json.dump(4);
+            return output.good();
+        }
+        catch (const std::exception&)
+        {
+            return false;
+        }
+    }
+}
+
+
+
+// モデルだけまとめて保存
+bool ModelObjectManager::SaveObjects() const
+{
+    const std::vector<std::pair<std::string, ActorBase*>> noActors;
+
+    return SaveTransformData(
+        GetObjects(),
+        noActors,
+        true,
+        false
+    );
+}
+
+// Actorだけまとめて保存
+bool ModelObjectManager::SaveActors() const
+{
+    const std::vector<ModelObject*> noObjects;
+
+    return SaveTransformData(
+        noObjects,
+        GetActors(),
+        false,
+        true
+    );
 }
 
 // オブジェクトの追加・削除・描画・保存
@@ -85,25 +263,16 @@ void ModelObjectManager::Draw() const
         if (object) object->Draw();
 }
 
+// 全モデルと全Actorをまとめて保存
 bool ModelObjectManager::SaveAll() const
 {
-  // 登録されているActorとModelObjectをすべて保存
-    bool success = true;
-    for (const auto* object : objects_)
-        if (object) success = object->Save() && success;
-    for (auto entry = ownership_.begin(); entry != ownership_.end(); ++entry)
-    {
-        ActorBase* actor = entry->second;
-        if (!actor) continue;
-        const bool alreadySaved = std::any_of(ownership_.begin(), entry, [actor](const auto& earlier)
-        {
-            return earlier.second == actor;
-        });
-        if (!alreadySaved) success = SaveActorTransform(*actor) && success;
-    }
-    return success;
+    return SaveTransformData(
+        GetObjects(),
+        GetActors(),
+        true,
+        true
+    );
 }
-
 bool ModelObjectManager::LoadActorTransform(ActorBase& actor, const std::string& filePath) const
 {
     const std::string actorKey = GetActorKey(actor);

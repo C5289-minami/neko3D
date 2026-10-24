@@ -27,6 +27,8 @@ public:
         const std::string& filePath = "./Data/Config/model_objects.json") const;
     std::vector<std::pair<std::string, ActorBase*>> GetActors() const;
     const std::vector<ModelObject*>& GetObjects() const { return objects_; }
+    bool SaveObjects() const;
+    bool SaveActors() const;
 
 private:
     std::string GetActorKey(const ActorBase& actor) const;

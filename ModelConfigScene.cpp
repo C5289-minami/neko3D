@@ -277,8 +277,28 @@ void ModelConfigScene::DrawImGui()
 			status_ = selected_->Save() ? u8"保存しました。" : u8"保存に失敗しました。";
 	}
 
+	if (ImGui::Button(u8"モデルだけ保存"))
+	{
+		status_ = MObjs().SaveObjects()
+			? u8"モデル設定を保存しました。"
+			: u8"モデル設定の保存に失敗しました。";
+	}
+
+	ImGui::SameLine();
+
+	if (ImGui::Button(u8"Actorだけ保存"))
+	{
+		status_ = MObjs().SaveActors()
+			? u8"Actor設定を保存しました。"
+			: u8"Actor設定の保存に失敗しました。";
+	}
+
 	if (ImGui::Button(u8"すべて保存"))
-		status_ = MObjs().SaveAll() ? u8"保存しました。" : u8"保存に失敗しました。";
+	{
+		status_ = MObjs().SaveAll()
+			? u8"すべての設定を保存しました。"
+			: u8"設定の保存に失敗しました。";
+	}
 
 	// ステータス表示
 	if (!status_.empty()) ImGui::TextUnformatted(status_.c_str());
