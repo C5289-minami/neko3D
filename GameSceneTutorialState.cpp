@@ -34,6 +34,9 @@ void GameSceneTutorialState::Enter()
 void GameSceneTutorialState::Tick(float deltaTime)
 {
 	DxPlus::Debug::SetFormatString(L"GameSceneTutorialState::Tick");
+
+	auto& player = gameScene_.GetGameContext()->GetPlayer();
+
 	const bool battleRequested = DxLib::CheckHitKey(KEY_INPUT_F2);
 	if (battleRequested)
 	{
@@ -41,7 +44,8 @@ void GameSceneTutorialState::Tick(float deltaTime)
 	}
 	else
 	{
-		gameScene_.FocusTutorialCamera(deltaTime, cameraPositionOffset_);
+		// player‚ðŒ©‘±‚¯‚é
+		gameScene_.GetTargetCamera().SetTarget(player.GetPosition() + Vec3::Up() * 100.0f);
 	}
 
 	const std::string requestedShot = battleRequested ? "Battle" : "Tutorial";
