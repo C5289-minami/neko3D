@@ -2,14 +2,6 @@
 #include "ActorBase.h"
 #include "Vector3.h"
 #include "DrawableObject.h"
-#include <vector>
-
-class JumpStand
-{
-public:
-	ModelObject jumpStandModel_;
-	ModelObject pillarModel_;
-};
 
 class Room : public ActorBase
 {
@@ -24,13 +16,7 @@ public:
 
    ModelObject& GetModelObject() { return roomModel_; }
 	const ModelObject& GetModelObject() const { return roomModel_; }
-
-	std::vector<JumpStand*> GetJumpStands() { return { &lowJumpStand_, &mediumJumpStand_, &highJumpStand_ }; }
-
 private:
 	ModelObject roomModel_;
-	JumpStand lowJumpStand_;
-	JumpStand mediumJumpStand_;
-	JumpStand highJumpStand_;
 };
 

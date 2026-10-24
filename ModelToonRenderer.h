@@ -1,10 +1,5 @@
 #pragma once
 #include "ModelType.h"
-#include <unordered_map>
-#include <vector>
-
-
-
 
 struct ModelObject;
 
@@ -57,18 +52,4 @@ private:
     int vertexShaderBone8Frame_{ -1 };
     // トゥーン設定をGPUへ渡すための定数バッファー
     int toonConstantBuffer_{ -1 };
-
-
-    struct TriangleListInfo
-    {
-        int index;
-        int vertexShader;
-    };
-
-    struct TriangleListCache
-    {
-        bool initialized = false;
-        std::vector<TriangleListInfo> lists;
-    };
-    mutable std::unordered_map<int, TriangleListCache> triangleListsCache_;
 };

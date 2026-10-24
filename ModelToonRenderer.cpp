@@ -5,7 +5,6 @@
 #include "ToonSettings.h"
 #include "ResourceManager.h"
 
-
 namespace
 {
     constexpr int ToonSettingsSlot = 5;
@@ -77,8 +76,6 @@ bool ModelToonRenderer::Init()
 
 void ModelToonRenderer::Release() noexcept
 {
-    triangleListsCache_.clear();
-
     if (toonConstantBuffer_ >= 0)
     {
         DeleteShaderConstantBuffer(toonConstantBuffer_);
@@ -218,62 +215,56 @@ void ModelToonRenderer::DrawTriangleLists(
 ) const
 {
     const int handle = RM().GetModel(model.GetModelKey());
-    if (handle < 0) return;
+
+    if (handle < 0)
+    {
+        return;
+    }
 
     model.ApplyTransform();
     model.ApplyCollisionColor();
 
-    // モデル情報は初回だけ取得する
-    auto& cache = triangleListsCache_[handle];
+    const int listCount = MV1GetTriangleListNum(handle);
 
-    if (!cache.initialized)
+    for (int i = 0; i < listCount; ++i)
     {
-        const int listCount = MV1GetTriangleListNum(handle);
+        const int vertexType =
+            MV1GetTriangleListVertexType(handle, i);
 
-        for (int i = 0; i < listCount; ++i)
+        int shader = -1;
+
+        switch (vertexType)
         {
-            const int vertexType =
-                MV1GetTriangleListVertexType(handle, i);
+        case DX_MV1_VERTEX_TYPE_1FRAME:
+        case DX_MV1_VERTEX_TYPE_NMAP_1FRAME:
+            shader = vertexShader_;
+            break;
 
-            int shader = -1;
+        case DX_MV1_VERTEX_TYPE_4FRAME:
+            shader = vertexShaderBone_;
+            break;
 
-            switch (vertexType)
-            {
-            case DX_MV1_VERTEX_TYPE_1FRAME:
-            case DX_MV1_VERTEX_TYPE_NMAP_1FRAME:
-                shader = vertexShader_;
-                break;
+        case DX_MV1_VERTEX_TYPE_NMAP_4FRAME:
+            shader = vertexShaderBoneNMap_;
+            break;
 
-            case DX_MV1_VERTEX_TYPE_4FRAME:
-                shader = vertexShaderBone_;
-                break;
+        case DX_MV1_VERTEX_TYPE_8FRAME:
+        case DX_MV1_VERTEX_TYPE_NMAP_8FRAME:
+            shader = vertexShaderBone8Frame_;
+            break;
 
-            case DX_MV1_VERTEX_TYPE_NMAP_4FRAME:
-                shader = vertexShaderBoneNMap_;
-                break;
-
-            case DX_MV1_VERTEX_TYPE_8FRAME:
-            case DX_MV1_VERTEX_TYPE_NMAP_8FRAME:
-                shader = vertexShaderBone8Frame_;
-                break;
-
-            default:
-                continue;
-            }
-
-            if (shader >= 0)
-            {
-                cache.lists.push_back({ i, shader });
-            }
+        default:
+            // 対応していない頂点タイプはスキップする。
+            continue;
         }
 
-        cache.initialized = true;
-    }
+        if (shader < 0)
+        {
+            continue;
+        }
 
-    // キャッシュした情報で描画する
-    for (const auto& list : cache.lists)
-    {
-        SetUseVertexShader(list.vertexShader);
-        MV1DrawTriangleList(handle, list.index);
+        SetUseVertexShader(shader);
+
+        MV1DrawTriangleList(handle, i);
     }
 }

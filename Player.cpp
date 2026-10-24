@@ -18,15 +18,12 @@ Player::Player()
 	: ActorBase("Player"), stateMachine_(*this)
 {
 	model_.SetOwner(*this);
-	model_.SetModelKey(ResourceKeys::Model_Player);
-
-	model_.SetObjectId("player_model");
-	model_.SetObjectName("Player");
 }
 
 
 void Player::Init()
 {
+	model_.SetModelKey(ResourceKeys::Model_Player);
 	const int modelHandle = RM().GetModel(model_.GetModelKey());
 	if (modelHandle < 0) return;
 
@@ -76,6 +73,12 @@ void Player::Update(float deltaTime)
 
 void Player::UpdateMovement(float deltaTime)
 {
+    // 移動入力を離している間は、壁登り用の接触状態を解除する。
+    if (!input_.isMoving)
+    {
+        touchingWall_ = false;
+    }
+
 	bool NearTheWall = false;
 	if (input_.isMoving)
 	{
@@ -90,7 +93,7 @@ void Player::UpdateMovement(float deltaTime)
 	//か
 	if (touchingWall_ && gravityEnabled_ && !IsDead() && !IsDamaging() &&
 		GetCurrentState() != PlayerStateType::WallJump &&
-		(NearTheWall || (!isGrounded_ && !input_.isMoving)))
+		NearTheWall)
 	{
 		stateMachine_.ChangeState(PlayerStateType::Climbing);
 	}

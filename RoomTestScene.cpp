@@ -336,22 +336,6 @@ void RoomTestScene::RenderDepth() const
 	modelToonRenderer_.DrawDepth(player.GetModelObject());
 	modelToonRenderer_.DrawDepth(boss.GetModelObject());
 
-	for (const auto& pillar : stage.GetPillarModelObjects())
-	{
-		modelToonRenderer_.DrawDepth(pillar);
-	}
-	for (const auto& model : stage.GetStageModelObjects())
-	{
-		modelToonRenderer_.DrawDepth(model);
-	}
-
-	for (const auto& jumpStand : gameContext->GetRoom().GetJumpStands())
-	{
-		ModelObject jumpStandModel = jumpStand->jumpStandModel_;
-		ModelObject pillarModel = jumpStand->pillarModel_;
-		modelToonRenderer_.DrawDepth(jumpStandModel);
-		modelToonRenderer_.DrawDepth(pillarModel);
-	}	
 
 }
 

@@ -22,6 +22,21 @@ void PlayerClimbingState::Enter()
 void PlayerClimbingState::Tick(float deltaTime)
 {
     const PlayerInput& input = player_.GetInput();
+
+    // 移動入力を離したら壁登りを終了し、空中では通常の重力で落下する。
+    if (!input.isMoving)
+    {
+        if (player_.IsGrounded() || !player_.IsGravityEnabled())
+        {
+            stateMachine_.ChangeState(PlayerStateType::Idle);
+        }
+        else
+        {
+            stateMachine_.ChangeState(PlayerStateType::NeutralJump);
+        }
+        return;
+    }
+
     if (input.jumpPressed && player_.IsTouchingWall() && player_.IsGravityEnabled())
     {
         stateMachine_.ChangeState(PlayerStateType::WallJump);
@@ -64,13 +79,8 @@ void PlayerClimbingState::Tick(float deltaTime)
         pushDirection_ = {};
     }
 
-    // 移動入力を離したら、頂上付近でも一定速度でゆっくり滑り落ちる。
-    if (!input.isMoving)
-    {
-        player_.SetVerticalSpeed(-player_.GetWallSlideSpeed());
-    }
-    // 入力中の登り方と、上端を越えない速度制限はこれまでどおり。
-    else if (player_.IsGrounded() || player_.IsNearWallTop())
+    // 入力中は、上端を越えないように登る速度を制限する。
+    if (player_.IsGrounded() || player_.IsNearWallTop())
     {
         float ClimbingSpeed = player_.GetClimbingSpeed();
         if (pushTime_ >= Const::PLAYER_WALL_CLIMB_WAIT && deltaTime > 0.0f)
@@ -82,7 +92,7 @@ void PlayerClimbingState::Tick(float deltaTime)
     }
     else if (pushingWall && pushTime_ >= Const::PLAYER_WALL_CLIMB_WAIT)
     {
-        // 滑ったあとに壁を押し直したときも、待ち時間後に登りへ戻す。
+        // 壁を押し続けたら、待ち時間後に登り始める。
         player_.SetVerticalSpeed(player_.GetClimbingSpeed());
     }
     DxPlus::Debug::SetFormatString(L"state:climbing");

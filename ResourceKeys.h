@@ -33,7 +33,6 @@ namespace ResourceKeys
     inline constexpr const wchar_t* Model_StageFbx  = L"Stage";
     inline constexpr const wchar_t* Model_stand_l   = L"stand_l";
     inline constexpr const wchar_t* Model_stand_m   = L"stand_m";
-	inline constexpr const wchar_t* Model_JumpStand = L"JumpStand";
 
     // ===== SpriteStudio =====
     inline constexpr const wchar_t* SpriteStudio_TitleCharacter = L"TitleCharacter";
