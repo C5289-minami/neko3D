@@ -18,12 +18,15 @@ Player::Player()
 	: ActorBase("Player"), stateMachine_(*this)
 {
 	model_.SetOwner(*this);
+	model_.SetModelKey(ResourceKeys::Model_Player);
+
+	model_.SetObjectId("player_model");
+	model_.SetObjectName("Player");
 }
 
 
 void Player::Init()
 {
-	model_.SetModelKey(ResourceKeys::Model_Player);
 	const int modelHandle = RM().GetModel(model_.GetModelKey());
 	if (modelHandle < 0) return;
 

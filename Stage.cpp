@@ -26,16 +26,14 @@ namespace
     float AlphaStageFadeSpeed = 2.4f;
 }
 
-void Stage::Init()
+Stage::Stage() : ActorBase("Stage") 
 {
-    //int modelHandle = DxLib::MV1DuplicateModel(RM().GetModel(ResourceKeys::Model_Stage));
     stagePillars_[0].SetModelKey(ResourceKeys::Model_hashira_l);
     stagePillars_[1].SetModelKey(ResourceKeys::Model_hashira_m);
     stagePillars_[2].SetModelKey(ResourceKeys::Model_hashira_s);
 
     stageModels_[0].SetModelKey(ResourceKeys::Model_stand_l);
     stageModels_[1].SetModelKey(ResourceKeys::Model_stand_m);
-
     // 地面の当たり判定に使うモデル
     stageModel_.SetModelKey(ResourceKeys::Model_StageFbx);
 
@@ -43,7 +41,27 @@ void Stage::Init()
     for (auto& model : stageModels_) model.SetOwner(*this);
     stageModel_.SetOwner(*this);
 
-    // SetupCollisionInfo();
+	stagePillars_[0].SetObjectId("PillarL");
+	stagePillars_[0].SetObjectName("PillarL");
+	stagePillars_[1].SetObjectId("PillarM");
+	stagePillars_[1].SetObjectName("PillarM");
+	stagePillars_[2].SetObjectId("PillarS");
+	stagePillars_[2].SetObjectName("PillarS");
+
+	stageModels_[0].SetObjectId("StageStandL");
+	stageModels_[0].SetObjectName("StageStandL");
+
+	stageModels_[1].SetObjectId("StageStandM");
+	stageModels_[1].SetObjectName("StageStandM");
+
+	stageModel_.SetObjectId("StageGround");
+	stageModel_.SetObjectName("StageGround");
+    
+}
+
+
+void Stage::Init()
+{
     Reset();
 }
 // 旧：Stage 専用だった判定処理。現在の処理は ModelCollision.cpp にある。
@@ -401,6 +419,7 @@ void Stage::DrawAlphaModel() const
 {
     if (alphaModelReady_) alphaModel_.Draw();
 }
+
 
 void Stage::DrawDebugUI()
 {
