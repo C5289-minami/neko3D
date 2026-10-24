@@ -151,20 +151,8 @@ void ShaderTest::Update(float deltaTime)
 
 	shaderToggleWasDown = shaderToggleDown;
 
-	// --- F3 でキャラを変える ---
-	static bool charToggleWasDown = false;
-	const bool charToggleDown =
-		DxLib::CheckHitKey(KEY_INPUT_F3) != 0;
 
-	if (charToggleDown && !charToggleWasDown)
-	{
-		if (gameContext->GetPlayer().GetModelObject().GetModelKey() == ResourceKeys::Model_Player)
-			gameContext->GetPlayer().GetModelObject().SetModelKey(ResourceKeys::Model_Paladin);
-		else
-			gameContext->GetPlayer().GetModelObject().SetModelKey(ResourceKeys::Model_Player);
-	}
-
-	charToggleWasDown = charToggleDown;
+	gameContext->GetPlayer().GetModelObject().SetModelKey(ResourceKeys::Model_Player);
 
 
 }
@@ -526,7 +514,7 @@ void ShaderTest::DrawScene(bool toonEnabled) const
 	for (const auto& pillar : gameContext->GetStage().GetPillarModelObjects())
 	{
 		drawActor(pillar);
-	
+
 	}
 	drawActor(gameContext->GetStage().GetModelObject());
 
