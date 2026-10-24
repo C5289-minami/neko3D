@@ -34,15 +34,13 @@ void ResourceManager::LoadAll()
 	LoadSprite(ResourceKeys::UI_ExitButton, L"./Data/Images/TitleUI/exit.png");
 
     // モデルの読み込み
-    LoadModel(ResourceKeys::Model_Stage,      L"./Data/Models/field.mv1");
-    LoadModel(ResourceKeys::Model_StageAlpha, L"./Data/Models/field.mv1");
-    LoadModel(ResourceKeys::Model_Paladin,    L"./Data/Models/Paladin.mv1");
-    LoadModel(ResourceKeys::Model_Player,    L"./Data/Models/player.mv1");
+    LoadModel(ResourceKeys::Model_Player,    L"./Data/Models/Player/player.mv1");
     LoadModel(ResourceKeys::Model_Boss,       L"./Data/Models/Boss/boss_test.mv1");
     LoadModel(ResourceKeys::Model_hashira_l, L"./Data/Models/stage/hashira_l.mv1");
     LoadModel(ResourceKeys::Model_hashira_m, L"./Data/Models/stage/hashira_m.mv1");
     LoadModel(ResourceKeys::Model_hashira_s, L"./Data/Models/stage/hashira_s.mv1");
     LoadModel(ResourceKeys::Model_StageFbx,  L"./Data/Models/stage/Stage.mv1");
+    LoadModel(ResourceKeys::Model_StageAlpha, L"./Data/Models/stage/Stage.mv1");
     LoadModel(ResourceKeys::Model_stand_l,  L"./Data/Models/stage/stand_l.mv1");
     LoadModel(ResourceKeys::Model_stand_m,  L"./Data/Models/stage/stand_m.mv1");
 	LoadModel(ResourceKeys::Model_Room, L"./Data/Models/Room/oheya.mv1");
