@@ -5,6 +5,11 @@
 #include "Vector3.h"
 
 struct ModelObject;
+#ifdef _DEBUG
+#include <functional>
+class Player;
+class Boss;
+#endif
 
 namespace Collision									// あたり判定用名前空間
 {
@@ -33,4 +38,28 @@ namespace Collision									// あたり判定用名前空間
 
 	bool IsHitSphereSphere(							// 球同士のあたり判定
 		const Sphere& sphereA, const Sphere& sphereB);
+#ifdef _DEBUG
+    struct DebugCanWatchState
+    {
+        bool touchingA{ false };
+        bool touchingB{ false };
+    };
+    using DebugSphereProvider = std::function<Sphere()>;
+
+    // 開始時に対象を登録する。判定・bool更新・描画は共通ループから実行する。
+    void RegisterDebugCanWatch(const void* owner, DebugSphereProvider sphereA, DebugSphereProvider sphereB);
+
+    // PlayerとBossを使う場合の登録。AがPlayer、BがBoss。
+    void RegisterDebugCanWatch(const void* owner, const Player& player, const Boss& boss);
+    void UnregisterDebugCanWatch(const void* owner);
+    DebugCanWatchState GetDebugCanWatchState(const void* owner);
+
+    // 共通ループから、シーン更新後に判定とboolを更新する。
+    void UpdateDebug();
+    // 共通ループから、シーン描画後に更新済みの球と接触状態を表示する。
+    void DrawDebug();
+    void ClearDebugCanWatch();
+    // 球を1個だけ描く共通処理。登録した対象の描画でも同じ処理を使う。
+    void DrawDebugSphere(const Sphere& sphere, unsigned int color);
+#endif
 }

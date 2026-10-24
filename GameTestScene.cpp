@@ -1,4 +1,4 @@
-// =============================
+﻿// =============================
 // Scenes/Game/GameTestScene.cpp
 // =============================
 #include "GameTestScene.h"
@@ -11,11 +11,13 @@
 #endif
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
+
 void GameTestScene::Init()
 {
-
-
 	gameContext->Reset();
+#ifdef _DEBUG
+    Collision::RegisterDebugCanWatch(this, gameContext->GetPlayer(), gameContext->GetBoss());
+#endif
 	playerCamera_.Reset();
 #ifndef NDEBUG
 	activeCamera_ = nullptr;
@@ -27,13 +29,13 @@ void GameTestScene::Init()
 	ToonSettingsManager::Load();
 	OutlineSettingsManager::Load();
 
-	// �g�D�[���`��ɕK�v�ȃV�F�[�_�[�Ɛݒ�o�b�t�@�[��������
+	// トゥーン描画に必要なシェーダーと設定バッファーを初期化
 	if (!modelToonRenderer_.Init())
-		DxPlus::Utils::FatalError(L"modelToonRenderer�̏��������s");
+		DxPlus::Utils::FatalError(L"modelToonRendererの初期化失敗");
 	if (!shaderEffects_.Init(DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT))
-		DxPlus::Utils::FatalError(L"shaderEffects�̏��������s");
+		DxPlus::Utils::FatalError(L"shaderEffectsの初期化失敗");
 
-	// toon�`��ƃA�E�g���C���`���L���ɂ���
+	// toon描画とアウトライン描画を有効にする
 	shaderEffects_.GetSettings().toonEnabled = true;
 	shaderEffects_.GetSettings().outlineEnabled = true;
 
@@ -69,7 +71,7 @@ void GameTestScene::Update(float deltaTime)
 	{
 		freeCamera_.FocusAt(gameContext->GetPlayer().GetPosition());
 	}
-	DxPlus::Debug::SetString(L" R: Transform���Z�b�g, F: FreeCamera���v���C���[�Ƀt�H�[�J�X");
+	DxPlus::Debug::SetString(L" R: Transformリセット, F: FreeCameraをプレイヤーにフォーカス");
 
 
 
@@ -95,14 +97,6 @@ void GameTestScene::Update(float deltaTime)
 		stage.UpdateAlphaModel(deltaTime, player);
 
 		boss.Update(deltaTime);
-		ModelObject playerModel = player.GetModelObject().WithParentTransform(
-			player.GetPosition(), player.GetRotation());
-		const bool touching = Collision::UpdateModelContact(playerModel, boss.GetModelObject());
-		player.GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
-		if (touching)
-		{
-			player.TakeDamage();
-		}
 
 
 		playerCamera_.Update(player.GetPosition(), boss.GetPosition(), deltaTime);
@@ -118,7 +112,7 @@ void GameTestScene::Update(float deltaTime)
 	}
 
 #ifndef NDEBUG
-	// ���l���͒��̓V�[���؂�ւ��̃L�[�𖳎�����
+	// 数値入力中はシーン切り替えのキーを無視する
 	if (ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard) return;
 #endif
 
@@ -128,7 +122,7 @@ void GameTestScene::Update(float deltaTime)
 	{
 		Scene* resultScene = SceneManager::GetInstance().GetScene(SceneID::Result);
 		SetNextScene(resultScene);
-		finished = true;    // �t�F�[�h�����̏ꍇ�� finished �� true �ɂ��Ă����K�v����
+		finished = true;    // フェード無しの場合は finished を true にしておく必要あり
 		return;
 	}
 }
@@ -154,8 +148,46 @@ void GameTestScene::Render() const
 	}
 }
 
+void GameTestScene::DrawImGui()
+{
+#ifndef NDEBUG
+    if (ImGui::Begin("Player Climbing / Wall Kick"))
+    {
+        auto& player = gameContext->GetPlayer();
+
+        ImGui::TextUnformatted(u8"壁登り");
+        float climbingSpeed = player.GetClimbingSpeed();
+        float wallSlideSpeed = player.GetWallSlideSpeed();
+        if (ImGui::DragFloat(u8"登る速度", &climbingSpeed, 1.0f, 0.0f, 5000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp))
+            player.SetClimbingSpeed(climbingSpeed);
+        if (ImGui::DragFloat(u8"滑り落ちる速度", &wallSlideSpeed, 1.0f, 0.0f, 5000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp))
+            player.SetWallSlideSpeed(wallSlideSpeed);
+        if (ImGui::Button(u8"壁登りの初期値に戻す"))
+            player.ResetClimbingSpeeds();
+
+        ImGui::Separator();
+        ImGui::TextUnformatted(u8"壁キック");
+        float wallJumpMoveSpeed = player.GetWallJumpMoveSpeed();
+        float wallJumpSpeed = player.GetWallJumpSpeed();
+        if (ImGui::DragFloat(u8"壁から離れる横速度", &wallJumpMoveSpeed, 10.0f, 0.0f, 5000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp))
+            player.SetWallJumpMoveSpeed(wallJumpMoveSpeed);
+        if (ImGui::DragFloat(u8"上向きの初速", &wallJumpSpeed, 10.0f, 0.0f, 5000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp))
+            player.SetWallJumpSpeed(wallJumpSpeed);
+        if (ImGui::Button(u8"壁キックの初期値に戻す"))
+            player.ResetWallJumpSpeeds();
+
+        ImGui::TextWrapped(u8"壁登りの速度は即時反映。壁キックは次に蹴ったときから反映します。");
+        ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
+    }
+    ImGui::End();
+#endif
+}
+
 void GameTestScene::End()
 {
+#ifdef _DEBUG
+    Collision::UnregisterDebugCanWatch(this);
+#endif
 }
 
 void GameTestScene::RenderDepth() const
@@ -213,7 +245,7 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	const auto& grid = gameContext->GetGrid();
 	const auto& room = gameContext->GetRoom();
 
-	// �g�D�[���V�F�[�_�[���g��Ȃ��ꍇ
+	// トゥーンシェーダーを使わない場合
 	if (!toonEnabled)
 	{
 		SetUsePixelShader(-1);
@@ -228,45 +260,30 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 		return;
 	}
 
-	// �g�D�[���`��J�n
+	// トゥーン描画開始
 	modelToonRenderer_.BeginPass();
 
-	const auto drawActor = [this](const ModelObject& model)
-		{
-			if (model.collisionHighlighted)
-			{
-				SetUsePixelShader(-1);
-				SetUseVertexShader(-1);
-				MV1SetUseOrigShader(FALSE);
-				model.Draw();
-				MV1SetUseOrigShader(TRUE);
-			}
-			else
-			{
-				modelToonRenderer_.Draw(model);
-			}
-		};
 	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
 		player.GetPosition(), player.GetRotation());
-	drawActor(playerModel);
-	// boss�̃��f����boss���̂̈ʒu�Ɖ�]��K�p���ĕ`�悷��
-	drawActor(boss.GetModelObject().WithParentTransform(
+	modelToonRenderer_.Draw(playerModel);
+	// bossのモデルにboss自体の位置と回転を適用して描画する
+	modelToonRenderer_.Draw(boss.GetModelObject().WithParentTransform(
 		boss.GetPosition(), boss.GetRotation()));
-	drawActor(stage.GetModelObject().WithParentTransform(
+	modelToonRenderer_.Draw(stage.GetModelObject().WithParentTransform(
 		stage.GetPosition(), stage.GetRotation()));
-	drawActor(stage.GetAlphaModelObject());
+	modelToonRenderer_.Draw(stage.GetAlphaModelObject());
 	for (const auto& pillar : stage.GetPillarModelObjects())
 	{
-		drawActor(pillar.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
+		modelToonRenderer_.Draw(pillar.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
 	}
 	for (const auto& model : stage.GetStageModelObjects())
 	{
-		drawActor(model.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
+		modelToonRenderer_.Draw(model.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
 	}
 	effectManager.Draw();
 	grid.Draw();
 
-	drawActor(room.GetModelObject());
+	modelToonRenderer_.Draw(room.GetModelObject());
 	modelToonRenderer_.EndPass();
 }
 

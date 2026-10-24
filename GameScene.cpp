@@ -21,9 +21,13 @@ void GameScene::Init()
 
     // チュートリアルも、使いたいモデルを登録するだけで同じ判定を利用できる。
     tutorialCollision_.Clear();
+    tutorialCollision_.AddModel(gameContext->GetRoom().GetModelObject(), ModelCollision::Surface::Floor);
     tutorialCollision_.AddModel(gameContext->GetRoom().GetModelObject(), ModelCollision::Surface::Wall);
+
+	
+
     for (const auto& pillar : gameContext->GetStage().GetPillarModelObjects())
-        tutorialCollision_.AddModel(pillar, ModelCollision::Surface::ClimbableWall);
+        tutorialCollision_.AddModel(pillar, ModelCollision::Surface::Pillar);
 
 	// トゥーン描画とアウトライン描画を有効にする
 	{
