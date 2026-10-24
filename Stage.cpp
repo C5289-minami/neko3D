@@ -28,9 +28,9 @@ namespace
 
 Stage::Stage() : ActorBase("Stage") 
 {
-    stagePillars_[0].SetModelKey(ResourceKeys::Model_hashira_l);
-    stagePillars_[1].SetModelKey(ResourceKeys::Model_hashira_m);
-    stagePillars_[2].SetModelKey(ResourceKeys::Model_hashira_s);
+    stagePillars_[0].SetModelKey(ResourceKeys::Model_PillarL);
+    stagePillars_[1].SetModelKey(ResourceKeys::Model_PillarM);
+    stagePillars_[2].SetModelKey(ResourceKeys::Model_PillarS);
 
     stageModels_[0].SetModelKey(ResourceKeys::Model_stand_l);
     stageModels_[1].SetModelKey(ResourceKeys::Model_stand_m);

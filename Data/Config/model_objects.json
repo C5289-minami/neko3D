@@ -12,6 +12,42 @@
                 0.0
             ]
         },
+        "HighJumpStand": {
+            "position": [
+                0.0,
+                -492.0,
+                0.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "LowJumpStand": {
+            "position": [
+                -1029.0,
+                0.0,
+                0.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "MediumJumpStand": {
+            "position": [
+                -623.0,
+                0.0,
+                0.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
         "Player": {
             "position": [
                 -9.0,
@@ -257,7 +293,7 @@
         "high_jump_stand_pillar": {
             "position": [
                 0.0,
-                0.0,
+                -395.0,
                 0.0
             ],
             "rotation": [
@@ -267,7 +303,7 @@
             ],
             "scale": [
                 1.0,
-                1.0,
+                2.700000047683716,
                 1.0
             ]
         },
@@ -325,7 +361,7 @@
         "medium_jump_stand_pillar": {
             "position": [
                 0.0,
-                0.0,
+                -252.0,
                 0.0
             ],
             "rotation": [
@@ -335,7 +371,7 @@
             ],
             "scale": [
                 1.0,
-                1.0,
+                1.600000023841858,
                 1.0
             ]
         },
@@ -357,6 +393,40 @@
             ]
         },
         "room_model": {
+            "position": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "room_pillar1": {
+            "position": [
+                -794.0,
+                0.0,
+                0.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "room_pillar2": {
             "position": [
                 0.0,
                 0.0,

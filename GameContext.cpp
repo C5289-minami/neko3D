@@ -20,13 +20,19 @@ void GameContext::Init()
     for (auto& model : stage.GetStageModelObjects())
         modelObjects.Add(model, stage);
     modelObjects.Add(boss.GetModelObject(), boss);
-    modelObjects.Add(room_.GetModelObject(), room_);
+    modelObjects.Add(room_.GetRoomObject(), room_);
+
+    for (auto& pillar : room_.GetPillars())
+    {
+        modelObjects.Add(*pillar, room_);
+	}
 
     for (auto& jumpStand : room_.GetJumpStands())
     {
-        modelObjects.Add(jumpStand->jumpStandModel_, room_);
-        modelObjects.Add(jumpStand->pillarModel_, room_);
+        modelObjects.Add(jumpStand->GetJumpStandModel(),*jumpStand);
+        modelObjects.Add(jumpStand->GetPillarModel(), *jumpStand);
 	}
+
 
     stage.Init();
     player.Init();

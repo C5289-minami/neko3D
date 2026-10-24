@@ -24,9 +24,9 @@ namespace ResourceKeys
 	inline constexpr const wchar_t* Model_Test = L"ModelTest";
 
     // ===== Stage Models =====
-    inline constexpr const wchar_t* Model_hashira_l = L"hashira_l";
-    inline constexpr const wchar_t* Model_hashira_m = L"hashira_m";
-    inline constexpr const wchar_t* Model_hashira_s = L"hashira_s";
+    inline constexpr const wchar_t* Model_PillarL = L"hashira_l";
+    inline constexpr const wchar_t* Model_PillarM = L"hashira_m";
+    inline constexpr const wchar_t* Model_PillarS = L"hashira_s";
     inline constexpr const wchar_t* Model_StageFbx  = L"Stage";
     inline constexpr const wchar_t* Model_StageAlpha = L"ModelStageAlpha";
     inline constexpr const wchar_t* Model_stand_l   = L"stand_l";

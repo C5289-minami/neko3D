@@ -36,14 +36,15 @@ void ResourceManager::LoadAll()
     // モデルの読み込み
     LoadModel(ResourceKeys::Model_Player,    L"./Data/Models/Player/player.mv1");
     LoadModel(ResourceKeys::Model_Boss,       L"./Data/Models/Boss/boss_test.mv1");
-    LoadModel(ResourceKeys::Model_hashira_l, L"./Data/Models/stage/hashira_l.mv1");
-    LoadModel(ResourceKeys::Model_hashira_m, L"./Data/Models/stage/hashira_m.mv1");
-    LoadModel(ResourceKeys::Model_hashira_s, L"./Data/Models/stage/hashira_s.mv1");
+    LoadModel(ResourceKeys::Model_PillarL, L"./Data/Models/stage/PillarL.mv1");
+    LoadModel(ResourceKeys::Model_PillarM, L"./Data/Models/stage/PillarM.mv1");
+    LoadModel(ResourceKeys::Model_PillarS, L"./Data/Models/stage/PillarS.mv1");
     LoadModel(ResourceKeys::Model_StageFbx,  L"./Data/Models/stage/Stage.mv1");
     LoadModel(ResourceKeys::Model_StageAlpha, L"./Data/Models/stage/Stage.mv1");
     LoadModel(ResourceKeys::Model_stand_l,  L"./Data/Models/stage/stand_l.mv1");
     LoadModel(ResourceKeys::Model_stand_m,  L"./Data/Models/stage/stand_m.mv1");
 	LoadModel(ResourceKeys::Model_Room, L"./Data/Models/Room/oheya.mv1");
+	LoadModel(ResourceKeys::Model_JumpStand, L"./Data/Models/Room/jumpstand.mv1");
 
 	//LoadModel(ResourceKeys::Model_Test, L"./Data/Models/test1.mv1");
 	// スプライトスタジオの読み込み

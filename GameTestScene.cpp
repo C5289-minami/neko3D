@@ -227,7 +227,7 @@ void GameTestScene::RenderDepth() const
 	}
 
 	modelToonRenderer_.DrawDepth(playerModel);
-	modelToonRenderer_.DrawDepth(room.GetModelObject());
+	modelToonRenderer_.DrawDepth(room.GetRoomObject());
 }
 
 void GameTestScene::DrawScene(bool toonEnabled) const
@@ -283,7 +283,7 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	effectManager.Draw();
 	grid.Draw();
 
-	modelToonRenderer_.Draw(room.GetModelObject());
+	modelToonRenderer_.Draw(room.GetRoomObject());
 	modelToonRenderer_.EndPass();
 }
 

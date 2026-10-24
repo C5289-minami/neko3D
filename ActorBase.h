@@ -24,9 +24,16 @@ public:
 	void SetPitch(float pitch) { pitch_ = pitch; }
    Vec3 GetRotation() const { return { pitch_, yaw_, 0.0f }; }
    const std::string& GetIdentifier() const { return actorID_; }
+
+   void SetOwner(ActorBase& owner) { owner_ = &owner; }
+   ActorBase* GetOwner() const { return owner_; }
+   // ワールド座標・ワールド回転
+   Vec3 GetWorldPosition() const;
+   Vec3 GetWorldRotation() const;
 protected:
    const std::string actorID_;
 	Vec3 position_{ 0.0f, 0.0f, 0.0f };
 	float yaw_{ 0.0f };
 	float pitch_{ 0.0f };
+	ActorBase* owner_{ nullptr };
 };

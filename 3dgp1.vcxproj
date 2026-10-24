@@ -218,6 +218,7 @@
     <ClInclude Include="GameStateMachine.h" />
     <ClInclude Include="GameStateType.h" />
     <ClInclude Include="GameTestScene.h" />
+    <ClInclude Include="JumpStand.h" />
     <ClInclude Include="ModelConfigScene.h" />
     <ClInclude Include="ModelObjectManager.h" />
     <ClInclude Include="ModelType.h" />
@@ -330,6 +331,7 @@
     <ClInclude Include="PlayerWallJump.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ActorBase.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraDirector.cpp" />
     <ClCompile Include="CameraObjectManager.cpp" />
