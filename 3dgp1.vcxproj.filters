@@ -687,6 +687,9 @@
     <ClInclude Include="GameSceneBattleState.h">
       <Filter>30_Scenes\Game\StateMashine\GameSceneBattleState</Filter>
     </ClInclude>
+    <ClInclude Include="JumpStand.h">
+      <Filter>40_Gameplay\Actors\Room</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -968,6 +971,7 @@
     <ClCompile Include="GameSceneBattleState.cpp">
       <Filter>30_Scenes\Game\StateMashine\GameSceneBattleState</Filter>
     </ClCompile>
+    <ClCompile Include="ActorBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Config\toon.json">

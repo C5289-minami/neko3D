@@ -3,60 +3,62 @@
 #include "Resourcekeys.h"
 #include "ModelObjectManager.h"
 
-// エラーを解消しつつ
-// コピーせずに無理やりロードするかコピーを実装
 
 
 Room::Room()
-	: ActorBase("Room")
+	: ActorBase("Room"),
+	lowJumpStand_("LowJumpStand"),
+	mediumJumpStand_("MediumJumpStand"),
+	highJumpStand_("HighJumpStand")
 {
 	roomModel_.SetModelKey(ResourceKeys::Model_Room);
+	pillar1_.SetModelKey(ResourceKeys::Model_PillarM);
+	pillar2_.SetModelKey(ResourceKeys::Model_PillarM);
 
-	lowJumpStand_.jumpStandModel_.SetModelKey(
-		ResourceKeys::Model_JumpStand);
-	lowJumpStand_.pillarModel_.SetModelKey(
-		ResourceKeys::Model_hashira_s);
+	for (auto& stand: this->GetJumpStands())
+	{
+		stand->GetJumpStandModel().SetModelKey(
+			ResourceKeys::Model_JumpStand);
+		stand->GetPillarModel().SetModelKey(
+			ResourceKeys::Model_PillarM);
 
-	mediumJumpStand_.jumpStandModel_.SetModelKey(
-		ResourceKeys::Model_JumpStand);
-	mediumJumpStand_.pillarModel_.SetModelKey(
-		ResourceKeys::Model_hashira_m);
+		stand->SetOwner(*this);
 
-	highJumpStand_.jumpStandModel_.SetModelKey(
-		ResourceKeys::Model_JumpStand);
-	highJumpStand_.pillarModel_.SetModelKey(
-		ResourceKeys::Model_hashira_l);
+		stand->Init();
+	}
 
 	roomModel_.SetOwner(*this);
-	lowJumpStand_.jumpStandModel_.SetOwner(*this);
-	lowJumpStand_.pillarModel_.SetOwner(*this);
-	mediumJumpStand_.jumpStandModel_.SetOwner(*this);
-	mediumJumpStand_.pillarModel_.SetOwner(*this);
-	highJumpStand_.jumpStandModel_.SetOwner(*this);
-	highJumpStand_.pillarModel_.SetOwner(*this);
-
+	pillar1_.SetOwner(*this);
+	pillar2_.SetOwner(*this);
 
 	// 部屋
 	roomModel_.SetObjectId("room_model");
 	roomModel_.SetObjectName("Room");
 
+	pillar1_.SetObjectId("room_pillar1");
+	pillar2_.SetObjectId("room_pillar2");
+	pillar1_.SetObjectName("Room Pillar1");
+	pillar2_.SetObjectName("Room Pillar2");
+
 	// 低いジャンプ台
-	lowJumpStand_.jumpStandModel_.SetObjectId("low_jump_stand");
-	lowJumpStand_.jumpStandModel_.SetObjectName("Low Jump Stand");
-	lowJumpStand_.pillarModel_.SetObjectId("low_jump_stand_pillar");
-	lowJumpStand_.pillarModel_.SetObjectName("Low Jump Stand Pillar");
+	lowJumpStand_.GetJumpStandModel().SetObjectId("low_jump_stand");
+	lowJumpStand_.GetJumpStandModel().SetObjectName("Low Jump Stand");
+	lowJumpStand_.GetPillarModel().SetObjectId("low_jump_stand_pillar");
+	lowJumpStand_.GetPillarModel().SetObjectName("Low Jump Stand Pillar");
 
 	// 中くらいのジャンプ台
-	mediumJumpStand_.jumpStandModel_.SetObjectId("medium_jump_stand");
-	mediumJumpStand_.jumpStandModel_.SetObjectName("Medium Jump Stand");
-	mediumJumpStand_.pillarModel_.SetObjectId("medium_jump_stand_pillar");
-	mediumJumpStand_.pillarModel_.SetObjectName("Medium Jump Stand Pillar");
+	mediumJumpStand_.GetJumpStandModel().SetObjectId("medium_jump_stand");
+	mediumJumpStand_.GetJumpStandModel().SetObjectName("Medium Jump Stand");
+	mediumJumpStand_.GetPillarModel().SetObjectId("medium_jump_stand_pillar");
+	mediumJumpStand_.GetPillarModel().SetObjectName("Medium Jump Stand Pillar");
 
 	// 高いジャンプ台
-	highJumpStand_.jumpStandModel_.SetObjectId("high_jump_stand");
-	highJumpStand_.jumpStandModel_.SetObjectName("High Jump Stand");
-	highJumpStand_.pillarModel_.SetObjectId("high_jump_stand_pillar");
-	highJumpStand_.pillarModel_.SetObjectName("High Jump Stand Pillar");
+	highJumpStand_.GetJumpStandModel().SetObjectId("high_jump_stand");
+	highJumpStand_.GetJumpStandModel().SetObjectName("High Jump Stand");
+	highJumpStand_.GetPillarModel().SetObjectId("high_jump_stand_pillar");
+	highJumpStand_.GetPillarModel().SetObjectName("High Jump Stand Pillar");
+
+
 }
 void Room::Init()
 {
@@ -69,15 +71,16 @@ void Room::Reset()
 	MObjs().LoadActorTransform(*this);
 
 	roomModel_.Load();
+	pillar1_.Load();
+	pillar2_.Load();
+	
 
-	lowJumpStand_.jumpStandModel_.Load();
-	lowJumpStand_.pillarModel_.Load();
-
-	mediumJumpStand_.jumpStandModel_.Load();
-	mediumJumpStand_.pillarModel_.Load();
-
-	highJumpStand_.jumpStandModel_.Load();
-	highJumpStand_.pillarModel_.Load();
+	for (auto& stand : this->GetJumpStands())
+	{
+		MObjs().LoadActorTransform(*stand);
+		stand->GetJumpStandModel().Load();
+		stand->GetPillarModel().Load();
+	}
 }
 
 void Room::Update(float deltaTime)
@@ -88,4 +91,10 @@ void Room::Update(float deltaTime)
 void Room::Draw() const
 {
 	roomModel_.Draw();
+	pillar1_.Draw();
+	pillar2_.Draw();
+
+	lowJumpStand_.Draw();
+	mediumJumpStand_.Draw();
+	highJumpStand_.Draw();
 }

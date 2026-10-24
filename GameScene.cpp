@@ -21,8 +21,8 @@ void GameScene::Init()
 
     // チュートリアルも、使いたいモデルを登録するだけで同じ判定を利用できる。
     tutorialCollision_.Clear();
-    tutorialCollision_.AddModel(gameContext->GetRoom().GetModelObject(), ModelCollision::Surface::Floor);
-    tutorialCollision_.AddModel(gameContext->GetRoom().GetModelObject(), ModelCollision::Surface::Wall);
+    tutorialCollision_.AddModel(gameContext->GetRoom().GetRoomObject(), ModelCollision::Surface::Floor);
+    tutorialCollision_.AddModel(gameContext->GetRoom().GetRoomObject(), ModelCollision::Surface::Wall);
 
 	
 
@@ -228,7 +228,7 @@ void GameScene::RenderDepth() const
 	const auto& effectManager = gameContext->GetEffectManager();
 	const auto& room = gameContext->GetRoom();
 
-	modelToonRenderer_.DrawDepth(room.GetModelObject());
+	modelToonRenderer_.DrawDepth(room.GetRoomObject());
 	modelToonRenderer_.DrawDepth(stage.GetModelObject());
 	modelToonRenderer_.DrawDepth(stage.GetAlphaModelObject());
 	modelToonRenderer_.DrawDepth(player.GetModelObject());
@@ -299,7 +299,7 @@ void GameScene::DrawScene(bool toonEnabled) const
 	effectManager.Draw();
 	grid.Draw();
 
-	drawActor(room.GetModelObject());
+	drawActor(room.GetRoomObject());
 	modelToonRenderer_.EndPass();
 }
 

@@ -330,7 +330,7 @@ void RoomTestScene::RenderDepth() const
 			cameraDirector_.GetCurrentPose());
 	}
 
-	modelToonRenderer_.DrawDepth(room.GetModelObject());
+	modelToonRenderer_.DrawDepth(room.GetRoomObject());
 	modelToonRenderer_.DrawDepth(stage.GetModelObject());
 	modelToonRenderer_.DrawDepth(stage.GetAlphaModelObject());
 	modelToonRenderer_.DrawDepth(player.GetModelObject());
@@ -347,8 +347,8 @@ void RoomTestScene::RenderDepth() const
 
 	for (const auto& jumpStand : gameContext->GetRoom().GetJumpStands())
 	{
-		ModelObject jumpStandModel = jumpStand->jumpStandModel_;
-		ModelObject pillarModel = jumpStand->pillarModel_;
+		ModelObject jumpStandModel = jumpStand->GetJumpStandModel();
+		ModelObject pillarModel = jumpStand->GetPillarModel();
 		modelToonRenderer_.DrawDepth(jumpStandModel);
 		modelToonRenderer_.DrawDepth(pillarModel);
 	}	
@@ -398,7 +398,7 @@ void RoomTestScene::DrawScene(bool toonEnabled) const
 	const auto& player = gameContext->GetPlayer();
 	const ModelObject playerModel = player.GetModelObject();
 	drawActor(playerModel);
-	drawActor(room.GetModelObject());
+	drawActor(room.GetRoomObject());
 	drawActor(gameContext->GetStage().GetModelObject());
 	for (const auto& pillar : gameContext->GetStage().GetPillarModelObjects())
 	{

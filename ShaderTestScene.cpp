@@ -441,7 +441,7 @@ void ShaderTest::RenderDepth() const
 
 	const auto& player = gameContext->GetPlayer().GetModelObject();
 	const auto& boss = gameContext->GetBoss().GetModelObject();
-	const auto& room = gameContext->GetRoom().GetModelObject();
+	const auto& room = gameContext->GetRoom().GetRoomObject();
 
 	//const ModelObject playerModel = player.GetModelObject().WithParentTransform(
 	//	player.GetPosition(), player.GetRotation());
@@ -505,7 +505,7 @@ void ShaderTest::DrawScene(bool toonEnabled) const
 	const ModelObject& playerModel = player.GetModelObject();
 	drawActor(playerModel);
 	drawActor(gameContext->GetBoss().GetModelObject());
-	drawActor(gameContext->GetRoom().GetModelObject());
+	drawActor(gameContext->GetRoom().GetRoomObject());
 
 	for (const auto& stages : gameContext->GetStage().GetStageModelObjects())
 	{

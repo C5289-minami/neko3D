@@ -256,25 +256,25 @@ void ModelObject::ApplyTransform(Vec3 masterPos) const
 
     if (owner_)
     {
-        const Vec3 parentPosition = owner_->GetPosition();
-        const Vec3 parentRotation = owner_->GetRotation();
+        // 直接の親だけでなく、その親の変換も取得する
+        const Vec3 parentPosition = owner_->GetWorldPosition();
+        const Vec3 parentRotation = owner_->GetWorldRotation();
 
-        // 親の回転行列
         const RotationMatrix parentMatrix =
             MakeRotationMatrix(parentRotation);
 
-        // 親と子の回転を合成
         const RotationMatrix worldMatrix =
-            Multiply(parentMatrix, MakeRotationMatrix(rotation));
+            Multiply(
+                parentMatrix,
+                MakeRotationMatrix(rotation)
+            );
 
-        // 子のワールド座標
         worldPosition =
-            parentPosition + TransformVector(position, parentMatrix);
+            parentPosition
+            + TransformVector(position, parentMatrix);
 
-        // DxLibに渡す回転角度
         worldRotation = ToRotationXYZ(worldMatrix);
 
-        // 合成済みの回転行列で中心位置を補正
         rotatedCenter = TransformVector(center, worldMatrix);
     }
     else
@@ -285,7 +285,6 @@ void ModelObject::ApplyTransform(Vec3 masterPos) const
     const Vec3 modelPosition =
         worldPosition + masterPos - rotatedCenter;
 
-    // 共通の変換設定
     MV1SetPosition(
         handle,
         DxConv::ToVECTOR(modelPosition)

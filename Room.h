@@ -3,18 +3,12 @@
 #include "Vector3.h"
 #include "DrawableObject.h"
 #include <vector>
-
-class JumpStand
-{
-public:
-	ModelObject jumpStandModel_;
-	ModelObject pillarModel_;
-};
+#include "JumpStand.h"
 
 class Room : public ActorBase
 {
 public:
-   Room();
+	Room();
 	~Room() = default;
 
 	void Init() override;
@@ -22,13 +16,15 @@ public:
 	void Update(float deltaTime) override;
 	void Draw() const override;
 
-   ModelObject& GetModelObject() { return roomModel_; }
-	const ModelObject& GetModelObject() const { return roomModel_; }
-
+	ModelObject& GetRoomObject() { return roomModel_; }
+	const ModelObject& GetRoomObject() const { return roomModel_; }
+	std::vector<ModelObject*> GetPillars() { return { &pillar1_, &pillar2_ }; }
 	std::vector<JumpStand*> GetJumpStands() { return { &lowJumpStand_, &mediumJumpStand_, &highJumpStand_ }; }
 
 private:
 	ModelObject roomModel_;
+	ModelObject pillar1_;
+	ModelObject pillar2_;
 	JumpStand lowJumpStand_;
 	JumpStand mediumJumpStand_;
 	JumpStand highJumpStand_;

@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <string>
+#include <functional>
 
 namespace
 {
@@ -126,36 +127,84 @@ void ModelConfigScene::DrawImGui()
 	ImGui::TextWrapped(u8"  4.	保存する。");
 	ImGui::TextWrapped(u8"  5.	右クリック中にカメラ操作。WASD・QEで移動、マウスで視点を操作する。");
 	ImGui::TextWrapped(u8"   設定はData / Config / model_objects.jsonに保存される。");
+	// Actorを親子階層で表示する
+	std::function<void(ActorBase*)> drawActorTree;
+
+	drawActorTree = [&](ActorBase* actor)
+		{
+			if (!actor) return;
+
+			const std::string name = actor->GetIdentifier();
+
+			ImGui::PushID(actor);
+
+			const ImGuiTreeNodeFlags flags =
+				ImGuiTreeNodeFlags_DefaultOpen |
+				(selectedActor_ == actor
+					? ImGuiTreeNodeFlags_Selected
+					: 0);
+
+			const bool expanded =
+				ImGui::TreeNodeEx(name.c_str(), flags);
+
+			if (ImGui::IsItemClicked())
+			{
+				selectedActor_ = actor;
+				selected_ = nullptr;
+			}
+
+			if (expanded)
+			{
+				// このActorが管理するModelObjectを表示
+				for (auto* object : objects)
+				{
+					if (!object || MObjs().GetOwner(*object) != actor)
+					{
+						continue;
+					}
+
+					const std::string label = GetObjectLabel(*object);
+
+					ImGui::PushID(object);
+
+					if (ImGui::Selectable(label.c_str(), selected_ == object))
+					{
+						selected_ = object;
+						selectedActor_ = nullptr;
+					}
+
+					ImGui::PopID();
+				}
+
+				// このActorを親に持つActorを再帰的に表示
+				for (const auto& [childName, child] : actors)
+				{
+					if (!child || child->GetOwner() != actor)
+					{
+						continue;
+					}
+
+					drawActorTree(child);
+				}
+
+				ImGui::TreePop();
+			}
+
+			ImGui::PopID();
+		};
+
+	// 親を持たないActorから開始
 	for (const auto& [name, actor] : actors)
 	{
-		if (!actor) continue;
-		ImGui::PushID(actor);
-		const ImGuiTreeNodeFlags actorFlags = ImGuiTreeNodeFlags_DefaultOpen |
-			(selectedActor_ == actor ? ImGuiTreeNodeFlags_Selected : 0);
-		const bool expanded = ImGui::TreeNodeEx(name.c_str(), actorFlags);
-		if (ImGui::IsItemClicked())
+		if (actor && !actor->GetOwner())
 		{
-			selectedActor_ = actor;
-			selected_ = nullptr;
+			drawActorTree(actor);
 		}
-		if (expanded)
-		{
-			for (auto* object : objects)
-			{
-				if (!object || MObjs().GetOwner(*object) != actor) continue;
+	}
 
-				const std::string label = GetObjectLabel(*object);
-				ImGui::PushID(object);
-				if (ImGui::Selectable(label.c_str(), selected_ == object))
-				{
-					selected_ = object;
-					selectedActor_ = nullptr;
-				}
-				ImGui::PopID();
-			}
-			ImGui::TreePop();
-		}
-		ImGui::PopID();
+	if (actors.empty())
+	{
+		ImGui::TextDisabled(u8"登録されたActorはありません。");
 	}
 
 	if (actors.empty())
@@ -228,8 +277,28 @@ void ModelConfigScene::DrawImGui()
 			status_ = selected_->Save() ? u8"保存しました。" : u8"保存に失敗しました。";
 	}
 
+	if (ImGui::Button(u8"モデルだけ保存"))
+	{
+		status_ = MObjs().SaveObjects()
+			? u8"モデル設定を保存しました。"
+			: u8"モデル設定の保存に失敗しました。";
+	}
+
+	ImGui::SameLine();
+
+	if (ImGui::Button(u8"Actorだけ保存"))
+	{
+		status_ = MObjs().SaveActors()
+			? u8"Actor設定を保存しました。"
+			: u8"Actor設定の保存に失敗しました。";
+	}
+
 	if (ImGui::Button(u8"すべて保存"))
-		status_ = MObjs().SaveAll() ? u8"保存しました。" : u8"保存に失敗しました。";
+	{
+		status_ = MObjs().SaveAll()
+			? u8"すべての設定を保存しました。"
+			: u8"設定の保存に失敗しました。";
+	}
 
 	// ステータス表示
 	if (!status_.empty()) ImGui::TextUnformatted(status_.c_str());
