@@ -27,6 +27,15 @@ Room::Room()
 	highJumpStand_.pillarModel_.SetModelKey(
 		ResourceKeys::Model_hashira_l);
 
+	roomModel_.SetOwner(*this);
+	lowJumpStand_.jumpStandModel_.SetOwner(*this);
+	lowJumpStand_.pillarModel_.SetOwner(*this);
+	mediumJumpStand_.jumpStandModel_.SetOwner(*this);
+	mediumJumpStand_.pillarModel_.SetOwner(*this);
+	highJumpStand_.jumpStandModel_.SetOwner(*this);
+	highJumpStand_.pillarModel_.SetOwner(*this);
+
+
 	// •”‰®
 	roomModel_.SetObjectId("room_model");
 	roomModel_.SetObjectName("Room");
