@@ -16,7 +16,7 @@ class Player;
 class Stage : public ActorBase
 {
 public:
-  Stage() : ActorBase("Stage") {}
+  Stage();
 	~Stage() = default;
 
 	// accessor
@@ -64,8 +64,6 @@ private:
     std::array<ModelObject, 3> stagePillars_{};	
 
     // std::array<int, 3> pillarCollisionHandles_{ -1, -1, -1 };
-
-
  
     std::array<ModelObject, 2> stageModels_{};
     // 当たり判定に使えるモデルハンドル。未準備・失敗時は -1。

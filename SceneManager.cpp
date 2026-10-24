@@ -39,20 +39,20 @@ void SceneManager::Init()
 	ResourceManager::GetInstance().LoadAll();
 	gameContext.Init();
 
-    std::vector<Scene*> scenes{
+	std::vector<Scene*> scenes{
 		&titleScene,
 		&gameScene,
 		&resultScene
 	};
 #ifndef NDEBUG
-   scenes.insert(scenes.end(), {
-		&shaderTestScene,
-		&ssFlipTestScene,
-		&roomTestScene,
-		&statusTestScene,
-		&modelConfigScene,
-		&gameTestScene
-	});
+	scenes.insert(scenes.end(), {
+		 &shaderTestScene,
+		 &ssFlipTestScene,
+		 &roomTestScene,
+		 &statusTestScene,
+		 &modelConfigScene,
+		 &gameTestScene
+		});
 #endif
 	for (Scene* currentScene : scenes)
 		currentScene->SetGameContext(&gameContext);
@@ -68,9 +68,9 @@ void SceneManager::Shutdown()
 {
 	// UI が所有する SpriteStudio Player を、参照先リソースより先に破棄する。
 	UIM().Clear();
-    // 判定用の複製モデルを、元モデルと DxLib より先に解放する。
-    gameScene.End();
-    gameContext.GetStage().GetCollision().Clear();
+	// 判定用の複製モデルを、元モデルと DxLib より先に解放する。
+	gameScene.End();
+	gameContext.GetStage().GetCollision().Clear();
 	ResourceManager::GetInstance().UnloadAll();
 
 #ifndef NDEBUG
@@ -112,7 +112,7 @@ void SceneManager::Run()
 {
 	if (scene)
 	{
-      UIM().Init();
+		UIM().Init();
 		scene->Init();
 	}
 	while (DxPlus::GameLoop(true))
@@ -147,7 +147,7 @@ void SceneManager::Run()
 
 				if (!next) { DxLib::ScreenFlip(); break; }
 				SetScene(next);
-               UIM().Init();
+				UIM().Init();
 				next->Init();
 			}
 
@@ -155,6 +155,7 @@ void SceneManager::Run()
 			scene->DrawFadeOverlay();
 
 #ifndef NDEBUG
+
 			//DebugUI
 			if (runConfig.enableDebugUI && runConfig.windowed)
 			{

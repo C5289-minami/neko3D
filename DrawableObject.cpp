@@ -106,8 +106,9 @@ void ModelObject::Init()
 
 bool ModelObject::Load(const std::string& filePath)
 {
-	// モデルキーが空の場合は読み込みをスキップ
-    if (modelKey.empty()) return false;
+    if (modelKey.empty() || objectId.empty())
+        return false;
+
 
 	// JSONファイルを読み込み、オブジェクトの位置、スケール、回転を設定
     try
@@ -123,7 +124,7 @@ bool ModelObject::Load(const std::string& filePath)
 		// "objects"キーが存在し、オブジェクトが存在するか確認
         const auto objects = json.find("objects");
         if (objects == json.end() || !objects->is_object()) return false;
-        const auto saved = objects->find(NarrowModelKey(modelKey));
+        const auto saved = objects->find(objectId);
         if (saved == objects->end() || !saved->is_object()) return false;
 
 		// JSONからVec3を読み込むためのラムダ関数
@@ -182,7 +183,15 @@ bool ModelObject::Save(const std::string& filePath) const
         if (!json.contains("objects") || !json["objects"].is_object())
             json["objects"] = nlohmann::json::object();
 
-        json["objects"][NarrowModelKey(modelKey)] = {
+
+
+
+        if (objectId.empty())
+        {
+            return false;
+        }
+
+        json["objects"][objectId] = {
             { "position", { position.x, position.y, position.z } },
             { "scale", { scale.x, scale.y, scale.z } },
             { "rotation", { rotation.x, rotation.y, rotation.z } }
@@ -226,17 +235,23 @@ void ModelObject::ApplyTransform(Vec3 masterPos) const
     const int handle = RM().GetModel(modelKey);
     if (handle < 0) return;
 
-    const Vec3 modelPosition = position + masterPos - RotateXYZ(center, rotation);
+    if (owner_)
+    {
+        const ModelObject world = WithParentTransform(
+            owner_->GetPosition(),
+            owner_->GetRotation()
+        );
+
+        world.ApplyTransform(masterPos);
+        return;
+    }
+
+    const Vec3 modelPosition =
+        position + masterPos - RotateXYZ(center, rotation);
 
     MV1SetPosition(handle, DxConv::ToVECTOR(modelPosition));
     MV1SetScale(handle, DxConv::ToVECTOR(scale));
     MV1SetRotationXYZ(handle, DxConv::ToVECTOR(rotation));
-    if (owner_)
-    {
-        WithParentTransform(owner_->GetPosition(), owner_->GetRotation()).ApplyTransform(masterPos);
-        return;
-    }
-
 }
 
 void ModelObject::Draw(Vec3 masterPos) const

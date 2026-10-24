@@ -66,9 +66,18 @@ struct ModelObject
 	void SetModelType(ModelType type) { modelType_ = type; }
 
 
-	
+	// 内部管理用のゲッターセッター
+	const std::string& GetObjectName() const { return objectName; }
+	void SetObjectName(const std::string& value) { objectName = value; }
+	const std::string& GetObjectId() const { return objectId; }
+	void SetObjectId(const std::string& value) { objectId = value; }
 
 private:
+	// 内部管理用
+	std::string objectName;
+	std::string objectId;
+
+	// modelの判別Key
 	std::wstring modelKey;
 	Vec3 position{};
 	Vec3 scale{ 1.0f, 1.0f, 1.0f };
