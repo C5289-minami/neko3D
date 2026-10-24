@@ -19,6 +19,17 @@ namespace
 		value = { components[0], components[1], components[2] };
 		return true;
 	}
+	std::string GetObjectLabel(const ModelObject& object)
+	{
+		if (!object.GetObjectName().empty())
+			return object.GetObjectName();
+
+		if (!object.GetObjectId().empty())
+			return object.GetObjectId();
+
+		const auto& key = object.GetModelKey();
+		return std::string(key.begin(), key.end());
+	}
 }
 
 void ModelConfigScene::Init()
@@ -133,9 +144,7 @@ void ModelConfigScene::DrawImGui()
 			{
 				if (!object || MObjs().GetOwner(*object) != actor) continue;
 
-              const auto& modelKey = object->GetModelKey();
-				const std::string modelName(modelKey.begin(), modelKey.end());
-				const std::string label = modelName + " (Local)";
+				const std::string label = GetObjectLabel(*object);
 				ImGui::PushID(object);
 				if (ImGui::Selectable(label.c_str(), selected_ == object))
 				{
@@ -161,12 +170,11 @@ void ModelConfigScene::DrawImGui()
 		for (auto* object : objects)
 		{
 			if (!object || MObjs().GetOwner(*object)) continue;
-			// modelKeyをUTF-8に変換して表示
-          const auto& modelKey = object->GetModelKey();
-			const std::string modelName(modelKey.begin(), modelKey.end());
+			const std::string label = GetObjectLabel(*object);
 			ImGui::PushID(object);
 			// 選択中のオブジェクトをハイライト
-			if (ImGui::Selectable(modelName.c_str(), !selectedActor_ && selected_ == object))
+			if (ImGui::Selectable(label.c_str(),
+				!selectedActor_ && selected_ == object))
 			{
 				selected_ = object;
 				selectedActor_ = nullptr;
@@ -239,19 +247,9 @@ void ModelConfigScene::RenderDepth() const
 	{
 		if (!object) continue;
 
-		const auto* owner = MObjs().GetOwner(*object);
-
-		const ModelObject drawObject = owner
-			? object->WithParentTransform(
-				owner->GetPosition(),
-				owner->GetRotation())
-			: *object;
-
-		// トライアングルリストごとに
-		modelToonRenderer_.DrawDepth(drawObject);
+		modelToonRenderer_.DrawDepth(*object);
 	}
 }
-
 void ModelConfigScene::DrawScene(bool toonEnabled) const
 {
 	const auto& objects = MObjs().GetObjects();
@@ -267,11 +265,7 @@ void ModelConfigScene::DrawScene(bool toonEnabled) const
 		for (const auto* object : objects)
 		{
 			if (!object) continue;
-			const auto* owner = MObjs().GetOwner(*object);
-			if (owner)
-				object->WithParentTransform(owner->GetPosition(), owner->GetRotation()).Draw();
-			else
-				object->Draw();
+			object->Draw();
 		}
 
 		return;
@@ -299,11 +293,7 @@ void ModelConfigScene::DrawScene(bool toonEnabled) const
 	for (const auto* object : objects)
 	{
 		if (!object) continue;
-		const auto* owner = MObjs().GetOwner(*object);
-		const ModelObject drawObject = owner
-			? object->WithParentTransform(owner->GetPosition(), owner->GetRotation())
-			: *object;
-		drawActor(drawObject);
+		drawActor(*object);
 	}
 
 	modelToonRenderer_.EndPass();

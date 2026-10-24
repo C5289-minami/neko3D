@@ -9,10 +9,14 @@
 
 
 Boss::Boss()
-  : ActorBase("Boss"), stateMachine_(*this)
+	: ActorBase("Boss"), stateMachine_(*this)
 {
- model_.SetOwner(*this);
- model_.SetModelKey(ResourceKeys::Model_Boss);
+	model_.SetOwner(*this);
+	model_.SetModelKey(ResourceKeys::Model_Boss);
+
+	model_.SetObjectId("boss_model");
+	model_.SetObjectName("Boss");
+
 	currentAnimIndex_ = 0;
 }
 
@@ -38,7 +42,7 @@ void Boss::Reset()
 	stateMachine_.Initialize();
 
 	// 更新を止めても描画できるように初期ポーズを用意する
-    animation_.Play3D(RM().GetModel(model_.GetModelKey()), currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
+	animation_.Play3D(RM().GetModel(model_.GetModelKey()), currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
 	animation_.Update(0.0f);
 }
 
@@ -48,7 +52,7 @@ void Boss::Update(float deltaTime)
 	stateMachine_.Tick(deltaTime);
 	position_ += velocity_ * deltaTime;
 
- const int modelHandle = RM().GetModel(model_.GetModelKey());
+	const int modelHandle = RM().GetModel(model_.GetModelKey());
 	animation_.Play3D(modelHandle, currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
 	animation_.Update(deltaTime);
 
@@ -57,9 +61,9 @@ void Boss::Update(float deltaTime)
 
 void Boss::Draw() const
 {
-    const ModelObject worldModel = model_.WithParentTransform(GetPosition(), GetRotation());
+	const ModelObject worldModel = model_.WithParentTransform(GetPosition(), GetRotation());
 	worldModel.ApplyCollisionColor();
-  animation_.Draw3D(worldModel.GetPosition(), worldModel.GetScale(), worldModel.GetRotation());
+	animation_.Draw3D(worldModel.GetPosition(), worldModel.GetScale(), worldModel.GetRotation());
 }
 
 void Boss::SetMoveDirection(const Vec3& moveDirection, float speed)
@@ -93,7 +97,7 @@ float Boss::GetAnimTotalTime(BossAnimType::Type type) const
 	float totalTime{};
 	float totalFlame{};
 	int index = static_cast<int>(type);
-   int modelHandle = RM().GetModel(model_.GetModelKey());
+	int modelHandle = RM().GetModel(model_.GetModelKey());
 
 	totalFlame = DxLib::MV1GetAnimTotalTime(modelHandle, index);
 	totalTime = totalFlame / Const::ANIM_FPS; // 秒数に変換

@@ -14,6 +14,12 @@ namespace
 {
     using RotationMatrix = std::array<std::array<float, 3>, 3>;
 
+	// ヘルパー関数: std::wstringをstd::stringに変換する
+    std::string NarrowModelKey(const std::wstring& key)
+    {
+        return { key.begin(), key.end() };
+    }
+
 	// ヘルパー関数: 回転を考慮してベクトルを回転させる
     Vec3 RotateXYZ(const Vec3& value, const Vec3& rotation)
     {
@@ -56,8 +62,6 @@ namespace
             { cosY * sinZ, sinX * sinY * sinZ + cosX * cosZ, cosX * sinY * sinZ - sinX * cosZ },
             { -sinY, sinX * cosY, cosX * cosY }
         }};
-
-
     }
 
     RotationMatrix Multiply(const RotationMatrix& left, const RotationMatrix& right)
@@ -84,25 +88,6 @@ namespace
         }
 
         return { std::atan2(-matrix[1][2], matrix[1][1]), y, 0.0f };
-    }
-
-    Vec3 TransformVector(
-        const Vec3& value,
-        const RotationMatrix& matrix)
-    {
-        return {
-            matrix[0][0] * value.x
-                + matrix[0][1] * value.y
-                + matrix[0][2] * value.z,
-
-            matrix[1][0] * value.x
-                + matrix[1][1] * value.y
-                + matrix[1][2] * value.z,
-
-            matrix[2][0] * value.x
-                + matrix[2][1] * value.y
-                + matrix[2][2] * value.z
-        };
     }
 }
 
@@ -250,56 +235,23 @@ void ModelObject::ApplyTransform(Vec3 masterPos) const
     const int handle = RM().GetModel(modelKey);
     if (handle < 0) return;
 
-    Vec3 worldPosition = position;
-    Vec3 worldRotation = rotation;
-    Vec3 rotatedCenter{};
-
     if (owner_)
     {
-        const Vec3 parentPosition = owner_->GetPosition();
-        const Vec3 parentRotation = owner_->GetRotation();
+        const ModelObject world = WithParentTransform(
+            owner_->GetPosition(),
+            owner_->GetRotation()
+        );
 
-        // 親の回転行列
-        const RotationMatrix parentMatrix =
-            MakeRotationMatrix(parentRotation);
-
-        // 親と子の回転を合成
-        const RotationMatrix worldMatrix =
-            Multiply(parentMatrix, MakeRotationMatrix(rotation));
-
-        // 子のワールド座標
-        worldPosition =
-            parentPosition + TransformVector(position, parentMatrix);
-
-        // DxLibに渡す回転角度
-        worldRotation = ToRotationXYZ(worldMatrix);
-
-        // 合成済みの回転行列で中心位置を補正
-        rotatedCenter = TransformVector(center, worldMatrix);
-    }
-    else
-    {
-        rotatedCenter = RotateXYZ(center, rotation);
+        world.ApplyTransform(masterPos);
+        return;
     }
 
     const Vec3 modelPosition =
-        worldPosition + masterPos - rotatedCenter;
+        position + masterPos - RotateXYZ(center, rotation);
 
-    // 共通の変換設定
-    MV1SetPosition(
-        handle,
-        DxConv::ToVECTOR(modelPosition)
-    );
-
-    MV1SetScale(
-        handle,
-        DxConv::ToVECTOR(scale)
-    );
-
-    MV1SetRotationXYZ(
-        handle,
-        DxConv::ToVECTOR(worldRotation)
-    );
+    MV1SetPosition(handle, DxConv::ToVECTOR(modelPosition));
+    MV1SetScale(handle, DxConv::ToVECTOR(scale));
+    MV1SetRotationXYZ(handle, DxConv::ToVECTOR(rotation));
 }
 
 void ModelObject::Draw(Vec3 masterPos) const
