@@ -59,18 +59,29 @@ public:
 	// 回転
 	void Turn(float direction, float speed, float deltaTime);
 	void TurnTowards(const Vec3& moveDir, float deltaTime);
-	//Playerの斜め移動
-	void PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& movementCenter);
+	// ステージ中心を基準に前後・左右へ移動する。
+	void MoveAroundStage(float deltaTime, Vec3& playerPos, const Vec3& movementCenter);
 
 	// ジャンプ
 	void JumpAction();
-	void StartLungingJump(const Vec3& moveDir);
+    void StartDoubleJump();
+    bool CanDoubleJump() const { return gravityEnabled_ && !isGrounded_ && !doubleJumpUsed_; }
+    float GetDoubleJumpSpeed() const { return doubleJumpSpeed_; }
+    void SetDoubleJumpSpeed(float value);
+    void ResetDoubleJumpSpeed();
     void StartWallJump();
-    float GetLungingMoveSpeed() const { return lungingMoveSpeed_; }
-    float GetLungingJumpSpeed() const { return lungingJumpSpeed_; }
-    void SetLungingMoveSpeed(float value);
-    void SetLungingJumpSpeed(float value);
-    void ResetLungingSpeeds();
+
+    // 旧仕様の突進ジャンプ用API。
+// 	void StartLungingJump(const Vec3& moveDir);
+//     // 空中にいて、まだ2回目を使っていないときだけ、とびかかれる。
+//     bool CanAirLunge() const { return gravityEnabled_ && !isGrounded_ && !doubleJumpUsed_; }
+//
+//     void StartWallJump();
+//     float GetLungingMoveSpeed() const { return lungingMoveSpeed_; }
+//     float GetLungingJumpSpeed() const { return lungingJumpSpeed_; }
+//     void SetLungingMoveSpeed(float value);
+//     void SetLungingJumpSpeed(float value);
+//     void ResetLungingSpeeds();
     // 壁登り・滑り落ち・壁キックは、それぞれ専用の速度を持つ。
     float GetClimbingSpeed() const { return climbingSpeed_; }
     float GetWallSlideSpeed() const { return wallSlideSpeed_; }
@@ -133,8 +144,8 @@ private:
 	PlayerInput input_;
 	PlayerStateMachine stateMachine_;
     float ultimateGauge_{ 0.0f };
-    float lungingMoveSpeed_{ Const::PLAYER_LUNGING_MOVE_SPEED };
-    float lungingJumpSpeed_{ Const::PLAYER_LUNGING_JUMP_SPEED };
+    // float lungingMoveSpeed_{ Const::PLAYER_LUNGING_MOVE_SPEED };
+    float doubleJumpSpeed_{ Const::PLAYER_DOUBLE_JUMP_SPEED };
     // float climbingSpeed_{ Const::PLAYER_CLIMBING_SPEED };
     float climbingSpeed_{ Const::PLAYER_ELEVATOR_SPEED };
     float wallSlideSpeed_{ Const::PLAYER_WALL_SLIDE_SPEED };
@@ -153,6 +164,9 @@ private:
     bool wasTouchingModel_{ false };
     bool gravityEnabled_{ true };
 
+    // false：ダブルジャンプをまだ使っていない。true：使用済み。
+    // 着地するまでtrueを保ち、Spaceを連打しても3回目は出せないようにする。
+    bool doubleJumpUsed_{ false };
 
     bool touchingWall_{ false };
     Vec3 wallNormal_{};

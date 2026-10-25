@@ -7,7 +7,7 @@ enum class PlayerStateType
     Walk,           // 歩行
     Grooming,      // 毛づくろい
     NeutralJump,    // その場でジャンプ
-    LungingJump,    // 移動しながらジャンプ
+    DoubleJump,    // 空中での2回目のジャンプ
     Attack,         // 通常攻撃
     UltimateAttack, // 必殺技
     Die,            // 死亡

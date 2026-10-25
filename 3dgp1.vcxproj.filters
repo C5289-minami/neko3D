@@ -91,7 +91,7 @@
     <Filter Include="40_Gameplay\Actors\Player\State\NeutralJump">
       <UniqueIdentifier>{d86ce60d-04a6-4895-85ad-1ae4163b633a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="40_Gameplay\Actors\Player\State\LungingJump">
+    <Filter Include="40_Gameplay\Actors\Player\State\DoubleJump">
       <UniqueIdentifier>{8396d9bd-15c9-4538-84eb-9a92844361ee}</UniqueIdentifier>
     </Filter>
     <Filter Include="40_Gameplay\Actors\Player\State\UltimateAttack">
@@ -411,8 +411,8 @@
     <ClInclude Include="PlayerDieState.h">
       <Filter>40_Gameplay\Actors\Player\State\Die</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerLungingJumpState.h">
-      <Filter>40_Gameplay\Actors\Player\State\LungingJump</Filter>
+    <ClInclude Include="PlayerDoubleJumpState.h">
+      <Filter>40_Gameplay\Actors\Player\State\DoubleJump</Filter>
     </ClInclude>
     <ClInclude Include="PlayerNeutralJumpState.h">
       <Filter>40_Gameplay\Actors\Player\State\NeutralJump</Filter>
@@ -806,8 +806,8 @@
     <ClCompile Include="PlayerDieState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Die</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerLungingJumpState.cpp">
-      <Filter>40_Gameplay\Actors\Player\State\LungingJump</Filter>
+    <ClCompile Include="PlayerDoubleJumpState.cpp">
+      <Filter>40_Gameplay\Actors\Player\State\DoubleJump</Filter>
     </ClCompile>
     <ClCompile Include="PlayerNeutralJumpState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\NeutralJump</Filter>

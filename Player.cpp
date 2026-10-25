@@ -59,6 +59,9 @@ void Player::Reset()
 	moveInput_ = {};
 	velocity_ = { 0.0f, 0.0f, 0.0f };
 
+    // ゲームをやり直したときも、ダブルジャンプを使える状態に戻す。
+    doubleJumpUsed_ = false;
+
 	// 空中から開始し、ステージへのレイキャストで接地させる。
 	isGrounded_ = false;
 	animation_.Reset();
@@ -78,6 +81,13 @@ void Player::Update(float deltaTime)
 
 void Player::UpdateMovement(float deltaTime)
 {
+    // 前のフレームで床に着いたら、2回目のジャンプを再び使えるようにする。
+    // 空中で被弾してステートが変わっても、このフラグはリセットしない。
+    if (isGrounded_)
+    {
+        doubleJumpUsed_ = false;
+    }
+
     // 段階実装：接触のTrue/Falseだけを残し、壁登りへの自動遷移は停止する。
 //     // 移動入力を離している間は、壁登り用の接触状態を解除する。
 //     if (!input_.isMoving)
@@ -117,22 +127,45 @@ void Player::UpdateMovement(float deltaTime)
 			const float cameraRotY = DxLib::GetCameraAngleHRotate();
 			const Vec3 cameraForward{ std::sin(cameraRotY), 0.0f, std::cos(cameraRotY) };
 			const Vec3 cameraRight{ cameraForward.z, 0.0f, -cameraForward.x };
-			Vec3 moveDirection = cameraRight * input_.moveDir.x + cameraForward * input_.moveDir.z;
+
+
+            // 旧仕様の入力固定と横方向への突進は使わない。
+//             bool isLunging = GetCurrentState() == PlayerStateType::LungingJump;
+//             Vec3 moveInput = input_.moveDir;//とびかかり中：moveInput_＝発動した瞬間に保存した入力
+// 											//通常移動中：input_.moveDir＝今押している入力だよん
+//
+//             float moveSpeed = Const::PLAYER_MOVE_SPEED;
+//             if (isLunging)
+//             {
+//                 moveInput = moveInput_;
+//                 moveSpeed = lungingMoveSpeed_;
+//             }
+
+            // 地上・空中とも、現在の入力で通常速度の移動だけを行う。
+            Vec3 moveInput = input_.moveDir;
+            if (moveInput.x != 0.0f && moveInput.z != 0.0f)
+            {
+                moveInput = {};
+            }
+            float moveSpeed = Const::PLAYER_MOVE_SPEED;
+
+            Vec3 moveDirection = cameraRight * moveInput.x + cameraForward * moveInput.z;
 			moveDirection.y = 0.0f;
+
 			if (moveDirection.LengthSq() > 0.0f)
 			{
 				moveDirection = moveDirection.Normalized();
-				position_.x += moveDirection.x * Const::PLAYER_MOVE_SPEED * deltaTime;
-				position_.z += moveDirection.z * Const::PLAYER_MOVE_SPEED * deltaTime;
+                position_.x += moveDirection.x * moveSpeed * deltaTime;
+                position_.z += moveDirection.z * moveSpeed * deltaTime;
 				TurnTowards(moveDirection, deltaTime);
 			}
 		}
 		else
 		{
 			// 中心がどっちにあるか調べる。高さはここでは考えない
-			PlayerDiagonalMove(deltaTime, position_, movementCenter_);
+			MoveAroundStage(deltaTime, position_, movementCenter_);
 		}
-		// 横移動は PlayerDiagonalMove、上下移動は velocity_.y にまとめる。
+		// 横移動は MoveAroundStage、上下移動は velocity_.y にまとめる。
 
 		if (gravityEnabled_ && GetCurrentState() != PlayerStateType::Climbing)
 		{
@@ -164,10 +197,11 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 	Vec3 pillarCenter{};
 
 	const ModelObject* pillarModel = nullptr;
+
 	if (!input_.jumpPressing) elevatorInputConsumed_ = false;
 	const bool canStartElevator = input_.jumpPressing && !elevatorInputConsumed_ &&
 		!IsPillarElevatorActive() && gravityEnabled_ && !IsDead() && !IsDamaging();
-	
+
 	// 柱の情報は毎回受け取り、上昇を始めるかどうかは後のifで決める。
 	touchingWall_ = collision.FindWall(//<-カプセルの処理
 		GetPosition(), modelOb, wallNormal_,
@@ -359,6 +393,8 @@ void Player::SetMoveDirection(const Vec3& moveDir)
 {
 	// 押している方向を覚えておく。実際に動かすのはUpdate
 	moveInput_ = { moveDir.x, 0.0f, moveDir.z };
+    // 前後と左右の同時入力は、ジャンプ中も両方とも無効にする。
+    if (moveInput_.x != 0.0f && moveInput_.z != 0.0f) moveInput_ = {};
 }
 
 
@@ -473,7 +509,7 @@ void Player::TurnTowards(
 	SetYaw(yaw);
 }
 
-void Player::PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& movementCenter)
+void Player::MoveAroundStage(float deltaTime, Vec3& playerPos, const Vec3& movementCenter)
 {
 	if (deltaTime <= 0.0f) return;
 
@@ -506,13 +542,15 @@ void Player::PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& mo
 	const Vec3 input = moveInput_.Normalized();
 	const Vec3 right{ forward.z, 0.0f, -forward.x };
 
-	const float moveSpeed =
-		GetCurrentState() == PlayerStateType::LungingJump ?
-		lungingMoveSpeed_ : Const::PLAYER_MOVE_SPEED;
-	if (GetCurrentState() == PlayerStateType::LungingJump)
-	{
-		input_.isMoving = false;
-	}
+    // 旧仕様の突進速度は使わず、2回目のジャンプも通常移動速度にする。
+// 	const float moveSpeed =
+// 		GetCurrentState() == PlayerStateType::LungingJump ?
+// 		lungingMoveSpeed_ : Const::PLAYER_MOVE_SPEED;
+// 	if (GetCurrentState() == PlayerStateType::LungingJump)
+// 	{
+// 		input_.isMoving = false;
+// 	}
+    const float moveSpeed = Const::PLAYER_MOVE_SPEED;
 
 	const float distance = moveSpeed * deltaTime;
 
@@ -528,40 +566,72 @@ void Player::PlayerDiagonalMove(float deltaTime, Vec3& playerPos, const Vec3& mo
 	TurnTowards(forward * input.z + right * input.x, deltaTime);
 }
 
-void Player::SetLungingMoveSpeed(float value)
+void Player::SetDoubleJumpSpeed(float value)
 {
-	if (std::isfinite(value)) lungingMoveSpeed_ = (std::max)(0.0f, value);
+    if (std::isfinite(value)) doubleJumpSpeed_ = (std::max)(0.0f, value);
 }
 
-void Player::SetLungingJumpSpeed(float value)
+void Player::ResetDoubleJumpSpeed()
 {
-	if (std::isfinite(value)) lungingJumpSpeed_ = (std::max)(0.0f, value);
+    doubleJumpSpeed_ = Const::PLAYER_DOUBLE_JUMP_SPEED;
 }
 
-void Player::ResetLungingSpeeds()
+void Player::StartDoubleJump()
 {
-	lungingMoveSpeed_ = Const::PLAYER_LUNGING_MOVE_SPEED;
-	lungingJumpSpeed_ = Const::PLAYER_LUNGING_JUMP_SPEED;
+    if (!CanDoubleJump()) return;
+    doubleJumpUsed_ = true;
+    StopMove();
+    SetMoveDirection(input_.moveDir);
+    velocity_.y = doubleJumpSpeed_;
+    isGrounded_ = false;
 }
 
-void Player::StartLungingJump(const Vec3& moveDir)
-{
-	if (!gravityEnabled_ || !isGrounded_ || moveDir.LengthSq() == 0.0f)
-	{
-		return;
-	}
-
-	StopMove();
-	// 横移動の入力を保存し、ジャンプでは上向きの速度だけ設定する。
-	Vec3 moveInput = moveDir;
-	// 左右と前後が同時に入力された場合、左右を優先して斜め移動を防ぐ
-	if (moveInput.x != 0.0f)
-		moveInput.z = 0.0f;
-
-	SetMoveDirection(moveInput);
-	velocity_.y = lungingJumpSpeed_;
-	isGrounded_ = false;
-}
+// 旧仕様：空中で入力方向へ突進する処理。
+// void Player::SetLungingMoveSpeed(float value)
+// {
+// 	if (std::isfinite(value)) lungingMoveSpeed_ = (std::max)(0.0f, value);
+// }
+//
+// void Player::SetLungingJumpSpeed(float value)
+// {
+// 	if (std::isfinite(value)) lungingJumpSpeed_ = (std::max)(0.0f, value);
+// }
+//
+// void Player::ResetLungingSpeeds()
+// {
+// 	lungingMoveSpeed_ = Const::PLAYER_LUNGING_MOVE_SPEED;
+// 	lungingJumpSpeed_ = Const::PLAYER_LUNGING_JUMP_SPEED;
+// }
+//
+// void Player::StartLungingJump(const Vec3& moveDir)
+// {
+//     // 地面にいるときや、すでに2回目を使った後は発動させない。
+//     if (!CanAirLunge())
+//     {
+//         return;
+//     }
+//
+//     // 発動したことを覚える。着地するまで、もう一度は使えない。
+//     doubleJumpUsed_ = true;
+//     StopMove();
+//
+//     // 2回目のSpaceを押した瞬間の方向を保存する。
+//     Vec3 moveInput = moveDir;
+//     // 方向キーを押していなければ、前へとびかかる。
+//     // 円周移動ではボス方向、通常移動ではカメラが向いている方向になる。
+//     if (moveInput.LengthSq() == 0.0f)
+//     {
+//         moveInput = Vec3(0.0f, 0.0f, 1.0f);
+//     }
+// 	// 左右と前後が同時に入力された場合、左右を優先して斜め移動を防ぐ
+// 	if (moveInput.x != 0.0f)
+// 		moveInput.z = 0.0f;
+//
+//     SetMoveDirection(moveInput);
+//     // 落下中でも上向きの速度に入れ直すので、空中でもう一度跳べる。
+//     velocity_.y = lungingJumpSpeed_;
+//     isGrounded_ = false;
+// }
 
 void Player::SetClimbingSpeed(float value)
 {
@@ -638,7 +708,7 @@ void Player::StartPillarElevator(const ModelObject* pillar, const Vec3& center, 
     const float arrivalY = topY - Const::PLAYER_ELEVATOR_TOP_OFFSET;
     if (!pillar || !gravityEnabled_|| IsDamaging() ||
         IsPillarElevatorActive() || position_.y >= arrivalY - Const::PLAYER_SKIN) return;
-	
+
 	elevatorPillar_ = pillar;
     elevatorCenter_ = center;
     elevatorTopY_ = arrivalY;
