@@ -7,6 +7,7 @@
 #include "Player.h"
 #include "Boss.h"
 #include <cmath>
+#include "DxLib.h"
 
 #include <vector>
 
@@ -325,4 +326,6 @@ void Collision::DrawDebugSphere(const Sphere& sphere, unsigned int color)
         previous = next;
     }
 }
+
+
 #endif

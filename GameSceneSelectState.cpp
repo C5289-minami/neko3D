@@ -23,6 +23,7 @@ void GameSceneSelectState::Enter()
 {
 	DxPlus::Debug::SetFormatString(L"GameSceneSelectState::Enter");
 	gameScene_.GetGameContext()->GetPlayer().SetPosition({ -2169.332763671875,317.12353515625,-1188.287109375 });
+	DxLib::SetMouseDispFlag(TRUE);
 }
 
 void GameSceneSelectState::Tick(float deltaTime)
@@ -37,4 +38,5 @@ void GameSceneSelectState::Tick(float deltaTime)
 void GameSceneSelectState::Exit()
 {
 	DxPlus::Debug::SetFormatString(L"GameSceneSelectState::Enter");
+	DxLib::SetMouseDispFlag(FALSE);
 }

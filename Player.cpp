@@ -46,7 +46,7 @@ void Player::Reset()
 
 	touchingWall_ = false;
 	wallNormal_ = {};
-    wallTopY_ = 0.0f;
+	wallTopY_ = 0.0f;
 
 	model_.collisionHighlighted = false;
 	ultimateGauge_ = 0.0f;
@@ -76,11 +76,11 @@ void Player::Update(float deltaTime)
 
 void Player::UpdateMovement(float deltaTime)
 {
-    // 移動入力を離している間は、壁登り用の接触状態を解除する。
-    if (!input_.isMoving)
-    {
-        touchingWall_ = false;
-    }
+	// 移動入力を離している間は、壁登り用の接触状態を解除する。
+	if (!input_.isMoving)
+	{
+		touchingWall_ = false;
+	}
 
 	bool NearTheWall = false;
 	if (input_.isMoving)
@@ -103,15 +103,42 @@ void Player::UpdateMovement(float deltaTime)
 
 	stateMachine_.Tick(deltaTime);
 
- if (isdefMove_)
+	if (isdefMove_)
 	{
-		Vec3 moveDirection = input_.moveDir;
+		// カメラの水平回転角を取得
+		const float cameraRotY = DxLib::GetCameraAngleHRotate();
+
+		// カメラの前方向
+		const Vec3 cameraForward(
+			std::sin(cameraRotY),
+			0.0f,
+			std::cos(cameraRotY)
+		);
+
+		// カメラの右方向
+		const Vec3 cameraRight(
+			cameraForward.z,
+			0.0f,
+			-cameraForward.x
+		);
+
+		// 入力をカメラ基準の移動方向に変換
+		Vec3 moveDirection =
+			cameraRight * input_.moveDir.x +
+			cameraForward * input_.moveDir.z;
+
 		moveDirection.y = 0.0f;
+
 		if (moveDirection.LengthSq() > 0.0f)
 		{
 			moveDirection = moveDirection.Normalized();
-			position_.x += moveDirection.x * Const::PLAYER_MOVE_SPEED * deltaTime;
-			position_.z += moveDirection.z * Const::PLAYER_MOVE_SPEED * deltaTime;
+
+			position_.x +=
+				moveDirection.x * Const::PLAYER_MOVE_SPEED * deltaTime;
+
+			position_.z +=
+				moveDirection.z * Const::PLAYER_MOVE_SPEED * deltaTime;
+
 			TurnTowards(moveDirection, deltaTime);
 		}
 	}
@@ -137,9 +164,9 @@ void Player::UpdateMovement(float deltaTime)
 // void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCenter)
 void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& movementCenter)
 {
-    // 体の形はプレイヤーが渡す。判定対象の形・配置は ModelCollision が管理する。
-    const ModelCollision::ModelOb modelOb{ Const::PLAYER_RADIUS, Const::PLAYER_HEIGHT, Const::PLAYER_SKIN };
-    collision.Refresh();
+	// 体の形はプレイヤーが渡す。判定対象の形・配置は ModelCollision が管理する。
+	const ModelCollision::ModelOb modelOb{ Const::PLAYER_RADIUS, Const::PLAYER_HEIGHT, Const::PLAYER_SKIN };
+	collision.Refresh();
 	movementCenter_ = movementCenter;
 	const Vec3 oldPosition = GetPosition();
 	const float previousY = oldPosition.y;
@@ -147,10 +174,10 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 	input_.Update();
 	// 今フレームの入力に合う側面を選び、柱のどの方向からでも登れるようにする。
 	// touchingWall_ = stage.FindPillarWall(GetPosition(), wallNormal_, GetWorldMoveDirection(input_.moveDir),
-        // &wallTopY_, GetCurrentState() == PlayerStateType::Climbing);
+		// &wallTopY_, GetCurrentState() == PlayerStateType::Climbing);
 	touchingWall_ = collision.FindWall(GetPosition(), modelOb, wallNormal_, GetWorldMoveDirection(input_.moveDir),
-        &wallTopY_, Const::PLAYER_CLIMB_DETECTION_MARGIN,
-        GetCurrentState() == PlayerStateType::Climbing ? Const::PLAYER_CLIMB_TOP_HOLD_DISTANCE : 0.0f);
+		&wallTopY_, Const::PLAYER_CLIMB_DETECTION_MARGIN,
+		GetCurrentState() == PlayerStateType::Climbing ? Const::PLAYER_CLIMB_TOP_HOLD_DISTANCE : 0.0f);
 	UpdateMovement(deltaTime);
 
 	// // ステージの柱に沿ってスライドさせる
@@ -177,11 +204,11 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 			position_.y = hit.point.y - Const::PLAYER_HEIGHT - Const::PLAYER_SKIN;
 			velocity_.y = 0.0f;
 		}
-	}	
+	}
 
 
 	// 落下中のみ床面に合わせ、このフレームの落下距離もレイの長さに含める。
-	if (dy<= 0.0f)
+	if (dy <= 0.0f)
 	{
 		Physics::RayHit hit{};
 		constexpr float groundSnapDistance = 30.0f;
@@ -203,10 +230,10 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 			rayDistance,
 			hit))
 		{
-            // 頂上で高さを保持している間は、下の足場への吸着でも位置を下げない。
-            const bool holdingClimbTop = GetCurrentState() == PlayerStateType::Climbing && IsNearWallTop();
+			// 頂上で高さを保持している間は、下の足場への吸着でも位置を下げない。
+			const bool holdingClimbTop = GetCurrentState() == PlayerStateType::Climbing && IsNearWallTop();
 			if (position_.y - hit.point.y <= groundSnapDistance &&
-                (!holdingClimbTop || hit.point.y >= position_.y))
+				(!holdingClimbTop || hit.point.y >= position_.y))
 			{
 				position_.y = hit.point.y;
 				velocity_.y = 0.0f;
@@ -500,34 +527,34 @@ void Player::StartLungingJump(const Vec3& moveDir)
 
 void Player::SetClimbingSpeed(float value)
 {
-    if (std::isfinite(value)) climbingSpeed_ = (std::max)(0.0f, value);
+	if (std::isfinite(value)) climbingSpeed_ = (std::max)(0.0f, value);
 }
 
 void Player::SetWallSlideSpeed(float value)
 {
-    if (std::isfinite(value)) wallSlideSpeed_ = (std::max)(0.0f, value);
+	if (std::isfinite(value)) wallSlideSpeed_ = (std::max)(0.0f, value);
 }
 
 void Player::ResetClimbingSpeeds()
 {
-    climbingSpeed_ = Const::PLAYER_CLIMBING_SPEED;
-    wallSlideSpeed_ = Const::PLAYER_WALL_SLIDE_SPEED;
+	climbingSpeed_ = Const::PLAYER_CLIMBING_SPEED;
+	wallSlideSpeed_ = Const::PLAYER_WALL_SLIDE_SPEED;
 }
 
 void Player::SetWallJumpMoveSpeed(float value)
 {
-    if (std::isfinite(value)) wallJumpMoveSpeed_ = (std::max)(0.0f, value);
+	if (std::isfinite(value)) wallJumpMoveSpeed_ = (std::max)(0.0f, value);
 }
 
 void Player::SetWallJumpSpeed(float value)
 {
-    if (std::isfinite(value)) wallJumpSpeed_ = (std::max)(0.0f, value);
+	if (std::isfinite(value)) wallJumpSpeed_ = (std::max)(0.0f, value);
 }
 
 void Player::ResetWallJumpSpeeds()
 {
-    wallJumpMoveSpeed_ = Const::PLAYER_WALL_JUMP_MOVE_SPEED;
-    wallJumpSpeed_ = Const::PLAYER_WALL_JUMP_SPEED;
+	wallJumpMoveSpeed_ = Const::PLAYER_WALL_JUMP_MOVE_SPEED;
+	wallJumpSpeed_ = Const::PLAYER_WALL_JUMP_SPEED;
 }
 
 void Player::StartWallJump()

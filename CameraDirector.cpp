@@ -171,6 +171,25 @@ namespace Camera
         Follow(duration, easing);
     }
 
+    void CameraDirector::SetPoseImmediate(const CameraPose& pose)
+    {
+		// ‘JˆÚ’†‚ÌƒJƒƒ‰‚ª‚È‚¢ê‡‚Í–³Ž‹
+        if (!activeCamera_ || !IsFinitePose(pose))
+        {
+            return;
+        }
+
+        // ŽÀs’†‚Ì‘JˆÚ‚ð’âŽ~
+        transition_.Reset();
+        followMotion_.Reset();
+
+        // ƒJƒƒ‰‚ÌŒ»ÝŽp¨‚ð’¼ÚXV
+        currentPose_ = pose;
+        mode_ = Mode::HoldingPose;
+
+        activeCamera_->ApplyPose(currentPose_);
+    }
+
     // =========================================================
     // BeginBlendToActiveCamera
     // =========================================================

@@ -81,6 +81,11 @@ void TitleScene::Init()
 		}
 	}
 
+
+	DxLib::SetMouseDispFlag(TRUE);
+	
+	
+	
 	StartFadeIn();
 }
 
