@@ -15,7 +15,7 @@ public:
     {
         Floor,  // 床。着地用の判定。
         Wall,   // 壁。側面で移動を止める・滑らせる。登れない。
-        Pillar  // 柱。側面を登ることができ、上にも乗れる。
+        Pillar  
     };
 
     // 動く側の体の大きさ。プレイヤー以外にも同じ判定を使える。
@@ -53,16 +53,16 @@ public:
 
     // 種類を問わず全モデルを調べる、汎用のレイ判定。
     bool Raycast(const Vec3& start, const Vec3& end, Physics::RayHit& hit) const;
-    // 着地用。床と柱を調べる。壁は対象外。
+    // 着地用。床だけを調べる。柱は接触判定のみ。
     bool RaycastDown(const Vec3& origin, float maxDistance, Physics::RayHit& hit) const;
-    // 頭上用。床・柱・壁のすべてを調べる。
+    // 頭上用。床・壁を調べる。柱は接触判定のみ。
     bool RaycastUp(const Vec3& origin, float maxDistance, Physics::RayHit& hit) const;
     // Refresh 後の、拡大縮小・回転を含めたモデルの幅・高さ・奥行き。
     Vec3 GetSize(const ModelObject& model) const;
 
 private:
     bool RaycastModels(const Vec3& start, const Vec3& end, Physics::RayHit& hit,
-        bool forLanding) const;
+        bool forLanding, bool ignorePillars = false) const;
 
     struct Entry
     {

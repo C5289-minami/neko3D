@@ -76,30 +76,31 @@ void Player::Update(float deltaTime)
 
 void Player::UpdateMovement(float deltaTime)
 {
-    // 移動入力を離している間は、壁登り用の接触状態を解除する。
-    if (!input_.isMoving)
-    {
-        touchingWall_ = false;
-    }
+    // 段階実装：接触のTrue/Falseだけを残し、壁登りへの自動遷移は停止する。
+//     // 移動入力を離している間は、壁登り用の接触状態を解除する。
+//     if (!input_.isMoving)
+//     {
+//         touchingWall_ = false;
+//     }
 
-	bool NearTheWall = false;
-	if (input_.isMoving)
-	{
-		Vec3 moveDirection = GetWorldMoveDirection(input_.moveDir);
-		float wallDirection = Vec3::Dot(moveDirection, wallNormal_);//壁の法線と移動方向の内積を計算して、壁に対してどの方向に向かっているかを判定する
+// 	bool NearTheWall = false;
+// 	if (input_.isMoving)
+// 	{
+// 		Vec3 moveDirection = GetWorldMoveDirection(input_.moveDir);
+// 		float wallDirection = Vec3::Dot(moveDirection, wallNormal_);//壁の法線と移動方向の内積を計算して、壁に対してどの方向に向かっているかを判定する
 
-		if (wallDirection < -0.25f)
-		{
-			NearTheWall = true;
-		}
-	}
-	//か
-	if (touchingWall_ && gravityEnabled_ && !IsDead() && !IsDamaging() &&
-		GetCurrentState() != PlayerStateType::WallJump &&
-		NearTheWall)
-	{
-		stateMachine_.ChangeState(PlayerStateType::Climbing);
-	}
+// 		if (wallDirection < -0.25f)
+// 		{
+// 			NearTheWall = true;
+// 		}
+// 	}
+// 	//か
+// 	if (touchingWall_ && gravityEnabled_ && !IsDead() && !IsDamaging() &&
+// 		GetCurrentState() != PlayerStateType::WallJump &&
+// 		NearTheWall)
+// 	{
+// 		stateMachine_.ChangeState(PlayerStateType::Climbing);
+// 	}
 
 	stateMachine_.Tick(deltaTime);
 

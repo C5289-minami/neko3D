@@ -155,6 +155,8 @@ void GameTestScene::DrawImGui()
     {
         auto& player = gameContext->GetPlayer();
 
+        ImGui::Text("Pillar contact: %s", player.IsTouchingWall() ? "True" : "False");
+
         ImGui::TextUnformatted(u8"壁登り");
         float climbingSpeed = player.GetClimbingSpeed();
         float wallSlideSpeed = player.GetWallSlideSpeed();

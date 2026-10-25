@@ -135,7 +135,7 @@ bool ModelCollision::Raycast(const Vec3& start, const Vec3& end, Physics::RayHit
 
 // 対象のモデルに絞ってから、最も近い衝突を選ぶ。
 bool ModelCollision::RaycastModels(const Vec3& start, const Vec3& end, Physics::RayHit& hit,
-    bool forLanding) const
+    bool forLanding, bool ignorePillars) const
 {
     bool found = false;
 
@@ -143,6 +143,8 @@ bool ModelCollision::RaycastModels(const Vec3& start, const Vec3& end, Physics::
     {
         if (entry.handle < 0) continue;
         if (forLanding && entry.surface == Surface::Wall) continue;
+        // 柱は接触のTrue/Falseだけを調べ、着地・頭上の位置補正には使わない。
+        if (ignorePillars && entry.surface == Surface::Pillar) continue;
 
         Physics::RayHit modelHit{};
         
@@ -160,13 +162,17 @@ bool ModelCollision::RaycastModels(const Vec3& start, const Vec3& end, Physics::
 bool ModelCollision::RaycastDown(const Vec3& origin, float maxDistance, Physics::RayHit& hit) const
 {
     if (maxDistance <= 0.0f) return false;
-    return RaycastModels(origin, origin - Vec3::Up() * maxDistance, hit, true);
+    // return RaycastModels(origin, origin - Vec3::Up() * maxDistance, hit, true);
+  
+    return RaycastModels(origin, origin - Vec3::Up() * maxDistance, hit, true, true);
 }
 
 bool ModelCollision::RaycastUp(const Vec3& origin, float maxDistance, Physics::RayHit& hit) const
 {
     if (maxDistance <= 0.0f) return false;
-    return RaycastModels(origin, origin + Vec3::Up() * maxDistance, hit, false);
+    // return RaycastModels(origin, origin + Vec3::Up() * maxDistance, hit, false);
+   
+    return RaycastModels(origin, origin + Vec3::Up() * maxDistance, hit, false, true);
 }
 
 Vec3 ModelCollision::GetSize(const ModelObject& model) const
@@ -319,7 +325,9 @@ Vec3 ModelCollision::SlideAlongWalls(const Vec3& oldPosition, const Vec3& desire
 
         for (const auto& entry : models_)
         {
-            if (entry.handle < 0 || entry.surface == Surface::Floor) continue;
+            // 柱への押し戻しを停止する。IsTouchingWalls / FindWall の真偽判定は残す。
+            // if (entry.handle < 0 || entry.surface == Surface::Floor) continue;
+            if (entry.handle < 0 || entry.surface != Surface::Wall) continue;
             const int handle = entry.handle;
 
             const auto result = MV1CollCheck_Capsule(handle, -1,
