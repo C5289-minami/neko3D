@@ -15,6 +15,9 @@ namespace Const
 	constexpr float PLAYER_CLIMBING_SPEED = 300.0f;
     constexpr float PLAYER_WALL_CLIMB_WAIT = 0.2f;
     constexpr float PLAYER_WALL_SLIDE_SPEED = 600.0f;
+    constexpr float PLAYER_ELEVATOR_SPEED = 1200.0f;
+    constexpr float PLAYER_ELEVATOR_TOP_OFFSET = 10.0f;
+    constexpr float PLAYER_ELEVATOR_EXIT_JUMP_SPEED = 350.0f;
     
     constexpr float PLAYER_JUMP_SPEED = 1000.0f;
     constexpr float PLAYER_MOVE_SPEED = 200.0f;

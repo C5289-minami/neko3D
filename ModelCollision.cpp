@@ -51,6 +51,7 @@ bool ModelCollision::Refresh()
 
             entry.handle = -1;
             entry.sourceHandle = source;
+            entry.boundsReady = false;
         
         }
         if (source < 0)
@@ -80,6 +81,7 @@ bool ModelCollision::Refresh()
                 }
             }
             if (entry.handle < 0) ready = false;
+            else if (entry.surface == Surface::Pillar && !UpdatePillarBounds(entry)) ready = false;
             continue;
         }
 
@@ -94,6 +96,7 @@ bool ModelCollision::Refresh()
 
         if (changed)
         {
+			entry.boundsReady = false;
 			MV1SetMatrix(entry.handle, world);// 位置・回転・拡大率を反映する
             if (MV1RefreshCollInfo(entry.handle, -1) < 0)
             {
@@ -102,8 +105,39 @@ bool ModelCollision::Refresh()
                 ready = false;
             }
         }
+        if (entry.handle >= 0 && entry.surface == Surface::Pillar &&
+            !entry.boundsReady && !UpdatePillarBounds(entry)) ready = false;
     }
     return ready;
+}
+
+bool ModelCollision::UpdatePillarBounds(Entry& entry)
+{
+    const auto bounds = entry.model->GetHitEllipsoid();
+    //中心点でなければ使えないのです　
+    entry.boundsReady = bounds.radii.x > 0.0f && bounds.radii.y > 0.0f && bounds.radii.z > 0.0f;
+ 
+
+    if (entry.boundsReady)
+    {
+        entry.center = bounds.center;
+        entry.radii = bounds.radii;
+        entry.topY = bounds.center.y + bounds.radii.y;
+    }
+    return entry.boundsReady;
+}
+
+bool ModelCollision::GetPillarBounds(const ModelObject* model, Vec3& center, float& topY) const
+{
+    for (const auto& entry : models_)
+    {
+        if (entry.model != model || entry.surface != Surface::Pillar ||
+            entry.handle < 0 || !entry.boundsReady) continue;
+        center = entry.center;
+        topY = entry.topY;
+        return true;
+    }
+    return false;
 }
 
 bool ModelCollision::IsTouchingWalls(const Vec3& feetPosition, const ModelOb& modelOb) const
@@ -175,6 +209,33 @@ bool ModelCollision::RaycastUp(const Vec3& origin, float maxDistance, Physics::R
     return RaycastModels(origin, origin + Vec3::Up() * maxDistance, hit, false, true);
 }
 
+bool ModelCollision::RaycastPillarTop(const Vec3& origin,
+            float maxDistance, float topOffset,Physics::RayHit& hit) const
+{
+    if (maxDistance <= 0.0f) return false;
+    const Vec3 offset = Vec3::Up() * topOffset;
+    const Vec3 start = origin + offset;
+    const Vec3 end = start - Vec3::Up() * maxDistance;
+    bool found = false;
+
+    for (const auto& entry : models_)
+    {
+        if (entry.handle < 0 || entry.surface != Surface::Pillar) continue;
+
+        Physics::RayHit modelHit{};
+
+        if (!Physics::Raycast(entry.handle, start, end, modelHit) || modelHit.normal.y <= 0.5f) continue;
+        modelHit.point -= offset;
+		//モデルが複数あっても、最も近い衝突を優先する
+        if (!found || modelHit.distance < hit.distance)
+        {
+            hit = modelHit;
+            found = true;
+        }
+    }
+    return found;
+}
+
 Vec3 ModelCollision::GetSize(const ModelObject& model) const
 {
     for (const auto& entry : models_)
@@ -210,11 +271,13 @@ Vec3 ModelCollision::GetSize(const ModelObject& model) const
 
 bool ModelCollision::FindWall(const Vec3& feetPosition, const ModelOb& modelOb, Vec3& wallNormal,
     const Vec3& moveDirection, float* wallTopY, float detectionMargin, float topHoldDistance,
-    Vec3* pillarCenter) const
+    Vec3* pillarCenter, const ModelObject** pillarModel) const
 	// 体のカプセルの側面に接触している壁を探す。見つかれば法線を返す。
 {
     wallNormal = {};
-    if (wallTopY) *wallTopY = 0.0f;
+	if (wallTopY) *wallTopY = 0.0f;          //壁が見つからなかったときの値を返す
+	if (pillarCenter) *pillarCenter = {};    //センターが見つからなかったときの値を返す
+    if (pillarModel) *pillarModel = nullptr; //ぬるぽ ガッ
 
     if (!modelOb.IsValid()) return false;
     const bool keepTopContact = topHoldDistance > 0.0f;
@@ -237,6 +300,23 @@ bool ModelCollision::FindWall(const Vec3& feetPosition, const ModelOb& modelOb, 
     for (const auto& entry : models_)
     {
         if (entry.handle < 0 || entry.surface != Surface::Pillar) continue;
+
+        // 表面に触れない柱の内部でも、Spaceを押し直して上昇を再開できる。
+        if (entry.boundsReady && feetPosition.y < entry.topY - modelOb.skin &&
+            headY > entry.center.y - entry.radii.y)
+        {
+            const float x = (feetPosition.x - entry.center.x) / entry.radii.x;
+            const float z = (feetPosition.z - entry.center.z) / entry.radii.z;
+            if (x * x + z * z <= 1.0f)
+            {
+                wallNormal = Vec3(feetPosition.x - entry.center.x, 0.0f,
+                    feetPosition.z - entry.center.z).Normalized();
+                if (wallTopY) *wallTopY = entry.topY;
+                hitPillar = entry.model;
+                foundWall = true;
+                break;
+            }
+        }
         const int handle = entry.handle;
 
         const auto result = MV1CollCheck_Capsule(handle, -1,
@@ -308,10 +388,15 @@ bool ModelCollision::FindWall(const Vec3& feetPosition, const ModelOb& modelOb, 
     // 接触中の柱そのものの中心を返す。親の配置・拡大率も反映される。
     if (hitPillar && pillarCenter)
     {
-        const auto bounds = hitPillar->GetHitEllipsoid();
+       /* const auto bounds = hitPillar->GetHitEllipsoid();
         if (bounds.radii.x <= 0.0f || bounds.radii.z <= 0.0f) return false;
-        *pillarCenter = bounds.center;
+        *pillarCenter = bounds.center;*/
+
+        float topY{};
+        if (!GetPillarBounds(hitPillar, *pillarCenter, topY)) return false;
+        if (wallTopY) *wallTopY = topY;
     }
+    if (pillarModel) *pillarModel = hitPillar;
     return foundWall;
 }
 
