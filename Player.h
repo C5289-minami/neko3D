@@ -77,6 +77,13 @@ public:
     void SetClimbingSpeed(float value);
     void SetWallSlideSpeed(float value);
     void ResetClimbingSpeeds();
+    //壁のぼり
+    bool IsPillarElevatorActive() const { return elevatorPillar_ != nullptr; }
+    void StartPillarElevator(const ModelObject* pillar, const Vec3& center, float topY);
+    bool UpdatePillarElevator(float deltaTime);
+    void EndPillarElevator();
+    void StartPillarExitJump();
+	//ゲッター・セッター
     float GetWallJumpMoveSpeed() const { return wallJumpMoveSpeed_; }
     float GetWallJumpSpeed() const { return wallJumpSpeed_; }
     void SetWallJumpMoveSpeed(float value);
@@ -128,7 +135,8 @@ private:
     float ultimateGauge_{ 0.0f };
     float lungingMoveSpeed_{ Const::PLAYER_LUNGING_MOVE_SPEED };
     float lungingJumpSpeed_{ Const::PLAYER_LUNGING_JUMP_SPEED };
-    float climbingSpeed_{ Const::PLAYER_CLIMBING_SPEED };
+    // float climbingSpeed_{ Const::PLAYER_CLIMBING_SPEED };
+    float climbingSpeed_{ Const::PLAYER_ELEVATOR_SPEED };
     float wallSlideSpeed_{ Const::PLAYER_WALL_SLIDE_SPEED };
     float wallJumpMoveSpeed_{ Const::PLAYER_WALL_JUMP_MOVE_SPEED };
     float wallJumpSpeed_{ Const::PLAYER_WALL_JUMP_SPEED };
@@ -150,4 +158,8 @@ private:
     Vec3 wallNormal_{};
 	bool isdefMove_{ false };// デフォルトの移動をするかどうか
     float wallTopY_{ 0.0f };
+    const ModelObject* elevatorPillar_{ nullptr };
+    Vec3 elevatorCenter_{};
+    float elevatorTopY_{};
+    bool elevatorInputConsumed_{ false };
 };
