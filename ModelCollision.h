@@ -47,9 +47,11 @@ public:
     bool IsTouchingWalls(const Vec3& feetPosition, const ModelOb& modelOb) const;
     Vec3 SlideAlongWalls(const Vec3& oldPosition, const Vec3& desiredPosition,
         const ModelOb& modelOb, bool& touched) const;
+    // pillarCenterを指定すると、接触判定で選ばれた柱の中心も返す。
     bool FindWall(const Vec3& feetPosition, const ModelOb& modelOb, Vec3& wallNormal,
         const Vec3& moveDirection = {}, float* wallTopY = nullptr,
-        float detectionMargin = 0.0f, float topHoldDistance = 0.0f) const;
+        float detectionMargin = 0.0f, float topHoldDistance = 0.0f,
+        Vec3* pillarCenter = nullptr) const;
 
     // 種類を問わず全モデルを調べる、汎用のレイ判定。
     bool Raycast(const Vec3& start, const Vec3& end, Physics::RayHit& hit) const;

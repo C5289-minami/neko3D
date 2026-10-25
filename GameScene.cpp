@@ -25,9 +25,15 @@ void GameScene::Init()
     tutorialCollision_.AddModel(gameContext->GetRoom().GetRoomObject(), ModelCollision::Surface::Wall);
 
 	
-
+	// チュートリアルの柱モデルを登録する
     for (const auto& pillar : gameContext->GetStage().GetPillarModelObjects())
         tutorialCollision_.AddModel(pillar, ModelCollision::Surface::Pillar);
+   
+	for (const auto* pillar : gameContext->GetRoom().GetPillars())
+        tutorialCollision_.AddModel(*pillar, ModelCollision::Surface::Pillar);
+	// チュートリアルのジャンプ台モデルを登録する
+	for (const auto* stand : gameContext->GetRoom().GetJumpStands())
+        tutorialCollision_.AddModel(stand->GetPillarModel(), ModelCollision::Surface::Pillar);
 
 	// トゥーン描画とアウトライン描画を有効にする
 	{
@@ -229,6 +235,13 @@ void GameScene::RenderDepth() const
 	const auto& room = gameContext->GetRoom();
 
 	modelToonRenderer_.DrawDepth(room.GetRoomObject());
+    for (const auto* pillar : gameContext->GetRoom().GetPillars())
+        modelToonRenderer_.DrawDepth(*pillar);
+    for (const auto* stand : gameContext->GetRoom().GetJumpStands())
+    {
+        modelToonRenderer_.DrawDepth(stand->GetJumpStandModel());
+        modelToonRenderer_.DrawDepth(stand->GetPillarModel());
+    }
 	modelToonRenderer_.DrawDepth(stage.GetModelObject());
 	modelToonRenderer_.DrawDepth(stage.GetAlphaModelObject());
 	modelToonRenderer_.DrawDepth(player.GetModelObject());
@@ -300,6 +313,13 @@ void GameScene::DrawScene(bool toonEnabled) const
 	grid.Draw();
 
 	drawActor(room.GetRoomObject());
+    for (const auto* pillar : gameContext->GetRoom().GetPillars())
+        drawActor(*pillar);
+    for (const auto* stand : gameContext->GetRoom().GetJumpStands())
+    {
+        drawActor(stand->GetJumpStandModel());
+        drawActor(stand->GetPillarModel());
+    }
 	modelToonRenderer_.EndPass();
 }
 

@@ -149,10 +149,24 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 	// 今フレームの入力に合う側面を選び、柱のどの方向からでも登れるようにする。
 	// touchingWall_ = stage.FindPillarWall(GetPosition(), wallNormal_, GetWorldMoveDirection(input_.moveDir),
         // &wallTopY_, GetCurrentState() == PlayerStateType::Climbing);
+	Vec3 pillarCenter{};
 	touchingWall_ = collision.FindWall(GetPosition(), modelOb, wallNormal_, GetWorldMoveDirection(input_.moveDir),
         &wallTopY_, Const::PLAYER_CLIMB_DETECTION_MARGIN,
-        GetCurrentState() == PlayerStateType::Climbing ? Const::PLAYER_CLIMB_TOP_HOLD_DISTANCE : 0.0f);
+     
+		GetCurrentState() == PlayerStateType::Climbing ? Const::PLAYER_CLIMB_TOP_HOLD_DISTANCE : 0.0f,
+        input_.jumpPressing ? &pillarCenter : nullptr);
+	const bool snapToPillar = touchingWall_ && input_.jumpPressing && !IsDead() && !IsDamaging();
+	// 柱に触れているときのSpaceは、通常ジャンプより中心への吸着を優先する。
+	if (snapToPillar) input_.jumpPressed = false;
+
 	UpdateMovement(deltaTime);
+	if (snapToPillar)
+	{
+		// 高さは動かさず、横方向だけ柱の中心へ寄せる。
+		position_.x = pillarCenter.x;
+		position_.z = pillarCenter.z;
+		StopMove();
+	}
 
 	// // ステージの柱に沿ってスライドさせる
 	// position_ = stage.SlideAlongPillars(oldPosition, position_, touchingPillar);

@@ -209,7 +209,8 @@ Vec3 ModelCollision::GetSize(const ModelObject& model) const
 }
 
 bool ModelCollision::FindWall(const Vec3& feetPosition, const ModelOb& modelOb, Vec3& wallNormal,
-    const Vec3& moveDirection, float* wallTopY, float detectionMargin, float topHoldDistance) const
+    const Vec3& moveDirection, float* wallTopY, float detectionMargin, float topHoldDistance,
+    Vec3* pillarCenter) const
 	// 体のカプセルの側面に接触している壁を探す。見つかれば法線を返す。
 {
     wallNormal = {};
@@ -231,6 +232,7 @@ bool ModelCollision::FindWall(const Vec3& feetPosition, const ModelOb& modelOb, 
     bool foundWall = false;
     float bestDirection = 2.0f;
     float bestDistance = detectionRadius;
+    const ModelObject* hitPillar = nullptr;
 
     for (const auto& entry : models_)
     {
@@ -294,12 +296,21 @@ bool ModelCollision::FindWall(const Vec3& feetPosition, const ModelOb& modelOb, 
 				bestDirection = wallDirection;  // 壁の法線と進行方向の内積が最も小さい面を優先する。
                 bestDistance = distance;        // 壁までの距離が最も近い面を優先する。
                 if (wallTopY) *wallTopY = top;
+				hitPillar = entry.model;
 				foundWall = true;               //  壁の法線が見つかったことを記録する。
             }
         }
 
         // 判定結果を解放してから、見つかったかどうかを返す。
         MV1CollResultPolyDimTerminate(result);
+    }
+
+    // 接触中の柱そのものの中心を返す。親の配置・拡大率も反映される。
+    if (hitPillar && pillarCenter)
+    {
+        const auto bounds = hitPillar->GetHitEllipsoid();
+        if (bounds.radii.x <= 0.0f || bounds.radii.z <= 0.0f) return false;
+        *pillarCenter = bounds.center;
     }
     return foundWall;
 }
