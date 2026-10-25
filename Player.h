@@ -56,6 +56,10 @@ public:
     Vec3 GetWorldMoveDirection(const Vec3& moveDir) const;
     void SetDefMove(bool defMove) { isdefMove_ = defMove; }
 
+#ifdef _DEBUG
+    void SetDebugDashEnabled(bool enabled) { debugDashEnabled_ = enabled; }
+#endif
+
 	// 回転
 	void Turn(float direction, float speed, float deltaTime);
 	void TurnTowards(const Vec3& moveDir, float deltaTime);
@@ -162,4 +166,8 @@ private:
     Vec3 elevatorCenter_{};
     float elevatorTopY_{};
     bool elevatorInputConsumed_{ false };
+
+#ifdef _DEBUG
+    bool debugDashEnabled_{ false };
+#endif
 };
