@@ -54,7 +54,7 @@ namespace Camera
 			direction.y = std::sin(pose.pitch);
 			direction.z = std::cos(pose.yaw) * std::cos(pose.pitch);
 
-			Initialize(pose.position, direction);
+			Initialize(pose.position, pose.position + direction);
 		}
 
 		virtual void Reset()

@@ -1,39 +1,45 @@
 #include "GameScene.h"
-#include "GameScene.h"
 #include "GameContext.h"
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
 #include "CameraObjectManager.h"
 #include "UIManager.h"
-
 #include <algorithm>
-
 #include "DxPlus/DxPlus.h"
+#include "Collision.h"
+#include "DxConv.h"
 
+#ifndef NDEBUG
+#include "imgui.h"
+#endif
 
-
-GameScene::GameScene(GameContext* context) 
-	: Scene(context), stateMachine_(*this) {}
+GameScene::GameScene(GameContext* context)
+	: Scene(context), stateMachine_(*this) {
+}
 
 void GameScene::Init()
 {
 	gameContext->Reset();
 
-    // チュートリアルも、使いたいモデルを登録するだけで同じ判定を利用できる。
-    tutorialCollision_.Clear();
-    tutorialCollision_.AddModel(gameContext->GetRoom().GetRoomObject(), ModelCollision::Surface::Floor);
-    tutorialCollision_.AddModel(gameContext->GetRoom().GetRoomObject(), ModelCollision::Surface::Wall);
+	// チュートリアルも、使いたいモデルを登録するだけで同じ判定を利用できる。
+	tutorialCollision_.Clear();
+	tutorialCollision_.AddModel(gameContext->GetRoom().GetRoomObject(), ModelCollision::Surface::Floor);
+	tutorialCollision_.AddModel(gameContext->GetRoom().GetRoomObject(), ModelCollision::Surface::Wall);
 
-	
-	// チュートリアルの柱モデルを登録する
-    for (const auto& pillar : gameContext->GetStage().GetPillarModelObjects())
-        tutorialCollision_.AddModel(pillar, ModelCollision::Surface::Pillar);
-   
+	// チュートリアルでもStageの柱を判定する。
+	for (const auto& pillar : gameContext->GetStage().GetPillarModelObjects())
+		tutorialCollision_.AddModel(pillar, ModelCollision::Surface::Pillar);
+
 	for (const auto* pillar : gameContext->GetRoom().GetPillars())
-        tutorialCollision_.AddModel(*pillar, ModelCollision::Surface::Pillar);
-	// チュートリアルのジャンプ台モデルを登録する
+		tutorialCollision_.AddModel(*pillar, ModelCollision::Surface::Pillar);
+
+	// ジャンプ台の床と柱を、それぞれの用途で登録する。
 	for (const auto* stand : gameContext->GetRoom().GetJumpStands())
-        tutorialCollision_.AddModel(stand->GetPillarModel(), ModelCollision::Surface::Pillar);
+	{
+		tutorialCollision_.AddModel(stand->GetJumpStandModel(), ModelCollision::Surface::Floor);
+		tutorialCollision_.AddModel(stand->GetPillarModel(), ModelCollision::Surface::Pillar);
+	}
+	tutorialCollision_.AddModel(gameContext->GetStage().GetModelObject(), ModelCollision::Surface::Floor);
 
 	// トゥーン描画とアウトライン描画を有効にする
 	{
@@ -77,7 +83,7 @@ void GameScene::Init()
 		UIM().GetUI(L"Game.Logo")->SetDisplayCondition(
 			[this]() -> bool
 			{
-             return GetCurrentGameState() == GameStateType::Title;
+				return GetCurrentGameState() == GameStateType::Title;
 			}
 		);
 
@@ -85,14 +91,14 @@ void GameScene::Init()
 		const DxPlus::Vec2 startPos(DxPlus::CLIENT_WIDTH * 0.2f, DxPlus::CLIENT_HEIGHT * 0.6f);
 		const std::wstring key = ResourceKeys::UI_StartButton;
 		UIM().CreateButtonUI(L"Game.StartButton", key, startPos,
-          [this]() { stateMachine_.ChangeState(GameStateType::Select); },
+			[this]() { stateMachine_.ChangeState(GameStateType::Select); },
 			{ -1,0 },
 			0.5f
 		);
 		UIM().GetUI(L"Game.StartButton")->SetDisplayCondition(
 			[this]() -> bool
 			{
-             return GetCurrentGameState() == GameStateType::Title;
+				return GetCurrentGameState() == GameStateType::Title;
 			}
 		);
 
@@ -107,13 +113,13 @@ void GameScene::Init()
 		UIM().GetUI(L"Game.ExitButton")->SetDisplayCondition(
 			[this]() -> bool
 			{
-             return GetCurrentGameState() == GameStateType::Title;
+				return GetCurrentGameState() == GameStateType::Title;
 			}
 		);
 	}
 
 	stateMachine_.Initialize();
-	
+
 	StartFadeIn();
 }
 
@@ -128,24 +134,6 @@ bool GameScene::UpdateStateCamera(float deltaTime, const std::string& requestedS
 		}
 	}
 	return transitionCompleted;
-}
-
-void GameScene::FocusTutorialCamera(float deltaTime, const Vec3& cameraPositionOffset)
-{
-    const Vec3 playerPosition = gameContext->GetPlayer().GetPosition();
-	const float followAmount = std::clamp(
-		targetCamera_.GetSettings().followSpeed * deltaTime,
-		0.0f,
-		1.0f);
-	const Vec3 desiredPosition = playerPosition + cameraPositionOffset;
-	const Vec3 desiredTarget = playerPosition + Vec3::Up() * 100.0f;
-
-	targetCamera_.SetPosition(
-		targetCamera_.GetPosition() +
-		(desiredPosition - targetCamera_.GetPosition()) * followAmount);
-	targetCamera_.SetTarget(
-		targetCamera_.GetTarget() +
-		(desiredTarget - targetCamera_.GetTarget()) * followAmount);
 }
 
 
@@ -167,7 +155,7 @@ void GameScene::Update(float deltaTime)
 		// stageの中心座標を取得して、playerの更新に渡す
 		const Vec3 stageCenterPosition = stage.GetPosition();
 
-      // チュートリアルは通常の前後左右移動、バトルはステージ中心を基準にした移動を使う。
+		// チュートリアルは通常移動、バトルはステージ中心を基準にした移動を使う。
 		const bool tutorial = GetCurrentGameState() == GameStateType::Tutorial;
 		player.SetDefMove(tutorial);
 		if (tutorial)
@@ -176,6 +164,7 @@ void GameScene::Update(float deltaTime)
 		else
 			// player.Update(deltaTime, stage, stageCenterPosition);
 			player.Update(deltaTime, stage.GetCollision(), stageCenterPosition);
+
 		stage.UpdateAlphaModel(deltaTime, player);
 		boss.Update(deltaTime);
 
@@ -185,20 +174,11 @@ void GameScene::Update(float deltaTime)
 		{
 			player.TakeDamage();
 		}
-		// 旧：部屋との接触で重力を止める処理。現在は ModelCollision の着地判定を使う。
-		// const bool stageTouching = Collision::UpdateModelContact(playerModel, gameContext->GetRoom().GetModelObject());
-		// if (stageTouching)
-		// {
-			// // プレイヤーがステージに接触している場合の処理
-			// player.SetGravityEnabled(false);
-			// player.SetVerticalSpeed(0.0f);
-			// player.SetGround(true);
-		// }
 
 
 	}
 
-    stateMachine_.Tick(deltaTime);
+	stateMachine_.Tick(deltaTime);
 
 	gameContext->GetEffectManager().Update(deltaTime);
 }
@@ -224,33 +204,121 @@ void GameScene::Render() const
 	}
 }
 
+void GameScene::DrawImGui()
+{
+#ifndef NDEBUG
+
+#endif
+}
+
 void GameScene::RenderDepth() const
 {
-	cameraDirector_.GetActiveCamera()->ApplyPose(cameraDirector_.GetCurrentPose());
+	cameraDirector_.GetActiveCamera()->ApplyPose(
+		cameraDirector_.GetCurrentPose()
+	);
 
 	const auto& boss = gameContext->GetBoss();
 	const auto& player = gameContext->GetPlayer();
 	const auto& stage = gameContext->GetStage();
-	const auto& effectManager = gameContext->GetEffectManager();
 	const auto& room = gameContext->GetRoom();
 
+	// Room本体
 	modelToonRenderer_.DrawDepth(room.GetRoomObject());
-    for (const auto* pillar : gameContext->GetRoom().GetPillars())
-        modelToonRenderer_.DrawDepth(*pillar);
-    for (const auto* stand : gameContext->GetRoom().GetJumpStands())
-    {
-        modelToonRenderer_.DrawDepth(stand->GetJumpStandModel());
-        modelToonRenderer_.DrawDepth(stand->GetPillarModel());
-    }
+
+	// Roomの柱
+	for (const auto* pillar : room.GetPillars())
+	{
+		if (pillar)
+		{
+			modelToonRenderer_.DrawDepth(*pillar);
+		}
+	}
+
+	// Roomのジャンプ台と柱
+	for (const auto* jumpStand : room.GetJumpStands())
+	{
+		if (!jumpStand) continue;
+
+		modelToonRenderer_.DrawDepth(
+			jumpStand->GetJumpStandModel()
+		);
+
+		modelToonRenderer_.DrawDepth(
+			jumpStand->GetPillarModel()
+		);
+	}
+
+	// Stage
 	modelToonRenderer_.DrawDepth(stage.GetModelObject());
 	modelToonRenderer_.DrawDepth(stage.GetAlphaModelObject());
+
+	for (const auto& pillar : stage.GetPillarModelObjects())
+	{
+		modelToonRenderer_.DrawDepth(pillar);
+	}
+
+	for (const auto& model : stage.GetStageModelObjects())
+	{
+		modelToonRenderer_.DrawDepth(model);
+	}
+
+	// PlayerとBoss
 	modelToonRenderer_.DrawDepth(player.GetModelObject());
 	modelToonRenderer_.DrawDepth(boss.GetModelObject());
 }
 
+void GameScene::DrawTutorialCollisionSpheres() const
+{
+#ifdef _DEBUG
+	const auto& settings = tutorialCollisionSettings_;
+
+	if (!settings.drawSpheres ||
+		GetCurrentGameState() != GameStateType::Tutorial)
+	{
+		return;
+	}
+
+	const auto& player = gameContext->GetPlayer();
+	const auto& stage = gameContext->GetStage();
+
+	const Vec3 playerCenter =
+		player.GetWorldPosition() + settings.playerOffset;
+
+	const Vec3 stageCenter =
+		stage.GetWorldPosition() + settings.stageOffset;
+
+	// Collision共通のSphere型を使う
+	const Collision::Sphere playerSphere{
+		playerCenter, settings.playerRadius
+	};
+
+	const Collision::Sphere stageSphere{
+		stageCenter, settings.stageRadius
+	};
+
+	const Collision::Sphere climbSphere{
+		stageCenter, settings.climbRadius
+	};
+
+	// Player：緑
+	Collision::DrawDebugSphere(
+		playerSphere, DxLib::GetColor(0, 255, 0));
+
+	// Battle遷移判定：赤
+	Collision::DrawDebugSphere(
+		stageSphere, DxLib::GetColor(255, 0, 0));
+
+	// カメラ追従開始判定：青
+	Collision::DrawDebugSphere(
+		climbSphere, DxLib::GetColor(0, 100, 255));
+#endif
+}
+
 void GameScene::DrawScene(bool toonEnabled) const
 {
-	cameraDirector_.GetActiveCamera()->ApplyPose(cameraDirector_.GetCurrentPose());
+	cameraDirector_.GetActiveCamera()->ApplyPose(
+		cameraDirector_.GetCurrentPose()
+	);
 
 	const auto& boss = gameContext->GetBoss();
 	const auto& player = gameContext->GetPlayer();
@@ -264,25 +332,32 @@ void GameScene::DrawScene(bool toonEnabled) const
 	{
 		SetUsePixelShader(-1);
 		SetUseVertexShader(-1);
+
 		boss.Draw();
 		stage.Draw();
 		player.Draw();
 		stage.DrawAlphaModel();
+
 		effectManager.Draw();
 		grid.Draw();
 		room.Draw();
+
+
+		DrawTutorialCollisionSpheres();
 		return;
 	}
 
-	// トゥーン描画開始
 	modelToonRenderer_.BeginPass();
 
-	const auto drawActor = [this](const ModelObject& model)
+	// 元のModelObjectを直接描画する
+	// 親子変換はModelObject::ApplyTransform()に任せる
+	const auto drawModel = [this](const ModelObject& model)
 		{
 			if (model.collisionHighlighted)
 			{
 				SetUsePixelShader(-1);
 				SetUseVertexShader(-1);
+
 				MV1SetUseOrigShader(FALSE);
 				model.Draw();
 				MV1SetUseOrigShader(TRUE);
@@ -292,38 +367,54 @@ void GameScene::DrawScene(bool toonEnabled) const
 				modelToonRenderer_.Draw(model);
 			}
 		};
-	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
-		player.GetPosition(), player.GetRotation());
-	drawActor(playerModel);
-	// bossのモデルにboss自体の位置と回転を適用して描画する
-	drawActor(boss.GetModelObject().WithParentTransform(
-		boss.GetPosition(), boss.GetRotation()));
-	drawActor(stage.GetModelObject().WithParentTransform(
-		stage.GetPosition(), stage.GetRotation()));
-	drawActor(stage.GetAlphaModelObject());
+
+	// BossとPlayer
+	drawModel(boss.GetModelObject());
+	drawModel(player.GetModelObject());
+
+	// Stage
+	drawModel(stage.GetModelObject());
+	drawModel(stage.GetAlphaModelObject());
+
 	for (const auto& pillar : stage.GetPillarModelObjects())
 	{
-		drawActor(pillar.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
+		drawModel(pillar);
 	}
+
 	for (const auto& model : stage.GetStageModelObjects())
 	{
-		drawActor(model.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
+		drawModel(model);
 	}
+
+	// Room本体
+	drawModel(room.GetRoomObject());
+
+	// Roomの柱
+	for (const auto* pillar : room.GetPillars())
+	{
+		if (pillar)
+		{
+			drawModel(*pillar);
+		}
+	}
+
+	// Roomのジャンプ台と柱
+	for (const auto* jumpStand : room.GetJumpStands())
+	{
+		if (!jumpStand) continue;
+
+		drawModel(jumpStand->GetJumpStandModel());
+		drawModel(jumpStand->GetPillarModel());
+	}
+
 	effectManager.Draw();
 	grid.Draw();
 
-	drawActor(room.GetRoomObject());
-    for (const auto* pillar : gameContext->GetRoom().GetPillars())
-        drawActor(*pillar);
-    for (const auto* stand : gameContext->GetRoom().GetJumpStands())
-    {
-        drawActor(stand->GetJumpStandModel());
-        drawActor(stand->GetPillarModel());
-    }
 	modelToonRenderer_.EndPass();
+	DrawTutorialCollisionSpheres();
 }
 
 void GameScene::End()
 {
-    tutorialCollision_.Clear();
+	tutorialCollision_.Clear();
 }

@@ -51,6 +51,9 @@ namespace Camera
 			float duration = 0.0f,
 			Motion::Easing easing = Motion::Easing::EaseInOut);
 
+		// カメラの現在姿勢を即時更新する
+		void SetPoseImmediate(const CameraPose& pose);
+
 		// 毎フレーム更新。遷移完了時のみ true
 		bool Update(float deltaTime);
 

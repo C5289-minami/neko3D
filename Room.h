@@ -19,7 +19,9 @@ public:
 	ModelObject& GetRoomObject() { return roomModel_; }
 	const ModelObject& GetRoomObject() const { return roomModel_; }
 	std::vector<ModelObject*> GetPillars() { return { &pillar1_, &pillar2_ }; }
+	std::vector<const ModelObject*> GetPillars() const{ return { &pillar1_, &pillar2_ }; }
 	std::vector<JumpStand*> GetJumpStands() { return { &lowJumpStand_, &mediumJumpStand_, &highJumpStand_ }; }
+	std::vector<const JumpStand*> GetJumpStands() const { return { &lowJumpStand_, &mediumJumpStand_, &highJumpStand_ }; }
 
 private:
 	ModelObject roomModel_;

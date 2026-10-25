@@ -113,7 +113,11 @@ void Player::UpdateMovement(float deltaTime)
 	{
 		if (isdefMove_)
 		{
-			Vec3 moveDirection = input_.moveDir;
+			// カメラの向きに合わせて移動方向を決める。
+			const float cameraRotY = DxLib::GetCameraAngleHRotate();
+			const Vec3 cameraForward{ std::sin(cameraRotY), 0.0f, std::cos(cameraRotY) };
+			const Vec3 cameraRight{ cameraForward.z, 0.0f, -cameraForward.x };
+			Vec3 moveDirection = cameraRight * input_.moveDir.x + cameraForward * input_.moveDir.z;
 			moveDirection.y = 0.0f;
 			if (moveDirection.LengthSq() > 0.0f)
 			{
@@ -146,9 +150,9 @@ void Player::UpdateMovement(float deltaTime)
 // void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCenter)
 void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& movementCenter)
 {
-    // 体の形はプレイヤーが渡す。判定対象の形・配置は ModelCollision が管理する。
-    const ModelCollision::ModelOb modelOb{ Const::PLAYER_RADIUS, Const::PLAYER_HEIGHT, Const::PLAYER_SKIN };
-    collision.Refresh();
+	// 体の形はプレイヤーが渡す。判定対象の形・配置は ModelCollision が管理する。
+	const ModelCollision::ModelOb modelOb{ Const::PLAYER_RADIUS, Const::PLAYER_HEIGHT, Const::PLAYER_SKIN };
+	collision.Refresh();
 	movementCenter_ = movementCenter;
 	const Vec3 oldPosition = GetPosition();
 	const float previousY = oldPosition.y;
@@ -231,7 +235,7 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 			isGrounded_ = false;
 			EndPillarElevator();
 		}
-	}	
+	}
 
 
 	// 落下中のみ床面に合わせ、このフレームの落下距離もレイの長さに含める。
@@ -561,12 +565,12 @@ void Player::StartLungingJump(const Vec3& moveDir)
 
 void Player::SetClimbingSpeed(float value)
 {
-    if (std::isfinite(value)) climbingSpeed_ = (std::max)(0.0f, value);
+	if (std::isfinite(value)) climbingSpeed_ = (std::max)(0.0f, value);
 }
 
 void Player::SetWallSlideSpeed(float value)
 {
-    if (std::isfinite(value)) wallSlideSpeed_ = (std::max)(0.0f, value);
+	if (std::isfinite(value)) wallSlideSpeed_ = (std::max)(0.0f, value);
 }
 
 void Player::ResetClimbingSpeeds()
@@ -578,18 +582,18 @@ void Player::ResetClimbingSpeeds()
 
 void Player::SetWallJumpMoveSpeed(float value)
 {
-    if (std::isfinite(value)) wallJumpMoveSpeed_ = (std::max)(0.0f, value);
+	if (std::isfinite(value)) wallJumpMoveSpeed_ = (std::max)(0.0f, value);
 }
 
 void Player::SetWallJumpSpeed(float value)
 {
-    if (std::isfinite(value)) wallJumpSpeed_ = (std::max)(0.0f, value);
+	if (std::isfinite(value)) wallJumpSpeed_ = (std::max)(0.0f, value);
 }
 
 void Player::ResetWallJumpSpeeds()
 {
-    wallJumpMoveSpeed_ = Const::PLAYER_WALL_JUMP_MOVE_SPEED;
-    wallJumpSpeed_ = Const::PLAYER_WALL_JUMP_SPEED;
+	wallJumpMoveSpeed_ = Const::PLAYER_WALL_JUMP_MOVE_SPEED;
+	wallJumpSpeed_ = Const::PLAYER_WALL_JUMP_SPEED;
 }
 
 void Player::StartWallJump()

@@ -11,6 +11,7 @@ GameSceneTitleState::GameSceneTitleState(GameStateMachine& gameStateMachine, Gam
 void GameSceneTitleState::Enter()
 {
 	DxPlus::Debug::SetFormatString(L"GameSceneTitleState::Enter");
+	DxLib::SetMouseDispFlag(TRUE);
 }
 
 void GameSceneTitleState::Tick(float deltaTime)
@@ -23,4 +24,5 @@ void GameSceneTitleState::Tick(float deltaTime)
 void GameSceneTitleState::Exit()
 {
 	DxPlus::Debug::SetFormatString(L"GameSceneTitleState::Exit");
+	DxLib::SetMouseDispFlag(FALSE);
 }
