@@ -1,6 +1,7 @@
 #pragma once
 #include "GameBaseState.h"
 #include "Vector3.h"
+#include "CameraPose.h" 
 
 class GameSceneTutorialState : public GameBaseState
 {
@@ -23,4 +24,16 @@ private:
 	float cameraFollowSpeed = 150.0f; // 普段のカメラ移動スピード（ゆっくり）
 	float cameraMaxLag = 150.0f; // これ以上離れたら急いで追いつく距離
 	float cameraTurnSpeed = 6.0f;   // カメラがプレイヤーを向く速さ（遅れないよう少し上げる）
+	
+	Camera::CameraPose GetTutorialCameraPose();
+
+	enum class TutorialCameraState
+	{
+		LookPlayer,   // 固定カメラからPlayerを見る
+		EnterMove,    // 追従開始位置まで移動中
+		FollowPlayer  // Playerを追従
+	};
+
+	TutorialCameraState cameraState_ =
+		TutorialCameraState::LookPlayer;
 };

@@ -30,33 +30,57 @@ void GameSceneTutorialState::Enter()
 	camera.SetTarget(player.GetPosition() + Vec3::Up() * 100.0f);
 
 	targetCameraSwitched_ = false;
-	tutorialCameraMoved_ = false;
+	cameraState_ = TutorialCameraState::LookPlayer;
 }
 
 void GameSceneTutorialState::Tick(float deltaTime)
 {
 	DxPlus::Debug::SetFormatString(L"GameSceneTutorialState::Tick");
 
+	auto& director = gameScene_.GetCameraDirector();
 	auto& player = gameScene_.GetGameContext()->GetPlayer();
 
-	// 追従開始前は、固定カメラからPlayerを見る
-	if (!tutorialCameraMoved_)
-	{
-		gameScene_.GetTargetCamera().SetTarget(player.GetPosition() + Vec3::Up() * 100.0f);
-	}
+	// =========================================
+	// カメラ
+	// =========================================
 
-	// Tutorialカメラへの初期遷移
-	if (gameScene_.UpdateStateCamera(deltaTime, "Tutorial") && !targetCameraSwitched_)
+	const bool transitionCompleted =
+		gameScene_.UpdateStateCamera(deltaTime, "Tutorial");
+
+	// 初期ショットの遷移完了後、TargetCameraへ切り替える
+	if (transitionCompleted && !targetCameraSwitched_)
 	{
-		gameScene_.GetCameraDirector().SwitchCamera(gameScene_.GetTargetCamera(), 1.2f);
+		director.SwitchCamera(
+			gameScene_.GetTargetCamera(),
+			1.2f);
+
 		targetCameraSwitched_ = true;
 	}
 
-	// Tutorialカメラ追従
-	if (tutorialCameraMoved_)
+	switch (cameraState_)
 	{
+	case TutorialCameraState::LookPlayer:
+		// 固定カメラからPlayerを見る
+		gameScene_.GetTargetCamera().SetTarget(
+			player.GetPosition() + Vec3::Up() * 100.0f);
+		break;
+
+	case TutorialCameraState::EnterMove:
+		// MoveToが完了したフレームで追従へ
+		if (transitionCompleted)
+		{
+			cameraState_ = TutorialCameraState::FollowPlayer;
+		}
+		break;
+
+	case TutorialCameraState::FollowPlayer:
 		FocusTutorialCamera(deltaTime);
+		break;
 	}
+
+	// =========================================
+	// 当たり判定
+	// =========================================
 
 	// GameScene が管理する球体設定を取得
 	const auto& settings = gameScene_.GetTutorialCollisionSettings();
@@ -77,9 +101,16 @@ void GameSceneTutorialState::Tick(float deltaTime)
 		settings.climbRadius
 	);
 
-	if (touchingClimb)
+
+	if (touchingClimb &&
+		cameraState_ == TutorialCameraState::LookPlayer)
 	{
-		tutorialCameraMoved_ = true;
+		cameraState_ = TutorialCameraState::EnterMove;
+
+		director.MoveTo(
+			GetTutorialCameraPose(),
+			0.7f,
+			Motion::Easing::EaseInOut);
 	}
 
 	// Battleへの遷移判定
@@ -163,4 +194,36 @@ void GameSceneTutorialState::FocusTutorialCamera(float deltaTime)
 	pose.fieldOfViewDegrees = cameraFov;
 
 	director.SetPoseImmediate(pose);
+}
+
+Camera::CameraPose GameSceneTutorialState::GetTutorialCameraPose()
+{
+	auto& context = *gameScene_.GetGameContext();
+	const auto& player = context.GetPlayer();
+	const auto& stage = context.GetStage();
+
+	const Vec3 playerPos = player.GetWorldPosition();
+	const Vec3 stagePos = stage.GetWorldPosition();
+
+	Vec3 stageToPlayer = playerPos - stagePos;
+	stageToPlayer.y = 0.0f;
+
+	if (stageToPlayer.LengthSq() < 0.0001f)
+		stageToPlayer = Vec3(0.0f, 0.0f, 1.0f);
+	else
+		stageToPlayer = stageToPlayer.Normalized();
+
+	const Vec3 lookPoint = playerPos + Vec3::Up() * 100.0f;
+
+	Camera::CameraPose pose{};
+
+	pose.position = lookPoint + stageToPlayer * cameraDistance;
+
+	const Vec3 viewDir = lookPoint - pose.position;
+
+	pose.yaw = std::atan2(viewDir.x, viewDir.z);
+	pose.pitch = cameraPitch;
+	pose.fieldOfViewDegrees = cameraFov;
+
+	return pose;
 }
