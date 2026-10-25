@@ -26,16 +26,20 @@ void GameScene::Init()
 	tutorialCollision_.AddModel(gameContext->GetRoom().GetRoomObject(), ModelCollision::Surface::Floor);
 	tutorialCollision_.AddModel(gameContext->GetRoom().GetRoomObject(), ModelCollision::Surface::Wall);
 
-	for (const auto& jumpStand : gameContext->GetRoom().GetJumpStands())
-	{
-		tutorialCollision_.AddModel(jumpStand->GetJumpStandModel(), ModelCollision::Surface::Floor);
-		tutorialCollision_.AddModel(jumpStand->GetPillarModel(), ModelCollision::Surface::Pillar);
-	}
-	for (const auto& pillar : gameContext->GetRoom().GetPillars())
+	// チュートリアルでもStageの柱を判定する。
+	for (const auto& pillar : gameContext->GetStage().GetPillarModelObjects())
+		tutorialCollision_.AddModel(pillar, ModelCollision::Surface::Pillar);
+
+	for (const auto* pillar : gameContext->GetRoom().GetPillars())
 		tutorialCollision_.AddModel(*pillar, ModelCollision::Surface::Pillar);
 
+	// ジャンプ台の床と柱を、それぞれの用途で登録する。
+	for (const auto* stand : gameContext->GetRoom().GetJumpStands())
+	{
+		tutorialCollision_.AddModel(stand->GetJumpStandModel(), ModelCollision::Surface::Floor);
+		tutorialCollision_.AddModel(stand->GetPillarModel(), ModelCollision::Surface::Pillar);
+	}
 	tutorialCollision_.AddModel(gameContext->GetStage().GetModelObject(), ModelCollision::Surface::Floor);
-
 
 	// トゥーン描画とアウトライン描画を有効にする
 	{
@@ -414,5 +418,3 @@ void GameScene::End()
 {
 	tutorialCollision_.Clear();
 }
-
-

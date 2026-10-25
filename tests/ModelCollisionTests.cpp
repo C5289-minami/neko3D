@@ -1,4 +1,4 @@
-#include "ModelCollision.h"
+﻿#include "ModelCollision.h"
 #include "DrawableObject.h"
 #include "ResourceManager.h"
 #include "ActorBase.h"
@@ -44,7 +44,7 @@ namespace
     {
         using Surface = ModelCollision::Surface;
         ModelObject pillar;
-        pillar.SetModelKey(ResourceKeys::Model_hashira_s);
+        pillar.SetModelKey(ResourceKeys::Model_PillarS);
         CenterModel(pillar, {});
         ModelCollision collision;
         collision.AddModel(pillar, Surface::Pillar);
@@ -66,18 +66,26 @@ namespace
         const Vec3 inwardPosition = oldPosition - normal * (radius * 0.8f);
         bool touched = false;
         const Vec3 stopped = collision.SlideAlongWalls(oldPosition, inwardPosition, modelOb, touched);
-        Check(touched && (stopped - oldPosition).Length() < radius * 0.02f,
-            "Moving straight into wall stops without sideways acceleration");
+
+        // Check(touched && (stopped - oldPosition).Length() < radius * 0.02f,
+        //     "Moving straight into wall stops without sideways acceleration");
+ 
+        Check(!touched && (stopped - inwardPosition).Length() < 0.01f,
+            "Pillar does not stop horizontal movement");
 
         const Vec3 diagonal = inwardPosition + tangent * (radius * 0.5f) + Vec3::Up() * 0.1f;
         const Vec3 slid = collision.SlideAlongWalls(oldPosition, diagonal, modelOb, touched);
-        Check(touched && std::abs(Vec3::Dot(slid - oldPosition, normal)) < radius * 0.02f &&
-            Vec3::Dot(slid - oldPosition, tangent) > radius * 0.4f && Near(slid.y, diagonal.y),
-            "Diagonal movement slides and preserves jump height");
+        // Check(touched && std::abs(Vec3::Dot(slid - oldPosition, normal)) < radius * 0.02f &&
+        //     Vec3::Dot(slid - oldPosition, tangent) > radius * 0.4f && Near(slid.y, diagonal.y),
+        //     "Diagonal movement slides and preserves jump height");
+
+        Check(!touched && (slid - diagonal).Length() < 0.01f,
+            "Pillar leaves diagonal movement and jump height unchanged");
         const Vec3 away = oldPosition + normal * radius;
         const Vec3 released = collision.SlideAlongWalls(oldPosition, away, modelOb, touched);
         Check(!touched && (released - away).Length() < 0.01f, "Movement away from wall is unrestricted");
         Check(collision.IsTouchingWalls(inwardPosition, modelOb), "Capsule contacts model mesh");
+        Check(!collision.IsTouchingWalls(away, modelOb), "Contact becomes false after leaving pillar");
 
         Vec3 wallNormal{};
         float top{};
@@ -97,15 +105,38 @@ namespace
         const Vec3 playerOld = side.point + normal * (playerBody.radius * 1.2f) - Vec3::Up() * (playerBody.height * 0.5f);
         const Vec3 playerInward = playerOld - normal * (playerBody.radius * 0.8f);
         const Vec3 playerStopped = collision.SlideAlongWalls(playerOld, playerInward, playerBody, touched);
-        Check(touched && (playerStopped - playerOld).Length() < 0.02f,
-            "Short player still stops at pillar side");
+        // Check(touched && (playerStopped - playerOld).Length() < 0.02f,
+        //     "Short player still stops at pillar side");
+        Check(!touched && (playerStopped - playerInward).Length() < 0.01f,
+            "Player passes through pillar while contact remains detectable");
         Check(collision.IsTouchingWalls(playerInward, playerBody), "Short player reports pillar contact");
         Check(collision.FindWall(playerOld, playerBody, wallNormal, -normal, &top, Const::PLAYER_CLIMB_DETECTION_MARGIN),
             "Short player can detect climbable pillar side");
 
         Physics::RayHit ground{};
-        Check(collision.RaycastDown({ 0, size.y * 2, 0 }, size.y * 4, ground),
-            "Pillar supports landing on its top");
+        // Check(collision.RaycastDown({ 0, size.y * 2, 0 }, size.y * 4, ground),
+        //     "Pillar supports landing on its top");
+        Check(!collision.RaycastDown({ 0, size.y * 2, 0 }, size.y * 4, ground),
+            "Pillar no longer corrects landing height");
+        Check(!collision.RaycastUp({ 0, -size.y, 0 }, size.y * 2, ground),
+            "Pillar no longer blocks jumps from below");
+
+        Player contactPlayer;
+        contactPlayer.Init();
+        contactPlayer.SetPosition(playerOld);
+        contactPlayer.Update(0.0f, collision);
+        Check(contactPlayer.IsTouchingWall() && contactPlayer.GetCurrentState() != PlayerStateType::Climbing,
+            "Player contact stays true without movement input or auto-climbing");
+        contactPlayer.SetGround(true);
+        contactPlayer.JumpAction();
+        contactPlayer.Update(0.01f, collision);
+        Check(Near(contactPlayer.GetPosition().x, playerOld.x) &&
+            contactPlayer.GetPosition().y > playerOld.y &&
+            contactPlayer.GetCurrentState() != PlayerStateType::Climbing,
+            "Jump remains a normal jump without attraction or automatic ascent");
+        contactPlayer.SetPosition(playerOld + normal * playerBody.radius * 4);
+        contactPlayer.Update(0.0f, collision);
+        Check(!contactPlayer.IsTouchingWall(), "Player contact returns to false away from pillar");
 
         collision.Clear();
         collision.AddModel(pillar, Surface::Wall);
@@ -169,7 +200,8 @@ namespace
         second.SetScale({ 2, 2, 2 });
         const float spacing = size.x * 5;
         CenterModel(second, { spacing, size.y * 2, 0 });
-        collision.AddModel(second, Surface::Pillar);
+        // collision.AddModel(second, Surface::Pillar);
+        collision.AddModel(second, Surface::Floor);
         Check(collision.Refresh(), "Register another instance of the same source model");
         const Vec3 doubled = collision.GetSize(second);
         Check(Near(doubled.x, size.x * 2, 0.1f) && Near(doubled.y, size.y * 2, 0.1f),
@@ -189,7 +221,8 @@ namespace
         Check(wallAboveFloor.Raycast({ 0, size.y * 5, 0 }, { 0, -size.y * 5, 0 }, ground) &&
             Near(ground.point.y, size.y * 3, 0.1f),
             "General rays select the nearer Wall model above Floor");
-        collision.AddModel(second, Surface::Pillar);
+        // collision.AddModel(second, Surface::Pillar);
+        collision.AddModel(second, Surface::Floor);
         Check(collision.Refresh() && collision.RaycastDown({ 0, size.y * 5, 0 }, size.y * 10, ground) &&
             Near(ground.point.y, size.y * 3, 0.1f), "Refresh moves collision and ray selects nearest model");
         Check(!collision.RaycastDown({ spacing, size.y * 5, 0 }, size.y * 10, ground),

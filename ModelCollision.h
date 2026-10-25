@@ -15,7 +15,7 @@ public:
     {
         Floor,  // 床。着地用の判定。
         Wall,   // 壁。側面で移動を止める・滑らせる。登れない。
-        Pillar  // 柱。側面を登ることができ、上にも乗れる。
+        Pillar  
     };
 
     // 動く側の体の大きさ。プレイヤー以外にも同じ判定を使える。
@@ -47,22 +47,33 @@ public:
     bool IsTouchingWalls(const Vec3& feetPosition, const ModelOb& modelOb) const;
     Vec3 SlideAlongWalls(const Vec3& oldPosition, const Vec3& desiredPosition,
         const ModelOb& modelOb, bool& touched) const;
+    // pillarCenterを指定すると、接触判定で選ばれた柱の中心も返す。
     bool FindWall(const Vec3& feetPosition, const ModelOb& modelOb, Vec3& wallNormal,
         const Vec3& moveDirection = {}, float* wallTopY = nullptr,
-        float detectionMargin = 0.0f, float topHoldDistance = 0.0f) const;
+        float detectionMargin = 0.0f, float topHoldDistance = 0.0f,
+
+        Vec3* pillarCenter = nullptr, const ModelObject** pillarModel = nullptr) const;
+    bool GetPillarBounds(const ModelObject* model, Vec3& center, float& topY) const;
 
     // 種類を問わず全モデルを調べる、汎用のレイ判定。
     bool Raycast(const Vec3& start, const Vec3& end, Physics::RayHit& hit) const;
-    // 着地用。床と柱を調べる。壁は対象外。
+    // 着地用。床だけを調べる。柱は接触判定のみ。
     bool RaycastDown(const Vec3& origin, float maxDistance, Physics::RayHit& hit) const;
-    // 頭上用。床・柱・壁のすべてを調べる。
+
+    // 柱の上面だけへの着地。足元の調整量だけ判定面を下げる。
+    bool RaycastPillarTop(const Vec3& origin, float maxDistance, float topOffset,
+        Physics::RayHit& hit) const;
+    // 頭上用。床・壁を調べる。柱は接触判定のみ。
     bool RaycastUp(const Vec3& origin, float maxDistance, Physics::RayHit& hit) const;
     // Refresh 後の、拡大縮小・回転を含めたモデルの幅・高さ・奥行き。
     Vec3 GetSize(const ModelObject& model) const;
 
 private:
+    struct Entry;
+    bool UpdatePillarBounds(Entry& entry);
+
     bool RaycastModels(const Vec3& start, const Vec3& end, Physics::RayHit& hit,
-        bool forLanding) const;
+        bool forLanding, bool ignorePillars = false) const;
 
     struct Entry
     {
@@ -70,6 +81,10 @@ private:
         Surface surface{ Surface::Floor };
         int sourceHandle{ -1 };
         int handle{ -1 }; // 同じモデルを複数配置しても混ざらない、判定専用の複製。
+        Vec3 center{};
+        Vec3 radii{};
+        float topY{};
+        bool boundsReady{ false };
     };
     std::vector<Entry> models_;
 };
