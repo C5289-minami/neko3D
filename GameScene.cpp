@@ -1,16 +1,17 @@
 #include "GameScene.h"
-#include "GameScene.h"
 #include "GameContext.h"
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
 #include "CameraObjectManager.h"
 #include "UIManager.h"
-
 #include <algorithm>
-
 #include "DxPlus/DxPlus.h"
+#include "Collision.h"
+#include "DxConv.h"
 
-
+#ifndef NDEBUG
+#include "imgui.h"
+#endif
 
 GameScene::GameScene(GameContext* context)
 	: Scene(context), stateMachine_(*this) {
@@ -33,8 +34,8 @@ void GameScene::Init()
 	for (const auto& pillar : gameContext->GetRoom().GetPillars())
 		tutorialCollision_.AddModel(*pillar, ModelCollision::Surface::Pillar);
 
-	//for (const auto& pillar : gameContext->GetStage().GetPillarModelObjects())
-	//	tutorialCollision_.AddModel(pillar, ModelCollision::Surface::Pillar);
+	tutorialCollision_.AddModel(gameContext->GetStage().GetModelObject(), ModelCollision::Surface::Floor);
+
 
 	// トゥーン描画とアウトライン描画を有効にする
 	{
@@ -131,44 +132,7 @@ bool GameScene::UpdateStateCamera(float deltaTime, const std::string& requestedS
 	return transitionCompleted;
 }
 
-void GameScene::FocusTutorialCamera()
-{
-	const auto& player = gameContext->GetPlayer();
-	const auto& stage = gameContext->GetStage();
 
-	const Vec3 playerPosition = player.GetWorldPosition();
-	const Vec3 stagePosition = stage.GetWorldPosition();
-
-	// StageからPlayerへ向かう方向を求める
-	Vec3 direction = playerPosition - stagePosition;
-	direction.y = 0.0f;
-
-	const float lengthSq =
-		direction.x * direction.x +
-		direction.z * direction.z;
-
-	if (lengthSq < 0.0001f)
-		return;
-
-	direction = direction.Normalized();
-
-	Vec3 cameraPosition = stagePosition;
-	// カメラの高さ
-
-	// Playerを挟んでStageの反対側に配置する
-	cameraPosition = playerPosition + direction * 300.0f;
-
-	cameraPosition.y = playerPosition.y + 100.0f;
-	
-
-	auto pose = cameraDirector_.GetCurrentPose();
-	pose.position = cameraPosition;
-	pose.pitch = 0.1f; // 少し上を向く
-	pose.yaw = std::atan2(-direction.x, -direction.z);
-	pose.fieldOfViewDegrees = 40.0f;
-
-	cameraDirector_.MoveTo(pose, 0.1f, Motion::Easing::EaseInOut);
-}
 void GameScene::Update(float deltaTime)
 {
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
@@ -206,15 +170,6 @@ void GameScene::Update(float deltaTime)
 		{
 			player.TakeDamage();
 		}
-		// 旧：部屋との接触で重力を止める処理。現在は ModelCollision の着地判定を使う。
-		// const bool stageTouching = Collision::UpdateModelContact(playerModel, gameContext->GetRoom().GetModelObject());
-		// if (stageTouching)
-		// {
-			// // プレイヤーがステージに接触している場合の処理
-			// player.SetGravityEnabled(false);
-			// player.SetVerticalSpeed(0.0f);
-			// player.SetGround(true);
-		// }
 
 
 	}
@@ -243,6 +198,13 @@ void GameScene::Render() const
 	{
 		DrawScene(false);
 	}
+}
+
+void GameScene::DrawImGui()
+{
+#ifndef NDEBUG
+
+#endif
 }
 
 void GameScene::RenderDepth() const
@@ -301,6 +263,53 @@ void GameScene::RenderDepth() const
 	modelToonRenderer_.DrawDepth(boss.GetModelObject());
 }
 
+void GameScene::DrawTutorialCollisionSpheres() const
+{
+#ifdef _DEBUG
+	const auto& settings = tutorialCollisionSettings_;
+
+	if (!settings.drawSpheres ||
+		GetCurrentGameState() != GameStateType::Tutorial)
+	{
+		return;
+	}
+
+	const auto& player = gameContext->GetPlayer();
+	const auto& stage = gameContext->GetStage();
+
+	const Vec3 playerCenter =
+		player.GetWorldPosition() + settings.playerOffset;
+
+	const Vec3 stageCenter =
+		stage.GetWorldPosition() + settings.stageOffset;
+
+	// Collision共通のSphere型を使う
+	const Collision::Sphere playerSphere{
+		playerCenter, settings.playerRadius
+	};
+
+	const Collision::Sphere stageSphere{
+		stageCenter, settings.stageRadius
+	};
+
+	const Collision::Sphere climbSphere{
+		stageCenter, settings.climbRadius
+	};
+
+	// Player：緑
+	Collision::DrawDebugSphere(
+		playerSphere, DxLib::GetColor(0, 255, 0));
+
+	// Battle遷移判定：赤
+	Collision::DrawDebugSphere(
+		stageSphere, DxLib::GetColor(255, 0, 0));
+
+	// カメラ追従開始判定：青
+	Collision::DrawDebugSphere(
+		climbSphere, DxLib::GetColor(0, 100, 255));
+#endif
+}
+
 void GameScene::DrawScene(bool toonEnabled) const
 {
 	cameraDirector_.GetActiveCamera()->ApplyPose(
@@ -329,6 +338,8 @@ void GameScene::DrawScene(bool toonEnabled) const
 		grid.Draw();
 		room.Draw();
 
+
+		DrawTutorialCollisionSpheres();
 		return;
 	}
 
@@ -396,9 +407,12 @@ void GameScene::DrawScene(bool toonEnabled) const
 	grid.Draw();
 
 	modelToonRenderer_.EndPass();
+	DrawTutorialCollisionSpheres();
 }
 
 void GameScene::End()
 {
 	tutorialCollision_.Clear();
 }
+
+

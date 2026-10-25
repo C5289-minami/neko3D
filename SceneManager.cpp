@@ -15,7 +15,7 @@
 void SceneManager::Init()
 {
 #ifdef _DEBUG
-    Collision::ClearDebugCanWatch();
+	Collision::ClearDebugCanWatch();
 #endif
 	const int w = DxPlus::CLIENT_WIDTH;
 	const int h = DxPlus::CLIENT_HEIGHT;
@@ -28,8 +28,7 @@ void SceneManager::Init()
 #endif
 
 	DxPlus::Initialize(w, h, runConfig.windowed);
-	DxLib::SetMouseDispFlag(TRUE);
-
+	DxPlus::Input::SetMouseCaptureEnabled(!runConfig.windowed);
 #ifndef NDEBUG
 	// Debug のときだけ、さらに windowed のときだけ DebugUI を許可
 	if (runConfig.enableDebugUI && runConfig.windowed)
@@ -70,8 +69,8 @@ void SceneManager::Init()
 void SceneManager::Shutdown()
 {
 #ifdef _DEBUG
-    // 参照先のキャラクターやリソースを解放する前に登録を解除する。
-    Collision::ClearDebugCanWatch();
+	// 参照先のキャラクターやリソースを解放する前に登録を解除する。
+	Collision::ClearDebugCanWatch();
 #endif
 	// UI が所有する SpriteStudio Player を、参照先リソースより先に破棄する。
 	UIM().Clear();
@@ -142,12 +141,12 @@ void SceneManager::Run()
 			float deltaTime = DxPlus::GetDeltaTime();
 			scene->Drive(deltaTime);
 #ifdef _DEBUG
-            Collision::UpdateDebug();
+			Collision::UpdateDebug();
 #endif
 			UIM().Update(deltaTime);
 			scene->Render();
 #ifdef _DEBUG
-            Collision::DrawDebug();
+			Collision::DrawDebug();
 #endif
 			UIM().Draw();
 

@@ -1,14 +1,16 @@
-#include "GameSceneTutorialState.h"
+ï»¿#include "GameSceneTutorialState.h"
 #include "GameScene.h"
 #include "GameStateMachine.h"
 #include "DxPlus/Debug.h"
 #include "GameContext.h"
+#include <cmath>
+#include <algorithm>
 
 namespace
 {
 	const Vec3 tutorialPlayerStartPos{ -1882.3f, -783.7f, -1373.0f };
+	constexpr float TwoPi = 6.28318530718f;
 }
-
 
 GameSceneTutorialState::GameSceneTutorialState(GameStateMachine& gameStateMachine, GameScene& gameScene)
 	: GameBaseState(gameStateMachine, gameScene)
@@ -17,91 +19,148 @@ GameSceneTutorialState::GameSceneTutorialState(GameStateMachine& gameStateMachin
 
 void GameSceneTutorialState::Enter()
 {
-    DxPlus::Debug::SetFormatString(
-        L"GameSceneTutorialState::Enter"
-    );
+	DxPlus::Debug::SetFormatString(L"GameSceneTutorialState::Enter");
 
-    auto* gameContext = gameScene_.GetGameContext();
-    auto& player = gameContext->GetPlayer();
+	auto& player = gameScene_.GetGameContext()->GetPlayer();
+	player.SetPosition(tutorialPlayerStartPos);
+	player.SetDefMove(true);
 
-    player.SetPosition(tutorialPlayerStartPos);
-    player.SetDefMove(true);
+	auto& camera = gameScene_.GetTargetCamera();
+	camera.Initialize(gameScene_.GetCameraDirector().GetCurrentPose());
+	camera.SetTarget(player.GetPosition() + Vec3::Up() * 100.0f);
 
-    auto& camera = gameScene_.GetTargetCamera();
-
-    camera.Initialize(
-        gameScene_.GetCameraDirector().GetCurrentPose()
-    );
-
-    // Å‰‚ÌƒJƒƒ‰ˆÊ’u‚ÆPlayer‚Ì‹——£‚ğ‹L˜^‚·‚é
-    cameraPositionOffset_ =
-        camera.GetPosition() - player.GetPosition();
-
-    // ŒÅ’èƒJƒƒ‰‚Ì‚Ü‚ÜPlayer‚ğŒ©‚é
-    camera.SetTarget(
-        player.GetPosition() + Vec3::Up() * 100.0f
-    );
-
-    targetCameraSwitched_ = false;
-    tutorialCameraMoved_ = false;
+	targetCameraSwitched_ = false;
+	tutorialCameraMoved_ = false;
 }
 
 void GameSceneTutorialState::Tick(float deltaTime)
 {
-    DxPlus::Debug::SetFormatString(
-        L"GameSceneTutorialState::Tick"
-    );
+	DxPlus::Debug::SetFormatString(L"GameSceneTutorialState::Tick");
 
-    auto& player = gameScene_.GetGameContext()->GetPlayer();
+	auto& player = gameScene_.GetGameContext()->GetPlayer();
 
-    // F2‚Å‘¦À‚ÉBattle‚Ö
-    if (DxLib::CheckHitKey(KEY_INPUT_F2))
-    {
-        stateMachine_.ChangeState(GameStateType::Battle);
-        return;
-    }
+	// è¿½å¾“é–‹å§‹å‰ã¯ã€å›ºå®šã‚«ãƒ¡ãƒ©ã‹ã‚‰Playerã‚’è¦‹ã‚‹
+	if (!tutorialCameraMoved_)
+	{
+		gameScene_.GetTargetCamera().SetTarget(player.GetPosition() + Vec3::Up() * 100.0f);
+	}
 
-    // ’Ç]ŠJn‘O‚ÍAŒÅ’èƒJƒƒ‰‚©‚çPlayer‚ğŒ©‚é
-    if (!tutorialCameraMoved_)
-    {
-        gameScene_.GetTargetCamera().SetTarget(
-            player.GetPosition() + Vec3::Up() * 100.0f
-        );
-    }
+	// Tutorialã‚«ãƒ¡ãƒ©ã¸ã®åˆæœŸé·ç§»
+	if (gameScene_.UpdateStateCamera(deltaTime, "Tutorial") && !targetCameraSwitched_)
+	{
+		gameScene_.GetCameraDirector().SwitchCamera(gameScene_.GetTargetCamera(), 1.2f);
+		targetCameraSwitched_ = true;
+	}
 
-    // TutorialƒJƒƒ‰‚Ö‚Ì‰Šú‘JˆÚ
-    if (gameScene_.UpdateStateCamera(deltaTime, "Tutorial"))
-    {
-        if (!targetCameraSwitched_)
-        {
-            gameScene_.GetCameraDirector().SwitchCamera(
-                gameScene_.GetTargetCamera(),
-                1.2f
-            );
+	// Tutorialã‚«ãƒ¡ãƒ©è¿½å¾“
+	if (tutorialCameraMoved_)
+	{
+		FocusTutorialCamera(deltaTime);
+	}
 
-            targetCameraSwitched_ = true;
-        }
-    }
+	// GameScene ãŒç®¡ç†ã™ã‚‹çƒä½“è¨­å®šã‚’å–å¾—
+	const auto& settings = gameScene_.GetTutorialCollisionSettings();
 
-    // ˆê’è‚Ì‚‚³‚É’B‚µ‚½‚ç’Ç]‚ğŠJn
-    if (targetCameraSwitched_
-        && !tutorialCameraMoved_
-        && player.GetPosition().y > tutorialPlayerStartPos.y + 50.0f)
-    {
-        tutorialCameraMoved_ = true;
-    }
+	auto& stage = gameScene_.GetGameContext()->GetStage();
 
-    // ’Ç]ŠJnŒã‚Í–ˆƒtƒŒ[ƒ€AStage‚ÆPlayer‚©‚çƒJƒƒ‰ˆÊ’u‚ğÄŒvZ
-    if (tutorialCameraMoved_)
-    {
-        gameScene_.FocusTutorialCamera();
-    }
+	const Vec3 playerCenter =
+		player.GetWorldPosition() + settings.playerOffset;
+
+	const Vec3 stageCenter =
+		stage.GetWorldPosition() + settings.stageOffset;
+
+	// ã‚«ãƒ¡ãƒ©è¿½å¾“é–‹å§‹åˆ¤å®š
+	const bool touchingClimb = Collision::IsHitSphereSphere(
+		playerCenter,
+		settings.playerRadius,
+		stageCenter,
+		settings.climbRadius
+	);
+
+	if (touchingClimb)
+	{
+		tutorialCameraMoved_ = true;
+	}
+
+	// Battleã¸ã®é·ç§»åˆ¤å®š
+	const bool touchingStage = Collision::IsHitSphereSphere(
+		playerCenter,
+		settings.playerRadius,
+		stageCenter,
+		settings.stageRadius
+	);
+
+	if (touchingStage &&
+		stage.GetPosition().y < playerCenter.y + settings.playerRadius)
+	{
+		stateMachine_.ChangeState(GameStateType::Battle);
+	}
 }
 
 void GameSceneTutorialState::Exit()
 {
 	DxPlus::Debug::SetFormatString(L"GameSceneTutorialState::Exit");
-	GameContext* gameContext = gameScene_.GetGameContext();
-	auto& player = gameContext->GetPlayer();
-	player.SetDefMove(false);
+	gameScene_.GetGameContext()->GetPlayer().SetDefMove(false);
+}
+
+void GameSceneTutorialState::FocusTutorialCamera(float deltaTime)
+{
+	auto* gameContext = gameScene_.GetGameContext();
+	const auto& player = gameContext->GetPlayer();
+	const auto& stage = gameContext->GetStage();
+
+	const Vec3 playerPos = player.GetWorldPosition();
+	const Vec3 stagePos = stage.GetWorldPosition();
+
+	// ---------------------------------------------------------
+	// ã‚¹ãƒ†ãƒ¼ã‚¸ã‹ã‚‰è¦‹ã¦ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®çœŸå¾Œã‚ã‚’è¨ˆç®—
+	// ---------------------------------------------------------
+	Vec3 stageToPlayer = playerPos - stagePos;
+	stageToPlayer.y = 0.0f;
+	if (stageToPlayer.LengthSq() < 0.0001f) return;
+	stageToPlayer = stageToPlayer.Normalized();
+
+	// ã‚«ãƒ¡ãƒ©ãŒè¦‹ã‚‹å ´æ‰€ï¼ˆãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®å°‘ã—ä¸Š )
+	const Vec3 lookPoint = playerPos + Vec3::Up() * 100.0f;
+
+	// ã‚«ãƒ¡ãƒ©ãŒç›®æŒ‡ã™å ´æ‰€ï¼ˆãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‹ã‚‰å¾Œã‚ã« cameraDistance é›¢ã‚ŒãŸä½ç½®ï¼‰
+	const Vec3 desiredPosition = lookPoint + stageToPlayer * cameraDistance;
+
+	// ---------------------------------------------------------
+	// ã‚«ãƒ¡ãƒ©ç§»å‹•
+	// ---------------------------------------------------------
+	auto& director = gameScene_.GetCameraDirector();
+	auto pose = director.GetCurrentPose();
+
+	const Vec3 diff = desiredPosition - pose.position;
+	const float distance = std::sqrt(diff.LengthSq());
+
+	if (distance > 0.0001f)
+	{
+		float speed = cameraFollowSpeed;
+
+		// ä¸€å®šè·é›¢ä»¥ä¸Šé›¢ã‚ŒãŸã‚‰ã€é›¢ã‚ŒãŸåˆ†ã ã‘ã‚¹ãƒ”ãƒ¼ãƒ‰ã‚’2ä¹—ã§æ€¥è¡Œã™ã‚‹
+		if (distance > cameraMaxLag)
+		{
+			const float overRatio = distance / cameraMaxLag;
+			speed *= (overRatio * overRatio); // ä¹—ç®—ã§é€Ÿåº¦ã‚’ã‚ã’ã‚‹ã€€
+		}
+
+		const float step = std::min(speed * deltaTime, distance);
+		pose.position += diff * (step / distance);
+	}
+
+	// ---------------------------------------------------------
+	// ã‚«ãƒ¡ãƒ©ã®å‘ãèª¿æ•´
+	// ---------------------------------------------------------
+	const Vec3 viewDir = lookPoint - pose.position;
+	const float targetYaw = std::atan2(viewDir.x, viewDir.z);
+
+	const float turnBlend = std::clamp(cameraTurnSpeed * deltaTime, 0.0f, 1.0f);
+	pose.yaw += std::remainder(targetYaw - pose.yaw, TwoPi) * turnBlend;
+
+	pose.pitch = cameraPitch;
+	pose.fieldOfViewDegrees = cameraFov;
+
+	director.SetPoseImmediate(pose);
 }

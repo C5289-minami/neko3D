@@ -12,7 +12,15 @@ public:
 	void Exit() override;
 
 private:
-	Vec3 cameraPositionOffset_{};
+	void FocusTutorialCamera(float deltaTime);
+
 	bool targetCameraSwitched_{ false };
 	bool tutorialCameraMoved_{ false };
+
+	float cameraDistance = 600.0f; // プレイヤーからの距離
+	float cameraFov = 45.0f;  // 画角
+	float cameraPitch = 0.1f;   // 上下の角度
+	float cameraFollowSpeed = 150.0f; // 普段のカメラ移動スピード（ゆっくり）
+	float cameraMaxLag = 150.0f; // これ以上離れたら急いで追いつく距離
+	float cameraTurnSpeed = 6.0f;   // カメラがプレイヤーを向く速さ（遅れないよう少し上げる）
 };
