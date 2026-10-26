@@ -127,6 +127,7 @@ Vec3 ActorBase::GetWorldRotation() const
     {
         return GetRotation();
     }
+    
 
     const RotationMatrix parentMatrix =
         MakeRotationMatrix(owner_->GetWorldRotation());

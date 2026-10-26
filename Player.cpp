@@ -146,10 +146,10 @@ void Player::UpdateMovement(float deltaTime)
 
             // 地上・空中とも、現在の入力で通常速度の移動だけを行う。
             Vec3 moveInput = input_.moveDir;
-            if (moveInput.x != 0.0f && moveInput.z != 0.0f)
-            {
-                moveInput = {};
-            }
+            //if (moveInput.x != 0.0f && moveInput.z != 0.0f)
+            //{
+            //    moveInput = {};
+            //}
             float moveSpeed = Const::PLAYER_MOVE_SPEED;
 
             Vec3 moveDirection = cameraRight * moveInput.x + cameraForward * moveInput.z;
@@ -348,9 +348,15 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 
 void Player::Draw() const
 {
-	const ModelObject worldModel = model_.WithParentTransform(GetPosition(), GetRotation());
-	worldModel.ApplyCollisionColor();
-	animation_.Draw3D(worldModel.GetPosition(), worldModel.GetScale(), worldModel.GetRotation());
+	const Matrix4 worldMatrix = model_.GetWorldMatrix();
+
+	model_.ApplyCollisionColor();
+
+	animation_.Draw3D(
+		worldMatrix.GetTranslation(),
+		worldMatrix.GetScale(),
+		worldMatrix.GetRotationXYZ()
+	);
 }
 
 
@@ -401,7 +407,7 @@ void Player::SetMoveDirection(const Vec3& moveDir)
 	// 押している方向を覚えておく。実際に動かすのはUpdate
 	moveInput_ = { moveDir.x, 0.0f, moveDir.z };
     // 前後と左右の同時入力は、ジャンプ中も両方とも無効にする。
-    if (moveInput_.x != 0.0f && moveInput_.z != 0.0f) moveInput_ = {};
+    //if (moveInput_.x != 0.0f && moveInput_.z != 0.0f) moveInput_ = {};
 }
 
 
