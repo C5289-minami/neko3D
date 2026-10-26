@@ -561,13 +561,7 @@ void Player::MoveAroundStage(float deltaTime, Vec3& playerPos, const Vec3& movem
 #ifdef _DEBUG
 	if (debugDashEnabled_) normalMoveSpeed *= 5.0f;
 #endif
-	const float moveSpeed =
-		GetCurrentState() == PlayerStateType::LungingJump ?
-		lungingMoveSpeed_ : normalMoveSpeed;
-	if (GetCurrentState() == PlayerStateType::LungingJump)
-	{
-		input_.isMoving = false;
-	}
+	const float moveSpeed = normalMoveSpeed;
 
 	const float distance = moveSpeed * deltaTime;
 
