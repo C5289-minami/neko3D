@@ -7,7 +7,7 @@
 #include "PlayerWalkState.h"
 #include "PlayerGroomingState.h"
 #include "PlayerNeutralJumpState.h"
-#include "PlayerLungingJumpState.h"
+#include "PlayerDoubleJumpState.h"
 #include "PlayerAttackState.h"
 #include "PlayerUltimateAttackState.h"
 #include "PlayerDamagingState.h"
@@ -40,7 +40,7 @@ private:
 	PlayerWalkState walkState_;
 	PlayerGroomingState groomingState_;
 	PlayerNeutralJumpState neutralJumpState_;
-	PlayerLungingJumpState lungingJumpState_;
+	PlayerDoubleJumpState doubleJumpState_;
 	PlayerAttackState attackState_;
 	PlayerUltimateAttackState ultimateAttackState_;
 	PlayerDamagingState damagingState_;

@@ -1,4 +1,4 @@
-#include "PlayerWallJump.h"
+﻿#include "PlayerWallJump.h"
 #include "DxPlus/Debug.h"
 #include "Player.h"
 
@@ -11,7 +11,7 @@ PlayerWallJump::PlayerWallJump(PlayerStateMachine& stateMachine, Player& player)
 void PlayerWallJump::Enter()
 {
 	player_.StopMove();
-    player_.SetAnimation(PlayerAnimType::Lunging_Jump, false);
+    player_.SetAnimation(PlayerAnimType::Double_Jump, false);
     player_.StartWallJump();
 	DxPlus::Debug::SetFormatString(L"PlayerWallJump::Enter");
 

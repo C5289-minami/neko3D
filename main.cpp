@@ -1,7 +1,7 @@
 // =============================
 // App/main.cpp
 // =============================
-#include <crtdbg.h>
+// #include <crtdbg.h>
 #include "DxPlus/DxPlus.h"
 #include "SceneManager.h"
 
@@ -45,7 +45,12 @@ static LRESULT CALLBACK CustomWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 int WINAPI wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 {
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF);
+// #ifdef _DEBUG
+// 	// メモリ確保・解放のたびに全領域を検査すると、毎フレームの処理が重くなる。
+// 	 _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF);
+// 	// 確保の記録と、終了時のメモリリーク検査は残す。
+// 	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+// #endif
 	srand((unsigned int)time(NULL));
 	DxLib::SetHookWinProc(CustomWinProc);
 	DxLib::SetWindowStyleMode(7);

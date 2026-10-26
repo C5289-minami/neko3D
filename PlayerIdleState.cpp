@@ -33,15 +33,9 @@ void PlayerIdleState::Tick(float)
         stateMachine_.ChangeState(PlayerStateType::Attack);
         return;
     }
-    // WASD+Space　入力方向へ突進ジャンプ
-    if (move.jumpPressed && move.isMoving && player_.IsGrounded() && player_.IsGravityEnabled())
-    {
-        stateMachine_.ChangeState(PlayerStateType::LungingJump);
-        return;
-    }
-    // Spaceだけで真上にジャンプ
-    if (move.jumpPressed &&!move.isMoving &&
-		player_.IsGrounded() &&player_.IsGravityEnabled())
+    // 1回目のSpaceは、方向キーを押していても通常ジャンプにする。
+    // 空中で押し直した2回目のSpaceは、ダブルジャンプに使う。
+    if (move.jumpPressed && player_.IsGrounded() && player_.IsGravityEnabled())
     {
         stateMachine_.ChangeState(PlayerStateType::NeutralJump);
         return;

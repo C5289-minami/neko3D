@@ -8,7 +8,7 @@ namespace PlayerAnimType
         Walk,             //
 		Grooming,        // けづくろい（Grooming）                    ・E
 		Neutral_Jump,     // ニュートラルジャンプ（Neutral Jump）       ・space
-		Lunging_Jump,     //　ランジジャンプ（Lunging Jump）           ・WorAorSorD+Space
+		Double_Jump,      // ダブルジャンプ。モデル内のアニメーション番号は維持する。
 		Attack,           // 攻撃（Attack）                           ・left mouse button
 		Ult_Attack,       // 必殺技（Ultimate Attack）                ・right mouse button
 		Die,              // 死亡（Die）

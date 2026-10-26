@@ -7,7 +7,7 @@ PlayerStateMachine::PlayerStateMachine(Player& player)
 	walkState_(*this, player),
 	groomingState_(*this, player),
 	neutralJumpState_(*this, player),
-	lungingJumpState_(*this, player),
+	doubleJumpState_(*this, player),
 	attackState_(*this, player),
 	ultimateAttackState_(*this, player),
 	damagingState_(*this, player),
@@ -50,8 +50,8 @@ State* PlayerStateMachine::FindState(PlayerStateType type)
         return &groomingState_;
     case PlayerStateType::NeutralJump:
         return &neutralJumpState_;
-    case PlayerStateType::LungingJump:
-        return &lungingJumpState_;
+    case PlayerStateType::DoubleJump:
+        return &doubleJumpState_;
     case PlayerStateType::Attack:
         return &attackState_;
     case PlayerStateType::UltimateAttack:

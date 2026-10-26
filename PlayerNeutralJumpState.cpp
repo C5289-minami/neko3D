@@ -1,4 +1,4 @@
-#include "PlayerNeutralJumpState.h"
+﻿#include "PlayerNeutralJumpState.h"
 #include "DxPlus/Debug.h"
 #include "Player.h"
 
@@ -24,8 +24,20 @@ void PlayerNeutralJumpState::Tick(float)
         return;
     }
 
-    // ���̏�W�����v�̌���A�󒆂ňړ�������ς�����B
-    player_.SetMoveDirection(player_.GetInput().moveDir);
+    const PlayerInput& input = player_.GetInput();
+
+    // ここは「通常ジャンプ中」だけ実行される。
+    // jumpPressedは押した瞬間だけtrueなので、長押しで2回目が出ることはない。
+    // Spaceを一度離して、空中でもう一度押したら、ダブルジャンプへ切り替える。
+    if (input.jumpPressed && player_.CanDoubleJump())
+    {
+        stateMachine_.ChangeState(PlayerStateType::DoubleJump);
+        // 切り替えた後は、通常ジャンプ側の処理を続けない。
+        return;
+    }
+
+    // 2回目を押すまでは、空中でも方向キーで移動できる。
+    player_.SetMoveDirection(input.moveDir);
     DxPlus::Debug::SetFormatString(L"state:neutral_jump");
 }
 
