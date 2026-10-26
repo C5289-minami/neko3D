@@ -690,6 +690,9 @@
     <ClInclude Include="JumpStand.h">
       <Filter>40_Gameplay\Actors\Room</Filter>
     </ClInclude>
+    <ClInclude Include="Matrix.h">
+      <Filter>10_Core\Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -971,7 +974,9 @@
     <ClCompile Include="GameSceneBattleState.cpp">
       <Filter>30_Scenes\Game\StateMashine\GameSceneBattleState</Filter>
     </ClCompile>
-    <ClCompile Include="ActorBase.cpp" />
+    <ClCompile Include="ActorBase.cpp">
+      <Filter>40_Gameplay\Actors\Base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Config\toon.json">

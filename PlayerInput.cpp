@@ -16,10 +16,10 @@ void PlayerInput::Update()
 	if (button & BUTTON_RIGHT) moveDir.x += 1.0f;
 
 	// 前後と左右を同時に押した間は、どちらにも移動しない。
-	if (moveDir.x != 0.0f && moveDir.z != 0.0f)
-	{
-		moveDir = {};
-	}
+	//if (moveDir.x != 0.0f && moveDir.z != 0.0f)
+	//{
+	//	moveDir = {};
+	//}
 
     // 押した瞬間の1フレームだけtrue。1回目・2回目のジャンプはこちらを使う。
     jumpPressed = (buttonDown & BUTTON_TRIGGER1) != 0;
