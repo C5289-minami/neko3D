@@ -690,6 +690,9 @@
     <ClInclude Include="JumpStand.h">
       <Filter>40_Gameplay\Actors\Room</Filter>
     </ClInclude>
+    <ClInclude Include="Matrix.h">
+      <Filter>10_Core\Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
