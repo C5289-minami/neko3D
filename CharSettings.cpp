@@ -132,8 +132,7 @@ CharData& CharSettingsManager::Get(size_t index)
 {
     if (index >= charDataList.size())
     {
-		CharData res;
-        return  res;
+		throw std::out_of_range("CharData Index out of range");
 	}
     return charDataList.at(index);
 }
