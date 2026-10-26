@@ -6,7 +6,6 @@
 #include "DxLib.h"
 // #include "Stage.h"
 #include "ModelObjectManager.h"
-#include "CharSettings.h"
 
 #include <cmath>
 #include "Sound3D.h"
@@ -31,14 +30,6 @@ void Player::Init()
 	if (modelHandle < 0) return;
 
 	model_.SetModelType(ModelType::Bone);
-
-
-	
-	charDataList_.reserve(3);
-	for (int i = 0; i < 3; ++i)
-	{
-		charDataList_.push_back(CharSettingsManager::Get(i));
-	}
 
 	Reset();
 }
@@ -89,6 +80,29 @@ void Player::Update(float deltaTime)
 	UpdateMovement(deltaTime);
 }
 
+void Player::SetModelKey(const std::wstring& key)
+{
+	// keyがないか、既に設定済みのモデルキーと同じなら何もしない
+	if (key.empty() || key == model_.GetModelKey()) return;
+
+	const int modelHandle = RM().GetModel(key);
+	if (modelHandle < 0) return;
+
+	model_.SetModelKey(key);
+	model_.SetModelType(ModelType::Bone);
+
+	animation_.Reset();
+	currentAnimIndex_ = static_cast<int>(PlayerAnimType::Idle);
+	currentAnimLoop_ = true;
+
+	animation_.Play3D(
+		modelHandle,
+		currentAnimIndex_,
+		currentAnimLoop_,
+		Const::ANIM_FPS);
+
+	animation_.Update(0.0f);
+}
 void Player::UpdateMovement(float deltaTime)
 {
     // 前のフレームで床に着いたら、2回目のジャンプを再び使えるようにする。
@@ -124,18 +138,7 @@ void Player::UpdateMovement(float deltaTime)
 // 		stateMachine_.ChangeState(PlayerStateType::Climbing);
 // 	}
 
-	for (int i = 0; i < charDataList_.size(); ++i)
-	{
-		const CharData& charData = charDataList_[i];
-		DxPlus::Debug::SetFormatString(L"キャラクター %d: 名前=%s, 最大HP=%.1f, 移動速度=%.1f, 攻撃倍率=%.2f, 攻撃速度=%.2f",
-			i + 1,
-			charData.name.c_str(),
-			charData.maxHealth,
-			charData.moveSpeed,
-			charData.attackRatio,
-			charData.attackSpeed
-		);
-	}
+	DxPlus::Debug::SetFormatString(L"CharacterSetting: %s", charData.name.c_str());
 
 	// 接触中の柱に沿って上下移動する Elevator は、ジャンプで離れるまで続く。
 	const bool elevatorFrame = GetCurrentState() == PlayerStateType::Climbing;

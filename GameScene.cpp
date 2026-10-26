@@ -141,6 +141,14 @@ void GameScene::Update(float deltaTime)
 {
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
+	// キャラクター選択中は本編Playerの移動・衝突判定を止める
+	if (GetCurrentGameState() == GameStateType::Select)
+	{
+		stateMachine_.Tick(deltaTime);
+		gameContext->GetEffectManager().Update(deltaTime);
+		return;
+
+	}
 	// Actor取得
 	auto& player = gameContext->GetPlayer();
 	auto& boss = gameContext->GetBoss();
@@ -247,6 +255,7 @@ void GameScene::RenderDepth() const
 			jumpStand->GetPillarModel()
 		);
 	}
+	modelToonRenderer_.DrawDepth(room.GetBasket().GetModelObject());
 
 	// Stage
 	modelToonRenderer_.DrawDepth(stage.GetModelObject());
@@ -263,7 +272,19 @@ void GameScene::RenderDepth() const
 	}
 
 	// PlayerとBoss
-	modelToonRenderer_.DrawDepth(player.GetModelObject());
+	if (gameContext->IsSelectPreviewVisible())
+	{
+		for (const auto& preview :
+			gameContext->GetSelectPreviewPlayers())
+		{
+			modelToonRenderer_.DrawDepth(preview.GetModelObject());
+		}
+	}
+	else
+	{
+		modelToonRenderer_.DrawDepth(player.GetModelObject());
+	}
+
 	modelToonRenderer_.DrawDepth(boss.GetModelObject());
 }
 
@@ -326,6 +347,11 @@ void GameScene::DrawScene(bool toonEnabled) const
 	const auto& effectManager = gameContext->GetEffectManager();
 	const auto& grid = gameContext->GetGrid();
 	const auto& room = gameContext->GetRoom();
+	const bool showSelectPlayers =
+		gameContext->IsSelectPreviewVisible();
+
+	const auto& selectPlayers =
+		gameContext->GetSelectPreviewPlayers();
 
 	// トゥーンシェーダーを使わない場合
 	if (!toonEnabled)
@@ -335,7 +361,19 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 		boss.Draw();
 		stage.Draw();
-		player.Draw();
+
+		if (showSelectPlayers)
+		{
+			for (const auto& preview : selectPlayers)
+			{
+				preview.Draw();
+			}
+		}
+		else
+		{
+			player.Draw();
+		}
+
 		stage.DrawAlphaModel();
 
 		effectManager.Draw();
@@ -370,7 +408,18 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 	// BossとPlayer
 	drawModel(boss.GetModelObject());
-	drawModel(player.GetModelObject());
+
+	if (showSelectPlayers)
+	{
+		for (const auto& preview : selectPlayers)
+		{
+			drawModel(preview.GetModelObject());
+		}
+	}
+	else
+	{
+		drawModel(player.GetModelObject());
+	}
 
 	// Stage
 	drawModel(stage.GetModelObject());
@@ -406,6 +455,7 @@ void GameScene::DrawScene(bool toonEnabled) const
 		drawModel(jumpStand->GetJumpStandModel());
 		drawModel(jumpStand->GetPillarModel());
 	}
+	drawModel(room.GetBasket().GetModelObject());
 
 	effectManager.Draw();
 	grid.Draw();

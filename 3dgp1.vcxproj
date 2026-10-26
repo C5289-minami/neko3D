@@ -192,6 +192,7 @@
     <ClInclude Include="AttackBaseState.h" />
     <ClInclude Include="AttackStateMachine.h" />
     <ClInclude Include="AttackStateType.h" />
+    <ClInclude Include="Basket.h" />
     <ClInclude Include="BossAnimType.h" />
     <ClInclude Include="BossBangSkill.h" />
     <ClInclude Include="Boss.h" />

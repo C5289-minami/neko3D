@@ -3,7 +3,7 @@
 // =============================
 #pragma once
 #include <string>
-
+#include <array>
 #include "Vector3.h"
 
 
@@ -50,6 +50,27 @@ public:
 	EffectManager& GetEffectManager() { return effectManager; }
 	Room& GetRoom() { return room_; }
 
+	// Select Preview
+    std::array<Player, 3>& GetSelectPreviewPlayers()
+    {
+        return selectPreviewPlayers_;
+    }
+
+    const std::array<Player, 3>& GetSelectPreviewPlayers() const
+    {
+        return selectPreviewPlayers_;
+    }
+
+    bool IsSelectPreviewVisible() const
+    {
+        return selectPreviewVisible_;
+    }
+
+    void SetSelectPreviewVisible(bool visible)
+    {
+        selectPreviewVisible_ = visible;
+    }
+
     // ---- lifecycle ----
     void Init();
     void Reset();
@@ -78,4 +99,6 @@ private:
     bool debugActorsPaused_{};
     std::string transformInitialStatus_;
 
+    std::array<Player, 3> selectPreviewPlayers_;
+    bool selectPreviewVisible_{ false };
 };

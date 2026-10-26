@@ -693,6 +693,9 @@
     <ClInclude Include="Matrix.h">
       <Filter>10_Core\Math</Filter>
     </ClInclude>
+    <ClInclude Include="Basket.h">
+      <Filter>40_Gameplay\Actors\Room</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">

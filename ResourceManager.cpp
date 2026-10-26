@@ -45,6 +45,7 @@ void ResourceManager::LoadAll()
     LoadModel(ResourceKeys::Model_stand_m,  L"./Data/Models/stage/stand_m.mv1");
 	LoadModel(ResourceKeys::Model_Room, L"./Data/Models/Room/oheya.mv1");
 	LoadModel(ResourceKeys::Model_JumpStand, L"./Data/Models/Room/jumpstand.mv1");
+	LoadModel(ResourceKeys::Model_Basket, L"./Data/Models/Room/Basket.mv1");
 
 	//LoadModel(ResourceKeys::Model_Test, L"./Data/Models/test1.mv1");
 	// スプライトスタジオの読み込み

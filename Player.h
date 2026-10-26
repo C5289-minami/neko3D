@@ -13,7 +13,6 @@
 #include "Consts.h"
 #include "CharSettings.h"
 
-#include <vector>
 
 #include"ModelCollision.h"
 
@@ -142,6 +141,12 @@ public:
 	bool CanUseUltimate() const { return ultimateGauge_ >= UltimateGaugeMax; }
 	bool TryUseUltimateGauge();
 
+	// キャラクター設定
+	CharData& GetCharData() { return charData; }
+	const CharData& GetCharData() const{ return charData; }
+	void SetCharData(const CharData& data) { charData = data; }
+	void SetModelKey(const std::wstring& key);
+
 private:
 	void UpdateMovement(float deltaTime);
 
@@ -192,7 +197,6 @@ private:
 #ifdef _DEBUG
 	bool debugDashEnabled_{ false };
 #endif
-
-	// character
-	std::vector<CharData> charDataList_;
+	// キャラクター設定
+	CharData charData;
 };
