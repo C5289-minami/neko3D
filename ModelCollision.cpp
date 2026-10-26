@@ -400,69 +400,96 @@ bool ModelCollision::FindWall(const Vec3& feetPosition, const ModelOb& modelOb, 
     return foundWall;
 }
 
+bool ModelCollision::RaycastWall(const Vec3& start, const Vec3& end, Physics::RayHit& hit) const
+{
+    bool found = false;
+    for (const auto& entry : models_)
+    {
+        if (entry.handle < 0 || entry.surface == Surface::Pillar) continue;
+
+        Physics::RayHit candidate{};
+        if (!Physics::Raycast(entry.handle, start, end, candidate)) continue;
+        // 足場の上面・下面と、歩ける傾斜は横移動を止めない。
+        if (std::abs(candidate.normal.y) >= 0.5f) continue;
+
+        // 部屋の内側から当たる場合も、レイの開始側へ法線を向ける。
+        if (Vec3::Dot(end - start, candidate.normal) > 0.0f)
+            candidate.normal = -candidate.normal;
+
+        if (!found || candidate.distance < hit.distance)
+        {
+            hit = candidate;
+            found = true;
+        }
+    }
+    return found;
+}
+
 Vec3 ModelCollision::SlideAlongWalls(const Vec3& oldPosition, const Vec3& desiredPosition,
     const ModelOb& modelOb, bool& touched) const
 {
-   
-    Vec3 move{ desiredPosition.x - oldPosition.x, 0.0f, desiredPosition.z - oldPosition.z };
-    Vec3 candidate = desiredPosition;
     touched = false;
-
     if (!modelOb.IsValid()) return desiredPosition;
-    // 隣接する柱の側面も考慮して、数回判定し直す。移動速度の増加や進行方向の自動補正は行わない。
+
+        //水平移動
+    Vec3 position{ oldPosition.x, desiredPosition.y, oldPosition.z };
+    Vec3 remaining{ desiredPosition.x - oldPosition.x, 0.0f, desiredPosition.z - oldPosition.z };
+    const float rayHeight = modelOb.height / 2.0f; // 横向きレイを出す、体の中央の高さ。
+
     for (int attempt = 0; attempt < 4; ++attempt)
     {
-        // 移動予定位置に、足元基準のカプセルを置いて調べる。
-        const Vec3 start = candidate + Vec3::Up() * modelOb.radius;
-        const Vec3 end = candidate + Vec3::Up() * (modelOb.height - modelOb.radius);
+        float length = remaining.Length();
+
+        if (length <= 0.00001f) break;
+
+		Vec3 direction = remaining / length;            // ベクトルの正規化。進行方向を求める。
+		Vec3 right{ direction.z, 0.0f, -direction.x };  // 進行方向の右向きベクトルを作る
+		Vec3 center = position + Vec3::Up() * rayHeight;// 体の中央の高さで、左右にレイを飛ばす
+
+        float travel = length;
 
         Vec3 wallNormal{};
-        float mostInward = -0.0001f;
 
-        for (const auto& entry : models_)
+        for (int side = -1; side <= 1; ++side)
         {
-            // 柱への押し戻しを停止する。IsTouchingWalls / FindWall の真偽判定は残す。
-            // if (entry.handle < 0 || entry.surface == Surface::Floor) continue;
-            if (entry.handle < 0 || entry.surface != Surface::Wall) continue;
-            const int handle = entry.handle;
+            const Vec3 start = center + right * (modelOb.radius * side);
+            const Vec3 end = start + direction * (length + modelOb.radius + modelOb.skin);
+   
+            Physics::RayHit hit{};
+            
+			if (!RaycastWall(start, end, hit)) continue;// 壁に当たらなければ
+            
+			float approaching = -Vec3::Dot(direction, hit.normal);// 進行方向と壁の法線の内積が負なら、壁に向かっている。
+            
+            if (approaching <= 0.00001f) continue;
 
-            const auto result = MV1CollCheck_Capsule(handle, -1,
-                DxConv::ToVECTOR(start), DxConv::ToVECTOR(end), modelOb.radius);
 
-            for (int i = 0; i < result.HitNum; ++i)
+            // 体の幅とskin分は壁から離す。傾いた側面では体の長さも考慮する。
+            float clearance = modelOb.radius + modelOb.skin;
+            clearance += (rayHeight - modelOb.radius) * std::abs(hit.normal.y);
+			//法線とない席の処理で、壁の面からどれだけ離れているかを計算する。
+            const float gap = Vec3::Dot(center - hit.point, hit.normal) - clearance;
+            float allowed = gap / approaching;
+            
+            if (allowed < 0.0f) allowed = 0.0f;
+            //壁にぶつかったら、かべっどまり
+            if (allowed <= travel)
             {
-                const auto& poly = result.Dim[i];
-                Vec3 normal = DxConv::ToVec3(poly.Normal).Normalized();
-
-                if (std::abs(normal.y) > 0.01f) continue; // 柱の上下面と斜面は対象外にする。
-
-                float top = (std::max)(poly.Position[0].y,
-                    (std::max)(poly.Position[1].y, poly.Position[2].y));
-
-                if (candidate.y >= top - modelOb.skin) continue; // 柱の上にいる場合は側面との衝突を処理しない。
-
-                normal.y = 0.0f;
-                normal = normal.Normalized();
-                // 部屋の内側でも使えるように、移動前の位置へ法線を向ける。
-                if (Vec3::Dot(oldPosition - DxConv::ToVec3(poly.Position[0]), normal) < 0.0f)
-                    normal = -normal;
-				//壁に向かう移動の際に、最も壁に向かう法線を採用する。
-                float inward = Vec3::Dot(move, normal);
-
-                if (inward < mostInward)
-                { mostInward = inward; wallNormal = normal; }
+                travel = allowed;
+                wallNormal = Vec3{ hit.normal.x, 0.0f, hit.normal.z }.Normalized();
             }
-            MV1CollResultPolyDimTerminate(result);
-        }
-        if (wallNormal.LengthSq() == 0.0f) return candidate; // 壁から離れる移動も含む。
+		}
+
+        position += direction * travel;//進行方向じぇ
+     
         touched = true;
-
-        // 壁へ入り込む成分だけを取り除き、横方向に弾き飛ばさない。
-        move -= wallNormal * Vec3::Dot(move, wallNormal);
-        candidate = { oldPosition.x + move.x, desiredPosition.y, oldPosition.z + move.z };
+		remaining -= direction * travel;//残りの移動量を更新する
+      
+        // 速度全体をゼロにせず、壁へ入り込む成分だけを除く。
+        const float inward = Vec3::Dot(remaining, wallNormal);
+      
+        if (inward < 0.0f) remaining -= wallNormal * inward;
     }
-    // 最後の再判定でも移動できなければ、このフレームの移動前の水平位置を維持する。
-    return { oldPosition.x, desiredPosition.y, oldPosition.z };
+    return position;
 }
-
 
