@@ -14,6 +14,8 @@
 #include "CharSettings.h"
 
 
+#include"ModelCollision.h"
+
 // class Stage;
 
 class Player : public ActorBase
@@ -88,18 +90,19 @@ public:
 //     void SetLungingMoveSpeed(float value);
 //     void SetLungingJumpSpeed(float value);
 //     void ResetLungingSpeeds();
-	// 壁登り・滑り落ち・壁キックは、それぞれ専用の速度を持つ。
-	float GetClimbingSpeed() const { return climbingSpeed_; }
-	float GetWallSlideSpeed() const { return wallSlideSpeed_; }
-	void SetClimbingSpeed(float value);
-	void SetWallSlideSpeed(float value);
-	void ResetClimbingSpeeds();
-	//壁のぼり
-	bool IsPillarElevatorActive() const { return elevatorPillar_ != nullptr; }
-	void StartPillarElevator(const ModelObject* pillar, const Vec3& center, float topY);
-	bool UpdatePillarElevator(float deltaTime);
-	void EndPillarElevator();
-	void StartPillarExitJump();
+    // 壁登り・滑り落ち・壁キックは、それぞれ専用の速度を持つ。
+    float GetClimbingSpeed() const { return climbingSpeed_; }
+    float GetWallSlideSpeed() const { return wallSlideSpeed_; }
+    void SetClimbingSpeed(float value);
+    void SetWallSlideSpeed(float value);
+    void ResetClimbingSpeeds();
+
+    //壁のぼり
+    bool IsPillarElevatorActive() const { return elevatorPillar_ != nullptr; }
+    void StartPillarElevator(const ModelObject* pillar, const Vec3& center, float topY);
+    bool UpdatePillarElevator(float deltaTime);
+    void EndPillarElevator();
+    void StartPillarExitJump();
 	//ゲッター・セッター
 	float GetWallJumpMoveSpeed() const { return wallJumpMoveSpeed_; }
 	float GetWallJumpSpeed() const { return wallJumpSpeed_; }
@@ -169,8 +172,10 @@ private:
 	Vec3 moveInput_{};      // Xは左右、Zは前後の入力
 	Vec3 velocity_{ 0.0f, 0.0f, 0.0f };
 
-	// bool touchingPillar = false;
-	bool touchingModel_ = false;
+    //const float Wall_MARGIN = Const::PLAYER_RADIUS + Const::PLAYER_HEIGHT;
+    //おれらにはModelCollisionのやつがあることを思い出した
+    // bool touchingPillar = false;
+    bool touchingModel_ = false;
 	bool isGrounded_{ false };
 	// bool wasTouchingPillar_{ false };
 	bool wasTouchingModel_{ false };

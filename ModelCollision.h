@@ -13,7 +13,7 @@ public:
     // 登録したモデルに使う判定を選ぶ。
     enum class Surface
     {
-        Floor,  // 床。着地用の判定。
+        Floor,  // 足場。上面は着地、側面は滑り移動用の判定。
         Wall,   // 壁。側面で移動を止める・滑らせる。登れない。
         Pillar  
     };
@@ -45,6 +45,7 @@ public:
 
     //必要な判定を呼ぶ。座標の変更や登る状態への遷移は呼び出し側が行う。
     bool IsTouchingWalls(const Vec3& feetPosition, const ModelOb& modelOb) const;
+    // 足場・壁の側面をレイで調べ、壁沿いの移動を残す。柱は対象外。
     Vec3 SlideAlongWalls(const Vec3& oldPosition, const Vec3& desiredPosition,
         const ModelOb& modelOb, bool& touched) const;
     // pillarCenterを指定すると、接触判定で選ばれた柱の中心も返す。
@@ -74,6 +75,7 @@ private:
 
     bool RaycastModels(const Vec3& start, const Vec3& end, Physics::RayHit& hit,
         bool forLanding, bool ignorePillars = false) const;
+    bool RaycastWall(const Vec3& start, const Vec3& end, Physics::RayHit& hit) const;
 
     struct Entry
     {
