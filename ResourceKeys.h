@@ -22,6 +22,7 @@ namespace ResourceKeys
     inline constexpr const wchar_t* Model_Boss    = L"ModelBoss";
 	inline constexpr const wchar_t* Model_Room = L"ModelRoom";
 	inline constexpr const wchar_t* Model_Test = L"ModelTest";
+	inline constexpr const wchar_t* Model_Basket = L"ModelBasket";
 
     // ===== Stage Models =====
     inline constexpr const wchar_t* Model_PillarL = L"hashira_l";

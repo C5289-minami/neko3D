@@ -30,6 +30,7 @@ public:
     void SetPitch(float pitch) { pitch_ = pitch; }
 
     const std::string& GetIdentifier() const { return actorID_; }
+	void SetIdentifier(const std::string& id) { actorID_ = id; }
 
     // êeéqä÷åW
     void SetOwner(ActorBase& owner) { owner_ = &owner; }
@@ -53,7 +54,7 @@ public:
     Vec3 GetWorldRotation() const;
 
 protected:
-    const std::string actorID_;
+    std::string actorID_;
     Vec3 position_{};
     float yaw_{};
     float pitch_{};
