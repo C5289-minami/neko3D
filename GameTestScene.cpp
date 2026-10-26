@@ -93,7 +93,16 @@ void GameTestScene::Update(float deltaTime)
 
 		// player.Update(deltaTime, stage, stageCenterPosition);
 		
+#ifdef _DEBUG
+		const bool debugDash = DxLib::CheckHitKey(KEY_INPUT_LSHIFT) != 0 ||
+			DxLib::CheckHitKey(KEY_INPUT_RSHIFT) != 0;
+		player.SetDebugDashEnabled(debugDash);
+#endif
 		player.Update(deltaTime, stage.GetCollision(), stageCenterPosition);
+#ifdef _DEBUG
+		// この更新だけに適用し、共有するPlayerを他のシーンへ持ち越さない。
+		player.SetDebugDashEnabled(false);
+#endif
 		stage.UpdateAlphaModel(deltaTime, player);
 
 		boss.Update(deltaTime);
@@ -154,6 +163,10 @@ void GameTestScene::DrawImGui()
     if (ImGui::Begin("Player Pillar Elevator"))
     {
         auto& player = gameContext->GetPlayer();
+
+#ifdef _DEBUG
+        ImGui::TextUnformatted(u8"Shift長押し：通常移動の速度を5倍（GameTest限定）");
+#endif
 
         ImGui::Text("Pillar contact: %s", player.IsTouchingWall() ? "True" : "False");
 

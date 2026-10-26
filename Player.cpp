@@ -49,6 +49,9 @@ void Player::Reset()
     wallTopY_ = 0.0f;
     EndPillarElevator();
     elevatorInputConsumed_ = false;
+#ifdef _DEBUG
+    debugDashEnabled_ = false;
+#endif
 
 	model_.collisionHighlighted = false;
 	ultimateGauge_ = 0.0f;
@@ -155,8 +158,12 @@ void Player::UpdateMovement(float deltaTime)
 			if (moveDirection.LengthSq() > 0.0f)
 			{
 				moveDirection = moveDirection.Normalized();
-                position_.x += moveDirection.x * moveSpeed * deltaTime;
-                position_.z += moveDirection.z * moveSpeed * deltaTime;
+				float moveSpeed = Const::PLAYER_MOVE_SPEED;
+#ifdef _DEBUG
+				if (debugDashEnabled_) moveSpeed *= 5.0f;
+#endif
+				position_.x += moveDirection.x * moveSpeed * deltaTime;
+				position_.z += moveDirection.z * moveSpeed * deltaTime;
 				TurnTowards(moveDirection, deltaTime);
 			}
 		}
@@ -550,7 +557,17 @@ void Player::MoveAroundStage(float deltaTime, Vec3& playerPos, const Vec3& movem
 // 	{
 // 		input_.isMoving = false;
 // 	}
-    const float moveSpeed = Const::PLAYER_MOVE_SPEED;
+	float normalMoveSpeed = Const::PLAYER_MOVE_SPEED;
+#ifdef _DEBUG
+	if (debugDashEnabled_) normalMoveSpeed *= 5.0f;
+#endif
+	const float moveSpeed =
+		GetCurrentState() == PlayerStateType::LungingJump ?
+		lungingMoveSpeed_ : normalMoveSpeed;
+	if (GetCurrentState() == PlayerStateType::LungingJump)
+	{
+		input_.isMoving = false;
+	}
 
 	const float distance = moveSpeed * deltaTime;
 
