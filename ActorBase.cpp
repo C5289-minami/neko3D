@@ -55,7 +55,7 @@ namespace
 
 
     }
-
+	// ‰ñ“]s—ñ‚ÌŠ|‚¯Z
     RotationMatrix Multiply(const RotationMatrix& left, const RotationMatrix& right)
     {
         RotationMatrix result{};

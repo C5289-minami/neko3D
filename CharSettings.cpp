@@ -130,6 +130,11 @@ size_t CharSettingsManager::GetCount()
 // インデックス指定で取得
 CharData& CharSettingsManager::Get(size_t index)
 {
+    if (index >= charDataList.size())
+    {
+		CharData res;
+        return  res;
+	}
     return charDataList.at(index);
 }
 

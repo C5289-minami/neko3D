@@ -6,11 +6,11 @@
 #include "DxLib.h"
 // #include "Stage.h"
 #include "ModelObjectManager.h"
+#include "CharSettings.h"
 
 #include <cmath>
 #include "Sound3D.h"
 #include <algorithm>
-// #include <vector>
 #include <iostream>
 
 
@@ -32,6 +32,13 @@ void Player::Init()
 
 	model_.SetModelType(ModelType::Bone);
 
+
+	
+	charDataList_.reserve(3);
+	for (int i = 0; i < 3; ++i)
+	{
+		charDataList_.push_back(CharSettingsManager::Get(i));
+	}
 
 	Reset();
 }
@@ -116,6 +123,19 @@ void Player::UpdateMovement(float deltaTime)
 // 	{
 // 		stateMachine_.ChangeState(PlayerStateType::Climbing);
 // 	}
+
+	for (int i = 0; i < charDataList_.size(); ++i)
+	{
+		const CharData& charData = charDataList_[i];
+		DxPlus::Debug::SetFormatString(L"キャラクター %d: 名前=%s, 最大HP=%.1f, 移動速度=%.1f, 攻撃倍率=%.2f, 攻撃速度=%.2f",
+			i + 1,
+			charData.name.c_str(),
+			charData.maxHealth,
+			charData.moveSpeed,
+			charData.attackRatio,
+			charData.attackSpeed
+		);
+	}
 
 	// 接触中の柱に沿って上下移動する Elevator は、ジャンプで離れるまで続く。
 	const bool elevatorFrame = GetCurrentState() == PlayerStateType::Climbing;
