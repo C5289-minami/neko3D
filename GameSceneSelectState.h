@@ -27,9 +27,9 @@ private:
 
     enum class SelectCameraState
     {
-        WaitSelectShot,       // Selectショットの完了待ち
-        MoveToSelectedPlayer, // 選択中のPlayerの前方へ移動中
-        Ready                 // 選択操作可能
+        WaitSelectShot,       /* Selectショットの完了待ち*/
+        MoveToSelectedPlayer, /* 選択中のPlayerの前方へ移動中*/
+        Ready                 /* 選択操作可能*/
     };
 
     SelectCameraState cameraState_{ SelectCameraState::WaitSelectShot };
