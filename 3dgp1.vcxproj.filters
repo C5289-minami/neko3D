@@ -974,7 +974,9 @@
     <ClCompile Include="GameSceneBattleState.cpp">
       <Filter>30_Scenes\Game\StateMashine\GameSceneBattleState</Filter>
     </ClCompile>
-    <ClCompile Include="ActorBase.cpp" />
+    <ClCompile Include="ActorBase.cpp">
+      <Filter>40_Gameplay\Actors\Base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Config\toon.json">

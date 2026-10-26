@@ -8,7 +8,7 @@
 #ifndef NDEBUG
 #include "imgui.h"
 #endif
-
+#include "CharSettings.h"
 
 void GameContext::Init()
 {
@@ -32,7 +32,7 @@ void GameContext::Init()
         modelObjects.Add(jumpStand->GetJumpStandModel(),*jumpStand);
         modelObjects.Add(jumpStand->GetPillarModel(), *jumpStand);
 	}
-
+	CharSettingsManager::Load();
 
     stage.Init();
     player.Init();

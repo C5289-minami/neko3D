@@ -11,6 +11,9 @@
 #include "PlayerAnimType.h"
 #include "ObjectTransform.h"
 #include "Consts.h"
+#include "CharSettings.h"
+
+#include <vector>
 
 // class Stage;
 
@@ -23,17 +26,17 @@ public:
 	void Reset() override;
 	void Update(float deltaTime) override;
 	void Draw() const override;
-    void DrawStatus() const;
+	void DrawStatus() const;
 
-    static constexpr int MaxHealth = 5;
-    static constexpr float DamageRecoveryTime = 0.5f;
-    int GetHealth() const { return health_; }
-    bool IsDead() const { return health_ <= 0; }
-    bool IsDamaging() const { return GetCurrentState() == PlayerStateType::Damaging; }
-    PlayerStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }
-    bool TakeDamage();
+	static constexpr int MaxHealth = 5;
+	static constexpr float DamageRecoveryTime = 0.5f;
+	int GetHealth() const { return health_; }
+	bool IsDead() const { return health_ <= 0; }
+	bool IsDamaging() const { return GetCurrentState() == PlayerStateType::Damaging; }
+	PlayerStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }
+	bool TakeDamage();
 
-    void SetAnimation(PlayerAnimType::Type type, bool loop = true);
+	void SetAnimation(PlayerAnimType::Type type, bool loop = true);
 
 	// // ステージとの当たり判定込みの更新
 	// void Update(float deltaTime, const Stage& stage, const Vec3& movementCenter = Vec3{});
@@ -43,21 +46,21 @@ public:
 	// 移動
 	void SetMoveDirection(const Vec3& moveDir);
 	void StopMove();
-    void SetVerticalSpeed(float speed) { velocity_.y = speed; }
-    bool IsTouchingWall() const { return touchingWall_; }
-    const Vec3& GetWallNormal() const { return wallNormal_; }
-    float GetWallTopY() const { return wallTopY_; }
-    bool IsNearWallTop() const//
-    {
-        const float distance = wallTopY_ - GetPosition().y;
-        return touchingWall_ && distance >= -Const::PLAYER_SKIN &&
-            distance <= Const::PLAYER_CLIMB_TOP_HOLD_DISTANCE;
-    }
-    Vec3 GetWorldMoveDirection(const Vec3& moveDir) const;
-    void SetDefMove(bool defMove) { isdefMove_ = defMove; }
+	void SetVerticalSpeed(float speed) { velocity_.y = speed; }
+	bool IsTouchingWall() const { return touchingWall_; }
+	const Vec3& GetWallNormal() const { return wallNormal_; }
+	float GetWallTopY() const { return wallTopY_; }
+	bool IsNearWallTop() const//
+	{
+		const float distance = wallTopY_ - GetPosition().y;
+		return touchingWall_ && distance >= -Const::PLAYER_SKIN &&
+			distance <= Const::PLAYER_CLIMB_TOP_HOLD_DISTANCE;
+	}
+	Vec3 GetWorldMoveDirection(const Vec3& moveDir) const;
+	void SetDefMove(bool defMove) { isdefMove_ = defMove; }
 
 #ifdef _DEBUG
-    void SetDebugDashEnabled(bool enabled) { debugDashEnabled_ = enabled; }
+	void SetDebugDashEnabled(bool enabled) { debugDashEnabled_ = enabled; }
 #endif
 
 	// 回転
@@ -68,14 +71,14 @@ public:
 
 	// ジャンプ
 	void JumpAction();
-    void StartDoubleJump();
-    bool CanDoubleJump() const { return gravityEnabled_ && !isGrounded_ && !doubleJumpUsed_; }
-    float GetDoubleJumpSpeed() const { return doubleJumpSpeed_; }
-    void SetDoubleJumpSpeed(float value);
-    void ResetDoubleJumpSpeed();
-    void StartWallJump();
+	void StartDoubleJump();
+	bool CanDoubleJump() const { return gravityEnabled_ && !isGrounded_ && !doubleJumpUsed_; }
+	float GetDoubleJumpSpeed() const { return doubleJumpSpeed_; }
+	void SetDoubleJumpSpeed(float value);
+	void ResetDoubleJumpSpeed();
+	void StartWallJump();
 
-    // 旧仕様の突進ジャンプ用API。
+	// 旧仕様の突進ジャンプ用API。
 // 	void StartLungingJump(const Vec3& moveDir);
 //     // 空中にいて、まだ2回目を使っていないときだけ、とびかかれる。
 //     bool CanAirLunge() const { return gravityEnabled_ && !isGrounded_ && !doubleJumpUsed_; }
@@ -86,60 +89,60 @@ public:
 //     void SetLungingMoveSpeed(float value);
 //     void SetLungingJumpSpeed(float value);
 //     void ResetLungingSpeeds();
-    // 壁登り・滑り落ち・壁キックは、それぞれ専用の速度を持つ。
-    float GetClimbingSpeed() const { return climbingSpeed_; }
-    float GetWallSlideSpeed() const { return wallSlideSpeed_; }
-    void SetClimbingSpeed(float value);
-    void SetWallSlideSpeed(float value);
-    void ResetClimbingSpeeds();
-    //壁のぼり
-    bool IsPillarElevatorActive() const { return elevatorPillar_ != nullptr; }
-    void StartPillarElevator(const ModelObject* pillar, const Vec3& center, float topY);
-    bool UpdatePillarElevator(float deltaTime);
-    void EndPillarElevator();
-    void StartPillarExitJump();
+	// 壁登り・滑り落ち・壁キックは、それぞれ専用の速度を持つ。
+	float GetClimbingSpeed() const { return climbingSpeed_; }
+	float GetWallSlideSpeed() const { return wallSlideSpeed_; }
+	void SetClimbingSpeed(float value);
+	void SetWallSlideSpeed(float value);
+	void ResetClimbingSpeeds();
+	//壁のぼり
+	bool IsPillarElevatorActive() const { return elevatorPillar_ != nullptr; }
+	void StartPillarElevator(const ModelObject* pillar, const Vec3& center, float topY);
+	bool UpdatePillarElevator(float deltaTime);
+	void EndPillarElevator();
+	void StartPillarExitJump();
 	//ゲッター・セッター
-    float GetWallJumpMoveSpeed() const { return wallJumpMoveSpeed_; }
-    float GetWallJumpSpeed() const { return wallJumpSpeed_; }
-    void SetWallJumpMoveSpeed(float value);
-    void SetWallJumpSpeed(float value);
-    void ResetWallJumpSpeeds();
+	float GetWallJumpMoveSpeed() const { return wallJumpMoveSpeed_; }
+	float GetWallJumpSpeed() const { return wallJumpSpeed_; }
+	void SetWallJumpMoveSpeed(float value);
+	void SetWallJumpSpeed(float value);
+	void ResetWallJumpSpeeds();
 	bool IsGrounded() const { return isGrounded_; }
 	void SetGround(bool grounded) { isGrounded_ = grounded; }
 	bool IsGravityEnabled() const { return gravityEnabled_; }
 	void SetGravityEnabled(bool enabled);
 
 	void SetPosition(const Vec3& position)
-    {
-        ActorBase::SetPosition(position);
-    }
-    ObjectTransform GetTransform() const
-    {
-        return { model_.GetScale(), GetPosition(), GetRotation() };
-    }
-    void SetTransform(const ObjectTransform& transform)
-    {
-        SetPosition(transform.position);
-        SetPitch(transform.rotation.x);
-        SetYaw(transform.rotation.y);
-        model_.SetScale(transform.scale);
-    }
-    ModelObject& GetModelObject() { return model_; }
-    const ModelObject& GetModelObject() const { return model_; }
+	{
+		ActorBase::SetPosition(position);
+	}
+	ObjectTransform GetTransform() const
+	{
+		return { model_.GetScale(), GetPosition(), GetRotation() };
+	}
+	void SetTransform(const ObjectTransform& transform)
+	{
+		SetPosition(transform.position);
+		SetPitch(transform.rotation.x);
+		SetYaw(transform.rotation.y);
+		model_.SetScale(transform.scale);
+	}
+	ModelObject& GetModelObject() { return model_; }
+	const ModelObject& GetModelObject() const { return model_; }
 	const PlayerInput& GetInput() const { return input_; }
 
-    // 必殺ゲージは仮。増加タイミングは後で決める
-    static constexpr float UltimateGaugeMax = 100.0f;
-    float GetUltimateGauge() const { return ultimateGauge_; }
-    void SetUltimateGauge(float value);
-    void AddUltimateGauge(float amount);
-    bool CanUseUltimate() const { return ultimateGauge_ >= UltimateGaugeMax; }
-    bool TryUseUltimateGauge();
+	// 必殺ゲージは仮。増加タイミングは後で決める
+	static constexpr float UltimateGaugeMax = 100.0f;
+	float GetUltimateGauge() const { return ultimateGauge_; }
+	void SetUltimateGauge(float value);
+	void AddUltimateGauge(float amount);
+	bool CanUseUltimate() const { return ultimateGauge_ >= UltimateGaugeMax; }
+	bool TryUseUltimateGauge();
 
 private:
-    void UpdateMovement(float deltaTime);
+	void UpdateMovement(float deltaTime);
 
-    int health_{ MaxHealth };
+	int health_{ MaxHealth };
 	ModelObject model_;
 	AnimationDraw animation_;
 	int currentAnimIndex_{ static_cast<int>(PlayerAnimType::Idle) };
@@ -147,41 +150,44 @@ private:
 
 	PlayerInput input_;
 	PlayerStateMachine stateMachine_;
-    float ultimateGauge_{ 0.0f };
-    // float lungingMoveSpeed_{ Const::PLAYER_LUNGING_MOVE_SPEED };
-    float doubleJumpSpeed_{ Const::PLAYER_DOUBLE_JUMP_SPEED };
-    // float climbingSpeed_{ Const::PLAYER_CLIMBING_SPEED };
-    float climbingSpeed_{ Const::PLAYER_ELEVATOR_SPEED };
-    float wallSlideSpeed_{ Const::PLAYER_WALL_SLIDE_SPEED };
-    float wallJumpMoveSpeed_{ Const::PLAYER_WALL_JUMP_MOVE_SPEED };
-    float wallJumpSpeed_{ Const::PLAYER_WALL_JUMP_SPEED };
+	float ultimateGauge_{ 0.0f };
+	// float lungingMoveSpeed_{ Const::PLAYER_LUNGING_MOVE_SPEED };
+	float doubleJumpSpeed_{ Const::PLAYER_DOUBLE_JUMP_SPEED };
+	// float climbingSpeed_{ Const::PLAYER_CLIMBING_SPEED };
+	float climbingSpeed_{ Const::PLAYER_ELEVATOR_SPEED };
+	float wallSlideSpeed_{ Const::PLAYER_WALL_SLIDE_SPEED };
+	float wallJumpMoveSpeed_{ Const::PLAYER_WALL_JUMP_MOVE_SPEED };
+	float wallJumpSpeed_{ Const::PLAYER_WALL_JUMP_SPEED };
 	float kari_max_jissou_ = UltimateGaugeMax;
 
 	Vec3 movementCenter_{}; // 足場の中心
 	Vec3 moveInput_{};      // Xは左右、Zは前後の入力
 	Vec3 velocity_{ 0.0f, 0.0f, 0.0f };
 
-    // bool touchingPillar = false;
-    bool touchingModel_ = false;
+	// bool touchingPillar = false;
+	bool touchingModel_ = false;
 	bool isGrounded_{ false };
-    // bool wasTouchingPillar_{ false };
-    bool wasTouchingModel_{ false };
-    bool gravityEnabled_{ true };
+	// bool wasTouchingPillar_{ false };
+	bool wasTouchingModel_{ false };
+	bool gravityEnabled_{ true };
 
-    // false：ダブルジャンプをまだ使っていない。true：使用済み。
-    // 着地するまでtrueを保ち、Spaceを連打しても3回目は出せないようにする。
-    bool doubleJumpUsed_{ false };
+	// false：ダブルジャンプをまだ使っていない。true：使用済み。
+	// 着地するまでtrueを保ち、Spaceを連打しても3回目は出せないようにする。
+	bool doubleJumpUsed_{ false };
 
-    bool touchingWall_{ false };
-    Vec3 wallNormal_{};
+	bool touchingWall_{ false };
+	Vec3 wallNormal_{};
 	bool isdefMove_{ false };// デフォルトの移動をするかどうか
-    float wallTopY_{ 0.0f };
-    const ModelObject* elevatorPillar_{ nullptr };
-    Vec3 elevatorCenter_{};
-    float elevatorTopY_{};
-    bool elevatorInputConsumed_{ false };
+	float wallTopY_{ 0.0f };
+	const ModelObject* elevatorPillar_{ nullptr };
+	Vec3 elevatorCenter_{};
+	float elevatorTopY_{};
+	bool elevatorInputConsumed_{ false };
 
 #ifdef _DEBUG
-    bool debugDashEnabled_{ false };
+	bool debugDashEnabled_{ false };
 #endif
+
+	// character
+	std::vector<CharData> charDataList_;
 };
