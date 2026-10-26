@@ -219,6 +219,7 @@
     <ClInclude Include="GameStateType.h" />
     <ClInclude Include="GameTestScene.h" />
     <ClInclude Include="JumpStand.h" />
+    <ClInclude Include="Matrix.h" />
     <ClInclude Include="ModelConfigScene.h" />
     <ClInclude Include="ModelObjectManager.h" />
     <ClInclude Include="ModelType.h" />
