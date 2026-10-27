@@ -778,6 +778,10 @@ void Player::SetGravityEnabled(bool enabled)
 
 void Player::StartPillarElevator(const ModelObject* pillar, const Vec3& center, float topY)
 {
+	float recordFirstPosY = position_.y;
+    // 柱の上端までPlayerの高さ3個分以上あるときは、吸い込みを開始しない。
+    if (topY - recordFirstPosY >= Const::PLAYER_HEIGHT * 3.0f) return;
+
     const float arrivalY = topY - Const::PLAYER_ELEVATOR_TOP_OFFSET;
     if (!pillar || !gravityEnabled_|| IsDamaging() ||
         IsPillarElevatorActive() || position_.y >= arrivalY - Const::PLAYER_SKIN) return;
