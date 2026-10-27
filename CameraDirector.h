@@ -5,6 +5,7 @@
 #include "CameraTransition.h"
 #include "Motion.h"
 #include "Collision.h"
+#include "CameraShake.h"
 
 #include <vector>
 #include <string>
@@ -63,6 +64,9 @@ namespace Camera
 		// 現在の描画用姿勢
 		const CameraPose& GetCurrentPose() const;
 
+		// 描画パスで同じカメラ姿勢を再適用する
+		void ApplyRenderPose() const;
+
 		// 現在使用中のカメラ
 		Camera* GetActiveCamera() const;
 
@@ -71,6 +75,33 @@ namespace Camera
 
 		// カメラ本来の姿勢を使用中か
 		bool IsFollowing() const;
+
+		// カメラ揺れ
+		void StartHorizontalShake(
+			float duration = 0.25f,
+			float strength = 20.0f,
+			float frequency = 20.0f)
+		{
+			cameraShake_.StartHorizontal(duration, strength, frequency);
+		}
+
+		void StartVerticalShake(
+			float duration = 0.25f,
+			float strength = 20.0f,
+			float frequency = 20.0f)
+		{
+			cameraShake_.StartVertical(duration, strength, frequency);
+		}
+
+		void StartMixedShake(
+			float duration = 0.25f,
+			float strength = 20.0f,
+			float frequency = 20.0f)
+		{
+			cameraShake_.StartMixed(duration, strength, frequency);
+		}
+
+		void StopShake() { cameraShake_.Stop(); }
 
 	private:
 		enum class Mode
@@ -113,9 +144,15 @@ namespace Camera
 		Motion followMotion_{};
 
 		CameraPose currentPose_{};
+		CameraPose renderPose_{};
 		CameraPose followStartPose_{};
 
 		Mode mode_{ Mode::FollowingCamera };
+
+		// 描画時にカメラ姿勢へ揺れを加える
+		void ApplyCurrentPose(float deltaTime);
+
+		CameraShake cameraShake_{};
 
 
 	};

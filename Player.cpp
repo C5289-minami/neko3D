@@ -56,6 +56,7 @@ void Player::Reset()
 	// 初期位置・回転・拡大率は既定値を設定した後にJSONから読み込む
 	MObjs().LoadActorTransform(*this);
 	model_.Load();
+    startPosition_ = GetPosition();
 
 	moveInput_ = {};
 	velocity_ = { 0.0f, 0.0f, 0.0f };
@@ -74,9 +75,43 @@ void Player::Reset()
 	animation_.Update(0.0f);
 }
 
+void Player::SetStartPosition(const Vec3& position)
+{
+    SetPosition(position);
+    startPosition_ = position;
+}
+
+// 修正の修正。
+// ミスが続きすいません。
+// Reset()だと埋まるし、GetPosition()だと動かなかった。
+// 最初の場所を覚えておいて、Rでそこに戻すようにした。
+void Player::ResetPosition()
+{
+    stateMachine_.ChangeState(PlayerStateType::Idle);
+    EndPillarElevator();
+    StopMove();
+    position_ = startPosition_;
+    velocity_ = {};
+    isGrounded_ = false;
+    touchingWall_ = false;
+    touchingModel_ = false;
+    wasTouchingModel_ = false;
+    wallNormal_ = {};
+    wallTopY_ = 0.0f;
+    doubleJumpUsed_ = false;
+    elevatorInputConsumed_ = input_.jumpPressing;
+}
+
 void Player::Update(float deltaTime)
 {
 	input_.Update();
+#ifdef _DEBUG
+    if (input_.RkeyPressed)
+    {
+        ResetPosition();
+        return;
+    }
+#endif
 	UpdateMovement(deltaTime);
 }
 
@@ -207,10 +242,6 @@ void Player::UpdateMovement(float deltaTime)
 		position_.y += velocity_.y * deltaTime;
 		isGrounded_ = false;
 	}
-#ifdef _DEBUG
-		//リセットキー
-		if(input_.RkeyPressed)	Reset();
-#endif // _DEBUG
 
 	const int modelHandle = RM().GetModel(model_.GetModelKey());
 	animation_.Play3D(modelHandle, currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
@@ -228,6 +259,14 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 	const float previousY = oldPosition.y;
 
 	input_.Update();
+#ifdef _DEBUG
+    if (input_.RkeyPressed)
+    {
+        ResetPosition();
+        // 落ちていた場所から当たり判定を続けないように、ここで終わる。
+        return;
+    }
+#endif
 	// 今フレームの入力に合う側面を選び、柱のどの方向からでも登れるようにする。
 	// touchingWall_ = stage.FindPillarWall(GetPosition(), wallNormal_, GetWorldMoveDirection(input_.moveDir),
         // &wallTopY_, GetCurrentState() == PlayerStateType::Climbing);

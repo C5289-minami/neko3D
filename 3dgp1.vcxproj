@@ -209,6 +209,7 @@
     <ClInclude Include="CameraDirector.h" />
     <ClInclude Include="CameraObjectManager.h" />
     <ClInclude Include="CameraPose.h" />
+    <ClInclude Include="CameraShake.h" />
     <ClInclude Include="CameraTransition.h" />
     <ClInclude Include="GameBaseState.h" />
     <ClInclude Include="GameSceneBattleState.h" />
@@ -337,6 +338,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraDirector.cpp" />
     <ClCompile Include="CameraObjectManager.cpp" />
+    <ClCompile Include="CameraShake.cpp" />
     <ClCompile Include="CameraTransition.cpp" />
     <ClCompile Include="CharSettings.cpp" />
     <ClCompile Include="AnimationDraw.cpp" />
