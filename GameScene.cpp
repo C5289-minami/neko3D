@@ -36,7 +36,7 @@ void GameScene::Init()
 	// ƒWƒƒƒ“ƒv‘ä‚Ì°‚Æ’Œ‚ðA‚»‚ê‚¼‚ê‚Ì—p“r‚Å“o˜^‚·‚éB
 	for (const auto* stand : gameContext->GetRoom().GetJumpStands())
 	{
-		tutorialCollision_.AddModel(stand->GetJumpStandModel(), ModelCollision::Surface::Floor);
+		tutorialCollision_.AddModel(stand->GetJumpStandModel(), ModelCollision::Surface::Stand);
 		tutorialCollision_.AddModel(stand->GetPillarModel(), ModelCollision::Surface::Pillar);
 	}
 	tutorialCollision_.AddModel(gameContext->GetStage().GetModelObject(), ModelCollision::Surface::Floor);
