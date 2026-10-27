@@ -26,6 +26,8 @@ namespace DxPlus
             { BUTTON_L1,        KEY_INPUT_Q },          // Q
             { BUTTON_R1,        KEY_INPUT_E },          // E
 
+            { BUTTON_R,         KEY_INPUT_R },          // R
+
             { BUTTON_START,     KEY_INPUT_RETURN },     // エンターキー (メニュー決定など)
             { BUTTON_SELECT,    KEY_INPUT_BACK },       // バックスペースキー (メニュー戻るなど)
 
