@@ -383,9 +383,35 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
             //     (!holdingClimbTop || hit.point.y >= position_.y))
 			if (position_.y - hit.point.y <= groundSnapDistance)
 			{
-				position_.y = hit.point.y;
-				velocity_.y = 0.0f;
-				isGrounded_ = true;
+                // 坂の中へ落ち込まないよう、足元を床の高さへ戻す。
+                position_.y = hit.point.y;
+
+                constexpr float SLOPE_LIMIT_Y = 0.7f;
+
+                if (hit.normal.y < SLOPE_LIMIT_Y)
+                {
+                    // 急な坂では踏ん張れないので、坂の下へ流される。
+                    isGrounded_ = false;
+
+                    if (gravityEnabled_)
+                    {
+                        const Vec3 slideDirection = Vec3{ hit.normal.x, 0.0f, hit.normal.z }.Normalized();
+                        const float slideAmount = Const::GRAVITY * deltaTime;
+                        const Vec3 slidePosition = position_ + slideDirection * slideAmount;
+
+                        // 坂の途中に壁があれば、そこを突き抜けずに止まる。
+                        bool touched = false;
+
+                        position_ = collision.SlideAlongWalls(position_, slidePosition, modelOb, touched);
+                        touchingModel_ |= touched;
+                    }
+                }
+                else
+                {
+                    // 立てる床なら、落下を止めて足をつける。
+                    velocity_.y = 0.0f;
+                    isGrounded_ = true;
+                }
 			}
 		}
 	}
@@ -791,6 +817,10 @@ void Player::SetGravityEnabled(bool enabled)
 
 void Player::StartPillarElevator(const ModelObject* pillar, const Vec3& center, float topY)
 {
+	float recordFirstPosY = position_.y;
+    // 柱の上端までPlayerの高さ3個分以上あるときは、吸い込みを開始しない。
+    if (topY - recordFirstPosY >= Const::PLAYER_HEIGHT * 3.0f) return;
+
     const float arrivalY = topY - Const::PLAYER_ELEVATOR_TOP_OFFSET;
     if (!pillar || !gravityEnabled_|| IsDamaging() ||
         IsPillarElevatorActive() || position_.y >= arrivalY - Const::PLAYER_SKIN) return;

@@ -5,6 +5,8 @@
 #include "DxLib.h"
 #include <algorithm>
 #include <cmath>
+#include "DxPlus/DxPlus.h"
+
 
 ModelCollision::~ModelCollision()
 {
@@ -81,7 +83,9 @@ bool ModelCollision::Refresh()
                 }
             }
             if (entry.handle < 0) ready = false;
-            else if (entry.surface == Surface::Pillar && !UpdatePillarBounds(entry)) ready = false;
+            else if ((entry.surface == Surface::Pillar || 
+                entry.surface == Surface::Stand) &&
+                !UpdateBounds(entry)) ready = false;
             continue;
         }
 
@@ -105,13 +109,14 @@ bool ModelCollision::Refresh()
                 ready = false;
             }
         }
-        if (entry.handle >= 0 && entry.surface == Surface::Pillar &&
-            !entry.boundsReady && !UpdatePillarBounds(entry)) ready = false;
+        if (entry.handle >= 0 && (entry.surface == Surface::Pillar || 
+            entry.surface == Surface::Stand) &&
+            !entry.boundsReady && !UpdateBounds(entry)) ready = false;
     }
     return ready;
 }
 
-bool ModelCollision::UpdatePillarBounds(Entry& entry)
+bool ModelCollision::UpdateBounds(Entry& entry)
 {
     const auto bounds = entry.model->GetHitEllipsoid();
     //中心点でなければ使えないのです　
@@ -148,9 +153,12 @@ bool ModelCollision::IsTouchingWalls(const Vec3& feetPosition, const ModelOb& mo
     const Vec3 start = feetPosition + Vec3::Up() * modelOb.radius;
     const Vec3 end = feetPosition + Vec3::Up() * (modelOb.height - modelOb.radius);
 
+    Vec3 normal{};
+    if (FindStandSide(feetPosition, modelOb, feetPosition, {}, normal)) return true;
+
     for (const auto& entry : models_)
     {
-        if (entry.handle < 0 || entry.surface == Surface::Floor) continue;
+        if (entry.handle < 0 || entry.surface == Surface::Floor || entry.surface == Surface::Stand) continue;
 		// 壁や登れる壁の判定は体のカプセルとモデルの衝突を調べる
         const auto result = MV1CollCheck_Capsule(entry.handle, -1,
             DxConv::ToVECTOR(start), DxConv::ToVECTOR(end), modelOb.radius);
@@ -291,11 +299,12 @@ bool ModelCollision::FindWall(const Vec3& feetPosition, const ModelOb& modelOb, 
     const Vec3 end = feetPosition + Vec3::Up() * (modelOb.height - modelOb.radius);
     const float headY = feetPosition.y + modelOb.height;
 
-    const Vec3 direction = Vec3(moveDirection.x, 0.0f, moveDirection.z).Normalized();
+    const Vec3 direction = Vec3(moveDirection.x, 0.0f, moveDirection.z).Normalized();//水平の
     bool foundWall = false;
     float bestDirection = 2.0f;
     float bestDistance = detectionRadius;
-    const ModelObject* hitPillar = nullptr;
+
+    const ModelObject* hitPillar = nullptr;//接触中に見つけたモデル用
 
     for (const auto& entry : models_)
     {
@@ -305,13 +314,16 @@ bool ModelCollision::FindWall(const Vec3& feetPosition, const ModelOb& modelOb, 
         if (entry.boundsReady && feetPosition.y < entry.topY - modelOb.skin &&
             headY > entry.center.y - entry.radii.y)
         {
-            const float x = (feetPosition.x - entry.center.x) / entry.radii.x;
-            const float z = (feetPosition.z - entry.center.z) / entry.radii.z;
-            if (x * x + z * z <= 1.0f)
+			const float x = (feetPosition.x - entry.center.x) / entry.radii.x;//足元の位置を楕円の標準化座標に変換する
+            const float z = (feetPosition.z - entry.center.z) / entry.radii.z;//これも
+
+			if (x * x + z * z <= 1.0f)//平方根を使わずに、足元が柱の楕円の内部にあるかを判定する
             {
                 wallNormal = Vec3(feetPosition.x - entry.center.x, 0.0f,
                     feetPosition.z - entry.center.z).Normalized();
+
                 if (wallTopY) *wallTopY = entry.topY;
+
                 hitPillar = entry.model;
                 foundWall = true;
                 break;
@@ -335,8 +347,8 @@ bool ModelCollision::FindWall(const Vec3& feetPosition, const ModelOb& modelOb, 
                 continue;
             }
 
-            float top = (std::max)({ poly.Position[0].y, poly.Position[1].y, poly.Position[2].y });
-            float bottom = (std::min)({ poly.Position[0].y, poly.Position[1].y, poly.Position[2].y });
+            float top = (std::max)({ poly.Position[0].y, poly.Position[1].y, poly.Position[2].y });   //
+            float bottom = (std::min)({ poly.Position[0].y, poly.Position[1].y, poly.Position[2].y });//
 
 
             // 足元が上端付近に達しているか
@@ -360,16 +372,19 @@ bool ModelCollision::FindWall(const Vec3& feetPosition, const ModelOb& modelOb, 
             // 体の高さと重ならない側面は使わない。
             if (headY <= bottom) continue;
 
-            Vec3 outward = Vec3(normal.x, 0.0f, normal.z).Normalized();
+            Vec3 outward = Vec3(normal.x, 0.0f, normal.z).Normalized();//法線の水平値のみで壁は知らん
             const float signedDistance = Vec3::Dot(feetPosition - DxConv::ToVec3(poly.Position[0]), outward);
+			//もし正の値だったら、足元が壁の外で、負の値だったら足元が壁の内側にある
+
             // モデルの面の表裏によらず、壁から移動する物体へ向く法線にそろえる。
             if (signedDistance < 0.0f) outward = -outward;
 
             const float wallDirection = Vec3::Dot(direction, outward);
             const float distance = std::abs(signedDistance);
+
             // 角で複数の面に触れた場合も、入力が向かっている面を優先する。
-            if (!foundWall || wallDirection < bestDirection - 0.0001f ||
-                (std::abs(wallDirection - bestDirection) <= 0.0001f &&
+            if (!foundWall || wallDirection < bestDirection - DxPlus::EPS ||
+                (std::abs(wallDirection - bestDirection) <= DxPlus::EPS &&
                     distance < bestDistance))
             {
 				wallNormal = outward;           // 壁の法線は、プレイヤーの進行方向に向かうようにそろえる。
@@ -405,7 +420,7 @@ bool ModelCollision::RaycastWall(const Vec3& start, const Vec3& end, Physics::Ra
     bool found = false;
     for (const auto& entry : models_)
     {
-        if (entry.handle < 0 || entry.surface == Surface::Pillar) continue;
+        if (entry.handle < 0 || entry.surface == Surface::Pillar || entry.surface == Surface::Stand) continue;
 
         Physics::RayHit candidate{};
         if (!Physics::Raycast(entry.handle, start, end, candidate)) continue;
@@ -425,71 +440,188 @@ bool ModelCollision::RaycastWall(const Vec3& start, const Vec3& end, Physics::Ra
     return found;
 }
 
+// 台に横からぶつかったとき、壁が体を押し返す向きを調べる。
+bool ModelCollision::FindStandSide(const Vec3& feetPosition, const ModelOb& modelOb,
+    const Vec3& startPosition, const Vec3& direction, Vec3& wallNormal) const
+{
+    const float radius = modelOb.radius + modelOb.skin;
+    const float headY = feetPosition.y + modelOb.height;
+
+    const Vec3 bottom = feetPosition + Vec3::Up() * modelOb.radius;
+    const Vec3 top = feetPosition + Vec3::Up() * (modelOb.height - modelOb.radius);
+
+    bool found = false;
+    float bestDirection = 0.0f;
+
+    for (const auto& entry : models_)
+    {
+        if (entry.surface != Surface::Stand || entry.handle < 0 || !entry.boundsReady) continue;
+
+        // 遠くの台や、体より上・下にある台には触れない。
+        if (feetPosition.y >= entry.topY - modelOb.skin ||
+            headY <= entry.center.y - entry.radii.y + modelOb.skin ||
+            std::abs(feetPosition.x - entry.center.x) > entry.radii.x + radius ||
+            std::abs(feetPosition.z - entry.center.z) > entry.radii.z + radius) continue;
+
+        // 体を囲む丸い枠が、台の側面に届いているかを見る。
+        const auto result = MV1CollCheck_Capsule(entry.handle, -1,
+            DxConv::ToVECTOR(bottom), DxConv::ToVECTOR(top), radius);
+
+        for (int i = 0; i < result.HitNum; ++i)
+        {
+            const auto& triangle = result.Dim[i];
+            const Vec3 faceNormal = DxConv::ToVec3(triangle.Normal).Normalized();
+
+            // 台の上に乗るときや、下を通るときは横から引っかけない。
+            if (std::abs(faceNormal.y) >= 0.5f) continue;
+
+            const float topY = (std::max)({ triangle.Position[0].y, triangle.Position[1].y, triangle.Position[2].y });
+            const float bottomY = (std::min)({ triangle.Position[0].y, triangle.Position[1].y, triangle.Position[2].y });
+
+            if (feetPosition.y >= topY - modelOb.skin || headY <= bottomY + modelOb.skin) continue;
+
+            Vec3 normal = Vec3{ faceNormal.x, 0.0f, faceNormal.z }.Normalized();
+
+            if (normal.LengthSq() == 0.0f) continue;
+			//normalの方やったら、台の内側に向いてるので、外側へ
+            if (Vec3::Dot(startPosition - DxConv::ToVec3(triangle.Position[0]), normal) < 0.0f)
+                normal = -normal;
+			//正の値なら壁が外に向いて負の値なら壁が内側に向いてる
+            const float wallDirection = Vec3::Dot(direction, normal);
+
+            // 壁から離れるときや、壁に沿って進むときは邪魔しない。
+            if (direction.LengthSq() > 0.0f && wallDirection >= -DxPlus::EPS) continue;
+
+            // 角で二つの壁に触れたら、進もうとしているほうの壁を優先する。
+            if (!found || wallDirection < bestDirection)
+            {
+                found = true;
+                bestDirection = wallDirection;
+                wallNormal = normal;
+            }
+        }
+
+        MV1CollResultPolyDimTerminate(result);
+    }
+
+    return found;
+}
+
+// 突進して台をすり抜けないよう、移動先までの道を確かめる
+void ModelCollision::SweepStands(const Vec3& startPosition, const Vec3& direction,
+    const ModelOb& modelOb, float& travel, Vec3& wallNormal) const
+{
+    const float checkDistance = modelOb.radius * 0.5f;
+
+    float distance = 0.0f;
+    float safeDistance = 0.0f;
+
+    while (true)
+    {
+        Vec3 normal{};
+        const Vec3 position = startPosition + direction * distance;
+
+        if (!FindStandSide(position, modelOb, startPosition, direction, normal))
+        {
+            if (distance >= travel) return;
+
+            safeDistance = distance;
+
+            // ここまでぶつからなければ、もう少し先を試す。
+            distance = (std::min)(distance + checkDistance, travel);
+
+            continue;
+        }
+
+        // 台から離れすぎた所で止まらないよう、ぶつかる直前まで近づける。
+        float blockedDistance = distance;
+
+        for (int search = 0; search < 12; ++search)
+        {
+            const float middle = (safeDistance + blockedDistance) * 0.5f;
+
+            if (FindStandSide(startPosition + direction * middle, modelOb, startPosition, direction, normal))
+                blockedDistance = middle;
+            else
+                safeDistance = middle;
+        }
+
+        travel = safeDistance;
+        wallNormal = normal;
+
+        return;
+    }
+}
+
 Vec3 ModelCollision::SlideAlongWalls(const Vec3& oldPosition, const Vec3& desiredPosition,
     const ModelOb& modelOb, bool& touched) const
 {
     touched = false;
+
     if (!modelOb.IsValid()) return desiredPosition;
 
-        //水平移動
+    // 壁に当たっても、ジャンプや落下まで止めない。
     Vec3 position{ oldPosition.x, desiredPosition.y, oldPosition.z };
     Vec3 remaining{ desiredPosition.x - oldPosition.x, 0.0f, desiredPosition.z - oldPosition.z };
-    const float rayHeight = modelOb.height / 2.0f; // 横向きレイを出す、体の中央の高さ。
+
+    const float rayHeight = modelOb.height * 0.5f;
 
     for (int attempt = 0; attempt < 4; ++attempt)
     {
-        float length = remaining.Length();
+        const float length = remaining.Length();
 
-        if (length <= 0.00001f) break;
+        if (length <= DxPlus::EPS) break;
 
-		Vec3 direction = remaining / length;            // ベクトルの正規化。進行方向を求める。
-		Vec3 right{ direction.z, 0.0f, -direction.x };  // 進行方向の右向きベクトルを作る
-		Vec3 center = position + Vec3::Up() * rayHeight;// 体の中央の高さで、左右にレイを飛ばす
+        const Vec3 direction = remaining / length;
+        const Vec3 right{ direction.z, 0.0f, -direction.x };
+        const Vec3 center = position + Vec3::Up() * rayHeight;
 
         float travel = length;
-
         Vec3 wallNormal{};
 
+        SweepStands(position, direction, modelOb, travel, wallNormal);
+
+        // 体の左右が壁にかすったときも止まれるよう、3か所から確認
         for (int side = -1; side <= 1; ++side)
         {
             const Vec3 start = center + right * (modelOb.radius * side);
             const Vec3 end = start + direction * (length + modelOb.radius + modelOb.skin);
-   
+            
             Physics::RayHit hit{};
-            
-			if (!RaycastWall(start, end, hit)) continue;// 壁に当たらなければ
-            
-			float approaching = -Vec3::Dot(direction, hit.normal);// 進行方向と壁の法線の内積が負なら、壁に向かっている。
-            
-            if (approaching <= 0.00001f) continue;
 
+            if (!RaycastWall(start, end, hit)) continue;
 
-            // 体の幅とskin分は壁から離す。傾いた側面では体の長さも考慮する。
-            float clearance = modelOb.radius + modelOb.skin;
-            clearance += (rayHeight - modelOb.radius) * std::abs(hit.normal.y);
-			//法線とない席の処理で、壁の面からどれだけ離れているかを計算する。
-            const float gap = Vec3::Dot(center - hit.point, hit.normal) - clearance;
-            float allowed = gap / approaching;
-            
+            const float approaching = -Vec3::Dot(direction, hit.normal);
+
+            if (approaching <= DxPlus::EPS) continue;
+
+            // 壁に体が埋まらんように体の幅の分だけ手前で止める
+            const float clearance = modelOb.radius + modelOb.skin +
+                (rayHeight - modelOb.radius) * std::abs(hit.normal.y);
+			// 壁の法線に沿った距離を、移動方向に沿った距離に変換
+            float allowed = (Vec3::Dot(center - hit.point, hit.normal) - clearance) / approaching;
+
             if (allowed < 0.0f) allowed = 0.0f;
-            //壁にぶつかったら、かべっどまり
+
             if (allowed <= travel)
             {
                 travel = allowed;
                 wallNormal = Vec3{ hit.normal.x, 0.0f, hit.normal.z }.Normalized();
             }
-		}
+        }
 
-        position += direction * travel;//進行方向じぇ
-     
+        position += direction * travel;
+
+        if (wallNormal.LengthSq() == 0.0f) break;
+
         touched = true;
-		remaining -= direction * travel;//残りの移動量を更新する
-      
-        // 速度全体をゼロにせず、壁へ入り込む成分だけを除く。
+        remaining -= direction * travel;
+
+        // 斜めにぶつかったら、壁沿いにずれる分は残しておく。
         const float inward = Vec3::Dot(remaining, wallNormal);
-      
+
         if (inward < 0.0f) remaining -= wallNormal * inward;
     }
+
     return position;
 }
-
