@@ -118,6 +118,9 @@ public:
 	{
 		ActorBase::SetPosition(position);
 	}
+    // 開始場所を変えるときは、Rで戻る場所も一緒に変える。
+    void SetStartPosition(const Vec3& position);
+    void ResetPosition();
 	ObjectTransform GetTransform() const
 	{
 		return { model_.GetScale(), GetPosition(), GetRotation() };
@@ -168,6 +171,7 @@ private:
 	float wallJumpSpeed_{ Const::PLAYER_WALL_JUMP_SPEED };
 	float kari_max_jissou_ = UltimateGaugeMax;
 
+    Vec3 startPosition_{}; // Rで戻る最初の場所。
 	Vec3 movementCenter_{}; // 足場の中心
 	Vec3 moveInput_{};      // Xは左右、Zは前後の入力
 	Vec3 velocity_{ 0.0f, 0.0f, 0.0f };

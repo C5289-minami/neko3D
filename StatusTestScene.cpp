@@ -34,7 +34,7 @@ void StatusTest::Init()
 
 	gameContext->GetPlayer().Init();
 	gameContext->GetPlayer().Reset();
-	gameContext->GetPlayer().SetPosition({ 0.0f, 100.0f, 0.0f });
+	gameContext->GetPlayer().SetStartPosition({ 0.0f, 100.0f, 0.0f });
 
 	if (!CharSettingsManager::Load())
 		DxPlus::Utils::FatalError(L"キャラクター情報の読み込みに失敗");
