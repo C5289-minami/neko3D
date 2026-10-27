@@ -182,8 +182,13 @@ void Player::UpdateMovement(float deltaTime)
 			{
 				moveDirection = moveDirection.Normalized();
 				float moveSpeed = Const::PLAYER_MOVE_SPEED;
-#ifdef _DEBUG
-				if (debugDashEnabled_) moveSpeed *= 5.0f;
+#ifdef _DEBUG//debugDashEnabled_ は、Shiftキーで有効化する。ジャンプ中でも速く移動できる。
+		if (debugDashEnabled_) moveSpeed *= 5.0f;
+		//リセットキー
+		if(input_.RkeyPressed)
+		{
+			Reset();
+		}
 #endif
 				position_.x += moveDirection.x * moveSpeed * deltaTime;
 				position_.z += moveDirection.z * moveSpeed * deltaTime;
