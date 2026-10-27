@@ -22,7 +22,7 @@ void GameSceneTutorialState::Enter()
 	DxPlus::Debug::SetFormatString(L"GameSceneTutorialState::Enter");
 
 	auto& player = gameScene_.GetGameContext()->GetPlayer();
-	player.SetPosition(tutorialPlayerStartPos);
+	player.SetStartPosition(tutorialPlayerStartPos);
 	player.SetDefMove(true);
 
 	auto& camera = gameScene_.GetTargetCamera();

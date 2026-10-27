@@ -50,7 +50,9 @@ void GameTestScene::Update(float deltaTime)
 
 #ifndef NDEBUG
 	const bool toggleDown = DxLib::CheckHitKey(KEY_INPUT_LALT) != 0 &&
+
 		DxLib::CheckHitKey(KEY_INPUT_RETURN) != 0;
+
 	if (toggleDown && !wasFreeCameraToggleDown_)
 	{
 		if (activeCamera_)
@@ -93,7 +95,7 @@ void GameTestScene::Update(float deltaTime)
 
 		// player.Update(deltaTime, stage, stageCenterPosition);
 		
-#ifdef _DEBUG
+#ifdef _DEBUG// Shift長押しで通常移動の速度を5倍にする（GameTest限定）
 		const bool debugDash = DxLib::CheckHitKey(KEY_INPUT_LSHIFT) != 0 ||
 			DxLib::CheckHitKey(KEY_INPUT_RSHIFT) != 0;
 		player.SetDebugDashEnabled(debugDash);
