@@ -19,6 +19,7 @@ namespace Camera
     CameraDirector::CameraDirector(Camera& camera)
         : activeCamera_(&camera)
         , currentPose_(camera.GetPose())
+        , renderPose_(currentPose_)
     {
     }
 
@@ -173,21 +174,20 @@ namespace Camera
 
     void CameraDirector::SetPoseImmediate(const CameraPose& pose)
     {
-		// ‘JˆÚ’†‚ÌƒJƒƒ‰‚ª‚È‚¢ê‡‚Í–³Ž‹
         if (!activeCamera_ || !IsFinitePose(pose))
         {
             return;
         }
 
-        // ŽÀs’†‚Ì‘JˆÚ‚ð’âŽ~
         transition_.Reset();
         followMotion_.Reset();
 
-        // ƒJƒƒ‰‚ÌŒ»ÝŽp¨‚ð’¼ÚXV
         currentPose_ = pose;
         mode_ = Mode::HoldingPose;
 
-        activeCamera_->ApplyPose(currentPose_);
+        // —h‚ê‚ð‰Á‚¦‚½•`‰æ—pŽp¨‚ð“K—p‚·‚é
+        // deltaTime = 0 ‚È‚Ì‚ÅA—h‚ê‚ÌŽžŠÔ‚Íi‚ß‚È‚¢
+        ApplyCurrentPose(0.0f);
     }
 
     // =========================================================
@@ -246,7 +246,7 @@ namespace Camera
         {
             currentPose_ = GetBasePose();
 
-            activeCamera_->ApplyPose(currentPose_);
+            ApplyCurrentPose(deltaTime);
             return false;
         }
 
@@ -255,7 +255,7 @@ namespace Camera
             const bool finished =
                 transition_.Update(deltaTime, currentPose_);
 
-            activeCamera_->ApplyPose(currentPose_);
+            ApplyCurrentPose(deltaTime);
 
             if (finished)
             {
@@ -268,7 +268,7 @@ namespace Camera
         case Mode::HoldingPose:
         {
             // ‰‰oŠ®—¹Œã‚àŽp¨‚ðˆÛŽ
-            activeCamera_->ApplyPose(currentPose_);
+            ApplyCurrentPose(deltaTime);
             return false;
         }
 
@@ -286,7 +286,7 @@ namespace Camera
                 targetPose,
                 t);
 
-            activeCamera_->ApplyPose(currentPose_);
+            ApplyCurrentPose(deltaTime);
 
             if (followMotion_.IsFinished())
             {
@@ -307,20 +307,21 @@ namespace Camera
 
     void CameraDirector::Reset()
     {
+        cameraShake_.Stop();
+
         transition_.Reset();
         followMotion_.Reset();
 
         previousCamera_ = nullptr;
 
-        if (!activeCamera_)
-        {
-            return;
-        }
+        if (!activeCamera_) return;
 
         currentPose_ = GetBasePose();
+        renderPose_ = currentPose_;
+
         mode_ = Mode::FollowingCamera;
 
-        activeCamera_->ApplyPose(currentPose_);
+        activeCamera_->ApplyPose(renderPose_);
     }
 
     // =========================================================
@@ -332,6 +333,7 @@ namespace Camera
     {
         return currentPose_;
     }
+
 
     Camera* CameraDirector::GetActiveCamera() const
     {
@@ -434,5 +436,23 @@ namespace Camera
             std::isfinite(pose.yaw) &&
             std::isfinite(pose.roll) &&
             std::isfinite(pose.fieldOfViewDegrees);
+    }
+    void CameraDirector::ApplyCurrentPose(float deltaTime)
+    {
+        renderPose_ = currentPose_;
+
+        // —h‚ê‚ÍUpdateŽž‚É1‰ñ‚¾‚¯ŒvŽZ‚·‚é
+        renderPose_.position +=
+            cameraShake_.Update(deltaTime, currentPose_);
+
+        activeCamera_->ApplyPose(renderPose_);
+    }
+
+    void CameraDirector::ApplyRenderPose() const
+    {
+        if (!activeCamera_) return;
+
+        // —h‚ê‚ðÄŒvŽZ‚¹‚¸A•Û‘¶Ï‚Ý‚ÌŽp¨‚ð“K—p‚·‚é
+        activeCamera_->ApplyPose(renderPose_);
     }
 }

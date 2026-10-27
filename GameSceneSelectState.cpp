@@ -38,7 +38,6 @@ namespace
 		const Vec3 playerPos = player.GetWorldPosition();
 		const float yaw = player.GetWorldRotation().y;
 
-		// ActorBase‚Ì‰ñ“]ŒvŽZ‚É‡‚í‚¹‚½Player‚Ì‘O•û
 		const Vec3 forward{
 			std::sin(yaw),
 			0.0f,
@@ -107,6 +106,11 @@ void GameSceneSelectState::Enter()
 
 	context->SetSelectPreviewVisible(true);
 
+	auto& camera = gameScene_.GetCameraDirector();
+
+	// ‰¡—h‚ê
+	camera.StartMixedShake(50.2f, 525.0f, 50.0f);
+
 	DxLib::SetMouseDispFlag(TRUE);
 }
 
@@ -114,6 +118,7 @@ void GameSceneSelectState::Tick(float deltaTime)
 {
 	DxPlus::Debug::SetFormatString(
 		L"GameSceneSelectState::Tick");
+
 
 	if (players_.empty()) return;
 

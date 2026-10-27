@@ -262,6 +262,9 @@
     <Filter Include="30_Scenes\Game\StateMashine\GameSceneResultsState">
       <UniqueIdentifier>{cfaf73d7-a10c-484e-9714-51762bf76fd6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="10_Core\Camera\CameraShake">
+      <UniqueIdentifier>{74007395-5b76-429b-b265-721c1d69ac9d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -696,6 +699,9 @@
     <ClInclude Include="Basket.h">
       <Filter>40_Gameplay\Actors\Room</Filter>
     </ClInclude>
+    <ClInclude Include="CameraShake.h">
+      <Filter>10_Core\Camera\CameraShake</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -979,6 +985,9 @@
     </ClCompile>
     <ClCompile Include="ActorBase.cpp">
       <Filter>40_Gameplay\Actors\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraShake.cpp">
+      <Filter>10_Core\Camera\CameraShake</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
