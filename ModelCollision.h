@@ -76,9 +76,9 @@ private:
     struct Entry;
     bool UpdateBounds(Entry& entry);
     bool FindStandSide(const Vec3& feetPosition, const ModelOb& modelOb,
-        const Vec3& startPosition, const Vec3& direction, Vec3& wallNormal) const;
+    const Vec3& startPosition, const Vec3& direction, Vec3& wallNormal) const;
     void SweepStands(const Vec3& startPosition, const Vec3& direction, const ModelOb& modelOb,
-        float& travel, Vec3& wallNormal) const;
+    float& travel, Vec3& wallNormal) const;
 
     bool RaycastModels(const Vec3& start, const Vec3& end, Physics::RayHit& hit,
         bool forLanding, bool ignorePillars = false) const;

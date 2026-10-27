@@ -483,8 +483,7 @@ bool ModelCollision::FindStandSide(const Vec3& feetPosition, const ModelOb& mode
             Vec3 normal = Vec3{ faceNormal.x, 0.0f, faceNormal.z }.Normalized();
 
             if (normal.LengthSq() == 0.0f) continue;
-
-			//normalの方向が、台の外側に向くようにそろえる。内側に向いている場合は反転する。
+			//normalの方やったら、台の内側に向いてるので、外側へ
             if (Vec3::Dot(startPosition - DxConv::ToVec3(triangle.Position[0]), normal) < 0.0f)
                 normal = -normal;
 			//正の値なら壁が外に向いて負の値なら壁が内側に向いてる

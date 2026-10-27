@@ -344,9 +344,35 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
             //     (!holdingClimbTop || hit.point.y >= position_.y))
 			if (position_.y - hit.point.y <= groundSnapDistance)
 			{
-				position_.y = hit.point.y;
-				velocity_.y = 0.0f;
-				isGrounded_ = true;
+                // 坂の中へ落ち込まないよう、足元を床の高さへ戻す。
+                position_.y = hit.point.y;
+
+                constexpr float SLOPE_LIMIT_Y = 0.7f;
+
+                if (hit.normal.y < SLOPE_LIMIT_Y)
+                {
+                    // 急な坂では踏ん張れないので、坂の下へ流される。
+                    isGrounded_ = false;
+
+                    if (gravityEnabled_)
+                    {
+                        const Vec3 slideDirection = Vec3{ hit.normal.x, 0.0f, hit.normal.z }.Normalized();
+                        const float slideAmount = Const::GRAVITY * deltaTime;
+                        const Vec3 slidePosition = position_ + slideDirection * slideAmount;
+
+                        // 坂の途中に壁があれば、そこを突き抜けずに止まる。
+                        bool touched = false;
+
+                        position_ = collision.SlideAlongWalls(position_, slidePosition, modelOb, touched);
+                        touchingModel_ |= touched;
+                    }
+                }
+                else
+                {
+                    // 立てる床なら、落下を止めて足をつける。
+                    velocity_.y = 0.0f;
+                    isGrounded_ = true;
+                }
 			}
 		}
 	}
