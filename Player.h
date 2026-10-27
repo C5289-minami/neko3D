@@ -60,7 +60,7 @@ public:
 	Vec3 GetWorldMoveDirection(const Vec3& moveDir) const;
 	void SetDefMove(bool defMove) { isdefMove_ = defMove; }
 
-#ifdef _DEBUG
+#ifdef _DEBUG//ShitのDebug用のダッシュ機能のセッ
 	void SetDebugDashEnabled(bool enabled) { debugDashEnabled_ = enabled; }
 #endif
 
