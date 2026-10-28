@@ -140,12 +140,25 @@ void Player::SetModelKey(const std::wstring& key)
 }
 void Player::UpdateMovement(float deltaTime)
 {
+	float count = 0.0f;
+	float counter = 1.0 * deltaTime;
     // 前のフレームで床に着いたら、2回目のジャンプを再び使えるようにする。
     // 空中で被弾してステートが変わっても、このフラグはリセットしない。
     if (isGrounded_)
     {
         doubleJumpUsed_ = false;
+        doubleJumpResetTimer_ = 0.0f;
     }
+    else if (doubleJumpUsed_)
+    {
+        doubleJumpResetTimer_ += deltaTime;
+        if (doubleJumpResetTimer_ >= 0.5f)
+        {
+            doubleJumpUsed_ = false;
+            doubleJumpResetTimer_ = 0.0f;
+        }
+    }
+
 
     // 段階実装：接触のTrue/Falseだけを残し、壁登りへの自動遷移は停止する。
 //     // 移動入力を離している間は、壁登り用の接触状態を解除する。
@@ -227,8 +240,6 @@ void Player::UpdateMovement(float deltaTime)
 		//debugDashEnabled_ は、Shiftキーで有効化する。ジャンプ中でも速く移動できる
 		if (debugDashEnabled_) moveSpeed *= 5.0f;
 #endif
-
-
 				position_.x += moveDirection.x * moveSpeed * deltaTime;
 				position_.z += moveDirection.z * moveSpeed * deltaTime;
 				TurnTowards(moveDirection, deltaTime);
@@ -316,11 +327,11 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 // 	UpdateMovement(deltaTime);
 // 	if (snapToPillar)
 // 	{
-// 		// 高さは動かさず、横方向だけ柱の中心へ寄せる。
-// 		position_.x = pillarCenter.x;
-// 		position_.z = pillarCenter.z;
-// 		StopMove();
-// 	}
+/// 		// 高さは動かさず、横方向だけ柱の中心へ寄せる。
+/// 		position_.x = pillarCenter.x;
+/// 		position_.z = pillarCenter.z;
+/// 		StopMove();
+/// 	}
 
 	// // ステージの柱に沿ってスライドさせる
 	// position_ = stage.SlideAlongPillars(oldPosition, position_, touchingPillar);
@@ -426,6 +437,7 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 	// const Vec3 capsuleStart = GetPosition() + Vec3::Up() * Const::PLAYER_RADIUS;
 	// const Vec3 capsuleEnd = GetPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
 	// touchingPillar |= stage.IsHitPillar(capsuleStart, capsuleEnd, Const::PLAYER_RADIUS);
+
 	touchingModel_ |= collision.IsTouchingWalls(GetPosition(), modelOb);
 
 	// if (touchingPillar && !wasTouchingPillar_)
@@ -697,7 +709,9 @@ void Player::ResetDoubleJumpSpeed()
 void Player::StartDoubleJump()
 {
     if (!CanDoubleJump()) return;
+
     doubleJumpUsed_ = true;
+    doubleJumpResetTimer_ = 0.0f;
     StopMove();
 
 	// 入力やカメラではなく、既存のプレイヤーの向きから水平速度を決める。

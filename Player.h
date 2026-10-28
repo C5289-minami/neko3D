@@ -203,4 +203,5 @@ private:
 #endif
 	// キャラクター設定
 	CharData charData;
+	float doubleJumpResetTimer_{ 0.0f };
 };
