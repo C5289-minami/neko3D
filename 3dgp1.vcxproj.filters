@@ -88,7 +88,7 @@
     <Filter Include="40_Gameplay\Actors\Player\State\Attack">
       <UniqueIdentifier>{6abc340a-046a-48dd-9042-c471d2f8875f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="40_Gameplay\Actors\Player\State\NeutralJump">
+    <Filter Include="40_Gameplay\Actors\Player\State\Jump">
       <UniqueIdentifier>{d86ce60d-04a6-4895-85ad-1ae4163b633a}</UniqueIdentifier>
     </Filter>
     <Filter Include="40_Gameplay\Actors\Player\State\DoubleJump">
@@ -417,8 +417,8 @@
     <ClInclude Include="PlayerDoubleJumpState.h">
       <Filter>40_Gameplay\Actors\Player\State\DoubleJump</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerNeutralJumpState.h">
-      <Filter>40_Gameplay\Actors\Player\State\NeutralJump</Filter>
+    <ClInclude Include="PlayerJumpState.h">
+      <Filter>40_Gameplay\Actors\Player\State\Jump</Filter>
     </ClInclude>
     <ClInclude Include="PlayerGroomingState.h">
       <Filter>40_Gameplay\Actors\Player\State\Grooming</Filter>
@@ -821,8 +821,8 @@
     <ClCompile Include="PlayerDoubleJumpState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\DoubleJump</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerNeutralJumpState.cpp">
-      <Filter>40_Gameplay\Actors\Player\State\NeutralJump</Filter>
+    <ClCompile Include="PlayerJumpState.cpp">
+      <Filter>40_Gameplay\Actors\Player\State\Jump</Filter>
     </ClCompile>
     <ClCompile Include="PlayerGroomingState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Grooming</Filter>

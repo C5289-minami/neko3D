@@ -26,9 +26,8 @@ void PlayerDoubleJumpState::Tick(float)
         return;
     }
 
-    // 突進せず、現在の方向キーで通常速度の空中移動を行う。
+    // 発動時の向きと3倍の水平速度はPlayer側で維持する。
     // Spaceを連打しても、着地するまで追加のジャンプはしない。
-    player_.SetMoveDirection(player_.GetInput().moveDir);
     DxPlus::Debug::SetFormatString(L"state:double_jump");
 }
 

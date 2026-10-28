@@ -195,7 +195,13 @@ void Player::UpdateMovement(float deltaTime)
 	// 到着してジャンプへ切り替わるフレームも、上下移動を二重に加えない。
 	if (!elevatorFrame)
 	{
-		if (isdefMove_)
+		if (GetCurrentState() == PlayerStateType::DoubleJump)
+		{
+			// 2回目を押した瞬間の向きと速度を、ジャンプ中は保つ。
+			position_.x += velocity_.x * deltaTime;
+			position_.z += velocity_.z * deltaTime;
+		}
+		else if (isdefMove_)
 		{
 			// カメラの向きに合わせて移動方向を決める。
 			const float cameraRotY = DxLib::GetCameraAngleHRotate();
@@ -707,7 +713,12 @@ void Player::StartDoubleJump()
     doubleJumpUsed_ = true;
     doubleJumpResetTimer_ = 0.0f;
     StopMove();
-    SetMoveDirection(input_.moveDir);
+
+	// 入力やカメラではなく、既存のプレイヤーの向きから水平速度を決める。
+    const float moveSpeed = Const::PLAYER_MOVE_SPEED * 3.0f;
+    velocity_.x = std::sin(GetYaw()) * moveSpeed;
+    velocity_.z = std::cos(GetYaw()) * moveSpeed;
+
     velocity_.y = doubleJumpSpeed_;
     isGrounded_ = false;
 }

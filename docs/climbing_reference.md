@@ -10,7 +10,7 @@
 - 通常の接触判定 `IsHitPillar` と、壁登り専用の `IsNearClimbableWall` を分ける。
 - 壁登りでは柱の側面だけを対象にし、足元が側面の上端に達した場合や、体の高さが側面と重ならない場合は登れないとする。
 - `Climbing` でSpaceを離した場合、または登れる範囲から出た場合に終了する。
-- 終了時は接地・移動入力に応じて `Idle` / `Walk`、空中なら `NeutralJump` に移る。
+- 終了時は接地・移動入力に応じて `Idle` / `Walk`、空中なら `Jump` に移る。
 - 同じ長押しで壁登りを繰り返さないよう、一度Spaceを離してから再開する。
 - 上昇量は `PLAYER_CLIMING_SPEED * deltaTime`。登っている間は落下速度の蓄積と床への吸着を止める。
 
@@ -183,7 +183,7 @@ index 872326f..1f1cc2c 100644
 +        if (player_.IsGrounded() || !player_.IsGravityEnabled())
 +            stateMachine_.ChangeState(input.isMoving ? PlayerStateType::Walk : PlayerStateType::Idle);
 +        else
-+            stateMachine_.ChangeState(PlayerStateType::NeutralJump);
++            stateMachine_.ChangeState(PlayerStateType::Jump);
 +        return;
      }
  

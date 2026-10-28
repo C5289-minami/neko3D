@@ -24,7 +24,7 @@ void PlayerDamagingState::Tick(float deltaTime)
         if (player_.IsDead())
             stateMachine_.ChangeState(PlayerStateType::Die);
         else if (!player_.IsGrounded() && player_.IsGravityEnabled())
-            stateMachine_.ChangeState(PlayerStateType::NeutralJump);
+            stateMachine_.ChangeState(PlayerStateType::Jump);
         else if(player_.GetInput().isMoving)
 			stateMachine_.ChangeState(PlayerStateType::Walk);
         else
