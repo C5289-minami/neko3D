@@ -27,12 +27,12 @@ void PlayerClimbingState::Tick(float deltaTime)
     {
         stateMachine_.ChangeState(player_.IsGrounded() || !player_.IsGravityEnabled()
             ? (player_.GetInput().isMoving ? PlayerStateType::Walk : PlayerStateType::Idle)
-            : PlayerStateType::NeutralJump);
+            : PlayerStateType::Jump);
         return;
     }
     if (player_.UpdatePillarElevator(deltaTime))
     {
-        stateMachine_.ChangeState(PlayerStateType::NeutralJump);
+        stateMachine_.ChangeState(PlayerStateType::Jump);
         // Exitで速度をリセットした後に、小さなジャンプの初速を設定する。
         player_.StartPillarExitJump();
     }
@@ -52,7 +52,7 @@ void PlayerClimbingState::Tick(float deltaTime)
 //         }
 //         else
 //         {
-//             stateMachine_.ChangeState(PlayerStateType::NeutralJump);
+//             stateMachine_.ChangeState(PlayerStateType::Jump);
 //         }
 //         return;
 //     }
@@ -74,7 +74,7 @@ void PlayerClimbingState::Tick(float deltaTime)
 //     {
 //         stateMachine_.ChangeState(player_.IsGrounded() || !player_.IsGravityEnabled()
 //             ? (input.isMoving ? PlayerStateType::Walk : PlayerStateType::Idle)
-//             : PlayerStateType::NeutralJump);
+//             : PlayerStateType::Jump);
 //
 //         return;
 //     }

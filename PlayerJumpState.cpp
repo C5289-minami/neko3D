@@ -1,21 +1,21 @@
-﻿#include "PlayerNeutralJumpState.h"
+﻿#include "PlayerJumpState.h"
 #include "DxPlus/Debug.h"
 #include "Player.h"
 
-PlayerNeutralJumpState::PlayerNeutralJumpState(PlayerStateMachine& stateMachine, Player& player)
+PlayerJumpState::PlayerJumpState(PlayerStateMachine& stateMachine, Player& player)
     : PlayerBaseState(stateMachine, player)
 {
 }
 
-void PlayerNeutralJumpState::Enter()
+void PlayerJumpState::Enter()
 {
     player_.StopMove();
-    player_.SetAnimation(PlayerAnimType::Neutral_Jump, false);
+    player_.SetAnimation(PlayerAnimType::Jump, false);
     player_.JumpAction();
-    DxPlus::Debug::SetFormatString(L"PlayerNeutralJumpState::Enter");
+    DxPlus::Debug::SetFormatString(L"PlayerJumpState::Enter");
 }
 
-void PlayerNeutralJumpState::Tick(float)
+void PlayerJumpState::Tick(float)
 {
     if (player_.IsGrounded() || !player_.IsGravityEnabled())
     {
@@ -38,11 +38,11 @@ void PlayerNeutralJumpState::Tick(float)
 
     // 2回目を押すまでは、空中でも方向キーで移動できる。
     player_.SetMoveDirection(input.moveDir);
-    DxPlus::Debug::SetFormatString(L"state:neutral_jump");
+    DxPlus::Debug::SetFormatString(L"state:jump");
 }
 
-void PlayerNeutralJumpState::Exit()
+void PlayerJumpState::Exit()
 {
     player_.StopMove();
-    DxPlus::Debug::SetFormatString(L"PlayerNeutralJumpState::Exit");
+    DxPlus::Debug::SetFormatString(L"PlayerJumpState::Exit");
 }
