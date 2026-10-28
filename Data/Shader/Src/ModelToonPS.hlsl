@@ -1,6 +1,4 @@
-// ModelToonPS.hlsl
-
-// 3DModelにトゥーンシェーダを適用するためのピクセルシェーダ
+// 3DModel用トゥーンシェーダ
 
 cbuffer ToonSettings : register(b5)
 {
@@ -24,45 +22,34 @@ SamplerState g_Sampler : register(s0);
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-    float4 texColor = g_DiffuseMap.Sample(
-        g_Sampler,
-        input.UV
-    );
-
+    float4 texColor = g_DiffuseMap.Sample(g_Sampler, input.UV);
+    float3 normal = normalize(input.Normal);
     float3 lightDir = normalize(-LightDirection.xyz);
 
-    float brightness = dot(
-        normalize(input.Normal),
-        lightDir
-    );
+    // 明るさ計算（環境光として全体を少し底上げし、壁が暗くなりすぎるのを防ぐ）
+    float brightness = dot(normal, lightDir) * 0.5f + 0.5f;
 
     float3 finalColor;
 
     if (brightness > Thresholds.x)
     {
-        finalColor = texColor.rgb * 1.2f;
+        // ハイライト（白飛びしないよう 1.05倍 に抑える）
+        finalColor = texColor.rgb * 1.05f;
     }
     else if (brightness > Thresholds.y)
     {
+        // 通常色
         finalColor = texColor.rgb;
     }
     else if (Shadow.z > 0.5f)
     {
-        // ハーフトーンモード
+        // ハーフトーン影
         finalColor = texColor.rgb;
 
         float spacing = max(HalftoneSettings.x, 2.0f);
-
-        float2 cell =
-            frac(input.Position.xy / spacing) - 0.5f;
-
+        float2 cell = frac(input.Position.xy / spacing) - 0.5f;
         float distanceToCenter = length(cell);
-
-        float dots = 1.0f - smoothstep(
-            0.32f,
-            0.40f,
-            distanceToCenter
-        );
+        float dots = 1.0f - smoothstep(0.32f, 0.40f, distanceToCenter);
 
         finalColor = lerp(
             finalColor,
@@ -72,30 +59,18 @@ float4 main(PS_INPUT input) : SV_TARGET
     }
     else if (brightness > Thresholds.z)
     {
-        // 通常モード：中間の影
+        // 中間の影
         float3 shadow = texColor.rgb * Shadow.x;
-
-        shadow = lerp(
-            shadow,
-            ShadowColor.rgb * 0.7f,
-            Shadow.y
-        );
-
+        shadow = lerp(shadow, ShadowColor.rgb * 0.7f, Shadow.y);
         finalColor = shadow;
     }
     else
     {
-        // 通常モード：濃い影
+        // 濃い影
         float3 shadow = texColor.rgb * Shadow.x;
-
-        shadow = lerp(
-            shadow,
-            ShadowColor.rgb,
-            Shadow.y
-        );
-
+        shadow = lerp(shadow, ShadowColor.rgb, Shadow.y);
         finalColor = shadow;
     }
 
-    return float4(finalColor, texColor.a);
+    return float4(saturate(finalColor), texColor.a);
 }

@@ -6,6 +6,7 @@
 #include "DxConv.h"
 #include "DxPlus/DxPlus.h"
 #include "CameraPose.h"
+#include "Consts.h"
 
 #include <algorithm>
 #include <cmath>
@@ -125,8 +126,8 @@ namespace Camera
 		// 注視点を指定してカメラを適用する
 		void ApplyView(const Vec3& target) const;
 
-		inline static float nearClipDistance_{ 10.0f };
-		inline static float farClipDistance_{ 20000.0f };
+		inline static float nearClipDistance_{ Const::CAMERA_NEAR };
+		inline static float farClipDistance_{ Const::CAMERA_FAR };
 		inline static float fieldOfViewDegrees_{ DefaultFieldOfView };
 
 		Vec3 position_{};

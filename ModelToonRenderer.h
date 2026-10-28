@@ -34,8 +34,11 @@ public:
 
     // 指定したモデルをトゥーン描画する
     void Draw(const ModelObject& model) const;
-    // 深度パス用の描画。ピクセルシェーダーは変更しない
+  
+    // 深度パス用の描画。オブジェクトIDは自動割り当て
     void DrawDepth(const ModelObject& model) const;
+    // オブジェクトIDを指定して深度パス用に描画
+    void DrawDepth(const ModelObject& model, int objectId) const;
 
     // 頂点シェーダーの設定
     // モデルタイプに応じた頂点シェーダーを設定する
@@ -58,6 +61,16 @@ private:
     // トゥーン設定をGPUへ渡すための定数バッファー
     int toonConstantBuffer_{ -1 };
 
+    struct DepthObjectIdConstants
+    {
+        float objectId = 1.0f;
+        float padding[3]{};
+    };
+
+    // オブジェクトごとのIDを管理
+    mutable std::unordered_map<const ModelObject*, int> depthObjectIds_;
+    mutable int nextDepthObjectId_{ 1 };
+    int depthObjectIdConstantBuffer_{ -1 };
 
     struct TriangleListInfo
     {

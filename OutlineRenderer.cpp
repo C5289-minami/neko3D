@@ -11,6 +11,9 @@ namespace
     // アウトライン設定を HLSL の定数バッファー b6 に渡す。
     constexpr int OutlineSettingsSlot = 6;
 
+    constexpr const wchar_t* ObjectIdShaderPath =
+        L"./Data/Shader/Bin/ObjectIdPS.pso";
+
     // 深度・法線情報を出力するシェーダー
     constexpr const wchar_t* DepthShaderPath =
         L"./Data/Shader/Bin/DepthPS.pso";
@@ -59,29 +62,21 @@ bool OutlineRenderer::Init(int width, int height)
 
     depthPixelShader_ = LoadPixelShader(DepthShaderPath);
     postProcessPixelShader_ = LoadPixelShader(PostProcessShaderPath);
+	objectIdPixelShader_ = LoadPixelShader(ObjectIdShaderPath);
     
 
-    // --------------------------------------------------------
-  // ② 深度・法線用バッファーを作成する
-  // --------------------------------------------------------
-
-  // 法線や深度を高精度で保存するため、浮動小数点形式にする
     SetDrawValidFloatTypeGraphCreateFlag(TRUE);
     SetCreateDrawValidGraphChannelNum(4);
     SetCreateGraphChannelBitDepth(32);
 
     depthBuffer_ = MakeScreen(width_, height_, TRUE);
+    objectIdBuffer_ = MakeScreen(width_, height_, TRUE);
 
-    // --------------------------------------------------------
-    // ③ 通常の画面バッファーを作成する
-    // --------------------------------------------------------
-
-    // 以降の画面作成には浮動小数点形式の設定を適用しない
+    // ここから通常の画面バッファー作成設定へ戻す
     SetDrawValidFloatTypeGraphCreateFlag(FALSE);
     SetCreateDrawValidGraphChannelNum(0);
     SetCreateGraphChannelBitDepth(0);
 
-    // 通常のシーン画像
     sceneBuffer_ = MakeScreen(width_, height_, TRUE);
 
 
@@ -90,15 +85,14 @@ bool OutlineRenderer::Init(int width, int height)
     // --------------------------------------------------------
 
     // 3Dモデルの前後関係を正しく判定できるようにする。
-    if (sceneBuffer_ >= 0)
-    {
-        SetUseGraphZBuffer(sceneBuffer_, TRUE);
-    }
-
     if (depthBuffer_ >= 0)
-    {
         SetUseGraphZBuffer(depthBuffer_, TRUE);
-    }
+
+    if (objectIdBuffer_ >= 0)
+        SetUseGraphZBuffer(objectIdBuffer_, TRUE);
+
+    if (sceneBuffer_ >= 0)
+        SetUseGraphZBuffer(sceneBuffer_, TRUE);
 
 
     // --------------------------------------------------------
@@ -115,6 +109,8 @@ bool OutlineRenderer::Init(int width, int height)
         postProcessPixelShader_ < 0 ||
         sceneBuffer_ < 0 ||
         depthBuffer_ < 0 ||
+        objectIdPixelShader_ < 0 ||
+        objectIdBuffer_ < 0 ||
         settingsConstantBuffer_ < 0)
     {
         Release();
@@ -174,7 +170,17 @@ void OutlineRenderer::Release() noexcept
         DeleteGraph(depthBuffer_);
         depthBuffer_ = -1;
     }
+    if (objectIdBuffer_ >= 0)
+    {
+        DeleteGraph(objectIdBuffer_);
+        objectIdBuffer_ = -1;
+    }
 
+    if (objectIdPixelShader_ >= 0)
+    {
+        DeleteShader(objectIdPixelShader_);
+        objectIdPixelShader_ = -1;
+    }
 
     // 画面サイズも初期状態へ戻す。
     width_ = 0;
@@ -301,6 +307,46 @@ void OutlineRenderer::EndDepthPass() const
     SetDrawScreen(DX_SCREEN_BACK);
 }
 
+// ============================================================
+// オブジェクトID描画開始
+// ============================================================
+void OutlineRenderer::BeginObjectIdPass() const
+{
+    if (objectIdBuffer_ < 0 || objectIdPixelShader_ < 0 ||
+        depthBuffer_ < 0)
+    {
+        return;
+    }
+
+    // IDの描画先に切り替える
+    SetDrawScreen(objectIdBuffer_);
+
+    // 重要：共有Zバッファーを設定する前に、
+    // IDバッファーの色だけをクリアする
+    SetDrawZBuffer(-1);
+    ClearDrawScreen();
+
+    // 深度・法線パスで作ったZバッファーを共有する
+    // ここで ClearDrawScreenZBuffer() は呼ばない
+    SetDrawZBuffer(depthBuffer_);
+
+    MV1SetUseOrigShader(TRUE);
+    SetUsePixelShader(objectIdPixelShader_);
+}
+
+// ============================================================
+// オブジェクトID描画終了
+// ============================================================
+void OutlineRenderer::EndObjectIdPass() const
+{
+    SetUsePixelShader(-1);
+    SetUseVertexShader(-1);
+
+    MV1SetUseOrigShader(FALSE);
+
+    SetDrawZBuffer(-1);
+    SetDrawScreen(DX_SCREEN_BACK);
+}
 
 // ============================================================
 // RenderPostProcess()
@@ -321,6 +367,7 @@ void OutlineRenderer::RenderPostProcess() const
     {
         // アウトラインを適用する。
         if (depthBuffer_ < 0 ||
+            objectIdBuffer_ < 0 ||
             postProcessPixelShader_ < 0 ||
             settingsConstantBuffer_ < 0)
         {
@@ -373,10 +420,14 @@ void OutlineRenderer::RenderOutlinePass(
         return;
     }
 
-    // 最新のアウトライン設定をコピーする。
+    // 最新の設定をコピー
     *settings = g_outlineSettings;
 
-    // シェーダーが使う定数バッファーを更新する。
+    // 現在のカメラのクリップ距離を取得
+    settings->cameraNear = GetCameraNear();
+    settings->cameraFar = GetCameraFar();
+
+    // 定数バッファーを更新
     UpdateShaderConstantBuffer(settingsConstantBuffer_);
 
 
@@ -401,6 +452,8 @@ void OutlineRenderer::RenderOutlinePass(
 
     // t1：深度・法線情報
     SetUseTextureToShader(1, depthBuffer_);
+
+    SetUseTextureToShader(2, objectIdBuffer_);
 
     // 輪郭検出・合成用シェーダーを使用する。
     SetUsePixelShader(postProcessPixelShader_);
@@ -427,6 +480,7 @@ void OutlineRenderer::RenderOutlinePass(
 
     SetUseTextureToShader(0, -1);
     SetUseTextureToShader(1, -1);
+    SetUseTextureToShader(2, -1);
 
     // 次の描画に備えてバックバッファーへ戻す。
     SetDrawScreen(DX_SCREEN_BACK);

@@ -106,10 +106,6 @@ void GameSceneSelectState::Enter()
 
 	context->SetSelectPreviewVisible(true);
 
-	auto& camera = gameScene_.GetCameraDirector();
-
-	// ‰¡—h‚ê
-	camera.StartMixedShake(50.2f, 525.0f, 50.0f);
 
 	DxLib::SetMouseDispFlag(TRUE);
 }

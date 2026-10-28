@@ -53,5 +53,9 @@ namespace Const
     constexpr int FPS_CAP = 480;
     constexpr float EPS = 1e-3f;
     constexpr float ANIM_FPS = 30.0f;
+
+    // ===== ÉJÉÅÉâ =====
+    constexpr float CAMERA_NEAR = 10.0f;
+    constexpr float CAMERA_FAR = 20000.0f;
  
 }

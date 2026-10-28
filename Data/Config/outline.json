@@ -1,11 +1,15 @@
 {
-    "depthStrength": 13.98900032043457,
-    "normalStrength": 10.67300033569336,
+    "depthStrength": 50.0,
+    "innerOpacity": 1.0,
+    "innerRadius": 1.0,
+    "normalStrength": 16.5,
+    "normalThreshold": 0.5249999761581421,
+    "outerOpacity": 1.0,
+    "outerRadius": 5.0,
     "outlineColor": [
         0.357776403427124,
         0.399218887090683,
-        0.7722007632255554
-    ],
-    "radius": 4.3520002365112305,
-    "threshold": 0.6890000104904175
+        0.7722007632255554,
+        1.0
+    ]
 }
