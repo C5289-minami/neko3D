@@ -23,17 +23,19 @@ namespace
 		ResourceKeys::Model_Player
 	};
 
+
 	constexpr float SelectTargetH = 100.0f;
-	constexpr float SelectTargetRightOffset = 400.0f;
+	constexpr float SelectTargetRightOffset = 150.0f;
+	constexpr float SelectCameraLeftOffset = 100.0f;
 	constexpr float SelectCameraForwardDistance = 350.0f;
-	constexpr float SelectCameraMoveDuration = 0.3f;
+	constexpr float SelectCameraMoveDuration = 0.6f;
 
 	Camera::CameraPose MakeCameraPoseInFrontOfPlayer(
 		Camera::CameraPose pose,
 		const Player& player)
 	{
 		const Vec3 playerPos = player.GetWorldPosition();
-		const float yaw = player.GetWorldRotation().y;
+		const float yaw = player.GetYaw();
 
 		const Vec3 forward{
 			std::sin(yaw),
@@ -41,12 +43,25 @@ namespace
 			std::cos(yaw)
 		};
 
-		// Playerの正面にカメラを配置
-		pose.position = playerPos + forward * SelectCameraForwardDistance;
-		pose.position.y = playerPos.y + SelectTargetH;
+		const Vec3 right{
+			std::cos(yaw),
+			0.0f,
+			-std::sin(yaw)
+		};
 
-		// Playerの上半身を注視する
-		const Vec3 target = playerPos + Vec3::Up() * SelectTargetH;
+		// Targetを画面右側に配置するため、注視点を右へずらす
+		const Vec3 target =
+			playerPos
+			+ Vec3::Up() * SelectTargetH
+			+ right * SelectTargetRightOffset;
+
+		// キャラクターの正面側にカメラを配置
+		pose.position = target + forward * SelectCameraForwardDistance;
+
+		// カメラを少し左へ移動
+		pose.position -= right * SelectCameraLeftOffset;
+
+		// Targetを注視
 		const Vec3 direction = target - pose.position;
 
 		pose.yaw = std::atan2(direction.x, direction.z);
@@ -60,6 +75,7 @@ namespace
 
 		return pose;
 	}
+
 }
 
 GameSceneSelectState::GameSceneSelectState(
