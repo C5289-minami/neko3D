@@ -208,7 +208,6 @@ void ShaderTest::DrawImGui()
 			u8"外側の太さ",
 			&outerRadius,
 			1,
-			5))
 			100))
 		{
 			g_outlineSettings.outerRadius =
