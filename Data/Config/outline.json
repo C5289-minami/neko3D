@@ -2,10 +2,10 @@
     "depthStrength": 50.0,
     "innerOpacity": 1.0,
     "innerRadius": 1.0,
-    "normalStrength": 16.5,
+    "normalStrength": 16.200000762939453,
     "normalThreshold": 0.5249999761581421,
-    "outerOpacity": 1.0,
-    "outerRadius": 5.0,
+    "outerOpacity": 0.8600000143051147,
+    "outerRadius": 8.0,
     "outlineColor": [
         0.357776403427124,
         0.399218887090683,

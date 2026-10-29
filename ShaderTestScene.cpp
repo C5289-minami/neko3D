@@ -209,6 +209,7 @@ void ShaderTest::DrawImGui()
 			&outerRadius,
 			1,
 			5))
+			100))
 		{
 			g_outlineSettings.outerRadius =
 				static_cast<float>(outerRadius);
@@ -223,7 +224,7 @@ void ShaderTest::DrawImGui()
 		);
 
 
-		ImGui::Separator();
+		ImGui::Separator();	
 		ImGui::Text(u8"--- 内側の法線エッジ ---");
 
 		int innerRadius = static_cast<int>(
@@ -233,7 +234,7 @@ void ShaderTest::DrawImGui()
 			u8"内側の太さ",
 			&innerRadius,
 			1,
-			5))
+			50))
 		{
 			g_outlineSettings.innerRadius =
 				static_cast<float>(innerRadius);
@@ -243,7 +244,7 @@ void ShaderTest::DrawImGui()
 			u8"内側の検出強度",
 			&g_outlineSettings.normalStrength,
 			0.0f,
-			20.0f,
+			50.0f,
 			"%.1f"
 		);
 

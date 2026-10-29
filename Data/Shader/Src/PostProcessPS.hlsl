@@ -100,7 +100,7 @@ float4 main(PS_INPUT input) : SV_TARGET
     // ========================================
     // ① 内側：同じオブジェクト内の法線エッジ
     // ========================================
-    int innerRadius = clamp((int) InnerSettings.x, 1, 5);
+    int innerRadius = (int) (InnerSettings.x);
     float normalEdge = 0.0f;
 
     for (int offset = 1; offset <= innerRadius; ++offset)
@@ -166,26 +166,26 @@ float4 main(PS_INPUT input) : SV_TARGET
    // ========================================
 // ② 外側：可視オブジェクトの輪郭
 // ========================================
-    int outerRadius = clamp((int) OuterSettings.x, 1, 5);
+    int outerRadius = (int) (OuterSettings.x);
     float outerEdge = 0.0f;
 
-    for (int offset = 1; offset <= outerRadius; ++offset)
+    for (int offset_ = 1; offset_ <= outerRadius; ++offset_)
     {
         uint2 lPx = uint2(
-        pixel.x >= (uint) offset ? pixel.x - offset : 0,
+        pixel.x >= (uint) offset_ ? pixel.x - offset_ : 0,
         pixel.y);
 
         uint2 rPx = uint2(
-        min(pixel.x + offset, width - 1),
+        min(pixel.x + offset_, width - 1),
         pixel.y);
 
         uint2 uPx = uint2(
         pixel.x,
-        pixel.y >= (uint) offset ? pixel.y - offset : 0);
+        pixel.y >= (uint) offset_ ? pixel.y - offset_ : 0);
 
         uint2 dPx = uint2(
         pixel.x,
-        min(pixel.y + offset, height - 1));
+        min(pixel.y + offset_, height - 1));
 
         float lId = LoadObjectId(lPx);
         float rId = LoadObjectId(rPx);
