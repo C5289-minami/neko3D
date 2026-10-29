@@ -116,9 +116,6 @@ void GameSceneSelectState::Enter()
 	enterWasDown_ = false;
 	mouseWasDown_ = false;
 
-	context->SetSelectPreviewVisible(true);
-
-
 	DxLib::SetMouseDispFlag(TRUE);
 }
 
@@ -281,7 +278,6 @@ void GameSceneSelectState::ConfirmSelection()
 	player.SetModelKey(selected.GetModelObject().GetModelKey());
 	player.SetCharData(selected.GetCharData());
 
-	context->SetSelectPreviewVisible(false);
 
 	stateMachine_.ChangeState(GameStateType::Tutorial);
 }
@@ -290,8 +286,6 @@ void GameSceneSelectState::Exit()
 {
 	DxPlus::Debug::SetFormatString(
 		L"GameSceneSelectState::Exit");
-
-	gameScene_.GetGameContext()->SetSelectPreviewVisible(false);
 
 	DxLib::SetMouseDispFlag(FALSE);
 }

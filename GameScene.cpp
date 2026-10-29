@@ -43,7 +43,8 @@ void GameScene::Init()
 	}
 	tutorialCollision_.AddModel(gameContext->GetStage().GetModelObject(), ModelCollision::Surface::Floor);
 
-
+	// キャラクター選択画面のプレビューを表示する
+	gameContext->SetSelectPreviewVisible(true);
 
 	// トゥーン描画とアウトライン描画を有効にする
 	{
@@ -78,49 +79,7 @@ void GameScene::Init()
 		cameraDirector_.Update(0);
 	}
 
-	// UI
-	{
-		// logoのUIを作成
-		const DxPlus::Vec2 logoPos(DxPlus::CLIENT_WIDTH * 0.3f, DxPlus::CLIENT_HEIGHT * 0.3f);
-		const std::wstring logoKey = ResourceKeys::UI_Logo;
-		UIM().CreateImageUI(L"Game.Logo", logoKey, logoPos, {}, 0.5f);
-		UIM().GetUI(L"Game.Logo")->SetDisplayCondition(
-			[this]() -> bool
-			{
-				return GetCurrentGameState() == GameStateType::Title;
-			}
-		);
-
-		// スタートボタンのUIを作成
-		const DxPlus::Vec2 startPos(DxPlus::CLIENT_WIDTH * 0.2f, DxPlus::CLIENT_HEIGHT * 0.6f);
-		const std::wstring key = ResourceKeys::UI_StartButton;
-		UIM().CreateButtonUI(L"Game.StartButton", key, startPos,
-			[this]() { stateMachine_.ChangeState(GameStateType::Select); },
-			{ -1,0 },
-			0.5f
-		);
-		UIM().GetUI(L"Game.StartButton")->SetDisplayCondition(
-			[this]() -> bool
-			{
-				return GetCurrentGameState() == GameStateType::Title;
-			}
-		);
-
-		// 終了ボタンのUIを作成
-		const DxPlus::Vec2 exitPos(DxPlus::CLIENT_WIDTH * 0.2f, DxPlus::CLIENT_HEIGHT * 0.75f);
-		const std::wstring exitKey = ResourceKeys::UI_ExitButton;
-		UIM().CreateButtonUI(L"Game.ExitButton", exitKey, exitPos,
-			[]() { PostQuitMessage(0); },
-			{ -1,0 },
-			0.5f
-		);
-		UIM().GetUI(L"Game.ExitButton")->SetDisplayCondition(
-			[this]() -> bool
-			{
-				return GetCurrentGameState() == GameStateType::Title;
-			}
-		);
-	}
+	
 
 	stateMachine_.Initialize();
 
