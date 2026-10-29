@@ -188,7 +188,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ActorBase.h" />
-    <ClInclude Include="AnimationDraw.h" />
     <ClInclude Include="AttackBaseState.h" />
     <ClInclude Include="AttackStateMachine.h" />
     <ClInclude Include="AttackStateType.h" />
@@ -222,6 +221,7 @@
     <ClInclude Include="GameTestScene.h" />
     <ClInclude Include="JumpStand.h" />
     <ClInclude Include="Matrix.h" />
+    <ClInclude Include="ModelAnimation.h" />
     <ClInclude Include="ModelConfigScene.h" />
     <ClInclude Include="ModelObjectManager.h" />
     <ClInclude Include="ModelType.h" />
@@ -341,7 +341,6 @@
     <ClCompile Include="CameraShake.cpp" />
     <ClCompile Include="CameraTransition.cpp" />
     <ClCompile Include="CharSettings.cpp" />
-    <ClCompile Include="AnimationDraw.cpp" />
     <ClCompile Include="AttackBaseState.cpp" />
     <ClCompile Include="AttackStateMachine.cpp" />
     <ClCompile Include="Boss.cpp" />
@@ -355,6 +354,7 @@
     <ClCompile Include="GameSceneTutorialState.cpp" />
     <ClCompile Include="GameStateMachine.cpp" />
     <ClCompile Include="GameTestScene.cpp" />
+    <ClCompile Include="ModelAnimation.cpp" />
     <ClCompile Include="ModelConfigScene.cpp" />
     <ClCompile Include="ModelObjectManager.cpp" />
     <ClCompile Include="PlayerWallJump.cpp" />

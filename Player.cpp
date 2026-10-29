@@ -12,6 +12,10 @@
 #include <algorithm>
 #include <iostream>
 
+#include <tchar.h>
+#include <cstdio>
+#include <Windows.h>
+#include <tchar.h>
 
 Player::Player()
 	: ActorBase("Player"), stateMachine_(*this)
@@ -66,13 +70,20 @@ void Player::Reset()
 
 	// 空中から開始し、ステージへのレイキャストで接地させる。
 	isGrounded_ = false;
-	animation_.Reset();
-	SetAnimation(PlayerAnimType::Idle, true);
 
 	stateMachine_.Initialize();
-	// 更新を止めても描画できるように初期ポーズを用意する
-	animation_.Play3D(RM().GetModel(model_.GetModelKey()), currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
-	animation_.Update(0.0f);
+
+	// Animation
+	animation_.Reset();	
+	SetAnimation(PlayerAnimType::Idle, true);
+
+	animation_.Play3D(
+		RM().GetModel(model_.GetModelKey()),
+		currentAnimIndex_,
+		currentAnimLoop_,
+		Const::ANIM_FPS,
+		0.0f
+	);
 }
 
 void Player::SetStartPosition(const Vec3& position)
@@ -117,7 +128,6 @@ void Player::Update(float deltaTime)
 
 void Player::SetModelKey(const std::wstring& key)
 {
-	// keyがないか、既に設定済みのモデルキーと同じなら何もしない
 	if (key.empty() || key == model_.GetModelKey()) return;
 
 	const int modelHandle = RM().GetModel(key);
@@ -127,6 +137,7 @@ void Player::SetModelKey(const std::wstring& key)
 	model_.SetModelType(ModelType::Bone);
 
 	animation_.Reset();
+
 	currentAnimIndex_ = static_cast<int>(PlayerAnimType::Idle);
 	currentAnimLoop_ = true;
 
@@ -134,14 +145,14 @@ void Player::SetModelKey(const std::wstring& key)
 		modelHandle,
 		currentAnimIndex_,
 		currentAnimLoop_,
-		Const::ANIM_FPS);
-
-	animation_.Update(0.0f);
+		Const::ANIM_FPS,
+		0.0f
+	);
 }
+
 void Player::UpdateMovement(float deltaTime)
 {
-	float count = 0.0f;
-	float counter = 1.0 * deltaTime;
+
     // 前のフレームで床に着いたら、2回目のジャンプを再び使えるようにする。
     // 空中で被弾してステートが変わっても、このフラグはリセットしない。
     if (isGrounded_)
@@ -236,7 +247,7 @@ void Player::UpdateMovement(float deltaTime)
 			{
 				moveDirection = moveDirection.Normalized();
 				float moveSpeed = Const::PLAYER_MOVE_SPEED;
-#ifdef _DEBUG
+#ifndef NDEBUG
 		//debugDashEnabled_ は、Shiftキーで有効化する。ジャンプ中でも速く移動できる
 		if (debugDashEnabled_) moveSpeed *= 5.0f;
 #endif
@@ -261,7 +272,15 @@ void Player::UpdateMovement(float deltaTime)
 	}
 
 	const int modelHandle = RM().GetModel(model_.GetModelKey());
-	animation_.Play3D(modelHandle, currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
+
+	animation_.Play3D(
+		modelHandle,
+		currentAnimIndex_,
+		currentAnimLoop_,
+		Const::ANIM_FPS,
+		0.2f
+	);
+
 	animation_.Update(deltaTime);
 }
 
@@ -461,15 +480,7 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 
 void Player::Draw() const
 {
-	const Matrix4 worldMatrix = model_.GetWorldMatrix();
-
-	model_.ApplyCollisionColor();
-
-	animation_.Draw3D(
-		worldMatrix.GetTranslation(),
-		worldMatrix.GetScale(),
-		worldMatrix.GetRotationXYZ()
-	);
+	model_.Draw();
 }
 
 

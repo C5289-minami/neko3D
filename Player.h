@@ -7,14 +7,11 @@
 #include "Vector3.h"
 // #include "Stage.h"
 #include "ModelCollision.h"
-#include "AnimationDraw.h"
+#include "ModelAnimation.h"
 #include "PlayerAnimType.h"
 #include "ObjectTransform.h"
 #include "Consts.h"
 #include "CharSettings.h"
-
-
-#include"ModelCollision.h"
 
 // class Stage;
 
@@ -155,7 +152,7 @@ private:
 
 	int health_{ MaxHealth };
 	ModelObject model_;
-	AnimationDraw animation_;
+	ModelAnimation animation_;
 	int currentAnimIndex_{ static_cast<int>(PlayerAnimType::Idle) };
 	bool currentAnimLoop_{ true };
 

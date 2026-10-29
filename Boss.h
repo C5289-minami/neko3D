@@ -1,7 +1,7 @@
 ﻿#pragma once
 #pragma once
 
-#include "AnimationDraw.h"
+#include "ModelAnimation.h"
 #include "BossStateMachine.h"
 #include "DrawableObject.h"
 #include "IAttackSkill.h"
@@ -52,7 +52,7 @@ private:
 
 
 	// Animation
-	AnimationDraw animation_;
+	ModelAnimation animation_;
 
 	int currentAnimIndex_{ -1 };
 	bool currentAnimLoop_{ true };

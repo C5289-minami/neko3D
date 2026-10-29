@@ -63,7 +63,7 @@ void Boss::Draw() const
 {
 	const ModelObject worldModel = model_.WithParentTransform(GetPosition(), GetRotation());
 	worldModel.ApplyCollisionColor();
-	animation_.Draw3D(worldModel.GetPosition(), worldModel.GetScale(), worldModel.GetRotation());
+	worldModel.Draw();
 }
 
 void Boss::SetMoveDirection(const Vec3& moveDirection, float speed)

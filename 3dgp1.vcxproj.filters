@@ -504,9 +504,6 @@
     <ClInclude Include="Button.h">
       <Filter>10_Core</Filter>
     </ClInclude>
-    <ClInclude Include="AnimationDraw.h">
-      <Filter>10_Core\Animation</Filter>
-    </ClInclude>
     <ClInclude Include="ActorBase.h">
       <Filter>40_Gameplay\Actors\Base</Filter>
     </ClInclude>
@@ -702,6 +699,9 @@
     <ClInclude Include="CameraShake.h">
       <Filter>10_Core\Camera\CameraShake</Filter>
     </ClInclude>
+    <ClInclude Include="ModelAnimation.h">
+      <Filter>10_Core\Animation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -866,9 +866,6 @@
     <ClCompile Include="UIManager.cpp">
       <Filter>10_Core\UI</Filter>
     </ClCompile>
-    <ClCompile Include="AnimationDraw.cpp">
-      <Filter>10_Core\Animation</Filter>
-    </ClCompile>
     <ClCompile Include="UIBase.cpp">
       <Filter>10_Core\UI</Filter>
     </ClCompile>
@@ -988,6 +985,9 @@
     </ClCompile>
     <ClCompile Include="CameraShake.cpp">
       <Filter>10_Core\Camera\CameraShake</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelAnimation.cpp">
+      <Filter>10_Core\Animation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
