@@ -435,27 +435,11 @@ void GameScene::DrawScene(bool toonEnabled) const
 		drawModel(model);
 	}
 
-	// Room本体
-	drawModel(room.GetRoomObject());
-
-	// Roomの柱
-	for (const auto* pillar : room.GetPillars())
+	// Room
+	for (const auto* allRoom : room.GetAllModelObjects())
 	{
-		if (pillar)
-		{
-			drawModel(*pillar);
-		}
+		drawModel(*allRoom);
 	}
-
-	// Roomのジャンプ台と柱
-	for (const auto* jumpStand : room.GetJumpStands())
-	{
-		if (!jumpStand) continue;
-
-		drawModel(jumpStand->GetJumpStandModel());
-		drawModel(jumpStand->GetPillarModel());
-	}
-	drawModel(room.GetBasket().GetModelObject());
 
 	effectManager.Draw();
 	grid.Draw();

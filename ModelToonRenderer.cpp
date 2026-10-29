@@ -24,6 +24,8 @@ namespace
 
     constexpr const wchar_t* BoneVertexShader8FramePath =
         L"./Data/Shader/Bin/ModelVS_Bone8Frame.vso";
+    constexpr const wchar_t* BoneVertexShader8FrameNMapPath =
+        L"./Data/Shader/Bin/ModelVS_Bone8FrameNMap.vso";
 }
 
 
@@ -51,6 +53,8 @@ bool ModelToonRenderer::Init()
 	vertexShaderBoneNMap_ = LoadVertexShader(BoneVertexShaderNMapPath);
     vertexShaderBone8Frame_ =
         LoadVertexShader(BoneVertexShader8FramePath);
+    vertexShaderBone8FrameNMap_ =
+        LoadVertexShader(BoneVertexShader8FrameNMapPath);
 
 
     toonConstantBuffer_ =
@@ -63,6 +67,7 @@ bool ModelToonRenderer::Init()
         vertexShaderBone_ < 0 ||
 		vertexShaderBoneNMap_ < 0 ||
         vertexShaderBone8Frame_ < 0 ||
+        vertexShaderBone8FrameNMap_ < 0 ||
         depthObjectIdConstantBuffer_ < 0 ||
         toonConstantBuffer_ < 0)
     {
@@ -305,8 +310,11 @@ void ModelToonRenderer::DrawTriangleLists(
                 break;
 
             case DX_MV1_VERTEX_TYPE_8FRAME:
-            case DX_MV1_VERTEX_TYPE_NMAP_8FRAME:
                 shader = vertexShaderBone8Frame_;
+                break;
+
+            case DX_MV1_VERTEX_TYPE_NMAP_8FRAME:
+                shader = vertexShaderBone8FrameNMap_;
                 break;
 
             default:

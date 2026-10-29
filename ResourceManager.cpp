@@ -35,7 +35,7 @@ void ResourceManager::LoadAll()
 
     // モデルの読み込み
     LoadModel(ResourceKeys::Model_Player,    L"./Data/Models/Player/player.mv1");
-    LoadModel(ResourceKeys::Model_Boss,       L"./Data/Models/Boss/boss_test.mv1");
+    LoadModel(ResourceKeys::Model_Boss,       L"./Data/Models/Boss/boss.mv1");
     LoadModel(ResourceKeys::Model_PillarL, L"./Data/Models/stage/PillarL.mv1");
     LoadModel(ResourceKeys::Model_PillarM, L"./Data/Models/stage/PillarM.mv1");
     LoadModel(ResourceKeys::Model_PillarS, L"./Data/Models/stage/PillarS.mv1");

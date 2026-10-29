@@ -23,13 +23,10 @@ namespace
 		ResourceKeys::Model_Player
 	};
 
-	constexpr float SelectTargetHeight = 100.0f;
-	constexpr int MouseHitHalfWidth = 130;
-	constexpr int MouseHitHalfHeight = 200;
-
-	// 選択中のキャラクターの前方にカメラを移動させる距離と時間
-	constexpr float SelectCameraForwardDistance = 500.0f;// 手前に200
-	constexpr float SelectCameraMoveDuration = 0.5f;
+	constexpr float SelectTargetH = 100.0f;
+	constexpr float SelectTargetRightOffset = 400.0f;
+	constexpr float SelectCameraForwardDistance = 350.0f;
+	constexpr float SelectCameraMoveDuration = 0.3f;
 
 	Camera::CameraPose MakeCameraPoseInFrontOfPlayer(
 		Camera::CameraPose pose,
@@ -46,21 +43,20 @@ namespace
 
 		// Playerの正面にカメラを配置
 		pose.position = playerPos + forward * SelectCameraForwardDistance;
-		pose.position.y = playerPos.y + SelectTargetHeight;
+		pose.position.y = playerPos.y + SelectTargetH;
 
-		// Playerの上半身付近を注視する
-		const Vec3 target =
-			playerPos + Vec3::Up() * SelectTargetHeight;
-
+		// Playerの上半身を注視する
+		const Vec3 target = playerPos + Vec3::Up() * SelectTargetH;
 		const Vec3 direction = target - pose.position;
 
-		// 注視点の方向からカメラの角度を計算
 		pose.yaw = std::atan2(direction.x, direction.z);
 		pose.pitch = std::atan2(
 			direction.y,
 			std::sqrt(
 				direction.x * direction.x +
-				direction.z * direction.z));
+				direction.z * direction.z
+			)
+		);
 
 		return pose;
 	}
@@ -222,36 +218,6 @@ void GameSceneSelectState::Tick(float deltaTime)
 	}
 
 	// =========================================
-	// マウスで選択・決定
-	// =========================================
-
-	if (mousePressed)
-	{
-		int mouseX = 0;
-		int mouseY = 0;
-
-		DxLib::GetMousePoint(&mouseX, &mouseY);
-
-		const int hitIndex =
-			FindPlayerByMouse(mouseX, mouseY);
-
-		if (hitIndex >= 0)
-		{
-			// すでに選択中のキャラクターなら即決定
-			if (hitIndex == selectedIndex_)
-			{
-				ConfirmSelection();
-				return;
-			}
-
-			// 選択対象を変更し、移動完了後に決定
-			confirmAfterCameraMove_ = true;
-			SelectIndex(hitIndex);
-			return;
-		}
-	}
-
-	// =========================================
 	// Enterで決定
 	// =========================================
 
@@ -284,43 +250,6 @@ void GameSceneSelectState::SelectIndex(int index)
 		Motion::Easing::EaseInOut);
 
 	cameraState_ = SelectCameraState::MoveToSelectedPlayer;
-}
-
-int GameSceneSelectState::FindPlayerByMouse(
-	int mouseX,
-	int mouseY) const
-{
-	for (std::size_t i = 0; i < players_.size(); ++i)
-	{
-		const Vec3 target =
-			players_[i]->GetWorldPosition() +
-			Vec3::Up() * SelectTargetHeight;
-
-		const VECTOR screenPosition =
-			DxLib::ConvWorldPosToScreenPos(
-				DxConv::ToVECTOR(target));
-
-		// カメラの描画範囲外ならスキップ
-		if (screenPosition.z <= 0.0f ||
-			screenPosition.z >= 1.0f)
-		{
-			continue;
-		}
-
-		const int screenX =
-			static_cast<int>(screenPosition.x);
-
-		const int screenY =
-			static_cast<int>(screenPosition.y);
-
-		if (std::abs(mouseX - screenX) <= MouseHitHalfWidth &&
-			std::abs(mouseY - screenY) <= MouseHitHalfHeight)
-		{
-			return static_cast<int>(i);
-		}
-	}
-
-	return -1;
 }
 
 void GameSceneSelectState::ConfirmSelection()

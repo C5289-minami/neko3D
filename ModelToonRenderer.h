@@ -58,6 +58,7 @@ private:
     int vertexShaderBoneNMap_{ -1 };
     // 8FRAME対応の頂点シェーダー
     int vertexShaderBone8Frame_{ -1 };
+    int vertexShaderBone8FrameNMap_{ -1 };
     // トゥーン設定をGPUへ渡すための定数バッファー
     int toonConstantBuffer_{ -1 };
 
