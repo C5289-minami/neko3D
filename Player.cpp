@@ -206,68 +206,13 @@ void Player::UpdateMovement(float deltaTime)
 	// 到着してジャンプへ切り替わるフレームも、上下移動を二重に加えない。
 	if (!elevatorFrame)
 	{
-		if (GetCurrentState() == PlayerStateType::DoubleJump)
-		{
-			// 2回目を押した瞬間の向きと速度を、ジャンプ中は保つ。
-			position_.x += velocity_.x * deltaTime;
-			position_.z += velocity_.z * deltaTime;
-		}
-		else if (isdefMove_)
-		{
-			// カメラの向きに合わせて移動方向を決める。
-			const float cameraRotY = DxLib::GetCameraAngleHRotate();
-			const Vec3 cameraForward{ std::sin(cameraRotY), 0.0f, std::cos(cameraRotY) };
-			const Vec3 cameraRight{ cameraForward.z, 0.0f, -cameraForward.x };
-
-
-            // 旧仕様の入力固定と横方向への突進は使わない。
-//             bool isLunging = GetCurrentState() == PlayerStateType::LungingJump;
-//             Vec3 moveInput = input_.moveDir;//とびかかり中：moveInput_＝発動した瞬間に保存した入力
-// 											//通常移動中：input_.moveDir＝今押している入力だよん
-//
-//             float moveSpeed = Const::PLAYER_MOVE_SPEED;
-//             if (isLunging)
-//             {
-//                 moveInput = moveInput_;
-//                 moveSpeed = lungingMoveSpeed_;
-//             }
-
-            // 地上・空中とも、現在の入力で通常速度の移動だけを行う。
-            Vec3 moveInput = input_.moveDir;
-            //if (moveInput.x != 0.0f && moveInput.z != 0.0f)
-            //{
-            //    moveInput = {};
-            //}
-            float moveSpeed = Const::PLAYER_MOVE_SPEED;
-
-            Vec3 moveDirection = cameraRight * moveInput.x + cameraForward * moveInput.z;
-			moveDirection.y = 0.0f;
-
-			if (moveDirection.LengthSq() > 0.0f)
-			{
-				moveDirection = moveDirection.Normalized();
-				float moveSpeed = Const::PLAYER_MOVE_SPEED;
-#ifndef NDEBUG
-		//debugDashEnabled_ は、Shiftキーで有効化する。ジャンプ中でも速く移動できる
-		if (debugDashEnabled_) moveSpeed *= 5.0f;
-#endif
-				position_.x += moveDirection.x * moveSpeed * deltaTime;
-				position_.z += moveDirection.z * moveSpeed * deltaTime;
-				TurnTowards(moveDirection, deltaTime);
-			}
-		}
-		else
-		{
-			// 中心がどっちにあるか調べる。高さはここでは考えない
-			MoveAroundStage(deltaTime, position_, movementCenter_);
-		}
-		// 横移動は MoveAroundStage、上下移動は velocity_.y にまとめる。
+		UpdateHorizontalVelocity(deltaTime);
 
 		if (gravityEnabled_ && GetCurrentState() != PlayerStateType::Climbing)
 		{
 			velocity_.y -= Const::GRAVITY * deltaTime;
 		}
-		position_.y += velocity_.y * deltaTime;
+		Move(deltaTime);
 		isGrounded_ = false;
 	}
 
@@ -530,8 +475,6 @@ void Player::SetMoveDirection(const Vec3& moveDir)
 {
 	// 押している方向を覚えておく。実際に動かすのはUpdate
 	moveInput_ = { moveDir.x, 0.0f, moveDir.z };
-    // 前後と左右の同時入力は、ジャンプ中も両方とも無効にする。
-    //if (moveInput_.x != 0.0f && moveInput_.z != 0.0f) moveInput_ = {};
 }
 
 
@@ -646,25 +589,60 @@ void Player::TurnTowards(
 	SetYaw(yaw);
 }
 
-void Player::MoveAroundStage(float deltaTime, Vec3& playerPos, const Vec3& movementCenter)
+void Player::UpdateHorizontalVelocity(float deltaTime)
 {
+	// 壁キック・ダブルジャンプ中は、開始時に設定した横速度をそのまま使う。
+	if (GetCurrentState() == PlayerStateType::WallJump ||
+		GetCurrentState() == PlayerStateType::DoubleJump)
+		return;
+
+	// 入力を離したフレームには横速度を消す。ジャンプ・重力のY速度は残す。
+	velocity_.x = 0.0f;
+	velocity_.z = 0.0f;
 	if (deltaTime <= 0.0f) return;
 
-	if (GetCurrentState() == PlayerStateType::WallJump)
-	{
-		// 壁を蹴った方向を保ち、入力や足場の中心に左右されず壁から離れる。
-		playerPos.x += velocity_.x * deltaTime;
-		playerPos.z += velocity_.z * deltaTime;
-		TurnTowards(Vec3(velocity_.x, 0.0f, velocity_.z), deltaTime);
-		return;
-	}
-	if (moveInput_.LengthSq() == 0.0f)
-	{
-		return;
-	}
+	float moveSpeed = Const::PLAYER_MOVE_SPEED;//通常移動速度
+#ifdef _DEBUG//debugモードでは、移動速度を5倍にする
+	if (debugDashEnabled_) moveSpeed *= 5.0f;//(shift中)
+#endif
 
-	//センターを中心にして、プレイヤーの位置から前方向を求める
-	Vec3 forward = movementCenter - playerPos;
+	if (isdefMove_)
+	{
+		// 移動と同じ、カメラ基準の入力方向を使う。
+		float cameraRotY = DxLib::GetCameraAngleHRotate();
+		//カメラが向いている方を「前」にする。
+		Vec3 cameraForward{ std::sin(cameraRotY), 0.0f, std::cos(cameraRotY) };
+		//前の向きを右に90度回して、カメラから見た「右」を作る。
+		//だから、カメラの向きが変わると、前後左右の移動方向も変わる。
+		Vec3 cameraRight{ cameraForward.z, 0.0f, -cameraForward.x };
+		Vec3 moveInput = input_.moveDir;
+		//キーに合わせて、前後左右カメラが動く向きが決まる
+		Vec3 moveDirection = cameraRight * moveInput.x + cameraForward * moveInput.z;//
+		Vec3 horizontalVelocity = moveDirection.Normalized() * moveSpeed;//入力
+		velocity_.x = horizontalVelocity.x;
+		velocity_.z = horizontalVelocity.z;
+	}
+	else
+	{
+		UpdateStageMoveVelocity(moveSpeed, deltaTime);
+	}
+}
+
+void Player::Move(float deltaTime)
+{
+	if (deltaTime <= 0.0f) return;
+	position_ += velocity_ * deltaTime;
+	// 上下の速度は向きに含めず、横に進む方向へ回転する。
+	TurnTowards(Vec3(velocity_.x, 0.0f, velocity_.z), deltaTime);
+}
+
+void Player::UpdateStageMoveVelocity(float moveSpeed, float deltaTime)
+{
+	if (deltaTime <= 0.0f || moveInput_.LengthSq() == 0.0f) return;
+	const float distance = moveSpeed * deltaTime;
+
+	// センターを中心にして、プレイヤーの位置から前方向を求める。
+	Vec3 forward = movementCenter_ - position_;
 	forward.y = 0.0f;
 	const float radius = forward.Length();
 	if (radius < 0.001f)
@@ -679,32 +657,18 @@ void Player::MoveAroundStage(float deltaTime, Vec3& playerPos, const Vec3& movem
 	const Vec3 input = moveInput_.Normalized();
 	const Vec3 right{ forward.z, 0.0f, -forward.x };
 
-    // 旧仕様の突進速度は使わず、2回目のジャンプも通常移動速度にする。
-// 	const float moveSpeed =
-// 		GetCurrentState() == PlayerStateType::LungingJump ?
-// 		lungingMoveSpeed_ : Const::PLAYER_MOVE_SPEED;
-// 	if (GetCurrentState() == PlayerStateType::LungingJump)
-// 	{
-// 		input_.isMoving = false;
-// 	}
-	float normalMoveSpeed = Const::PLAYER_MOVE_SPEED;
-#ifdef _DEBUG
-	if (debugDashEnabled_) normalMoveSpeed *= 5.0f;
-#endif
-	const float moveSpeed = normalMoveSpeed;
-
-	const float distance = moveSpeed * deltaTime;
-
-
-
 	const float nextRadius = (std::max)(1.0f, radius - input.z * distance);
 	const float angle = input.x * distance / (std::max)(1.0f, radius);
 	const Vec3 outward = -forward * std::cos(angle) + right * std::sin(angle);
 
-	playerPos.x = movementCenter.x + outward.x * nextRadius;
-	playerPos.z = movementCenter.z + outward.z * nextRadius;
+	// 円周移動した後のX・Z座標を求める。
+	const float nextX = movementCenter_.x + outward.x * nextRadius;
+	const float nextZ = movementCenter_.z + outward.z * nextRadius;
 
-	TurnTowards(forward * input.z + right * input.x, deltaTime);
+	// 次の座標までの距離を、このフレームの時間で割って横速度にする。
+	// 座標への反映はMoveで行う。ジャンプ・重力のY速度はここでは触らない。
+	velocity_.x = (nextX - position_.x) / deltaTime;
+	velocity_.z = (nextZ - position_.z) / deltaTime;
 }
 
 void Player::SetDoubleJumpSpeed(float value)

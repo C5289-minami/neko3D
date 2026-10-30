@@ -15,7 +15,9 @@ void PlayerInput::Update()
 	if (button & (BUTTON_LEFT | BUTTON_L1)) moveDir.x -= 1.0f;
 	if (button & BUTTON_RIGHT) moveDir.x += 1.0f;
 
-	// 前後と左右を同時に押した間は、どちらにも移動しない。
+	// 斜め入力も受け付け、縦横だけの入力と移動速度を揃える。
+	moveDir = moveDir.Normalized();
+
 	//if (moveDir.x != 0.0f && moveDir.z != 0.0f)
 	//{
 	//	moveDir = {};
