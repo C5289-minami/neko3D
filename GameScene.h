@@ -44,7 +44,7 @@ public:
         float stageRadius = 1200.0f;
 
         // カメラ追従を開始する球体
-        float climbRadius = 2000.0f;
+        float climbRadius = 2500.0f;
 
         // デバッグ描画
         bool drawSpheres = true;

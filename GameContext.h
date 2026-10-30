@@ -36,16 +36,9 @@ public:
     Grid& GetGrid() { return grid; }
     const Grid& GetGrid() const { return grid; }
 
-    const Vec3& GetPlayerPosition() const { return player.GetPosition(); }
-    void SetPlayerPosition(const Vec3& position) { player.SetPosition(position); }
-    float GetPlayerUltimateGauge() const { return player.GetUltimateGauge(); }
-    void SetPlayerUltimateGauge(float value) { player.SetUltimateGauge(value); }
-    //èdóÕ
-    bool IsPlayerGravityEnabled() const { return player.IsGravityEnabled(); }
-    void SetPlayerGravityEnabled(bool enabled) { player.SetGravityEnabled(enabled); }
-    //DebugSceneControls GetDebugControls();
 	Boss& GetBoss() { return boss; }
-	Player& GetPlayer() { return player; }
+    Player* GetPlayer() { return activePlayer; }
+    void SetActivePlayer(Player& player) { activePlayer = &player; }
 	Stage& GetStage() { return stage; }
 	EffectManager& GetEffectManager() { return effectManager; }
 	Room& GetRoom() { return room_; }
@@ -93,7 +86,9 @@ private:
 	// Actors
     Stage stage;
     Room room_;
-	Player player;
+    Player defaultPlayer;
+    Player* activePlayer = &defaultPlayer;
+
     Boss boss;
 
     bool debugActorsPaused_{};

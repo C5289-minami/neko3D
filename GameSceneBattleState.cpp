@@ -20,7 +20,7 @@ void GameSceneBattleState::Enter()
         L"GameSceneBattleState::Enter"
     );
 
-    auto& player = gameScene_.GetGameContext()->GetPlayer();
+    auto* player = gameScene_.GetGameContext()->GetPlayer();
 
     // バトル用カメラへ切り替える
     gameScene_.GetCameraDirector().SwitchCamera(
@@ -28,8 +28,8 @@ void GameSceneBattleState::Enter()
         1.2f
     );
 
-    player.SetDefMove(false);
-    player.StopMove();
+    player->SetDefMove(false);
+    player->StopMove();
 }
 
 void GameSceneBattleState::Tick(float deltaTime)
@@ -40,12 +40,12 @@ void GameSceneBattleState::Tick(float deltaTime)
 
     auto* gameContext = gameScene_.GetGameContext();
 
-    auto& player = gameContext->GetPlayer();
+    auto* player = gameContext->GetPlayer();
     auto& boss = gameContext->GetBoss();
 
     // GameTestSceneのplayerCamera_.Update()に相当する処理
     gameScene_.GetTargetCamera().Update(
-        player.GetPosition(),
+        player->GetPosition(),
         boss.GetPosition(),
         deltaTime
     );
@@ -60,8 +60,8 @@ void GameSceneBattleState::Tick(float deltaTime)
     {
         gameContext->GetEffectManager().PlayHit(
             RM().GetEffect(ResourceKeys::Effect_Test),
-            player.GetPosition() + Vec3::Up() * 100.0f,
-            player.GetYaw() + DX_PI_F
+            player->GetPosition() + Vec3::Up() * 100.0f,
+            player->GetYaw() + DX_PI_F
         );
     }
 }
