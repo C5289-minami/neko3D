@@ -23,7 +23,6 @@ void GameTestScene::Init()
 	activeCamera_ = nullptr;
 	freeCamera_.Reset();
 	wasFreeCameraToggleDown_ = false;
-	wasHandAttackKeyDown_ = DxLib::CheckHitKey(KEY_INPUT_1) != 0;
 #endif
 
 
@@ -47,13 +46,9 @@ void GameTestScene::Init()
 
 void GameTestScene::Update(float deltaTime)
 {
-	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
+	using namespace DxPlus::Input;
 
-#ifdef _DEBUG
-	const bool handAttackKeyDown = DxLib::CheckHitKey(KEY_INPUT_1) != 0;
-	const bool handAttackKeyPressed = handAttackKeyDown && !wasHandAttackKeyDown_;
-	wasHandAttackKeyDown_ = handAttackKeyDown;
-#endif
+	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
 #ifndef NDEBUG
 	const bool toggleDown = DxLib::CheckHitKey(KEY_INPUT_LALT) != 0 &&
@@ -117,9 +112,8 @@ void GameTestScene::Update(float deltaTime)
 		boss.Update(deltaTime);
 
 #ifdef _DEBUG
-		// 1を押したら、両手攻撃を最初から試す。数値の入力中は始めない。
-		const bool editingText = ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard;
-		if (handAttackKeyPressed && !editingText)
+		// 1を押したら、両手攻撃を最初から試す。
+		if (GetButtonDown(PLAYER1) & BUTTON_1)
 		{
 			boss.StartHandAttack();
 		}
@@ -133,7 +127,6 @@ void GameTestScene::Update(float deltaTime)
 
 		playerCamera_.Update(player.GetPosition(), boss.GetPosition(), deltaTime);
 
-		using namespace DxPlus::Input;
 		if (GetButtonDown(PLAYER1) & BUTTON_L3)
 		{
 			gameContext->GetEffectManager().PlayHit(RM().GetEffect(ResourceKeys::Effect_Test),
@@ -148,7 +141,6 @@ void GameTestScene::Update(float deltaTime)
 	if (ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard) return;
 #endif
 
-	using namespace DxPlus::Input;
 	int buttonDown = GetButtonDown(PLAYER1);
 	if (buttonDown & BUTTON_SELECT)
 	{

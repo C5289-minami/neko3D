@@ -83,6 +83,7 @@ private:
 	float counter_{ 0.0f };
 	float distance_{ 200.0f };
 	bool handAttackActive_{ false };
+	Vec3 oldPos{};
 	std::vector<AttackData> attackHands_{};// 攻撃判定の情報を保持
 
 

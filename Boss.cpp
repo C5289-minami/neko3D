@@ -220,12 +220,16 @@ bool Boss::UpdateHandAttack(float deltaTime, const Vec3& playerPosition)
 		return false;
 	}
 
-	counter_ += deltaTime;
-
 	attackHands_[0].hitSphere.radius = 50.0f;
 	attackHands_[1].hitSphere.radius = 50.0f;
 
 	Vec3 center = playerPosition + Vec3::Up() * 30.0f;// プレイヤーの頭上30.0fの位置を中心にする
+	if (counter_ < 3.0f)
+	{
+		oldPos = center;
+	}
+
+	counter_ += deltaTime;
 	if (counter_ >= 3.0f)
 	{
 		distance_ -= 600.0f * deltaTime;
@@ -236,8 +240,8 @@ bool Boss::UpdateHandAttack(float deltaTime, const Vec3& playerPosition)
 		}
 	}
 
-	attackHands_[0].hitSphere.center = center + Vec3(-distance_, 0.0f, 0.0f);// 左手の攻撃判定の中心を設定
-	attackHands_[1].hitSphere.center = center + Vec3(distance_, 0.0f, 0.0f);// 右手の攻撃判定の中心を設定
+	attackHands_[0].hitSphere.center = oldPos + Vec3(-distance_, 0.0f, 0.0f);// 左手の攻撃判定の中心を設定
+	attackHands_[1].hitSphere.center = oldPos + Vec3(distance_, 0.0f, 0.0f);// 右手の攻撃判定の中心を設定
 
 
 	if (counter_ < 3.0f) return false;

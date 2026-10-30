@@ -30,6 +30,7 @@ namespace Collision									// あたり判定用名前空間
 	{
 		Vec3 center{};								// 中心座標
 		float radius{};							// 半径
+        Vec3 rotate{};                      //角度
 	};
 
 	bool IsHitSphereSphere(							// 球同士のあたり判定

@@ -35,6 +35,7 @@ namespace DxPlus::Input
     constexpr int BUTTON_L3 = 1 << 14;
     constexpr int BUTTON_R3 = 1 << 15;
     constexpr int BUTTON_R = 1 << 16; // Rキー
+    constexpr int BUTTON_1 = 1 << 17; // 数字の1キー
 
     constexpr float STICK_DEAD_ZONE = 0.1f;//スティックの遊び
 }
