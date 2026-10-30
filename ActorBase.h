@@ -33,7 +33,19 @@
 	    void SetIdentifier(const std::string& id) { actorID_ = id; }
 
         // 親子関係
-        void SetOwner(ActorBase& owner) { owner_ = &owner; }
+        void SetOwner(ActorBase& owner)
+        {
+            owner_ = &owner;
+
+            // 最初に設定された親を記憶する
+            if (!defaultOwner_) defaultOwner_ = &owner;
+        }
+
+        void ClearOwner() { owner_ = nullptr; }
+
+        // 最初に設定された親に戻す
+        void ResetOwner() { owner_ = defaultOwner_; }
+
         ActorBase* GetOwner() const { return owner_; }
 
         // ローカル行列
@@ -59,4 +71,5 @@
         float yaw_{};
         float pitch_{};
         ActorBase* owner_{ nullptr };
+        ActorBase* defaultOwner_{ nullptr };
     };

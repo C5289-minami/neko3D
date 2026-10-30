@@ -34,7 +34,7 @@ void RoomTestScene::Init()
 		cameraDirector_.Reset();
 
 		// 演出用アングルA：プレイヤーの右後ろから見上げる
-		auto& player = gameContext->GetPlayer();
+		auto* player = gameContext->GetPlayer();
 
 		Camera::CameraPose shotA{};
 		shotA.fieldOfViewDegrees = 150.0f;
@@ -81,14 +81,14 @@ void RoomTestScene::Update(float deltaTime)
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
 	auto& room = gameContext->GetRoom();
-	auto& player = gameContext->GetPlayer();
+	auto* player = gameContext->GetPlayer();
 	auto& stage = gameContext->GetStage();
 
-	float posY = player.GetPosition().y;
-	player.Update(deltaTime * 0.5f);
-	player.SetPosition({ player.GetPosition().x, posY, player.GetPosition().z });
+	float posY = player->GetPosition().y;
+	player->Update(deltaTime * 0.5f);
+	player->SetPosition({ player->GetPosition().x, posY, player->GetPosition().z });
 	room.Update(deltaTime);
-	stage.UpdateAlphaModel(deltaTime, gameContext->GetPlayer());
+	stage.UpdateAlphaModel(deltaTime, *gameContext->GetPlayer());
 
 
 	// --- F2 でシェーダー全体のON/OFFを切り替える ---
@@ -109,19 +109,19 @@ void RoomTestScene::Update(float deltaTime)
 	{
 		// プレイヤーの前方向
 		const Vec3 playerForward{
-			std::sin(player.GetYaw()),
+			std::sin(player->GetYaw()),
 			0.0f,
-			std::cos(player.GetYaw())
+			std::cos(player->GetYaw())
 		};
 
 		// 仮の注視対象：プレイヤーの前方500の地点
 		// ボスが用意できたら、ここをボスの位置に置き換える
 		const Vec3 focusPosition =
-			player.GetPosition() + playerForward * 500.0f;
+			player->GetPosition() + playerForward * 500.0f;
 
 		// TargetCameraの追従姿勢を更新
 		targetCamera_.Update(
-			player.GetPosition(),
+			player->GetPosition(),
 			focusPosition,
 			deltaTime);
 
@@ -319,7 +319,7 @@ void RoomTestScene::DrawImGui()
 void RoomTestScene::RenderDepth() const
 {
 	auto& room = gameContext->GetRoom();
-	auto& player = gameContext->GetPlayer();
+	auto* player = gameContext->GetPlayer();
 	auto& stage = gameContext->GetStage();
 	auto& boss = gameContext->GetBoss();
 
@@ -333,7 +333,7 @@ void RoomTestScene::RenderDepth() const
 	modelToonRenderer_.DrawDepth(room.GetRoomObject());
 	modelToonRenderer_.DrawDepth(stage.GetModelObject());
 	modelToonRenderer_.DrawDepth(stage.GetAlphaModelObject());
-	modelToonRenderer_.DrawDepth(player.GetModelObject());
+	modelToonRenderer_.DrawDepth(player->GetModelObject());
 	modelToonRenderer_.DrawDepth(boss.GetModelObject());
 
 	for (const auto& pillar : stage.GetPillarModelObjects())
@@ -370,7 +370,7 @@ void RoomTestScene::DrawScene(bool toonEnabled) const
 		SetUsePixelShader(-1);
 		SetUseVertexShader(-1);
 
-		gameContext->GetPlayer().Draw();
+		gameContext->GetPlayer()->Draw();
 		gameContext->GetStage().Draw();
 		room.Draw();
 
@@ -396,7 +396,7 @@ void RoomTestScene::DrawScene(bool toonEnabled) const
 			}
 		};
 	const auto& player = gameContext->GetPlayer();
-	const ModelObject playerModel = player.GetModelObject();
+	const ModelObject playerModel = player->GetModelObject();
 	drawActor(playerModel);
 	drawActor(room.GetRoomObject());
 	drawActor(gameContext->GetStage().GetModelObject());

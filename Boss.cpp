@@ -7,71 +7,7 @@
 #include "DxPlus/Debug.h"
 #include "ModelObjectManager.h"
 
-#include <Windows.h>
-#include <cstdarg>
-#include <cstdio>
 
-#ifndef NDEBUG
-
-namespace
-{
-	const char* GetVertexTypeName(int type)
-	{
-		switch (type)
-		{
-		case DX_MV1_VERTEX_TYPE_1FRAME:  return "1FRAME";
-		case DX_MV1_VERTEX_TYPE_4FRAME:  return "4FRAME";
-		case DX_MV1_VERTEX_TYPE_8FRAME:  return "8FRAME";
-		case DX_MV1_VERTEX_TYPE_FREE_FRAME: return "FREE_FRAME";
-		case DX_MV1_VERTEX_TYPE_NMAP_1FRAME: return "NMAP_1FRAME";
-		case DX_MV1_VERTEX_TYPE_NMAP_4FRAME: return "NMAP_4FRAME";
-		case DX_MV1_VERTEX_TYPE_NMAP_8FRAME: return "NMAP_8FRAME";
-		case DX_MV1_VERTEX_TYPE_NMAP_FREE_FRAME: return "NMAP_FREE_FRAME";
-		default: return "UNKNOWN";
-		}
-	}
-	void DebugLog(const char* format, ...)
-	{
-		char buffer[512]{};
-
-		va_list args;
-		va_start(args, format);
-		vsnprintf_s(buffer, sizeof(buffer), _TRUNCATE, format, args);
-		va_end(args);
-
-		OutputDebugStringA(buffer);
-	}
-	void DebugModelVertexTypes(const char* name, int handle)
-	{
-		if (handle < 0)
-		{
-			DebugLog("[ModelCheck] %s: invalid handle\n", name);
-			return;
-		}
-
-		const int frameNum = MV1GetFrameNum(handle);
-		const int listNum = MV1GetTriangleListNum(handle);
-
-		DebugLog("\n===== %s Model Check =====\n", name);
-		DebugLog("FrameNum: %d\n", frameNum);
-		DebugLog("TriangleListNum: %d\n", listNum);
-
-		for (int i = 0; i < listNum; ++i)
-		{
-			const int type = MV1GetTriangleListVertexType(handle, i);
-
-			DebugLog(
-				"List[%d]: Type=%d (%s), Vertices=%d\n",
-				i,
-				type,
-				GetVertexTypeName(type),
-				MV1GetTriangleListVertexNum(handle, i)
-			);
-		}
-	}
-}
-
-#endif
 Boss::Boss()
 	: ActorBase("Boss"), stateMachine_(*this)
 {
@@ -92,9 +28,6 @@ void Boss::Init()
 	model_.SetModelType(ModelType::Bone);
 	
 	Reset();
-#ifndef NDEBUG
-	DebugModelVertexTypes("Boss", RM().GetModel(model_.GetModelKey()));
-#endif
 }
 
 void Boss::Reset()
