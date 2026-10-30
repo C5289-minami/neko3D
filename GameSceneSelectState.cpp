@@ -18,9 +18,9 @@ namespace
 	// 3種類のキャラクターモデルがある場合は、それぞれのキーに変更する。
 	const std::array<std::wstring, 3> playerModelKeys
 	{
-		ResourceKeys::Model_Player,
-		ResourceKeys::Model_Player,
-		ResourceKeys::Model_Player
+		ResourceKeys::Model_PlayerMike,
+		ResourceKeys::Model_PlayerSabi,
+		ResourceKeys::Model_PlayerKuro
 	};
 
 

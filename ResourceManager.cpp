@@ -34,7 +34,11 @@ void ResourceManager::LoadAll()
 	LoadSprite(ResourceKeys::UI_ExitButton, L"./Data/Images/TitleUI/exit.png");
 
     // モデルの読み込み
-    LoadModel(ResourceKeys::Model_Player,    L"./Data/Models/Player/player.mv1");
+    LoadModel(ResourceKeys::Model_PlayerMike,    L"./Data/Models/Player/mike.mv1");
+    LoadModel(ResourceKeys::Model_PlayerSabi,    L"./Data/Models/Player/sabi.mv1");
+    LoadModel(ResourceKeys::Model_PlayerKuro,    L"./Data/Models/Player/kuro.mv1");
+
+
     LoadModel(ResourceKeys::Model_Boss,       L"./Data/Models/Boss/boss.mv1");
     LoadModel(ResourceKeys::Model_PillarL, L"./Data/Models/stage/PillarL.mv1");
     LoadModel(ResourceKeys::Model_PillarM, L"./Data/Models/stage/PillarM.mv1");

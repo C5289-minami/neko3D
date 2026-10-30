@@ -152,8 +152,6 @@ void ShaderTest::Update(float deltaTime)
 	shaderToggleWasDown = shaderToggleDown;
 
 
-	gameContext->GetPlayer().GetModelObject().SetModelKey(ResourceKeys::Model_Player);
-
 
 }
 
