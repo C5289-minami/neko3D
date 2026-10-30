@@ -19,7 +19,7 @@ public:
 private:
     void SelectIndex(int index);
     void ConfirmSelection();
-    int FindPlayerByMouse(int mouseX, int mouseY) const;
+
 
     std::vector<Player*> players_;
 

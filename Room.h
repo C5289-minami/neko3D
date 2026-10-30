@@ -26,6 +26,38 @@ public:
 	Basket& GetBasket() { return basket_; }
 	const Basket& GetBasket()const { return basket_; }
 
+	const std::vector<const ModelObject*> GetAllModelObjects() const
+	{
+		std::vector<const ModelObject*> objects;
+		objects.push_back(&roomModel_);
+		objects.push_back(&pillar1_);
+		objects.push_back(&pillar2_);
+		objects.push_back(&lowJumpStand_.GetJumpStandModel());
+		objects.push_back(&lowJumpStand_.GetPillarModel());
+		objects.push_back(&mediumJumpStand_.GetJumpStandModel());
+		objects.push_back(&mediumJumpStand_.GetPillarModel());
+		objects.push_back(&highJumpStand_.GetJumpStandModel());
+		objects.push_back(&highJumpStand_.GetPillarModel());
+		objects.push_back(&basket_.GetModelObject());
+		return objects;
+	}
+
+	std::vector <ModelObject*> GetAllModelObjects()
+	{
+		std::vector<ModelObject*> objects;
+		objects.push_back(&roomModel_);
+		objects.push_back(&pillar1_);
+		objects.push_back(&pillar2_);
+		objects.push_back(&lowJumpStand_.GetJumpStandModel());
+		objects.push_back(&lowJumpStand_.GetPillarModel());
+		objects.push_back(&mediumJumpStand_.GetJumpStandModel());
+		objects.push_back(&mediumJumpStand_.GetPillarModel());
+		objects.push_back(&highJumpStand_.GetJumpStandModel());
+		objects.push_back(&highJumpStand_.GetPillarModel());
+		objects.push_back(&basket_.GetModelObject());
+		return objects;
+	}
+
 private:
 	ModelObject roomModel_;
 	ModelObject pillar1_;

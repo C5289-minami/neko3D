@@ -1,17 +1,15 @@
-// PostProcessPS.hlsl
-
-// アウトラインと法線エッジを描画するためのピクセルシェーダ
-
-
 Texture2D g_SceneTexture : register(t0);
 Texture2D g_DepthTexture : register(t1);
+Texture2D g_ObjectIdTexture : register(t2);
 
 SamplerState g_Sampler : register(s0);
 
 cbuffer OutlineSettings : register(b6)
 {
-    float4 Outline;
-    float4 OutlineColor;
+    float4 OuterSettings; // x: 太さ, y: 未使用, z: 不透明度, w: padding
+    float4 InnerSettings; // x: 太さ, y: 法線強度, z: 法線閾値, w: 不透明度
+    float4 OutlineColor; // rgb: 線の色, a: 未使用
+    float4 CameraDepthSettings; // 未使用。C++との配置を維持
 };
 
 struct PS_INPUT
@@ -19,382 +17,223 @@ struct PS_INPUT
     float4 Position : SV_POSITION;
 };
 
+static const float kNormalScaleFactor = 20.0f;
+static const float kNormalSmoothWidth = 0.15f;
 
-// ================================
-// 深度
-// ================================
-
+// オブジェクトIDを取得
+float LoadObjectId(uint2 pixel)
+{
+    return g_ObjectIdTexture.Load(int3(pixel, 0)).r;
+}
+// 深度を取得
 float LoadDepth(uint2 pixel)
 {
-    return g_DepthTexture.Load(
-        int3(pixel, 0)
-    ).a;
+    return g_DepthTexture.Load(int3(pixel, 0)).a;
 }
 
-
-// ================================
-// 法線
-// ================================
-
+// 法線を取得
 float3 LoadNormal(uint2 pixel)
 {
-    float3 normal =
-        g_DepthTexture.Load(
-            int3(pixel, 0)
-        ).rgb;
-
-    // 0～1 → -1～1
-    normal =
-        normal * 2.0f - 1.0f;
-
-    return normalize(normal);
+    float3 normal = g_DepthTexture.Load(int3(pixel, 0)).rgb;
+    return normalize(normal * 2.0f - 1.0f);
 }
 
+// 同じオブジェクトか判定
+bool IsSameObject(float a, float b)
+{
+    return a > 0.5f && abs(a - b) < 0.25f;
+}
+// 手前側のオブジェクト境界だけを輪郭として扱う
+bool IsOuterBoundary(
+    float centerId,
+    float centerDepth,
+    float sampleId,
+    float sampleDepth)
+{
+    // 背景との境界
+    if (sampleId < 0.5f)
+        return true;
 
-// ================================
-// メイン
-// ================================
+    // 同じオブジェクトなら輪郭ではない
+    if (IsSameObject(centerId, sampleId))
+        return false;
+
+    // IDがあるのに深度が無効なら判定しない
+    if (sampleDepth <= 0.000001f)
+        return false;
+
+    // DirectXの通常の深度方式では、値が小さい方が手前
+    // 現在のピクセルが手前の場合だけ線を描く
+    return centerDepth < sampleDepth - 0.0001f;
+}
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-    // ================================
-    // テクスチャサイズ
-    // ================================
+    uint width, height;
+    g_ObjectIdTexture.GetDimensions(width, height);
 
-    uint width;
-    uint height;
+    uint sceneWidth, sceneHeight;
+    g_SceneTexture.GetDimensions(sceneWidth, sceneHeight);
 
-    g_DepthTexture.GetDimensions(
-        width,
-        height
+    uint2 pixel = uint2(
+        min((uint) input.Position.x, width - 1),
+        min((uint) input.Position.y, height - 1)
     );
 
-    uint sceneWidth;
-    uint sceneHeight;
-
-    g_SceneTexture.GetDimensions(
-        sceneWidth,
-        sceneHeight
+    float2 uv = saturate(
+        input.Position.xy / float2(sceneWidth, sceneHeight)
     );
 
+    float4 sceneColor = g_SceneTexture.Sample(g_Sampler, uv);
 
-    // ================================
-    // Pixel座標
-    // ================================
+    float centerId = LoadObjectId(pixel);
+    float centerDepth = LoadDepth(pixel);
 
-    uint2 pixel =
-        uint2(
-            input.Position.x,
-            input.Position.y
-        );
-
-    pixel.x =
-        min(
-            pixel.x,
-            width - 1
-        );
-
-    pixel.y =
-        min(
-            pixel.y,
-            height - 1
-        );
-
-
-    // ================================
-    // 元画像
-    // ================================
-
-    float2 uv =
-        input.Position.xy /
-        float2(
-            sceneWidth,
-            sceneHeight
-        );
-
-    uv =
-        saturate(uv);
-
-    float4 sceneColor =
-        g_SceneTexture.Sample(
-            g_Sampler,
-            uv
-        );
-
-
-    // ================================
-    // 中央
-    // ================================
-
-    float centerDepth =
-        LoadDepth(pixel);
-
-    float3 centerNormal =
-        LoadNormal(pixel);
-
-
-    // ================================
-    // 1px隣の座標
-    // ================================
-
-    uint2 leftPixel =
-        pixel;
-
-    leftPixel.x =
-        (pixel.x > 0)
-        ? pixel.x - 1
-        : 0;
-
-
-    uint2 rightPixel =
-        pixel;
-
-    rightPixel.x =
-        min(
-            pixel.x + 1,
-            width - 1
-        );
-
-
-    uint2 upPixel =
-        pixel;
-
-    upPixel.y =
-        (pixel.y > 0)
-        ? pixel.y - 1
-        : 0;
-
-
-    uint2 downPixel =
-        pixel;
-
-    downPixel.y =
-        min(
-            pixel.y + 1,
-            height - 1
-        );
-
-
-    // ================================
-    // 隣の深度
-    // ================================
-
-    float leftDepth =
-        LoadDepth(leftPixel);
-
-    float rightDepth =
-        LoadDepth(rightPixel);
-
-    float upDepth =
-        LoadDepth(upPixel);
-
-    float downDepth =
-        LoadDepth(downPixel);
-
-
-    // ================================
-    // 隣の法線
-    // ================================
-
-    float3 leftNormal =
-        LoadNormal(leftPixel);
-
-    float3 rightNormal =
-        LoadNormal(rightPixel);
-
-    float3 upNormal =
-        LoadNormal(upPixel);
-
-    float3 downNormal =
-        LoadNormal(downPixel);
-
-
-    // ================================
-    // 深度エッジ
-    // ================================
-
-    int radius =
-    clamp(
-        (int) Outline.x,
-        1,
-        5
-    );
-
-    float depthEdge = 0.0f;
-
-    for (int offset = 1; offset <= radius; ++offset)
+// 背景には線を描かず、元のシーン画像を返す
+    if (centerId < 0.5f)
     {
-        uint2 leftPixel = pixel;
-        leftPixel.x =
-        (pixel.x >= offset)
-        ? pixel.x - offset
-        : 0;
-
-        uint2 rightPixel = pixel;
-        rightPixel.x =
-        min(
-            pixel.x + offset,
-            width - 1
-        );
-
-        uint2 upPixel = pixel;
-        upPixel.y =
-        (pixel.y >= offset)
-        ? pixel.y - offset
-        : 0;
-
-        uint2 downPixel = pixel;
-        downPixel.y =
-        min(
-            pixel.y + offset,
-            height - 1
-        );
-
-        float leftDepth = LoadDepth(leftPixel);
-        float rightDepth = LoadDepth(rightPixel);
-        float upDepth = LoadDepth(upPixel);
-        float downDepth = LoadDepth(downPixel);
-
-        if (centerDepth > 0.0f)
-        {
-            if (leftDepth <= 0.0f)
-                depthEdge = 1.0f;
-
-            if (rightDepth <= 0.0f)
-                depthEdge = 1.0f;
-
-            if (upDepth <= 0.0f)
-                depthEdge = 1.0f;
-
-            if (downDepth <= 0.0f)
-                depthEdge = 1.0f;
-        }
+        return sceneColor;
     }
 
-    // ================================
-    // 法線エッジ
-    // ================================
+    float3 centerNormal = LoadNormal(pixel);
 
+    // ========================================
+    // ① 内側：同じオブジェクト内の法線エッジ
+    // ========================================
+    int innerRadius = (int) (InnerSettings.x);
     float normalEdge = 0.0f;
 
-    if (centerDepth > 0.0f)
+    for (int offset = 1; offset <= innerRadius; ++offset)
     {
-        if (leftDepth > 0.0f)
+        uint2 lPx = uint2(
+            pixel.x >= (uint) offset ? pixel.x - offset : 0,
+            pixel.y
+        );
+
+        uint2 rPx = uint2(
+            min(pixel.x + offset, width - 1),
+            pixel.y
+        );
+
+        uint2 uPx = uint2(
+            pixel.x,
+            pixel.y >= (uint) offset ? pixel.y - offset : 0
+        );
+
+        uint2 dPx = uint2(
+            pixel.x,
+            min(pixel.y + offset, height - 1)
+        );
+
+        float lId = LoadObjectId(lPx);
+        float rId = LoadObjectId(rPx);
+        float uId = LoadObjectId(uPx);
+        float dId = LoadObjectId(dPx);
+
+        if (IsSameObject(centerId, lId))
         {
-            normalEdge =
-                max(
-                    normalEdge,
-                    length(
-                        centerNormal -
-                        leftNormal
-                    )
-                );
+            normalEdge = max(
+                normalEdge,
+                length(centerNormal - LoadNormal(lPx))
+            );
         }
 
-        if (rightDepth > 0.0f)
+        if (IsSameObject(centerId, rId))
         {
-            normalEdge =
-                max(
-                    normalEdge,
-                    length(
-                        centerNormal -
-                        rightNormal
-                    )
-                );
+            normalEdge = max(
+                normalEdge,
+                length(centerNormal - LoadNormal(rPx))
+            );
         }
 
-        if (upDepth > 0.0f)
+        if (IsSameObject(centerId, uId))
         {
-            normalEdge =
-                max(
-                    normalEdge,
-                    length(
-                        centerNormal -
-                        upNormal
-                    )
-                );
+            normalEdge = max(
+                normalEdge,
+                length(centerNormal - LoadNormal(uPx))
+            );
         }
 
-        if (downDepth > 0.0f)
+        if (IsSameObject(centerId, dId))
         {
-            normalEdge =
-                max(
-                    normalEdge,
-                    length(
-                        centerNormal -
-                        downNormal
-                    )
-                );
+            normalEdge = max(
+                normalEdge,
+                length(centerNormal - LoadNormal(dPx))
+            );
         }
     }
 
+   // ========================================
+// ② 外側：可視オブジェクトの輪郭
+// ========================================
+    int outerRadius = (int) (OuterSettings.x);
+    float outerEdge = 0.0f;
 
-    // ================================
-    // 深度の強度
-    // ================================
+    for (int offset_ = 1; offset_ <= outerRadius; ++offset_)
+    {
+        uint2 lPx = uint2(
+        pixel.x >= (uint) offset_ ? pixel.x - offset_ : 0,
+        pixel.y);
 
-    float depthSignal =
-        saturate(
-            depthEdge *
-            Outline.y
-        );
+        uint2 rPx = uint2(
+        min(pixel.x + offset_, width - 1),
+        pixel.y);
 
+        uint2 uPx = uint2(
+        pixel.x,
+        pixel.y >= (uint) offset_ ? pixel.y - offset_ : 0);
 
-    // ================================
-    // 法線強度
-    //
-    // 0～20 → 0～1
-    // ================================
+        uint2 dPx = uint2(
+        pixel.x,
+        min(pixel.y + offset_, height - 1));
+
+        float lId = LoadObjectId(lPx);
+        float rId = LoadObjectId(rPx);
+        float uId = LoadObjectId(uPx);
+        float dId = LoadObjectId(dPx);
+
+        float lD = LoadDepth(lPx);
+        float rD = LoadDepth(rPx);
+        float uD = LoadDepth(uPx);
+        float dD = LoadDepth(dPx);
+
+        if (IsOuterBoundary(centerId, centerDepth, lId, lD) ||
+        IsOuterBoundary(centerId, centerDepth, rId, rD) ||
+        IsOuterBoundary(centerId, centerDepth, uId, uD) ||
+        IsOuterBoundary(centerId, centerDepth, dId, dD))
+        {
+            outerEdge = 1.0f;
+            break;
+        }
+    }
+    // ========================================
+    // ③ 内側・外側の線の強さ
+    // ========================================
 
     float normalSignal =
-    normalEdge * (Outline.z / 20.0f);
+        normalEdge * (InnerSettings.y / kNormalScaleFactor);
 
-    float normalThreshold =
-    0.20f +
-    Outline.w * 0.5f;
-
-    float normalMask =
-    smoothstep(
-        normalThreshold,
-        normalThreshold + 0.15f,
+    float innerMask = smoothstep(
+        InnerSettings.z,
+        InnerSettings.z + kNormalSmoothWidth,
         normalSignal
     );
 
+    float outerMask = outerEdge;
 
-    // ================================
-    // 深度のしきい値
-    // ================================
+    // ========================================
+    // ④ 不透明度を個別に適用
+    // ========================================
+    float outerAlpha = outerMask * saturate(OuterSettings.z);
+    float innerAlpha = innerMask * saturate(InnerSettings.w);
 
-    float depthMask =
-        smoothstep(
-            Outline.w,
-            Outline.w + 0.3f,
-            depthSignal
-        );
+    float finalAlpha = max(outerAlpha, innerAlpha);
 
-
-    // ================================
-    // Depth + Normal
-    // ================================
-
-    float edge =
-        max(
-            depthMask,
-            normalMask
-        );
-
-
-    // ================================
-    // アウトライン
-    // ================================
-    float3 outlineColor = OutlineColor.rgb;
-    sceneColor.rgb =
-        lerp(
-            sceneColor.rgb,
-            outlineColor,
-            edge
-        );
-
+    sceneColor.rgb = lerp(
+        sceneColor.rgb,
+        OutlineColor.rgb,
+        finalAlpha
+    );
 
     return sceneColor;
 }

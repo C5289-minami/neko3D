@@ -18,25 +18,24 @@ namespace
 	// 3種類のキャラクターモデルがある場合は、それぞれのキーに変更する。
 	const std::array<std::wstring, 3> playerModelKeys
 	{
-		ResourceKeys::Model_Player,
-		ResourceKeys::Model_Player,
-		ResourceKeys::Model_Player
+		ResourceKeys::Model_PlayerMike,
+		ResourceKeys::Model_PlayerSabi,
+		ResourceKeys::Model_PlayerKuro
 	};
 
-	constexpr float SelectTargetHeight = 100.0f;
-	constexpr int MouseHitHalfWidth = 130;
-	constexpr int MouseHitHalfHeight = 200;
 
-	// 選択中のキャラクターの前方にカメラを移動させる距離と時間
-	constexpr float SelectCameraForwardDistance = 500.0f;// 手前に200
-	constexpr float SelectCameraMoveDuration = 0.5f;
+	constexpr float SelectTargetH = 100.0f;
+	constexpr float SelectTargetRightOffset = 150.0f;
+	constexpr float SelectCameraLeftOffset = 100.0f;
+	constexpr float SelectCameraForwardDistance = 350.0f;
+	constexpr float SelectCameraMoveDuration = 0.6f;
 
 	Camera::CameraPose MakeCameraPoseInFrontOfPlayer(
 		Camera::CameraPose pose,
 		const Player& player)
 	{
 		const Vec3 playerPos = player.GetWorldPosition();
-		const float yaw = player.GetWorldRotation().y;
+		const float yaw = player.GetYaw();
 
 		const Vec3 forward{
 			std::sin(yaw),
@@ -44,26 +43,39 @@ namespace
 			std::cos(yaw)
 		};
 
-		// Playerの正面にカメラを配置
-		pose.position = playerPos + forward * SelectCameraForwardDistance;
-		pose.position.y = playerPos.y + SelectTargetHeight;
+		const Vec3 right{
+			std::cos(yaw),
+			0.0f,
+			-std::sin(yaw)
+		};
 
-		// Playerの上半身付近を注視する
+		// Targetを画面右側に配置するため、注視点を右へずらす
 		const Vec3 target =
-			playerPos + Vec3::Up() * SelectTargetHeight;
+			playerPos
+			+ Vec3::Up() * SelectTargetH
+			+ right * SelectTargetRightOffset;
 
+		// キャラクターの正面側にカメラを配置
+		pose.position = target + forward * SelectCameraForwardDistance;
+
+		// カメラを少し左へ移動
+		pose.position -= right * SelectCameraLeftOffset;
+
+		// Targetを注視
 		const Vec3 direction = target - pose.position;
 
-		// 注視点の方向からカメラの角度を計算
 		pose.yaw = std::atan2(direction.x, direction.z);
 		pose.pitch = std::atan2(
 			direction.y,
 			std::sqrt(
 				direction.x * direction.x +
-				direction.z * direction.z));
+				direction.z * direction.z
+			)
+		);
 
 		return pose;
 	}
+
 }
 
 GameSceneSelectState::GameSceneSelectState(
@@ -103,13 +115,6 @@ void GameSceneSelectState::Enter()
 	dWasDown_ = false;
 	enterWasDown_ = false;
 	mouseWasDown_ = false;
-
-	context->SetSelectPreviewVisible(true);
-
-	auto& camera = gameScene_.GetCameraDirector();
-
-	// 横揺れ
-	camera.StartMixedShake(50.2f, 525.0f, 50.0f);
 
 	DxLib::SetMouseDispFlag(TRUE);
 }
@@ -226,36 +231,6 @@ void GameSceneSelectState::Tick(float deltaTime)
 	}
 
 	// =========================================
-	// マウスで選択・決定
-	// =========================================
-
-	if (mousePressed)
-	{
-		int mouseX = 0;
-		int mouseY = 0;
-
-		DxLib::GetMousePoint(&mouseX, &mouseY);
-
-		const int hitIndex =
-			FindPlayerByMouse(mouseX, mouseY);
-
-		if (hitIndex >= 0)
-		{
-			// すでに選択中のキャラクターなら即決定
-			if (hitIndex == selectedIndex_)
-			{
-				ConfirmSelection();
-				return;
-			}
-
-			// 選択対象を変更し、移動完了後に決定
-			confirmAfterCameraMove_ = true;
-			SelectIndex(hitIndex);
-			return;
-		}
-	}
-
-	// =========================================
 	// Enterで決定
 	// =========================================
 
@@ -290,43 +265,6 @@ void GameSceneSelectState::SelectIndex(int index)
 	cameraState_ = SelectCameraState::MoveToSelectedPlayer;
 }
 
-int GameSceneSelectState::FindPlayerByMouse(
-	int mouseX,
-	int mouseY) const
-{
-	for (std::size_t i = 0; i < players_.size(); ++i)
-	{
-		const Vec3 target =
-			players_[i]->GetWorldPosition() +
-			Vec3::Up() * SelectTargetHeight;
-
-		const VECTOR screenPosition =
-			DxLib::ConvWorldPosToScreenPos(
-				DxConv::ToVECTOR(target));
-
-		// カメラの描画範囲外ならスキップ
-		if (screenPosition.z <= 0.0f ||
-			screenPosition.z >= 1.0f)
-		{
-			continue;
-		}
-
-		const int screenX =
-			static_cast<int>(screenPosition.x);
-
-		const int screenY =
-			static_cast<int>(screenPosition.y);
-
-		if (std::abs(mouseX - screenX) <= MouseHitHalfWidth &&
-			std::abs(mouseY - screenY) <= MouseHitHalfHeight)
-		{
-			return static_cast<int>(i);
-		}
-	}
-
-	return -1;
-}
-
 void GameSceneSelectState::ConfirmSelection()
 {
 	if (players_.empty()) return;
@@ -340,7 +278,6 @@ void GameSceneSelectState::ConfirmSelection()
 	player.SetModelKey(selected.GetModelObject().GetModelKey());
 	player.SetCharData(selected.GetCharData());
 
-	context->SetSelectPreviewVisible(false);
 
 	stateMachine_.ChangeState(GameStateType::Tutorial);
 }
@@ -349,8 +286,6 @@ void GameSceneSelectState::Exit()
 {
 	DxPlus::Debug::SetFormatString(
 		L"GameSceneSelectState::Exit");
-
-	gameScene_.GetGameContext()->SetSelectPreviewVisible(false);
 
 	DxLib::SetMouseDispFlag(FALSE);
 }

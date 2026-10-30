@@ -10,13 +10,13 @@
 class UIBase
 {
 public:
-    UIBase(const std::wstring& key, DxPlus::Vec2 pos, DxPlus::Vec2 dir = DxPlus::Vec2(0, -1), float motionDuration = 1.0f) :
+	UIBase(const std::wstring& key, DxPlus::Vec2 pos, DxPlus::Vec2 dir = DxPlus::Vec2(0, -1), float motionDuration = 1.0f) :
 		key(key),
 		position(pos),
-      basePosition(pos)
+		basePosition(pos)
 	{
 		//Init();
-        motion.Start(0.0f, 1.0f, motionDuration, showEasing);
+		motion.Start(0.0f, 1.0f, motionDuration, showEasing);
 		SetToMove(dir); // モーションの方向を設定
 		state = State::Do;// モーション実行中に設定
 	}
@@ -29,15 +29,15 @@ public:
 	// 方向を入れると出てくるMotionを設定する関数
 	void SetToMove(DxPlus::Vec2 dir);
 	void UpdateStartMotion();
-    // 表示・非表示モーションのイージングを設定する
+	// 表示・非表示モーションのイージングを設定する
 	void SetShowEasing(Motion::Easing easing) { showEasing = easing; if (state == State::Do) motion.SetEasing(easing); }
 	void SetHideEasing(Motion::Easing easing) { hideEasing = easing; if (state == State::Hide) motion.SetEasing(easing); }
-  void SetMotionDuration(float duration) { motion.SetDuration(duration); UpdateStartMotion(); }
+	void SetMotionDuration(float duration) { motion.SetDuration(duration); UpdateStartMotion(); }
 	float GetMotionDuration() const { return motion.GetDuration(); }
-    void SetMoveDistance(float distance) { MoveDistance = std::max(0.0f, distance); UpdateStartMotion(); }
+	void SetMoveDistance(float distance) { MoveDistance = std::max(0.0f, distance); UpdateStartMotion(); }
 	float GetMoveDistance() const { return MoveDistance; }
 	// alpha
-  void SetAlpha(int targetAlpha) { finAlpha = std::clamp(targetAlpha, 0, 255); }
+	void SetAlpha(int targetAlpha) { finAlpha = std::clamp(targetAlpha, 0, 255); }
 	int GetAlpha() const { return alpha; }
 	void FadeOut(float duration = -1.0f);
 	void FadeIn(float duration = -1.0f);
@@ -45,7 +45,7 @@ public:
 
 	virtual void SetScale(float targetScale) { scale = targetScale; }
 	float GetScale() const { return scale; }
- void SetPosition(DxPlus::Vec2 targetPosition)
+	void SetPosition(DxPlus::Vec2 targetPosition)
 	{
 		basePosition = targetPosition;
 		if (state == State::Do || state == State::Hide)
@@ -54,16 +54,31 @@ public:
 			position = targetPosition;
 	}
 	DxPlus::Vec2 GetPosition() const { return basePosition; }
- const std::wstring& GetKey() const { return key; }
+	const std::wstring& GetKey() const { return key; }
 	bool IsActive() const { return state != State::False; }
-   void SetVisible(bool visible) { isVisible = visible; fadeOnlyMotion = false; }
+	// 見えるかどうかを設定
+	void SetVisible(bool visible) { isVisible = visible; fadeOnlyMotion = false; }
 	bool IsVisible() const { return isVisible; }
+	//　有効化
+	void SetTrue()
+	{
+		isVisible = true;
+		fadeOnlyMotion = false;
+
+		motion.Start(0.0f, 1.0f, motion.GetDuration(), showEasing);
+		state = State::Do;
+
+		UpdateStartMotion();
+	}
+	// 無効化
 	void SetFalse() { isVisible = false; state = State::False; }
+	// 非表示モーションを開始する
+	void Hide();
 
 	// 表示条件を設定する関数
-    void SetDisplayCondition(std::function<bool()> condition)
+	void SetDisplayCondition(std::function<bool()> condition)
 	{
-       displayCondition = condition ? std::move(condition) : []() { return true; };
+		displayCondition = condition ? std::move(condition) : []() { return true; };
 	}
 
 	// Zオーダー(描画順)を設定する関数
@@ -75,7 +90,7 @@ protected:
 	DxPlus::Vec2 position{};
 	DxPlus::Vec2 basePosition{};
 	float scale{ 1.0f };
-    std::wstring key;
+	std::wstring key;
 	int alpha{ 255 };
 	int finAlpha{ 255 };
 	enum class State
@@ -87,7 +102,7 @@ protected:
 	};
 	State state{ State::Normal };
 	//表示する条件
-    std::function<bool()> displayCondition = []() { return true; };
+	std::function<bool()> displayCondition = []() { return true; };
 	bool isVisible{ true };
 	bool fadeOnlyMotion{};
 	float shakeElapsed{};
@@ -107,7 +122,7 @@ protected:
 	// 表示開始モーション関連
 	// =======================
 	DxPlus::Vec2 Direction{}; // モーションの方向
- float MoveDistance{ 100.0f }; // モーションの移動距離
+	float MoveDistance{ 100.0f }; // モーションの移動距離
 
 	int zOrder{ 0 }; // 描画順を設定（値が大きいほど手前に描画）
 };

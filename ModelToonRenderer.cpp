@@ -24,6 +24,8 @@ namespace
 
     constexpr const wchar_t* BoneVertexShader8FramePath =
         L"./Data/Shader/Bin/ModelVS_Bone8Frame.vso";
+    constexpr const wchar_t* BoneVertexShader8FrameNMapPath =
+        L"./Data/Shader/Bin/ModelVS_Bone8FrameNMap.vso";
 }
 
 
@@ -51,16 +53,22 @@ bool ModelToonRenderer::Init()
 	vertexShaderBoneNMap_ = LoadVertexShader(BoneVertexShaderNMapPath);
     vertexShaderBone8Frame_ =
         LoadVertexShader(BoneVertexShader8FramePath);
+    vertexShaderBone8FrameNMap_ =
+        LoadVertexShader(BoneVertexShader8FrameNMapPath);
 
 
     toonConstantBuffer_ =
         CreateShaderConstantBuffer(sizeof(ToonSettings));
+    depthObjectIdConstantBuffer_ =
+        CreateShaderConstantBuffer(sizeof(DepthObjectIdConstants));
 
     if (pixelShader_ < 0 ||
         vertexShader_ < 0 ||
         vertexShaderBone_ < 0 ||
 		vertexShaderBoneNMap_ < 0 ||
         vertexShaderBone8Frame_ < 0 ||
+        vertexShaderBone8FrameNMap_ < 0 ||
+        depthObjectIdConstantBuffer_ < 0 ||
         toonConstantBuffer_ < 0)
     {
         Release();
@@ -114,6 +122,13 @@ void ModelToonRenderer::Release() noexcept
         DeleteShader(vertexShaderBone8Frame_);
         vertexShaderBone8Frame_ = -1;
     }
+    if (depthObjectIdConstantBuffer_ >= 0)
+    {
+        DeleteShaderConstantBuffer(depthObjectIdConstantBuffer_);
+        depthObjectIdConstantBuffer_ = -1;
+    }
+    depthObjectIds_.clear();
+    nextDepthObjectId_ = 1;
 }
 
 
@@ -182,10 +197,48 @@ void ModelToonRenderer::Draw(
     DrawTriangleLists(model);
 }
 
-void ModelToonRenderer::DrawDepth(
-    const ModelObject& model
-) const
+void ModelToonRenderer::DrawDepth(const ModelObject& model) const
 {
+    auto it = depthObjectIds_.find(&model);
+
+    if (it == depthObjectIds_.end())
+    {
+        const int objectId = nextDepthObjectId_++;
+        it = depthObjectIds_.emplace(&model, objectId).first;
+    }
+
+    DrawDepth(model, it->second);
+}
+void ModelToonRenderer::DrawDepth(
+    const ModelObject& model,
+    int objectId) const
+{
+    if (depthObjectIdConstantBuffer_ < 0)
+    {
+        return;
+    }
+
+    auto* settings = static_cast<DepthObjectIdConstants*>(
+        GetBufferShaderConstantBuffer(depthObjectIdConstantBuffer_));
+
+    if (settings == nullptr)
+    {
+        return;
+    }
+
+    settings->objectId = static_cast<float>(objectId);
+    settings->padding[0] = 0.0f;
+    settings->padding[1] = 0.0f;
+    settings->padding[2] = 0.0f;
+
+    UpdateShaderConstantBuffer(depthObjectIdConstantBuffer_);
+
+    SetShaderConstantBuffer(
+        depthObjectIdConstantBuffer_,
+        DX_SHADERTYPE_PIXEL,
+        7
+    );
+
     DrawTriangleLists(model);
 }
 
@@ -220,6 +273,10 @@ void ModelToonRenderer::DrawTriangleLists(
     const int handle = RM().GetModel(model.GetModelKey());
     if (handle < 0) return;
 
+    // モデル描画でZバッファーを使用し、深度を書き込む
+    MV1SetUseZBuffer(handle, TRUE);
+    MV1SetWriteZBuffer(handle, TRUE);
+
     model.ApplyTransform();
     model.ApplyCollisionColor();
 
@@ -253,8 +310,11 @@ void ModelToonRenderer::DrawTriangleLists(
                 break;
 
             case DX_MV1_VERTEX_TYPE_8FRAME:
-            case DX_MV1_VERTEX_TYPE_NMAP_8FRAME:
                 shader = vertexShaderBone8Frame_;
+                break;
+
+            case DX_MV1_VERTEX_TYPE_NMAP_8FRAME:
+                shader = vertexShaderBone8FrameNMap_;
                 break;
 
             default:

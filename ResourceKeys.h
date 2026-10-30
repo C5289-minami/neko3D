@@ -18,7 +18,11 @@ namespace ResourceKeys
     //inline constexpr const wchar_t* Texture_petanurihatyottohuben = L"petanurihatyottohuben";
 
     // ===== Models =====
-    inline constexpr const wchar_t* Model_Player    = L"ModelPlayer";
+    inline constexpr const wchar_t* Model_PlayerMike    = L"ModelPlayerMike";
+    inline constexpr const wchar_t* Model_PlayerSabi    = L"ModelPlayerSabi";
+    inline constexpr const wchar_t* Model_PlayerKuro    = L"ModelPlayerKuro";
+
+
     inline constexpr const wchar_t* Model_Boss    = L"ModelBoss";
 	inline constexpr const wchar_t* Model_Room = L"ModelRoom";
 	inline constexpr const wchar_t* Model_Test = L"ModelTest";
