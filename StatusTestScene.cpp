@@ -30,11 +30,11 @@ void StatusTest::Init()
 	shaderEffects_.GetSettings().toonEnabled = true;
 	shaderEffects_.GetSettings().outlineEnabled = true;
 
- testModel_.SetModelKey(ResourceKeys::Model_Test);
+	testModel_.SetModelKey(ResourceKeys::Model_Test);
 
-	gameContext->GetPlayer().Init();
-	gameContext->GetPlayer().Reset();
-	gameContext->GetPlayer().SetStartPosition({ 0.0f, 100.0f, 0.0f });
+	gameContext->GetPlayer()->Init();
+	gameContext->GetPlayer()->Reset();
+	gameContext->GetPlayer()->SetStartPosition({ 0.0f, 100.0f, 0.0f });
 
 	if (!CharSettingsManager::Load())
 		DxPlus::Utils::FatalError(L"キャラクター情報の読み込みに失敗");
@@ -46,7 +46,7 @@ void StatusTest::Update(float deltaTime)
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
 	float scale = 1.0f;
- testModel_.SetScale({ scale, scale, scale });
+	testModel_.SetScale({ scale, scale, scale });
 
 	// --- 右クリックを押している間のみカメラ操作 ---
 	if ((DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
@@ -70,24 +70,28 @@ void StatusTest::Update(float deltaTime)
 
 	shaderToggleWasDown = shaderToggleDown;
 
-  gameContext->GetPlayer().Update(deltaTime);
-	if (gameContext->GetPlayer().GetPosition().y < 0.0f)
+	gameContext->GetPlayer()->Update(deltaTime);
+	if (gameContext->GetPlayer()->GetPosition().y < 0.0f)
 	{
-        gameContext->GetPlayer().SetPosition({ gameContext->GetPlayer().GetPosition().x, 0.0f, gameContext->GetPlayer().GetPosition().z });
-		gameContext->GetPlayer().SetGround(true);
+		gameContext->GetPlayer()->SetPosition({
+			gameContext->GetPlayer()->GetPosition().x,
+			0.0f,
+			gameContext->GetPlayer()->GetPosition().z
+			});
+		gameContext->GetPlayer()->SetGround(true);
 	}
 
-    auto& player = gameContext->GetPlayer();
-	ModelObject playerModel = player.GetModelObject().WithParentTransform(
-		player.GetPosition(), player.GetRotation());
+	auto* player = gameContext->GetPlayer();
+	ModelObject playerModel = player->GetModelObject().WithParentTransform(
+		player->GetPosition(), player->GetRotation());
 	Collision::UpdateModelContact(playerModel, testModel_);
-    player.GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
+	player->GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
 
 }
 
 void StatusTest::DrawImGui()
 {
-  #ifndef NDEBUG
+#ifndef NDEBUG
 	ImGui::Begin("Status Test Scene");
 	{
 		ImGui::Text("F2: Toggle Shader Effects");
@@ -96,26 +100,26 @@ void StatusTest::DrawImGui()
 		if (ImGui::Button("Add Character", ImVec2(-1, 0)))
 		{
 			CharData newChar{};
-         newChar.name = u8"キャラクター " + std::to_string(charSettings_.GetCount() + 1);
+			newChar.name = u8"キャラクター " + std::to_string(charSettings_.GetCount() + 1);
 			charSettings_.Add(newChar);
 		}
 		for (size_t i = 0; i < charSettings_.GetCount(); ++i)
 		{
-            ImGui::PushID(static_cast<int>(i));
+			ImGui::PushID(static_cast<int>(i));
 			CharData& charData = charSettings_.Get(i);
-            const std::string headerLabel = charData.name + "###CharacterHeader";
+			const std::string headerLabel = charData.name + "###CharacterHeader";
 			if (ImGui::CollapsingHeader(headerLabel.c_str()))
 			{
-                char nameBuffer[256]{};
+				char nameBuffer[256]{};
 				const size_t nameLength = std::min(charData.name.size(), sizeof(nameBuffer) - 1);
 				std::copy_n(charData.name.data(), nameLength, nameBuffer);
 				ImGui::Text(u8"名前"); ImGui::SameLine();
-               if (ImGui::InputText(u8"###名前", nameBuffer, sizeof(nameBuffer)))
+				if (ImGui::InputText(u8"###名前", nameBuffer, sizeof(nameBuffer)))
 					charData.name = nameBuffer;
 				ImGui::Text(u8"最大HP"); ImGui::SameLine();
-				ImGui::InputFloat(u8"###最大HP",   &charData.maxHealth);
+				ImGui::InputFloat(u8"###最大HP", &charData.maxHealth);
 				ImGui::Text(u8"移動速度"); ImGui::SameLine();
-				ImGui::InputFloat(u8"###移動速度",   &charData.moveSpeed);
+				ImGui::InputFloat(u8"###移動速度", &charData.moveSpeed);
 				ImGui::Text(u8"攻撃倍率"); ImGui::SameLine();
 				ImGui::InputFloat(u8"###攻撃倍率", &charData.attackRatio);
 				ImGui::Text(u8"攻撃速度"); ImGui::SameLine();
@@ -127,7 +131,7 @@ void StatusTest::DrawImGui()
 					break;
 				}
 			}
-           ImGui::PopID();
+			ImGui::PopID();
 		}
 		// 保存、読み込み
 		if (ImGui::Button("Save", ImVec2(-1, 0)))
@@ -142,7 +146,7 @@ void StatusTest::DrawImGui()
 		}
 	}
 	ImGui::End();
-   #endif
+#endif
 }
 
 void StatusTest::Render() const
@@ -181,7 +185,7 @@ void StatusTest::RenderDepth() const
 
 	// Bone対応の頂点シェーダー
 	modelToonRenderer_.SetVertexShader(ModelType::Bone);
- gameContext->GetPlayer().Draw();
+	gameContext->GetPlayer()->Draw();
 
 }
 
@@ -191,7 +195,7 @@ void StatusTest::DrawScene(bool toonEnabled) const
 	activeCamera_->ApplyCamera();
 
 	// つかわないもの
-   gameContext->GetGrid().Draw();
+	gameContext->GetGrid().Draw();
 
 	// トゥーンシェーダーを使わない場合
 	if (!toonEnabled)
@@ -200,7 +204,7 @@ void StatusTest::DrawScene(bool toonEnabled) const
 		SetUseVertexShader(-1);
 
 		testModel_.Draw();
-     gameContext->GetPlayer().Draw();
+		gameContext->GetPlayer()->Draw();
 
 
 		return;
@@ -225,9 +229,9 @@ void StatusTest::DrawScene(bool toonEnabled) const
 			}
 		};
 	drawActor(testModel_);
-    const auto& player = gameContext->GetPlayer();
-	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
-		player.GetPosition(), player.GetRotation());
+	const auto* player = gameContext->GetPlayer();
+	const ModelObject playerModel = player->GetModelObject().WithParentTransform(
+		player->GetPosition(), player->GetRotation());
 	drawActor(playerModel);
 
 

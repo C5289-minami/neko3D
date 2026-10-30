@@ -21,13 +21,13 @@ void GameSceneTutorialState::Enter()
 {
 	DxPlus::Debug::SetFormatString(L"GameSceneTutorialState::Enter");
 
-	auto& player = gameScene_.GetGameContext()->GetPlayer();
-	player.SetStartPosition(tutorialPlayerStartPos);
-	player.SetDefMove(true);
+	auto* player = gameScene_.GetGameContext()->GetPlayer();
+	player->SetStartPosition(tutorialPlayerStartPos);
+	player->SetDefMove(true);
 
 	auto& camera = gameScene_.GetTargetCamera();
 	camera.Initialize(gameScene_.GetCameraDirector().GetCurrentPose());
-	camera.SetTarget(player.GetPosition() + Vec3::Up() * 100.0f);
+	camera.SetTarget(player->GetPosition() + Vec3::Up() * 100.0f);
 
 	targetCameraSwitched_ = false;
 	cameraState_ = TutorialCameraState::LookPlayer;
@@ -38,7 +38,7 @@ void GameSceneTutorialState::Tick(float deltaTime)
 	DxPlus::Debug::SetFormatString(L"GameSceneTutorialState::Tick");
 
 	auto& director = gameScene_.GetCameraDirector();
-	auto& player = gameScene_.GetGameContext()->GetPlayer();
+	auto* player = gameScene_.GetGameContext()->GetPlayer();
 
 	// =========================================
 	// カメラ
@@ -62,7 +62,7 @@ void GameSceneTutorialState::Tick(float deltaTime)
 	case TutorialCameraState::LookPlayer:
 		// 固定カメラからPlayerを見る
 		gameScene_.GetTargetCamera().SetTarget(
-			player.GetPosition() + Vec3::Up() * 100.0f);
+			player->GetPosition() + Vec3::Up() * 100.0f);
 		break;
 
 	case TutorialCameraState::EnterMove:
@@ -88,7 +88,7 @@ void GameSceneTutorialState::Tick(float deltaTime)
 	auto& stage = gameScene_.GetGameContext()->GetStage();
 
 	const Vec3 playerCenter =
-		player.GetWorldPosition() + settings.playerOffset;
+		player->GetWorldPosition() + settings.playerOffset;
 
 	const Vec3 stageCenter =
 		stage.GetWorldPosition() + settings.stageOffset;
@@ -131,16 +131,16 @@ void GameSceneTutorialState::Tick(float deltaTime)
 void GameSceneTutorialState::Exit()
 {
 	DxPlus::Debug::SetFormatString(L"GameSceneTutorialState::Exit");
-	gameScene_.GetGameContext()->GetPlayer().SetDefMove(false);
+	gameScene_.GetGameContext()->GetPlayer()->SetDefMove(false);
 }
 
 void GameSceneTutorialState::FocusTutorialCamera(float deltaTime)
 {
 	auto* gameContext = gameScene_.GetGameContext();
-	const auto& player = gameContext->GetPlayer();
+	const auto* player = gameContext->GetPlayer();
 	const auto& stage = gameContext->GetStage();
 
-	const Vec3 playerPos = player.GetWorldPosition();
+	const Vec3 playerPos = player->GetWorldPosition();
 	const Vec3 stagePos = stage.GetWorldPosition();
 
 	// ---------------------------------------------------------
@@ -199,10 +199,10 @@ void GameSceneTutorialState::FocusTutorialCamera(float deltaTime)
 Camera::CameraPose GameSceneTutorialState::GetTutorialCameraPose()
 {
 	auto& context = *gameScene_.GetGameContext();
-	const auto& player = context.GetPlayer();
+	const auto* player = context.GetPlayer();
 	const auto& stage = context.GetStage();
 
-	const Vec3 playerPos = player.GetWorldPosition();
+	const Vec3 playerPos = player->GetWorldPosition();
 	const Vec3 stagePos = stage.GetWorldPosition();
 
 	Vec3 stageToPlayer = playerPos - stagePos;

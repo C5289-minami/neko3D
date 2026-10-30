@@ -16,7 +16,7 @@ void GameTestScene::Init()
 {
 	gameContext->Reset();
 #ifdef _DEBUG
-    Collision::RegisterDebugCanWatch(this, gameContext->GetPlayer(), gameContext->GetBoss());
+    Collision::RegisterDebugCanWatch(this, *gameContext->GetPlayer(), gameContext->GetBoss());
 #endif
 	playerCamera_.Reset();
 #ifndef NDEBUG
@@ -71,7 +71,7 @@ void GameTestScene::Update(float deltaTime)
 	}
 	if (DxLib::CheckHitKey(KEY_INPUT_F) != 0)
 	{
-		freeCamera_.FocusAt(gameContext->GetPlayer().GetPosition());
+		freeCamera_.FocusAt(gameContext->GetPlayer()->GetPosition());
 	}
 	DxPlus::Debug::SetString(L" R: Transformリセット, F: FreeCameraをプレイヤーにフォーカス");
 
@@ -87,7 +87,7 @@ void GameTestScene::Update(float deltaTime)
 	else
 #endif
 	{
-		auto& player = gameContext->GetPlayer();
+		auto* player = gameContext->GetPlayer();
 		auto& boss = gameContext->GetBoss();
 		auto& stage = gameContext->GetStage();
 		const Vec3 stageCenterPosition = stage.GetPosition();
@@ -98,26 +98,26 @@ void GameTestScene::Update(float deltaTime)
 #ifdef _DEBUG// Shift長押しで通常移動の速度を5倍にする（GameTest限定）
 		const bool debugDash = DxLib::CheckHitKey(KEY_INPUT_LSHIFT) != 0 ||
 			DxLib::CheckHitKey(KEY_INPUT_RSHIFT) != 0;
-		player.SetDebugDashEnabled(debugDash);
+		player->SetDebugDashEnabled(debugDash);
 #endif
-		player.Update(deltaTime, stage.GetCollision(), stageCenterPosition);
+		player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
 #ifdef _DEBUG
 		// この更新だけに適用し、共有するPlayerを他のシーンへ持ち越さない。
-		player.SetDebugDashEnabled(false);
+		player->SetDebugDashEnabled(false);
 #endif
-		stage.UpdateAlphaModel(deltaTime, player);
+		stage.UpdateAlphaModel(deltaTime, *player);
 
 		boss.Update(deltaTime);
 
 
-		playerCamera_.Update(player.GetPosition(), boss.GetPosition(), deltaTime);
+		playerCamera_.Update(player->GetPosition(), boss.GetPosition(), deltaTime);
 
 		using namespace DxPlus::Input;
 		if (GetButtonDown(PLAYER1) & BUTTON_L3)
 		{
 			gameContext->GetEffectManager().PlayHit(RM().GetEffect(ResourceKeys::Effect_Test),
-				player.GetPosition() + Vec3::Up() * 100.0f,
-				player.GetYaw() + DX_PI_F);
+				player->GetPosition() + Vec3::Up() * 100.0f,
+				player->GetYaw() + DX_PI_F);
 		}
 		gameContext->GetEffectManager().Update(deltaTime);
 	}
@@ -164,20 +164,20 @@ void GameTestScene::DrawImGui()
 #ifndef NDEBUG
     if (ImGui::Begin("Player Pillar Elevator"))
     {
-        auto& player = gameContext->GetPlayer();
+        auto* player = gameContext->GetPlayer();
 
 #ifdef _DEBUG
         ImGui::TextUnformatted(u8"Shift長押し：通常移動の速度を5倍（GameTest限定）");
 #endif
 
-        ImGui::Text("Pillar contact: %s", player.IsTouchingWall() ? "True" : "False");
+        ImGui::Text("Pillar contact: %s", player->IsTouchingWall() ? "True" : "False");
 
         ImGui::TextUnformatted(u8"柱のエレベーター");
-        float climbingSpeed = player.GetClimbingSpeed();
+        float climbingSpeed = player->GetClimbingSpeed();
         if (ImGui::DragFloat(u8"上昇速度", &climbingSpeed, 10.0f, 0.0f, 5000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp))
-            player.SetClimbingSpeed(climbingSpeed);
+            player->SetClimbingSpeed(climbingSpeed);
         if (ImGui::Button(u8"上昇速度を初期値に戻す"))
-            player.ResetClimbingSpeeds();
+            player->ResetClimbingSpeeds();
         ImGui::TextWrapped(u8"柱の上端 - 10で到着し、小さくジャンプします。");
         // 旧仕様の壁登り・壁キック設定。
 //         ImGui::TextUnformatted(u8"壁登り");
@@ -224,12 +224,12 @@ void GameTestScene::RenderDepth() const
 #endif
 
 	const auto& boss = gameContext->GetBoss();
-	const auto& player = gameContext->GetPlayer();
+	const auto* player = gameContext->GetPlayer();
 	const auto& stage = gameContext->GetStage();
 	const auto& room = gameContext->GetRoom();
 
-	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
-		player.GetPosition(), player.GetRotation());
+	const ModelObject playerModel = player->GetModelObject().WithParentTransform(
+		player->GetPosition(), player->GetRotation());
 	const ModelObject bossModel = boss.GetModelObject().WithParentTransform(
 		boss.GetPosition(), boss.GetRotation());
 	const ModelObject stageModel = stage.GetModelObject().WithParentTransform(
@@ -264,7 +264,7 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 #endif
 
 	const auto& boss = gameContext->GetBoss();
-	const auto& player = gameContext->GetPlayer();
+	const auto* player = gameContext->GetPlayer();
 	const auto& stage = gameContext->GetStage();
 	const auto& effectManager = gameContext->GetEffectManager();
 	const auto& grid = gameContext->GetGrid();
@@ -277,7 +277,7 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 		SetUseVertexShader(-1);
 		boss.Draw();
 		stage.Draw();
-		player.Draw();
+		player->Draw();
 		stage.DrawAlphaModel();
 		effectManager.Draw();
 		grid.Draw();
@@ -288,8 +288,8 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	// トゥーン描画開始
 	modelToonRenderer_.BeginPass();
 
-	const ModelObject playerModel = player.GetModelObject().WithParentTransform(
-		player.GetPosition(), player.GetRotation());
+	const ModelObject playerModel = player->GetModelObject().WithParentTransform(
+		player->GetPosition(), player->GetRotation());
 	modelToonRenderer_.Draw(playerModel);
 	// bossのモデルにboss自体の位置と回転を適用して描画する
 	modelToonRenderer_.Draw(boss.GetModelObject().WithParentTransform(

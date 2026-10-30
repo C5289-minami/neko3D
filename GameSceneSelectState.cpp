@@ -24,9 +24,9 @@ namespace
 	};
 
 
-	constexpr float SelectTargetH = 100.0f;
+	constexpr float SelectTargetH = 180.0f;
 	constexpr float SelectTargetRightOffset = 150.0f;
-	constexpr float SelectCameraLeftOffset = 100.0f;
+	constexpr float SelectCameraLeftOffset = 120.0f;
 	constexpr float SelectCameraForwardDistance = 350.0f;
 	constexpr float SelectCameraMoveDuration = 0.6f;
 
@@ -271,13 +271,15 @@ void GameSceneSelectState::ConfirmSelection()
 
 	auto* context = gameScene_.GetGameContext();
 
-	const Player& selected = *players_[selectedIndex_];
-	Player& player = context->GetPlayer();
+	Player& selected = *players_[selectedIndex_];
 
-	// 選んだキャラクターの情報を本編Playerへ反映
-	player.SetModelKey(selected.GetModelObject().GetModelKey());
-	player.SetCharData(selected.GetCharData());
+	// Basketとの親子関係を解除
+	selected.ClearOwner();
 
+	// 本編で使用するPlayerを切り替える
+	context->SetActivePlayer(selected);
+	Vec3 standUpRot = { 0.0f, selected.GetModelObject().GetRotation().y ,  0.0f};
+	context->GetPlayer()->GetModelObject().SetRotation(standUpRot);
 
 	stateMachine_.ChangeState(GameStateType::Tutorial);
 }
