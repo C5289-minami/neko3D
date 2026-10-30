@@ -278,8 +278,17 @@ void GameSceneSelectState::ConfirmSelection()
 
 	// 本編で使用するPlayerを切り替える
 	context->SetActivePlayer(selected);
-	Vec3 standUpRot = { 0.0f, selected.GetModelObject().GetRotation().y ,  0.0f};
-	context->GetPlayer()->GetModelObject().SetRotation(standUpRot);
+
+	auto* player = context->GetPlayer();
+
+	// 選択画面で無効にした重力を有効に戻す
+	player->SetGravityEnabled(true);
+
+	// Play用のサイズと回転にする
+	auto& selectModel = selected.GetModelObject();
+	player->GetModelObject().SetRotation({});
+	player->GetModelObject().SetScale({ 1.0f, 1.0f, 1.0f });
+	player->GetModelObject().SetPosition({});
 
 	stateMachine_.ChangeState(GameStateType::Tutorial);
 }

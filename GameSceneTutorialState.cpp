@@ -26,7 +26,6 @@ void GameSceneTutorialState::Enter()
 	player->SetDefMove(true);
 
 	auto& camera = gameScene_.GetTargetCamera();
-	camera.Initialize(gameScene_.GetCameraDirector().GetCurrentPose());
 	camera.SetTarget(player->GetPosition() + Vec3::Up() * 100.0f);
 
 	targetCameraSwitched_ = false;
@@ -53,6 +52,9 @@ void GameSceneTutorialState::Tick(float deltaTime)
 		director.SwitchCamera(
 			gameScene_.GetTargetCamera(),
 			1.2f);
+		auto& camera = gameScene_.GetTargetCamera();
+		camera.Initialize(gameScene_.GetCameraDirector().GetCurrentPose());
+
 
 		targetCameraSwitched_ = true;
 	}
