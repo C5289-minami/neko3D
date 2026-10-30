@@ -13,7 +13,7 @@
 void GameContext::Init()
 {
 	auto& modelObjects = MObjs();
-	//modelObjects.Add(defaultPlayer->GetModelObject(), defaultPlayer);
+	modelObjects.Add(defaultPlayer.GetModelObject(), defaultPlayer);
 	modelObjects.Add(stage.GetModelObject(), stage);
 	for (auto& model : stage.GetPillarModelObjects())
 		modelObjects.Add(model, stage);
