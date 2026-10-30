@@ -817,17 +817,21 @@ void Player::SetGravityEnabled(bool enabled)
 
 void Player::StartPillarElevator(const ModelObject* pillar, const Vec3& center, float topY)
 {
-	float recordFirstPosY = position_.y;
-    // 柱の上端までPlayerの高さ3個分以上あるときは、吸い込みを開始しない。
-    if (topY - recordFirstPosY >= Const::PLAYER_HEIGHT * 3.0f) return;
-
-    const float arrivalY = topY - Const::PLAYER_ELEVATOR_TOP_OFFSET;
+     float recordFirstPosY = topY - Const::PLAYER_ELEVATOR_TOP_OFFSET;
     if (!pillar || !gravityEnabled_|| IsDamaging() ||
-        IsPillarElevatorActive() || position_.y >= arrivalY - Const::PLAYER_SKIN) return;
+        IsPillarElevatorActive()) return;
+
+    // 上端の近くではジャンプを優先する。Spaceを離すまで吸い戻さない。
+    float topJumpMargin = 20.0f;
+    if (position_.y >= recordFirstPosY - topJumpMargin)
+    {
+        elevatorInputConsumed_ = true;
+        return;
+    }
 
 	elevatorPillar_ = pillar;
     elevatorCenter_ = center;
-    elevatorTopY_ = arrivalY;
+    elevatorTopY_ = recordFirstPosY;
     elevatorInputConsumed_ = true;
 
     position_.x = center.x;
