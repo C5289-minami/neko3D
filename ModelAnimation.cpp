@@ -18,7 +18,7 @@ namespace
         int referenceCount;
     };
 
-    // 全ModelAnimationインスタンスで共有する管理表
+    // 全ModelAnimationインスタンスで共有するmap
     std::map<AnimationKey, SharedAttachInfo> sharedAttaches;
 }
 
