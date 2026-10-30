@@ -90,7 +90,9 @@ void Boss::Init()
 	stateMachine_.Initialize();
 
 	model_.SetModelType(ModelType::Bone);
-
+	attackHands_.clear();
+	attackHands_.resize(2);
+	
 	Reset();
 #ifndef NDEBUG
 	DebugModelVertexTypes("Boss", RM().GetModel(model_.GetModelKey()));
@@ -99,6 +101,8 @@ void Boss::Init()
 
 void Boss::Reset()
 {
+	counter_ = 0.0f;
+	distance_ = 200.0f;
 	// 初期位置・回転・拡大率はJSONファイルから読み込む
 	MObjs().LoadActorTransform(*this);
 	model_.Load();
@@ -109,6 +113,8 @@ void Boss::Reset()
 	SetAnimation(BossAnimType::Idle, true);
 	animation_.Reset();
 	stateMachine_.Initialize();
+
+	attackHands_.clear();
 
 	// 更新を止めても描画できるように初期ポーズを用意する
 	animation_.Play3D(RM().GetModel(model_.GetModelKey()), currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
@@ -171,6 +177,43 @@ float Boss::GetAnimTotalTime(BossAnimType::Type type) const
 	totalFlame = DxLib::MV1GetAnimTotalTime(modelHandle, index);
 	totalTime = totalFlame / Const::ANIM_FPS; // 秒数に変換
 	return totalTime;
+}
+
+bool Boss::UpdateHandAttack(float deltaTime, const Vec3& playerPosition)
+{
+	counter_ += deltaTime;
+
+	attackHands_[0].hitSphere.radius = 50.0f;
+	attackHands_[1].hitSphere.radius = 50.0f;
+
+	Vec3 center = playerPosition + Vec3::Up() * 30.0f;// プレイヤーの頭上30.0fの位置を中心にする
+	if (counter_ >= 3.0f)
+	{
+		distance_ -= 600.0f * deltaTime;
+
+		if (distance_ < 0.0f)
+		{
+			distance_ = 0.0f;
+		}
+	}
+
+	attackHands_[0].hitSphere.center = center + Vec3(-distance_, 0.0f, 0.0f);// 左手の攻撃判定の中心を設定
+	attackHands_[1].hitSphere.center = center + Vec3(distance_, 0.0f, 0.0f);// 右手の攻撃判定の中心を設定
+
+
+	for(AttackData& hand : attackHands_)
+	{
+		if (!hand.isHit)continue;
+
+		if (Collision::IsHitSphereSphere(hand.hitSphere, Collision::Sphere{ playerPosition, 30.0f }))// プレイヤーの当たり判定は半径30.0fの球と仮定
+		{
+			hand.isHit = false;
+			DxPlus::Debug::SetFormatString(L"Hit by Boss Hand Attack!");
+			
+		}
+
+	}
+	return true;
 }
 
 bool Boss::UseSkill(IAttackSkill& skill)

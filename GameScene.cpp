@@ -138,13 +138,19 @@ void GameScene::Update(float deltaTime)
 
 		stage.UpdateAlphaModel(deltaTime, player);
 		boss.Update(deltaTime);
-
 		// playerとbossの衝突判定
-		const bool touching = Collision::UpdateModelContact(playerModel, bossModel);
-		if (touching)
+		//const bool touching = Collision::UpdateModelContact(playerModel, bossModel);　これなし
+		//if (touching)
+		//{
+		//	player.TakeDamage();
+		//}
+
+		if (boss.UpdateHandAttack(deltaTime, player.GetWorldPosition()))
 		{
 			player.TakeDamage();
 		}
+
+
 
 
 	}

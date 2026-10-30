@@ -9,6 +9,14 @@
 #include "ObjectTransform.h"
 #include "BossAnimType.h"
 #include "ActorBase.h"
+#include<vector>
+
+struct AttackData
+{
+	Collision::Sphere hitSphere;
+	bool isHit{ false };
+};
+
 
 class Boss : public ActorBase
 {
@@ -44,6 +52,8 @@ public:
 	}
 	float GetAnimTotalTime(BossAnimType::Type type) const;
 
+	bool UpdateHandAttack(float deltaTime, const Vec3& playerPosition);
+
 private:
 	ModelObject model_{};
 	Vec3 velocity_{};
@@ -65,4 +75,9 @@ private:
 
 	bool isHeatUp{ false };
 	
+	float counter_{ 0.0f };
+	float distance_{ 200.0f };
+	std::vector<AttackData> attackHands_{};// 攻撃判定の情報を保持
+
+
 };
