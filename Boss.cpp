@@ -212,7 +212,7 @@ void Boss::StartHandAttack()
 }
 
 bool Boss::UpdateHandAttack(
-	float deltaTime, const Vec3& playerPosition, float playerYaw)
+	float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition)
 {
 	if (!handAttackActive_) return false;
 	if (distance_ <= 0.0f)
@@ -228,7 +228,6 @@ bool Boss::UpdateHandAttack(
 	if (counter_ < 3.0f)
 	{
 		oldPos = center;
-		oldYaw = playerYaw;
 	}
 
 	counter_ += deltaTime;
@@ -242,10 +241,24 @@ bool Boss::UpdateHandAttack(
 		}
 	}
 
-	Vec3 playerRight{ std::cos(oldYaw), 0.0f, -std::sin(oldYaw) };
-	attackHands_[0].hitSphere.center = oldPos - playerRight * distance_;// 左手の攻撃判定の中心を設定
-	attackHands_[1].hitSphere.center = oldPos + playerRight * distance_;// 右手の攻撃判定の中心を設定
+	// ステージ中心から、狙う位置へ向かう方向を求める。
+	Vec3 outward = oldPos - stagePosition;
+	outward.y = 0.0f;
+	float radius = outward.Length();// ステージ中心から狙う位置までの距離
+	if (radius < 0.001f) return false;
+	outward /= radius;// 正規化
 
+	// 同じ円周の左右に置いて、間隔が縮まると狙う位置へ近づく。
+
+	Vec3 right{ outward.z, 0.0f, -outward.x };
+	float angle = distance_ / radius;
+
+	Vec3 circleCenter{ stagePosition.x, oldPos.y, stagePosition.z };
+	Vec3 front = outward * std::cos(angle);
+	Vec3 side = right * std::sin(angle);
+
+	attackHands_[0].hitSphere.center = circleCenter + (front - side) * radius;
+	attackHands_[1].hitSphere.center = circleCenter + (front + side) * radius;
 
 	if (counter_ < 3.0f) return false;
 
