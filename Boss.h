@@ -9,6 +9,7 @@
 #include "ObjectTransform.h"
 #include "BossAnimType.h"
 #include "ActorBase.h"
+#include "Collision.h"
 #include<vector>
 
 struct AttackData
@@ -52,7 +53,11 @@ public:
 	}
 	float GetAnimTotalTime(BossAnimType::Type type) const;
 
+	void StartHandAttack();
 	bool UpdateHandAttack(float deltaTime, const Vec3& playerPosition);
+#ifdef _DEBUG
+	void DrawHandAttackDebug() const;
+#endif
 
 private:
 	ModelObject model_{};
@@ -77,6 +82,7 @@ private:
 	
 	float counter_{ 0.0f };
 	float distance_{ 200.0f };
+	bool handAttackActive_{ false };
 	std::vector<AttackData> attackHands_{};// 攻撃判定の情報を保持
 
 

@@ -145,10 +145,6 @@ void GameScene::Update(float deltaTime)
 		//	player.TakeDamage();
 		//}
 
-		if (boss.UpdateHandAttack(deltaTime, player.GetWorldPosition()))
-		{
-			player.TakeDamage();
-		}
 
 
 
@@ -179,6 +175,7 @@ void GameScene::Render() const
 	{
 		DrawScene(false);
 	}
+
 }
 
 void GameScene::DrawImGui()

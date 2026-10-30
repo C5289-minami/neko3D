@@ -23,6 +23,7 @@ private:
 #ifndef NDEBUG
     Camera::FreeCamera freeCamera_;
     bool wasFreeCameraToggleDown_{};
+    bool wasHandAttackKeyDown_{};
 #endif
 
     ModelToonRenderer modelToonRenderer_{};

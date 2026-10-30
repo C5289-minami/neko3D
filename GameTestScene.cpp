@@ -23,6 +23,7 @@ void GameTestScene::Init()
 	activeCamera_ = nullptr;
 	freeCamera_.Reset();
 	wasFreeCameraToggleDown_ = false;
+	wasHandAttackKeyDown_ = DxLib::CheckHitKey(KEY_INPUT_1) != 0;
 #endif
 
 
@@ -47,6 +48,12 @@ void GameTestScene::Init()
 void GameTestScene::Update(float deltaTime)
 {
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
+
+#ifdef _DEBUG
+	const bool handAttackKeyDown = DxLib::CheckHitKey(KEY_INPUT_1) != 0;
+	const bool handAttackKeyPressed = handAttackKeyDown && !wasHandAttackKeyDown_;
+	wasHandAttackKeyDown_ = handAttackKeyDown;
+#endif
 
 #ifndef NDEBUG
 	const bool toggleDown = DxLib::CheckHitKey(KEY_INPUT_LALT) != 0 &&
@@ -109,6 +116,20 @@ void GameTestScene::Update(float deltaTime)
 
 		boss.Update(deltaTime);
 
+#ifdef _DEBUG
+		// 1を押したら、両手攻撃を最初から試す。数値の入力中は始めない。
+		const bool editingText = ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard;
+		if (handAttackKeyPressed && !editingText)
+		{
+			boss.StartHandAttack();
+		}
+		if (boss.UpdateHandAttack(deltaTime, player.GetWorldPosition()))
+		{
+			player.TakeDamage();
+		}
+		DxPlus::Debug::SetString(L"1: Hand attack test (3 sec follow)");
+#endif
+
 
 		playerCamera_.Update(player.GetPosition(), boss.GetPosition(), deltaTime);
 
@@ -157,6 +178,11 @@ void GameTestScene::Render() const
 	{
 		DrawScene(false);
 	}
+
+#ifdef _DEBUG
+	(activeCamera_ ? activeCamera_ : &playerCamera_)->ApplyCamera();
+	gameContext->GetBoss().DrawHandAttackDebug();
+#endif
 }
 
 void GameTestScene::DrawImGui()
