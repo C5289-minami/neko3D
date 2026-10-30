@@ -63,8 +63,6 @@ public:
 	// 回転
 	void Turn(float direction, float speed, float deltaTime);
 	void TurnTowards(const Vec3& moveDir, float deltaTime);
-	// ステージ中心を基準に前後・左右へ移動する。
-	void MoveAroundStage(float deltaTime, Vec3& playerPos, const Vec3& movementCenter);
 
 	// ジャンプ
 	void JumpAction();
@@ -138,6 +136,12 @@ public:
 
 private:
     void UpdateMovement(float deltaTime);
+	// 横速度を決めた後、MoveでXYZの速度をまとめて座標に反映する。
+	void UpdateHorizontalVelocity(float deltaTime);//nyuuryokukei
+	void Move(float deltaTime);
+
+	// ステージ中心を基準に、円周移動・前後移動の横速度を設定する。
+	void UpdateStageMoveVelocity(float moveSpeed, float deltaTime);
 
     int health_{ MaxHealth };
 	ModelObject model_;
@@ -159,7 +163,7 @@ private:
 
 	Vec3 movementCenter_{}; // 足場の中心
 	Vec3 moveInput_{};      // Xは左右、Zは前後の入力
-	Vec3 velocity_{ 0.0f, 0.0f, 0.0f };
+	Vec3 velocity_{ 0.0f, 0.0f, 0.0f }; // 当たり判定で補正する前の移動速度（ワールド座標）
 
     // bool touchingPillar = false;
     bool touchingModel_ = false;
