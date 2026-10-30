@@ -30,6 +30,7 @@ Room::Room()
 	roomModel_.SetOwner(*this);
 	pillar1_.SetOwner(*this);
 	pillar2_.SetOwner(*this);
+	basket_.SetOwner(*this);
 
 	// •”‰®
 	roomModel_.SetObjectId("room_model");
@@ -74,6 +75,7 @@ void Room::Reset()
 	pillar1_.Load();
 	pillar2_.Load();
 	
+	MObjs().LoadActorTransform(basket_);
 
 	for (auto& stand : this->GetJumpStands())
 	{
@@ -97,4 +99,6 @@ void Room::Draw() const
 	lowJumpStand_.Draw();
 	mediumJumpStand_.Draw();
 	highJumpStand_.Draw();
+
+	basket_.Draw();
 }

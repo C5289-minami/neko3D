@@ -6,7 +6,7 @@ enum class PlayerStateType
     Idle = 0,       // 待機
     Walk,           // 歩行
     Grooming,      // 毛づくろい
-    NeutralJump,    // その場でジャンプ
+    Jump,    // 通常ジャンプ
     DoubleJump,    // 空中での2回目のジャンプ
     Attack,         // 通常攻撃
     UltimateAttack, // 必殺技

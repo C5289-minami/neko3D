@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Vector3.h"
 	
 struct PlayerInput
@@ -11,6 +11,7 @@ struct PlayerInput
 	bool run{ false };
 	bool jumpPressed{ false };
 	bool jumpPressing{ false };
+    bool RkeyPressed{ false };  // Rキーを押した瞬間
 	bool attackPressed{ false };
 	bool ultimatePressed{ false };
 	bool groomingPressed{ false };

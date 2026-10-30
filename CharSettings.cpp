@@ -130,6 +130,10 @@ size_t CharSettingsManager::GetCount()
 // インデックス指定で取得
 CharData& CharSettingsManager::Get(size_t index)
 {
+    if (index >= charDataList.size())
+    {
+		throw std::out_of_range("CharData Index out of range");
+	}
     return charDataList.at(index);
 }
 

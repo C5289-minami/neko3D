@@ -1,4 +1,4 @@
-#include "GameScene.h"
+ï»¿#include "GameScene.h"
 #include "GameContext.h"
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
@@ -17,23 +17,25 @@ GameScene::GameScene(GameContext* context)
 	: Scene(context), stateMachine_(*this) {
 }
 
+
+
 void GameScene::Init()
 {
 	gameContext->Reset();
 
-	// ƒ`ƒ…[ƒgƒŠƒAƒ‹‚àAŽg‚¢‚½‚¢ƒ‚ƒfƒ‹‚ð“o˜^‚·‚é‚¾‚¯‚Å“¯‚¶”»’è‚ð—˜—p‚Å‚«‚éB
+	// ãƒãƒ¥ãƒ¼ãƒˆãƒªã‚¢ãƒ«ã‚‚ã€ä½¿ã„ãŸã„ãƒ¢ãƒ‡ãƒ«ã‚’ç™»éŒ²ã™ã‚‹ã ã‘ã§åŒã˜åˆ¤å®šã‚’åˆ©ç”¨ã§ãã‚‹ã€‚
 	tutorialCollision_.Clear();
 	tutorialCollision_.AddModel(gameContext->GetRoom().GetRoomObject(), ModelCollision::Surface::Floor);
 	tutorialCollision_.AddModel(gameContext->GetRoom().GetRoomObject(), ModelCollision::Surface::Wall);
 
-	// ƒ`ƒ…[ƒgƒŠƒAƒ‹‚Å‚àStage‚Ì’Œ‚ð”»’è‚·‚éB
+	// ãƒãƒ¥ãƒ¼ãƒˆãƒªã‚¢ãƒ«ã§ã‚‚Stageã®æŸ±ã‚’åˆ¤å®šã™ã‚‹ã€‚
 	for (const auto& pillar : gameContext->GetStage().GetPillarModelObjects())
 		tutorialCollision_.AddModel(pillar, ModelCollision::Surface::Pillar);
 
 	for (const auto* pillar : gameContext->GetRoom().GetPillars())
 		tutorialCollision_.AddModel(*pillar, ModelCollision::Surface::Pillar);
 
-	// ƒWƒƒƒ“ƒv‘ä‚Ì°‚Æ’Œ‚ðA‚»‚ê‚¼‚ê‚Ì—p“r‚Å“o˜^‚·‚éB
+	// ã‚¸ãƒ£ãƒ³ãƒ—å°ã®åºŠã¨æŸ±ã‚’ã€ãã‚Œãžã‚Œã®ç”¨é€”ã§ç™»éŒ²ã™ã‚‹ã€‚
 	for (const auto* stand : gameContext->GetRoom().GetJumpStands())
 	{
 		tutorialCollision_.AddModel(stand->GetJumpStandModel(), ModelCollision::Surface::Floor);
@@ -41,28 +43,31 @@ void GameScene::Init()
 	}
 	tutorialCollision_.AddModel(gameContext->GetStage().GetModelObject(), ModelCollision::Surface::Floor);
 
-	// ƒgƒD[ƒ“•`‰æ‚ÆƒAƒEƒgƒ‰ƒCƒ“•`‰æ‚ð—LŒø‚É‚·‚é
+	// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼é¸æŠžç”»é¢ã®ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ã‚’è¡¨ç¤ºã™ã‚‹
+	gameContext->SetSelectPreviewVisible(true);
+
+	// ãƒˆã‚¥ãƒ¼ãƒ³æç”»ã¨ã‚¢ã‚¦ãƒˆãƒ©ã‚¤ãƒ³æç”»ã‚’æœ‰åŠ¹ã«ã™ã‚‹
 	{
 		ToonSettingsManager::Load();
 		OutlineSettingsManager::Load();
 
-		// ƒgƒD[ƒ“•`‰æ‚É•K—v‚ÈƒVƒF[ƒ_[‚ÆÝ’èƒoƒbƒtƒ@[‚ð‰Šú‰»
+		// ãƒˆã‚¥ãƒ¼ãƒ³æç”»ã«å¿…è¦ãªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã¨è¨­å®šãƒãƒƒãƒ•ã‚¡ãƒ¼ã‚’åˆæœŸåŒ–
 		if (!modelToonRenderer_.Init())
-			DxPlus::Utils::FatalError(L"modelToonRenderer‚Ì‰Šú‰»Ž¸”s");
+			DxPlus::Utils::FatalError(L"modelToonRendererã®åˆæœŸåŒ–å¤±æ•—");
 		if (!shaderEffects_.Init(DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT))
-			DxPlus::Utils::FatalError(L"shaderEffects‚Ì‰Šú‰»Ž¸”s");
+			DxPlus::Utils::FatalError(L"shaderEffectsã®åˆæœŸåŒ–å¤±æ•—");
 
-		// toon•`‰æ‚ÆƒAƒEƒgƒ‰ƒCƒ“•`‰æ‚ð—LŒø‚É‚·‚é
+		// toonæç”»ã¨ã‚¢ã‚¦ãƒˆãƒ©ã‚¤ãƒ³æç”»ã‚’æœ‰åŠ¹ã«ã™ã‚‹
 		shaderEffects_.GetSettings().toonEnabled = true;
 		shaderEffects_.GetSettings().outlineEnabled = true;
 	}
-
 
 	// camera
 	{
 		cameraDirector_.Reset();
 		activeCameraShot_.clear();
-		if (!CObjs().LoadCameras())DxPlus::Utils::FatalError(L"ƒJƒƒ‰‚Ìƒ[ƒh‚ÉŽ¸”s");
+		if (!CObjs().LoadCameras())
+			DxPlus::Utils::FatalError(L"ã‚«ãƒ¡ãƒ©ã®ãƒ­ãƒ¼ãƒ‰ã«å¤±æ•—");
 		if (CObjs().LoadCameras())
 		{
 			for (const auto& shot : CObjs().GetCameras())
@@ -74,49 +79,7 @@ void GameScene::Init()
 		cameraDirector_.Update(0);
 	}
 
-	// UI
-	{
-		// logo‚ÌUI‚ðì¬
-		const DxPlus::Vec2 logoPos(DxPlus::CLIENT_WIDTH * 0.3f, DxPlus::CLIENT_HEIGHT * 0.3f);
-		const std::wstring logoKey = ResourceKeys::UI_Logo;
-		UIM().CreateImageUI(L"Game.Logo", logoKey, logoPos, {}, 0.5f);
-		UIM().GetUI(L"Game.Logo")->SetDisplayCondition(
-			[this]() -> bool
-			{
-				return GetCurrentGameState() == GameStateType::Title;
-			}
-		);
-
-		// ƒXƒ^[ƒgƒ{ƒ^ƒ“‚ÌUI‚ðì¬
-		const DxPlus::Vec2 startPos(DxPlus::CLIENT_WIDTH * 0.2f, DxPlus::CLIENT_HEIGHT * 0.6f);
-		const std::wstring key = ResourceKeys::UI_StartButton;
-		UIM().CreateButtonUI(L"Game.StartButton", key, startPos,
-			[this]() { stateMachine_.ChangeState(GameStateType::Select); },
-			{ -1,0 },
-			0.5f
-		);
-		UIM().GetUI(L"Game.StartButton")->SetDisplayCondition(
-			[this]() -> bool
-			{
-				return GetCurrentGameState() == GameStateType::Title;
-			}
-		);
-
-		// I—¹ƒ{ƒ^ƒ“‚ÌUI‚ðì¬
-		const DxPlus::Vec2 exitPos(DxPlus::CLIENT_WIDTH * 0.2f, DxPlus::CLIENT_HEIGHT * 0.75f);
-		const std::wstring exitKey = ResourceKeys::UI_ExitButton;
-		UIM().CreateButtonUI(L"Game.ExitButton", exitKey, exitPos,
-			[]() { PostQuitMessage(0); },
-			{ -1,0 },
-			0.5f
-		);
-		UIM().GetUI(L"Game.ExitButton")->SetDisplayCondition(
-			[this]() -> bool
-			{
-				return GetCurrentGameState() == GameStateType::Title;
-			}
-		);
-	}
+	
 
 	stateMachine_.Initialize();
 
@@ -141,21 +104,29 @@ void GameScene::Update(float deltaTime)
 {
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
-	// ActorŽæ“¾
+	// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼é¸æŠžä¸­ã¯æœ¬ç·¨Playerã®ç§»å‹•ãƒ»è¡çªåˆ¤å®šã‚’æ­¢ã‚ã‚‹
+	if (GetCurrentGameState() == GameStateType::Select)
+	{
+		stateMachine_.Tick(deltaTime);
+		gameContext->GetEffectManager().Update(deltaTime);
+		return;
+
+	}
+	// Actorå–å¾—
 	auto& player = gameContext->GetPlayer();
 	auto& boss = gameContext->GetBoss();
 	auto& stage = gameContext->GetStage();
-	// ƒ‚ƒfƒ‹Žæ“¾
+	// ãƒ¢ãƒ‡ãƒ«å–å¾—
 	ModelObject& playerModel = player.GetModelObject();
 	ModelObject& bossModel = boss.GetModelObject();
 
 	// actors
 	{
 
-		// stage‚Ì’†SÀ•W‚ðŽæ“¾‚µ‚ÄAplayer‚ÌXV‚É“n‚·
+		// stageã®ä¸­å¿ƒåº§æ¨™ã‚’å–å¾—ã—ã¦ã€playerã®æ›´æ–°ã«æ¸¡ã™
 		const Vec3 stageCenterPosition = stage.GetPosition();
 
-		// ƒ`ƒ…[ƒgƒŠƒAƒ‹‚Í’ÊíˆÚ“®Aƒoƒgƒ‹‚ÍƒXƒe[ƒW’†S‚ðŠî€‚É‚µ‚½ˆÚ“®‚ðŽg‚¤B
+		// ãƒãƒ¥ãƒ¼ãƒˆãƒªã‚¢ãƒ«ã¯é€šå¸¸ç§»å‹•ã€ãƒãƒˆãƒ«ã¯ã‚¹ãƒ†ãƒ¼ã‚¸ä¸­å¿ƒã‚’åŸºæº–ã«ã—ãŸç§»å‹•ã‚’ä½¿ã†ã€‚
 		const bool tutorial = GetCurrentGameState() == GameStateType::Tutorial;
 		player.SetDefMove(tutorial);
 		if (tutorial)
@@ -168,7 +139,7 @@ void GameScene::Update(float deltaTime)
 		stage.UpdateAlphaModel(deltaTime, player);
 		boss.Update(deltaTime);
 
-		// player‚Æboss‚ÌÕ“Ë”»’è
+		// playerã¨bossã®è¡çªåˆ¤å®š
 		const bool touching = Collision::UpdateModelContact(playerModel, bossModel);
 		if (touching)
 		{
@@ -213,19 +184,17 @@ void GameScene::DrawImGui()
 
 void GameScene::RenderDepth() const
 {
-	cameraDirector_.GetActiveCamera()->ApplyPose(
-		cameraDirector_.GetCurrentPose()
-	);
+	cameraDirector_.ApplyRenderPose();
 
 	const auto& boss = gameContext->GetBoss();
 	const auto& player = gameContext->GetPlayer();
 	const auto& stage = gameContext->GetStage();
 	const auto& room = gameContext->GetRoom();
 
-	// Room–{‘Ì
+	// Roomæœ¬ä½“
 	modelToonRenderer_.DrawDepth(room.GetRoomObject());
 
-	// Room‚Ì’Œ
+	// Roomã®æŸ±
 	for (const auto* pillar : room.GetPillars())
 	{
 		if (pillar)
@@ -234,7 +203,7 @@ void GameScene::RenderDepth() const
 		}
 	}
 
-	// Room‚ÌƒWƒƒƒ“ƒv‘ä‚Æ’Œ
+	// Roomã®ã‚¸ãƒ£ãƒ³ãƒ—å°ã¨æŸ±
 	for (const auto* jumpStand : room.GetJumpStands())
 	{
 		if (!jumpStand) continue;
@@ -247,6 +216,7 @@ void GameScene::RenderDepth() const
 			jumpStand->GetPillarModel()
 		);
 	}
+	modelToonRenderer_.DrawDepth(room.GetBasket().GetModelObject());
 
 	// Stage
 	modelToonRenderer_.DrawDepth(stage.GetModelObject());
@@ -262,8 +232,20 @@ void GameScene::RenderDepth() const
 		modelToonRenderer_.DrawDepth(model);
 	}
 
-	// Player‚ÆBoss
-	modelToonRenderer_.DrawDepth(player.GetModelObject());
+	// Playerã¨Boss
+	if (gameContext->IsSelectPreviewVisible())
+	{
+		for (const auto& preview :
+			gameContext->GetSelectPreviewPlayers())
+		{
+			modelToonRenderer_.DrawDepth(preview.GetModelObject());
+		}
+	}
+	else
+	{
+		modelToonRenderer_.DrawDepth(player.GetModelObject());
+	}
+
 	modelToonRenderer_.DrawDepth(boss.GetModelObject());
 }
 
@@ -287,7 +269,7 @@ void GameScene::DrawTutorialCollisionSpheres() const
 	const Vec3 stageCenter =
 		stage.GetWorldPosition() + settings.stageOffset;
 
-	// Collision‹¤’Ê‚ÌSphereŒ^‚ðŽg‚¤
+	// Collisionå…±é€šã®Sphereåž‹ã‚’ä½¿ã†
 	const Collision::Sphere playerSphere{
 		playerCenter, settings.playerRadius
 	};
@@ -300,15 +282,15 @@ void GameScene::DrawTutorialCollisionSpheres() const
 		stageCenter, settings.climbRadius
 	};
 
-	// PlayerF—Î
+	// Playerï¼šç·‘
 	Collision::DrawDebugSphere(
 		playerSphere, DxLib::GetColor(0, 255, 0));
 
-	// Battle‘JˆÚ”»’èFÔ
+	// Battleé·ç§»åˆ¤å®šï¼šèµ¤
 	Collision::DrawDebugSphere(
 		stageSphere, DxLib::GetColor(255, 0, 0));
 
-	// ƒJƒƒ‰’Ç]ŠJŽn”»’èFÂ
+	// ã‚«ãƒ¡ãƒ©è¿½å¾“é–‹å§‹åˆ¤å®šï¼šé’
 	Collision::DrawDebugSphere(
 		climbSphere, DxLib::GetColor(0, 100, 255));
 #endif
@@ -316,9 +298,7 @@ void GameScene::DrawTutorialCollisionSpheres() const
 
 void GameScene::DrawScene(bool toonEnabled) const
 {
-	cameraDirector_.GetActiveCamera()->ApplyPose(
-		cameraDirector_.GetCurrentPose()
-	);
+	cameraDirector_.ApplyRenderPose();
 
 	const auto& boss = gameContext->GetBoss();
 	const auto& player = gameContext->GetPlayer();
@@ -326,8 +306,13 @@ void GameScene::DrawScene(bool toonEnabled) const
 	const auto& effectManager = gameContext->GetEffectManager();
 	const auto& grid = gameContext->GetGrid();
 	const auto& room = gameContext->GetRoom();
+	const bool showSelectPlayers =
+		gameContext->IsSelectPreviewVisible();
 
-	// ƒgƒD[ƒ“ƒVƒF[ƒ_[‚ðŽg‚í‚È‚¢ê‡
+	const auto& selectPlayers =
+		gameContext->GetSelectPreviewPlayers();
+
+	// ãƒˆã‚¥ãƒ¼ãƒ³ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ä½¿ã‚ãªã„å ´åˆ
 	if (!toonEnabled)
 	{
 		SetUsePixelShader(-1);
@@ -335,7 +320,19 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 		boss.Draw();
 		stage.Draw();
-		player.Draw();
+
+		if (showSelectPlayers)
+		{
+			for (const auto& preview : selectPlayers)
+			{
+				preview.Draw();
+			}
+		}
+		else
+		{
+			player.Draw();
+		}
+
 		stage.DrawAlphaModel();
 
 		effectManager.Draw();
@@ -349,8 +346,8 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 	modelToonRenderer_.BeginPass();
 
-	// Œ³‚ÌModelObject‚ð’¼Ú•`‰æ‚·‚é
-	// eŽq•ÏŠ·‚ÍModelObject::ApplyTransform()‚É”C‚¹‚é
+	// å…ƒã®ModelObjectã‚’ç›´æŽ¥æç”»ã™ã‚‹
+	// è¦ªå­å¤‰æ›ã¯ModelObject::ApplyTransform()ã«ä»»ã›ã‚‹
 	const auto drawModel = [this](const ModelObject& model)
 		{
 			if (model.collisionHighlighted)
@@ -368,9 +365,20 @@ void GameScene::DrawScene(bool toonEnabled) const
 			}
 		};
 
-	// Boss‚ÆPlayer
+	// Bossã¨Player
 	drawModel(boss.GetModelObject());
-	drawModel(player.GetModelObject());
+
+	if (showSelectPlayers)
+	{
+		for (const auto& preview : selectPlayers)
+		{
+			drawModel(preview.GetModelObject());
+		}
+	}
+	else
+	{
+		drawModel(player.GetModelObject());
+	}
 
 	// Stage
 	drawModel(stage.GetModelObject());
@@ -386,25 +394,10 @@ void GameScene::DrawScene(bool toonEnabled) const
 		drawModel(model);
 	}
 
-	// Room–{‘Ì
-	drawModel(room.GetRoomObject());
-
-	// Room‚Ì’Œ
-	for (const auto* pillar : room.GetPillars())
+	// Room
+	for (const auto* allRoom : room.GetAllModelObjects())
 	{
-		if (pillar)
-		{
-			drawModel(*pillar);
-		}
-	}
-
-	// Room‚ÌƒWƒƒƒ“ƒv‘ä‚Æ’Œ
-	for (const auto* jumpStand : room.GetJumpStands())
-	{
-		if (!jumpStand) continue;
-
-		drawModel(jumpStand->GetJumpStandModel());
-		drawModel(jumpStand->GetPillarModel());
+		drawModel(*allRoom);
 	}
 
 	effectManager.Draw();

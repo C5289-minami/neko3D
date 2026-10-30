@@ -55,7 +55,7 @@ namespace
 
 
     }
-
+	// ‰ñ“]s—ñ‚ÌŠ|‚¯ŽZ
     RotationMatrix Multiply(const RotationMatrix& left, const RotationMatrix& right)
     {
         RotationMatrix result{};
@@ -127,6 +127,7 @@ Vec3 ActorBase::GetWorldRotation() const
     {
         return GetRotation();
     }
+    
 
     const RotationMatrix parentMatrix =
         MakeRotationMatrix(owner_->GetWorldRotation());

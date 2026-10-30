@@ -16,6 +16,8 @@ namespace DxPlus
     constexpr float PI = 3.14159265358979323846f;
     constexpr float Deg2Rad = PI / 180.0f; // 度数 → ラジアン変換
     constexpr float Rad2Deg = 180.0f / PI; // ラジアン → 度数変換
+	constexpr float EPS = 1e-6f; // 浮動小数点の誤差許容値
+    //大体0.0000001だね
 
     // その他の定数が追加される場合はここにカテゴリを追加可能
 }

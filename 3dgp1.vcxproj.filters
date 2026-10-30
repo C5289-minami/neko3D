@@ -88,7 +88,7 @@
     <Filter Include="40_Gameplay\Actors\Player\State\Attack">
       <UniqueIdentifier>{6abc340a-046a-48dd-9042-c471d2f8875f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="40_Gameplay\Actors\Player\State\NeutralJump">
+    <Filter Include="40_Gameplay\Actors\Player\State\Jump">
       <UniqueIdentifier>{d86ce60d-04a6-4895-85ad-1ae4163b633a}</UniqueIdentifier>
     </Filter>
     <Filter Include="40_Gameplay\Actors\Player\State\DoubleJump">
@@ -262,6 +262,9 @@
     <Filter Include="30_Scenes\Game\StateMashine\GameSceneResultsState">
       <UniqueIdentifier>{cfaf73d7-a10c-484e-9714-51762bf76fd6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="10_Core\Camera\CameraShake">
+      <UniqueIdentifier>{74007395-5b76-429b-b265-721c1d69ac9d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -414,8 +417,8 @@
     <ClInclude Include="PlayerDoubleJumpState.h">
       <Filter>40_Gameplay\Actors\Player\State\DoubleJump</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerNeutralJumpState.h">
-      <Filter>40_Gameplay\Actors\Player\State\NeutralJump</Filter>
+    <ClInclude Include="PlayerJumpState.h">
+      <Filter>40_Gameplay\Actors\Player\State\Jump</Filter>
     </ClInclude>
     <ClInclude Include="PlayerGroomingState.h">
       <Filter>40_Gameplay\Actors\Player\State\Grooming</Filter>
@@ -500,9 +503,6 @@
     </ClInclude>
     <ClInclude Include="Button.h">
       <Filter>10_Core</Filter>
-    </ClInclude>
-    <ClInclude Include="AnimationDraw.h">
-      <Filter>10_Core\Animation</Filter>
     </ClInclude>
     <ClInclude Include="ActorBase.h">
       <Filter>40_Gameplay\Actors\Base</Filter>
@@ -690,6 +690,18 @@
     <ClInclude Include="JumpStand.h">
       <Filter>40_Gameplay\Actors\Room</Filter>
     </ClInclude>
+    <ClInclude Include="Matrix.h">
+      <Filter>10_Core\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Basket.h">
+      <Filter>40_Gameplay\Actors\Room</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraShake.h">
+      <Filter>10_Core\Camera\CameraShake</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelAnimation.h">
+      <Filter>10_Core\Animation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -809,8 +821,8 @@
     <ClCompile Include="PlayerDoubleJumpState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\DoubleJump</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerNeutralJumpState.cpp">
-      <Filter>40_Gameplay\Actors\Player\State\NeutralJump</Filter>
+    <ClCompile Include="PlayerJumpState.cpp">
+      <Filter>40_Gameplay\Actors\Player\State\Jump</Filter>
     </ClCompile>
     <ClCompile Include="PlayerGroomingState.cpp">
       <Filter>40_Gameplay\Actors\Player\State\Grooming</Filter>
@@ -853,9 +865,6 @@
     </ClCompile>
     <ClCompile Include="UIManager.cpp">
       <Filter>10_Core\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="AnimationDraw.cpp">
-      <Filter>10_Core\Animation</Filter>
     </ClCompile>
     <ClCompile Include="UIBase.cpp">
       <Filter>10_Core\UI</Filter>
@@ -971,7 +980,15 @@
     <ClCompile Include="GameSceneBattleState.cpp">
       <Filter>30_Scenes\Game\StateMashine\GameSceneBattleState</Filter>
     </ClCompile>
-    <ClCompile Include="ActorBase.cpp" />
+    <ClCompile Include="ActorBase.cpp">
+      <Filter>40_Gameplay\Actors\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraShake.cpp">
+      <Filter>10_Core\Camera\CameraShake</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelAnimation.cpp">
+      <Filter>10_Core\Animation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Config\toon.json">

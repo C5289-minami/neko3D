@@ -35,7 +35,7 @@ void PlayerGroomingState::Tick(float)
     // 空中で押し直した2回目のSpaceは、ダブルジャンプに使う。
     if (input.jumpPressed && player_.IsGrounded() && player_.IsGravityEnabled())
     {
-        stateMachine_.ChangeState(PlayerStateType::NeutralJump);
+        stateMachine_.ChangeState(PlayerStateType::Jump);
         return;
     }
     if (input.isMoving)

@@ -13,7 +13,8 @@ public:
     // 登録したモデルに使う判定を選ぶ。
     enum class Surface
     {
-        Floor,  // 床。着地用の判定。
+        Floor,  // 足場。上面は着地、側面は滑り移動用の判定。
+        Stand,  // 乗れる台。横からぶつかると止まり、上に乗ると足元がそろう。
         Wall,   // 壁。側面で移動を止める・滑らせる。登れない。
         Pillar  
     };
@@ -45,8 +46,11 @@ public:
 
     //必要な判定を呼ぶ。座標の変更や登る状態への遷移は呼び出し側が行う。
     bool IsTouchingWalls(const Vec3& feetPosition, const ModelOb& modelOb) const;
+
+    // 壁にぶつかる分だけ止まり、斜めに進むと壁沿いにすべる。柱は通り抜ける。
     Vec3 SlideAlongWalls(const Vec3& oldPosition, const Vec3& desiredPosition,
         const ModelOb& modelOb, bool& touched) const;
+
     // pillarCenterを指定すると、接触判定で選ばれた柱の中心も返す。
     bool FindWall(const Vec3& feetPosition, const ModelOb& modelOb, Vec3& wallNormal,
         const Vec3& moveDirection = {}, float* wallTopY = nullptr,
@@ -70,10 +74,15 @@ public:
 
 private:
     struct Entry;
-    bool UpdatePillarBounds(Entry& entry);
+    bool UpdateBounds(Entry& entry);
+    bool FindStandSide(const Vec3& feetPosition, const ModelOb& modelOb,
+    const Vec3& startPosition, const Vec3& direction, Vec3& wallNormal) const;
+    void SweepStands(const Vec3& startPosition, const Vec3& direction, const ModelOb& modelOb,
+    float& travel, Vec3& wallNormal) const;
 
     bool RaycastModels(const Vec3& start, const Vec3& end, Physics::RayHit& hit,
         bool forLanding, bool ignorePillars = false) const;
+    bool RaycastWall(const Vec3& start, const Vec3& end, Physics::RayHit& hit) const;
 
     struct Entry
     {

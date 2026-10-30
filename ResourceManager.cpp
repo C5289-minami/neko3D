@@ -34,8 +34,12 @@ void ResourceManager::LoadAll()
 	LoadSprite(ResourceKeys::UI_ExitButton, L"./Data/Images/TitleUI/exit.png");
 
     // モデルの読み込み
-    LoadModel(ResourceKeys::Model_Player,    L"./Data/Models/Player/player.mv1");
-    LoadModel(ResourceKeys::Model_Boss,       L"./Data/Models/Boss/boss_test.mv1");
+    LoadModel(ResourceKeys::Model_PlayerMike,    L"./Data/Models/Player/mike.mv1");
+    LoadModel(ResourceKeys::Model_PlayerSabi,    L"./Data/Models/Player/sabi.mv1");
+    LoadModel(ResourceKeys::Model_PlayerKuro,    L"./Data/Models/Player/kuro.mv1");
+
+
+    LoadModel(ResourceKeys::Model_Boss,       L"./Data/Models/Boss/boss.mv1");
     LoadModel(ResourceKeys::Model_PillarL, L"./Data/Models/stage/PillarL.mv1");
     LoadModel(ResourceKeys::Model_PillarM, L"./Data/Models/stage/PillarM.mv1");
     LoadModel(ResourceKeys::Model_PillarS, L"./Data/Models/stage/PillarS.mv1");
@@ -45,6 +49,7 @@ void ResourceManager::LoadAll()
     LoadModel(ResourceKeys::Model_stand_m,  L"./Data/Models/stage/stand_m.mv1");
 	LoadModel(ResourceKeys::Model_Room, L"./Data/Models/Room/oheya.mv1");
 	LoadModel(ResourceKeys::Model_JumpStand, L"./Data/Models/Room/jumpstand.mv1");
+	LoadModel(ResourceKeys::Model_Basket, L"./Data/Models/Room/Basket.mv1");
 
 	//LoadModel(ResourceKeys::Model_Test, L"./Data/Models/test1.mv1");
 	// スプライトスタジオの読み込み

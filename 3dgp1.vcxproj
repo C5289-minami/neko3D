@@ -188,10 +188,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ActorBase.h" />
-    <ClInclude Include="AnimationDraw.h" />
     <ClInclude Include="AttackBaseState.h" />
     <ClInclude Include="AttackStateMachine.h" />
     <ClInclude Include="AttackStateType.h" />
+    <ClInclude Include="Basket.h" />
     <ClInclude Include="BossAnimType.h" />
     <ClInclude Include="BossBangSkill.h" />
     <ClInclude Include="Boss.h" />
@@ -208,6 +208,7 @@
     <ClInclude Include="CameraDirector.h" />
     <ClInclude Include="CameraObjectManager.h" />
     <ClInclude Include="CameraPose.h" />
+    <ClInclude Include="CameraShake.h" />
     <ClInclude Include="CameraTransition.h" />
     <ClInclude Include="GameBaseState.h" />
     <ClInclude Include="GameSceneBattleState.h" />
@@ -219,6 +220,8 @@
     <ClInclude Include="GameStateType.h" />
     <ClInclude Include="GameTestScene.h" />
     <ClInclude Include="JumpStand.h" />
+    <ClInclude Include="Matrix.h" />
+    <ClInclude Include="ModelAnimation.h" />
     <ClInclude Include="ModelConfigScene.h" />
     <ClInclude Include="ModelObjectManager.h" />
     <ClInclude Include="ModelType.h" />
@@ -277,7 +280,7 @@
     <ClInclude Include="PlayerIdleState.h" />
     <ClInclude Include="PlayerGroomingState.h" />
     <ClInclude Include="PlayerClimbingState.h" />
-    <ClInclude Include="PlayerNeutralJumpState.h" />
+    <ClInclude Include="PlayerJumpState.h" />
     <ClInclude Include="PlayerDoubleJumpState.h" />
     <ClInclude Include="PlayerAttackState.h" />
     <ClInclude Include="PlayerDamagingState.h" />
@@ -335,9 +338,9 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraDirector.cpp" />
     <ClCompile Include="CameraObjectManager.cpp" />
+    <ClCompile Include="CameraShake.cpp" />
     <ClCompile Include="CameraTransition.cpp" />
     <ClCompile Include="CharSettings.cpp" />
-    <ClCompile Include="AnimationDraw.cpp" />
     <ClCompile Include="AttackBaseState.cpp" />
     <ClCompile Include="AttackStateMachine.cpp" />
     <ClCompile Include="Boss.cpp" />
@@ -351,6 +354,7 @@
     <ClCompile Include="GameSceneTutorialState.cpp" />
     <ClCompile Include="GameStateMachine.cpp" />
     <ClCompile Include="GameTestScene.cpp" />
+    <ClCompile Include="ModelAnimation.cpp" />
     <ClCompile Include="ModelConfigScene.cpp" />
     <ClCompile Include="ModelObjectManager.cpp" />
     <ClCompile Include="PlayerWallJump.cpp" />
@@ -392,7 +396,7 @@
     <ClCompile Include="PlayerIdleState.cpp" />
     <ClCompile Include="PlayerGroomingState.cpp" />
     <ClCompile Include="PlayerClimbingState.cpp" />
-    <ClCompile Include="PlayerNeutralJumpState.cpp" />
+    <ClCompile Include="PlayerJumpState.cpp" />
     <ClCompile Include="PlayerDoubleJumpState.cpp" />
     <ClCompile Include="PlayerAttackState.cpp" />
     <ClCompile Include="PlayerDamagingState.cpp" />

@@ -338,7 +338,7 @@ void Stage::Reset()
         collision_.AddModel(model, ModelCollision::Surface::Pillar);
     
     for (const auto& model : stageModels_)
-        collision_.AddModel(model, ModelCollision::Surface::Floor);
+        collision_.AddModel(model, ModelCollision::Surface::Stand);
     
     collision_.Refresh();
     

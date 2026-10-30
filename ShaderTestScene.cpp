@@ -152,8 +152,6 @@ void ShaderTest::Update(float deltaTime)
 	shaderToggleWasDown = shaderToggleDown;
 
 
-	gameContext->GetPlayer().GetModelObject().SetModelKey(ResourceKeys::Model_Player);
-
 
 }
 
@@ -188,7 +186,7 @@ void ShaderTest::Render() const
 }
 void ShaderTest::DrawImGui()
 {
-#ifndef NDEBUG
+#ifndef NDEBUG	
 	// Outline Settings
 	{
 		ImGui::Begin("Outline Settings");
@@ -198,34 +196,63 @@ void ShaderTest::DrawImGui()
 			g_outlineSettings.outlineColor
 		);
 
-		ImGui::SliderFloat(
-			u8"アウトライン太さ",
-			&g_outlineSettings.radius,
-			0.0f,
-			5.0f
-		);
+		ImGui::Separator();
+		ImGui::Text(u8"--- 外側の輪郭線 ---");
+
+		int outerRadius = static_cast<int>(
+			g_outlineSettings.outerRadius);
+
+		if (ImGui::SliderInt(
+			u8"外側の太さ",
+			&outerRadius,
+			1,
+			100))
+		{
+			g_outlineSettings.outerRadius =
+				static_cast<float>(outerRadius);
+		}
 
 		ImGui::SliderFloat(
-			u8"深度強度",
-			&g_outlineSettings.depthStrength,
+			u8"外側の不透明度",
+			&g_outlineSettings.outerOpacity,
 			0.0f,
-			50.0f
+			1.0f,
+			"%.2f"
 		);
 
+
+		ImGui::Separator();	
+		ImGui::Text(u8"--- 内側の法線エッジ ---");
+
+		int innerRadius = static_cast<int>(
+			g_outlineSettings.innerRadius);
+
+		if (ImGui::SliderInt(
+			u8"内側の太さ",
+			&innerRadius,
+			1,
+			50))
+		{
+			g_outlineSettings.innerRadius =
+				static_cast<float>(innerRadius);
+		}
+
 		ImGui::SliderFloat(
-			u8"法線強度",
+			u8"内側の検出強度",
 			&g_outlineSettings.normalStrength,
 			0.0f,
-			20.0f
+			50.0f,
+			"%.1f"
 		);
+
 
 		ImGui::SliderFloat(
-			u8"輪郭しきい値",
-			&g_outlineSettings.threshold,
-			0.0f,
-			1.0f
+			u8"内側の不透明度",
+			&g_outlineSettings.innerOpacity,
+			0.0f, 1.0f, "%.2f"
 		);
 
+		ImGui::Separator();
 
 		if (ImGui::Button(u8"保存"))
 		{
@@ -434,35 +461,33 @@ void ShaderTest::DrawImGui()
 	}
 #endif
 }
+
+
 void ShaderTest::RenderDepth() const
 {
-	// シーンのカメラを設定する
 	camera_.ApplyCamera();
 
-	const auto& player = gameContext->GetPlayer().GetModelObject();
-	const auto& boss = gameContext->GetBoss().GetModelObject();
-	const auto& room = gameContext->GetRoom().GetRoomObject();
+	int objectId = 1;
 
-	//const ModelObject playerModel = player.GetModelObject().WithParentTransform(
-	//	player.GetPosition(), player.GetRotation());
-	//const ModelObject bossModel = boss.GetModelObject().WithParentTransform(
-	//	boss.GetPosition(), boss.GetRotation());
-	//const ModelObject stageModel = stage.GetModelObject().WithParentTransform(
-	//	stage.GetPosition(), stage.GetRotation());
+	auto drawDepth = [this, &objectId](const ModelObject& model)
+		{
+			modelToonRenderer_.DrawDepth(model, objectId++);
+		};
 
 	for (const auto& stages : gameContext->GetStage().GetStageModelObjects())
 	{
-		modelToonRenderer_.DrawDepth(stages);
+		drawDepth(stages);
 	}
+
 	for (const auto& pillar : gameContext->GetStage().GetPillarModelObjects())
 	{
-		modelToonRenderer_.DrawDepth(pillar);
+		drawDepth(pillar);
 	}
-	modelToonRenderer_.DrawDepth(gameContext->GetStage().GetModelObject());
 
-	modelToonRenderer_.DrawDepth(boss);
-	modelToonRenderer_.DrawDepth(player);
-	modelToonRenderer_.DrawDepth(room);
+	drawDepth(gameContext->GetStage().GetModelObject());
+	drawDepth(gameContext->GetBoss().GetModelObject());
+	drawDepth(gameContext->GetPlayer().GetModelObject());
+	drawDepth(gameContext->GetRoom().GetRoomObject());
 }
 
 void ShaderTest::DrawScene(bool toonEnabled) const

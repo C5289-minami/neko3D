@@ -1,23 +1,58 @@
 #include "OutlineSettings.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <fstream>
 #include <nlohmann/json.hpp>
+
+namespace
+{
+    constexpr float MinRadius = 1.0f;
+    constexpr float MaxRadius = 5.0f;
+    constexpr float MinValue = 0.0f;
+    constexpr float MaxValue = 1.0f;
+    constexpr float MaxDepthStrength = 50.0f;
+    constexpr float MaxNormalStrength = 20.0f;
+
+    template <typename JsonType>
+    void LoadFloat(
+        const JsonType& json,
+        const char* key,
+        float& value,
+        float minimum,
+        float maximum)
+    {
+        const auto it = json.find(key);
+
+        if (it != json.end() && it->is_number())
+        {
+            value = std::clamp(
+                it->get<float>(),
+                minimum,
+                maximum);
+        }
+    }
+}
 
 bool OutlineSettingsManager::Save(const std::string& filePath)
 {
     nlohmann::json json;
 
+    json["outerRadius"] = g_outlineSettings.outerRadius;
+    json["depthStrength"] = g_outlineSettings.depthStrength;
+    json["outerOpacity"] = g_outlineSettings.outerOpacity;
+
+    json["innerRadius"] = g_outlineSettings.innerRadius;
+    json["normalStrength"] = g_outlineSettings.normalStrength;
+    json["normalThreshold"] = g_outlineSettings.normalThreshold;
+    json["innerOpacity"] = g_outlineSettings.innerOpacity;
+
     json["outlineColor"] = {
         g_outlineSettings.outlineColor[0],
         g_outlineSettings.outlineColor[1],
-        g_outlineSettings.outlineColor[2]
-	};
-
-    json["radius"] = g_outlineSettings.radius;
-    json["depthStrength"] = g_outlineSettings.depthStrength;
-    json["normalStrength"] = g_outlineSettings.normalStrength;
-    json["threshold"] = g_outlineSettings.threshold;
+        g_outlineSettings.outlineColor[2],
+        g_outlineSettings.outlineColor[3]
+    };
 
     std::ofstream file(filePath);
 
@@ -44,43 +79,90 @@ bool OutlineSettingsManager::Load(const std::string& filePath)
         nlohmann::json json;
         file >> json;
 
-        if (json.contains("outlineColor"))
+        OutlineSettings loaded{};
+
+        // 以前の設定ファイルとの互換性
+        float legacyRadius = loaded.outerRadius;
+        LoadFloat(
+            json,
+            "radius",
+            legacyRadius,
+            MinRadius,
+            MaxRadius);
+
+        loaded.outerRadius = legacyRadius;
+        loaded.innerRadius = legacyRadius;
+
+        LoadFloat(
+            json,
+            "outerRadius",
+            loaded.outerRadius,
+            MinRadius,
+            MaxRadius);
+
+        LoadFloat(
+            json,
+            "depthStrength",
+            loaded.depthStrength,
+            MinValue,
+            MaxDepthStrength);
+
+        LoadFloat(
+            json,
+            "outerOpacity",
+            loaded.outerOpacity,
+            MinValue,
+            MaxValue);
+
+        LoadFloat(
+            json,
+            "innerRadius",
+            loaded.innerRadius,
+            MinRadius,
+            MaxRadius);
+
+        LoadFloat(
+            json,
+            "normalStrength",
+            loaded.normalStrength,
+            MinValue,
+            MaxNormalStrength);
+
+        LoadFloat(
+            json,
+            "normalThreshold",
+            loaded.normalThreshold,
+            MinValue,
+            MaxValue);
+
+        LoadFloat(
+            json,
+            "innerOpacity",
+            loaded.innerOpacity,
+            MinValue,
+            MaxValue);
+
+        const auto colorIt = json.find("outlineColor");
+
+        if (colorIt != json.end() && colorIt->is_array())
         {
-            for (int i = 0; i < 3; ++i)
+            const size_t count = std::min<std::size_t>(
+                colorIt->size(),
+                4);
+
+            for (size_t i = 0; i < count; ++i)
             {
-                g_outlineSettings.outlineColor[i] =
-                    json["outlineColor"][i];
+                if ((*colorIt)[i].is_number())
+                {
+                    loaded.outlineColor[i] = std::clamp(
+                        (*colorIt)[i].get<float>(),
+                        MinValue,
+                        MaxValue);
+                }
             }
         }
 
-        if (json.contains("radius") &&
-            json["radius"].is_number())
-        {
-            g_outlineSettings.radius =
-                std::clamp(json["radius"].get<float>(), 0.0f, 5.0f);
-        }
-
-        if (json.contains("depthStrength") &&
-            json["depthStrength"].is_number())
-        {
-            g_outlineSettings.depthStrength =
-                std::clamp(json["depthStrength"].get<float>(), 0.0f, 50.0f);
-        }
-
-        if (json.contains("normalStrength") &&
-            json["normalStrength"].is_number())
-        {
-            g_outlineSettings.normalStrength =
-                std::clamp(json["normalStrength"].get<float>(), 0.0f, 20.0f);
-        }
-
-        if (json.contains("threshold") &&
-            json["threshold"].is_number())
-        {
-            g_outlineSettings.threshold =
-                std::clamp(json["threshold"].get<float>(), 0.0f, 1.0f);
-        }
-
+        g_outlineSettings = loaded;
         return true;
     }
     catch (const nlohmann::json::exception&)

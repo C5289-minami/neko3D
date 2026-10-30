@@ -31,56 +31,85 @@ void UIBase::Shake(float intensity, float duration, float frequency)
     shakeOffset = {};
 }
 
+void UIBase::Hide()
+{
+    if (state == State::False || state == State::Hide)
+        return;
+
+    isVisible = false;
+    fadeOnlyMotion = false;
+
+    motion.Start(0.0f, 1.0f, motion.GetDuration(), hideEasing);
+    motion.StartReverse();
+
+    state = State::Hide;
+}
+
 void UIBase::Update(float deltaTime)
 {
+    deltaTime = std::max(0.0f, deltaTime);
     finAlpha = std::clamp(finAlpha, 0, 255);
-    if (deltaTime < 0.0f) deltaTime = 0.0f;
+
     position = position - shakeOffset;
     shakeOffset = {};
-    const bool condition = isVisible && displayCondition();
 
-    if (condition && (state == State::False || state == State::Hide)) {
-        if (state == State::False) {
-            motion.Start(0.0f, 1.0f, motion.GetDuration(), showEasing);
-        } else {
-            motion.SetEasing(showEasing);
-        }
+    const bool shouldShow = isVisible && displayCondition();
+
+    // 表示開始
+    if (shouldShow && state == State::False)
+    {
+        motion.Start(0.0f, 1.0f, motion.GetDuration(), showEasing);
         state = State::Do;
     }
 
-    if (!condition && (state == State::Normal || state == State::Do)) {
+    // 表示条件が無効になったら非表示モーションへ
+    if (!shouldShow && (state == State::Normal || state == State::Do))
+    {
         motion.SetEasing(hideEasing);
         state = State::Hide;
     }
 
-    if (!condition && state == State::False) return;
-
-    if (state == State::Do) {
+    // モーション更新
+    switch (state)
+    {
+    case State::Do:
         motion.Increase(deltaTime);
-        if (motion.IsFinished()) state = State::Normal;
-    } else if (state == State::Hide) {
+        if (motion.IsFinished())
+            state = State::Normal;
+        break;
+
+    case State::Hide:
         motion.Decrease(deltaTime);
-        if (motion.IsFinished()) state = State::False;
+        if (motion.IsFinished())
+            state = State::False;
+        break;
+
+    case State::Normal:
+    case State::False:
+        break;
     }
 
-    if (state == State::Do || state == State::Hide) {
+    // 透明度更新
+    if (state == State::Do || state == State::Hide)
         alpha = static_cast<int>(finAlpha * motion.GetEasedProgress());
-    } else if (state == State::Normal) {
-        alpha = finAlpha;
-    } else {
-        alpha = 0;
-    }
+    else
+        alpha = (state == State::Normal) ? finAlpha : 0;
 
     UpdateStartMotion();
 
+    // 揺れ
     if (shakeElapsed < shakeDuration)
     {
         shakeElapsed = std::min(shakeElapsed + deltaTime, shakeDuration);
+
         const float remaining = 1.0f - shakeElapsed / shakeDuration;
         const float phase = shakeElapsed * shakeFrequency * 6.2831853f;
+
         shakeOffset = DxPlus::Vec2(
             std::sin(phase) * shakeIntensity * remaining,
-            std::sin(phase * 1.37f) * shakeIntensity * remaining);
+            std::sin(phase * 1.37f) * shakeIntensity * remaining
+        );
+
         position = position + shakeOffset;
     }
 }
