@@ -117,7 +117,9 @@ void GameTestScene::Update(float deltaTime)
 		{
 			boss.StartHandAttack();
 		}
-		if (boss.UpdateHandAttack(deltaTime, player.GetWorldPosition()))
+		if (boss.UpdateHandAttack(deltaTime,
+			player.GetWorldPosition(),
+			player.GetWorldRotation().y))
 		{
 			player.TakeDamage();
 		}

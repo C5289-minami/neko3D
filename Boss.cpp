@@ -211,7 +211,8 @@ void Boss::StartHandAttack()
 	}
 }
 
-bool Boss::UpdateHandAttack(float deltaTime, const Vec3& playerPosition)
+bool Boss::UpdateHandAttack(
+	float deltaTime, const Vec3& playerPosition, float playerYaw)
 {
 	if (!handAttackActive_) return false;
 	if (distance_ <= 0.0f)
@@ -227,6 +228,7 @@ bool Boss::UpdateHandAttack(float deltaTime, const Vec3& playerPosition)
 	if (counter_ < 3.0f)
 	{
 		oldPos = center;
+		oldYaw = playerYaw;
 	}
 
 	counter_ += deltaTime;
@@ -240,8 +242,9 @@ bool Boss::UpdateHandAttack(float deltaTime, const Vec3& playerPosition)
 		}
 	}
 
-	attackHands_[0].hitSphere.center = oldPos + Vec3(-distance_, 0.0f, 0.0f);// ¶Žè‚ÌUŒ‚”»’è‚Ì’†S‚ðÝ’è
-	attackHands_[1].hitSphere.center = oldPos + Vec3(distance_, 0.0f, 0.0f);// ‰EŽè‚ÌUŒ‚”»’è‚Ì’†S‚ðÝ’è
+	Vec3 playerRight{ std::cos(oldYaw), 0.0f, -std::sin(oldYaw) };
+	attackHands_[0].hitSphere.center = oldPos - playerRight * distance_;// ¶Žè‚ÌUŒ‚”»’è‚Ì’†S‚ðÝ’è
+	attackHands_[1].hitSphere.center = oldPos + playerRight * distance_;// ‰EŽè‚ÌUŒ‚”»’è‚Ì’†S‚ðÝ’è
 
 
 	if (counter_ < 3.0f) return false;

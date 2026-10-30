@@ -54,7 +54,7 @@ public:
 	float GetAnimTotalTime(BossAnimType::Type type) const;
 
 	void StartHandAttack();
-	bool UpdateHandAttack(float deltaTime, const Vec3& playerPosition);
+	bool UpdateHandAttack(float deltaTime, const Vec3& playerPosition, float playerYaw);
 #ifdef _DEBUG
 	void DrawHandAttackDebug() const;
 #endif
@@ -84,6 +84,7 @@ private:
 	float distance_{ 200.0f };
 	bool handAttackActive_{ false };
 	Vec3 oldPos{};
+	float oldYaw{ 0.0f };
 	std::vector<AttackData> attackHands_{};// 攻撃判定の情報を保持
 
 
