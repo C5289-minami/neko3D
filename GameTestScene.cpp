@@ -26,19 +26,20 @@ void GameTestScene::Init()
 #endif
 
 
-	ToonSettingsManager::Load();
-	OutlineSettingsManager::Load();
+	{
+		ToonSettingsManager::Load();
+		OutlineSettingsManager::Load();
 
-	// トゥーン描画に必要なシェーダーと設定バッファーを初期化
-	if (!modelToonRenderer_.Init())
-		DxPlus::Utils::FatalError(L"modelToonRendererの初期化失敗");
-	if (!shaderEffects_.Init(DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT))
-		DxPlus::Utils::FatalError(L"shaderEffectsの初期化失敗");
+		// トゥーン描画に必要なシェーダーと設定バッファーを初期化
+		if (!modelToonRenderer_.Init())
+			DxPlus::Utils::FatalError(L"modelToonRendererの初期化失敗");
+		if (!shaderEffects_.Init(DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT))
+			DxPlus::Utils::FatalError(L"shaderEffectsの初期化失敗");
 
-	// toon描画とアウトライン描画を有効にする
-	shaderEffects_.GetSettings().toonEnabled = true;
-	shaderEffects_.GetSettings().outlineEnabled = true;
-
+		// toon描画とアウトライン描画を有効にする
+		shaderEffects_.GetSettings().toonEnabled = true;
+		shaderEffects_.GetSettings().outlineEnabled = true;
+	}
 
 
 	StartFadeIn();
