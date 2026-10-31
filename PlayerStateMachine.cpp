@@ -1,4 +1,5 @@
 #include "PlayerStateMachine.h"
+#include "Player.h"
 #include <utility>
 
 PlayerStateMachine::PlayerStateMachine(Player& player)
@@ -27,6 +28,8 @@ void PlayerStateMachine::Initialize()
 
 void PlayerStateMachine::ChangeState(PlayerStateType type)
 {
+	if (type == PlayerStateType::Attack && player_.IsDead()) return;
+
 	if (initialized_ && currentType_ == type) return;
 
 	State* newState = FindState(type);
@@ -36,6 +39,30 @@ void PlayerStateMachine::ChangeState(PlayerStateType type)
 	initialized_ = true;
 	StateMachine::SwitchState(newState);
 
+}
+
+bool PlayerStateMachine::IsAttackBallActive() const
+{
+	// 攻撃ステート中で、攻撃球が有効なら true を返す。
+	return currentType_ == PlayerStateType::Attack && attackState_.IsBallActive();
+}
+
+const Collision::Sphere& PlayerStateMachine::GetAttackBallSphere() const
+{
+	// 攻撃ステートが持つ攻撃球の当たり判定を参照で返す。
+	return attackState_.GetAttackSphere();
+}
+
+bool PlayerStateMachine::TryRegisterAttackBallHit()
+{
+	// 攻撃ステート中に、今回の攻撃球の命中を一度だけ登録できたか返す。
+	return currentType_ == PlayerStateType::Attack && attackState_.TryRegisterHit();
+}
+
+void PlayerStateMachine::Draw() const
+{
+	if (currentType_ == PlayerStateType::Attack)
+		attackState_.Draw();
 }
 
 

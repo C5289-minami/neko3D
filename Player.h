@@ -118,6 +118,8 @@ public:
 	{
 		ActorBase::SetPosition(position);
 	}
+    // 攻撃球の出現位置。攻撃処理とGameTestSceneのデバッグ表示で共通して使う。
+    Vec3 GetAttackBallSpawnPosition() const;
     // 開始場所を変えるときは、Rで戻る場所も一緒に変える。
     void SetStartPosition(const Vec3& position);
     void ResetPosition();
@@ -151,6 +153,7 @@ public:
 	void SetModelKey(const std::wstring& key);
 
 	PlayerStateMachine& GetStateMachine() { return stateMachine_; }
+    const PlayerStateMachine& GetStateMachine() const { return stateMachine_; }
 
 private:
     void UpdateMovement(float deltaTime);

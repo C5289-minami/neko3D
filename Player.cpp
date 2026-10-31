@@ -26,6 +26,14 @@ Player::Player()
 	model_.SetObjectName("Player");
 }
 
+Vec3 Player::GetAttackBallSpawnPosition() const
+//攻撃処理とTestSceneの攻撃位置を合わせるための関数
+{
+	const Vec3 forward{ std::sin(GetYaw()), 0.0f, std::cos(GetYaw()) };
+	return GetPosition()
+		+ Vec3::Up() * (Const::PLAYER_HEIGHT * Const::PLAYER_ATTACK_BALL_HEIGHT_MULTIPLIER)
+		+ forward * (Const::PLAYER_RADIUS + Const::PLAYER_ATTACK_BALL_FORWARD_OFFSET);
+}
 
 void Player::Init()
 {
@@ -171,6 +179,7 @@ void Player::UpdateMovement(float deltaTime)
     // 歩いて足場を離れた場合も、通常ジャンプ中と同じ空中入力を受け付ける。
     // Jumpへの遷移だけでは上向きの速度を加えない。
     auto state = GetCurrentState();
+
     if (gravityEnabled_ && !isGrounded_ &&
         (state == PlayerStateType::Idle || state == PlayerStateType::Walk ||
             state == PlayerStateType::Grooming))
@@ -434,6 +443,7 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 void Player::Draw() const
 {
 	model_.Draw();
+	stateMachine_.Draw();
 }
 
 
