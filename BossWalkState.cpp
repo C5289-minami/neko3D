@@ -17,6 +17,8 @@ void BossWalkState::Enter()
 
 void BossWalkState::Tick(float deltaTime)
 {
+	boss_.UpdateAnimation(deltaTime);
+
 	walkMotion_.Update(deltaTime);
 	if (walkMotion_.IsFinished())
 	{

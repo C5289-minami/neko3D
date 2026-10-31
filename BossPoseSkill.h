@@ -4,58 +4,39 @@
 #include "Boss.h"
 #include "Motion.h"
 
-#include <cmath>
-
-// ボスの攻撃スキルを管理するための抽象クラス
-
 class BossPoseSkill : public IAttackSkill
 {
 public:
-    explicit BossPoseSkill(Boss& boss)
-        : boss_(boss)
+    explicit BossPoseSkill(
+        Boss& boss,
+        float preActionTime = 0.35f,
+        float aimingTime = 0.15f,
+        float attackTime = 0.3f,
+        float recoveryTime = 0.35f,
+        float returnTime = 0.1f
+    )
+        : boss_(boss),
+        preActionMotion_(0.0f, 1.0f, preActionTime, Motion::Easing::EaseOut),
+        aimingMotion_(0.0f, 1.0f, aimingTime),
+        attackMotion_(0.0f, 1.0f, attackTime, Motion::Easing::EaseInOut),
+        recoveryMotion_(0.0f, 1.0f, recoveryTime, Motion::Easing::EaseOut),
+        returnMotion_(0.0f, 1.0f, returnTime)
     {
     }
 
-    void Reset()
-    {
-        basePosition_ = boss_.GetPosition();
-        baseRotation_ = boss_.GetModelObject().GetRotation();
-        preActionMotion_.Reset();
-        aimingMotion_.Reset();
-        attackMotion_.Reset();
-        recoveryMotion_.Reset();
-        returnMotion_.Reset();
-    }
+    void Reset();
 
-    void OnPreAction(float deltaTime) override
-    {
-        preActionMotion_.Update(deltaTime);
-        ApplyPhase(AttackStateType::PreAction, preActionMotion_.GetEasedProgress());
-    }
+    void OnPreActionEnter() override;
+    void OnAimingEnter() override;
+    void OnAttackEnter() override;
+    void OnRecoveryEnter() override;
+    void OnReturnEnter() override;
 
-    void OnAiming(float deltaTime) override
-    {
-        aimingMotion_.Update(deltaTime);
-        ApplyPhase(AttackStateType::Aiming, 1.0f);
-    }
-
-    void OnAttack(float deltaTime) override
-    {
-        attackMotion_.Update(deltaTime);
-        ApplyPhase(AttackStateType::Attack, attackMotion_.GetEasedProgress());
-    }
-
-    void OnRecovery(float deltaTime) override
-    {
-        recoveryMotion_.Update(deltaTime);
-        ApplyPhase(AttackStateType::Recovery, recoveryMotion_.GetEasedProgress());
-    }
-
-    void OnReturn(float deltaTime) override
-    {
-        returnMotion_.Update(deltaTime);
-        ApplyPose({}, {});
-    }
+    void OnPreAction(float deltaTime) override;
+    void OnAiming(float deltaTime) override;
+    void OnAttack(float deltaTime) override;
+    void OnRecovery(float deltaTime) override;
+    void OnReturn(float deltaTime) override;
 
     bool IsPreActionFinished() const override { return preActionMotion_.IsFinished(); }
     bool IsAimingFinished() const override { return aimingMotion_.IsFinished(); }
@@ -63,48 +44,22 @@ public:
     bool IsRecoveryFinished() const override { return recoveryMotion_.IsFinished(); }
     bool IsReturnFinished() const override { return returnMotion_.IsFinished(); }
 
+    void UpdateAnimation(float deltaTime) override
+    {
+        boss_.UpdateAnimation(deltaTime);
+    }
+    void SetPhaseDuration(
+        float preAction,
+        float aiming,
+        float attack,
+        float recovery,
+        float returnTime
+    );
 protected:
     virtual void ApplyPhase(AttackStateType phase, float progress) = 0;
 
-    Vec3 GetForward() const
-    {
-        return { std::sin(baseRotation_.y), 0.0f, std::cos(baseRotation_.y) };
-    }
-
-    void ApplyPose(const Vec3& positionOffset, const Vec3& rotationOffset)
-    {
-        boss_.SetPosition(basePosition_ + positionOffset);
-        boss_.GetModelObject().SetRotation(baseRotation_ + rotationOffset);
-    }
-
-    void SetMotionDuration(AttackStateType phase, float duration)
-    {
-        switch (phase)
-        {
-        case AttackStateType::PreAction:
-            preActionMotion_.SetDuration(duration);
-            break;
-        case AttackStateType::Aiming:
-            aimingMotion_.SetDuration(duration);
-            break;
-        case AttackStateType::Attack:
-            attackMotion_.SetDuration(duration);
-            break;
-        case AttackStateType::Recovery:
-            recoveryMotion_.SetDuration(duration);
-            break;
-        case AttackStateType::Return:
-            returnMotion_.SetDuration(duration);
-            break;
-        default:
-            break;
-        }
-	}
-
     Boss& boss_;
 private:
-    Vec3 basePosition_{};
-    Vec3 baseRotation_{};
     Motion preActionMotion_{ 0.0f, 1.0f, 0.35f, Motion::Easing::EaseOut };
     Motion aimingMotion_{ 0.0f, 1.0f, 0.15f };
     Motion attackMotion_{ 0.0f, 1.0f, 0.3f, Motion::Easing::EaseInOut };

@@ -3,11 +3,6 @@
 #include <string>
 
 #include "Boss.h"
-#include "BossBangSkill.h"
-#include "BossBiteSkill.h"
-#include "BossClapSkill.h"
-#include "BossHairBallSkill.h"
-#include "BossTailWhipSkill.h"
 #include "Scene.h"
 #include "GameContext.h"
 #include "DrawableObject.h"
@@ -22,12 +17,7 @@ class ShaderTest final : public Scene
 {
 public:
     explicit ShaderTest(class GameContext* context)
-        : Scene(context),
-          bangSkill_(context->GetBoss()),
-          tailWhipSkill_(context->GetBoss()),
-          clapSkill_(context->GetBoss()),
-          hairBallSkill_(context->GetBoss()),
-          biteSkill_(context->GetBoss())
+        : Scene(context)
     {
     }
 
@@ -37,15 +27,8 @@ public:
 	void DrawImGui() override;
 
 private:
-    BossBangSkill bangSkill_;
-    BossTailWhipSkill tailWhipSkill_;
-    BossClapSkill clapSkill_;
-    BossHairBallSkill hairBallSkill_;
-    BossBiteSkill biteSkill_;
-
   
     // Debug
-    bool skillKeyWasDown_{};
     Camera::FreeCamera camera_{};
     bool debugActorsPaused_{};
     std::string transformInitialStatus_;

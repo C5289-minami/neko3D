@@ -42,7 +42,7 @@ public:
 	}
 
 	bool IsBlending() const { return static_cast<bool>(nextAnimation_); }
-
+	bool IsFinished() const;
 private:
 	class AttachedAnimation
 	{
@@ -104,4 +104,5 @@ private:
 
 	bool loop_{ true };
 	float speedScale_{ 1.0f };
+	bool finished_{ false };
 };

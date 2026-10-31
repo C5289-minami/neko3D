@@ -7,6 +7,11 @@
 #include "DxPlus/Debug.h"
 #include "ModelObjectManager.h"
 
+// skill
+#include "BossHairBallSkill.h"
+#include "BossClapSkill.h"
+#include "BossBiteSkill.h"
+#include "BossTailWhipSkill.h"
 
 Boss::Boss()
 	: ActorBase("Boss"), stateMachine_(*this)
@@ -16,9 +21,8 @@ Boss::Boss()
 
 	model_.SetObjectId("boss_model");
 	model_.SetObjectName("Boss");
-
-	currentAnimIndex_ = 0;
 }
+Boss::~Boss() = default;
 
 void Boss::Init()
 {
@@ -26,6 +30,11 @@ void Boss::Init()
 	stateMachine_.Initialize();
 
 	model_.SetModelType(ModelType::Bone);
+
+	hairBallSkill_ = std::make_unique<BossHairBallSkill>(*this);
+	clapSkill_ = std::make_unique<BossClapSkill>(*this);
+	biteSkill_ = std::make_unique<BossBiteSkill>(*this);
+	tailWhipSkill_ = std::make_unique<BossTailWhipSkill>(*this);
 	
 	Reset();
 }
@@ -49,22 +58,39 @@ void Boss::Reset()
 	attackHands_.clear();
 	attackHands_.resize(2);
 
-	// 更新を止めても描画できるように初期ポーズを用意する
-	animation_.Play3D(RM().GetModel(model_.GetModelKey()), currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
+	// AnimationHandleの初期化
+	const int idleModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Idle);
+	idleAnimHandle_ = AnimationHandle::FromIndex(idleModelHandle, 0);
+
+	const int sippoModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Sippo);
+	tailWhipAnimHandle_ = AnimationHandle::FromIndex(sippoModelHandle, 0);
+
+
+	// 初期アニメーションの再生
+	animation_.Play3D(
+		RM().GetModel(model_.GetModelKey()),
+		GetAnimationHandle(BossAnimType::Idle),
+		true,
+		Const::ANIM_FPS
+	);
 	animation_.Update(0.0f);
+
 }
 
 void Boss::Update(float deltaTime)
 {
-
 	stateMachine_.Tick(deltaTime);
+	
+
 	position_ += velocity_ * deltaTime;
 
-	const int modelHandle = RM().GetModel(model_.GetModelKey());
-	animation_.Play3D(modelHandle, currentAnimIndex_, currentAnimLoop_, Const::ANIM_FPS);
-	animation_.Update(deltaTime);
-
-	DxPlus::Debug::SetString(L"Kで歩き / スキルはBoss::UseSkillから発動");
+	// 変更されたアニメーションを再生
+	animation_.Play3D(
+		RM().GetModel(model_.GetModelKey()),
+		GetAnimationHandle(currentAnimType_),
+		currentAnimLoop_,
+		Const::ANIM_FPS
+	);
 }
 
 void Boss::Draw() const
@@ -94,6 +120,59 @@ void Boss::DrawHandAttackDebug() const
 	DxLib::SetWriteZBuffer3D(TRUE);
 }
 #endif
+void Boss::UpdateAnimation(float deltaTime)
+{
+	animation_.Update(deltaTime);
+}
+
+AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
+{
+
+	switch (type)
+	{
+	case BossAnimType::Idle:  return idleAnimHandle_;
+	case BossAnimType::TailWhip: return tailWhipAnimHandle_;
+	default:
+		DxPlus::Utils::FatalError(L"BossHandleを取得できませんでした。GetAnimationHandleを確認して");
+		return {};
+	}
+}
+
+bool Boss::UseSkill(BossAttackType type)
+{
+	if (stateMachine_.GetCurrentType() == BossStateType::Attack)
+		return false;
+
+	switch (type)
+	{
+	case BossAttackType::HairBall:
+		hairBallSkill_->Reset();
+		activeSkill_ = hairBallSkill_.get();
+		break;
+
+	case BossAttackType::Clap:
+		clapSkill_->Reset();
+		activeSkill_ = clapSkill_.get();
+		break;
+
+	case BossAttackType::Bite:
+		biteSkill_->Reset();
+		activeSkill_ = biteSkill_.get();
+		break;
+
+	case BossAttackType::TailWhip:
+		tailWhipSkill_->Reset();
+		activeSkill_ = tailWhipSkill_.get();
+		break;
+
+	default:
+		return false;
+	}
+
+	stateMachine_.ChangeState(BossStateType::Attack);
+	return stateMachine_.GetCurrentType() == BossStateType::Attack;
+}
+
 
 void Boss::SetMoveDirection(const Vec3& moveDirection, float speed)
 {
@@ -210,21 +289,4 @@ bool Boss::UpdateHandAttack(
 
 	}
 	return false;
-}
-
-bool Boss::UseSkill(IAttackSkill& skill)
-{
-	if (stateMachine_.GetCurrentType() == BossStateType::Attack)
-	{
-		return false;
-	}
-
-	activeSkill_ = &skill;
-	stateMachine_.ChangeState(BossStateType::Attack);
-	if (stateMachine_.GetCurrentType() != BossStateType::Attack)
-	{
-		activeSkill_ = nullptr;
-		return false;
-	}
-	return true;
 }

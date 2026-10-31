@@ -82,34 +82,6 @@ void ShaderTest::Update(float deltaTime)
 		//gameContext->GetBoss().Update(deltaTime);
 	}
 
-	// --- スキル入力処理 ---
-	int selectedSkill = 0;
-	if (DxLib::CheckHitKey(KEY_INPUT_1)) selectedSkill = 1;
-	else if (DxLib::CheckHitKey(KEY_INPUT_2)) selectedSkill = 2;
-	else if (DxLib::CheckHitKey(KEY_INPUT_3)) selectedSkill = 3;
-	else if (DxLib::CheckHitKey(KEY_INPUT_4)) selectedSkill = 4;
-	else if (DxLib::CheckHitKey(KEY_INPUT_5)) selectedSkill = 5;
-
-	const bool skillKeyDown = selectedSkill != 0;
-	if (!actorsPaused && !keyboardCaptured && skillKeyDown && !skillKeyWasDown_ && gameContext->GetBoss().GetCurrentState() != BossStateType::Attack)
-	{
-		BossPoseSkill* skill = nullptr;
-		switch (selectedSkill)
-		{
-		case 1: skill = &bangSkill_; break;
-		case 2: skill = &tailWhipSkill_; break;
-		case 3: skill = &clapSkill_; break;
-		case 4: skill = &hairBallSkill_; break;
-		case 5: skill = &biteSkill_; break;
-		}
-
-		if (skill)
-		{
-			skill->Reset();
-			gameContext->GetBoss().UseSkill(*skill);
-		}
-	}
-	skillKeyWasDown_ = skillKeyDown;
 #ifndef NDEBUG
 	if (DxLib::CheckHitKey(KEY_INPUT_F1))
 	{

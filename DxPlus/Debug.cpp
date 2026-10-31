@@ -54,7 +54,11 @@ namespace DxPlus
 
         for (const auto& message : debugMessages)
         {
-            DxPlus::Text::DrawString(message.c_str(), startX, y, defaultColor);
+            DxPlus::Text::DrawString(message.c_str(), startX - 1, y - 1, defaultColor);
+
+            DxPlus::Text::DrawString(message.c_str(), startX + 1, y + 1, defaultColor);
+
+            DxPlus::Text::DrawString(message.c_str(), startX, y, 0);
             y += lineSpacing;
         }
 

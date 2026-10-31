@@ -11,6 +11,29 @@ AttackBaseState::AttackBaseState(AttackStateMachine& stateMachine, AttackStateTy
 
 void AttackBaseState::Enter()
 {
+	IAttackSkill* skill = stateMachine_.GetCurrentSkill();
+	if (!skill) return;
+
+	switch (type_)
+	{
+	case AttackStateType::PreAction:
+		skill->OnPreActionEnter();
+		break;
+	case AttackStateType::Aiming:
+		skill->OnAimingEnter();
+		break;
+	case AttackStateType::Attack:
+		skill->OnAttackEnter();
+		break;
+	case AttackStateType::Recovery:
+		skill->OnRecoveryEnter();
+		break;
+	case AttackStateType::Return:
+		skill->OnReturnEnter();
+		break;
+	default:
+		break;
+	}
 }
 
 void AttackBaseState::Tick(float deltaTime)
@@ -28,26 +51,31 @@ void AttackBaseState::Tick(float deltaTime)
 	{
 	case AttackStateType::PreAction:
 		skill->OnPreAction(deltaTime);
+		skill->UpdateAnimation(deltaTime);
 		phaseFinished = skill->IsPreActionFinished();
 		nextType = AttackStateType::Aiming;
 		break;
 	case AttackStateType::Aiming:
 		skill->OnAiming(deltaTime);
+		skill->UpdateAnimation(deltaTime);
 		phaseFinished = skill->IsAimingFinished();
 		nextType = AttackStateType::Attack;
 		break;
 	case AttackStateType::Attack:
 		skill->OnAttack(deltaTime);
+		skill->UpdateAnimation(deltaTime);
 		phaseFinished = skill->IsAttackFinished();
 		nextType = AttackStateType::Recovery;
 		break;
 	case AttackStateType::Recovery:
 		skill->OnRecovery(deltaTime);
+		skill->UpdateAnimation(deltaTime);
 		phaseFinished = skill->IsRecoveryFinished();
 		nextType = AttackStateType::Return;
 		break;
 	case AttackStateType::Return:
 		skill->OnReturn(deltaTime);
+		skill->UpdateAnimation(deltaTime);
 		phaseFinished = skill->IsReturnFinished();
 		break;
 	default:
