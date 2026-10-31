@@ -14,6 +14,7 @@ void PlayerJumpState::Enter()
     player_.SetAnimation(PlayerAnimType::Jump, false);
     // 落下開始でもこの状態を使う。上向きの初速はTryJumpが設定する。
     DxPlus::Debug::SetFormatString(L"PlayerJumpState::Enter");
+  
 }
 
 void PlayerJumpState::Tick(float)
@@ -22,6 +23,7 @@ void PlayerJumpState::Tick(float)
     // 踏み外し直後は通常ジャンプを優先し、猶予後は未使用の二段目を使う。
     if (input.jumpPressed && player_.TryJump())
     {
+       
         return;
     }
 
@@ -29,6 +31,7 @@ void PlayerJumpState::Tick(float)
     {
         stateMachine_.ChangeState(player_.GetInput().isMoving
             ? PlayerStateType::Walk : PlayerStateType::Idle);
+
         return;
     }
 
