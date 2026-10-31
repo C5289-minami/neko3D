@@ -28,6 +28,7 @@ public:
 	void Initialize();
 
 	void ChangeState(PlayerStateType type);
+	void Draw() const;
 
 	PlayerStateType GetCurrentType() const { return currentType_; };
 

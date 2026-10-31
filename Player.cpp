@@ -171,6 +171,7 @@ void Player::UpdateMovement(float deltaTime)
     // 歩いて足場を離れた場合も、通常ジャンプ中と同じ空中入力を受け付ける。
     // Jumpへの遷移だけでは上向きの速度を加えない。
     auto state = GetCurrentState();
+
     if (gravityEnabled_ && !isGrounded_ &&
         (state == PlayerStateType::Idle || state == PlayerStateType::Walk ||
             state == PlayerStateType::Grooming))
@@ -434,6 +435,7 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 void Player::Draw() const
 {
 	model_.Draw();
+	stateMachine_.Draw();
 }
 
 

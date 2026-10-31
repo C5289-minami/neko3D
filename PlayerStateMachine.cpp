@@ -1,4 +1,5 @@
 #include "PlayerStateMachine.h"
+#include "Player.h"
 #include <utility>
 
 PlayerStateMachine::PlayerStateMachine(Player& player)
@@ -27,6 +28,8 @@ void PlayerStateMachine::Initialize()
 
 void PlayerStateMachine::ChangeState(PlayerStateType type)
 {
+	if (type == PlayerStateType::Attack && player_.IsDead()) return;
+
 	if (initialized_ && currentType_ == type) return;
 
 	State* newState = FindState(type);
@@ -36,6 +39,12 @@ void PlayerStateMachine::ChangeState(PlayerStateType type)
 	initialized_ = true;
 	StateMachine::SwitchState(newState);
 
+}
+
+void PlayerStateMachine::Draw() const
+{
+	if (currentType_ == PlayerStateType::Attack)
+		attackState_.Draw();
 }
 
 
