@@ -188,6 +188,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ActorBase.h" />
+    <ClInclude Include="AnimationHandle.h" />
     <ClInclude Include="AttackBaseState.h" />
     <ClInclude Include="AttackStateMachine.h" />
     <ClInclude Include="AttackStateType.h" />
@@ -210,6 +211,8 @@
     <ClInclude Include="CameraPose.h" />
     <ClInclude Include="CameraShake.h" />
     <ClInclude Include="CameraTransition.h" />
+    <ClInclude Include="PlayerActionEvent.h" />
+    <ClInclude Include="TutorialChecklist.h" />
     <ClInclude Include="GameBaseState.h" />
     <ClInclude Include="GameSceneBattleState.h" />
     <ClInclude Include="GameSceneResultsState.h" />
@@ -327,6 +330,9 @@
     <ClInclude Include="StatusTestScene.h" />
     <ClInclude Include="TitleScene.h" />
     <ClInclude Include="ToonSettings.h" />
+    <ClInclude Include="TutorialObjective.h" />
+    <ClInclude Include="TutorialTaskManager.h" />
+    <ClInclude Include="TutorialType.h" />
     <ClInclude Include="UIBase.h" />
     <ClInclude Include="UIManager.h" />
     <ClInclude Include="Vector3.h" />
@@ -427,6 +433,8 @@
     <ClCompile Include="StatusTestScene.cpp" />
     <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="ToonSettings.cpp" />
+    <ClCompile Include="TutorialChecklist.cpp" />
+    <ClCompile Include="TutorialTaskManager.cpp" />
     <ClCompile Include="UIBase.cpp" />
     <ClCompile Include="UIManager.cpp" />
   </ItemGroup>

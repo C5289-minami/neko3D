@@ -16,6 +16,10 @@
 #include "CameraDirector.h"
 #include <string>
 
+// Tutorial
+#include "TutorialChecklist.h"
+#include "TutorialType.h"
+
 class GameScene final : public Scene
 {
 public:
@@ -50,14 +54,19 @@ public:
         bool drawSpheres = true;
     };
 
+	// チュートリアル
+
     TutorialCollisionSettings& GetTutorialCollisionSettings()
     {
         return tutorialCollisionSettings_;
     }
-
     const TutorialCollisionSettings& GetTutorialCollisionSettings() const
     {
         return tutorialCollisionSettings_;
+    }
+    TutorialChecklist& GetTutorialChecklist()
+    {
+        return tutorialChecklist_;
     }
 private:
 
@@ -80,4 +89,5 @@ private:
 
     TutorialCollisionSettings tutorialCollisionSettings_{};
     void DrawTutorialCollisionSpheres() const;
+    TutorialChecklist tutorialChecklist_;
 };

@@ -66,7 +66,7 @@ public:
 	void TurnTowards(const Vec3& moveDir, float deltaTime);
 
 	// ジャンプ
-	void JumpAction();
+	bool JumpAction();
 	void StartDoubleJump();
 	bool CanDoubleJump() const { return gravityEnabled_ && !isGrounded_ && !doubleJumpUsed_; }
 	float GetDoubleJumpSpeed() const { return doubleJumpSpeed_; }
@@ -144,6 +144,8 @@ public:
 	const CharData& GetCharData() const{ return charData; }
 	void SetCharData(const CharData& data) { charData = data; }
 	void SetModelKey(const std::wstring& key);
+
+	PlayerStateMachine& GetStateMachine() { return stateMachine_; }
 
 private:
     void UpdateMovement(float deltaTime);

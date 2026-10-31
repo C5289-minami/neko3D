@@ -2,6 +2,8 @@
 #include "GameBaseState.h"
 #include "Vector3.h"
 #include "CameraPose.h" 
+#include "TutorialType.h"
+#include "TutorialTaskManager.h"
 
 class GameSceneTutorialState : public GameBaseState
 {
@@ -36,4 +38,8 @@ private:
 
 	TutorialCameraState cameraState_ =
 		TutorialCameraState::LookPlayer;
+
+	TutorialTaskManager taskManager_;
+
+	Vec3 previousPlayerPosition_{};
 };

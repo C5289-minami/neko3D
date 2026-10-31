@@ -15,7 +15,6 @@
 #include <tchar.h>
 #include <cstdio>
 #include <Windows.h>
-#include <tchar.h>
 
 Player::Player()
 	: ActorBase("Player"), stateMachine_(*this)
@@ -791,17 +790,15 @@ void Player::StartWallJump()
 	isGrounded_ = false;
 }
 
-void Player::JumpAction()
+bool Player::JumpAction()
 {
 	if (!gravityEnabled_ || !isGrounded_)
-	{
-		return;
-	}
+		return false;
 
-	velocity_.y =
-		Const::PLAYER_JUMP_SPEED;
-
+	velocity_.y = Const::PLAYER_JUMP_SPEED;
 	isGrounded_ = false;
+
+	return true;
 }
 
 
