@@ -42,7 +42,8 @@ void Boss::Init()
 void Boss::Reset()
 {
 	counter_ = 0.0f;
-	health_ = MaxHealth;
+	health_ = maxHealth_;
+	phase_ = BossPhase::Phase1;
 	distance_ = 200.0f;
 	handAttackActive_ = false;
 	// 初期位置・回転・拡大率はJSONファイルから読み込む
@@ -76,6 +77,15 @@ void Boss::Reset()
 	);
 	animation_.Update(0.0f);
 
+}
+
+void Boss::TakeDamage()
+{
+	--health_;
+
+	// 体力が半分以下ならフェーズ2へ。
+	if (phase_ == BossPhase::Phase1 && health_ <= maxHealth_ / 2)
+		phase_ = BossPhase::Phase2;
 }
 
 void Boss::Update(float deltaTime)

@@ -14,6 +14,12 @@
 #include <memory>
 #include "BossAttackType.h"
 
+enum class BossPhase
+{
+	Phase1,
+	Phase2
+};
+
 class BossHairBallSkill;
 class BossClapSkill;
 class BossBiteSkill;
@@ -67,7 +73,8 @@ public:
 	bool UpdateHandAttack(float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition);
 	bool IsHitByAttackSphere(const Collision::Sphere& sphere) const;
 	int GetHealth() const { return health_; }
-	void TakeDamage() { --health_; }
+	BossPhase GetPhase() const { return phase_; }
+	void TakeDamage();
 #ifdef _DEBUG
 	void DrawHandAttackDebug() const;
 #endif
@@ -85,13 +92,13 @@ private:
 	BossStateMachine stateMachine_;
 
 
+	BossPhase phase_{ BossPhase::Phase1 };
+
 	int health_{ MaxHealth };
 	int maxHealth_{ MaxHealth };
 	float downGauge_{ 0.0f };
 	float maxDownGauge_{ 100.0f };
 	float attackPower_{ 10.0f };
-
-	bool isHeatUp{ false };
 
 	float counter_{ 0.0f };
 	float distance_{ 200.0f };
