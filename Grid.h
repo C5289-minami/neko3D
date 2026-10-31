@@ -2,7 +2,6 @@
 // Gameplay/Debug/Grid.h
 // =============================
 #pragma once
-#include <algorithm>
 
 class Grid
 {
@@ -11,7 +10,11 @@ public:
 
     // accessors
     int GetHalfCount() const { return halfCount; }
-    void SetHalfCount(int h) { halfCount = std::max(h, 1); }
+    void SetHalfCount(int h) 
+    {
+		if (h < 1) h = 1;
+        halfCount = h; 
+    }
 
     float GetSpacing() const { return spacing; }
     void SetSpacing(float s) { spacing = s; }
