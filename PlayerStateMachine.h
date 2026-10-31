@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "StateMachine.h"
 #include "PlayerStateType.h"
+#include "PlayerActionEvent.h"
+#include <functional>
 
 // State
 #include "PlayerIdleState.h"
@@ -15,6 +17,7 @@
 #include "PlayerClimbingState.h"
 #include "PlayerWallJump.h"
 
+
 class Player;
 
 class PlayerStateMachine : public StateMachine
@@ -28,6 +31,12 @@ public:
 
 	PlayerStateType GetCurrentType() const { return currentType_; };
 
+
+	// 通知先を登録
+	void SetEventCallback(
+		std::function<void(PlayerActionEvent)> callback);
+	// イベントを通知
+	void NotifyEvent(PlayerActionEvent event);
 private:
 	State* FindState(PlayerStateType type);
 
@@ -35,6 +44,8 @@ private:
 	
 	PlayerStateType currentType_{ PlayerStateType::Idle };
 	bool initialized_{ false };
+
+	std::function<void(PlayerActionEvent)> eventCallback_;
 
 	PlayerIdleState idleState_;
 	PlayerWalkState walkState_;

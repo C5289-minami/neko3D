@@ -70,7 +70,8 @@ public:
 	bool CanGroundJump() const { return gravityEnabled_ && (isGrounded_ || coyoteTimeRemaining_ > 0.0f); }
 	// 地上・踏み外し直後は通常ジャンプ、それ以外の空中では二段ジャンプ。
 	bool TryJump();
-	void JumpAction();
+	bool JumpAction();
+
 	void StartDoubleJump();
 	bool CanDoubleJump() const { return gravityEnabled_ && !isGrounded_ && !doubleJumpUsed_; }
 	float GetDoubleJumpSpeed() const { return doubleJumpSpeed_; }
@@ -148,6 +149,8 @@ public:
 	const CharData& GetCharData() const{ return charData; }
 	void SetCharData(const CharData& data) { charData = data; }
 	void SetModelKey(const std::wstring& key);
+
+	PlayerStateMachine& GetStateMachine() { return stateMachine_; }
 
 private:
     void UpdateMovement(float deltaTime);

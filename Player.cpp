@@ -15,7 +15,6 @@
 #include <tchar.h>
 #include <cstdio>
 #include <Windows.h>
-#include <tchar.h>
 
 Player::Player()
 	: ActorBase("Player"), stateMachine_(*this)
@@ -824,18 +823,15 @@ bool Player::TryJump()
     return false;
 }
 
-void Player::JumpAction()
+bool Player::JumpAction()
 {
-	if (!CanGroundJump())
-	{
-		return;
-	}
+	if (!CanGroundJump())return false;
 
-	velocity_.y =
-		Const::PLAYER_JUMP_SPEED;
-
+	velocity_.y = Const::PLAYER_JUMP_SPEED;
 	isGrounded_ = false;
 	coyoteTimeRemaining_ = 0.0f;
+
+	return true;
 }
 
 

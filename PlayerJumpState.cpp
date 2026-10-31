@@ -1,6 +1,7 @@
 ﻿#include "PlayerJumpState.h"
-#include "DxPlus/Debug.h"
+#include "PlayerStateMachine.h"
 #include "Player.h"
+#include "DxPlus/Debug.h"
 
 PlayerJumpState::PlayerJumpState(PlayerStateMachine& stateMachine, Player& player)
     : PlayerBaseState(stateMachine, player)

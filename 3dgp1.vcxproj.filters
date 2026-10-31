@@ -265,6 +265,9 @@
     <Filter Include="10_Core\Camera\CameraShake">
       <UniqueIdentifier>{74007395-5b76-429b-b265-721c1d69ac9d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="15_System\Tutorial">
+      <UniqueIdentifier>{01cc81e3-5211-47c5-aa98-84f85af8ae49}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -702,6 +705,22 @@
     <ClInclude Include="ModelAnimation.h">
       <Filter>10_Core\Animation</Filter>
     </ClInclude>
+    <ClInclude Include="AnimationHandle.h">
+      <Filter>10_Core\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="TutorialChecklist.h">
+      <Filter>15_System\Tutorial</Filter>
+    </ClInclude>
+    <ClInclude Include="TutorialType.h">
+      <Filter>15_System\Tutorial</Filter>
+    </ClInclude>
+    <ClInclude Include="TutorialObjective.h">
+      <Filter>15_System\Tutorial</Filter>
+    </ClInclude>
+    <ClInclude Include="TutorialTaskManager.h" />
+    <ClInclude Include="PlayerActionEvent.h">
+      <Filter>40_Gameplay\Actors\Player</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -989,6 +1008,10 @@
     <ClCompile Include="ModelAnimation.cpp">
       <Filter>10_Core\Animation</Filter>
     </ClCompile>
+    <ClCompile Include="TutorialChecklist.cpp">
+      <Filter>15_System\Tutorial</Filter>
+    </ClCompile>
+    <ClCompile Include="TutorialTaskManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Config\toon.json">

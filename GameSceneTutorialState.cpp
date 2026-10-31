@@ -25,11 +25,34 @@ void GameSceneTutorialState::Enter()
 	player->SetStartPosition(tutorialPlayerStartPos);
 	player->SetDefMove(true);
 
+	// チェックリスト初期化
+	auto& checklist = gameScene_.GetTutorialChecklist();
+
+	taskManager_.Init(checklist);
+
+	taskManager_.AddTask(TutorialType::Move, L"3秒移動する", 3.0f);
+	taskManager_.AddTask(TutorialType::Jump, L"ジャンプする");
+	taskManager_.AddTask(TutorialType::DoubleJump, L"二段ジャンプする");
+	taskManager_.AddTask(TutorialType::Climb, L"柱を登る");
+
+	checklist.SetVisible(true);
+
+	previousPlayerPosition_ = player->GetWorldPosition();
+
+	// カメラを初期位置に設定
 	auto& camera = gameScene_.GetTargetCamera();
 	camera.SetTarget(player->GetPosition() + Vec3::Up() * 100.0f);
 
 	targetCameraSwitched_ = false;
 	cameraState_ = TutorialCameraState::LookPlayer;
+
+	// PlayerStateMachineの通知をTaskManagerに接続
+	player->GetStateMachine().SetEventCallback(
+		[this](PlayerActionEvent event)
+		{
+			taskManager_.OnPlayerAction(event);
+		}
+	);
 }
 
 void GameSceneTutorialState::Tick(float deltaTime)
@@ -38,6 +61,24 @@ void GameSceneTutorialState::Tick(float deltaTime)
 
 	auto& director = gameScene_.GetCameraDirector();
 	auto* player = gameScene_.GetGameContext()->GetPlayer();
+
+	// =========================================
+	// 移動チュートリアル
+	// =========================================
+
+	const Vec3 currentPosition = player->GetWorldPosition();
+
+	Vec3 movement = currentPosition - previousPlayerPosition_;
+	movement.y = 0.0f;
+
+	// Walk状態の間だけ時間を加算
+	if (player->GetCurrentState() == PlayerStateType::Walk)
+	{
+		taskManager_.AddProgress(TutorialType::Move, deltaTime);
+	}
+
+	// 毎フレーム更新する
+	previousPlayerPosition_ = currentPosition;
 
 	// =========================================
 	// カメラ
@@ -133,7 +174,15 @@ void GameSceneTutorialState::Tick(float deltaTime)
 void GameSceneTutorialState::Exit()
 {
 	DxPlus::Debug::SetFormatString(L"GameSceneTutorialState::Exit");
-	gameScene_.GetGameContext()->GetPlayer()->SetDefMove(false);
+
+	auto* player = gameScene_.GetGameContext()->GetPlayer();
+
+	// 通知先を解除
+	player->GetStateMachine().SetEventCallback({});
+
+	player->SetDefMove(false);
+
+	gameScene_.GetTutorialChecklist().SetVisible(false);
 }
 
 void GameSceneTutorialState::FocusTutorialCamera(float deltaTime)
@@ -163,7 +212,7 @@ void GameSceneTutorialState::FocusTutorialCamera(float deltaTime)
 	// カメラ移動
 	// ---------------------------------------------------------
 	auto& director = gameScene_.GetCameraDirector();
-	auto pose = director.GetCurrentPose();
+	Camera::CameraPose pose = director.GetCurrentPose();
 
 	const Vec3 diff = desiredPosition - pose.position;
 	const float distance = std::sqrt(diff.LengthSq());
