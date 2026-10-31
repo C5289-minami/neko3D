@@ -31,11 +31,8 @@ void PlayerGroomingState::Tick(float)
         stateMachine_.ChangeState(PlayerStateType::Attack);
         return;
     }
-    // 1回目のSpaceは、方向キーを押していても通常ジャンプにする。
-    // 空中で押し直した2回目のSpaceは、ダブルジャンプに使う。
-    if (input.jumpPressed && player_.IsGrounded() && player_.IsGravityEnabled())
+    if (input.jumpPressed && player_.TryJump())
     {
-        stateMachine_.ChangeState(PlayerStateType::Jump);
         return;
     }
     if (input.isMoving)

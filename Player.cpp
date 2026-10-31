@@ -66,6 +66,7 @@ void Player::Reset()
 
     // ゲームをやり直したときも、ダブルジャンプを使える状態に戻す。
     doubleJumpUsed_ = false;
+    coyoteTimeRemaining_ = 0.0f;
 
 	// 空中から開始し、ステージへのレイキャストで接地させる。
 	isGrounded_ = false;
@@ -109,6 +110,7 @@ void Player::ResetPosition()
     wallNormal_ = {};
     wallTopY_ = 0.0f;
     doubleJumpUsed_ = false;
+    coyoteTimeRemaining_ = 0.0f;
     elevatorInputConsumed_ = input_.jumpPressing;
 }
 
@@ -157,16 +159,23 @@ void Player::UpdateMovement(float deltaTime)
     if (isGrounded_)
     {
         doubleJumpUsed_ = false;
-        doubleJumpResetTimer_ = 0.0f;
-    }
-    else if (doubleJumpUsed_)
+        coyoteTimeRemaining_ = gravityEnabled_ ? CoyoteTime : 0.0f;
+		//コヨーテタイムの残り時間をリセットする。重力が無効な場合は0にする。
+	  }
+    else
     {
-        doubleJumpResetTimer_ += deltaTime;
-        if (doubleJumpResetTimer_ >= 0.5f)
-        {
-            doubleJumpUsed_ = false;
-            doubleJumpResetTimer_ = 0.0f;
-        }
+		coyoteTimeRemaining_ = (std::max)(0.0f,//コヨーテタイムの残り時間を減らす。0未満にならないようにする。
+            coyoteTimeRemaining_ - (std::max)(0.0f, deltaTime));
+    }
+
+    // 歩いて足場を離れた場合も、通常ジャンプ中と同じ空中入力を受け付ける。
+    // Jumpへの遷移だけでは上向きの速度を加えない。
+    auto state = GetCurrentState();
+    if (gravityEnabled_ && !isGrounded_ &&
+        (state == PlayerStateType::Idle || state == PlayerStateType::Walk ||
+            state == PlayerStateType::Grooming))
+    {
+        stateMachine_.ChangeState(PlayerStateType::Jump);
     }
 
 
@@ -590,20 +599,27 @@ void Player::TurnTowards(
 
 void Player::UpdateHorizontalVelocity(float deltaTime)
 {
-	// 壁キック・ダブルジャンプ中は、開始時に設定した横速度をそのまま使う。
-	if (GetCurrentState() == PlayerStateType::WallJump ||
-		GetCurrentState() == PlayerStateType::DoubleJump)
-		return;
+	// 壁キック中は、開始時に設定した横速度をそのまま使う。
+	if (GetCurrentState() == PlayerStateType::WallJump) return;
+	bool isDoubleJump = GetCurrentState() == PlayerStateType::DoubleJump;
 
-	// 入力を離したフレームには横速度を消す。ジャンプ・重力のY速度は残す。
-	velocity_.x = 0.0f;
-	velocity_.z = 0.0f;
+	// 通常時は入力を離すと横速度を止める。ダブルジャンプ中は、
+	// 入力を離したら直前の横速度を保ち、入力があれば方向を変える。
+	if (!isDoubleJump)
+	{
+		velocity_.x = 0.0f;//入力を離したら横速度を止める
+		velocity_.z = 0.0f;
+	}
 	if (deltaTime <= 0.0f) return;
+
+	if (isDoubleJump && moveInput_.LengthSq() == 0.0f) return;
 
 	float moveSpeed = Const::PLAYER_MOVE_SPEED;//通常移動速度
 #ifdef _DEBUG//debugモードでは、移動速度を5倍にする
 	if (debugDashEnabled_) moveSpeed *= 5.0f;//(shift中)
 #endif
+
+	if (isDoubleJump) moveSpeed *= 3.0f;
 
 	if (isdefMove_)
 	{
@@ -685,8 +701,8 @@ void Player::StartDoubleJump()
     if (!CanDoubleJump()) return;
 
     doubleJumpUsed_ = true;
-    doubleJumpResetTimer_ = 0.0f;
-    StopMove();
+    coyoteTimeRemaining_ = 0.0f;
+    //StopMove();
 
 	// 入力やカメラではなく、既存のプレイヤーの向きから水平速度を決める。
     const float moveSpeed = Const::PLAYER_MOVE_SPEED * 3.0f;
@@ -788,15 +804,32 @@ void Player::StartWallJump()
 	velocity_.z = direction.z * wallJumpMoveSpeed_;
 	velocity_.y = wallJumpSpeed_;
 	isGrounded_ = false;
+	coyoteTimeRemaining_ = 0.0f;
+}
+
+bool Player::TryJump()
+{
+    if (CanGroundJump())
+    {
+        stateMachine_.ChangeState(PlayerStateType::Jump);
+        JumpAction();
+        return true;
+    }
+    if (CanDoubleJump())
+    {
+        stateMachine_.ChangeState(PlayerStateType::DoubleJump);
+        return true;
+    }
+    return false;
 }
 
 bool Player::JumpAction()
 {
-	if (!gravityEnabled_ || !isGrounded_)
-		return false;
+	if (!CanGroundJump())return false;
 
 	velocity_.y = Const::PLAYER_JUMP_SPEED;
 	isGrounded_ = false;
+	coyoteTimeRemaining_ = 0.0f;
 
 	return true;
 }
@@ -805,6 +838,7 @@ bool Player::JumpAction()
 void Player::SetGravityEnabled(bool enabled)
 {
 	gravityEnabled_ = enabled;
+	coyoteTimeRemaining_ = 0.0f;
 	if (!gravityEnabled_)
 	{
 		velocity_.y = 0.0f;
@@ -830,6 +864,7 @@ void Player::StartPillarElevator(const ModelObject* pillar, const Vec3& center, 
     elevatorCenter_ = center;
     elevatorTopY_ = recordFirstPosY;
     elevatorInputConsumed_ = true;
+    coyoteTimeRemaining_ = 0.0f;
 
     position_.x = center.x;
     position_.z = center.z;
@@ -860,4 +895,5 @@ void Player::StartPillarExitJump()
     velocity_.y = Const::PLAYER_ELEVATOR_EXIT_JUMP_SPEED;
     isGrounded_ = false;
     elevatorInputConsumed_ = true;
+    coyoteTimeRemaining_ = 0.0f;
 }

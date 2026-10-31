@@ -26,7 +26,9 @@ void PlayerDoubleJumpState::Tick(float)
         return;
     }
 
-    // 発動時の向きと3倍の水平速度はPlayer側で維持する。
+    // 空中でも方向入力を読み取り、Player側で横速度に反映する。
+    player_.SetMoveDirection(player_.GetInput().moveDir);
+
     // Spaceを連打しても、着地するまで追加のジャンプはしない。
     DxPlus::Debug::SetFormatString(L"state:double_jump");
 }
