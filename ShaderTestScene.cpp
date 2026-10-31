@@ -48,12 +48,12 @@ void ShaderTest::Init()
 	gameContext->GetStage().Init();
 	gameContext->GetBoss().Init();
 	// プレイヤーの初期設定
-	gameContext->GetPlayer().Init();
-	gameContext->GetPlayer().Reset();
+	gameContext->GetPlayer()->Init();
+	gameContext->GetPlayer()->Reset();
 	// gameContext->GetPlayer().Update(0, gameContext->GetStage());
-	gameContext->GetPlayer().Update(0, gameContext->GetStage().GetCollision());
+	gameContext->GetPlayer()->Update(0, gameContext->GetStage().GetCollision());
 	debugActorsPaused_ = false;
-	gameContext->GetStage().ResetAlphaModel(gameContext->GetPlayer().GetPosition());
+	gameContext->GetStage().ResetAlphaModel(gameContext->GetPlayer()->GetPosition());
 
 
 }
@@ -62,7 +62,7 @@ void ShaderTest::Update(float deltaTime)
 {
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 #ifndef NDEBUG
-	camera_.UpdateSceneView(deltaTime, gameContext->GetPlayer().GetPosition());
+	camera_.UpdateSceneView(deltaTime, gameContext->GetPlayer()->GetPosition());
 	const bool actorsPaused = debugActorsPaused_ || camera_.IsSceneViewActive();
 #else
 	const bool actorsPaused = false;
@@ -126,15 +126,15 @@ void ShaderTest::Update(float deltaTime)
 		camera_.Update(deltaTime);
 	}
 	else SetMouseDispFlag(TRUE);
-	auto& player = gameContext->GetPlayer();
-	ModelObject playerModel = player.GetModelObject().WithParentTransform(
-		player.GetPosition(), player.GetRotation());
+	auto* player = gameContext->GetPlayer();
+	ModelObject playerModel = player->GetModelObject().WithParentTransform(
+		player->GetPosition(), player->GetRotation());
 	const bool touching = Collision::UpdateModelContact(playerModel, gameContext->GetBoss().GetModelObject());
-	player.GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
-	if (updateActors && touching) gameContext->GetPlayer().TakeDamage();
+	player->GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
+	if (updateActors && touching) gameContext->GetPlayer()->TakeDamage();
 
 
-	gameContext->GetStage().UpdateAlphaModel(deltaTime, gameContext->GetPlayer());
+	gameContext->GetStage().UpdateAlphaModel(deltaTime, *gameContext->GetPlayer());
 
 
 	// --- F2 でシェーダー全体のON/OFFを切り替える ---
@@ -173,7 +173,7 @@ void ShaderTest::Render() const
 		DrawScene(false);
 	}
 
-	gameContext->GetPlayer().DrawStatus();
+	gameContext->GetPlayer()->DrawStatus();
 
 	const int white = DxLib::GetColor(255, 255, 255);
 	int fontHandle = RM().GetFont(ResourceKeys::Font_Title);
@@ -486,7 +486,7 @@ void ShaderTest::RenderDepth() const
 
 	drawDepth(gameContext->GetStage().GetModelObject());
 	drawDepth(gameContext->GetBoss().GetModelObject());
-	drawDepth(gameContext->GetPlayer().GetModelObject());
+	drawDepth(gameContext->GetPlayer()->GetModelObject());
 	drawDepth(gameContext->GetRoom().GetRoomObject());
 }
 
@@ -502,7 +502,7 @@ void ShaderTest::DrawScene(bool toonEnabled) const
 
 		gameContext->GetStage().Draw();
 		gameContext->GetBoss().Draw();
-		gameContext->GetPlayer().Draw();
+		gameContext->GetPlayer()->Draw();
 		gameContext->GetRoom().Draw();
 
 		return;
@@ -526,8 +526,8 @@ void ShaderTest::DrawScene(bool toonEnabled) const
 				modelToonRenderer_.Draw(model);
 			}
 		};
-	const auto& player = gameContext->GetPlayer();
-	const ModelObject& playerModel = player.GetModelObject();
+	const auto* player = gameContext->GetPlayer();
+	const ModelObject& playerModel = player->GetModelObject();
 	drawActor(playerModel);
 	drawActor(gameContext->GetBoss().GetModelObject());
 	drawActor(gameContext->GetRoom().GetRoomObject());

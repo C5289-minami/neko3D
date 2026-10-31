@@ -13,7 +13,7 @@
 void GameContext::Init()
 {
 	auto& modelObjects = MObjs();
-	modelObjects.Add(player.GetModelObject(), player);
+	modelObjects.Add(defaultPlayer.GetModelObject(), defaultPlayer);
 	modelObjects.Add(stage.GetModelObject(), stage);
 	for (auto& model : stage.GetPillarModelObjects())
 		modelObjects.Add(model, stage);
@@ -55,9 +55,9 @@ void GameContext::Init()
 	}
 
 	stage.Init();
-	player.Init();
 	boss.Init();
 	room_.Init();
+	activePlayer->Init();
 
 	for (auto& preview : selectPreviewPlayers_)
 	{
@@ -77,11 +77,21 @@ void GameContext::Reset()
 	DxLib::SetGlobalAmbientLight(DxLib::GetColorF(0.35f, 0.35f, 0.35f, 1.0f));
 
 	stage.Reset();
-	player.Reset();
 	boss.Reset();
 	room_.Reset();
 
+	// 本編Playerを初期Playerに戻す
+	activePlayer = &defaultPlayer;
+	activePlayer->Reset();
+
+	// プレビューPlayerを初期状態に戻す
+	for (auto& preview : selectPreviewPlayers_)
+	{
+		preview.ResetOwner();
+		preview.Reset();
+		preview.SetGravityEnabled(false);
+		preview.SetDefMove(false);
+	}
+
 	debugActorsPaused_ = false;
-	//TransformSettings::ResetToDefaults(GetDebugControls().targets, transformInitialStatus_);
-	stage.ResetAlphaModel(player.GetPosition());
 }

@@ -79,7 +79,7 @@ void GameScene::Init()
 		cameraDirector_.Update(0);
 	}
 
-	
+
 
 	stateMachine_.Initialize();
 
@@ -113,11 +113,11 @@ void GameScene::Update(float deltaTime)
 
 	}
 	// Actor取得
-	auto& player = gameContext->GetPlayer();
+	auto* player = gameContext->GetPlayer();
 	auto& boss = gameContext->GetBoss();
 	auto& stage = gameContext->GetStage();
 	// モデル取得
-	ModelObject& playerModel = player.GetModelObject();
+	ModelObject& playerModel = player->GetModelObject();
 	ModelObject& bossModel = boss.GetModelObject();
 
 	// actors
@@ -128,15 +128,15 @@ void GameScene::Update(float deltaTime)
 
 		// チュートリアルは通常移動、バトルはステージ中心を基準にした移動を使う。
 		const bool tutorial = GetCurrentGameState() == GameStateType::Tutorial;
-		player.SetDefMove(tutorial);
+		player->SetDefMove(tutorial);
 		if (tutorial)
 			// player.Update(deltaTime);
-			player.Update(deltaTime, tutorialCollision_);
+			player->Update(deltaTime, tutorialCollision_);
 		else
 			// player.Update(deltaTime, stage, stageCenterPosition);
-			player.Update(deltaTime, stage.GetCollision(), stageCenterPosition);
+			player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
 
-		stage.UpdateAlphaModel(deltaTime, player);
+		stage.UpdateAlphaModel(deltaTime, *player);
 		boss.Update(deltaTime);
 		// playerとbossの衝突判定
 		//const bool touching = Collision::UpdateModelContact(playerModel, bossModel);　これなし
@@ -190,7 +190,7 @@ void GameScene::RenderDepth() const
 	cameraDirector_.ApplyRenderPose();
 
 	const auto& boss = gameContext->GetBoss();
-	const auto& player = gameContext->GetPlayer();
+	const auto* player = gameContext->GetPlayer();
 	const auto& stage = gameContext->GetStage();
 	const auto& room = gameContext->GetRoom();
 
@@ -236,17 +236,10 @@ void GameScene::RenderDepth() const
 	}
 
 	// PlayerとBoss
-	if (gameContext->IsSelectPreviewVisible())
+	for (const auto& preview :
+		gameContext->GetSelectPreviewPlayers())
 	{
-		for (const auto& preview :
-			gameContext->GetSelectPreviewPlayers())
-		{
-			modelToonRenderer_.DrawDepth(preview.GetModelObject());
-		}
-	}
-	else
-	{
-		modelToonRenderer_.DrawDepth(player.GetModelObject());
+		modelToonRenderer_.DrawDepth(preview.GetModelObject());
 	}
 
 	modelToonRenderer_.DrawDepth(boss.GetModelObject());
@@ -263,11 +256,11 @@ void GameScene::DrawTutorialCollisionSpheres() const
 		return;
 	}
 
-	const auto& player = gameContext->GetPlayer();
+	const auto* player = gameContext->GetPlayer();
 	const auto& stage = gameContext->GetStage();
 
 	const Vec3 playerCenter =
-		player.GetWorldPosition() + settings.playerOffset;
+		player->GetWorldPosition() + settings.playerOffset;
 
 	const Vec3 stageCenter =
 		stage.GetWorldPosition() + settings.stageOffset;
@@ -304,13 +297,11 @@ void GameScene::DrawScene(bool toonEnabled) const
 	cameraDirector_.ApplyRenderPose();
 
 	const auto& boss = gameContext->GetBoss();
-	const auto& player = gameContext->GetPlayer();
+	const auto* player = gameContext->GetPlayer();
 	const auto& stage = gameContext->GetStage();
 	const auto& effectManager = gameContext->GetEffectManager();
 	const auto& grid = gameContext->GetGrid();
 	const auto& room = gameContext->GetRoom();
-	const bool showSelectPlayers =
-		gameContext->IsSelectPreviewVisible();
 
 	const auto& selectPlayers =
 		gameContext->GetSelectPreviewPlayers();
@@ -324,17 +315,13 @@ void GameScene::DrawScene(bool toonEnabled) const
 		boss.Draw();
 		stage.Draw();
 
-		if (showSelectPlayers)
+
+		for (const auto& preview : selectPlayers)
 		{
-			for (const auto& preview : selectPlayers)
-			{
-				preview.Draw();
-			}
+			preview.Draw();
 		}
-		else
-		{
-			player.Draw();
-		}
+
+
 
 		stage.DrawAlphaModel();
 
@@ -371,17 +358,13 @@ void GameScene::DrawScene(bool toonEnabled) const
 	// BossとPlayer
 	drawModel(boss.GetModelObject());
 
-	if (showSelectPlayers)
+
+	for (const auto& preview : selectPlayers)
 	{
-		for (const auto& preview : selectPlayers)
-		{
-			drawModel(preview.GetModelObject());
-		}
+		drawModel(preview.GetModelObject());
 	}
-	else
-	{
-		drawModel(player.GetModelObject());
-	}
+
+
 
 	// Stage
 	drawModel(stage.GetModelObject());
