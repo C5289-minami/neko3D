@@ -11,6 +11,14 @@
 #include "ActorBase.h"
 #include "Collision.h"
 #include<vector>
+#include <memory>
+#include "BossAttackType.h"
+
+class BossHairBallSkill;
+class BossClapSkill;
+class BossBiteSkill;
+class BossTailWhipSkill;
+
 
 struct AttackData
 {
@@ -23,32 +31,32 @@ class Boss : public ActorBase
 {
 public:
 	Boss();
+	~Boss() override;
 
 	void Init() override;
 	void Reset()override;
 	void Update(float deltaTime)override;
 	void Draw() const override;
 
-	bool UseSkill(IAttackSkill& skill);
 	void ClearActiveSkill() { activeSkill_ = nullptr; }
 
 	void SetMoveDirection(const Vec3& moveDirection, float speed);
 	void StopMove();
 	IAttackSkill* GetActiveSkill() const { return activeSkill_; }
- ObjectTransform GetTransform() const { return { model_.GetScale(), model_.GetPosition(), model_.GetRotation() }; }
-    void SetTransform(const ObjectTransform& transform)
-    {
-        model_.SetScale(transform.scale);
+	ObjectTransform GetTransform() const { return { model_.GetScale(), model_.GetPosition(), model_.GetRotation() }; }
+	void SetTransform(const ObjectTransform& transform)
+	{
+		model_.SetScale(transform.scale);
 		model_.SetPosition(transform.position);
 		model_.SetRotation(transform.rotation);
-    }
+	}
 	BossStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }
 	ModelObject& GetModelObject() { return model_; }
 	const int GetModelHandle() const;
 	const ModelObject& GetModelObject() const { return model_; }
 	void SetAnimation(BossAnimType::Type type, bool loop = true)
 	{
-		currentAnimIndex_ = static_cast<int>(type);
+		currentAnimType_ = type;
 		currentAnimLoop_ = loop;
 	}
 	float GetAnimTotalTime(BossAnimType::Type type) const;
@@ -59,18 +67,18 @@ public:
 	void DrawHandAttackDebug() const;
 #endif
 
+	AnimationHandle GetAnimationHandle(BossAnimType::Type type) const;
+	ModelAnimation& GetAnimation() { return animation_; }
+	void UpdateAnimation(float deltaTime);
+
+	// Skill
+	bool UseSkill(BossAttackType type);
 private:
 	ModelObject model_{};
 	Vec3 velocity_{};
 	IAttackSkill* activeSkill_{ nullptr };
 	BossStateMachine stateMachine_;
 
-
-	// Animation
-	ModelAnimation animation_;
-
-	int currentAnimIndex_{ -1 };
-	bool currentAnimLoop_{ true };
 
 	float health_{ 100.0f };
 	float maxHealth_{ 100.0f };
@@ -79,12 +87,24 @@ private:
 	float attackPower_{ 10.0f };
 
 	bool isHeatUp{ false };
-	
+
 	float counter_{ 0.0f };
 	float distance_{ 200.0f };
 	bool handAttackActive_{ false };
 	Vec3 oldPos{};
 	std::vector<AttackData> attackHands_{};// 攻撃判定の情報を保持
 
+	// アニメーション関連
+	ModelAnimation animation_;
 
+	BossAnimType::Type currentAnimType_{ BossAnimType::Idle };
+	bool currentAnimLoop_{ true };
+	AnimationHandle idleAnimHandle_{};
+	AnimationHandle tailWhipAnimHandle_{};
+
+	// Skill
+	std::unique_ptr<BossHairBallSkill> hairBallSkill_;
+	std::unique_ptr<BossClapSkill> clapSkill_;
+	std::unique_ptr<BossBiteSkill> biteSkill_;
+	std::unique_ptr<BossTailWhipSkill> tailWhipSkill_;
 };

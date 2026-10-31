@@ -40,6 +40,9 @@ void ResourceManager::LoadAll()
 
 
     LoadModel(ResourceKeys::Model_Boss,       L"./Data/Models/Boss/boss.mv1");
+	LoadModel(ResourceKeys::Model_BossAnim_Idle, L"./Data/Models/Boss/boss_idle.mv1");
+	LoadModel(ResourceKeys::Model_BossAnim_Sippo, L"./Data/Models/Boss/boss_sippo.mv1");
+
     LoadModel(ResourceKeys::Model_PillarL, L"./Data/Models/stage/PillarL.mv1");
     LoadModel(ResourceKeys::Model_PillarM, L"./Data/Models/stage/PillarM.mv1");
     LoadModel(ResourceKeys::Model_PillarS, L"./Data/Models/stage/PillarS.mv1");

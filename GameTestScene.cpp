@@ -200,29 +200,26 @@ void GameTestScene::DrawImGui()
         if (ImGui::Button(u8"上昇速度を初期値に戻す"))
             player->ResetClimbingSpeeds();
         ImGui::TextWrapped(u8"柱の上端 - 10で到着し、小さくジャンプします。");
-        // 旧仕様の壁登り・壁キック設定。
-//         ImGui::TextUnformatted(u8"壁登り");
-//         float climbingSpeed = player.GetClimbingSpeed();
-//         float wallSlideSpeed = player.GetWallSlideSpeed();
-//         if (ImGui::DragFloat(u8"登る速度", &climbingSpeed, 1.0f, 0.0f, 5000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp))
-//             player.SetClimbingSpeed(climbingSpeed);
-//         if (ImGui::DragFloat(u8"滑り落ちる速度", &wallSlideSpeed, 1.0f, 0.0f, 5000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp))
-//             player.SetWallSlideSpeed(wallSlideSpeed);
-//         if (ImGui::Button(u8"壁登りの初期値に戻す"))
-//             player.ResetClimbingSpeeds();
-//
-//         ImGui::Separator();
-//         ImGui::TextUnformatted(u8"壁キック");
-//         float wallJumpMoveSpeed = player.GetWallJumpMoveSpeed();
-//         float wallJumpSpeed = player.GetWallJumpSpeed();
-//         if (ImGui::DragFloat(u8"壁から離れる横速度", &wallJumpMoveSpeed, 10.0f, 0.0f, 5000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp))
-//             player.SetWallJumpMoveSpeed(wallJumpMoveSpeed);
-//         if (ImGui::DragFloat(u8"上向きの初速", &wallJumpSpeed, 10.0f, 0.0f, 5000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp))
-//             player.SetWallJumpSpeed(wallJumpSpeed);
-//         if (ImGui::Button(u8"壁キックの初期値に戻す"))
-//             player.ResetWallJumpSpeeds();
-//
-//         ImGui::TextWrapped(u8"壁登りの速度は即時反映。壁キックは次に蹴ったときから反映します。");
+   
+
+		// Boss攻撃テスト
+		ImGui::Separator();
+		ImGui::TextUnformatted(u8"Boss Attack Test");
+
+		auto& boss = gameContext->GetBoss();
+
+		if (ImGui::Button(u8"HairBall"))
+			boss.UseSkill(BossAttackType::HairBall);
+
+		if (ImGui::Button(u8"Clap"))
+			boss.UseSkill(BossAttackType::Clap);
+
+		if (ImGui::Button(u8"Bite"))
+			boss.UseSkill(BossAttackType::Bite);
+
+		if (ImGui::Button(u8"TailWhip"))
+			boss.UseSkill(BossAttackType::TailWhip);
+
         ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
     }
     ImGui::End();

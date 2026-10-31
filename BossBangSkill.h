@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BossAttackStateType.h"
+#include "BossAttackType.h"
 #include "BossPoseSkill.h"
 
 class BossBangSkill final : public BossPoseSkill
@@ -16,17 +16,20 @@ private:
         switch (phase)
         {
         case AttackStateType::PreAction:
+            boss_.SetAnimation(BossAnimType::Idle);
+            break;
+
         case AttackStateType::Aiming:
-            ApplyPose({ 0.0f, -20.0f * progress, 0.0f }, { -0.25f * progress, 0.0f, 0.0f });
+            boss_.SetAnimation(BossAnimType::Idle);
             break;
+
         case AttackStateType::Attack:
-            ApplyPose({ 0.0f, -40.0f * progress, 0.0f }, { 0.55f * progress, 0.0f, 0.0f });
+            boss_.SetAnimation(BossAnimType::TailWhip, false);
             break;
+
         case AttackStateType::Recovery:
-            ApplyPose({ 0.0f, -40.0f * (1.0f - progress), 0.0f }, { 0.55f * (1.0f - progress), 0.0f, 0.0f });
-            break;
-        default:
-            ApplyPose({}, {});
+        case AttackStateType::Return:
+            boss_.SetAnimation(BossAnimType::Idle);
             break;
         }
     }

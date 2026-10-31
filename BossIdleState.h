@@ -11,5 +11,4 @@ public:
     void Tick(float deltaTime) override;
     void Exit() override;
 private:
-	Motion idleMotion_;
 };

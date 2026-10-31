@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BossAttackStateType.h"
+#include "BossAttackType.h"
 #include "BossPoseSkill.h"
 
 
@@ -12,31 +12,30 @@ public:
     explicit BossBiteSkill(Boss& boss) : BossPoseSkill(boss) {}
 
 
-
+    bool IsAttackFinished() const override
+    {
+        return boss_.GetAnimation().IsFinished();
+    }
 private:
     void ApplyPhase(AttackStateType phase, float progress) override
     {
-        const Vec3 forward = GetForward();
         switch (phase)
         {
         case AttackStateType::PreAction:
+            boss_.SetAnimation(BossAnimType::Idle);
             break;
+
         case AttackStateType::Aiming:
+            boss_.SetAnimation(BossAnimType::Idle);
             break;
+
         case AttackStateType::Attack:
-        {
-            SetMotionDuration(AttackStateType::Attack, boss_.GetAnimTotalTime(BossAnimType::PowerUp));
-            boss_.SetAnimation(BossAnimType::PowerUp, false);
-        }
+            boss_.SetAnimation(BossAnimType::TailWhip, false);
             break;
+
         case AttackStateType::Recovery:
-        {
-            const float remaining = 1.0f - progress;
-            ApplyPose(forward * (85.0f * remaining), { 0.65f * remaining, 0.0f, 0.0f });
-            break;
-        }
-        default:
-            ApplyPose({}, {});
+        case AttackStateType::Return:
+            boss_.SetAnimation(BossAnimType::Idle);
             break;
         }
     }
