@@ -1,86 +1,107 @@
 #pragma once
 
+#include "AnimationHandle.h"
+
 class ModelAnimation
 {
 public:
-    ModelAnimation() = default;
-    ~ModelAnimation() = default;
+	ModelAnimation() = default;
+	~ModelAnimation() = default;
 
-    ModelAnimation(const ModelAnimation&) = delete;
-    ModelAnimation& operator=(const ModelAnimation&) = delete;
+	ModelAnimation(const ModelAnimation&) = delete;
+	ModelAnimation& operator=(const ModelAnimation&) = delete;
 
-    // アニメーションを再生する。
-    // 前回と異なるアニメーションなら blendSeconds 秒かけて切り替える。
-    void Play3D(
-        int modelHandle,
-        int animIndex,
-        bool loop,
-        float speedScale = 1.0f,
-        float blendSeconds = 0.15f
-    );
 
-    // 再生時間とブレンドを更新する。
-    void Update(float deltaTime);
+	// アニメーション番号で再生する。
+	void Play3D(
+		int modelHandle,
+		int animIndex,
+		bool loop,
+		float speedScale = 1.0f,
+		float blendSeconds = 0.15f
+	);
 
-    // アニメーションを解除する。
-    void Reset();
+	// AnimationHandleで再生する。
+	void Play3D(
+		int modelHandle,
+		const AnimationHandle& animation,
+		bool loop,
+		float speedScale = 1.0f,
+		float blendSeconds = 0.15f
+	);
 
-    int GetCurrentAnimIndex() const { return currentAnimIndex_; }
-    bool IsBlending() const { return static_cast<bool>(nextAnimation_); }
+	// 再生時間とブレンドを更新する。
+	void Update(float deltaTime);
+
+	// アニメーションを解除する。
+	void Reset();
+
+	AnimationHandle GetCurrentAnimationHandle() const
+	{
+		return currentAnimationHandle_;
+	}
+
+	bool IsBlending() const { return static_cast<bool>(nextAnimation_); }
 
 private:
-    class AttachedAnimation
-    {
-    public:
-        AttachedAnimation() = default;
-        ~AttachedAnimation();
+	class AttachedAnimation
+	{
+	public:
+		AttachedAnimation() = default;
+		~AttachedAnimation();
 
-        AttachedAnimation(const AttachedAnimation&) = delete;
-        AttachedAnimation& operator=(const AttachedAnimation&) = delete;
+		AttachedAnimation(const AttachedAnimation&) = delete;
+		AttachedAnimation& operator=(const AttachedAnimation&) = delete;
 
-        bool Attach(int modelHandle, int animIndex);
-        void Reset();
+		bool Attach(
+			int targetModelHandle,
+			const AnimationHandle& animation
+		);
 
-        explicit operator bool() const { return attachIndex_ >= 0; }
+		void Reset();
 
-        int GetModelHandle() const { return modelHandle_; }
-        int GetAttachIndex() const { return attachIndex_; }
+		explicit operator bool() const { return attachIndex_ >= 0; }
 
-    private:
-        int modelHandle_{ -1 };
-        int animIndex_{ -1 };
-        int attachIndex_{ -1 };
-    };
+		int GetModelHandle() const { return targetModelHandle_; }
+		int GetAttachIndex() const { return attachIndex_; }
 
-    static void AdvanceAnimation(
-        const AttachedAnimation& animation,
-        float& elapsed,
-        bool loop,
-        float speedScale,
-        float deltaTime
-    );
+	private:
+		int targetModelHandle_{ -1 };
+		int sourceModelHandle_{ -1 };
+		int animIndex_{ -1 };
+		int attachIndex_{ -1 };
+	};
 
-    static void SetAnimationTime(
-        const AttachedAnimation& animation,
-        float elapsed
-    );
+	static void AdvanceAnimation(
+		const AttachedAnimation& animation,
+		float& elapsed,
+		bool loop,
+		float speedScale,
+		float deltaTime
+	);
 
-    int modelHandle_{ -1 };
+	static void SetAnimationTime(
+		const AttachedAnimation& animation,
+		float elapsed
+	);
 
-    // 現在再生しているアニメーション
-    AttachedAnimation currentAnimation_;
-    int currentAnimIndex_{ -1 };
-    float currentElapsed_{ 0.0f };
+	// 再生対象のモデル
+	int modelHandle_{ -1 };
 
-    // 切り替え先のアニメーション
-    AttachedAnimation nextAnimation_;
-    int nextAnimIndex_{ -1 };
-    float nextElapsed_{ 0.0f };
+	// 現在再生しているアニメーション
+	AttachedAnimation currentAnimation_;
+	AnimationHandle currentAnimationHandle_;
+	float currentElapsed_{ 0.0f };
 
-    // ブレンドの進行状況
-    float blendElapsed_{ 0.0f };
-    float blendDuration_{ 0.0f };
+	// 切り替え先のアニメーション
+	AttachedAnimation nextAnimation_;
+	AnimationHandle nextAnimationHandle_;
+	float nextElapsed_{ 0.0f };
 
-    bool loop_{ true };
-    float speedScale_{ 1.0f };
+	// ブレンドの進行状況
+	float blendElapsed_{ 0.0f };
+	float blendDuration_{ 0.0f };
+
+	bool loop_{ true };
+	float speedScale_{ 1.0f };
 };

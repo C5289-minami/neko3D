@@ -1,4 +1,5 @@
 #include "PlayerStateMachine.h"
+#include <utility>
 
 PlayerStateMachine::PlayerStateMachine(Player& player)
     : player_(player),
@@ -37,6 +38,18 @@ void PlayerStateMachine::ChangeState(PlayerStateType type)
 
 }
 
+
+void PlayerStateMachine::SetEventCallback(
+    std::function<void(PlayerActionEvent)> callback)
+{
+    eventCallback_ = std::move(callback);
+}
+
+void PlayerStateMachine::NotifyEvent(PlayerActionEvent event)
+{
+    if (eventCallback_)
+        eventCallback_(event);
+}
 
 State* PlayerStateMachine::FindState(PlayerStateType type)
 {

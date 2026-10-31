@@ -151,13 +151,18 @@ void GameScene::Update(float deltaTime)
 
 	stateMachine_.Tick(deltaTime);
 
+	if (GetCurrentGameState() == GameStateType::Tutorial)
+	{
+		tutorialChecklist_.Update(deltaTime);
+	}
+
 	gameContext->GetEffectManager().Update(deltaTime);
 }
 
 void GameScene::Render() const
 {
-
 	DxLib::ClearDrawScreen();
+
 	if (shaderEffects_.IsEnabled())
 	{
 		shaderEffects_.Render(
@@ -172,6 +177,12 @@ void GameScene::Render() const
 	else
 	{
 		DrawScene(false);
+	}
+
+	// 3Dシーンの描画後にUIを描画
+	if (GetCurrentGameState() == GameStateType::Tutorial)
+	{
+		tutorialChecklist_.Draw();
 	}
 }
 

@@ -1,6 +1,7 @@
 ﻿#include "PlayerJumpState.h"
-#include "DxPlus/Debug.h"
+#include "PlayerStateMachine.h"
 #include "Player.h"
+#include "DxPlus/Debug.h"
 
 PlayerJumpState::PlayerJumpState(PlayerStateMachine& stateMachine, Player& player)
     : PlayerBaseState(stateMachine, player)
@@ -11,7 +12,13 @@ void PlayerJumpState::Enter()
 {
     player_.StopMove();
     player_.SetAnimation(PlayerAnimType::Jump, false);
-    player_.JumpAction();
+
+    // ジャンプに成功した場合だけ通知する
+    if (player_.JumpAction())
+    {
+        stateMachine_.NotifyEvent(PlayerActionEvent::Jumped);
+    }
+
     DxPlus::Debug::SetFormatString(L"PlayerJumpState::Enter");
 }
 
