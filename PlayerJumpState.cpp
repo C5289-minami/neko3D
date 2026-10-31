@@ -32,7 +32,6 @@ void PlayerJumpState::Tick(float)
     if (input.jumpPressed && player_.CanDoubleJump())
     {
         stateMachine_.ChangeState(PlayerStateType::DoubleJump);
-        // 切り替えた後は、通常ジャンプ側の処理を続けない。
         return;
     }
 

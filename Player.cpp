@@ -591,20 +591,27 @@ void Player::TurnTowards(
 
 void Player::UpdateHorizontalVelocity(float deltaTime)
 {
-	// 壁キック・ダブルジャンプ中は、開始時に設定した横速度をそのまま使う。
-	if (GetCurrentState() == PlayerStateType::WallJump ||
-		GetCurrentState() == PlayerStateType::DoubleJump)
-		return;
+	// 壁キック中は、開始時に設定した横速度をそのまま使う。
+	if (GetCurrentState() == PlayerStateType::WallJump) return;
+	bool isDoubleJump = GetCurrentState() == PlayerStateType::DoubleJump;
 
-	// 入力を離したフレームには横速度を消す。ジャンプ・重力のY速度は残す。
-	velocity_.x = 0.0f;
-	velocity_.z = 0.0f;
+	// 通常時は入力を離すと横速度を止める。ダブルジャンプ中は、
+	// 入力を離したら直前の横速度を保ち、入力があれば方向を変える。
+	if (!isDoubleJump)
+	{
+		velocity_.x = 0.0f;//入力を離したら横速度を止める
+		velocity_.z = 0.0f;
+	}
 	if (deltaTime <= 0.0f) return;
+
+	if (isDoubleJump && moveInput_.LengthSq() == 0.0f) return;
 
 	float moveSpeed = Const::PLAYER_MOVE_SPEED;//通常移動速度
 #ifdef _DEBUG//debugモードでは、移動速度を5倍にする
 	if (debugDashEnabled_) moveSpeed *= 5.0f;//(shift中)
 #endif
+
+	if (isDoubleJump) moveSpeed *= 3.0f;
 
 	if (isdefMove_)
 	{
@@ -687,7 +694,7 @@ void Player::StartDoubleJump()
 
     doubleJumpUsed_ = true;
     doubleJumpResetTimer_ = 0.0f;
-    StopMove();
+    //StopMove();
 
 	// 入力やカメラではなく、既存のプレイヤーの向きから水平速度を決める。
     const float moveSpeed = Const::PLAYER_MOVE_SPEED * 3.0f;
