@@ -16,6 +16,7 @@ void PlayerClimbingState::Enter()
     // pushDirection_ = {};
     // 壁登り用のアニメーションを用意するまでは、既存の待機アニメーションを使う。
     player_.SetAnimation(PlayerAnimType::Idle, true);
+   
     DxPlus::Debug::SetFormatString(L"PlayerClimbingState::Enter");
 }
 
@@ -35,6 +36,7 @@ void PlayerClimbingState::Tick(float deltaTime)
         stateMachine_.ChangeState(PlayerStateType::Jump);
         // Exitで速度をリセットした後に、小さなジャンプの初速を設定する。
         player_.StartPillarExitJump();
+        stateMachine_.NotifyEvent(PlayerActionEvent::ReachedPillarTop);
     }
 }
 
