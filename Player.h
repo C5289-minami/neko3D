@@ -66,6 +66,10 @@ public:
 	void TurnTowards(const Vec3& moveDir, float deltaTime);
 
 	// ジャンプ
+	static constexpr float CoyoteTime = 0.1f;
+	bool CanGroundJump() const { return gravityEnabled_ && (isGrounded_ || coyoteTimeRemaining_ > 0.0f); }
+	// 地上・踏み外し直後は通常ジャンプ、それ以外の空中では二段ジャンプ。
+	bool TryJump();
 	void JumpAction();
 	void StartDoubleJump();
 	bool CanDoubleJump() const { return gravityEnabled_ && !isGrounded_ && !doubleJumpUsed_; }
@@ -189,6 +193,7 @@ private:
 	// false：ダブルジャンプをまだ使っていない。true：使用済み。
 	// 着地するまでtrueを保ち、Spaceを連打しても3回目は出せないようにする。
 	bool doubleJumpUsed_{ false };
+	float coyoteTimeRemaining_{ 0.0f };
 
 	bool touchingWall_{ false };
 	Vec3 wallNormal_{};
@@ -204,5 +209,4 @@ private:
 #endif
 	// キャラクター設定
 	CharData charData;
-	float doubleJumpResetTimer_{ 0.0f };
 };

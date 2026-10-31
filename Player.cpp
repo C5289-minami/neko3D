@@ -67,6 +67,7 @@ void Player::Reset()
 
     // ゲームをやり直したときも、ダブルジャンプを使える状態に戻す。
     doubleJumpUsed_ = false;
+    coyoteTimeRemaining_ = 0.0f;
 
 	// 空中から開始し、ステージへのレイキャストで接地させる。
 	isGrounded_ = false;
@@ -110,6 +111,7 @@ void Player::ResetPosition()
     wallNormal_ = {};
     wallTopY_ = 0.0f;
     doubleJumpUsed_ = false;
+    coyoteTimeRemaining_ = 0.0f;
     elevatorInputConsumed_ = input_.jumpPressing;
 }
 
@@ -158,16 +160,23 @@ void Player::UpdateMovement(float deltaTime)
     if (isGrounded_)
     {
         doubleJumpUsed_ = false;
-        doubleJumpResetTimer_ = 0.0f;
-    }
-    else if (doubleJumpUsed_)
+        coyoteTimeRemaining_ = gravityEnabled_ ? CoyoteTime : 0.0f;
+		//コヨーテタイムの残り時間をリセットする。重力が無効な場合は0にする。
+	  }
+    else
     {
-        doubleJumpResetTimer_ += deltaTime;
-        if (doubleJumpResetTimer_ >= 0.5f)
-        {
-            doubleJumpUsed_ = false;
-            doubleJumpResetTimer_ = 0.0f;
-        }
+		coyoteTimeRemaining_ = (std::max)(0.0f,//コヨーテタイムの残り時間を減らす。0未満にならないようにする。
+            coyoteTimeRemaining_ - (std::max)(0.0f, deltaTime));
+    }
+
+    // 歩いて足場を離れた場合も、通常ジャンプ中と同じ空中入力を受け付ける。
+    // Jumpへの遷移だけでは上向きの速度を加えない。
+    auto state = GetCurrentState();
+    if (gravityEnabled_ && !isGrounded_ &&
+        (state == PlayerStateType::Idle || state == PlayerStateType::Walk ||
+            state == PlayerStateType::Grooming))
+    {
+        stateMachine_.ChangeState(PlayerStateType::Jump);
     }
 
 
@@ -693,7 +702,7 @@ void Player::StartDoubleJump()
     if (!CanDoubleJump()) return;
 
     doubleJumpUsed_ = true;
-    doubleJumpResetTimer_ = 0.0f;
+    coyoteTimeRemaining_ = 0.0f;
     //StopMove();
 
 	// 入力やカメラではなく、既存のプレイヤーの向きから水平速度を決める。
@@ -796,11 +805,28 @@ void Player::StartWallJump()
 	velocity_.z = direction.z * wallJumpMoveSpeed_;
 	velocity_.y = wallJumpSpeed_;
 	isGrounded_ = false;
+	coyoteTimeRemaining_ = 0.0f;
+}
+
+bool Player::TryJump()
+{
+    if (CanGroundJump())
+    {
+        stateMachine_.ChangeState(PlayerStateType::Jump);
+        JumpAction();
+        return true;
+    }
+    if (CanDoubleJump())
+    {
+        stateMachine_.ChangeState(PlayerStateType::DoubleJump);
+        return true;
+    }
+    return false;
 }
 
 void Player::JumpAction()
 {
-	if (!gravityEnabled_ || !isGrounded_)
+	if (!CanGroundJump())
 	{
 		return;
 	}
@@ -809,12 +835,14 @@ void Player::JumpAction()
 		Const::PLAYER_JUMP_SPEED;
 
 	isGrounded_ = false;
+	coyoteTimeRemaining_ = 0.0f;
 }
 
 
 void Player::SetGravityEnabled(bool enabled)
 {
 	gravityEnabled_ = enabled;
+	coyoteTimeRemaining_ = 0.0f;
 	if (!gravityEnabled_)
 	{
 		velocity_.y = 0.0f;
@@ -836,6 +864,7 @@ void Player::StartPillarElevator(const ModelObject* pillar, const Vec3& center, 
     elevatorCenter_ = center;
     elevatorTopY_ = arrivalY;
     elevatorInputConsumed_ = true;
+    coyoteTimeRemaining_ = 0.0f;
 
     position_.x = center.x;
     position_.z = center.z;
@@ -866,4 +895,5 @@ void Player::StartPillarExitJump()
     velocity_.y = Const::PLAYER_ELEVATOR_EXIT_JUMP_SPEED;
     isGrounded_ = false;
     elevatorInputConsumed_ = true;
+    coyoteTimeRemaining_ = 0.0f;
 }
