@@ -25,6 +25,7 @@ void PlayerAttackState::Enter()
 	ballVelocity_ = forward * Const::PLAYER_ATTACK_BALL_SPEED;
 	
 	elapsed_ = 0.0f;
+	hasHitTarget_ = false;
 	
 	ballActive_ = !player_.IsDead();
 
@@ -69,10 +70,19 @@ void PlayerAttackState::Exit()
 {
 	player_.StopMove();
 	ballActive_ = false;
+	hasHitTarget_ = false;
 	attackSphere_ = {};
 	ballVelocity_ = {};
 	elapsed_ = 0.0f;
 	DxPlus::Debug::SetFormatString(L"PlayerAttackState::Exit");
+}
+
+bool PlayerAttackState::TryRegisterHit()//UŒ‚‚ª—LŒø‚ÅA‚Ü‚¾ƒqƒbƒg‚µ‚Ä‚¢‚È‚¢ê‡‚Éƒqƒbƒg‚ğ“o˜^‚·‚é
+{
+	if (!ballActive_ || hasHitTarget_) return false;
+
+	hasHitTarget_ = true;
+	return true;
 }
 
 void PlayerAttackState::Draw() const

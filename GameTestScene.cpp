@@ -140,6 +140,20 @@ void GameTestScene::Update(float deltaTime)
 		{
 			player->TakeDamage();
 		}
+		auto& playerStateMachine = player->GetStateMachine();
+		if (playerStateMachine.IsAttackBallActive()) // 攻撃球が飛んでいるか
+		{
+			const auto& attackBall = playerStateMachine.GetAttackBallSphere();
+			const bool hitBossHand = boss.IsHitByAttackSphere(attackBall); // 左右どちらかの手に当たったか
+			if (hitBossHand) // 当たった場合だけダメージ処理へ
+			{
+				// 同じ攻撃球で何度もHPが減らないよう、命中を一度だけ記録する。
+				const bool firstHitForThisBall = playerStateMachine.TryRegisterAttackBallHit(); // この球の初回命中か
+				if (firstHitForThisBall)
+					boss.TakeDamage();
+			}
+		}
+		DxPlus::Debug::SetFormatString(L"Boss HP: %d / %d", boss.GetHealth(), Boss::MaxHealth);
 		DxPlus::Debug::SetString(L"1: Hand attack test (3 sec follow)");
 #endif
 

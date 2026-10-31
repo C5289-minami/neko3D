@@ -42,6 +42,7 @@ void Boss::Init()
 void Boss::Reset()
 {
 	counter_ = 0.0f;
+	health_ = MaxHealth;
 	distance_ = 200.0f;
 	handAttackActive_ = false;
 	// 初期位置・回転・拡大率はJSONファイルから読み込む
@@ -221,6 +222,19 @@ void Boss::StartHandAttack()
 	{
 		hand.isHit = true;
 	}
+}
+
+bool Boss::IsHitByAttackSphere(const Collision::Sphere& sphere) const
+{//攻撃の当たり判定を確認する関数
+	if (!handAttackActive_) return false;
+
+	for (const AttackData& hand : attackHands_)
+		//攻撃判定の情報を保持する配列をループして確認
+	{
+		if (Collision::IsHitSphereSphere(hand.hitSphere, sphere))
+			return true;
+	}
+	return false;
 }
 
 bool Boss::UpdateHandAttack(

@@ -11,9 +11,12 @@ public:
     void Exit() override;
 	void Draw() const;
 	const Collision::Sphere& GetAttackSphere() const { return attackSphere_; }
+	bool IsBallActive() const { return ballActive_; }
+	bool TryRegisterHit();
 
 private:
 	bool ballActive_{};
+	bool hasHitTarget_{};
 	Collision::Sphere attackSphere_{};
 	Vec3 ballVelocity_{};
 	float elapsed_{};

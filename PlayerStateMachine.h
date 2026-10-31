@@ -29,6 +29,9 @@ public:
 
 	void ChangeState(PlayerStateType type);
 	void Draw() const;
+	bool IsAttackBallActive() const;
+	const Collision::Sphere& GetAttackBallSphere() const;
+	bool TryRegisterAttackBallHit();
 
 	PlayerStateType GetCurrentType() const { return currentType_; };
 

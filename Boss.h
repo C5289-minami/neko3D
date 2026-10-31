@@ -30,6 +30,8 @@ struct AttackData
 class Boss : public ActorBase
 {
 public:
+	static constexpr int MaxHealth = 4;
+
 	Boss();
 	~Boss() override;
 
@@ -63,6 +65,9 @@ public:
 
 	void StartHandAttack();
 	bool UpdateHandAttack(float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition);
+	bool IsHitByAttackSphere(const Collision::Sphere& sphere) const;
+	int GetHealth() const { return health_; }
+	void TakeDamage() { --health_; }
 #ifdef _DEBUG
 	void DrawHandAttackDebug() const;
 #endif
@@ -80,8 +85,8 @@ private:
 	BossStateMachine stateMachine_;
 
 
-	float health_{ 100.0f };
-	float maxHealth_{ 100.0f };
+	int health_{ MaxHealth };
+	int maxHealth_{ MaxHealth };
 	float downGauge_{ 0.0f };
 	float maxDownGauge_{ 100.0f };
 	float attackPower_{ 10.0f };
