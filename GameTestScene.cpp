@@ -119,10 +119,10 @@ void GameTestScene::Update(float deltaTime)
 			boss.StartHandAttack();
 		}
 		if (boss.UpdateHandAttack(deltaTime,
-			player.GetWorldPosition(),
+			player->GetWorldPosition(),
 			stage.GetWorldPosition()))
 		{
-			player.TakeDamage();
+			player->TakeDamage();
 		}
 		DxPlus::Debug::SetString(L"1: Hand attack test (3 sec follow)");
 #endif
