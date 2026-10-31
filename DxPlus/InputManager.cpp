@@ -19,6 +19,9 @@ namespace DxPlus
         using namespace Input;
         std::vector<ActionMapping> keyboardMappingsP1
         {
+#ifdef _DEBUG
+            { BUTTON_1,         KEY_INPUT_1 },          // 両手攻撃のテスト
+#endif
             { BUTTON_UP,        KEY_INPUT_W },          // W
             { BUTTON_DOWN,      KEY_INPUT_S },          // S
             { BUTTON_LEFT,      KEY_INPUT_A },          // A

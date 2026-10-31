@@ -47,6 +47,8 @@ void GameTestScene::Init()
 
 void GameTestScene::Update(float deltaTime)
 {
+	using namespace DxPlus::Input;
+
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
 #ifndef NDEBUG
@@ -110,10 +112,24 @@ void GameTestScene::Update(float deltaTime)
 
 		boss.Update(deltaTime);
 
+#ifdef _DEBUG
+		// 1を押したら、両手攻撃を最初から試す。
+		if (GetButtonDown(PLAYER1) & BUTTON_1)
+		{
+			boss.StartHandAttack();
+		}
+		if (boss.UpdateHandAttack(deltaTime,
+			player->GetWorldPosition(),
+			stage.GetWorldPosition()))
+		{
+			player->TakeDamage();
+		}
+		DxPlus::Debug::SetString(L"1: Hand attack test (3 sec follow)");
+#endif
+
 
 		playerCamera_.Update(player->GetPosition(), boss.GetPosition(), deltaTime);
 
-		using namespace DxPlus::Input;
 		if (GetButtonDown(PLAYER1) & BUTTON_L3)
 		{
 			gameContext->GetEffectManager().PlayHit(RM().GetEffect(ResourceKeys::Effect_Test),
@@ -128,7 +144,6 @@ void GameTestScene::Update(float deltaTime)
 	if (ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard) return;
 #endif
 
-	using namespace DxPlus::Input;
 	int buttonDown = GetButtonDown(PLAYER1);
 	if (buttonDown & BUTTON_SELECT)
 	{
@@ -158,6 +173,11 @@ void GameTestScene::Render() const
 	{
 		DrawScene(false);
 	}
+
+#ifdef _DEBUG
+	(activeCamera_ ? activeCamera_ : &playerCamera_)->ApplyCamera();
+	gameContext->GetBoss().DrawHandAttackDebug();
+#endif
 }
 
 void GameTestScene::DrawImGui()
