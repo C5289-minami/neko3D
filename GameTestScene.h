@@ -29,8 +29,11 @@ private:
     ShaderEffectController shaderEffects_{};
     void DrawScene(bool toonEnabled) const;
     void RenderDepth() const;
+    void DrawAttackSphereDebug() const;
 
     std::string transformInitialStatus_;
     bool debugActorsPaused_{};
+    float attackSphereDebugRemaining_{};
+    bool rightMouseWasDown_{};
 };
 

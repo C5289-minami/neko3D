@@ -27,13 +27,15 @@ namespace Const
     constexpr float PLAYER_WALL_JUMP_MOVE_SPEED = 600.0f;
     constexpr float PLAYER_WALL_JUMP_SPEED = 800.0f;
 
-    constexpr float PLAYER_ATTACK_BALL_SPEED = 700.0f;
-    constexpr float PLAYER_ATTACK_BALL_LIFETIME = 0.6f;
-    constexpr float PLAYER_ATTACK_BALL_RADIUS = 25.0f;
-
     constexpr float PLAYER_HEIGHT = 60.0f;
     constexpr float PLAYER_SKIN = 1.0f;
     constexpr float PLAYER_RADIUS = 30.0f;
+
+    constexpr float PLAYER_ATTACK_BALL_SPEED = PLAYER_MOVE_SPEED;
+    constexpr float PLAYER_ATTACK_BALL_LIFETIME = 0.6f;
+    constexpr float PLAYER_ATTACK_BALL_RADIUS = PLAYER_RADIUS;
+    constexpr float PLAYER_ATTACK_BALL_HEIGHT_MULTIPLIER = 0.5f;
+    constexpr float PLAYER_ATTACK_BALL_FORWARD_OFFSET = PLAYER_ATTACK_BALL_RADIUS;
 
   
     // 壁登りの検出専用。移動を止めるカプセルの半径は変えない。

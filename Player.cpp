@@ -26,6 +26,14 @@ Player::Player()
 	model_.SetObjectName("Player");
 }
 
+Vec3 Player::GetAttackBallSpawnPosition() const
+//攻撃処理とTestSceneの攻撃位置を合わせるための関数
+{
+	const Vec3 forward{ std::sin(GetYaw()), 0.0f, std::cos(GetYaw()) };
+	return GetPosition()
+		+ Vec3::Up() * (Const::PLAYER_HEIGHT * Const::PLAYER_ATTACK_BALL_HEIGHT_MULTIPLIER)
+		+ forward * (Const::PLAYER_RADIUS + Const::PLAYER_ATTACK_BALL_FORWARD_OFFSET);
+}
 
 void Player::Init()
 {

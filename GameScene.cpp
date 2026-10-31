@@ -322,6 +322,7 @@ void GameScene::DrawScene(bool toonEnabled) const
 		SetUsePixelShader(-1);
 		SetUseVertexShader(-1);
 
+		player->Draw();
 		boss.Draw();
 		stage.Draw();
 
@@ -367,6 +368,7 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 	// BossとPlayer
 	drawModel(boss.GetModelObject());
+	drawModel(player->GetModelObject());
 
 
 	for (const auto& preview : selectPlayers)
@@ -400,6 +402,7 @@ void GameScene::DrawScene(bool toonEnabled) const
 	grid.Draw();
 
 	modelToonRenderer_.EndPass();
+	player->GetStateMachine().Draw();
 	DrawTutorialCollisionSpheres();
 }
 

@@ -6,6 +6,9 @@
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
 #include "Collision.h"
+#include "Consts.h"
+#include "DxConv.h"
+#include "DxLib.h"
 #ifndef NDEBUG
 #include "imgui.h"
 #endif
@@ -19,6 +22,8 @@ void GameTestScene::Init()
     Collision::RegisterDebugCanWatch(this, *gameContext->GetPlayer(), gameContext->GetBoss());
 #endif
 	playerCamera_.Reset();
+	attackSphereDebugRemaining_ = 0.0f;
+	rightMouseWasDown_ = false;
 #ifndef NDEBUG
 	activeCamera_ = nullptr;
 	freeCamera_.Reset();
@@ -50,6 +55,17 @@ void GameTestScene::Update(float deltaTime)
 	using namespace DxPlus::Input;
 
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
+
+#ifdef _DEBUG
+	const bool rightMouseDown = (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0;
+	
+	if (rightMouseDown && !rightMouseWasDown_)
+		attackSphereDebugRemaining_ = 1.0f;
+	rightMouseWasDown_ = rightMouseDown;
+	
+	attackSphereDebugRemaining_ = (std::max)(0.0f,
+		attackSphereDebugRemaining_ - (std::max)(0.0f, deltaTime));
+#endif
 
 #ifndef NDEBUG
 	const bool toggleDown = DxLib::CheckHitKey(KEY_INPUT_LALT) != 0 &&
@@ -300,6 +316,7 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 		effectManager.Draw();
 		grid.Draw();
 		room.Draw();
+		DrawAttackSphereDebug();
 		return;
 	}
 
@@ -328,5 +345,24 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 
 	modelToonRenderer_.Draw(room.GetRoomObject());
 	modelToonRenderer_.EndPass();
+	player->GetStateMachine().Draw();
+	DrawAttackSphereDebug();
+}
+
+void GameTestScene::DrawAttackSphereDebug() const
+{
+#ifdef _DEBUG
+	if (attackSphereDebugRemaining_ <= 0.0f) return;
+
+	const auto* player = gameContext->GetPlayer();
+	const unsigned int color = DxLib::GetColor(0, 0, 0);
+	DxLib::DrawSphere3D(
+		DxConv::ToVECTOR(player->GetAttackBallSpawnPosition()),
+		Const::PLAYER_ATTACK_BALL_RADIUS,
+		6,
+		color,
+		color,
+		false);
+#endif
 }
 
