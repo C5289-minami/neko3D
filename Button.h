@@ -27,6 +27,10 @@ public:
     };
 
     void SetTriggerMode(TriggerMode mode) { triggerMode = mode; }
+    void Trigger()
+    {
+        if (onClick) onClick();
+    }
 
     bool Update(const DxPlus::Vec2& mousePos, bool mousePush)
     {
@@ -34,33 +38,42 @@ public:
 
         const float halfWidth = center.x * scale;
         const float halfHeight = center.y * scale;
-        isHovered = mousePos.x >= position.x - halfWidth && mousePos.x <= position.x + halfWidth &&
+
+        const bool mouseHovered =
+            mousePos.x >= position.x - halfWidth && mousePos.x <= position.x + halfWidth &&
             mousePos.y >= position.y - halfHeight && mousePos.y <= position.y + halfHeight;
+
+        isHovered = isSelected || mouseHovered;
 
         const bool justPressed = mousePush && !prevMousePush;
         const bool justReleased = !mousePush && prevMousePush;
-        if (justPressed && isHovered) isPressedOnButton = true;
+
+        if (justPressed && mouseHovered) isPressedOnButton = true;
 
         bool triggered = false;
+
         switch (triggerMode)
         {
         case TriggerMode::Down:
-            triggered = isHovered && justPressed;
+            triggered = mouseHovered && justPressed;
             break;
         case TriggerMode::Up:
-            triggered = isHovered && isPressedOnButton && justReleased;
+            triggered = mouseHovered && isPressedOnButton && justReleased;
             break;
         case TriggerMode::Hold:
-            triggered = isHovered && mousePush;
+            triggered = mouseHovered && mousePush;
             break;
         }
 
-        if (justReleased || !isHovered) isPressedOnButton = false;
+        if (justReleased || !mouseHovered) isPressedOnButton = false;
+
         prevMousePush = mousePush;
 
         const bool hasHoverSprite = !hoverSpriteKey.empty() && RM().GetSprite(hoverSpriteKey);
         alpha = baseAlpha * ((isHovered && !hasHoverSprite) ? 128 : 255) / 255;
-        if (triggered && onClick) onClick();
+
+        if (triggered) pendingTrigger = true;
+
         return triggered;
     }
 
@@ -98,6 +111,7 @@ public:
     void SetHoverSprite(const std::wstring& key) { hoverSpriteKey = key; }
     void SetScale(float value) { scale = value; }
     void SetPosition(const DxPlus::Vec2& pos) { position = pos; }
+    void SetSelected(bool selected) { isSelected = selected; }
 
     // アンカー位置を指定して、画像の中心座標に変換する
     void SetAnchorPosition(const DxPlus::Vec2& anchorPosition, const DxPlus::Vec2& anchor)
@@ -108,6 +122,13 @@ public:
         );
     }
 
+    std::function<void()> TakePendingTrigger()
+    {
+        if (!pendingTrigger) return {};
+
+        pendingTrigger = false;
+        return onClick;
+    }
     const DxPlus::Vec2& GetPosition() const { return position; }
 
 private:
@@ -135,4 +156,6 @@ private:
     TriggerMode triggerMode{ TriggerMode::Down };
     bool prevMousePush{ false };
     bool isPressedOnButton{ false };
+    bool isSelected{ false };
+    bool pendingTrigger{ false };
 };

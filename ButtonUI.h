@@ -58,8 +58,9 @@ public:
 	void SetTextAlign(DxPlus::Text::TextAlign align) { text_.SetAlign(align); }
 	void SetTextOffset(DxPlus::Vec2 offset) { text_.SetOffset(offset); }
 	void SetTextScale(float scale) { text_.SetScale(scale); }
-
-
+	std::function<void()> TakePendingTrigger() { return button.TakePendingTrigger(); }
+	void SetSelected(bool selected) { button.SetSelected(selected); }
+	void Trigger() { button.Trigger(); }
 private:
 	Button button;
 	ButtonLabel text_;
