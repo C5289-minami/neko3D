@@ -72,8 +72,15 @@ public:
         if (!sprite) sprite = RM().GetSprite(spriteKey);
         if (!sprite) return;
 
-        DxLib::SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+        if (isHovered)
+            DxLib::SetDrawBright(100, 100, 100);
+        else
+            DxLib::SetDrawBright(255, 255, 255);
+
+        DxLib::SetDrawBlendMode(DX_BLENDMODE_ALPHA, baseAlpha);
         sprite->Draw(position, DxPlus::Vec2(scale, scale));
+
+        DxLib::SetDrawBright(255, 255, 255);
         DxLib::SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
     }
 
@@ -91,6 +98,17 @@ public:
     void SetHoverSprite(const std::wstring& key) { hoverSpriteKey = key; }
     void SetScale(float value) { scale = value; }
     void SetPosition(const DxPlus::Vec2& pos) { position = pos; }
+
+    // アンカー位置を指定して、画像の中心座標に変換する
+    void SetAnchorPosition(const DxPlus::Vec2& anchorPosition, const DxPlus::Vec2& anchor)
+    {
+        position = DxPlus::Vec2(
+            anchorPosition.x + (0.5f - anchor.x) * center.x * 2.0f * scale,
+            anchorPosition.y + (0.5f - anchor.y) * center.y * 2.0f * scale
+        );
+    }
+
+    const DxPlus::Vec2& GetPosition() const { return position; }
 
 private:
     void UpdateSpriteSize()

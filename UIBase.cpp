@@ -116,13 +116,23 @@ void UIBase::Update(float deltaTime)
 
 void UIBase::Draw()
 {
-	// Falseó‘Ô‚É‘JˆÚ‚µI‚í‚Á‚½‚ç•`‰æ‚ð’âŽ~‚·‚é
-	if (state == State::False) return;
- const auto* sprite = RM().GetSprite(key);
-	if (!sprite) return;
-	DxLib::SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
- sprite->Draw(position, DxPlus::Vec2(scale, scale));
-	DxLib::SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+    if (state == State::False) return;
+
+    const auto* sprite = RM().GetSprite(key);
+    if (!sprite) return;
+
+    float width = 0.0f;
+    float height = 0.0f;
+    DxLib::GetGraphSizeF(sprite->GetID(), &width, &height);
+
+    DxPlus::Vec2 drawPosition(
+        position.x + (0.5f - center.x) * width * scale,
+        position.y + (0.5f - center.y) * height * scale
+    );
+
+    DxLib::SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+    sprite->Draw(drawPosition, DxPlus::Vec2(scale, scale));
+    DxLib::SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
 
 // •ûŒü‚ð“ü‚ê‚é‚Æo‚Ä‚­‚éMotion‚ðÝ’è‚·‚éŠÖ”

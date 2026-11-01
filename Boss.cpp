@@ -96,13 +96,7 @@ void Boss::Update(float deltaTime)
 
 	position_ += velocity_ * deltaTime;
 
-	// 変更されたアニメーションを再生
-	animation_.Play3D(
-		RM().GetModel(model_.GetModelKey()),
-		GetAnimationHandle(currentAnimType_),
-		currentAnimLoop_,
-		Const::ANIM_FPS
-	);
+	
 }
 
 void Boss::Draw() const
@@ -210,6 +204,27 @@ void Boss::StopMove()
 }
 
 const int Boss::GetModelHandle() const { return RM().GetModel(model_.GetModelKey()); }
+
+void Boss::SetAnimation(BossAnimType::Type type, bool loop, bool playAfterBlend)
+{
+	if (currentAnimType_ == type && currentAnimLoop_ == loop)
+		return;
+
+	animation_.Reset();
+
+	currentAnimType_ = type;	
+	currentAnimLoop_ = loop;
+
+
+	animation_.Play3D(
+		RM().GetModel(model_.GetModelKey()),
+		GetAnimationHandle(currentAnimType_),
+		currentAnimLoop_,
+		Const::ANIM_FPS,
+		0.15f,
+		playAfterBlend
+	);
+}
 
 float Boss::GetAnimTotalTime(BossAnimType::Type type) const
 {

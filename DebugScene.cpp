@@ -11,7 +11,7 @@ void TestScene::Init()
 
     // キャラクター
     m_ssPlayer = RM().GetSpriteStudioPlayer(
-        ResourceKeys::SpriteStudio_TitleCharacter);
+        ResourceKeys::SpriteStudio_Gauge);
 
     flipTestMode = 0;
 
@@ -22,7 +22,7 @@ void TestScene::Init()
         // アニメーション一覧を自動取得
         const auto animations =
             RM().GetSpriteStudioAnimationNames(
-                ResourceKeys::SpriteStudio_TitleCharacter);
+                ResourceKeys::SpriteStudio_Gauge);
 
         // 「/walk」で終わるアニメーションを探す
         for (std::size_t i = 0; i < animations.size(); ++i)
@@ -39,7 +39,7 @@ void TestScene::Init()
             {
                 // 見つかったインデックスで再生
                 RM().PlaySpriteStudioAnimation(
-                    ResourceKeys::SpriteStudio_TitleCharacter,
+                    ResourceKeys::SpriteStudio_Gauge,
                     i,
                     0,      // 無限ループ
                     1.0f);  // 通常速度

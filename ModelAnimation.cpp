@@ -8,7 +8,6 @@
 
 namespace
 {
-	// 再生対象モデル・アニメーション元モデル・アニメーション番号
 	using AnimationKey = std::tuple<int, int, int>;
 
 	struct SharedAttachInfo
@@ -17,7 +16,6 @@ namespace
 		int referenceCount;
 	};
 
-	// 全ModelAnimationインスタンスで共有するmap
 	std::map<AnimationKey, SharedAttachInfo> sharedAttaches;
 }
 
@@ -47,7 +45,6 @@ bool ModelAnimation::AttachedAnimation::Attach(
 		return false;
 	}
 
-	// すでに同じアニメーションを持っているなら何もしない。
 	if (targetModelHandle_ == targetModelHandle &&
 		sourceModelHandle_ == sourceModelHandle &&
 		animIndex_ == animIndex &&
@@ -66,7 +63,6 @@ bool ModelAnimation::AttachedAnimation::Attach(
 
 	auto it = sharedAttaches.find(key);
 
-	// ほかのModelAnimationがすでにアタッチしていたら共有する。
 	if (it != sharedAttaches.end())
 	{
 		++it->second.referenceCount;
@@ -79,7 +75,6 @@ bool ModelAnimation::AttachedAnimation::Attach(
 		return true;
 	}
 
-	// 初めて使う組み合わせだけアタッチする。
 	const int attachIndex = MV1AttachAnim(
 		targetModelHandle,
 		animIndex,
@@ -123,8 +118,6 @@ void ModelAnimation::AttachedAnimation::Reset()
 		{
 			--it->second.referenceCount;
 
-			// 最後に使っていたインスタンスが解除した場合だけ、
-			// DxLibのアタッチを解除する。
 			if (it->second.referenceCount == 0)
 			{
 				MV1DetachAnim(targetModelHandle_, attachIndex_);
@@ -148,14 +141,16 @@ void ModelAnimation::Play3D(
 	int animIndex,
 	bool loop,
 	float speedScale,
-	float blendSeconds)
+	float blendSeconds,
+	bool playImmediately)
 {
 	Play3D(
 		modelHandle,
 		AnimationHandle::FromIndex(modelHandle, animIndex),
 		loop,
 		speedScale,
-		blendSeconds
+		blendSeconds,
+		playImmediately
 	);
 }
 
@@ -164,18 +159,21 @@ void ModelAnimation::Play3D(
 	const AnimationHandle& animation,
 	bool loop,
 	float speedScale,
-	float blendSeconds)
+	float blendSeconds,
+	bool playImmediately)
 {
 	if (modelHandle < 0 || !animation)
 		return;
 
-	speedScale = (std::max)(0.0f, speedScale);
+	speedScale = std::isfinite(speedScale)
+		? (std::max)(0.0f, speedScale)
+		: 1.0f;
 
 	blendSeconds = std::isfinite(blendSeconds)
 		? (std::max)(0.0f, blendSeconds)
 		: 0.0f;
 
-	// 初回再生、またはモデルが変わった場合は直接再生する。
+	// 初回再生、またはモデルが変わった場合。
 	if (modelHandle_ != modelHandle || !currentAnimation_)
 	{
 		Reset();
@@ -186,8 +184,11 @@ void ModelAnimation::Play3D(
 		modelHandle_ = modelHandle;
 		currentAnimationHandle_ = animation;
 		currentElapsed_ = 0.0f;
+
 		loop_ = loop;
 		speedScale_ = speedScale;
+		isPlaying_ = playImmediately;
+		finished_ = false;
 
 		MV1SetAttachAnimBlendRate(
 			modelHandle_,
@@ -200,13 +201,15 @@ void ModelAnimation::Play3D(
 	}
 
 	loop_ = loop;
-	speedScale_ = speedScale;
 
-	// 同じ切り替え先が指定され続けても、ブレンドをやり直さない。
+	// 同じ切り替え先が指定され続けた場合。
 	if (nextAnimation_ && nextAnimationHandle_ == animation)
+	{
+		nextPlayImmediately_ = playImmediately;
 		return;
+	}
 
-	// 現在のアニメーションに戻す要求なら、ブレンドを取り消す。
+	// 現在のアニメーションに戻す場合。
 	if (currentAnimationHandle_ == animation)
 	{
 		if (nextAnimation_)
@@ -214,9 +217,12 @@ void ModelAnimation::Play3D(
 			nextAnimation_.Reset();
 			nextAnimationHandle_ = {};
 
-			nextElapsed_ = 0.0f;
 			blendElapsed_ = 0.0f;
 			blendDuration_ = 0.0f;
+
+			nextPlayImmediately_ = true;
+			startRequested_ = false;
+			playToRequested_ = false;
 
 			MV1SetAttachAnimBlendRate(
 				modelHandle_,
@@ -228,7 +234,7 @@ void ModelAnimation::Play3D(
 		return;
 	}
 
-	// 切り替え時間が0秒なら、その場で切り替える。
+	// ブレンド時間が0なら即座に切り替える。
 	if (blendSeconds <= 0.0f)
 	{
 		nextAnimation_.Reset();
@@ -243,10 +249,18 @@ void ModelAnimation::Play3D(
 		currentAnimationHandle_ = animation;
 		currentElapsed_ = 0.0f;
 
-		nextAnimationHandle_ = {};
-		nextElapsed_ = 0.0f;
 		blendElapsed_ = 0.0f;
 		blendDuration_ = 0.0f;
+
+		nextAnimationHandle_ = {};
+		nextPlayImmediately_ = true;
+		startRequested_ = false;
+		playToRequested_ = false;
+
+		speedScale_ = speedScale;
+		isPlaying_ = playImmediately;
+		finished_ = false;
+		playEndTime_ = -1.0f;
 
 		MV1SetAttachAnimBlendRate(
 			modelHandle_,
@@ -258,15 +272,18 @@ void ModelAnimation::Play3D(
 		return;
 	}
 
-	// 別の切り替え先へ変更された場合、前のブレンドを取り消す。
+	// 別の切り替え先へ変更された場合。
 	if (nextAnimation_)
 	{
 		nextAnimation_.Reset();
 		nextAnimationHandle_ = {};
 
-		nextElapsed_ = 0.0f;
 		blendElapsed_ = 0.0f;
 		blendDuration_ = 0.0f;
+
+		nextPlayImmediately_ = true;
+		startRequested_ = false;
+		playToRequested_ = false;
 
 		MV1SetAttachAnimBlendRate(
 			modelHandle_,
@@ -275,18 +292,20 @@ void ModelAnimation::Play3D(
 		);
 	}
 
-	// 切り替え先をアタッチする。
 	if (!nextAnimation_.Attach(modelHandle, animation))
 		return;
 
 	nextAnimationHandle_ = animation;
-	nextElapsed_ = 0.0f;
+	nextPlayImmediately_ = playImmediately;
+
+	startRequested_ = false;
+	playToRequested_ = false;
+
 	blendElapsed_ = 0.0f;
 	blendDuration_ = blendSeconds;
 
 	SetAnimationTime(nextAnimation_, 0.0f);
 
-	// ブレンド開始時は現在のアニメーションだけを表示する。
 	MV1SetAttachAnimBlendRate(
 		modelHandle_,
 		currentAnimation_.GetAttachIndex(),
@@ -301,42 +320,186 @@ void ModelAnimation::Play3D(
 }
 
 // ============================================================
+// Play control
+// ============================================================
+
+void ModelAnimation::Start(float speedScale)
+{
+	speedScale_ = std::isfinite(speedScale)
+		? (std::max)(0.0f, speedScale)
+		: 1.0f;
+
+	// ブレンド中なら、完了後に再生する。
+	if (nextAnimation_)
+	{
+		startRequested_ = true;
+		playToRequested_ = false;
+		return;
+	}
+
+	if (!currentAnimation_)
+		return;
+
+	// 最後まで再生済みなら先頭から再生する。
+	const float totalTime = MV1GetAttachAnimTotalTime(
+		currentAnimation_.GetModelHandle(),
+		currentAnimation_.GetAttachIndex()
+	);
+
+	if (totalTime > 0.0f && currentElapsed_ >= totalTime)
+		currentElapsed_ = 0.0f;
+
+	playEndTime_ = -1.0f;
+	isPlaying_ = true;
+	finished_ = false;
+
+	SetAnimationTime(currentAnimation_, currentElapsed_);
+}
+
+void ModelAnimation::PlayTo(float endTime, float speedScale)
+{
+	if (!std::isfinite(endTime) || !std::isfinite(speedScale))
+		return;
+
+	endTime = (std::max)(0.0f, endTime);
+	speedScale = (std::max)(0.0f, speedScale);
+
+	// ブレンド中なら、完了後に指定位置まで再生する。
+	if (nextAnimation_)
+	{
+		playToRequested_ = true;
+		startRequested_ = false;
+
+		requestedEndTime_ = endTime;
+		requestedSpeedScale_ = speedScale;
+		return;
+	}
+
+	if (!currentAnimation_)
+		return;
+
+	// 同じ終了位置ですでに停止しているなら何もしない。
+	if (playEndTime_ == endTime && finished_)
+		return;
+
+	const float totalTime = MV1GetAttachAnimTotalTime(
+		currentAnimation_.GetModelHandle(),
+		currentAnimation_.GetAttachIndex()
+	);
+
+	playEndTime_ = (std::min)(endTime, totalTime);
+	speedScale_ = speedScale;
+
+	isPlaying_ = currentElapsed_ < playEndTime_;
+	finished_ = !isPlaying_;
+
+	if (!isPlaying_)
+		currentElapsed_ = playEndTime_;
+
+	SetAnimationTime(currentAnimation_, currentElapsed_);
+}
+
+void ModelAnimation::Pause()
+{
+	if (nextAnimation_)
+	{
+		startRequested_ = false;
+		playToRequested_ = false;
+		return;
+	}
+
+	isPlaying_ = false;
+}
+
+void ModelAnimation::SetTime(float time)
+{
+	if (!std::isfinite(time))
+		return;
+
+	if (nextAnimation_)
+	{
+		startRequested_ = false;
+		playToRequested_ = false;
+		return;
+	}
+
+	if (!currentAnimation_)
+		return;
+
+	const float totalTime = MV1GetAttachAnimTotalTime(
+		currentAnimation_.GetModelHandle(),
+		currentAnimation_.GetAttachIndex()
+	);
+
+	currentElapsed_ = (std::clamp)(time, 0.0f, totalTime);
+
+	playEndTime_ = -1.0f;
+	isPlaying_ = false;
+	finished_ = false;
+
+	SetAnimationTime(currentAnimation_, currentElapsed_);
+}
+
+// ============================================================
 // Update
 // ============================================================
 
 void ModelAnimation::Update(float deltaTime)
 {
+	if (!std::isfinite(deltaTime))
+		return;
+
 	deltaTime = (std::max)(0.0f, deltaTime);
 
 	if (!currentAnimation_)
 		return;
 
-	// 現在のアニメーションを進める。
-	AdvanceAnimation(
-		currentAnimation_,
-		currentElapsed_,
-		loop_,
-		speedScale_,
-		deltaTime
-	);
+	if (isPlaying_)
+	{
+		// PlayTo中はループさせず、指定時間まで進める。
+		const bool useLoop = playEndTime_ < 0.0f && loop_;
 
-	SetAnimationTime(currentAnimation_, currentElapsed_);
+		AdvanceAnimation(
+			currentAnimation_,
+			currentElapsed_,
+			useLoop,
+			speedScale_,
+			deltaTime
+		);
+
+		// 指定時間に到達したら停止。
+		if (playEndTime_ >= 0.0f && currentElapsed_ >= playEndTime_)
+		{
+			currentElapsed_ = playEndTime_;
+			isPlaying_ = false;
+			finished_ = true;
+		}
+
+		// アニメーション全体の最後に到達した場合。
+		else if (!loop_)
+		{
+			const float totalTime = MV1GetAttachAnimTotalTime(
+				currentAnimation_.GetModelHandle(),
+				currentAnimation_.GetAttachIndex()
+			);
+
+			if (totalTime > 0.0f && currentElapsed_ >= totalTime)
+			{
+				currentElapsed_ = totalTime;
+				isPlaying_ = false;
+				finished_ = true;
+			}
+		}
+
+		SetAnimationTime(currentAnimation_, currentElapsed_);
+	}
 
 	if (!nextAnimation_)
 		return;
 
-	// 切り替え先のアニメーションも進める。
-	AdvanceAnimation(
-		nextAnimation_,
-		nextElapsed_,
-		loop_,
-		speedScale_,
-		deltaTime
-	);
+	// ブレンド中の次のアニメーションは先頭フレームで固定。
+	SetAnimationTime(nextAnimation_, 0.0f);
 
-	SetAnimationTime(nextAnimation_, nextElapsed_);
-
-	// ブレンド率を0から1へ変化させる。
 	blendElapsed_ += deltaTime;
 
 	const float blendRate = (std::min)(
@@ -356,11 +519,9 @@ void ModelAnimation::Update(float deltaTime)
 		blendRate
 	);
 
-	// ブレンド完了。切り替え先を通常の再生状態にする。
 	if (blendRate >= 1.0f)
 	{
 		const AnimationHandle finishedAnimation = nextAnimationHandle_;
-		const float finishedElapsed = nextElapsed_;
 
 		nextAnimation_.Reset();
 		currentAnimation_.Reset();
@@ -372,7 +533,7 @@ void ModelAnimation::Update(float deltaTime)
 		}
 
 		currentAnimationHandle_ = finishedAnimation;
-		currentElapsed_ = finishedElapsed;
+		currentElapsed_ = 0.0f;
 
 		MV1SetAttachAnimBlendRate(
 			modelHandle_,
@@ -380,12 +541,39 @@ void ModelAnimation::Update(float deltaTime)
 			1.0f
 		);
 
-		SetAnimationTime(currentAnimation_, currentElapsed_);
+		SetAnimationTime(currentAnimation_, 0.0f);
+
+		// ブレンド後の再生方法を決める。
+		if (playToRequested_)
+		{
+			playEndTime_ = requestedEndTime_;
+			speedScale_ = requestedSpeedScale_;
+
+			const float totalTime = MV1GetAttachAnimTotalTime(
+				currentAnimation_.GetModelHandle(),
+				currentAnimation_.GetAttachIndex()
+			);
+
+			playEndTime_ = (std::min)(playEndTime_, totalTime);
+
+			isPlaying_ = currentElapsed_ < playEndTime_;
+			finished_ = !isPlaying_;
+		}
+		else
+		{
+			playEndTime_ = -1.0f;
+			isPlaying_ = nextPlayImmediately_ || startRequested_;
+			finished_ = false;
+		}
 
 		nextAnimationHandle_ = {};
-		nextElapsed_ = 0.0f;
+
 		blendElapsed_ = 0.0f;
 		blendDuration_ = 0.0f;
+
+		nextPlayImmediately_ = true;
+		startRequested_ = false;
+		playToRequested_ = false;
 	}
 }
 
@@ -422,7 +610,7 @@ void ModelAnimation::AdvanceAnimation(
 	}
 	else
 	{
-
+		elapsed = (std::min)(elapsed, totalTime);
 	}
 }
 
@@ -455,24 +643,31 @@ void ModelAnimation::Reset()
 	currentElapsed_ = 0.0f;
 
 	nextAnimationHandle_ = {};
-	nextElapsed_ = 0.0f;
 
 	blendElapsed_ = 0.0f;
 	blendDuration_ = 0.0f;
 
+	nextPlayImmediately_ = true;
+	startRequested_ = false;
+
+	playToRequested_ = false;
+	requestedEndTime_ = -1.0f;
+
+	requestedSpeedScale_ = Const::ANIM_FPS;
+
+	isPlaying_ = true;
+	playEndTime_ = -1.0f;
+
 	loop_ = true;
-	speedScale_ = 1.0f;
+	speedScale_ = Const::ANIM_FPS;
+	finished_ = false;
 }
+
+// ============================================================
+// IsFinished
+// ============================================================
 
 bool ModelAnimation::IsFinished() const
 {
-	if (loop_ || !currentAnimation_ || nextAnimation_)
-		return false;
-
-	const float totalTime = MV1GetAttachAnimTotalTime(
-		currentAnimation_.GetModelHandle(),
-		currentAnimation_.GetAttachIndex()
-	);
-
-	return totalTime > 0.0f && currentElapsed_ >= totalTime;
+	return finished_ && !nextAnimation_;
 }

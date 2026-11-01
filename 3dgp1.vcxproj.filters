@@ -561,9 +561,6 @@
     <ClInclude Include="AttackBaseState.h">
       <Filter>40_Gameplay\Actors\Base\Attack</Filter>
     </ClInclude>
-    <ClInclude Include="BossAttackStateType.h">
-      <Filter>40_Gameplay\Actors\Boss\State\Attack</Filter>
-    </ClInclude>
     <ClInclude Include="BossHairBallSkill.h">
       <Filter>40_Gameplay\Actors\Boss\State\Attack\Skill</Filter>
     </ClInclude>
@@ -717,9 +714,17 @@
     <ClInclude Include="TutorialObjective.h">
       <Filter>15_System\Tutorial</Filter>
     </ClInclude>
-    <ClInclude Include="TutorialTaskManager.h" />
     <ClInclude Include="PlayerActionEvent.h">
       <Filter>40_Gameplay\Actors\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="TutorialTaskManager.h">
+      <Filter>15_System\Tutorial</Filter>
+    </ClInclude>
+    <ClInclude Include="ButtonLabel.h">
+      <Filter>10_Core\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="BossAttackType.h">
+      <Filter>40_Gameplay\Actors\Boss</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1011,7 +1016,15 @@
     <ClCompile Include="TutorialChecklist.cpp">
       <Filter>15_System\Tutorial</Filter>
     </ClCompile>
-    <ClCompile Include="TutorialTaskManager.cpp" />
+    <ClCompile Include="TutorialTaskManager.cpp">
+      <Filter>15_System\Tutorial</Filter>
+    </ClCompile>
+    <ClCompile Include="ButtonLabel.cpp">
+      <Filter>10_Core\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="BossPoseSkill.cpp">
+      <Filter>40_Gameplay\Actors\Boss\State\Attack\Skill\Base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Config\toon.json">

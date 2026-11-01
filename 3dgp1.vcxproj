@@ -206,6 +206,7 @@
     <ClInclude Include="BossStateMachine.h" />
     <ClInclude Include="BossStateType.h" />
     <ClInclude Include="BossTailWhipSkill.h" />
+    <ClInclude Include="ButtonLabel.h" />
     <ClInclude Include="CameraDirector.h" />
     <ClInclude Include="CameraObjectManager.h" />
     <ClInclude Include="CameraPose.h" />
@@ -342,6 +343,7 @@
   <ItemGroup>
     <ClCompile Include="ActorBase.cpp" />
     <ClCompile Include="BossPoseSkill.cpp" />
+    <ClCompile Include="ButtonLabel.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraDirector.cpp" />
     <ClCompile Include="CameraObjectManager.cpp" />
