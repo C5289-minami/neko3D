@@ -19,7 +19,7 @@ public:
 private:
     void SelectIndex(int index);
     void ConfirmSelection();
-
+    void UpdateSelectedUI();
 
     std::vector<Player*> players_;
 

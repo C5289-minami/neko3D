@@ -6,6 +6,7 @@
 #include "ResourceKeys.h"
 #include "DxConv.h"
 #include "DxPlus/Debug.h"
+#include "UIManager.h"
 
 #include <array>
 #include <cmath>
@@ -13,12 +14,6 @@
 
 namespace
 {
-
-	// 現在共有されているコードで確認できるモデルキー。
-	// 3種類のキャラクターモデルがある場合は、それぞれのキーに変更する。
-
-
-
 	constexpr float SelectTargetH = 180.0f;
 	constexpr float SelectTargetRightOffset = 150.0f;
 	constexpr float SelectCameraLeftOffset = 120.0f;
@@ -84,11 +79,31 @@ void GameSceneSelectState::Enter()
 {
 	DxPlus::Debug::SetFormatString(L"GameSceneSelectState::Enter");
 
+	// UI
+	{
+		const DxPlus::Vec2 position{
+			DxPlus::CLIENT_WIDTH * 0.25f,
+			DxPlus::CLIENT_HEIGHT * 0.5f
+		};
+
+		if (!UIM().GetUI(L"Select.Mike"))
+			UIM().CreateImageUI(L"Select.Mike", ResourceKeys::SelectMike, position, { 0,-1 }, SelectCameraMoveDuration);
+
+		if (!UIM().GetUI(L"Select.Sabi"))
+			UIM().CreateImageUI(L"Select.Sabi", ResourceKeys::SelectSabi, position, { 0,-1 }, SelectCameraMoveDuration);
+
+		if (!UIM().GetUI(L"Select.Kuro"))
+			UIM().CreateImageUI(L"Select.Kuro", ResourceKeys::SelectKuro, position, { 0,-1 }, SelectCameraMoveDuration);
+
+		if (auto* ui = UIM().GetUI(L"Select.Mike")) ui->SetFalse();
+		if (auto* ui = UIM().GetUI(L"Select.Sabi")) ui->SetFalse();
+		if (auto* ui = UIM().GetUI(L"Select.Kuro")) ui->SetFalse();
+	}
+
 	auto* context = gameScene_.GetGameContext();
-
 	players_.clear();
-
 	auto& previews = context->GetSelectPreviewPlayers();
+
 
 	for (std::size_t i = 0; i < previews.size(); ++i)
 	{
@@ -159,7 +174,8 @@ void GameSceneSelectState::Tick(float deltaTime)
 		{
 			cameraState_ = SelectCameraState::Ready;
 
-			// マウスでキャラクターを選択した場合は、
+			UpdateSelectedUI();
+
 			// カメラ移動完了後に決定する
 			if (confirmAfterCameraMove_)
 			{
@@ -245,6 +261,10 @@ void GameSceneSelectState::SelectIndex(int index)
 
 	selectedIndex_ = index;
 
+	UIM().GetUI(L"Select.Mike")->Hide();
+	UIM().GetUI(L"Select.Sabi")->Hide();
+	UIM().GetUI(L"Select.Kuro")->Hide();
+
 	auto& director = gameScene_.GetCameraDirector();
 
 	auto pose = MakeCameraPoseInFrontOfPlayer(
@@ -287,10 +307,34 @@ void GameSceneSelectState::ConfirmSelection()
 	stateMachine_.ChangeState(GameStateType::Tutorial);
 }
 
+void GameSceneSelectState::UpdateSelectedUI()
+{
+	const wchar_t* keys[] = {
+		L"Select.Mike",
+		L"Select.Sabi",
+		L"Select.Kuro"
+	};
+
+	for (int i = 0; i < 3; ++i)
+	{
+		if (auto* ui = UIM().GetUI(keys[i]))
+		{
+			if (i == selectedIndex_)
+				ui->SetTrue();
+			else
+				ui->SetFalse();
+		}
+	}
+}
+
 void GameSceneSelectState::Exit()
 {
 	DxPlus::Debug::SetFormatString(
 		L"GameSceneSelectState::Exit");
+	if (auto* ui = UIM().GetUI(L"Select.Mike")) ui->SetFalse();
+	if (auto* ui = UIM().GetUI(L"Select.Sabi")) ui->SetFalse();
+	if (auto* ui = UIM().GetUI(L"Select.Kuro")) ui->SetFalse();
+
 
 	DxLib::SetMouseDispFlag(FALSE);
 }
