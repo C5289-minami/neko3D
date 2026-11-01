@@ -18,6 +18,5 @@ private:
 	bool ballActive_{};
 	bool hasHitTarget_{};
 	Collision::Sphere attackSphere_{};
-	Vec3 ballVelocity_{};
 	float elapsed_{};
 };
