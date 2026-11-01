@@ -104,8 +104,9 @@ void GameScene::Update(float deltaTime)
 {
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
-	// キャラクター選択中は本編Playerの移動・衝突判定を止める
-	if (GetCurrentGameState() == GameStateType::Select)
+	// BattleとTutorial以外は本編Playerの移動・衝突判定を止める
+	if (GetCurrentGameState() != GameStateType::Tutorial &&
+		GetCurrentGameState() != GameStateType::Battle)
 	{
 		stateMachine_.Tick(deltaTime);
 		gameContext->GetEffectManager().Update(deltaTime);
