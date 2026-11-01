@@ -34,7 +34,7 @@ void GameSceneTitleState::Enter()
         auto* logo = UIM().CreateImageUI(
             L"Game.Logo",
             ResourceKeys::UI_Logo,
-            { DxPlus::CLIENT_WIDTH * 0.2f, DxPlus::CLIENT_HEIGHT * 0.3f },
+            { DxPlus::CLIENT_WIDTH * 0.05f, DxPlus::CLIENT_HEIGHT * 0.3f },
             {},
             0.5f
         );
@@ -46,7 +46,7 @@ void GameSceneTitleState::Enter()
         auto* startButton = UIM().CreateButtonUI(
             L"Game.StartButton",
             ResourceKeys::Button_Red.back,
-            { DxPlus::CLIENT_WIDTH * 0.2f, DxPlus::CLIENT_HEIGHT * 0.6f },
+            { DxPlus::CLIENT_WIDTH * 0.05f, DxPlus::CLIENT_HEIGHT * 0.65f },
             [this]() { stateMachine_.ChangeState(GameStateType::Select); },
             { -1, 0 },
             0.5f
@@ -64,7 +64,7 @@ void GameSceneTitleState::Enter()
         auto* exitButton = UIM().CreateButtonUI(
             L"Game.ExitButton",
             ResourceKeys::Button_Red.back,
-            { DxPlus::CLIENT_WIDTH * 0.2f, DxPlus::CLIENT_HEIGHT * 0.75f },
+            { DxPlus::CLIENT_WIDTH * 0.05f, DxPlus::CLIENT_HEIGHT * 0.8f },
             []() { PostQuitMessage(0); },
             { -1, 0 },
             0.5f

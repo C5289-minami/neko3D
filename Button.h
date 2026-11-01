@@ -108,6 +108,8 @@ public:
         );
     }
 
+    const DxPlus::Vec2& GetPosition() const { return position; }
+
 private:
     void UpdateSpriteSize()
     {

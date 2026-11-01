@@ -42,7 +42,8 @@ public:
 		else
 			button.Draw();
 
-		text_.Draw(position, scale, alpha);
+		// ‰æ‘œ‚Ì’†S‚ğŠî€‚É•¶š‚ğ•`‰æ
+		text_.Draw(button.GetPosition(), scale, alpha);
 	}
 	void SetButtonHoverSprite(const std::wstring& key) { button.SetHoverSprite(key); }
 	void SetScale(float s)override {
@@ -57,6 +58,8 @@ public:
 	void SetTextAlign(DxPlus::Text::TextAlign align) { text_.SetAlign(align); }
 	void SetTextOffset(DxPlus::Vec2 offset) { text_.SetOffset(offset); }
 	void SetTextScale(float scale) { text_.SetScale(scale); }
+
+
 private:
 	Button button;
 	ButtonLabel text_;
