@@ -61,6 +61,7 @@ void ResourceManager::LoadAll()
 	LoadModel(ResourceKeys::Model_BossAnim_Sippo, L"./Data/Models/Boss/boss_sippo.mv1");
 	LoadModel(ResourceKeys::Model_BossAnim_Damage, L"./Data/Models/Boss/boss_damage.mv1");
 	LoadModel(ResourceKeys::Model_BossAnim_Attck_Hit, L"./Data/Models/Boss/boss_tataku.mv1");
+	LoadModel(ResourceKeys::Model_BossAnim_Die, L"./Data/Models/Boss/boss_zyoubutu.mv1");
 
 	LoadModel(ResourceKeys::Model_PillarL, L"./Data/Models/stage/PillarL.mv1");
 	LoadModel(ResourceKeys::Model_PillarM, L"./Data/Models/stage/PillarM.mv1");

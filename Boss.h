@@ -114,7 +114,8 @@ private:
 	AnimationHandle idleAnimHandle_{};
 	AnimationHandle tailWhipAnimHandle_{};
 	AnimationHandle damageAnimHandle_{};
-	AnimationHandle AtkHitAnimHnadle_{};
+	AnimationHandle atkHitAnimHnadle_{};
+	AnimationHandle dieAnimHandle_{};
 
 	// Skill
 	std::unique_ptr<BossHairBallSkill> hairBallSkill_;

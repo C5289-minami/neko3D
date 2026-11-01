@@ -253,6 +253,9 @@ void GameTestScene::DrawImGui()
 		if (ImGui::Button(u8"Damage (HP -1)"))
 			boss.TakeDamage();
 
+		if (ImGui::Button(u8"Die (成仏)"))
+			boss.SetAnimation(BossAnimType::Die, false);//Skillが呼べない；；
+
 		if (ImGui::Button(u8"Bite"))
 			boss.UseSkill(BossAttackType::Bite);
 
