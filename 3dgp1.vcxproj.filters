@@ -259,14 +259,17 @@
     <Filter Include="30_Scenes\Game\StateMashine\GameSceneBattleState">
       <UniqueIdentifier>{4276574e-d1eb-465c-8e21-1bd9e6808560}</UniqueIdentifier>
     </Filter>
-    <Filter Include="30_Scenes\Game\StateMashine\GameSceneResultsState">
-      <UniqueIdentifier>{cfaf73d7-a10c-484e-9714-51762bf76fd6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="10_Core\Camera\CameraShake">
       <UniqueIdentifier>{74007395-5b76-429b-b265-721c1d69ac9d}</UniqueIdentifier>
     </Filter>
     <Filter Include="15_System\Tutorial">
       <UniqueIdentifier>{01cc81e3-5211-47c5-aa98-84f85af8ae49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes\Game\StateMashine\GameSceneClearState">
+      <UniqueIdentifier>{cfaf73d7-a10c-484e-9714-51762bf76fd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="30_Scenes\Game\StateMashine\GameSceneGameOverState">
+      <UniqueIdentifier>{3372c1ec-dde9-4f05-8435-60233a21c426}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -681,9 +684,6 @@
     <ClInclude Include="GameSceneSelectState.h">
       <Filter>30_Scenes\Game\StateMashine\GameSceneSelectState</Filter>
     </ClInclude>
-    <ClInclude Include="GameSceneResultsState.h">
-      <Filter>30_Scenes\Game\StateMashine\GameSceneResultsState</Filter>
-    </ClInclude>
     <ClInclude Include="GameSceneBattleState.h">
       <Filter>30_Scenes\Game\StateMashine\GameSceneBattleState</Filter>
     </ClInclude>
@@ -725,6 +725,12 @@
     </ClInclude>
     <ClInclude Include="BossAttackType.h">
       <Filter>40_Gameplay\Actors\Boss</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSceneClearState.h">
+      <Filter>30_Scenes\Game\StateMashine\GameSceneClearState</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSceneGameOverState.h">
+      <Filter>30_Scenes\Game\StateMashine\GameSceneGameOverState</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -998,9 +1004,6 @@
     <ClCompile Include="GameSceneSelectState.cpp">
       <Filter>30_Scenes\Game\StateMashine\GameSceneSelectState</Filter>
     </ClCompile>
-    <ClCompile Include="GameSceneResultsState.cpp">
-      <Filter>30_Scenes\Game\StateMashine\GameSceneResultsState</Filter>
-    </ClCompile>
     <ClCompile Include="GameSceneBattleState.cpp">
       <Filter>30_Scenes\Game\StateMashine\GameSceneBattleState</Filter>
     </ClCompile>
@@ -1024,6 +1027,12 @@
     </ClCompile>
     <ClCompile Include="BossPoseSkill.cpp">
       <Filter>40_Gameplay\Actors\Boss\State\Attack\Skill\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSceneClearState.cpp">
+      <Filter>30_Scenes\Game\StateMashine\GameSceneClearState</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSceneGameOverState.cpp">
+      <Filter>30_Scenes\Game\StateMashine\GameSceneGameOverState</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

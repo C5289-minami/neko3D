@@ -212,11 +212,12 @@
     <ClInclude Include="CameraPose.h" />
     <ClInclude Include="CameraShake.h" />
     <ClInclude Include="CameraTransition.h" />
+    <ClInclude Include="GameSceneGameOverState.h" />
     <ClInclude Include="PlayerActionEvent.h" />
     <ClInclude Include="TutorialChecklist.h" />
     <ClInclude Include="GameBaseState.h" />
     <ClInclude Include="GameSceneBattleState.h" />
-    <ClInclude Include="GameSceneResultsState.h" />
+    <ClInclude Include="GameSceneClearState.h" />
     <ClInclude Include="GameSceneSelectState.h" />
     <ClInclude Include="GameSceneTitleState.h" />
     <ClInclude Include="GameSceneTutorialState.h" />
@@ -357,7 +358,8 @@
     <ClCompile Include="BossIdleState.cpp" />
     <ClCompile Include="BossStateMachine.cpp" />
     <ClCompile Include="GameSceneBattleState.cpp" />
-    <ClCompile Include="GameSceneResultsState.cpp" />
+    <ClCompile Include="GameSceneClearState.cpp" />
+    <ClCompile Include="GameSceneGameOverState.cpp" />
     <ClCompile Include="GameSceneSelectState.cpp" />
     <ClCompile Include="GameSceneTitleState.cpp" />
     <ClCompile Include="GameSceneTutorialState.cpp" />

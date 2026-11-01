@@ -33,7 +33,7 @@ void UIBase::Shake(float intensity, float duration, float frequency)
 
 void UIBase::Hide()
 {
-    if (state == State::False || state == State::Hide)
+    if (state == UIState::False || state == UIState::Hide)
         return;
 
     isVisible = false;
@@ -42,7 +42,7 @@ void UIBase::Hide()
     motion.Start(0.0f, 1.0f, motion.GetDuration(), hideEasing);
     motion.StartReverse();
 
-    state = State::Hide;
+    state = UIState::Hide;
 }
 
 void UIBase::Update(float deltaTime)
@@ -56,44 +56,44 @@ void UIBase::Update(float deltaTime)
     const bool shouldShow = isVisible && displayCondition();
 
     // 表示開始
-    if (shouldShow && state == State::False)
+    if (shouldShow && state == UIState::False)
     {
         motion.Start(0.0f, 1.0f, motion.GetDuration(), showEasing);
-        state = State::Do;
+        state = UIState::Do;
     }
 
     // 表示条件が無効になったら非表示モーションへ
-    if (!shouldShow && (state == State::Normal || state == State::Do))
+    if (!shouldShow && (state == UIState::Normal || state == UIState::Do))
     {
         motion.SetEasing(hideEasing);
-        state = State::Hide;
+        state = UIState::Hide;
     }
 
     // モーション更新
     switch (state)
     {
-    case State::Do:
+    case UIState::Do:
         motion.Increase(deltaTime);
         if (motion.IsFinished())
-            state = State::Normal;
+            state = UIState::Normal;
         break;
 
-    case State::Hide:
+    case UIState::Hide:
         motion.Decrease(deltaTime);
         if (motion.IsFinished())
-            state = State::False;
+            state = UIState::False;
         break;
 
-    case State::Normal:
-    case State::False:
+    case UIState::Normal:
+    case UIState::False:
         break;
     }
 
     // 透明度更新
-    if (state == State::Do || state == State::Hide)
+    if (state == UIState::Do || state == UIState::Hide)
         alpha = static_cast<int>(finAlpha * motion.GetEasedProgress());
     else
-        alpha = (state == State::Normal) ? finAlpha : 0;
+        alpha = (state == UIState::Normal) ? finAlpha : 0;
 
     UpdateStartMotion();
 
@@ -116,7 +116,7 @@ void UIBase::Update(float deltaTime)
 
 void UIBase::Draw()
 {
-    if (state == State::False) return;
+    if (state == UIState::False) return;
 
     const auto* sprite = RM().GetSprite(key);
     if (!sprite) return;
@@ -138,7 +138,7 @@ void UIBase::Draw()
 // 方向を入れると出てくるMotionを設定する関数
 void UIBase::SetToMove(DxPlus::Vec2 dir)
 {
-    state = State::Do;
+    state = UIState::Do;
     motion.Start(0.0f, 1.0f, motion.GetDuration(), showEasing);
     Direction = dir;
     if (motion.GetDuration() > 0)
@@ -155,10 +155,10 @@ void UIBase::UpdateStartMotion()
 
     if (motion.GetDuration() > 0.0f) {
         const float easedProgress = motion.GetEasedProgress();
-        if (state == State::Do) {
+        if (state == UIState::Do) {
             position = (basePosition - Direction * MoveDistance) + Direction * (MoveDistance * easedProgress);
         }
-        else if (state == State::Hide) {
+        else if (state == UIState::Hide) {
             position = basePosition - Direction * (MoveDistance * (1.0f - easedProgress));
         }
     }

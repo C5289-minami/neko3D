@@ -6,5 +6,6 @@ enum class GameStateType
 	Select,
 	Tutorial,
 	Battle,
-	Results,
+	Clear,
+	GameOver,
 };

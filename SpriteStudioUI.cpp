@@ -84,7 +84,7 @@ void SpriteStudioUI::Update(float deltaTime)
 
 void SpriteStudioUI::Draw()
 {
-    if (player && state != State::False)
+    if (player && state != UIState::False)
     {
         player->draw();
     }

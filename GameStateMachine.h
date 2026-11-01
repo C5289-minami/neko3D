@@ -8,7 +8,8 @@
 #include "GameSceneSelectState.h"
 #include "GameSceneTutorialState.h"
 #include "GameSceneBattleState.h"
-#include "GameSceneResultsState.h"
+#include "GameSceneClearState.h"
+#include "GameSceneGameOverState.h"
 
 class GameScene;
 
@@ -32,8 +33,9 @@ private:
 	bool initialized_{ false };
 
 	GameSceneTitleState titleState_;
-  GameSceneSelectState selectState_;
+	GameSceneSelectState selectState_;
 	GameSceneTutorialState tutorialState_;
 	GameSceneBattleState battleState_;
-	GameSceneResultsState resultsState_;
+	GameSceneClearState clearState_;
+	GameSceneGameOverState gameOverState_;
 };

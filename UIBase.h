@@ -17,7 +17,7 @@ public:
 		//Init();
 		motion.Start(0.0f, 1.0f, motionDuration, showEasing);
 		SetToMove(dir); // モーションの方向を設定
-		state = State::Do;// モーション実行中に設定
+		state = UIState::Do;// モーション実行中に設定
 	}
 	virtual ~UIBase() = default;
 
@@ -29,8 +29,8 @@ public:
 	void SetToMove(DxPlus::Vec2 dir);
 	void UpdateStartMotion();
 	// 表示・非表示モーションのイージングを設定する
-	void SetShowEasing(Motion::Easing easing) { showEasing = easing; if (state == State::Do) motion.SetEasing(easing); }
-	void SetHideEasing(Motion::Easing easing) { hideEasing = easing; if (state == State::Hide) motion.SetEasing(easing); }
+	void SetShowEasing(Motion::Easing easing) { showEasing = easing; if (state == UIState::Do) motion.SetEasing(easing); }
+	void SetHideEasing(Motion::Easing easing) { hideEasing = easing; if (state == UIState::Hide) motion.SetEasing(easing); }
 	void SetMotionDuration(float duration) { motion.SetDuration(duration); UpdateStartMotion(); }
 	float GetMotionDuration() const { return motion.GetDuration(); }
 	void SetMoveDistance(float distance) { MoveDistance = std::max(0.0f, distance); UpdateStartMotion(); }
@@ -47,14 +47,14 @@ public:
 	void SetPosition(DxPlus::Vec2 targetPosition)
 	{
 		basePosition = targetPosition;
-		if (state == State::Do || state == State::Hide)
+		if (state == UIState::Do || state == UIState::Hide)
 			UpdateStartMotion();
 		else
 			position = targetPosition;
 	}
 	DxPlus::Vec2 GetPosition() const { return basePosition; }
 	const std::wstring& GetKey() const { return key; }
-	bool IsActive() const { return state != State::False; }
+	bool IsActive() const { return state != UIState::False; }
 	// 見えるかどうかを設定
 	void SetVisible(bool visible) { isVisible = visible; fadeOnlyMotion = false; }
 	bool IsVisible() const { return isVisible; }
@@ -65,12 +65,12 @@ public:
 		fadeOnlyMotion = false;
 
 		motion.Start(0.0f, 1.0f, motion.GetDuration(), showEasing);
-		state = State::Do;
+		state = UIState::Do;
 
 		UpdateStartMotion();
 	}
 	// 無効化
-	void SetFalse() { isVisible = false; state = State::False; }
+	void SetFalse() { isVisible = false; state = UIState::False; }
 	// 非表示モーションを開始する
 	void Hide();
 
@@ -88,6 +88,15 @@ public:
 	void SetCenter(DxPlus::Vec2 value) { center = value; }
 	DxPlus::Vec2 GetCenter() const { return center; }
 
+
+	enum class UIState
+	{
+		Normal,// ふつうの状態(静止)
+		Do,// モーション実行中(出現)
+		Hide,// 消失モーション中
+		False,// 表示していない
+	};
+	UIState GetCurrentState()const { return state; }
 protected:
 	DxPlus::Vec2 position{};
 	DxPlus::Vec2 basePosition{};
@@ -96,14 +105,8 @@ protected:
 	std::wstring key;
 	int alpha{ 255 };
 	int finAlpha{ 255 };
-	enum class State
-	{
-		Normal,// ふつうの状態(静止)
-		Do,// モーション実行中(出現)
-		Hide,// 消失モーション中
-		False,// 表示していない
-	};
-	State state{ State::Normal };
+
+	UIState state{ UIState::Normal };
 	//表示する条件
 	std::function<bool()> displayCondition = []() { return true; };
 	bool isVisible{ true };

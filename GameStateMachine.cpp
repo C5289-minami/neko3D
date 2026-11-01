@@ -8,7 +8,8 @@ GameStateMachine::GameStateMachine(GameScene& gameScene)
     selectState_(*this, gameScene),
     tutorialState_(*this, gameScene),
     battleState_(*this, gameScene),
-    resultsState_(*this, gameScene)
+    clearState_(*this, gameScene),
+	gameOverState_(*this, gameScene)
 {
 
 }
@@ -45,8 +46,10 @@ State* GameStateMachine::FindState(GameStateType type)
         return &tutorialState_;
     case GameStateType::Battle:
         return &battleState_;
-    case GameStateType::Results:
-        return &resultsState_;
+    case GameStateType::Clear:
+        return &clearState_;
+    case GameStateType::GameOver:
+		return &gameOverState_;
     default:
         return nullptr;
     }

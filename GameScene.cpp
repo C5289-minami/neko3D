@@ -192,7 +192,19 @@ void GameScene::Render() const
 void GameScene::DrawImGui()
 {
 #ifndef NDEBUG
-
+	ImGui::Begin("GameScene Debug");
+	
+	// clear
+	if (ImGui::Button("Clear"))
+	{
+		stateMachine_.ChangeState(GameStateType::Clear);
+	}
+	if (ImGui::Button("GameOver"))
+	{
+		stateMachine_.ChangeState(GameStateType::GameOver);
+	}
+	
+	ImGui::End();
 #endif
 }
 
