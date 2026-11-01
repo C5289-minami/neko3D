@@ -5,6 +5,7 @@
 #include "UIManager.h"
 #include "ResourceKeys.h"
 #include "DxPlus/Debug.h"
+#include "CameraObjectManager.h"
 
 GameSceneTitleState::GameSceneTitleState(
     GameStateMachine& gameStateMachine,
@@ -73,8 +74,10 @@ void GameSceneTitleState::Enter()
         exitButton->SetCenter({ 0.0f, 0.5f });
 		exitButton->SetTextFont(RM().GetFont(ResourceKeys::Font_Game));
 		exitButton->SetTextScale(1.5f);
-        exitButton->SetText(L"‚â‚ß‚éƒ“ƒSƒ“ƒS");
+        exitButton->SetText(L"‚â‚ß‚é");
     }
+	gameScene_.GetCameraDirector().SetPoseImmediate(CObjs().GetCameraPose("Title"));
+
 }
 void GameSceneTitleState::Tick(float deltaTime)
 {

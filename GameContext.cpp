@@ -40,6 +40,12 @@ void GameContext::Init()
 
 	CharSettingsManager::Load();
 
+	const std::array<std::wstring, 3> playerModelKeys
+	{
+		ResourceKeys::Model_PlayerMike,
+		ResourceKeys::Model_PlayerSabi,
+		ResourceKeys::Model_PlayerKuro
+	};
 	for (std::size_t i = 0; i < selectPreviewPlayers_.size(); ++i)
 	{
 		auto& selectPlayer = selectPreviewPlayers_[i];
@@ -48,6 +54,7 @@ void GameContext::Init()
 		// Player Actor‚Ìe‚ðBasket‚É‚·‚é
 		selectPlayer.SetOwner(room_.GetBasket());
 
+		selectPlayer.GetModelObject().SetModelKey(playerModelKeys[i]);
 		selectPlayer.SetIdentifier("select_player_" + suffix);
 		selectPlayer.GetModelObject().SetObjectId("select_player_" + suffix);
 		selectPlayer.GetModelObject().SetObjectName("SelectPlayer" + suffix);

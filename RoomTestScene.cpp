@@ -330,34 +330,49 @@ void RoomTestScene::RenderDepth() const
 			cameraDirector_.GetCurrentPose());
 	}
 
-	modelToonRenderer_.DrawDepth(room.GetRoomObject());
+	// RoomObj
+	for (const auto* allRoom : room.GetAllModelObjects())
+	{
+		modelToonRenderer_.DrawDepth(*allRoom);
+	}
+
+	// Stage
 	modelToonRenderer_.DrawDepth(stage.GetModelObject());
 	modelToonRenderer_.DrawDepth(stage.GetAlphaModelObject());
-	modelToonRenderer_.DrawDepth(player->GetModelObject());
-	modelToonRenderer_.DrawDepth(boss.GetModelObject());
 
 	for (const auto& pillar : stage.GetPillarModelObjects())
 	{
 		modelToonRenderer_.DrawDepth(pillar);
 	}
+
 	for (const auto& model : stage.GetStageModelObjects())
 	{
 		modelToonRenderer_.DrawDepth(model);
 	}
 
-	for (const auto& jumpStand : gameContext->GetRoom().GetJumpStands())
+	// Player‚ÆBoss
+	for (const auto& preview :
+		gameContext->GetSelectPreviewPlayers())
 	{
-		ModelObject jumpStandModel = jumpStand->GetJumpStandModel();
-		ModelObject pillarModel = jumpStand->GetPillarModel();
-		modelToonRenderer_.DrawDepth(jumpStandModel);
-		modelToonRenderer_.DrawDepth(pillarModel);
-	}	
+		modelToonRenderer_.DrawDepth(preview.GetModelObject());
+	}
+
+	modelToonRenderer_.DrawDepth(boss.GetModelObject());
 
 }
 
 void RoomTestScene::DrawScene(bool toonEnabled) const
 {
-	auto& room = gameContext->GetRoom();
+	const auto& boss = gameContext->GetBoss();
+	const auto* player = gameContext->GetPlayer();
+	const auto& stage = gameContext->GetStage();
+	const auto& effectManager = gameContext->GetEffectManager();
+	const auto& grid = gameContext->GetGrid();
+	const auto& room = gameContext->GetRoom();
+
+	const auto& selectPlayers =
+		gameContext->GetSelectPreviewPlayers();
+
 	// ƒJƒƒ‰‚ðÝ’è‚·‚é
 	if (auto* activeCamera = cameraDirector_.GetActiveCamera())
 	{
@@ -370,22 +385,39 @@ void RoomTestScene::DrawScene(bool toonEnabled) const
 		SetUsePixelShader(-1);
 		SetUseVertexShader(-1);
 
-		gameContext->GetPlayer()->Draw();
-		gameContext->GetStage().Draw();
+		player->Draw();
+		boss.Draw();
+		stage.Draw();
+
+
+		for (const auto& preview : selectPlayers)
+		{
+			preview.Draw();
+		}
+
+
+
+		stage.DrawAlphaModel();
+
+		effectManager.Draw();
+		grid.Draw();
 		room.Draw();
+
 
 		return;
 	}
 
-	// ƒgƒD[ƒ“•`‰æŠJŽn
 	modelToonRenderer_.BeginPass();
 
-	const auto drawActor = [this](const ModelObject& model)
+	// Œ³‚ÌModelObject‚ð’¼Ú•`‰æ‚·‚é
+	// eŽq•ÏŠ·‚ÍModelObject::ApplyTransform()‚É”C‚¹‚é
+	const auto drawModel = [this](const ModelObject& model)
 		{
 			if (model.collisionHighlighted)
 			{
 				SetUsePixelShader(-1);
 				SetUseVertexShader(-1);
+
 				MV1SetUseOrigShader(FALSE);
 				model.Draw();
 				MV1SetUseOrigShader(TRUE);
@@ -395,18 +427,37 @@ void RoomTestScene::DrawScene(bool toonEnabled) const
 				modelToonRenderer_.Draw(model);
 			}
 		};
-	const auto& player = gameContext->GetPlayer();
-	const ModelObject playerModel = player->GetModelObject();
-	drawActor(playerModel);
-	drawActor(room.GetRoomObject());
-	drawActor(gameContext->GetStage().GetModelObject());
-	for (const auto& pillar : gameContext->GetStage().GetPillarModelObjects())
+
+	// Boss‚ÆPlayer
+	drawModel(boss.GetModelObject());
+	drawModel(player->GetModelObject());
+
+
+	for (const auto& preview : selectPlayers)
 	{
-		drawActor(pillar);
+		drawModel(preview.GetModelObject());
 	}
-	for (const auto& model : gameContext->GetStage().GetStageModelObjects())
+
+
+
+	// Stage
+	drawModel(stage.GetModelObject());
+	drawModel(stage.GetAlphaModelObject());
+
+	for (const auto& pillar : stage.GetPillarModelObjects())
 	{
-		drawActor(model);
+		drawModel(pillar);
+	}
+
+	for (const auto& model : stage.GetStageModelObjects())
+	{
+		drawModel(model);
+	}
+
+	// Room
+	for (const auto* allRoom : room.GetAllModelObjects())
+	{
+		drawModel(*allRoom);
 	}
 
 	modelToonRenderer_.EndPass();

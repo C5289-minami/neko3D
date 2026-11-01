@@ -16,12 +16,7 @@ namespace
 
 	// 現在共有されているコードで確認できるモデルキー。
 	// 3種類のキャラクターモデルがある場合は、それぞれのキーに変更する。
-	const std::array<std::wstring, 3> playerModelKeys
-	{
-		ResourceKeys::Model_PlayerMike,
-		ResourceKeys::Model_PlayerSabi,
-		ResourceKeys::Model_PlayerKuro
-	};
+
 
 
 	constexpr float SelectTargetH = 180.0f;
@@ -99,7 +94,6 @@ void GameSceneSelectState::Enter()
 	{
 		auto& preview = previews[i];
 
-		preview.SetModelKey(playerModelKeys[i]);
 		preview.SetGravityEnabled(false);
 		preview.SetDefMove(false);
 		preview.StopMove();
