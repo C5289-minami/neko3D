@@ -68,6 +68,13 @@ void GameSceneTitleState::Tick(float deltaTime)
 {
     DxPlus::Debug::SetFormatString(L"GameSceneTitleState::Tick");
     gameScene_.UpdateStateCamera(deltaTime, "Title");
+
+    using namespace DxPlus::Input;
+    bool enter = (GetButtonDown(PLAYER1)& BUTTON_START);
+    if (enter)
+    {
+        stateMachine_.ChangeState(GameStateType::Select);
+    }
 }
 
 void GameSceneTitleState::Exit()

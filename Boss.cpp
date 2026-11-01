@@ -41,6 +41,7 @@ void Boss::Init()
 
 void Boss::Reset()
 {
+
 	counter_ = 0.0f;
 	health_ = maxHealth_;
 	phase_ = BossPhase::Phase1;
@@ -106,9 +107,8 @@ void Boss::Update(float deltaTime)
 
 void Boss::Draw() const
 {
-	const ModelObject worldModel = model_.WithParentTransform(GetPosition(), GetRotation());
-	worldModel.ApplyCollisionColor();
-	worldModel.Draw();
+	model_.ApplyCollisionColor();
+	model_.Draw();
 }
 
 #ifdef _DEBUG
@@ -196,7 +196,7 @@ void Boss::SetMoveDirection(const Vec3& moveDirection, float speed)
 
 	direction = direction.Normalized();
 	velocity_ = direction * speed;
-	pitch_ = std::atan2(direction.x, direction.z);
+	yaw_ = std::atan2(direction.x, direction.z);
 	stateMachine_.ChangeState(BossStateType::Walk);
 }
 

@@ -204,32 +204,11 @@ void GameScene::RenderDepth() const
 	const auto& stage = gameContext->GetStage();
 	const auto& room = gameContext->GetRoom();
 
-	// Room本体
-	modelToonRenderer_.DrawDepth(room.GetRoomObject());
-
-	// Roomの柱
-	for (const auto* pillar : room.GetPillars())
+	// RoomObj
+	for (const auto* allRoom : room.GetAllModelObjects())
 	{
-		if (pillar)
-		{
-			modelToonRenderer_.DrawDepth(*pillar);
-		}
+		modelToonRenderer_.DrawDepth(*allRoom);
 	}
-
-	// Roomのジャンプ台と柱
-	for (const auto* jumpStand : room.GetJumpStands())
-	{
-		if (!jumpStand) continue;
-
-		modelToonRenderer_.DrawDepth(
-			jumpStand->GetJumpStandModel()
-		);
-
-		modelToonRenderer_.DrawDepth(
-			jumpStand->GetPillarModel()
-		);
-	}
-	modelToonRenderer_.DrawDepth(room.GetBasket().GetModelObject());
 
 	// Stage
 	modelToonRenderer_.DrawDepth(stage.GetModelObject());
