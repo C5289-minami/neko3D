@@ -12,6 +12,27 @@ public:
 		: BossPoseSkill(boss)
 	{
 	}
+
+	bool IsAimingFinished() const override
+	{
+		return boss_.GetAnimation().IsFinished();
+	}
+
+	bool IsAttackFinished() const override
+	{
+		return boss_.GetAnimation().IsFinished();
+	}
+
+	bool IsRecoveryFinished() const override
+	{
+		return boss_.GetAnimation().IsFinished();
+	}
+
+	bool IsReturnFinished() const override
+	{
+		return !boss_.GetAnimation().IsBlending();
+	}
+
 private:
     void ApplyPhase(AttackStateType phase, float progress) override
     {

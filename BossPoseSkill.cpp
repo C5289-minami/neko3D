@@ -71,27 +71,27 @@ void BossPoseSkill::OnReturn(float deltaTime)
 
 bool BossPoseSkill::IsPreActionFinished() const
 {
-	return !boss_.GetAnimation().IsBlending();
+	return preActionMotion_.IsFinished();
 }
 
 bool BossPoseSkill::IsAimingFinished() const
 {
-	return boss_.GetAnimation().IsFinished();
+	return aimingMotion_.IsFinished();
 }
 
 bool BossPoseSkill::IsAttackFinished() const
 {
-	return boss_.GetAnimation().IsFinished();
+	return attackMotion_.IsFinished();
 }
 
 bool BossPoseSkill::IsRecoveryFinished() const
 {
-	return boss_.GetAnimation().IsFinished();
+	return recoveryMotion_.IsFinished();
 }
 
 bool BossPoseSkill::IsReturnFinished() const
 {
-	return !boss_.GetAnimation().IsBlending();
+	return returnMotion_.IsFinished();
 }
 
 
