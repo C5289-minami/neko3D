@@ -4,54 +4,61 @@
 #include "DxPlus/DxPlus.h"
 #include "Button.h"
 #include <functional>
+#include "ButtonLabel.h"
 
 class ButtonUI : public UIBase
 {
-	public:
-     ButtonUI(const std::wstring& key, DxPlus::Vec2 pos,
-			std::function<void()> onclick,
-			DxPlus::Vec2 dir = DxPlus::Vec2(0, 0), 
-			float motionDuration = 0.0f)
+public:
+	ButtonUI(const std::wstring& key, DxPlus::Vec2 pos,
+		std::function<void()> onclick,
+		DxPlus::Vec2 dir = DxPlus::Vec2(0, 0),
+		float motionDuration = 0.0f)
 		: UIBase(key, pos, dir, motionDuration),
-          button(pos, key, std::move(onclick))
+		button(pos, key, std::move(onclick))
 	{
-	}
+	};
 	void Update(float deltaTime) override
 	{
-      pressed = false;
+		pressed = false;
 		UIBase::Update(deltaTime);
-       button.SetPosition(position);
-		button.SetAlpha(this->alpha);
-		
-		if(state != State::Normal)
-		{
+
+		button.SetAnchorPosition(position, center);
+		button.SetAlpha(alpha);
+
+		if (state != State::Normal)
 			return;
-		}
+
 		DxPlus::Vec2 mousePos = DxPlus::Input::GetMousePositionF();
 		bool clicked = (DxLib::GetMouseInput() & MOUSE_INPUT_LEFT) != 0;
-       pressed = button.Update(mousePos, clicked);
-
+		pressed = button.Update(mousePos, clicked);
 	}
-    bool IsPressed() const { return pressed; }
+	bool IsPressed() const { return pressed; }
 	void Draw() override
 	{
 		if (state == State::False) return;
-		if (state != State::Normal) {
-			// モーション中は通常の画像を描画
+
+		if (state != State::Normal)
 			UIBase::Draw();
-		}
-		else {
-			// 通常時はホバー判定付きのボタン描画
+		else
 			button.Draw();
-		}
-	
+
+		text_.Draw(position, scale, alpha);
 	}
-   void SetButtonHoverSprite(const std::wstring& key) { button.SetHoverSprite(key); }
-	void SetScale(float s)override { 
+	void SetButtonHoverSprite(const std::wstring& key) { button.SetHoverSprite(key); }
+	void SetScale(float s)override {
 		UIBase::SetScale(s);
-		button.SetScale(s); 
+		button.SetScale(s);
 	};
+	void SetText(const std::wstring& text) { text_.SetText(text); }
+	const std::wstring& GetText() const { return text_.GetText(); }
+
+	void SetTextFont(int handle) { text_.SetFontHandle(handle); }
+	void SetTextColor(int color) { text_.SetColor(color); }
+	void SetTextAlign(DxPlus::Text::TextAlign align) { text_.SetAlign(align); }
+	void SetTextOffset(DxPlus::Vec2 offset) { text_.SetOffset(offset); }
+	void SetTextScale(float scale) { text_.SetScale(scale); }
 private:
 	Button button;
-  bool pressed{ false };
+	ButtonLabel text_;
+	bool pressed{ false };
 };

@@ -31,37 +31,47 @@ void GameSceneTitleState::Enter()
     // 存在しない場合だけ生成
     if (!UIM().GetUI(L"Game.Logo"))
     {
-        UIM().CreateImageUI(
+        auto* logo = UIM().CreateImageUI(
             L"Game.Logo",
             ResourceKeys::UI_Logo,
-            { DxPlus::CLIENT_WIDTH * 0.3f, DxPlus::CLIENT_HEIGHT * 0.3f },
+            { DxPlus::CLIENT_WIDTH * 0.2f, DxPlus::CLIENT_HEIGHT * 0.3f },
             {},
             0.5f
         );
+		logo->SetCenter({ 0.5f, 0.5f });
     }
 
     if (!UIM().GetButtonUI(L"Game.StartButton"))
     {
-        UIM().CreateButtonUI(
+        auto* startButton = UIM().CreateButtonUI(
             L"Game.StartButton",
-            ResourceKeys::UI_StartButton,
+            ResourceKeys::Button_Red.back,
             { DxPlus::CLIENT_WIDTH * 0.2f, DxPlus::CLIENT_HEIGHT * 0.6f },
             [this]() { stateMachine_.ChangeState(GameStateType::Select); },
             { -1, 0 },
             0.5f
         );
+		startButton->SetButtonHoverSprite(ResourceKeys::Button_Red.hover);
+		startButton->SetTextFont(RM().GetFont(ResourceKeys::Font_Game));
+		startButton->SetTextScale(1.5f);
+		startButton->SetText(L"スタート");
+
     }
 
     if (!UIM().GetButtonUI(L"Game.ExitButton"))
     {
-        UIM().CreateButtonUI(
+        auto* exitButton = UIM().CreateButtonUI(
             L"Game.ExitButton",
-            ResourceKeys::UI_ExitButton,
+            ResourceKeys::Button_Red.back,
             { DxPlus::CLIENT_WIDTH * 0.2f, DxPlus::CLIENT_HEIGHT * 0.75f },
             []() { PostQuitMessage(0); },
             { -1, 0 },
             0.5f
         );
+		exitButton->SetButtonHoverSprite(ResourceKeys::Button_Red.hover);
+		exitButton->SetTextFont(RM().GetFont(ResourceKeys::Font_Game));
+		exitButton->SetTextScale(1.5f);
+        exitButton->SetText(L"やめるンゴ");
     }
 }
 void GameSceneTitleState::Tick(float deltaTime)

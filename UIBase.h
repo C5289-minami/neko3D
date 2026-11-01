@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 #include <algorithm>
 #include <string>
 #include <utility>
@@ -86,9 +85,13 @@ public:
 	void SetZOrder(int z) { zOrder = z; }
 	int GetZOrder() const { return zOrder; }
 
+	void SetCenter(DxPlus::Vec2 value) { center = value; }
+	DxPlus::Vec2 GetCenter() const { return center; }
+
 protected:
 	DxPlus::Vec2 position{};
 	DxPlus::Vec2 basePosition{};
+	DxPlus::Vec2 center{ 0.5f, 0.5f };
 	float scale{ 1.0f };
 	std::wstring key;
 	int alpha{ 255 };
