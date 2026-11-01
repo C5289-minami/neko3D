@@ -25,7 +25,7 @@ public:
 		button.SetAnchorPosition(position, center);
 		button.SetAlpha(alpha);
 
-		if (state != State::Normal)
+		if (state != UIState::Normal)
 			return;
 
 		DxPlus::Vec2 mousePos = DxPlus::Input::GetMousePositionF();
@@ -35,9 +35,9 @@ public:
 	bool IsPressed() const { return pressed; }
 	void Draw() override
 	{
-		if (state == State::False) return;
+		if (state == UIState::False) return;
 
-		if (state != State::Normal)
+		if (state != UIState::Normal)
 			UIBase::Draw();
 		else
 			button.Draw();
