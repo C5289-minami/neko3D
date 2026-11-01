@@ -19,6 +19,8 @@ void GameContext::Init()
 		modelObjects.Add(model, stage);
 	for (auto& model : stage.GetStageModelObjects())
 		modelObjects.Add(model, stage);
+
+	boss.SetOwner(stage);
 	modelObjects.Add(boss.GetModelObject(), boss);
 	modelObjects.Add(room_.GetRoomObject(), room_);
 

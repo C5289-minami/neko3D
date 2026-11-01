@@ -17,39 +17,40 @@
 
 void GameTestScene::Init()
 {
-	gameContext->Reset();
+    gameContext->Reset();
+
 #ifdef _DEBUG
-    Collision::RegisterDebugCanWatch(this, *gameContext->GetPlayer(), gameContext->GetBoss());
+    Collision::RegisterDebugCanWatch(
+        this, *gameContext->GetPlayer(), gameContext->GetBoss());
 #endif
-	playerCamera_.Reset();
-	attackSphereDebugRemaining_ = 0.0f;
-	rightMouseWasDown_ = false;
+
+    playerCamera_.Reset();
+    attackSphereDebugRemaining_ = 0.0f;
+    rightMouseWasDown_ = false;
+
 #ifndef NDEBUG
-	activeCamera_ = nullptr;
-	freeCamera_.Reset();
-	wasFreeCameraToggleDown_ = false;
+    activeCamera_ = nullptr;
+    freeCamera_.Reset();
+    wasFreeCameraToggleDown_ = false;
 #endif
 
+    ToonSettingsManager::Load();
+    OutlineSettingsManager::Load();
 
-	{
-		ToonSettingsManager::Load();
-		OutlineSettingsManager::Load();
+    if (!modelToonRenderer_.Init())
+        DxPlus::Utils::FatalError(L"modelToonRendererの初期化失敗");
 
-		// トゥーン描画に必要なシェーダーと設定バッファーを初期化
-		if (!modelToonRenderer_.Init())
-			DxPlus::Utils::FatalError(L"modelToonRendererの初期化失敗");
-		if (!shaderEffects_.Init(DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT))
-			DxPlus::Utils::FatalError(L"shaderEffectsの初期化失敗");
+    if (!shaderEffects_.Init(
+        DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT))
+    {
+        DxPlus::Utils::FatalError(L"shaderEffectsの初期化失敗");
+    }
 
-		// toon描画とアウトライン描画を有効にする
-		shaderEffects_.GetSettings().toonEnabled = true;
-		shaderEffects_.GetSettings().outlineEnabled = true;
-	}
+    shaderEffects_.GetSettings().toonEnabled = true;
+    shaderEffects_.GetSettings().outlineEnabled = true;
 
-
-	StartFadeIn();
+    StartFadeIn();
 }
-
 void GameTestScene::Update(float deltaTime)
 {
 	using namespace DxPlus::Input;
@@ -119,13 +120,15 @@ void GameTestScene::Update(float deltaTime)
 			DxLib::CheckHitKey(KEY_INPUT_RSHIFT) != 0;
 		player->SetDebugDashEnabled(debugDash);
 #endif
+
 		player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
+
 #ifdef _DEBUG
 		// この更新だけに適用し、共有するPlayerを他のシーンへ持ち越さない。
 		player->SetDebugDashEnabled(false);
 #endif
-		stage.UpdateAlphaModel(deltaTime, *player);
 
+		stage.UpdateAlphaModel(deltaTime, *player);
 		boss.Update(deltaTime);
 
 #ifdef _DEBUG
@@ -158,7 +161,7 @@ void GameTestScene::Update(float deltaTime)
 #endif
 
 
-		playerCamera_.Update(player->GetPosition(), boss.GetPosition(), deltaTime);
+		playerCamera_.Update(player->GetWorldPosition(), boss.GetWorldPosition(), deltaTime);
 
 		if (GetButtonDown(PLAYER1) & BUTTON_L3)
 		{
@@ -276,31 +279,33 @@ void GameTestScene::RenderDepth() const
 	const auto& stage = gameContext->GetStage();
 	const auto& room = gameContext->GetRoom();
 
-	const ModelObject playerModel = player->GetModelObject().WithParentTransform(
-		player->GetPosition(), player->GetRotation());
-	const ModelObject bossModel = boss.GetModelObject().WithParentTransform(
-		boss.GetPosition(), boss.GetRotation());
-	const ModelObject stageModel = stage.GetModelObject().WithParentTransform(
-		stage.GetPosition(), stage.GetRotation());
-
-	modelToonRenderer_.DrawDepth(bossModel);
-	modelToonRenderer_.DrawDepth(stageModel);
+	// RoomObj
+	for (const auto* allRoom : room.GetAllModelObjects())
+	{
+		modelToonRenderer_.DrawDepth(*allRoom);
+	}
+	// Stage
+	modelToonRenderer_.DrawDepth(stage.GetModelObject());
 	modelToonRenderer_.DrawDepth(stage.GetAlphaModelObject());
 
 	for (const auto& pillar : stage.GetPillarModelObjects())
 	{
-		modelToonRenderer_.DrawDepth(
-			pillar.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
+		modelToonRenderer_.DrawDepth(pillar);
 	}
 
 	for (const auto& model : stage.GetStageModelObjects())
 	{
-		modelToonRenderer_.DrawDepth(
-			model.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
+		modelToonRenderer_.DrawDepth(model);
 	}
 
-	modelToonRenderer_.DrawDepth(playerModel);
-	modelToonRenderer_.DrawDepth(room.GetRoomObject());
+	// PlayerとBoss
+	for (const auto& preview :
+		gameContext->GetSelectPreviewPlayers())
+	{
+		modelToonRenderer_.DrawDepth(preview.GetModelObject());
+	}
+
+	modelToonRenderer_.DrawDepth(boss.GetModelObject());
 }
 
 void GameTestScene::DrawScene(bool toonEnabled) const
@@ -317,6 +322,8 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	const auto& effectManager = gameContext->GetEffectManager();
 	const auto& grid = gameContext->GetGrid();
 	const auto& room = gameContext->GetRoom();
+	const auto& selectPlayers =
+		gameContext->GetSelectPreviewPlayers();
 
 	// トゥーンシェーダーを使わない場合
 	if (!toonEnabled)
@@ -326,6 +333,10 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 		boss.Draw();
 		stage.Draw();
 		player->Draw();
+		for (const auto& preview : selectPlayers)
+		{
+			preview.Draw();
+		}
 		stage.DrawAlphaModel();
 		effectManager.Draw();
 		grid.Draw();
@@ -337,27 +348,58 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	// トゥーン描画開始
 	modelToonRenderer_.BeginPass();
 
-	const ModelObject playerModel = player->GetModelObject().WithParentTransform(
-		player->GetPosition(), player->GetRotation());
-	modelToonRenderer_.Draw(playerModel);
-	// bossのモデルにboss自体の位置と回転を適用して描画する
-	modelToonRenderer_.Draw(boss.GetModelObject().WithParentTransform(
-		boss.GetPosition(), boss.GetRotation()));
-	modelToonRenderer_.Draw(stage.GetModelObject().WithParentTransform(
-		stage.GetPosition(), stage.GetRotation()));
-	modelToonRenderer_.Draw(stage.GetAlphaModelObject());
+	const auto drawModel = [this](const ModelObject& model)
+		{
+			if (model.collisionHighlighted)
+			{
+				SetUsePixelShader(-1);
+				SetUseVertexShader(-1);
+
+				MV1SetUseOrigShader(FALSE);
+				model.Draw();
+				MV1SetUseOrigShader(TRUE);
+			}
+			else
+			{
+				modelToonRenderer_.Draw(model);
+			}
+		};
+
+	// BossとPlayer
+	drawModel(boss.GetModelObject());
+	drawModel(player->GetModelObject());
+
+
+	for (const auto& preview : selectPlayers)
+	{
+		drawModel(preview.GetModelObject());
+	}
+
+
+
+	// Stage
+	drawModel(stage.GetModelObject());
+	drawModel(stage.GetAlphaModelObject());
+
 	for (const auto& pillar : stage.GetPillarModelObjects())
 	{
-		modelToonRenderer_.Draw(pillar.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
+		drawModel(pillar);
 	}
+
 	for (const auto& model : stage.GetStageModelObjects())
 	{
-		modelToonRenderer_.Draw(model.WithParentTransform(stage.GetPosition(), stage.GetRotation()));
+		drawModel(model);
 	}
+
+	// Room
+	for (const auto* allRoom : room.GetAllModelObjects())
+	{
+		drawModel(*allRoom);
+	}
+
 	effectManager.Draw();
 	grid.Draw();
 
-	modelToonRenderer_.Draw(room.GetRoomObject());
 	modelToonRenderer_.EndPass();
 	player->GetStateMachine().Draw();
 	DrawAttackSphereDebug();
