@@ -68,9 +68,24 @@ void Boss::Reset()
 	const int sippoModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Sippo);
 	tailWhipAnimHandle_ = AnimationHandle::FromIndex(sippoModelHandle, 0);
 	const int AtkHitModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Attck_Hit);
-	AtkHitAnimHnadle_ = AnimationHandle::FromIndex(AtkHitModelHandle, 0);
+	atkHitAnimHnadle_ = AnimationHandle::FromIndex(AtkHitModelHandle, 0);
 	const int damageModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Damage);
 	damageAnimHandle_ = AnimationHandle::FromIndex(damageModelHandle, 0);
+	const int dieModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Die);
+	dieAnimHandle_ = AnimationHandle::FromIndex(dieModelHandle, 0);
+	// 成仏モデルは本体と同じテクスチャを使うため、Bossモデルのテクスチャを共有する。
+	const int baseModelHandle = RM().GetModel(ResourceKeys::Model_Boss);
+	const int baseTextureCount = DxLib::MV1GetTextureNum(baseModelHandle);
+	const int dieTextureCount = DxLib::MV1GetTextureNum(dieModelHandle);
+	if (baseTextureCount > 0)
+	{
+		const int sharedTextureHandle = DxLib::MV1GetTextureGraphHandle(baseModelHandle, 0);
+		if (sharedTextureHandle != -1)
+		{
+			for (int textureIndex = 0; textureIndex < dieTextureCount; ++textureIndex)
+				DxLib::MV1SetTextureGraphHandle(dieModelHandle, textureIndex, sharedTextureHandle, FALSE);
+		}
+	}
 
 	// 初期アニメーションの再生
 	animation_.Play3D(
@@ -96,10 +111,10 @@ void Boss::TakeDamage()
 
 void Boss::Update(float deltaTime)
 {
-	if (currentAnimType_ == BossAnimType::Damage)
+	if (currentAnimType_ == BossAnimType::Damage || currentAnimType_ == BossAnimType::Die)
 	{
 		animation_.Update(deltaTime);
-		if (animation_.IsFinished())
+		if (currentAnimType_ == BossAnimType::Damage && animation_.IsFinished())
 			stateMachine_.ChangeState(BossStateType::Idle);
 	}
 	else
@@ -151,8 +166,9 @@ AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 	{
 	case BossAnimType::Idle:  return idleAnimHandle_;
 	case BossAnimType::TailWhip: return tailWhipAnimHandle_;
-	case BossAnimType::Clap: return AtkHitAnimHnadle_;
+	case BossAnimType::Clap: return atkHitAnimHnadle_;
 	case BossAnimType::Damage: return damageAnimHandle_;
+	case BossAnimType::Die: return dieAnimHandle_;
 	default:
 		DxPlus::Utils::FatalError(L"BossHandleを取得できませんでした。GetAnimationHandleを確認して");
 		return {};

@@ -10,5 +10,6 @@ namespace BossAnimType
         Clap,
         Bite,
         Damage,
+        Die,
     };
 }
