@@ -18,11 +18,16 @@ namespace ResourceKeys
 	inline constexpr const Button Button_Pink = { L"UIPinkButton", L"UIPinkHover" };
 	inline constexpr const Button Button_Purple = { L"UIPurpleButton", L"UIPurpleHover" };
 	inline constexpr const Button Button_Rose = { L"UIRoseButton", L"UIRoseHover" };
+	inline constexpr const wchar_t* BossStatusBack = L"UIBossStatusBack";
+	inline constexpr const wchar_t* MikeStatusBack = L"UIMikeStatusBack";//‰¼
 
-
-	// ===== Textures / Grids =====
-	//inline constexpr const wchar_t* Texture_openPBR_shader1 = L"openPBR_shader1";
-	//inline constexpr const wchar_t* Texture_petanurihatyottohuben = L"petanurihatyottohuben";
+	// result
+	inline constexpr const wchar_t* ClearResult = L"UIClearResult";
+	inline constexpr const wchar_t* GameOverResult = L"UIGameOverResult";
+	// select
+	inline constexpr const wchar_t* SelectMike = L"UISelectMike";
+	inline constexpr const wchar_t* SelectSabi = L"UISelectSabi";
+	inline constexpr const wchar_t* SelectKuro = L"UISelectKuro";
 
 	// ===== Models =====
 	inline constexpr const wchar_t* Model_PlayerMike = L"ModelPlayerMike";
@@ -32,7 +37,6 @@ namespace ResourceKeys
 
 	inline constexpr const wchar_t* Model_Boss = L"ModelBoss";
 	inline constexpr const wchar_t* Model_Room = L"ModelRoom";
-	inline constexpr const wchar_t* Model_Test = L"ModelTest";
 	inline constexpr const wchar_t* Model_Basket = L"ModelBasket";
 	// Boss Anim
 	inline constexpr const wchar_t* Model_BossAnim_Idle = L"BossAnimIdle";

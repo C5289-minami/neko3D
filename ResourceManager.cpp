@@ -41,6 +41,15 @@ void ResourceManager::LoadAll()
 	LoadButtonSprite(ResourceKeys::Button_Purple, L"./Data/Images/Button/button_purple.png", L"./Data/Images/Button/button_purple_hover.png");
 	LoadButtonSprite(ResourceKeys::Button_Rose, L"./Data/Images/Button/button_rose.png", L"./Data/Images/Button/button_rose_hover.png");
 
+	LoadSprite(ResourceKeys::BossStatusBack, L"./Data/Images/Boss/boss_status_back.png");
+	LoadSprite(ResourceKeys::MikeStatusBack, L"./Data/Images/Player/mike_status_back.png");
+	LoadSprite(ResourceKeys::ClearResult, L"./Data/Images/Result/clear.png");
+	LoadSprite(ResourceKeys::GameOverResult, L"./Data/Images/Result/gameover.png");
+	LoadSprite(ResourceKeys::SelectMike, L"./Data/Images/Select/mike.png");
+	LoadSprite(ResourceKeys::SelectSabi, L"./Data/Images/Select/sabi.png");
+	LoadSprite(ResourceKeys::SelectKuro, L"./Data/Images/Select/kuro.png");
+
+
 	// モデルの読み込み
 	LoadModel(ResourceKeys::Model_PlayerMike, L"./Data/Models/Player/mike.mv1");
 	LoadModel(ResourceKeys::Model_PlayerSabi, L"./Data/Models/Player/sabi.mv1");
