@@ -20,9 +20,8 @@ enum class BossPhase
 	Phase2
 };
 
-class BossHairBallSkill;
 class BossClapSkill;
-class BossBiteSkill;
+class BossSlamSkill;
 class BossTailWhipSkill;
 
 
@@ -65,7 +64,8 @@ public:
 	void SetAnimation(
 		BossAnimType::Type type,
 		bool loop = true,
-		bool playAfterBlend = true
+      bool playAfterBlend = true,
+		float blendSeconds = 0.15f
 	);
 	float GetAnimTotalTime(BossAnimType::Type type) const;
 
@@ -118,8 +118,7 @@ private:
 	AnimationHandle dieAnimHandle_{};
 
 	// Skill
-	std::unique_ptr<BossHairBallSkill> hairBallSkill_;
 	std::unique_ptr<BossClapSkill> clapSkill_;
-	std::unique_ptr<BossBiteSkill> biteSkill_;
+	std::unique_ptr<BossSlamSkill> slamSkill_;
 	std::unique_ptr<BossTailWhipSkill> tailWhipSkill_;
 };

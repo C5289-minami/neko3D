@@ -356,13 +356,17 @@ void ModelAnimation::Start(float speedScale)
 	SetAnimationTime(currentAnimation_, currentElapsed_);
 }
 
-void ModelAnimation::PlayTo(float endTime, float speedScale)
+void ModelAnimation::PlayTo(float endTime, float speedScale, float blendSeconds)
 {
-	if (!std::isfinite(endTime) || !std::isfinite(speedScale))
+  if (!std::isfinite(endTime) ||
+		!std::isfinite(speedScale) ||
+		(!std::isfinite(blendSeconds) && blendSeconds != -1.0f))
 		return;
 
 	endTime = (std::max)(0.0f, endTime);
 	speedScale = (std::max)(0.0f, speedScale);
+	if (blendSeconds >= 0.0f)
+		blendSeconds = (std::max)(0.0f, blendSeconds);
 
 	// ブレンド中なら、完了後に指定位置まで再生する。
 	if (nextAnimation_)
@@ -372,6 +376,8 @@ void ModelAnimation::PlayTo(float endTime, float speedScale)
 
 		requestedEndTime_ = endTime;
 		requestedSpeedScale_ = speedScale;
+     if (blendSeconds >= 0.0f)
+			blendDuration_ = blendSeconds;
 		return;
 	}
 

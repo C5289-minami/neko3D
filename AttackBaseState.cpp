@@ -14,26 +14,7 @@ void AttackBaseState::Enter()
 	IAttackSkill* skill = stateMachine_.GetCurrentSkill();
 	if (!skill) return;
 
-	switch (type_)
-	{
-	case AttackStateType::PreAction:
-		skill->OnPreActionEnter();
-		break;
-	case AttackStateType::Aiming:
-		skill->OnAimingEnter();
-		break;
-	case AttackStateType::Attack:
-		skill->OnAttackEnter();
-		break;
-	case AttackStateType::Recovery:
-		skill->OnRecoveryEnter();
-		break;
-	case AttackStateType::Return:
-		skill->OnReturnEnter();
-		break;
-	default:
-		break;
-	}
+	skill->BeginPhase(type_);
 }
 
 void AttackBaseState::Tick(float deltaTime)
@@ -45,44 +26,35 @@ void AttackBaseState::Tick(float deltaTime)
 		return;
 	}
 
-	bool phaseFinished = false;
 	AttackStateType nextType = AttackStateType::None;
 	switch (type_)
 	{
 	case AttackStateType::PreAction:
-		skill->OnPreAction(deltaTime);
-		skill->UpdateAnimation(deltaTime);
-		phaseFinished = skill->IsPreActionFinished();
+      skill->UpdatePhase(type_, deltaTime);
 		nextType = AttackStateType::Aiming;
 		break;
 	case AttackStateType::Aiming:
-		skill->OnAiming(deltaTime);
-		skill->UpdateAnimation(deltaTime);
-		phaseFinished = skill->IsAimingFinished();
+     skill->UpdatePhase(type_, deltaTime);
 		nextType = AttackStateType::Attack;
 		break;
 	case AttackStateType::Attack:
-		skill->OnAttack(deltaTime);
-		skill->UpdateAnimation(deltaTime);
-		phaseFinished = skill->IsAttackFinished();
+     skill->UpdatePhase(type_, deltaTime);
 		nextType = AttackStateType::Recovery;
 		break;
 	case AttackStateType::Recovery:
-		skill->OnRecovery(deltaTime);
-		skill->UpdateAnimation(deltaTime);
-		phaseFinished = skill->IsRecoveryFinished();
+       skill->UpdatePhase(type_, deltaTime);
 		nextType = AttackStateType::Return;
 		break;
 	case AttackStateType::Return:
-		skill->OnReturn(deltaTime);
-		skill->UpdateAnimation(deltaTime);
-		phaseFinished = skill->IsReturnFinished();
+     skill->UpdatePhase(type_, deltaTime);
 		break;
 	default:
 		return;
 	}
 
-	if (phaseFinished)
+	skill->UpdateAnimation(deltaTime);
+
+  if (skill->IsPhaseFinished(type_))
 	{
 		stateMachine_.ChangeState(nextType);
 	}
@@ -90,6 +62,9 @@ void AttackBaseState::Tick(float deltaTime)
 
 void AttackBaseState::Exit()
 {
+   IAttackSkill* skill = stateMachine_.GetCurrentSkill();
+	if (skill)
+		skill->FinishPhase(type_);
 }
 
 AttackStateMachine::AttackStateMachine()

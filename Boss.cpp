@@ -8,10 +8,9 @@
 #include "ModelObjectManager.h"
 
 // skill
-#include "BossHairBallSkill.h"
 #include "BossClapSkill.h"
-#include "BossBiteSkill.h"
 #include "BossTailWhipSkill.h"
+#include "BossSlamSkill.h"
 
 Boss::Boss()
 	: ActorBase("Boss"), stateMachine_(*this)
@@ -31,9 +30,8 @@ void Boss::Init()
 
 	model_.SetModelType(ModelType::Bone);
 
-	hairBallSkill_ = std::make_unique<BossHairBallSkill>(*this);
 	clapSkill_ = std::make_unique<BossClapSkill>(*this);
-	biteSkill_ = std::make_unique<BossBiteSkill>(*this);
+	slamSkill_ = std::make_unique<BossSlamSkill>(*this);
 	tailWhipSkill_ = std::make_unique<BossTailWhipSkill>(*this);
 
 	Reset();
@@ -171,6 +169,7 @@ AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 	case BossAnimType::Idle:  return idleAnimHandle_;
 	case BossAnimType::TailWhip: return tailWhipAnimHandle_;
 	case BossAnimType::Clap: return atkHitAnimHnadle_;
+	case BossAnimType::Slam: return atkHitAnimHnadle_;
 	case BossAnimType::Damage: return damageAnimHandle_;
 	case BossAnimType::Die: return dieAnimHandle_;
 	default:
@@ -186,19 +185,14 @@ bool Boss::UseSkill(BossAttackType type)
 
 	switch (type)
 	{
-	case BossAttackType::HairBall:
-		hairBallSkill_->Reset();
-		activeSkill_ = hairBallSkill_.get();
-		break;
-
 	case BossAttackType::Clap:
 		clapSkill_->Reset();
 		activeSkill_ = clapSkill_.get();
 		break;
 
-	case BossAttackType::Bite:
-		biteSkill_->Reset();
-		activeSkill_ = biteSkill_.get();
+	case BossAttackType::Slam:
+		slamSkill_->Reset();
+		activeSkill_ = slamSkill_.get();
 		break;
 
 	case BossAttackType::TailWhip:
@@ -241,23 +235,24 @@ void Boss::StopMove()
 
 const int Boss::GetModelHandle() const { return RM().GetModel(model_.GetModelKey()); }
 
-void Boss::SetAnimation(BossAnimType::Type type, bool loop, bool playAfterBlend)
+void Boss::SetAnimation(
+	BossAnimType::Type type,
+	bool loop,
+	bool playAfterBlend,
+	float blendSeconds)
 {
 	if (currentAnimType_ == type && currentAnimLoop_ == loop)
 		return;
 
-	animation_.Reset();
-
 	currentAnimType_ = type;
 	currentAnimLoop_ = loop;
-
 
 	animation_.Play3D(
 		RM().GetModel(model_.GetModelKey()),
 		GetAnimationHandle(currentAnimType_),
 		currentAnimLoop_,
 		Const::ANIM_FPS,
-		0.15f,
+		blendSeconds,
 		playAfterBlend
 	);
 }

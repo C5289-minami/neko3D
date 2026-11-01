@@ -570,16 +570,10 @@
     <ClInclude Include="AttackBaseState.h">
       <Filter>40_Gameplay\Actors\Base\Attack</Filter>
     </ClInclude>
-    <ClInclude Include="BossHairBallSkill.h">
-      <Filter>40_Gameplay\Actors\Boss\State\Attack\Skill</Filter>
-    </ClInclude>
-    <ClInclude Include="BossBangSkill.h">
+    <ClInclude Include="BossSlamSkill.h">
       <Filter>40_Gameplay\Actors\Boss\State\Attack\Skill</Filter>
     </ClInclude>
     <ClInclude Include="BossTailWhipSkill.h">
-      <Filter>40_Gameplay\Actors\Boss\State\Attack\Skill</Filter>
-    </ClInclude>
-    <ClInclude Include="BossBiteSkill.h">
       <Filter>40_Gameplay\Actors\Boss\State\Attack\Skill</Filter>
     </ClInclude>
     <ClInclude Include="BossPoseSkill.h">
