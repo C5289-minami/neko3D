@@ -1,5 +1,7 @@
 #pragma once
 
+#include "AttackStateType.h"
+
 // =================================
 // 攻撃スキルのインターフェース
 // =================================
@@ -10,6 +12,11 @@ public:
     virtual ~IAttackSkill() = default;
 
     virtual void UpdateAnimation(float deltaTime) = 0;
+
+    virtual void BeginPhase(AttackStateType) {}
+    virtual void UpdatePhase(AttackStateType, float) {}
+    virtual void FinishPhase(AttackStateType) {}
+    virtual bool IsPhaseFinished(AttackStateType) const { return true; }
 
     // 各フェーズの開始処理
     virtual void OnPreActionEnter() {}

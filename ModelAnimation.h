@@ -47,7 +47,11 @@ public:
 	bool IsFinished() const;
 
 	// 現在位置から指定時間まで再生して停止する。
-	void PlayTo(float endTime, float speedScale = Const::ANIM_FPS);
+ void PlayTo(
+		float endTime,
+		float speedScale = Const::ANIM_FPS,
+		float blendSeconds = -1.0f
+	);
 
 	// 現在位置から最後まで再生する。
 	void Start(float speedScale = Const::ANIM_FPS);

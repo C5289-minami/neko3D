@@ -241,23 +241,21 @@ void GameTestScene::DrawImGui()
 
 		auto& boss = gameContext->GetBoss();
 
-		if (ImGui::Button(u8"Idle (Loop)"))
-			boss.SetAnimation(BossAnimType::Idle, true);
+		if (ImGui::Button(u8"Boss.Reset"))
+			boss.Reset();
 
-		if (ImGui::Button(u8"HairBall"))
-			boss.UseSkill(BossAttackType::HairBall);
-
-		if (ImGui::Button(u8"Clap"))
-			boss.UseSkill(BossAttackType::Clap);
 
 		if (ImGui::Button(u8"Damage (HP -1)"))
 			boss.TakeDamage();
 
 		if (ImGui::Button(u8"Die (成仏)"))
-			boss.SetAnimation(BossAnimType::Die, false);//Skillが呼べない；；
+			boss.TakeDamage(999); // HPを0にして死亡させる
 
-		if (ImGui::Button(u8"Bite"))
-			boss.UseSkill(BossAttackType::Bite);
+		if (ImGui::Button(u8"Clap"))
+			boss.UseSkill(BossAttackType::Clap);
+
+		if (ImGui::Button(u8"Slam"))
+			boss.UseSkill(BossAttackType::Slam);
 
 		if (ImGui::Button(u8"TailWhip"))
 			boss.UseSkill(BossAttackType::TailWhip);

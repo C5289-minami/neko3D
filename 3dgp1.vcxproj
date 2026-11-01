@@ -194,13 +194,14 @@
     <ClInclude Include="AttackStateType.h" />
     <ClInclude Include="Basket.h" />
     <ClInclude Include="BossAnimType.h" />
-    <ClInclude Include="BossBangSkill.h" />
+    <ClInclude Include="BossSlamSkill.h" />
     <ClInclude Include="Boss.h" />
     <ClInclude Include="BossAttackState.h" />
     <ClInclude Include="BossAttackType.h" />
     <ClInclude Include="BossBaseState.h" />
-    <ClInclude Include="BossBiteSkill.h" />
     <ClInclude Include="BossClapSkill.h" />
+    <ClInclude Include="BossDieState.h" />
+    <ClInclude Include="BossFlinchState.h" />
     <ClInclude Include="BossIdleState.h" />
     <ClInclude Include="BossPoseSkill.h" />
     <ClInclude Include="BossStateMachine.h" />
@@ -264,7 +265,6 @@
     <ClInclude Include="GameContext.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="Grid.h" />
-    <ClInclude Include="BossHairBallSkill.h" />
     <ClInclude Include="IAttackSkill.h" />
     <ClInclude Include="imgui\backends\imgui_impl_dx11.h" />
     <ClInclude Include="imgui\backends\imgui_impl_win32.h" />
@@ -343,6 +343,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ActorBase.cpp" />
+    <ClCompile Include="BossDieState.cpp" />
+    <ClCompile Include="BossFlinchState.cpp" />
     <ClCompile Include="BossPoseSkill.cpp" />
     <ClCompile Include="ButtonLabel.cpp" />
     <ClCompile Include="Camera.cpp" />

@@ -3,6 +3,14 @@
 #include "AttackStateType.h"
 #include "Boss.h"
 #include "Motion.h"
+#include <unordered_map>
+
+enum class PhaseFinishCondition
+{
+    MotionFinished,          // Motion の終了
+    AnimationFinished,      // アニメーションの終了
+    AnimationBlendFinished  // ブレンドの終了
+};
 
 class BossPoseSkill : public IAttackSkill
 {
@@ -25,6 +33,11 @@ public:
     }
 
     void Reset();
+
+    void BeginPhase(AttackStateType phase) override;
+    void UpdatePhase(AttackStateType phase, float deltaTime) override;
+    void FinishPhase(AttackStateType phase) override;
+    bool IsPhaseFinished(AttackStateType phase) const override;
 
     void OnPreActionEnter() override;
     void OnAimingEnter() override;
@@ -56,13 +69,26 @@ public:
         float returnTime
     );
 protected:
+    virtual void EnterPhase(AttackStateType phase) {}
     virtual void ApplyPhase(AttackStateType phase, float progress) = 0;
+    virtual void EndPhase(AttackStateType phase) {}
+
+    // フェーズの終了条件を設定する
+    void SetFinishCondition(
+        AttackStateType phase,
+        PhaseFinishCondition condition);
 
     Boss& boss_;
+    // フェーズに対応するMotionを取得
+    Motion& GetPhaseMotion(AttackStateType phase);
+    const Motion& GetPhaseMotion(AttackStateType phase) const;
 private:
-    Motion preActionMotion_{ 0.0f, 1.0f, 0.35f, Motion::Easing::EaseOut };
-    Motion aimingMotion_{ 0.0f, 1.0f, 0.15f };
-    Motion attackMotion_{ 0.0f, 1.0f, 0.3f, Motion::Easing::EaseInOut };
-    Motion recoveryMotion_{ 0.0f, 1.0f, 0.35f, Motion::Easing::EaseOut };
-    Motion returnMotion_{ 0.0f, 1.0f, 0.1f };
+    // フェーズごとの終了条件
+    std::unordered_map<AttackStateType, PhaseFinishCondition> finishConditions_;
+
+    Motion preActionMotion_{ 0.0f, 1.0f, 0.0f, Motion::Easing::EaseOut };
+    Motion aimingMotion_{ 0.0f, 1.0f, 0.0f };
+    Motion attackMotion_{ 0.0f, 1.0f, 0.0f, Motion::Easing::EaseInOut };
+    Motion recoveryMotion_{ 0.0f, 1.0f, 0.0f, Motion::Easing::EaseOut };
+    Motion returnMotion_{ 0.0f, 1.0f, 0.0f };
 };

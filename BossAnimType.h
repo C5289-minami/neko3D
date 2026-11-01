@@ -4,11 +4,10 @@ namespace BossAnimType
 {
     enum Type
     {
-        Idle,
-        TailWhip,
-        HairBall,
-        Clap,
-        Bite,
+        Idle,       // ‘Ò‹@
+		TailWhip,   // ”ö•Ú
+		Slam,       // ’@‚«‚Â‚¯
+		Clap,       // ”L‚¾‚Ü‚µ
         Damage,
         Die,
     };

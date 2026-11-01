@@ -5,7 +5,9 @@ BossStateMachine::BossStateMachine(Boss& boss)
     : boss_(boss),
       idleState_(*this, boss),
       moveState_(*this, boss),
-	attackState_(*this, boss)
+	attackState_(*this, boss),
+	flinchState_(*this, boss),
+	dieState_(*this, boss)
 {
 }
 
@@ -39,6 +41,10 @@ State* BossStateMachine::FindState(BossStateType type)
         return &moveState_;
 	case BossStateType::Attack:
 		return &attackState_;
+	case BossStateType::flinch:
+		return &flinchState_;
+	case BossStateType::Die:
+		return &dieState_;
     default:
         return nullptr;
     }

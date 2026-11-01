@@ -8,10 +8,9 @@
 #include "ModelObjectManager.h"
 
 // skill
-#include "BossHairBallSkill.h"
 #include "BossClapSkill.h"
-#include "BossBiteSkill.h"
 #include "BossTailWhipSkill.h"
+#include "BossSlamSkill.h"
 
 Boss::Boss()
 	: ActorBase("Boss"), stateMachine_(*this)
@@ -31,11 +30,10 @@ void Boss::Init()
 
 	model_.SetModelType(ModelType::Bone);
 
-	hairBallSkill_ = std::make_unique<BossHairBallSkill>(*this);
 	clapSkill_ = std::make_unique<BossClapSkill>(*this);
-	biteSkill_ = std::make_unique<BossBiteSkill>(*this);
+	slamSkill_ = std::make_unique<BossSlamSkill>(*this);
 	tailWhipSkill_ = std::make_unique<BossTailWhipSkill>(*this);
-	
+
 	Reset();
 }
 
@@ -74,18 +72,18 @@ void Boss::Reset()
 	const int dieModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Die);
 	dieAnimHandle_ = AnimationHandle::FromIndex(dieModelHandle, 0);
 	// 成仏モデルは本体と同じテクスチャを使うため、Bossモデルのテクスチャを共有する。
-	const int baseModelHandle = RM().GetModel(ResourceKeys::Model_Boss);
-	const int baseTextureCount = DxLib::MV1GetTextureNum(baseModelHandle);
-	const int dieTextureCount = DxLib::MV1GetTextureNum(dieModelHandle);
-	if (baseTextureCount > 0)
-	{
-		const int sharedTextureHandle = DxLib::MV1GetTextureGraphHandle(baseModelHandle, 0);
-		if (sharedTextureHandle != -1)
-		{
-			for (int textureIndex = 0; textureIndex < dieTextureCount; ++textureIndex)
-				DxLib::MV1SetTextureGraphHandle(dieModelHandle, textureIndex, sharedTextureHandle, FALSE);
-		}
-	}
+	//const int baseModelHandle = RM().GetModel(ResourceKeys::Model_Boss);
+	//const int baseTextureCount = DxLib::MV1GetTextureNum(baseModelHandle);
+	//const int dieTextureCount = DxLib::MV1GetTextureNum(dieModelHandle);
+	//if (baseTextureCount > 0)
+	//{
+	//	const int sharedTextureHandle = DxLib::MV1GetTextureGraphHandle(baseModelHandle, 0);
+	//	if (sharedTextureHandle != -1)
+	//	{
+	//		for (int textureIndex = 0; textureIndex < dieTextureCount; ++textureIndex)
+	//			DxLib::MV1SetTextureGraphHandle(dieModelHandle, textureIndex, sharedTextureHandle, FALSE);
+	//	}
+	//}
 
 	// 初期アニメーションの再生
 	animation_.Play3D(
@@ -98,34 +96,38 @@ void Boss::Reset()
 
 }
 
-void Boss::TakeDamage()
+void Boss::TakeDamage(int damaege)
 {
-	--health_;
+	// DamageStateをつけてBossを揺らすとか
+	// 一瞬赤くするとかしてもいいかも
+	// ここではやらない
+
+	health_ -= damaege;
 	velocity_ = {};
-	SetAnimation(BossAnimType::Damage, false);
+
+	// ここにもし必殺技ならをつける
+	stateMachine_.ChangeState(BossStateType::flinch);
 
 	// 体力が半分以下ならフェーズ2へ。
 	if (phase_ == BossPhase::Phase1 && health_ <= maxHealth_ / 2)
 		phase_ = BossPhase::Phase2;
+
+	if (health_ <= 0)
+	{
+		health_ = 0;
+		stateMachine_.ChangeState(BossStateType::Die);
+	}
+
 }
 
 void Boss::Update(float deltaTime)
 {
-	if (currentAnimType_ == BossAnimType::Damage || currentAnimType_ == BossAnimType::Die)
-	{
-		animation_.Update(deltaTime);
-		if (currentAnimType_ == BossAnimType::Damage && animation_.IsFinished())
-			stateMachine_.ChangeState(BossStateType::Idle);
-	}
-	else
-	{
-		stateMachine_.Tick(deltaTime);
-	}
-	
+	// ここでAnimationのUpdateは呼ばない
+	// 速度や指定フレーム移動など管理するため、StateMachineの中で呼ぶ
+	stateMachine_.Tick(deltaTime);
 
 	position_ += velocity_ * deltaTime;
 
-	
 }
 
 void Boss::Draw() const
@@ -167,6 +169,7 @@ AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 	case BossAnimType::Idle:  return idleAnimHandle_;
 	case BossAnimType::TailWhip: return tailWhipAnimHandle_;
 	case BossAnimType::Clap: return atkHitAnimHnadle_;
+	case BossAnimType::Slam: return atkHitAnimHnadle_;
 	case BossAnimType::Damage: return damageAnimHandle_;
 	case BossAnimType::Die: return dieAnimHandle_;
 	default:
@@ -182,19 +185,14 @@ bool Boss::UseSkill(BossAttackType type)
 
 	switch (type)
 	{
-	case BossAttackType::HairBall:
-		hairBallSkill_->Reset();
-		activeSkill_ = hairBallSkill_.get();
-		break;
-
 	case BossAttackType::Clap:
 		clapSkill_->Reset();
 		activeSkill_ = clapSkill_.get();
 		break;
 
-	case BossAttackType::Bite:
-		biteSkill_->Reset();
-		activeSkill_ = biteSkill_.get();
+	case BossAttackType::Slam:
+		slamSkill_->Reset();
+		activeSkill_ = slamSkill_.get();
 		break;
 
 	case BossAttackType::TailWhip:
@@ -237,23 +235,24 @@ void Boss::StopMove()
 
 const int Boss::GetModelHandle() const { return RM().GetModel(model_.GetModelKey()); }
 
-void Boss::SetAnimation(BossAnimType::Type type, bool loop, bool playAfterBlend)
+void Boss::SetAnimation(
+	BossAnimType::Type type,
+	bool loop,
+	bool playAfterBlend,
+	float blendSeconds)
 {
 	if (currentAnimType_ == type && currentAnimLoop_ == loop)
 		return;
 
-	animation_.Reset();
-
-	currentAnimType_ = type;	
+	currentAnimType_ = type;
 	currentAnimLoop_ = loop;
-
 
 	animation_.Play3D(
 		RM().GetModel(model_.GetModelKey()),
 		GetAnimationHandle(currentAnimType_),
 		currentAnimLoop_,
 		Const::ANIM_FPS,
-		0.15f,
+		blendSeconds,
 		playAfterBlend
 	);
 }
@@ -345,7 +344,7 @@ bool Boss::UpdateHandAttack(
 
 	if (counter_ < 3.0f) return false;
 
-	for(AttackData& hand : attackHands_)
+	for (AttackData& hand : attackHands_)
 	{
 		if (!hand.isHit)continue;
 
@@ -355,7 +354,7 @@ bool Boss::UpdateHandAttack(
 			attackHands_[1].isHit = false;
 			DxPlus::Debug::SetFormatString(L"Hit by Boss Hand Attack!");
 			return true;
-			
+
 		}
 
 	}
