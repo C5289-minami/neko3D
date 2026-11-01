@@ -30,7 +30,7 @@ void StatusTest::Init()
 	shaderEffects_.GetSettings().toonEnabled = true;
 	shaderEffects_.GetSettings().outlineEnabled = true;
 
-	testModel_.SetModelKey(ResourceKeys::Model_Test);
+	testModel_.SetModelKey(ResourceKeys::Model_Basket);
 
 	gameContext->GetPlayer()->Init();
 	gameContext->GetPlayer()->Reset();
