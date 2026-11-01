@@ -30,8 +30,6 @@ namespace Const
     constexpr float PLAYER_HEIGHT = 60.0f;
     constexpr float PLAYER_SKIN = 1.0f;
     constexpr float PLAYER_RADIUS = 30.0f;
-
-    constexpr float PLAYER_ATTACK_BALL_SPEED = PLAYER_MOVE_SPEED;
     constexpr float PLAYER_ATTACK_BALL_LIFETIME = 0.6f;
     constexpr float PLAYER_ATTACK_BALL_RADIUS = PLAYER_RADIUS;
     constexpr float PLAYER_ATTACK_BALL_HEIGHT_MULTIPLIER = 0.5f;

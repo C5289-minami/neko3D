@@ -5,7 +5,6 @@
 #include "DxLib.h"
 #include "DxConv.h"
 #include <algorithm>
-#include <cmath>
 
 PlayerAttackState::PlayerAttackState(PlayerStateMachine& stateMachine, Player& player)
 	: PlayerBaseState(stateMachine, player)
@@ -17,12 +16,8 @@ void PlayerAttackState::Enter()
 	player_.StopMove();
 	//player_.SetAnimation(PlayerAnimType::Attack, false);
 	
-	const Vec3 forward{ std::sin(player_.GetYaw()), 0.0f, std::cos(player_.GetYaw()) };
-	
 	attackSphere_.center = player_.GetAttackBallSpawnPosition();
 	attackSphere_.radius = Const::PLAYER_ATTACK_BALL_RADIUS;
-	
-	ballVelocity_ = forward * Const::PLAYER_ATTACK_BALL_SPEED;
 	
 	elapsed_ = 0.0f;
 	hasHitTarget_ = false;
@@ -49,7 +44,6 @@ void PlayerAttackState::Tick(float deltaTime)
 	if (ballActive_)//çUåÇíÜÇ»ÇÁçXêV
 	{
 		const float step = (std::max)(0.0f, deltaTime);
-		attackSphere_.center += ballVelocity_ * step;
 		elapsed_ += step;
 		ballActive_ = elapsed_ < Const::PLAYER_ATTACK_BALL_LIFETIME;
 	}
@@ -72,7 +66,6 @@ void PlayerAttackState::Exit()
 	ballActive_ = false;
 	hasHitTarget_ = false;
 	attackSphere_ = {};
-	ballVelocity_ = {};
 	elapsed_ = 0.0f;
 	DxPlus::Debug::SetFormatString(L"PlayerAttackState::Exit");
 }
