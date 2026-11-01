@@ -59,7 +59,11 @@ void SceneManager::Init()
 	for (Scene* currentScene : scenes)
 		currentScene->SetGameContext(&gameContext);
 
+#ifndef NDEBUG
 	scene = &titleScene; // 最初のシーン
+#else
+	scene = &gameScene; // 最初のシーン
+#endif // !NDEBUG
 
 	// 設定ファイルのロード
 	ToonSettingsManager::Load();

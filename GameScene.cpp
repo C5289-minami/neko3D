@@ -358,7 +358,18 @@ void GameScene::DrawScene(bool toonEnabled) const
 			}
 		};
 
+
+
+
+	
+
+	// Room
+	for (const auto* allRoom : room.GetAllModelObjects())
+	{
+		drawModel(*allRoom);
+	}
 	// BossとPlayer
+	DrawPlayerShadow();
 	drawModel(boss.GetModelObject());
 	drawModel(player->GetModelObject());
 
@@ -369,6 +380,8 @@ void GameScene::DrawScene(bool toonEnabled) const
 	}
 
 
+	effectManager.Draw();
+	grid.Draw();
 
 	// Stage
 	drawModel(stage.GetModelObject());
@@ -384,14 +397,6 @@ void GameScene::DrawScene(bool toonEnabled) const
 		drawModel(model);
 	}
 
-	// Room
-	for (const auto* allRoom : room.GetAllModelObjects())
-	{
-		drawModel(*allRoom);
-	}
-
-	effectManager.Draw();
-	grid.Draw();
 
 	modelToonRenderer_.EndPass();
 	player->GetStateMachine().Draw();
@@ -401,4 +406,49 @@ void GameScene::DrawScene(bool toonEnabled) const
 void GameScene::End()
 {
 	tutorialCollision_.Clear();
+}
+
+void GameScene::DrawPlayerShadow() const
+{
+	const auto* player = gameContext->GetPlayer();
+	const auto& stage = gameContext->GetStage();
+
+	// 状態に応じて使用するCollisionを選ぶ
+	const ModelCollision* collision = nullptr;
+
+	if (GetCurrentGameState() == GameStateType::Tutorial)
+		collision = &tutorialCollision_;
+	else if (GetCurrentGameState() == GameStateType::Battle)
+		collision = &stage.GetCollision();
+
+	if (!collision) return;
+
+	// 床へのRaycast
+	const Vec3 playerPos = player->GetWorldPosition();
+
+	Physics::RayHit hit{};
+	if (!collision->RaycastDown(
+		playerPos + Vec3::Up() * 50.0f,
+		500.0f,
+		hit))
+	{
+		return;
+	}
+
+	// 床の位置を画面座標に変換
+	const VECTOR screenPos = ConvWorldPosToScreenPos(
+		DxConv::ToVECTOR(hit.point));
+
+	const int x = static_cast<int>(screenPos.x);
+	const int y = static_cast<int>(screenPos.y);
+
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
+
+	DrawOval(
+		x, y,
+		40, 12,
+		GetColor(0, 0, 0),
+		TRUE);
+
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
