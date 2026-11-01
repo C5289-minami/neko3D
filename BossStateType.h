@@ -6,5 +6,6 @@ enum class BossStateType
     Idle,
     Walk,
 	Attack,
-	Recover
+    flinch, // ‹¯‚Ý
+	Die,    // Ž€–S
 };

@@ -35,7 +35,7 @@ void Boss::Init()
 	clapSkill_ = std::make_unique<BossClapSkill>(*this);
 	biteSkill_ = std::make_unique<BossBiteSkill>(*this);
 	tailWhipSkill_ = std::make_unique<BossTailWhipSkill>(*this);
-	
+
 	Reset();
 }
 
@@ -74,18 +74,18 @@ void Boss::Reset()
 	const int dieModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Die);
 	dieAnimHandle_ = AnimationHandle::FromIndex(dieModelHandle, 0);
 	// 成仏モデルは本体と同じテクスチャを使うため、Bossモデルのテクスチャを共有する。
-	const int baseModelHandle = RM().GetModel(ResourceKeys::Model_Boss);
-	const int baseTextureCount = DxLib::MV1GetTextureNum(baseModelHandle);
-	const int dieTextureCount = DxLib::MV1GetTextureNum(dieModelHandle);
-	if (baseTextureCount > 0)
-	{
-		const int sharedTextureHandle = DxLib::MV1GetTextureGraphHandle(baseModelHandle, 0);
-		if (sharedTextureHandle != -1)
-		{
-			for (int textureIndex = 0; textureIndex < dieTextureCount; ++textureIndex)
-				DxLib::MV1SetTextureGraphHandle(dieModelHandle, textureIndex, sharedTextureHandle, FALSE);
-		}
-	}
+	//const int baseModelHandle = RM().GetModel(ResourceKeys::Model_Boss);
+	//const int baseTextureCount = DxLib::MV1GetTextureNum(baseModelHandle);
+	//const int dieTextureCount = DxLib::MV1GetTextureNum(dieModelHandle);
+	//if (baseTextureCount > 0)
+	//{
+	//	const int sharedTextureHandle = DxLib::MV1GetTextureGraphHandle(baseModelHandle, 0);
+	//	if (sharedTextureHandle != -1)
+	//	{
+	//		for (int textureIndex = 0; textureIndex < dieTextureCount; ++textureIndex)
+	//			DxLib::MV1SetTextureGraphHandle(dieModelHandle, textureIndex, sharedTextureHandle, FALSE);
+	//	}
+	//}
 
 	// 初期アニメーションの再生
 	animation_.Play3D(
@@ -98,34 +98,38 @@ void Boss::Reset()
 
 }
 
-void Boss::TakeDamage()
+void Boss::TakeDamage(int damaege)
 {
-	--health_;
+	// DamageStateをつけてBossを揺らすとか
+	// 一瞬赤くするとかしてもいいかも
+	// ここではやらない
+
+	health_ -= damaege;
 	velocity_ = {};
-	SetAnimation(BossAnimType::Damage, false);
+
+	// ここにもし必殺技ならをつける
+	stateMachine_.ChangeState(BossStateType::flinch);
 
 	// 体力が半分以下ならフェーズ2へ。
 	if (phase_ == BossPhase::Phase1 && health_ <= maxHealth_ / 2)
 		phase_ = BossPhase::Phase2;
+
+	if (health_ <= 0)
+	{
+		health_ = 0;
+		stateMachine_.ChangeState(BossStateType::Die);
+	}
+
 }
 
 void Boss::Update(float deltaTime)
 {
-	if (currentAnimType_ == BossAnimType::Damage || currentAnimType_ == BossAnimType::Die)
-	{
-		animation_.Update(deltaTime);
-		if (currentAnimType_ == BossAnimType::Damage && animation_.IsFinished())
-			stateMachine_.ChangeState(BossStateType::Idle);
-	}
-	else
-	{
-		stateMachine_.Tick(deltaTime);
-	}
-	
+	// ここでAnimationのUpdateは呼ばない
+	// 速度や指定フレーム移動など管理するため、StateMachineの中で呼ぶ
+	stateMachine_.Tick(deltaTime);
 
 	position_ += velocity_ * deltaTime;
 
-	
 }
 
 void Boss::Draw() const
@@ -244,7 +248,7 @@ void Boss::SetAnimation(BossAnimType::Type type, bool loop, bool playAfterBlend)
 
 	animation_.Reset();
 
-	currentAnimType_ = type;	
+	currentAnimType_ = type;
 	currentAnimLoop_ = loop;
 
 
@@ -345,7 +349,7 @@ bool Boss::UpdateHandAttack(
 
 	if (counter_ < 3.0f) return false;
 
-	for(AttackData& hand : attackHands_)
+	for (AttackData& hand : attackHands_)
 	{
 		if (!hand.isHit)continue;
 
@@ -355,7 +359,7 @@ bool Boss::UpdateHandAttack(
 			attackHands_[1].isHit = false;
 			DxPlus::Debug::SetFormatString(L"Hit by Boss Hand Attack!");
 			return true;
-			
+
 		}
 
 	}

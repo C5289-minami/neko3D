@@ -154,9 +154,6 @@
     <Filter Include="30_Scenes\Test">
       <UniqueIdentifier>{f3daf8e3-a39d-453e-abec-344167853166}</UniqueIdentifier>
     </Filter>
-    <Filter Include="40_Gameplay\Actors\Boss\State\Idle">
-      <UniqueIdentifier>{f25d3bb9-90fc-4a4b-a72c-d136de548f87}</UniqueIdentifier>
-    </Filter>
     <Filter Include="40_Gameplay\Actors\Boss\State\Walk">
       <UniqueIdentifier>{d1e164e5-74d0-48e9-bb6b-e33cbcaa0c46}</UniqueIdentifier>
     </Filter>
@@ -270,6 +267,15 @@
     </Filter>
     <Filter Include="30_Scenes\Game\StateMashine\GameSceneGameOverState">
       <UniqueIdentifier>{3372c1ec-dde9-4f05-8435-60233a21c426}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Boss\State\Die">
+      <UniqueIdentifier>{e4f2055d-6bf8-4c90-82f8-ae09ad0ae199}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Boss\State\flinch">
+      <UniqueIdentifier>{875d6dc8-fb51-4fad-9ebf-68faa85a2198}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="40_Gameplay\Actors\Boss\State\Idle">
+      <UniqueIdentifier>{f25d3bb9-90fc-4a4b-a72c-d136de548f87}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -732,6 +738,12 @@
     <ClInclude Include="GameSceneGameOverState.h">
       <Filter>30_Scenes\Game\StateMashine\GameSceneGameOverState</Filter>
     </ClInclude>
+    <ClInclude Include="BossDieState.h">
+      <Filter>40_Gameplay\Actors\Boss\State\Die</Filter>
+    </ClInclude>
+    <ClInclude Include="BossFlinchState.h">
+      <Filter>40_Gameplay\Actors\Boss\State\flinch</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -1033,6 +1045,12 @@
     </ClCompile>
     <ClCompile Include="GameSceneGameOverState.cpp">
       <Filter>30_Scenes\Game\StateMashine\GameSceneGameOverState</Filter>
+    </ClCompile>
+    <ClCompile Include="BossDieState.cpp">
+      <Filter>40_Gameplay\Actors\Boss\State\Die</Filter>
+    </ClCompile>
+    <ClCompile Include="BossFlinchState.cpp">
+      <Filter>40_Gameplay\Actors\Boss\State\flinch</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

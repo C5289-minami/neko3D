@@ -201,6 +201,8 @@
     <ClInclude Include="BossBaseState.h" />
     <ClInclude Include="BossBiteSkill.h" />
     <ClInclude Include="BossClapSkill.h" />
+    <ClInclude Include="BossDieState.h" />
+    <ClInclude Include="BossFlinchState.h" />
     <ClInclude Include="BossIdleState.h" />
     <ClInclude Include="BossPoseSkill.h" />
     <ClInclude Include="BossStateMachine.h" />
@@ -343,6 +345,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ActorBase.cpp" />
+    <ClCompile Include="BossDieState.cpp" />
+    <ClCompile Include="BossFlinchState.cpp" />
     <ClCompile Include="BossPoseSkill.cpp" />
     <ClCompile Include="ButtonLabel.cpp" />
     <ClCompile Include="Camera.cpp" />

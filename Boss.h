@@ -74,7 +74,7 @@ public:
 	bool IsHitByAttackSphere(const Collision::Sphere& sphere) const;
 	int GetHealth() const { return health_; }
 	BossPhase GetPhase() const { return phase_; }
-	void TakeDamage();
+	void TakeDamage(int damage = 1);
 #ifdef _DEBUG
 	void DrawHandAttackDebug() const;
 #endif
