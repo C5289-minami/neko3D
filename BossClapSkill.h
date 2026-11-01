@@ -21,20 +21,16 @@ private:
 		switch (phase)
 		{
 		case AttackStateType::PreAction:
-			boss_.SetAnimation(BossAnimType::Idle);
+			boss_.SetAnimation(BossAnimType::TailWhip, false, false);
 			break;
-
 		case AttackStateType::Aiming:
-			boss_.SetAnimation(BossAnimType::Idle);
 			break;
-
-		case AttackStateType::Attack:
-			boss_.SetAnimation(BossAnimType::TailWhip, false);
-			break;
-
 		case AttackStateType::Recovery:
+			break;
 		case AttackStateType::Return:
-			boss_.SetAnimation(BossAnimType::Idle);
+			break;
+		case AttackStateType::Attack:
+			boss_.GetAnimation().Start();
 			break;
 		}
 	}

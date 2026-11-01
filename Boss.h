@@ -62,11 +62,11 @@ public:
 	ModelObject& GetModelObject() { return model_; }
 	const int GetModelHandle() const;
 	const ModelObject& GetModelObject() const { return model_; }
-	void SetAnimation(BossAnimType::Type type, bool loop = true)
-	{
-		currentAnimType_ = type;
-		currentAnimLoop_ = loop;
-	}
+	void SetAnimation(
+		BossAnimType::Type type,
+		bool loop = true,
+		bool playAfterBlend = true
+	);
 	float GetAnimTotalTime(BossAnimType::Type type) const;
 
 	void StartHandAttack();

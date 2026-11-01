@@ -38,11 +38,11 @@ public:
     void OnRecovery(float deltaTime) override;
     void OnReturn(float deltaTime) override;
 
-    bool IsPreActionFinished() const override { return preActionMotion_.IsFinished(); }
-    bool IsAimingFinished() const override { return aimingMotion_.IsFinished(); }
-    bool IsAttackFinished() const override { return attackMotion_.IsFinished(); }
-    bool IsRecoveryFinished() const override { return recoveryMotion_.IsFinished(); }
-    bool IsReturnFinished() const override { return returnMotion_.IsFinished(); }
+    virtual bool IsPreActionFinished() const override;
+    virtual bool IsAimingFinished() const override;
+    virtual bool IsAttackFinished() const override;
+    virtual bool IsRecoveryFinished() const override;
+    virtual bool IsReturnFinished() const override;
 
     void UpdateAnimation(float deltaTime) override
     {

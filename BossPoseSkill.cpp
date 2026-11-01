@@ -69,6 +69,32 @@ void BossPoseSkill::OnReturn(float deltaTime)
 	ApplyPhase(AttackStateType::Return, returnMotion_.GetEasedProgress());
 }
 
+bool BossPoseSkill::IsPreActionFinished() const
+{
+	return !boss_.GetAnimation().IsBlending();
+}
+
+bool BossPoseSkill::IsAimingFinished() const
+{
+	return boss_.GetAnimation().IsFinished();
+}
+
+bool BossPoseSkill::IsAttackFinished() const
+{
+	return boss_.GetAnimation().IsFinished();
+}
+
+bool BossPoseSkill::IsRecoveryFinished() const
+{
+	return boss_.GetAnimation().IsFinished();
+}
+
+bool BossPoseSkill::IsReturnFinished() const
+{
+	return !boss_.GetAnimation().IsBlending();
+}
+
+
 void BossPoseSkill::SetPhaseDuration(float preAction, float aiming, float attack, float recovery, float returnTime)
 {
 	preActionMotion_.SetDuration(preAction);

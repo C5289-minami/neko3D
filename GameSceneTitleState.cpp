@@ -38,7 +38,7 @@ void GameSceneTitleState::Enter()
             {},
             0.5f
         );
-		logo->SetCenter({ 0.5f, 0.5f });
+		logo->SetCenter({ 0.0f, 0.5f });
     }
 
     if (!UIM().GetButtonUI(L"Game.StartButton"))
@@ -52,6 +52,7 @@ void GameSceneTitleState::Enter()
             0.5f
         );
 		startButton->SetButtonHoverSprite(ResourceKeys::Button_Red.hover);
+        startButton->SetCenter({ 0.0f, 0.5f });
 		startButton->SetTextFont(RM().GetFont(ResourceKeys::Font_Game));
 		startButton->SetTextScale(1.5f);
 		startButton->SetText(L"ƒXƒ^[ƒg");
@@ -69,9 +70,10 @@ void GameSceneTitleState::Enter()
             0.5f
         );
 		exitButton->SetButtonHoverSprite(ResourceKeys::Button_Red.hover);
+        exitButton->SetCenter({ 0.0f, 0.5f });
 		exitButton->SetTextFont(RM().GetFont(ResourceKeys::Font_Game));
 		exitButton->SetTextScale(1.5f);
-        exitButton->SetText(L"‚â‚ß‚éƒ“ƒS");
+        exitButton->SetText(L"‚â‚ß‚éƒ“ƒSƒ“ƒS");
     }
 }
 void GameSceneTitleState::Tick(float deltaTime)
