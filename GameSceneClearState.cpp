@@ -5,13 +5,13 @@
 #include "UIManager.h"
 
 GameSceneClearState::GameSceneClearState(GameStateMachine& gameStateMachine, GameScene& gameScene)
-    :GameBaseState(gameStateMachine, gameScene)
+	:GameBaseState(gameStateMachine, gameScene)
 {
 }
 
 void GameSceneClearState::Enter()
 {
-    DxPlus::Debug::SetFormatString(L"GameSceneClearState::Enter");
+	DxPlus::Debug::SetFormatString(L"GameSceneClearState::Enter");
 	DxLib::SetMouseDispFlag(TRUE);
 
 	// クリアUIを再表示
@@ -58,7 +58,11 @@ void GameSceneClearState::Enter()
 				L"Result.ClearToTitleButton",
 				ResourceKeys::Button_Rose.back,
 				{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.9f },
-				[]() { PostQuitMessage(0); },
+				[this]() {
+					gameScene_.Init();
+					stateMachine_.ChangeState(GameStateType::Title);
+					this->Exit();
+				},
 				{},
 				1.5f
 			);
@@ -70,34 +74,59 @@ void GameSceneClearState::Enter()
 			toTitleButton->SetFalse();
 		}
 	}
+	selectedIndex_ = 0;
 }
 
 void GameSceneClearState::Tick(float deltaTime)
 {
-    DxPlus::Debug::SetFormatString(L"GameSceneClearState::Enter");
-    gameScene_.UpdateStateCamera(deltaTime, "");
+	DxPlus::Debug::SetFormatString(L"GameSceneClearState::Tick");
+	gameScene_.UpdateStateCamera(deltaTime, "");
 
 	auto* clear = UIM().GetUI(L"Result.Clear");
 
-	if (clear && clear->GetCurrentState() == UIBase::UIState::Normal)
-	{
-		if (auto* retry = UIM().GetUI(L"Result.ClearRetryButton"))
-		{
-			if (!retry->IsVisible())
-				retry->SetTrue();
-		}
+	if (!clear || clear->GetCurrentState() != UIBase::UIState::Normal)
+		return;
 
-		if (auto* toTitle = UIM().GetUI(L"Result.ClearToTitleButton"))
-		{
-			if (!toTitle->IsVisible())
-				toTitle->SetTrue();
-		}
+	auto* retry = UIM().GetButtonUI(L"Result.ClearRetryButton");
+	auto* toTitle = UIM().GetButtonUI(L"Result.ClearToTitleButton");
+
+	if (!retry || !toTitle)
+		return;
+
+	if (!retry->IsVisible())
+		retry->SetTrue();
+
+	if (!toTitle->IsVisible())
+		toTitle->SetTrue();
+
+	// ボタンの表示アニメーション完了まで待機
+	if (retry->GetCurrentState() != UIBase::UIState::Normal ||
+		toTitle->GetCurrentState() != UIBase::UIState::Normal)
+		return;
+
+	using namespace DxPlus::Input;
+
+	if (GetButtonDown(PLAYER1) & BUTTON_UP)
+		selectedIndex_ = 0;
+
+	if (GetButtonDown(PLAYER1) & BUTTON_DOWN)
+		selectedIndex_ = 1;
+
+	retry->SetSelected(selectedIndex_ == 0);
+	toTitle->SetSelected(selectedIndex_ == 1);
+
+	if (GetButtonDown(PLAYER1) & BUTTON_START)
+	{
+		if (selectedIndex_ == 0)
+			retry->Trigger();
+		else
+			toTitle->Trigger();
 	}
 }
 
 void GameSceneClearState::Exit()
 {
-    DxPlus::Debug::SetFormatString(L"GameSceneClearState::Enter");
+	DxPlus::Debug::SetFormatString(L"GameSceneClearState::Enter");
 	if (auto* clear = UIM().GetUI(L"Result.Clear"))
 		clear->Hide();
 

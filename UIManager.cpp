@@ -4,6 +4,8 @@
 #include "Button.h"
 #include "DxPlus/DxPlus.h"
 #include <algorithm>
+#include "ButtonUI.h"
+#include <vector>
 
 UIBase* UIManager::CreateImageUI(const std::wstring& id, const std::wstring& resourceKey,
 	DxPlus::Vec2 position, DxPlus::Vec2 moveDirection, float motionDuration)
@@ -84,12 +86,26 @@ void UIManager::Init()
 
 void UIManager::Update(float deltaTime)
 {
-	for (auto& ui : UIs) {
-      ui.object->Update(deltaTime);
-	}
-	//DxPlus::Debug::SetFormatString(L"Current UI Type: %d", static_cast<int>(currentUIType)); // デバッグ用に現在のUIタイプを表示
-}
+	std::vector<std::function<void()>> pendingCallbacks;
 
+	// すべてのUIを更新
+	for (auto& ui : UIs)
+	{
+		ui.object->Update(deltaTime);
+
+		if (auto* button = dynamic_cast<ButtonUI*>(ui.object.get()))
+		{
+			auto callback = button->TakePendingTrigger();
+
+			if (callback)
+				pendingCallbacks.push_back(std::move(callback));
+		}
+	}
+
+	// UI更新がすべて終わってからコールバックを実行
+	for (auto& callback : pendingCallbacks)
+		callback();
+}
 void UIManager::Draw(int drawZOrder)
 {
   std::stable_sort(UIs.begin(), UIs.end(), [](const auto& left, const auto& right) {
