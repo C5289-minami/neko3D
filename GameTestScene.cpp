@@ -241,11 +241,17 @@ void GameTestScene::DrawImGui()
 
 		auto& boss = gameContext->GetBoss();
 
+		if (ImGui::Button(u8"Idle (Loop)"))
+			boss.SetAnimation(BossAnimType::Idle, true);
+
 		if (ImGui::Button(u8"HairBall"))
 			boss.UseSkill(BossAttackType::HairBall);
 
 		if (ImGui::Button(u8"Clap"))
 			boss.UseSkill(BossAttackType::Clap);
+
+		if (ImGui::Button(u8"Damage (HP -1)"))
+			boss.TakeDamage();
 
 		if (ImGui::Button(u8"Bite"))
 			boss.UseSkill(BossAttackType::Bite);

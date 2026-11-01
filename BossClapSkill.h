@@ -10,7 +10,10 @@ class BossClapSkill final : public BossPoseSkill
 public:
 	static constexpr BossAttackType Type = BossAttackType::Clap;
 
-	explicit BossClapSkill(Boss& boss) : BossPoseSkill(boss) {}
+	explicit BossClapSkill(Boss& boss)
+		: BossPoseSkill(boss, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f)
+	{
+	}
 	bool IsAttackFinished() const override
 	{
 		return boss_.GetAnimation().IsFinished();
@@ -21,16 +24,16 @@ private:
 		switch (phase)
 		{
 		case AttackStateType::PreAction:
-			boss_.SetAnimation(BossAnimType::TailWhip, false, false);
 			break;
 		case AttackStateType::Aiming:
+			break;
+		case AttackStateType::Attack:
+			boss_.SetAnimation(BossAnimType::Clap, false);
 			break;
 		case AttackStateType::Recovery:
 			break;
 		case AttackStateType::Return:
-			break;
-		case AttackStateType::Attack:
-			boss_.GetAnimation().Start();
+			boss_.SetAnimation(BossAnimType::Idle, true);
 			break;
 		}
 	}

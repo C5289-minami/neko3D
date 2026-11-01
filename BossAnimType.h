@@ -9,5 +9,6 @@ namespace BossAnimType
         HairBall,
         Clap,
         Bite,
+        Damage,
     };
 }

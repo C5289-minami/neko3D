@@ -67,7 +67,10 @@ void Boss::Reset()
 
 	const int sippoModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Sippo);
 	tailWhipAnimHandle_ = AnimationHandle::FromIndex(sippoModelHandle, 0);
-
+	const int AtkHitModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Attck_Hit);
+	AtkHitAnimHnadle_ = AnimationHandle::FromIndex(AtkHitModelHandle, 0);
+	const int damageModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Damage);
+	damageAnimHandle_ = AnimationHandle::FromIndex(damageModelHandle, 0);
 
 	// 初期アニメーションの再生
 	animation_.Play3D(
@@ -83,6 +86,8 @@ void Boss::Reset()
 void Boss::TakeDamage()
 {
 	--health_;
+	velocity_ = {};
+	SetAnimation(BossAnimType::Damage, false);
 
 	// 体力が半分以下ならフェーズ2へ。
 	if (phase_ == BossPhase::Phase1 && health_ <= maxHealth_ / 2)
@@ -91,7 +96,16 @@ void Boss::TakeDamage()
 
 void Boss::Update(float deltaTime)
 {
-	stateMachine_.Tick(deltaTime);
+	if (currentAnimType_ == BossAnimType::Damage)
+	{
+		animation_.Update(deltaTime);
+		if (animation_.IsFinished())
+			stateMachine_.ChangeState(BossStateType::Idle);
+	}
+	else
+	{
+		stateMachine_.Tick(deltaTime);
+	}
 	
 
 	position_ += velocity_ * deltaTime;
@@ -137,6 +151,8 @@ AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 	{
 	case BossAnimType::Idle:  return idleAnimHandle_;
 	case BossAnimType::TailWhip: return tailWhipAnimHandle_;
+	case BossAnimType::Clap: return AtkHitAnimHnadle_;
+	case BossAnimType::Damage: return damageAnimHandle_;
 	default:
 		DxPlus::Utils::FatalError(L"BossHandleを取得できませんでした。GetAnimationHandleを確認して");
 		return {};
