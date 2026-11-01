@@ -29,6 +29,7 @@ public:
     void End() override;
 	void Render() const override;
 	void DrawImGui() override;
+	void DrawPlayerShadow()const;
 
 	GameStateType GetCurrentGameState() const { return stateMachine_.GetCurrentType(); }
 	bool UpdateStateCamera(float deltaTime, const std::string& requestedShot);

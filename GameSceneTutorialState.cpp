@@ -41,7 +41,7 @@ void GameSceneTutorialState::Enter()
 
 	// カメラを初期位置に設定
 	auto& camera = gameScene_.GetTargetCamera();
-	camera.SetTarget(player->GetPosition() + Vec3::Up() * 100.0f);
+	camera.SetTarget(player->GetPosition() + Vec3::Up() * cameraPlayerHeightOffset);
 
 	targetCameraSwitched_ = false;
 	cameraState_ = TutorialCameraState::LookPlayer;
@@ -105,7 +105,7 @@ void GameSceneTutorialState::Tick(float deltaTime)
 	case TutorialCameraState::LookPlayer:
 		// 固定カメラからPlayerを見る
 		gameScene_.GetTargetCamera().SetTarget(
-			player->GetPosition() + Vec3::Up() * 100.0f);
+			player->GetPosition() + Vec3::Up() * cameraPlayerHeightOffset);
 		break;
 
 	case TutorialCameraState::EnterMove:
@@ -203,7 +203,7 @@ void GameSceneTutorialState::FocusTutorialCamera(float deltaTime)
 	stageToPlayer = stageToPlayer.Normalized();
 
 	// カメラが見る場所（プレイヤーの少し上 )
-	const Vec3 lookPoint = playerPos + Vec3::Up() * 100.0f;
+	const Vec3 lookPoint = playerPos + Vec3::Up() * cameraPlayerHeightOffset;
 
 	// カメラが目指す場所（プレイヤーから後ろに cameraDistance 離れた位置）
 	const Vec3 desiredPosition = lookPoint + stageToPlayer * cameraDistance;
@@ -264,7 +264,7 @@ Camera::CameraPose GameSceneTutorialState::GetTutorialCameraPose()
 	else
 		stageToPlayer = stageToPlayer.Normalized();
 
-	const Vec3 lookPoint = playerPos + Vec3::Up() * 100.0f;
+	const Vec3 lookPoint = playerPos + Vec3::Up() * cameraPlayerHeightOffset;
 
 	Camera::CameraPose pose{};
 
