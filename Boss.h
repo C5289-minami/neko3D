@@ -113,6 +113,8 @@ private:
 	bool currentAnimLoop_{ true };
 	AnimationHandle idleAnimHandle_{};
 	AnimationHandle tailWhipAnimHandle_{};
+	AnimationHandle damageAnimHandle_{};
+	AnimationHandle AtkHitAnimHnadle_{};
 
 	// Skill
 	std::unique_ptr<BossHairBallSkill> hairBallSkill_;
