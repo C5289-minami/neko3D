@@ -1,165 +1,211 @@
-#include "TutorialChecklist.h"
 
-#include <algorithm>
+#include "TutorialChecklist.h"
+#include "UIManager.h"
+#include "ResourceKeys.h"
+
+#include <utility>
 
 namespace
 {
-    constexpr int PanelWidth = 280;
-    constexpr int HeaderHeight = 40;
-    constexpr int ItemHeight = 34;
-    constexpr int Padding = 12;
+    // =========================
+    // スタンプ演出時間
+    // =========================
+    constexpr float StampPressDuration = 1.5f;
+    constexpr float StampFadeDuration = 0.3f;
+
+    // =========================
+    // 押印演出（Press）
+    // =========================
+    constexpr float PressStartAlpha = 0.0f;
+    constexpr float PressEndAlpha = 255.0f;
+
+    constexpr float PressStartScale = 5.0f;
+    constexpr float PressEndScale = 1.0f;
+
+    constexpr float PressStartAngleSpeed = 10.0f;
+	constexpr float PressStartRandamAngle = 360.0f;
+    constexpr float PressEndAngleSpeed = 0.0f;
+
+    constexpr Motion::Easing PressEasing = Motion::Easing::EaseInOut;
+
+    // =========================
+    // 消失演出（FadeOut）
+    // =========================
+    constexpr float FadeStartAlpha = PressEndAlpha;
+    constexpr float FadeEndAlpha = 0.0f;
+
+    constexpr float FadeStartScale = PressEndScale;
+    constexpr float FadeEndScale = 2.0f;
+
+    constexpr float FadeStartAngleSpeed = PressEndAngleSpeed;
+    constexpr float FadeEndAngleSpeed = 10.0f;
+
+    constexpr Motion::Easing FadeEasing = Motion::Easing::EaseOut;
+
+    // =========================
+    // 演出用スタンプ初期値
+    // =========================
+    constexpr float EffectStartAngle = 0.0f;
+
+    // =========================
+    // 位置
+    // =========================
+    constexpr int StampRandomOffsetX = 100;
+
+    // =========================
+    // 補間
+    // =========================
+    float Lerp(float from, float to, float t)
+    {
+        return from + (to - from) * t;
+    }
 }
 
 void TutorialChecklist::Init()
 {
     items.clear();
 
+    for (const auto& id : stampIds)
+        UIM().RemoveUI(id);
+
+    for (const auto& id : stampEffectIds)
+        UIM().RemoveUI(id);
+
+    stampIds.clear();
+    stampEffectIds.clear();
+
     isVisible = false;
-    panelMotion.Reset();
+
+    panelPosition = DxPlus::Vec2(
+        DxPlus::CLIENT_WIDTH * 0.25f,
+        DxPlus::CLIENT_HEIGHT * 0.5f);
+
+    auto* list = UIM().GetUI(L"TutorialList");
+
+    if (!list)
+    {
+        list = UIM().CreateImageUI(
+            L"TutorialList",
+            ResourceKeys::TutorialBack,
+            panelPosition);
+    }
+
+    if (list)
+        list->SetFalse();
 }
 
 void TutorialChecklist::Update(float deltaTime)
 {
     if (!isVisible) return;
 
-    // パネル全体のアニメーション
-    panelMotion.Update(deltaTime);
-
-    // 各項目のアニメーション
-    for (auto& item : items)
-    {
-        item.checkMotion.Update(deltaTime);
-
-        item.checkScale = std::clamp(
-            item.checkMotion.GetValue(),
-            0.0f,
-            1.0f
-        );
-    }
-}
-
-void TutorialChecklist::Draw() const
-{
-    if (!isVisible || items.empty()) return;
-
-    const float panelRate = panelMotion.GetValue();
-
-    // パネルの位置と透明度
-    const int x = static_cast<int>(
-        position.x - 25.0f * (1.0f - panelRate)
-        );
-
-    const int y = static_cast<int>(position.y);
-
-    const int alpha = static_cast<int>(220.0f * panelRate);
-
-    const int panelHeight =
-        HeaderHeight +
-        static_cast<int>(items.size()) * ItemHeight +
-        Padding;
-
-    // アルファブレンド開始
-    DxLib::SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
-
-    // 背景
-    DxLib::DrawBox(
-        x, y,
-        x + PanelWidth,
-        y + panelHeight,
-        DxLib::GetColor(25, 25, 35),
-        TRUE
-    );
-
-    // 枠線
-    DxLib::DrawBox(
-        x, y,
-        x + PanelWidth,
-        y + panelHeight,
-        DxLib::GetColor(100, 100, 120),
-        FALSE
-    );
-
-    // タイトル
-    DxLib::DrawString(
-        x + Padding,
-        y + 10,
-        L"チュートリアル",
-        DxLib::GetColor(255, 255, 255)
-    );
-
-    // 各項目
     for (std::size_t i = 0; i < items.size(); ++i)
     {
-        const auto& item = items[i];
+        auto& item = items[i];
 
-        const int itemX = x + Padding;
-        const int itemY =
-            y + HeaderHeight + static_cast<int>(i) * ItemHeight;
+        if (item.stampPhase == StampAnimationPhase::None ||
+            item.stampPhase == StampAnimationPhase::Finished)
+            continue;
 
-        // チェックボックス
-        constexpr int CheckSize = 20;
+        const std::wstring effectId =
+            L"TutorialStampEffect" + std::to_wstring(i);
 
-        DxLib::DrawBox(
-            itemX,
-            itemY,
-            itemX + CheckSize,
-            itemY + CheckSize,
-            DxLib::GetColor(180, 180, 190),
-            FALSE
-        );
+        const std::wstring stampId =
+            L"TutorialStamp" + std::to_wstring(i);
 
-        // チェックマーク
-        if (item.checkScale > 0.0f)
+        auto* effect = UIM().GetUI(effectId);
+        if (!effect) continue;
+
+        auto* completedStamp = UIM().GetUI(stampId);
+
+        item.stampMotion.Update(deltaTime);
+
+        const float t = item.stampMotion.GetValue();
+
+        // =================================
+        // ① 押印演出
+        // =================================
+        if (item.stampPhase == StampAnimationPhase::Press)
         {
-            const int centerX = itemX + CheckSize / 2;
-            const int centerY = itemY + CheckSize / 2;
+            const float alpha =
+                Lerp(PressStartAlpha, PressEndAlpha, t);
 
-            const float scale = item.checkScale;
+            item.checkScale =
+                Lerp(PressStartScale, PressEndScale, t);
 
-            // 3点を中心から拡大
-            const int p1X = centerX + static_cast<int>(-6 * scale);
-            const int p1Y = centerY;
+            const float angleSpeed =
+                Lerp(PressStartAngleSpeed, PressEndAngleSpeed, t);
 
-            const int p2X = centerX + static_cast<int>(-1 * scale);
-            const int p2Y = centerY + static_cast<int>(5 * scale);
+            effect->SetAlphaDirect(static_cast<int>(alpha));
+            effect->SetScale(item.checkScale);
+            effect->SetAngleSpeed(angleSpeed);
 
-            const int p3X = centerX + static_cast<int>(7 * scale);
-            const int p3Y = centerY - static_cast<int>(6 * scale);
+            if (item.stampMotion.IsFinished())
+            {
+                item.stampPhase = StampAnimationPhase::FadeOut;
 
-            DxLib::DrawLine(
-                p1X, p1Y,
-                p2X, p2Y,
-                DxLib::GetColor(100, 255, 120)
-            );
+                item.stampMotion.Start(
+                    0.0f,
+                    1.0f,
+                    StampFadeDuration,
+                    FadeEasing);
 
-            DxLib::DrawLine(
-                p2X, p2Y,
-                p3X, p3Y,
-                DxLib::GetColor(100, 255, 120)
-            );
+                // 演出用スタンプの回転角度を引き継ぐ
+                if (completedStamp)
+                    completedStamp->SetAngle(effect->GetAngle());
+            }
         }
 
-        // 文字色
-        const unsigned int textColor = item.completed
-            ? DxLib::GetColor(130, 145, 150)
-            : DxLib::GetColor(255, 255, 255);
+        // =================================
+        // ② 演出用スタンプ消失
+        // =================================
+        else if (item.stampPhase == StampAnimationPhase::FadeOut)
+        {
+            const float alpha =
+                Lerp(FadeStartAlpha, FadeEndAlpha, t);
 
-        DxLib::DrawString(
-            itemX + 30,
-            itemY + 2,
-            item.text.c_str(),
-            textColor
-        );
+            item.checkScale =
+                Lerp(FadeStartScale, FadeEndScale, t);
+
+            const float angleSpeed =
+                Lerp(FadeStartAngleSpeed, FadeEndAngleSpeed, t);
+
+            effect->SetAlphaDirect(static_cast<int>(alpha));
+            effect->SetScale(item.checkScale);
+            effect->SetAngleSpeed(angleSpeed);
+
+            // 完了スタンプを徐々に表示
+            if (completedStamp)
+            {
+                completedStamp->SetAlphaDirect(
+                    static_cast<int>(Lerp(0.0f, 255.0f, t)));
+            }
+
+            // 演出終了
+            if (item.stampMotion.IsFinished())
+            {
+                effect->SetAlphaDirect(static_cast<int>(FadeEndAlpha));
+                effect->SetAngleSpeed(0.0f);
+                effect->SetFalse();
+
+
+                item.stampPhase = StampAnimationPhase::Finished;
+            }
+        }
     }
-
-    // アルファブレンド終了
-    DxLib::SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
 
-void TutorialChecklist::AddItem(const std::wstring& text)
+void TutorialChecklist::AddItem(
+    const std::wstring& text,
+    DxPlus::Vec2 stampPosition)
 {
     ChecklistItem item;
+
     item.text = text;
+    item.stampPosition = stampPosition;
+
+    // ランダムなXオフセット
+    item.stampPosition.x +=
+        DxLib::GetRand(StampRandomOffsetX * 2) - StampRandomOffsetX;
 
     items.push_back(std::move(item));
 }
@@ -171,15 +217,86 @@ void TutorialChecklist::CompleteItem(std::size_t index)
     auto& item = items[index];
 
     if (item.completed) return;
-
     item.completed = true;
 
-    item.checkMotion.Start(
+    const DxPlus::Vec2 position =
+        panelPosition + item.stampPosition;
+
+    const std::wstring stampId =
+        L"TutorialStamp" + std::to_wstring(index);
+
+    const std::wstring effectId =
+        L"TutorialStampEffect" + std::to_wstring(index);
+
+    // =================================
+    // ① 完了スタンプ（残しておくUI）
+    // =================================
+
+    auto* stamp = UIM().CreateImageUI(
+        stampId,
+        ResourceKeys::TutorialStamp,
+        position,
+        DxPlus::Vec2(0.0f, 0.0f));
+
+    if (stamp)
+    {
+        stamp->SetAlphaDirect(0);
+        stamp->SetScale(1.0f);
+        stamp->SetAngle(0.0f);
+        stamp->SetAngleSpeed(0.0f);
+
+        if (isVisible)
+            stamp->SetVisible(true);
+        else
+            stamp->SetFalse();
+
+        stampIds.push_back(stampId);
+    }
+
+    // =================================
+    // ② 押印演出UI
+    // =================================
+
+    auto* effect = UIM().CreateImageUI(
+        effectId,
+        ResourceKeys::TutorialStamp,
+        position,
+        DxPlus::Vec2(0.0f, 0.0f));
+
+    if (!effect)
+    {
+        // 演出UIを生成できなかった場合
+        if (stamp)
+            stamp->SetAlphaDirect(255);
+
+        item.stampPhase = StampAnimationPhase::Finished;
+        return;
+    }
+
+    effect->SetAlphaDirect(static_cast<int>(PressStartAlpha));
+    effect->SetScale(PressStartScale);
+    effect->SetAngle(EffectStartAngle + DxLib::GetRand(PressStartRandamAngle));
+    effect->SetAngleSpeed(PressStartAngleSpeed);
+
+    if (isVisible)
+        effect->SetVisible(true);
+    else
+        effect->SetFalse();
+
+    stampEffectIds.push_back(effectId);
+
+    // =================================
+    // 押印アニメーション開始
+    // =================================
+
+    item.checkScale = PressStartScale;
+    item.stampPhase = StampAnimationPhase::Press;
+
+    item.stampMotion.Start(
         0.0f,
         1.0f,
-        0.25f,
-        Motion::Easing::EaseOut
-    );
+        StampPressDuration,
+        PressEasing);
 }
 
 void TutorialChecklist::SetVisible(bool visible)
@@ -188,18 +305,54 @@ void TutorialChecklist::SetVisible(bool visible)
 
     isVisible = visible;
 
-    if (visible)
+    // =================================
+    // チェックリスト本体
+    // =================================
+
+    if (auto* list = UIM().GetUI(L"TutorialList"))
     {
-        // 左からスライドして表示
-        panelMotion.Start(
-            0.0f,
-            1.0f,
-            0.3f,
-            Motion::Easing::EaseOut
-        );
+        if (!isVisible)
+            list->Hide();
+        else
+            list->FadeIn(0.5f);
     }
-    else
+
+    // =================================
+    // 完了スタンプ
+    // =================================
+
+    for (const auto& stampId : stampIds)
     {
-        panelMotion.Reset();
+        if (auto* stamp = UIM().GetUI(stampId))
+        {
+            if (!isVisible)
+                stamp->SetFalse();
+            else
+                stamp->SetVisible(true);
+        }
+    }
+
+    // =================================
+    // 演出用スタンプ
+    // =================================
+
+    for (std::size_t i = 0; i < items.size(); ++i)
+    {
+        const std::wstring effectId =
+            L"TutorialStampEffect" + std::to_wstring(i);
+
+        if (auto* effect = UIM().GetUI(effectId))
+        {
+            if (!isVisible)
+            {
+                effect->SetFalse();
+                effect->SetAngleSpeed(0.0f);
+            }
+            else if (items[i].stampPhase == StampAnimationPhase::Press ||
+                items[i].stampPhase == StampAnimationPhase::FadeOut)
+            {
+                effect->SetVisible(true);
+            }
+        }
     }
 }

@@ -6,6 +6,7 @@
 #include "DxPlus/DxPlus.h"
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
+#include "StatusUI.h"
 
 GameSceneBattleState::GameSceneBattleState(
     GameStateMachine& gameStateMachine,
@@ -30,6 +31,9 @@ void GameSceneBattleState::Enter()
 
     player->SetDefMove(false);
     player->StopMove();
+
+	//StatusUI::InitPlayer();
+	//StatusUI::InitBoss();
 }
 
 void GameSceneBattleState::Tick(float deltaTime)
@@ -64,6 +68,15 @@ void GameSceneBattleState::Tick(float deltaTime)
             player->GetYaw() + DX_PI_F
         );
     }
+
+    // gaugeçXêV
+	StatusUI::SyncStatusBar(L"PlayerHealthGauge", static_cast<float>(player->GetHealth()) / Player::MaxHealth);
+	//StatusUI::SyncStatusBar(L"PlayerUltGauge", player->GetUltProgress());
+	//StatusUI::SyncStatusBar(L"BossHealthGauge", boss.GetHealthProgress());
+	//StatusUI::SyncStatusBar(L"BossDownGauge", boss.GetDownGaugeProgress());
+	StatusUI::SyncStatusBar(L"PlayerUltGauge", static_cast<float>(player->GetHealth()) / Player::MaxHealth);
+	StatusUI::SyncStatusBar(L"BossHealthGauge", static_cast<float>(player->GetHealth()) / Player::MaxHealth);
+	StatusUI::SyncStatusBar(L"BossDownGauge", static_cast<float>(player->GetHealth()) / Player::MaxHealth);
 }
 
 void GameSceneBattleState::Exit()

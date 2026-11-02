@@ -35,12 +35,66 @@ Vec3 Player::GetAttackBallSpawnPosition() const
 		+ forward * (Const::PLAYER_RADIUS + Const::PLAYER_ATTACK_BALL_FORWARD_OFFSET);
 }
 
+void Player::SetAnimation(
+	PlayerAnimType::Type type,
+	bool loop ,
+	bool playAfterBlend,
+	float blendSeconds 
+)
+{
+	if (currentAnimType_ == type && currentAnimLoop_ == loop)
+		return;
+
+	currentAnimType_ = type;
+	currentAnimLoop_ = loop;
+
+	animation_.Play3D(
+		RM().GetModel(model_.GetModelKey()),
+		GetAnimationHandle(currentAnimType_),
+		currentAnimLoop_,
+		Const::ANIM_FPS,
+		blendSeconds,
+		playAfterBlend
+	);
+}
+void Player::UpdateAnimation(float deltaTime)
+{
+	animation_.Update(deltaTime);
+}
+AnimationHandle Player::GetAnimationHandle(PlayerAnimType::Type type) const
+{
+	switch (type)
+	{
+	case PlayerAnimType::Idle:
+		return idleAnimHandle_;
+	case PlayerAnimType::Walk:
+		return walkAnimHandle_;
+	case PlayerAnimType::Jump:
+		return jumpAnimHandle_;
+	case PlayerAnimType::Double_Jump:
+		return doubleJumpAnimHandle_;
+	default:
+		return idleAnimHandle_;
+	}
+}
+
 void Player::Init()
 {
 	const int modelHandle = RM().GetModel(model_.GetModelKey());
 	if (modelHandle < 0) return;
 
 	model_.SetModelType(ModelType::Bone);
+
+	// AnimationHandleの初期化
+	const int idleModelHandle = RM().GetModel(ResourceKeys::Model_PlayerAnim_Idle);
+	idleAnimHandle_ = AnimationHandle::FromIndex(idleModelHandle, 0);
+
+	const int walkAnimHandle = RM().GetModel(ResourceKeys::Model_PlayerAnim_Walk);
+	walkAnimHandle_ = AnimationHandle::FromIndex(walkAnimHandle, 0);
+	const int jumpAnimHandle = RM().GetModel(ResourceKeys::Model_PlayerAnim_Jump);
+	jumpAnimHandle_ = AnimationHandle::FromIndex(jumpAnimHandle, 0);
+	const int doubleJumpAnimHandle = RM().GetModel(ResourceKeys::Model_PlayerAnim_Dodge);
+	doubleJumpAnimHandle_ = AnimationHandle::FromIndex(doubleJumpAnimHandle, 0);
 
 	Reset();
 }
@@ -55,11 +109,11 @@ void Player::Reset()
 
 	touchingWall_ = false;
 	wallNormal_ = {};
-    wallTopY_ = 0.0f;
-    EndPillarElevator();
-    elevatorInputConsumed_ = false;
+	wallTopY_ = 0.0f;
+	EndPillarElevator();
+	elevatorInputConsumed_ = false;
 #ifdef _DEBUG
-    debugDashEnabled_ = false;
+	debugDashEnabled_ = false;
 #endif
 
 	model_.collisionHighlighted = false;
@@ -67,37 +121,35 @@ void Player::Reset()
 	// 初期位置・回転・拡大率は既定値を設定した後にJSONから読み込む
 	MObjs().LoadActorTransform(*this);
 	model_.Load();
-    startPosition_ = GetPosition();
+	startPosition_ = GetPosition();
 
 	moveInput_ = {};
 	velocity_ = { 0.0f, 0.0f, 0.0f };
 
-    // ゲームをやり直したときも、ダブルジャンプを使える状態に戻す。
-    doubleJumpUsed_ = false;
-    coyoteTimeRemaining_ = 0.0f;
+	// ゲームをやり直したときも、ダブルジャンプを使える状態に戻す。
+	doubleJumpUsed_ = false;
+	coyoteTimeRemaining_ = 0.0f;
 
 	// 空中から開始し、ステージへのレイキャストで接地させる。
 	isGrounded_ = false;
 
 	stateMachine_.Initialize();
 
-	// Animation
-	animation_.Reset();	
-	SetAnimation(PlayerAnimType::Idle, true);
-
+	// 初期アニメーションの再生
+	animation_.Reset();
 	animation_.Play3D(
 		RM().GetModel(model_.GetModelKey()),
-		currentAnimIndex_,
-		currentAnimLoop_,
-		Const::ANIM_FPS,
-		0.0f
+		GetAnimationHandle(PlayerAnimType::Idle),
+		true,
+		Const::ANIM_FPS
 	);
+	animation_.Update(0.0f);
 }
 
 void Player::SetStartPosition(const Vec3& position)
 {
-    SetPosition(position);
-    startPosition_ = position;
+	SetPosition(position);
+	startPosition_ = position;
 }
 
 // 修正の修正。
@@ -106,31 +158,31 @@ void Player::SetStartPosition(const Vec3& position)
 // 最初の場所を覚えておいて、Rでそこに戻すようにした。
 void Player::ResetPosition()
 {
-    stateMachine_.ChangeState(PlayerStateType::Idle);
-    EndPillarElevator();
-    StopMove();
-    position_ = startPosition_;
-    velocity_ = {};
-    isGrounded_ = false;
-    touchingWall_ = false;
-    touchingModel_ = false;
-    wasTouchingModel_ = false;
-    wallNormal_ = {};
-    wallTopY_ = 0.0f;
-    doubleJumpUsed_ = false;
-    coyoteTimeRemaining_ = 0.0f;
-    elevatorInputConsumed_ = input_.jumpPressing;
+	stateMachine_.ChangeState(PlayerStateType::Idle);
+	EndPillarElevator();
+	StopMove();
+	position_ = startPosition_;
+	velocity_ = {};
+	isGrounded_ = false;
+	touchingWall_ = false;
+	touchingModel_ = false;
+	wasTouchingModel_ = false;
+	wallNormal_ = {};
+	wallTopY_ = 0.0f;
+	doubleJumpUsed_ = false;
+	coyoteTimeRemaining_ = 0.0f;
+	elevatorInputConsumed_ = input_.jumpPressing;
 }
 
 void Player::Update(float deltaTime)
 {
 	input_.Update();
 #ifdef _DEBUG
-    if (input_.RkeyPressed)
-    {
-        ResetPosition();
-        return;
-    }
+	if (input_.RkeyPressed)
+	{
+		ResetPosition();
+		return;
+	}
 #endif
 	UpdateMovement(deltaTime);
 }
@@ -162,33 +214,33 @@ void Player::SetModelKey(const std::wstring& key)
 void Player::UpdateMovement(float deltaTime)
 {
 
-    // 前のフレームで床に着いたら、2回目のジャンプを再び使えるようにする。
-    // 空中で被弾してステートが変わっても、このフラグはリセットしない。
-    if (isGrounded_)
-    {
-        doubleJumpUsed_ = false;
-        coyoteTimeRemaining_ = gravityEnabled_ ? CoyoteTime : 0.0f;
+	// 前のフレームで床に着いたら、2回目のジャンプを再び使えるようにする。
+	// 空中で被弾してステートが変わっても、このフラグはリセットしない。
+	if (isGrounded_)
+	{
+		doubleJumpUsed_ = false;
+		coyoteTimeRemaining_ = gravityEnabled_ ? CoyoteTime : 0.0f;
 		//コヨーテタイムの残り時間をリセットする。重力が無効な場合は0にする。
-	  }
-    else
-    {
+	}
+	else
+	{
 		coyoteTimeRemaining_ = (std::max)(0.0f,//コヨーテタイムの残り時間を減らす。0未満にならないようにする。
-            coyoteTimeRemaining_ - (std::max)(0.0f, deltaTime));
-    }
+			coyoteTimeRemaining_ - (std::max)(0.0f, deltaTime));
+	}
 
-    // 歩いて足場を離れた場合も、通常ジャンプ中と同じ空中入力を受け付ける。
-    // Jumpへの遷移だけでは上向きの速度を加えない。
-    auto state = GetCurrentState();
+	// 歩いて足場を離れた場合も、通常ジャンプ中と同じ空中入力を受け付ける。
+	// Jumpへの遷移だけでは上向きの速度を加えない。
+	auto state = GetCurrentState();
 
-    if (gravityEnabled_ && !isGrounded_ &&
-        (state == PlayerStateType::Idle || state == PlayerStateType::Walk ||
-            state == PlayerStateType::Grooming))
-    {
-        stateMachine_.ChangeState(PlayerStateType::Jump);
-    }
+	if (gravityEnabled_ && !isGrounded_ &&
+		(state == PlayerStateType::Idle || state == PlayerStateType::Walk ||
+			state == PlayerStateType::Grooming))
+	{
+		stateMachine_.ChangeState(PlayerStateType::Jump);
+	}
 
 
-    // 段階実装：接触のTrue/Falseだけを残し、壁登りへの自動遷移は停止する。
+	// 段階実装：接触のTrue/Falseだけを残し、壁登りへの自動遷移は停止する。
 //     // 移動入力を離している間は、壁登り用の接触状態を解除する。
 //     if (!input_.isMoving)
 //     {
@@ -232,18 +284,6 @@ void Player::UpdateMovement(float deltaTime)
 		Move(deltaTime);
 		isGrounded_ = false;
 	}
-
-	const int modelHandle = RM().GetModel(model_.GetModelKey());
-
-	animation_.Play3D(
-		modelHandle,
-		currentAnimIndex_,
-		currentAnimLoop_,
-		Const::ANIM_FPS,
-		0.2f
-	);
-
-	animation_.Update(deltaTime);
 }
 
 // void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCenter)
@@ -258,16 +298,16 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 
 	input_.Update();
 #ifdef _DEBUG
-    if (input_.RkeyPressed)
-    {
-        ResetPosition();
-        // 落ちていた場所から当たり判定を続けないように、ここで終わる。
-        return;
-    }
+	if (input_.RkeyPressed)
+	{
+		ResetPosition();
+		// 落ちていた場所から当たり判定を続けないように、ここで終わる。
+		return;
+	}
 #endif
 	// 今フレームの入力に合う側面を選び、柱のどの方向からでも登れるようにする。
 	// touchingWall_ = stage.FindPillarWall(GetPosition(), wallNormal_, GetWorldMoveDirection(input_.moveDir),
-        // &wallTopY_, GetCurrentState() == PlayerStateType::Climbing);
+		// &wallTopY_, GetCurrentState() == PlayerStateType::Climbing);
 	Vec3 pillarCenter{};
 
 	const ModelObject* pillarModel = nullptr;
@@ -300,7 +340,7 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 	}
 	if (IsPillarElevatorActive()) input_.jumpPressed = false;
 	UpdateMovement(deltaTime);
-    // 旧仕様：中心へ寄せるだけの処理。
+	// 旧仕様：中心へ寄せるだけの処理。
 // 	const bool snapToPillar = touchingWall_ && input_.jumpPressing && !IsDead() && !IsDamaging();
 // 	// 柱に触れているときのSpaceは、通常ジャンプより中心への吸着を優先する。
 // 	if (snapToPillar) input_.jumpPressed = false;
@@ -375,41 +415,41 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 		}
 		if (foundGround)
 		{
-            // 旧仕様：壁の上端で接触を保持している間の床補正。
-            // const bool holdingClimbTop = GetCurrentState() == PlayerStateType::Climbing && IsNearWallTop();
-            // if (position_.y - hit.point.y <= groundSnapDistance &&
-            //     (!holdingClimbTop || hit.point.y >= position_.y))
+			// 旧仕様：壁の上端で接触を保持している間の床補正。
+			// const bool holdingClimbTop = GetCurrentState() == PlayerStateType::Climbing && IsNearWallTop();
+			// if (position_.y - hit.point.y <= groundSnapDistance &&
+			//     (!holdingClimbTop || hit.point.y >= position_.y))
 			if (position_.y - hit.point.y <= groundSnapDistance)
 			{
-                // 坂の中へ落ち込まないよう、足元を床の高さへ戻す。
-                position_.y = hit.point.y;
+				// 坂の中へ落ち込まないよう、足元を床の高さへ戻す。
+				position_.y = hit.point.y;
 
-                constexpr float SLOPE_LIMIT_Y = 0.7f;
+				constexpr float SLOPE_LIMIT_Y = 0.7f;
 
-                if (hit.normal.y < SLOPE_LIMIT_Y)
-                {
-                    // 急な坂では踏ん張れないので、坂の下へ流される。
-                    isGrounded_ = false;
+				if (hit.normal.y < SLOPE_LIMIT_Y)
+				{
+					// 急な坂では踏ん張れないので、坂の下へ流される。
+					isGrounded_ = false;
 
-                    if (gravityEnabled_)
-                    {
-                        const Vec3 slideDirection = Vec3{ hit.normal.x, 0.0f, hit.normal.z }.Normalized();
-                        const float slideAmount = Const::GRAVITY * deltaTime;
-                        const Vec3 slidePosition = position_ + slideDirection * slideAmount;
+					if (gravityEnabled_)
+					{
+						const Vec3 slideDirection = Vec3{ hit.normal.x, 0.0f, hit.normal.z }.Normalized();
+						const float slideAmount = Const::GRAVITY * deltaTime;
+						const Vec3 slidePosition = position_ + slideDirection * slideAmount;
 
-                        // 坂の途中に壁があれば、そこを突き抜けずに止まる。
-                        bool touched = false;
+						// 坂の途中に壁があれば、そこを突き抜けずに止まる。
+						bool touched = false;
 
-                        position_ = collision.SlideAlongWalls(position_, slidePosition, modelOb, touched);
-                        touchingModel_ |= touched;
-                    }
-                }
-                else
-                {
-                    // 立てる床なら、落下を止めて足をつける。
-                    velocity_.y = 0.0f;
-                    isGrounded_ = true;
-                }
+						position_ = collision.SlideAlongWalls(position_, slidePosition, modelOb, touched);
+						touchingModel_ |= touched;
+					}
+				}
+				else
+				{
+					// 立てる床なら、落下を止めて足をつける。
+					velocity_.y = 0.0f;
+					isGrounded_ = true;
+				}
 			}
 		}
 	}
@@ -461,12 +501,6 @@ void Player::DrawStatus() const
 	const wchar_t* state = IsDamaging() ? L"Damaging" : IsDead() ? L"Die" : L"";
 	DxLib::DrawFormatString(24, 150, DxLib::GetColor(255, 255, 255),
 		L"HP: %d / %d  %s", health_, MaxHealth, state);
-}
-
-void Player::SetAnimation(PlayerAnimType::Type type, bool loop)
-{
-	currentAnimIndex_ = static_cast<int>(type);
-	currentAnimLoop_ = loop;
 }
 
 
@@ -698,29 +732,29 @@ void Player::UpdateStageMoveVelocity(float moveSpeed, float deltaTime)
 
 void Player::SetDoubleJumpSpeed(float value)
 {
-    if (std::isfinite(value)) doubleJumpSpeed_ = (std::max)(0.0f, value);
+	if (std::isfinite(value)) doubleJumpSpeed_ = (std::max)(0.0f, value);
 }
 
 void Player::ResetDoubleJumpSpeed()
 {
-    doubleJumpSpeed_ = Const::PLAYER_DOUBLE_JUMP_SPEED;
+	doubleJumpSpeed_ = Const::PLAYER_DOUBLE_JUMP_SPEED;
 }
 
 void Player::StartDoubleJump()
 {
-    if (!CanDoubleJump()) return;
+	if (!CanDoubleJump()) return;
 
-    doubleJumpUsed_ = true;
-    coyoteTimeRemaining_ = 0.0f;
-    //StopMove();
+	doubleJumpUsed_ = true;
+	coyoteTimeRemaining_ = 0.0f;
+	//StopMove();
 
 	// 入力やカメラではなく、既存のプレイヤーの向きから水平速度を決める。
-    const float moveSpeed = Const::PLAYER_MOVE_SPEED * 3.0f;
-    velocity_.x = std::sin(GetYaw()) * moveSpeed;
-    velocity_.z = std::cos(GetYaw()) * moveSpeed;
+	const float moveSpeed = Const::PLAYER_MOVE_SPEED * 3.0f;
+	velocity_.x = std::sin(GetYaw()) * moveSpeed;
+	velocity_.z = std::cos(GetYaw()) * moveSpeed;
 
-    velocity_.y = doubleJumpSpeed_;
-    isGrounded_ = false;
+	velocity_.y = doubleJumpSpeed_;
+	isGrounded_ = false;
 }
 
 // 旧仕様：空中で入力方向へ突進する処理。
@@ -782,9 +816,9 @@ void Player::SetWallSlideSpeed(float value)
 
 void Player::ResetClimbingSpeeds()
 {
-    // climbingSpeed_ = Const::PLAYER_CLIMBING_SPEED;
-    climbingSpeed_ = Const::PLAYER_ELEVATOR_SPEED;
-    wallSlideSpeed_ = Const::PLAYER_WALL_SLIDE_SPEED;
+	// climbingSpeed_ = Const::PLAYER_CLIMBING_SPEED;
+	climbingSpeed_ = Const::PLAYER_ELEVATOR_SPEED;
+	wallSlideSpeed_ = Const::PLAYER_WALL_SLIDE_SPEED;
 }
 
 void Player::SetWallJumpMoveSpeed(float value)
@@ -819,18 +853,18 @@ void Player::StartWallJump()
 
 bool Player::TryJump()
 {
-    if (CanGroundJump())
-    {
-        stateMachine_.ChangeState(PlayerStateType::Jump);
-        JumpAction();
-        return true;
-    }
-    if (CanDoubleJump())
-    {
-        stateMachine_.ChangeState(PlayerStateType::DoubleJump);
-        return true;
-    }
-    return false;
+	if (CanGroundJump())
+	{
+		stateMachine_.ChangeState(PlayerStateType::Jump);
+		JumpAction();
+		return true;
+	}
+	if (CanDoubleJump())
+	{
+		stateMachine_.ChangeState(PlayerStateType::DoubleJump);
+		return true;
+	}
+	return false;
 }
 
 bool Player::JumpAction()
@@ -858,52 +892,52 @@ void Player::SetGravityEnabled(bool enabled)
 
 void Player::StartPillarElevator(const ModelObject* pillar, const Vec3& center, float topY)
 {
-     float recordFirstPosY = topY - Const::PLAYER_ELEVATOR_TOP_OFFSET;
-    if (!pillar || !gravityEnabled_|| IsDamaging() ||
-        IsPillarElevatorActive()) return;
+	float recordFirstPosY = topY - Const::PLAYER_ELEVATOR_TOP_OFFSET;
+	if (!pillar || !gravityEnabled_ || IsDamaging() ||
+		IsPillarElevatorActive()) return;
 
-    // 上端の近くではジャンプを優先する。Spaceを離すまで吸い戻さない。
-    float topJumpMargin = 20.0f;
-    if (position_.y >= recordFirstPosY - topJumpMargin)
-    {
-        elevatorInputConsumed_ = true;
-        return;
-    }
+	// 上端の近くではジャンプを優先する。Spaceを離すまで吸い戻さない。
+	float topJumpMargin = 20.0f;
+	if (position_.y >= recordFirstPosY - topJumpMargin)
+	{
+		elevatorInputConsumed_ = true;
+		return;
+	}
 
 	elevatorPillar_ = pillar;
-    elevatorCenter_ = center;
-    elevatorTopY_ = recordFirstPosY;
-    elevatorInputConsumed_ = true;
-    coyoteTimeRemaining_ = 0.0f;
+	elevatorCenter_ = center;
+	elevatorTopY_ = recordFirstPosY;
+	elevatorInputConsumed_ = true;
+	coyoteTimeRemaining_ = 0.0f;
 
-    position_.x = center.x;
-    position_.z = center.z;
+	position_.x = center.x;
+	position_.z = center.z;
 
 	isGrounded_ = false;
-    stateMachine_.ChangeState(PlayerStateType::Climbing);
+	stateMachine_.ChangeState(PlayerStateType::Climbing);
 }
 
 bool Player::UpdatePillarElevator(float deltaTime)
 {
-    StopMove();
-    velocity_.y = 0.0f;
-    isGrounded_ = false;
-    position_.x = elevatorCenter_.x;
-    position_.z = elevatorCenter_.z;
-    if (deltaTime <= 0.0f) return false;
-    position_.y = (std::min)(elevatorTopY_, position_.y + climbingSpeed_ * deltaTime);
-    return position_.y >= elevatorTopY_;
+	StopMove();
+	velocity_.y = 0.0f;
+	isGrounded_ = false;
+	position_.x = elevatorCenter_.x;
+	position_.z = elevatorCenter_.z;
+	if (deltaTime <= 0.0f) return false;
+	position_.y = (std::min)(elevatorTopY_, position_.y + climbingSpeed_ * deltaTime);
+	return position_.y >= elevatorTopY_;
 }
 
 void Player::EndPillarElevator()
 {
-    elevatorPillar_ = nullptr;
+	elevatorPillar_ = nullptr;
 }
 
 void Player::StartPillarExitJump()
 {
-    velocity_.y = Const::PLAYER_ELEVATOR_EXIT_JUMP_SPEED;
-    isGrounded_ = false;
-    elevatorInputConsumed_ = true;
-    coyoteTimeRemaining_ = 0.0f;
+	velocity_.y = Const::PLAYER_ELEVATOR_EXIT_JUMP_SPEED;
+	isGrounded_ = false;
+	elevatorInputConsumed_ = true;
+	coyoteTimeRemaining_ = 0.0f;
 }

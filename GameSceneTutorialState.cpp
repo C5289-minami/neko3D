@@ -9,6 +9,22 @@
 namespace
 {
 	const Vec3 tutorialPlayerStartPos{ -1882.3f, -783.7f, -1373.0f };
+	struct task
+	{
+		TutorialType type;
+		std::wstring taskName;
+		DxPlus::Vec2 stampPosition;
+		float requiredProgress{ 1.0f };
+	};
+	task tasks[] =
+	{
+		{ TutorialType::Move,		L"3秒移動する",			DxPlus::Vec2(0.0f, -452.5f + 271.0f),3.0f },
+		{ TutorialType::Jump,		L"ジャンプする",		DxPlus::Vec2(0.0f, -452.5f + 397.0f) },
+		{ TutorialType::DoubleJump,	L"二段ジャンプする",	DxPlus::Vec2(0.0f, -452.5f + 532.0f) },
+		{ TutorialType::Climb,		L"柱を登る",			DxPlus::Vec2(0.0f, -452.5f + 643.0f) }
+	};
+
+
 	constexpr float TwoPi = 6.28318530718f;
 }
 
@@ -30,12 +46,10 @@ void GameSceneTutorialState::Enter()
 
 	taskManager_.Init(checklist);
 
-	taskManager_.AddTask(TutorialType::Move, L"3秒移動する", 3.0f);
-	taskManager_.AddTask(TutorialType::Jump, L"ジャンプする");
-	taskManager_.AddTask(TutorialType::DoubleJump, L"二段ジャンプする");
-	taskManager_.AddTask(TutorialType::Climb, L"柱を登る");
-
-	checklist.SetVisible(true);
+	for (const auto& t : tasks)
+	{
+		taskManager_.AddTask(t.type, t.taskName, t.stampPosition, t.requiredProgress);
+	}
 
 	previousPlayerPosition_ = player->GetWorldPosition();
 
@@ -72,6 +86,7 @@ void GameSceneTutorialState::Tick(float deltaTime)
 	movement.y = 0.0f;
 
 	// Walk状態の間だけ時間を加算
+	taskManager_.Update(deltaTime);
 	if (player->GetCurrentState() == PlayerStateType::Walk)
 	{
 		taskManager_.AddProgress(TutorialType::Move, deltaTime);
@@ -96,7 +111,8 @@ void GameSceneTutorialState::Tick(float deltaTime)
 		auto& camera = gameScene_.GetTargetCamera();
 		camera.Initialize(gameScene_.GetCameraDirector().GetCurrentPose());
 
-
+		auto& checklist = gameScene_.GetTutorialChecklist();
+		checklist.SetVisible(true);
 		targetCameraSwitched_ = true;
 	}
 

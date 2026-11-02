@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <cstddef>
 
+
+
 void TutorialTaskManager::Init(TutorialChecklist& checklist)
 {
     objectives_.clear();
@@ -12,9 +14,16 @@ void TutorialTaskManager::Init(TutorialChecklist& checklist)
     checklist_->Init();
 }
 
+void TutorialTaskManager::Update(float deltaTime)
+{
+    if (checklist_)
+        checklist_->Update(deltaTime);
+}
+
 void TutorialTaskManager::AddTask(
     TutorialType type,
     const std::wstring& text,
+    DxPlus::Vec2 stampPosition,
     float requiredProgress)
 {
     if (FindIndex(type) != -1) return;
@@ -26,7 +35,7 @@ void TutorialTaskManager::AddTask(
     objectives_.push_back(objective);
 
     if (checklist_)
-        checklist_->AddItem(text);
+        checklist_->AddItem(text, stampPosition);
 }
 
 void TutorialTaskManager::AddProgress(

@@ -34,27 +34,7 @@ void Boss::Init()
 	slamSkill_ = std::make_unique<BossSlamSkill>(*this);
 	tailWhipSkill_ = std::make_unique<BossTailWhipSkill>(*this);
 
-	Reset();
-}
-
-void Boss::Reset()
-{
-
-	health_ = maxHealth_;
-	phase_ = BossPhase::Phase1;
-	// JSONİ’è‚©‚çˆÊ’uE‰ñ“]EƒXƒP[ƒ‹‚ğ“Ç‚İ‚ŞB
-	MObjs().LoadActorTransform(*this);
-	model_.Load();
-
-	model_.collisionHighlighted = false;
-	velocity_ = {};
-	activeSkill_ = nullptr;
-	SetAnimation(BossAnimType::Idle, true);
-	animation_.Reset();
-	stateMachine_.Initialize();
-	if (clapSkill_ != nullptr) clapSkill_->Reset();
-
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ƒnƒ“ƒhƒ‹‚ğ‰Šú‰»‚·‚éB
+	// AnimationHandleã®åˆæœŸåŒ–
 	const int idleModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Idle);
 	idleAnimHandle_ = AnimationHandle::FromIndex(idleModelHandle, 0);
 
@@ -66,7 +46,40 @@ void Boss::Reset()
 	damageAnimHandle_ = AnimationHandle::FromIndex(damageModelHandle, 0);
 	const int dieModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Die);
 	dieAnimHandle_ = AnimationHandle::FromIndex(dieModelHandle, 0);
-	// €–Sƒ‚ƒfƒ‹‚Í–{‘Ì‚Æ“¯‚¶ƒeƒNƒXƒ`ƒƒ‚ğg‚¤‚½‚ßABossƒ‚ƒfƒ‹‚ÌƒeƒNƒXƒ`ƒƒ‚ğ‹¤—L‚·‚éB
+
+	Reset();
+}
+
+void Boss::Reset()
+{
+
+	health_ = maxHealth_;
+	phase_ = BossPhase::Phase1;
+	// JSONè¨­å®šã‹ã‚‰ä½ç½®ãƒ»å›è»¢ãƒ»ã‚¹ã‚±ãƒ¼ãƒ«ã‚’èª­ã¿è¾¼ã‚€ã€‚
+	MObjs().LoadActorTransform(*this);
+	model_.Load();
+
+	model_.collisionHighlighted = false;
+	velocity_ = {};
+	activeSkill_ = nullptr;
+	SetAnimation(BossAnimType::Idle, true);
+
+	stateMachine_.Initialize();
+	if (clapSkill_ != nullptr) clapSkill_->Reset();
+
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒãƒ³ãƒ‰ãƒ«ã‚’åˆæœŸåŒ–ã™ã‚‹ã€‚
+	const int idleModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Idle);
+	idleAnimHandle_ = AnimationHandle::FromIndex(idleModelHandle, 0);
+
+	const int sippoModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Sippo);
+	tailWhipAnimHandle_ = AnimationHandle::FromIndex(sippoModelHandle, 0);
+	const int AtkHitModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Attck_Hit);
+	atkHitAnimHnadle_ = AnimationHandle::FromIndex(AtkHitModelHandle, 0);
+	const int damageModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Damage);
+	damageAnimHandle_ = AnimationHandle::FromIndex(damageModelHandle, 0);
+	const int dieModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Die);
+	dieAnimHandle_ = AnimationHandle::FromIndex(dieModelHandle, 0);
+	// æ­»äº¡ãƒ¢ãƒ‡ãƒ«ã¯æœ¬ä½“ã¨åŒã˜ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ä½¿ã†ãŸã‚ã€Bossãƒ¢ãƒ‡ãƒ«ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’å…±æœ‰ã™ã‚‹ã€‚
 	//const int baseModelHandle = RM().GetModel(ResourceKeys::Model_Boss);
 	//const int baseTextureCount = DxLib::MV1GetTextureNum(baseModelHandle);
 	//const int dieTextureCount = DxLib::MV1GetTextureNum(dieModelHandle);
@@ -80,7 +93,7 @@ void Boss::Reset()
 	//	}
 	//}
 
-	// ‰ŠúƒAƒjƒ[ƒVƒ‡ƒ“‚ğÄ¶‚·‚éB
+	// åˆæœŸã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’å†ç”Ÿã™ã‚‹ã€‚
 	animation_.Play3D(
 		RM().GetModel(model_.GetModelKey()),
 		GetAnimationHandle(BossAnimType::Idle),
@@ -93,17 +106,17 @@ void Boss::Reset()
 
 void Boss::TakeDamage(int damaege)
 {
-	// ƒ_ƒ[ƒW‚ğó‚¯‚½‚çHP‚ğŒ¸‚ç‚·B
-	// ‚»‚Ìê‚Å’â~‚³‚¹A‚Ğ‚é‚İó‘Ô‚ÖˆÚs‚·‚éB
-	// ƒ_ƒ[ƒWˆ—Œã‚ÉƒtƒF[ƒYˆÚs‚ğŠm”F‚·‚éB
+	// ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’å—ã‘ãŸã‚‰HPã‚’æ¸›ã‚‰ã™ã€‚
+	// ãã®å ´ã§åœæ­¢ã•ã›ã€ã²ã‚‹ã¿çŠ¶æ…‹ã¸ç§»è¡Œã™ã‚‹ã€‚
+	// ãƒ€ãƒ¡ãƒ¼ã‚¸å‡¦ç†å¾Œã«ãƒ•ã‚§ãƒ¼ã‚ºç§»è¡Œã‚’ç¢ºèªã™ã‚‹ã€‚
 
 	health_ -= damaege;
 	velocity_ = {};
 
-	// ƒ_ƒ[ƒW‚ğó‚¯‚½‚ç‚Ğ‚é‚İó‘Ô‚ÖˆÚs‚·‚éB
+	// ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’å—ã‘ãŸã‚‰ã²ã‚‹ã¿çŠ¶æ…‹ã¸ç§»è¡Œã™ã‚‹ã€‚
 	stateMachine_.ChangeState(BossStateType::flinch);
 
-	// HP‚ªÅ‘å’l‚Ì”¼•ªˆÈ‰º‚É‚È‚é‚ÆƒtƒF[ƒY2‚ÖˆÚs‚·‚éB
+	// HPãŒæœ€å¤§å€¤ã®åŠåˆ†ä»¥ä¸‹ã«ãªã‚‹ã¨ãƒ•ã‚§ãƒ¼ã‚º2ã¸ç§»è¡Œã™ã‚‹ã€‚
 	if (phase_ == BossPhase::Phase1 && health_ <= maxHealth_ / 2)
 		phase_ = BossPhase::Phase2;
 
@@ -117,8 +130,8 @@ void Boss::TakeDamage(int damaege)
 
 void Boss::Update(float deltaTime)
 {
-	// ƒAƒjƒ[ƒVƒ‡ƒ“XV‚ÍƒXƒLƒ‹‚ÌƒtƒF[ƒYˆ—‘¤‚Ås‚¤B
-	// Ä¶‹æŠÔ‚âUŒ‚’†‚Ì“®ì‚ğƒXƒLƒ‹‘¤‚ÅŠÇ—‚·‚éB
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æ›´æ–°ã¯ã‚¹ã‚­ãƒ«ã®ãƒ•ã‚§ãƒ¼ã‚ºå‡¦ç†å´ã§è¡Œã†ã€‚
+	// å†ç”ŸåŒºé–“ã‚„æ”»æ’ƒä¸­ã®å‹•ä½œã‚’ã‚¹ã‚­ãƒ«å´ã§ç®¡ç†ã™ã‚‹ã€‚
 	stateMachine_.Tick(deltaTime);
 
 	position_ += velocity_ * deltaTime;
@@ -156,7 +169,7 @@ AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 	case BossAnimType::Damage: return damageAnimHandle_;
 	case BossAnimType::Die: return dieAnimHandle_;
 	default:
-		DxPlus::Utils::FatalError(L"ƒAƒjƒ[ƒVƒ‡ƒ“ƒnƒ“ƒhƒ‹‚ğæ“¾‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½BGetAnimationHandle‚ğŠm”F‚µ‚Ä‚­‚¾‚³‚¢B");
+		DxPlus::Utils::FatalError(L"ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒãƒ³ãƒ‰ãƒ«ã‚’å–å¾—ã§ãã¾ã›ã‚“ã§ã—ãŸã€‚GetAnimationHandleã‚’ç¢ºèªã—ã¦ãã ã•ã„ã€‚");
 		return {};
 	}
 }
@@ -263,7 +276,7 @@ float Boss::GetAnimTotalTime(BossAnimType::Type type) const
 	int modelHandle = RM().GetModel(model_.GetModelKey());
 
 	totalFlame = DxLib::MV1GetAnimTotalTime(modelHandle, index);
-	totalTime = totalFlame / Const::ANIM_FPS; // ƒtƒŒ[ƒ€”‚ğ•b”‚É•ÏŠ·‚·‚éB
+	totalTime = totalFlame / Const::ANIM_FPS; // ãƒ•ãƒ¬ãƒ¼ãƒ æ•°ã‚’ç§’æ•°ã«å¤‰æ›ã™ã‚‹ã€‚
 	return totalTime;
 }
 

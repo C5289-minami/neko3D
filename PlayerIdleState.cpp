@@ -13,13 +13,16 @@ PlayerIdleState::PlayerIdleState(PlayerStateMachine& stateMachine, Player& playe
 void PlayerIdleState::Enter()
 {
 	player_.StopMove();
+	player_.GetAnimation().Reset();
 	player_.SetAnimation(PlayerAnimType::Idle, true);
 
 	DxPlus::Debug::SetFormatString(L"PlayerIdleState::Enter");
 }
 
-void PlayerIdleState::Tick(float)
+void PlayerIdleState::Tick(float deltaTime)
 {
+	player_.UpdateAnimation(deltaTime);
+
 	const PlayerInput& move = player_.GetInput();
     // ゲージ100で右クリックすると必殺技
     if (move.ultimatePressed && player_.CanUseUltimate())

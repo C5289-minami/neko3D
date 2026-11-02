@@ -13,14 +13,24 @@
 *   checklist.AddItem(L"çUåÇÇâÒîÇ∑ÇÈ");
 */
 
+enum class StampAnimationPhase
+{
+    None,
+    Press,
+    FadeOut,
+    Finished
+};
+
 struct ChecklistItem
 {
     std::wstring text;
+    DxPlus::Vec2 stampPosition{};
     bool completed{ false };
 
-    float checkScale{ 0.0f };
+    float checkScale{ 5.0f };
 
-    Motion checkMotion;
+    Motion stampMotion{};
+    StampAnimationPhase stampPhase{ StampAnimationPhase::None };
 };
 
 class TutorialChecklist
@@ -28,19 +38,17 @@ class TutorialChecklist
 public:
     void Init();
     void Update(float deltaTime);
-    void Draw() const;
 
-    void AddItem(const std::wstring& text);
+    void AddItem(const std::wstring& text, DxPlus::Vec2 stampPosition = {});
     void CompleteItem(std::size_t index);
 
     void SetVisible(bool visible);
 
 private:
     std::vector<ChecklistItem> items;
+    std::vector<std::wstring> stampIds;
+    std::vector<std::wstring> stampEffectIds;
 
-    Motion panelMotion;
-
-    DxPlus::Vec2 position{ 30.0f, 100.0f };
-
-    bool isVisible{ true };
+	DxPlus::Vec2 panelPosition{ 0.0f, 0.0f };
+	bool isVisible{ true };
 };

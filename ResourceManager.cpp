@@ -48,20 +48,28 @@ void ResourceManager::LoadAll()
 	LoadSprite(ResourceKeys::SelectMike, L"./Data/Images/Select/mike.png");
 	LoadSprite(ResourceKeys::SelectSabi, L"./Data/Images/Select/sabi.png");
 	LoadSprite(ResourceKeys::SelectKuro, L"./Data/Images/Select/kuro.png");
-
+	LoadSprite(ResourceKeys::TutorialBack, L"./Data/Images/Tutorial/tutorial.png");
+	LoadSprite(ResourceKeys::TutorialStamp, L"./Data/Images/Tutorial/stamp.png");
 
 	// モデルの読み込み
 	LoadModel(ResourceKeys::Model_PlayerMike, L"./Data/Models/Player/mike.mv1");
 	LoadModel(ResourceKeys::Model_PlayerSabi, L"./Data/Models/Player/sabi.mv1");
 	LoadModel(ResourceKeys::Model_PlayerKuro, L"./Data/Models/Player/kuro.mv1");
+	//Animations
+	//LoadModel(ResourceKeys::Model_PlayerAnim_Idle, L"./Data/Models/Player/Animation/player_idle.mv1");
+	LoadModel(ResourceKeys::Model_PlayerAnim_Walk, L"./Data/Models/Player/Animation/player_walk.mv1");
+	LoadModel(ResourceKeys::Model_PlayerAnim_Jump, L"./Data/Models/Player/Animation/player_jump.mv1");
+	LoadModel(ResourceKeys::Model_PlayerAnim_Dodge, L"./Data/Models/Player/Animation/player_dodge.mv1");
+	//LoadModel(ResourceKeys::Model_PlayerAnim_Attack, L"./Data/Models/Player/Animation/player_attack.mv1");
 
 
 	LoadModel(ResourceKeys::Model_Boss, L"./Data/Models/Boss/boss.mv1");
-	LoadModel(ResourceKeys::Model_BossAnim_Idle, L"./Data/Models/Boss/boss_idle.mv1");
-	LoadModel(ResourceKeys::Model_BossAnim_Sippo, L"./Data/Models/Boss/boss_sippo.mv1");
-	LoadModel(ResourceKeys::Model_BossAnim_Damage, L"./Data/Models/Boss/boss_damage.mv1");
-	LoadModel(ResourceKeys::Model_BossAnim_Attck_Hit, L"./Data/Models/Boss/boss_tataku.mv1");
-	LoadModel(ResourceKeys::Model_BossAnim_Die, L"./Data/Models/Boss/boss_zyoubutu.mv1");
+	// Animations
+	LoadModel(ResourceKeys::Model_BossAnim_Idle,		L"./Data/Models/Boss/Animation/boss_idle.mv1");
+	LoadModel(ResourceKeys::Model_BossAnim_Sippo,		L"./Data/Models/Boss/Animation/boss_sippo.mv1");
+	LoadModel(ResourceKeys::Model_BossAnim_Damage,		L"./Data/Models/Boss/Animation/boss_damage.mv1");
+	LoadModel(ResourceKeys::Model_BossAnim_Attck_Hit,	L"./Data/Models/Boss/Animation/boss_tataku.mv1");
+	LoadModel(ResourceKeys::Model_BossAnim_Die,			L"./Data/Models/Boss/Animation/boss_zyoubutu.mv1");
 
 	LoadModel(ResourceKeys::Model_PillarL, L"./Data/Models/stage/PillarL.mv1");
 	LoadModel(ResourceKeys::Model_PillarM, L"./Data/Models/stage/PillarM.mv1");
@@ -79,6 +87,22 @@ void ResourceManager::LoadAll()
 
 	LoadSpriteStudioPlayer(
 		ResourceKeys::SpriteStudio_Gauge,
+		"UI",
+		"./Data/UI/UI.ssbp");
+	LoadSpriteStudioPlayer(
+		ResourceKeys::SpriteStudio_BossDownGauge,
+		"UI",
+		"./Data/UI/UI.ssbp");
+	LoadSpriteStudioPlayer(
+		ResourceKeys::SpriteStudio_BossHealthGauge,
+		"UI",
+		"./Data/UI/UI.ssbp");
+	LoadSpriteStudioPlayer(
+		ResourceKeys::SpriteStudio_PlayerHealthGauge,
+		"UI",
+		"./Data/UI/UI.ssbp");
+	LoadSpriteStudioPlayer(
+		ResourceKeys::SpriteStudio_PlayerUltGauge,
 		"UI",
 		"./Data/UI/UI.ssbp");
 
