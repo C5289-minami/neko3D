@@ -413,7 +413,11 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 		drawModel(preview.GetModelObject());
 	}
 
-
+	// Room
+	for (const auto* allRoom : room.GetAllModelObjects())
+	{
+		drawModel(*allRoom);
+	}
 
 	// Stage
 	drawModel(stage.GetModelObject());
@@ -428,11 +432,7 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 		drawModel(model);
 	}
 
-	// Room
-	for (const auto* allRoom : room.GetAllModelObjects())
-	{
-		drawModel(*allRoom);
-	}
+
 
 	effectManager.Draw();
 	grid.Draw();

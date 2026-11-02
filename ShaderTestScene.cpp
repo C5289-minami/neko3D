@@ -365,6 +365,11 @@ void ShaderTest::DrawImGui()
 			0.0f, 1.0f
 		);
 
+		ImGui::ColorEdit3 (
+			u8"モデルの色",
+			g_toonSettings.modelColor
+		);
+
 		if (ImGui::Button(u8"保存"))
 		{
 			ToonSettingsManager::Save();

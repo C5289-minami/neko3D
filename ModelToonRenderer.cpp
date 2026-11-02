@@ -199,6 +199,11 @@ void ModelToonRenderer::Draw(
 
 void ModelToonRenderer::DrawDepth(const ModelObject& model) const
 {
+	// ”¼“§–¾ƒ‚ƒfƒ‹‚Í•`‰æ‚µ‚È‚¢
+    if (model.GetAlpha() < 1.0f)
+    {
+        return;
+	}
 
     auto it = depthObjectIds_.find(&model);
 
@@ -214,6 +219,11 @@ void ModelToonRenderer::DrawDepth(
     const ModelObject& model,
     int objectId) const
 {
+    // ”¼“§–¾ƒ‚ƒfƒ‹‚Í•`‰æ‚µ‚È‚¢
+    if (model.GetAlpha() < 1.0f)
+    {
+        return;
+    }
     if (depthObjectIdConstantBuffer_ < 0)
     {
         return;
@@ -280,9 +290,7 @@ void ModelToonRenderer::DrawTriangleLists(
 
     if (settings == nullptr) return;
 
-    settings->modelColor[0] = 1.0f;
-    settings->modelColor[1] = 1.0f;
-    settings->modelColor[2] = 1.0f;
+
     settings->modelColor[3] = model.GetAlpha();
 
     UpdateShaderConstantBuffer(toonConstantBuffer_);

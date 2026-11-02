@@ -162,7 +162,7 @@ void GameScene::Update(float deltaTime)
 		Collision::SetModelsBetweenTransparent(
 			cameraDirector_.GetCurrentPose().position,
 			player->GetWorldPosition() + Vec3::Up() * 30.0f,
-			gameContext->GetStage().GetCollision()
+			tutorialCollision_
 		);
 	}
 	else if (GetCurrentGameState() == GameStateType::Battle)
@@ -389,11 +389,14 @@ void GameScene::DrawScene(bool toonEnabled) const
 	}
 
 
+	// BossとPlayer
+	drawModel(boss.GetModelObject());
+	if (drawPlayerShadow_)
+		DrawPlayerShadow();
+	drawModel(player->GetModelObject());
+
 	// Stage
 	drawModel(stage.GetModelObject());
-
-
-
 	for (const auto& pillar : stage.GetPillarModelObjects())
 	{
 		drawModel(pillar);
@@ -403,12 +406,6 @@ void GameScene::DrawScene(bool toonEnabled) const
 	{
 		drawModel(model);
 	}
-	// BossとPlayer
-	drawModel(boss.GetModelObject());
-	if (drawPlayerShadow_)
-		DrawPlayerShadow();
-	drawModel(player->GetModelObject());
-
 
 	effectManager.Draw();
 	modelToonRenderer_.EndPass();

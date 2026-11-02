@@ -52,6 +52,13 @@ bool ToonSettingsManager::Save(const std::string& filePath)
         g_toonSettings.halftoneSettings[3]
     };
 
+    json ["modelColor"] = {
+        g_toonSettings.modelColor[0],
+        g_toonSettings.modelColor[1],
+        g_toonSettings.modelColor[2],
+        g_toonSettings.modelColor[3]
+	};
+
     std::ofstream file(filePath);
 
     if (!file)
@@ -146,6 +153,14 @@ bool ToonSettingsManager::Load(const std::string& filePath)
         }
 	}
 
+    if (json.contains("modelColor"))
+    {
+        for (int i = 0; i < 4; ++i)
+        {
+            g_toonSettings.modelColor[i] =
+                json["modelColor"][i];
+        }
+    }
 
     return true;
 }

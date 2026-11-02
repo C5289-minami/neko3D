@@ -80,6 +80,6 @@ namespace Collision									// ‚ ‚½‚è”»’è—p–¼‘O‹óŠÔ
         const Vec3& start,
         const Vec3& end,
         const ModelCollision& collision,
-		const float alpha = 0.5f
+		const float alpha = 0.7f
     );
 }
