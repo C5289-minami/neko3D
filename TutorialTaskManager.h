@@ -5,6 +5,7 @@
 
 #include "TutorialType.h"
 #include "PlayerActionEvent.h"
+#include "DxPlus/DxPlus.h"
 
 class TutorialChecklist;
 
@@ -26,6 +27,7 @@ public:
     void AddTask(
         TutorialType type,
         const std::wstring& text,
+        DxPlus::Vec2 stampPosition = {},
         float requiredProgress = 1.0f
     );
 
