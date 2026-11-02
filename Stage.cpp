@@ -35,7 +35,7 @@ Stage::Stage() : ActorBase("Stage")
     stageModels_[0].SetModelKey(ResourceKeys::Model_stand_l);
     stageModels_[1].SetModelKey(ResourceKeys::Model_stand_m);
     // 地面の当たり判定に使うモデル
-    stageModel_.SetModelKey(ResourceKeys::Model_StageFbx);
+    stageModel_.SetModelKey(ResourceKeys::Model_Stage);
 
     for (auto& model : stagePillars_) model.SetOwner(*this);
     for (auto& model : stageModels_) model.SetOwner(*this);
@@ -329,25 +329,20 @@ void Stage::Reset()
 
 
     // RefreshCollisionInfo();
-   
+
     // モデルごとに判定の役割を登録する。形・大きさはモデルから取得される。
     collision_.Clear();
     collision_.AddModel(stageModel_, ModelCollision::Surface::Floor);
-   
+
     for (const auto& model : stagePillars_)
         collision_.AddModel(model, ModelCollision::Surface::Pillar);
-    
+
     for (const auto& model : stageModels_)
         collision_.AddModel(model, ModelCollision::Surface::Stand);
-    
-    collision_.Refresh();
-    
-    // 透過モデルの配置情報は毎回リセット
-    alphaModelReady_ = false;
-    // リセット直後は透過効果が残らないように不透明度を初期値へ
-    alphaModel_.SetAlpha(1.0f);
-}
 
+    collision_.Refresh();
+
+}
 void Stage::Update(float deltaTime)
 {
 }
@@ -357,68 +352,16 @@ void Stage::Draw() const
     // 柱と台座をそれぞれ描画
     for (const auto& model : stagePillars_)
     {
-        model.WithParentTransform(GetPosition(), GetRotation()).Draw();
+        model.Draw();
     }
     for (const auto& model : stageModels_)
     {
-        model.WithParentTransform(GetPosition(), GetRotation()).Draw();
+        model.Draw();
     }
 
-    stageModel_.WithParentTransform(GetPosition(), GetRotation()).Draw();
-}
-void Stage::ResetAlphaModel(const Vec3& playerPosition)
-{
-
-    alphaModelReady_ = false;
-
-    // ResourceKeys
-    alphaModel_.SetModelKey(ResourceKeys::Model_StageAlpha);
-    alphaModel_.SetScale({ AlphaStageScale, AlphaStageScale, AlphaStageScale });
-    alphaModel_.SetRotation({});
-    alphaModel_.SetCenter({});
-    alphaModel_.SetAlpha(1.0f);
-
-    const int handle = RM().GetModel(ResourceKeys::Model_StageAlpha);
-    if (handle < 0) return;
-
-    MV1SetPosition(handle, VGet(0.0f, 0.0f, 0.0f));
-    MV1SetRotationXYZ(handle, VGet(0.0f, 0.0f, 0.0f));
-    MV1SetScale(handle, DxConv::ToVECTOR(alphaModel_.GetScale()));// スケールを適用してから範囲を取得するため、先にスケールをセットする。
-    if (MV1SetupReferenceMesh(handle, -1, TRUE, TRUE) < 0) return;
-
-    MV1RefreshReferenceMesh(handle, -1, TRUE, TRUE);
-    const auto mesh = MV1GetReferenceMesh(handle, -1, TRUE, TRUE);
-    const bool hasVertices = mesh.VertexNum > 0;
-
-    //スケール適用後のモデルの範囲として保存する。
-    const Vec3 minimum{ mesh.MinPosition.x, mesh.MinPosition.y, mesh.MinPosition.z };
-    const Vec3 maximum{ mesh.MaxPosition.x, mesh.MaxPosition.y, mesh.MaxPosition.z };
-
-    // 参照メッシュは範囲を取得したら解放する。
-	MV1TerminateReferenceMesh(handle, -1, TRUE, TRUE);// 参照メッシュを解放しないと、モデルの範囲が正しく取得できない場合がある。 へぇ
-    if (!hasVertices) return;
-
-   //Playerの頭の上に出てくる
-    alphaModel_.SetPosition({
-        playerPosition.x - (minimum.x + maximum.x) * 0.5f,
-        playerPosition.y + Const::PLAYER_HEIGHT + AlphaStageHeadClearance - minimum.y,
-        playerPosition.z - (minimum.z + maximum.z) * 0.5f
-    });
-
-    alphaModelReady_ = true;
+    stageModel_.Draw();
 }
 
-void Stage::UpdateAlphaModel(float deltaTime, const Player& player)
-{
-    if (!alphaModelReady_) return;
-
-    alphaModel_.FadeTo(player, AlphaStageFadeSpeed, deltaTime);
-}
-
-void Stage::DrawAlphaModel() const
-{
-    if (alphaModelReady_) alphaModel_.Draw();
-}
 
 
 void Stage::DrawDebugUI()

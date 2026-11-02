@@ -69,6 +69,9 @@ public:
     {
         return tutorialChecklist_;
     }
+
+    // ‰e
+	void SetDrawPlayerShadow(bool draw) { drawPlayerShadow_ = draw; }
 private:
 
     ModelCollision tutorialCollision_;
@@ -78,7 +81,6 @@ private:
     void RenderDepth() const;
 
     std::string transformInitialStatus_;
-    bool debugActorsPaused_{};
 
 	// ƒJƒƒ‰
 	Camera::FreeCamera camera_;
@@ -91,4 +93,7 @@ private:
     TutorialCollisionSettings tutorialCollisionSettings_{};
     void DrawTutorialCollisionSpheres() const;
     TutorialChecklist tutorialChecklist_;
+
+	// Player‚Ì‰e‚ğ•`‰æ‚·‚é
+	bool drawPlayerShadow_{ false };
 };

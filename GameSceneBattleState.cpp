@@ -2,7 +2,6 @@
 #include "GameScene.h"
 #include "GameStateMachine.h"
 #include "GameContext.h"
-#include "DxPlus/Debug.h"
 #include "DxPlus/DxPlus.h"
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
@@ -17,10 +16,6 @@ GameSceneBattleState::GameSceneBattleState(
 
 void GameSceneBattleState::Enter()
 {
-    DxPlus::Debug::SetFormatString(
-        L"GameSceneBattleState::Enter"
-    );
-
     auto* player = gameScene_.GetGameContext()->GetPlayer();
 
     // バトル用カメラへ切り替える
@@ -31,30 +26,55 @@ void GameSceneBattleState::Enter()
 
     player->SetDefMove(false);
     player->StopMove();
-
-	//StatusUI::InitPlayer();
-	//StatusUI::InitBoss();
+    gameScene_.SetDrawPlayerShadow(true);
 }
 
 void GameSceneBattleState::Tick(float deltaTime)
 {
-    DxPlus::Debug::SetFormatString(
-        L"GameSceneBattleState::Tick"
-    );
-
     auto* gameContext = gameScene_.GetGameContext();
 
     auto* player = gameContext->GetPlayer();
     auto& boss = gameContext->GetBoss();
+    auto& stage = gameContext->GetStage();
 
-    // GameTestSceneのplayerCamera_.Update()に相当する処理
+    const Vec3 stageCenterPosition = stage.GetPosition();
+
+
+
+    // Bossの手攻撃判定
+    if (boss.UpdateHandAttack(
+        deltaTime,
+        player->GetWorldPosition(),
+        stage.GetWorldPosition()))
+    {
+        player->TakeDamage();
+    }
+
+    // Playerの攻撃球とBossの手の当たり判定
+    auto& playerStateMachine = player->GetStateMachine();
+
+    if (playerStateMachine.IsAttackBallActive())
+    {
+        const auto& attackBall =
+            playerStateMachine.GetAttackBallSphere();
+
+        if (boss.IsHitByAttackSphere(attackBall))
+        {
+            // 同じ攻撃球による連続ダメージを防止
+            if (playerStateMachine.TryRegisterAttackBallHit())
+            {
+                boss.TakeDamage();
+            }
+        }
+    }
+
+    // カメラ更新
     gameScene_.GetTargetCamera().Update(
         player->GetPosition(),
-        boss.GetPosition(),
+        boss.GetWorldPosition(),
         deltaTime
     );
 
-    // カメラの切り替え・遷移を更新
     gameScene_.GetCameraDirector().Update(deltaTime);
 
     // L3でヒットエフェクトを再生
@@ -69,19 +89,32 @@ void GameSceneBattleState::Tick(float deltaTime)
         );
     }
 
-    // gauge更新
-	StatusUI::SyncStatusBar(L"PlayerHealthGauge", static_cast<float>(player->GetHealth()) / Player::MaxHealth);
-	//StatusUI::SyncStatusBar(L"PlayerUltGauge", player->GetUltProgress());
-	//StatusUI::SyncStatusBar(L"BossHealthGauge", boss.GetHealthProgress());
-	//StatusUI::SyncStatusBar(L"BossDownGauge", boss.GetDownGaugeProgress());
-	StatusUI::SyncStatusBar(L"PlayerUltGauge", static_cast<float>(player->GetHealth()) / Player::MaxHealth);
-	StatusUI::SyncStatusBar(L"BossHealthGauge", static_cast<float>(player->GetHealth()) / Player::MaxHealth);
-	StatusUI::SyncStatusBar(L"BossDownGauge", static_cast<float>(player->GetHealth()) / Player::MaxHealth);
+    // エフェクト更新
+    gameContext->GetEffectManager().Update(deltaTime);
+
+    //// ステータスUI更新
+    //StatusUI::SyncStatusBar(
+    //    L"PlayerHealthGauge",
+    //    static_cast<float>(player->GetHealth()) / Player::MaxHealth
+    //);
+
+    //StatusUI::SyncStatusBar(
+    //    L"PlayerUltGauge",
+    //    player->GetUltProgress()
+    //);
+
+    //StatusUI::SyncStatusBar(
+    //    L"BossHealthGauge",
+    //    boss.GetHealthProgress()
+    //);
+
+    //StatusUI::SyncStatusBar(
+    //    L"BossDownGauge",
+    //    boss.GetDownGaugeProgress()
+    //);
 }
 
 void GameSceneBattleState::Exit()
 {
-    DxPlus::Debug::SetFormatString(
-        L"GameSceneBattleState::Exit"
-    );
+    gameScene_.SetDrawPlayerShadow(false);
 }

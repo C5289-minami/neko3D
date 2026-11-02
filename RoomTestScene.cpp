@@ -88,7 +88,6 @@ void RoomTestScene::Update(float deltaTime)
 	player->Update(deltaTime * 0.5f);
 	player->SetPosition({ player->GetPosition().x, posY, player->GetPosition().z });
 	room.Update(deltaTime);
-	stage.UpdateAlphaModel(deltaTime, *gameContext->GetPlayer());
 
 
 	// --- F2 でシェーダー全体のON/OFFを切り替える ---
@@ -338,7 +337,6 @@ void RoomTestScene::RenderDepth() const
 
 	// Stage
 	modelToonRenderer_.DrawDepth(stage.GetModelObject());
-	modelToonRenderer_.DrawDepth(stage.GetAlphaModelObject());
 
 	for (const auto& pillar : stage.GetPillarModelObjects())
 	{
@@ -397,7 +395,6 @@ void RoomTestScene::DrawScene(bool toonEnabled) const
 
 
 
-		stage.DrawAlphaModel();
 
 		effectManager.Draw();
 		grid.Draw();
@@ -442,7 +439,6 @@ void RoomTestScene::DrawScene(bool toonEnabled) const
 
 	// Stage
 	drawModel(stage.GetModelObject());
-	drawModel(stage.GetAlphaModelObject());
 
 	for (const auto& pillar : stage.GetPillarModelObjects())
 	{

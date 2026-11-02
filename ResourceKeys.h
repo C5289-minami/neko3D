@@ -22,9 +22,10 @@ namespace ResourceKeys
 	//Tutorial
 	inline constexpr const wchar_t* TutorialBack = L"UITutorialBack";
 	inline constexpr const wchar_t* TutorialStamp = L"UITutorialStamp";
-  
+	
+	// status
 	inline constexpr const wchar_t* BossStatusBack = L"UIBossStatusBack";
-	inline constexpr const wchar_t* MikeStatusBack = L"UIMikeStatusBack";//‰¼
+	inline constexpr const wchar_t* MikeStatusBack = L"UIMikeStatusBack";
 
 	// result
 	inline constexpr const wchar_t* ClearResult = L"UIClearResult";
@@ -59,8 +60,7 @@ namespace ResourceKeys
 	inline constexpr const wchar_t* Model_PillarL = L"hashira_l";
 	inline constexpr const wchar_t* Model_PillarM = L"hashira_m";
 	inline constexpr const wchar_t* Model_PillarS = L"hashira_s";
-	inline constexpr const wchar_t* Model_StageFbx = L"Stage";
-	inline constexpr const wchar_t* Model_StageAlpha = L"ModelStageAlpha";
+	inline constexpr const wchar_t* Model_Stage = L"Stage";
 	inline constexpr const wchar_t* Model_stand_l = L"stand_l";
 	inline constexpr const wchar_t* Model_stand_m = L"stand_m";
 	inline constexpr const wchar_t* Model_JumpStand = L"JumpStand";
