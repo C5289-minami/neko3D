@@ -13,9 +13,6 @@ public:
     void Render() const override;
 
 private:
-    ss::Player* m_ssPlayer = nullptr;
-	ss::Player* gaugeAnim = nullptr;
-    SSAnimation::SSGauge gauge;
     int flipTestMode = 0;
 };
 

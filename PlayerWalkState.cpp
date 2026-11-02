@@ -13,8 +13,10 @@ void PlayerWalkState::Enter()
    player_.SetAnimation(PlayerAnimType::Walk, true);
 }
 
-void PlayerWalkState::Tick(float)
+void PlayerWalkState::Tick(float deltaTime)
 {
+    player_.UpdateAnimation(deltaTime);
+
 	const PlayerInput& move = player_.GetInput();
     // ゲージ100で右クリックすると必殺技
     if (move.ultimatePressed && player_.CanUseUltimate())

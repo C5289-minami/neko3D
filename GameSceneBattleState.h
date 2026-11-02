@@ -9,5 +9,6 @@ public:
 	void Enter() override;
 	void Tick(float deltaTime) override;
 	void Exit() override;
+private:
 };
 

@@ -18,12 +18,13 @@ namespace ResourceKeys
 	inline constexpr const Button Button_Pink = { L"UIPinkButton", L"UIPinkHover" };
 	inline constexpr const Button Button_Purple = { L"UIPurpleButton", L"UIPurpleHover" };
 	inline constexpr const Button Button_Rose = { L"UIRoseButton", L"UIRoseHover" };
+  
 	//Tutorial
 	inline constexpr const wchar_t* TutorialBack = L"UITutorialBack";
 	inline constexpr const wchar_t* TutorialStamp = L"UITutorialStamp";
-
+  
 	inline constexpr const wchar_t* BossStatusBack = L"UIBossStatusBack";
-	inline constexpr const wchar_t* MikeStatusBack = L"UIMikeStatusBack";//‰¼
+	inline constexpr const wchar_t* MikeStatusBack = L"UIMikeStatusBack";//â€°Â¼
 
 	// result
 	inline constexpr const wchar_t* ClearResult = L"UIClearResult";
@@ -37,7 +38,12 @@ namespace ResourceKeys
 	inline constexpr const wchar_t* Model_PlayerMike = L"ModelPlayerMike";
 	inline constexpr const wchar_t* Model_PlayerSabi = L"ModelPlayerSabi";
 	inline constexpr const wchar_t* Model_PlayerKuro = L"ModelPlayerKuro";
-
+	// Player Anim
+	inline constexpr const wchar_t* Model_PlayerAnim_Idle = L"PlayerAnimIdle";
+	inline constexpr const wchar_t* Model_PlayerAnim_Walk = L"PlayerAnimWalk";
+	inline constexpr const wchar_t* Model_PlayerAnim_Jump = L"PlayerAnimJump";
+	inline constexpr const wchar_t* Model_PlayerAnim_Dodge = L"PlayerAnimDodge";
+	inline constexpr const wchar_t* Model_PlayerAnim_Attack = L"PlayerAnimAttack";
 
 	inline constexpr const wchar_t* Model_Boss = L"ModelBoss";
 	inline constexpr const wchar_t* Model_Room = L"ModelRoom";
@@ -61,6 +67,11 @@ namespace ResourceKeys
 
 	// ===== SpriteStudio =====
 	inline constexpr const wchar_t* SpriteStudio_Gauge = L"Gauge";
+	inline constexpr const wchar_t* SpriteStudio_PlayerHealthGauge = L"PlayerHealthGauge";
+	inline constexpr const wchar_t* SpriteStudio_PlayerUltGauge = L"PlayerUltGauge";
+	inline constexpr const wchar_t* SpriteStudio_BossHealthGauge = L"BossHealthGauge";
+	inline constexpr const wchar_t* SpriteStudio_BossDownGauge = L"BossDownGauge";
+
 
 	// ===== Effects =====
 	inline constexpr const wchar_t* Effect_Test = L"EffectTest";

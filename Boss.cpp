@@ -34,6 +34,19 @@ void Boss::Init()
 	slamSkill_ = std::make_unique<BossSlamSkill>(*this);
 	tailWhipSkill_ = std::make_unique<BossTailWhipSkill>(*this);
 
+	// AnimationHandleの初期化
+	const int idleModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Idle);
+	idleAnimHandle_ = AnimationHandle::FromIndex(idleModelHandle, 0);
+
+	const int sippoModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Sippo);
+	tailWhipAnimHandle_ = AnimationHandle::FromIndex(sippoModelHandle, 0);
+	const int AtkHitModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Attck_Hit);
+	atkHitAnimHnadle_ = AnimationHandle::FromIndex(AtkHitModelHandle, 0);
+	const int damageModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Damage);
+	damageAnimHandle_ = AnimationHandle::FromIndex(damageModelHandle, 0);
+	const int dieModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Die);
+	dieAnimHandle_ = AnimationHandle::FromIndex(dieModelHandle, 0);
+
 	Reset();
 }
 
@@ -53,24 +66,13 @@ void Boss::Reset()
 	velocity_ = {};
 	activeSkill_ = nullptr;
 	SetAnimation(BossAnimType::Idle, true);
-	animation_.Reset();
+
 	stateMachine_.Initialize();
 
 	attackHands_.clear();
 	attackHands_.resize(2);
 
-	// AnimationHandleの初期化
-	const int idleModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Idle);
-	idleAnimHandle_ = AnimationHandle::FromIndex(idleModelHandle, 0);
 
-	const int sippoModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Sippo);
-	tailWhipAnimHandle_ = AnimationHandle::FromIndex(sippoModelHandle, 0);
-	const int AtkHitModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Attck_Hit);
-	atkHitAnimHnadle_ = AnimationHandle::FromIndex(AtkHitModelHandle, 0);
-	const int damageModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Damage);
-	damageAnimHandle_ = AnimationHandle::FromIndex(damageModelHandle, 0);
-	const int dieModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Die);
-	dieAnimHandle_ = AnimationHandle::FromIndex(dieModelHandle, 0);
 	// 成仏モデルは本体と同じテクスチャを使うため、Bossモデルのテクスチャを共有する。
 	//const int baseModelHandle = RM().GetModel(ResourceKeys::Model_Boss);
 	//const int baseTextureCount = DxLib::MV1GetTextureNum(baseModelHandle);
@@ -86,6 +88,7 @@ void Boss::Reset()
 	//}
 
 	// 初期アニメーションの再生
+	animation_.Reset();
 	animation_.Play3D(
 		RM().GetModel(model_.GetModelKey()),
 		GetAnimationHandle(BossAnimType::Idle),
