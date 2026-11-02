@@ -87,7 +87,9 @@ void TutorialChecklist::Init()
         list = UIM().CreateImageUI(
             L"TutorialList",
             ResourceKeys::TutorialBack,
-            panelPosition);
+            panelPosition,
+            {0,-1}
+        );
     }
 
     if (list)
