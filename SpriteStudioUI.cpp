@@ -64,22 +64,23 @@ void SpriteStudioUI::Update(float deltaTime)
     UIBase::Update(deltaTime);
     if (!player) return;
 
-    player->setPosition(position.x, position.y);
-    player->setScale(scale, scale);
-    player->setAlpha(alpha);
     if (progressControlled)
     {
         const int totalFrames = player->getTotalFrame();
         if (totalFrames > 0)
-        {
             player->setFrameNo(static_cast<int>(std::round(progress * (totalFrames - 1))));
-        }
         player->update(0.0f);
     }
     else
     {
         player->update(deltaTime);
     }
+
+    player->setPosition(
+        position.x + positionOffset.x,
+        position.y + positionOffset.y);
+    player->setScale(scale, scale);
+    player->setAlpha(alpha);
 }
 
 void SpriteStudioUI::Draw()
@@ -88,6 +89,7 @@ void SpriteStudioUI::Draw()
     {
         player->draw();
     }
+
 }
 
 void SpriteStudioUI::SetScale(float targetScale)
@@ -97,4 +99,5 @@ void SpriteStudioUI::SetScale(float targetScale)
     {
         player->setScale(targetScale, targetScale);
     }
+
 }

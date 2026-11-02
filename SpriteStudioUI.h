@@ -19,6 +19,8 @@ public:
     void SetProgress(float progress);
     void PlayAnimation(const std::string& animationName = "");
 
+    void SetPositionOffset(DxPlus::Vec2 offset) { positionOffset = offset; }
+    DxPlus::Vec2 GetPositionOffset() const { return positionOffset; }
 private:
     void StartAnimation(const std::string& animationName);
 
@@ -26,4 +28,5 @@ private:
     ss::Player* player{};
     float progress{};
     bool progressControlled{};
+    DxPlus::Vec2 positionOffset{};
 };

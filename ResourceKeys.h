@@ -18,6 +18,7 @@ namespace ResourceKeys
 	inline constexpr const Button Button_Pink = { L"UIPinkButton", L"UIPinkHover" };
 	inline constexpr const Button Button_Purple = { L"UIPurpleButton", L"UIPurpleHover" };
 	inline constexpr const Button Button_Rose = { L"UIRoseButton", L"UIRoseHover" };
+	// status
 	inline constexpr const wchar_t* BossStatusBack = L"UIBossStatusBack";
 	inline constexpr const wchar_t* MikeStatusBack = L"UIMikeStatusBack";//‰¼
 
@@ -57,6 +58,11 @@ namespace ResourceKeys
 
 	// ===== SpriteStudio =====
 	inline constexpr const wchar_t* SpriteStudio_Gauge = L"Gauge";
+	inline constexpr const wchar_t* SpriteStudio_PlayerHealthGauge = L"PlayerHealthGauge";
+	inline constexpr const wchar_t* SpriteStudio_PlayerUltGauge = L"PlayerUltGauge";
+	inline constexpr const wchar_t* SpriteStudio_BossHealthGauge = L"BossHealthGauge";
+	inline constexpr const wchar_t* SpriteStudio_BossDownGauge = L"BossDownGauge";
+
 
 	// ===== Effects =====
 	inline constexpr const wchar_t* Effect_Test = L"EffectTest";

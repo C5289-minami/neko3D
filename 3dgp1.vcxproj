@@ -215,6 +215,7 @@
     <ClInclude Include="CameraTransition.h" />
     <ClInclude Include="GameSceneGameOverState.h" />
     <ClInclude Include="PlayerActionEvent.h" />
+    <ClInclude Include="StatusUI.h" />
     <ClInclude Include="TutorialChecklist.h" />
     <ClInclude Include="GameBaseState.h" />
     <ClInclude Include="GameSceneBattleState.h" />
@@ -438,6 +439,7 @@
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="StateMachine.cpp" />
     <ClCompile Include="StatusTestScene.cpp" />
+    <ClCompile Include="StatusUI.cpp" />
     <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="ToonSettings.cpp" />
     <ClCompile Include="TutorialChecklist.cpp" />

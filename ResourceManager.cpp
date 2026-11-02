@@ -81,6 +81,22 @@ void ResourceManager::LoadAll()
 		ResourceKeys::SpriteStudio_Gauge,
 		"UI",
 		"./Data/UI/UI.ssbp");
+	LoadSpriteStudioPlayer(
+		ResourceKeys::SpriteStudio_BossDownGauge,
+		"UI",
+		"./Data/UI/UI.ssbp");
+	LoadSpriteStudioPlayer(
+		ResourceKeys::SpriteStudio_BossHealthGauge,
+		"UI",
+		"./Data/UI/UI.ssbp");
+	LoadSpriteStudioPlayer(
+		ResourceKeys::SpriteStudio_PlayerHealthGauge,
+		"UI",
+		"./Data/UI/UI.ssbp");
+	LoadSpriteStudioPlayer(
+		ResourceKeys::SpriteStudio_PlayerUltGauge,
+		"UI",
+		"./Data/UI/UI.ssbp");
 
 	//// サウンドの読み込み
 	SetCreate3DSoundFlag(TRUE);
