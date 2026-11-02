@@ -172,7 +172,49 @@ bool ModelCollision::IsTouchingWalls(const Vec3& feetPosition, const ModelOb& mo
 
 bool ModelCollision::Raycast(const Vec3& start, const Vec3& end, Physics::RayHit& hit) const
 {
-	return RaycastModels(start, end, hit, false);
+	bool found = false;
+
+	for (const auto& entry : models_)
+	{
+		if (entry.handle < 0) continue;
+
+		Physics::RayHit modelHit{};
+		if (!Physics::Raycast(entry.handle, start, end, modelHit)) continue;
+
+		if (!found || modelHit.distance < hit.distance)
+		{
+			hit = modelHit;
+			found = true;
+		}
+	}
+	return found;
+}
+
+std::vector<ModelObject*> ModelCollision::GetModelsHitByRay(
+	const Vec3& start,
+	const Vec3& end) const
+{
+	std::vector<ModelObject*> hitModels;
+
+	for (const auto& entry : models_)
+	{
+		if (entry.handle < 0) continue;
+
+		Physics::RayHit hit{};
+
+		if (!Physics::Raycast(entry.handle, start, end, hit))
+			continue;
+
+		ModelObject* model = const_cast<ModelObject*>(entry.model);
+
+		if (std::find(hitModels.begin(), hitModels.end(), model)
+			== hitModels.end())
+		{
+			hitModels.push_back(model);
+		}
+	}
+
+	return hitModels;
 }
 
 // 対象のモデルに絞ってから、最も近い衝突を選ぶ。

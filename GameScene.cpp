@@ -137,7 +137,6 @@ void GameScene::Update(float deltaTime)
 			// player.Update(deltaTime, stage, stageCenterPosition);
 			player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
 
-		stage.UpdateAlphaModel(deltaTime, *player);
 		boss.Update(deltaTime);
 		// playerとbossの衝突判定
 		//const bool touching = Collision::UpdateModelContact(playerModel, bossModel);　これなし
@@ -154,6 +153,32 @@ void GameScene::Update(float deltaTime)
 
 
 	stateMachine_.Tick(deltaTime);
+
+	// カメラ透過
+	Collision::ResetTransparentModels();// まずリセットしてから、透過対象を追加する
+
+	if (GetCurrentGameState() == GameStateType::Tutorial)
+	{
+		Collision::SetModelsBetweenTransparent(
+			cameraDirector_.GetCurrentPose().position,
+			player->GetWorldPosition() + Vec3::Up() * 30.0f,
+			gameContext->GetStage().GetCollision()
+		);
+	}
+	else if (GetCurrentGameState() == GameStateType::Battle)
+	{
+		Collision::SetModelsBetweenTransparent(
+			cameraDirector_.GetCurrentPose().position, 
+			player->GetWorldPosition() + Vec3::Up() * 30.0f,
+			gameContext->GetStage().GetCollision()
+		);
+
+		Collision::SetModelsBetweenTransparent(
+			cameraDirector_.GetCurrentPose().position,
+			boss.GetWorldPosition() + Vec3::Up() * 320.0f,// 顔が見たいので少し上
+			gameContext->GetStage().GetCollision()
+		);
+	}
 
 	if (GetCurrentGameState() == GameStateType::Tutorial)
 	{
@@ -220,7 +245,6 @@ void GameScene::RenderDepth() const
 
 	// Stage
 	modelToonRenderer_.DrawDepth(stage.GetModelObject());
-	modelToonRenderer_.DrawDepth(stage.GetAlphaModelObject());
 
 	for (const auto& pillar : stage.GetPillarModelObjects())
 	{
@@ -321,7 +345,6 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 
 
-		stage.DrawAlphaModel();
 
 		effectManager.Draw();
 		grid.Draw();
@@ -368,7 +391,6 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 	// Stage
 	drawModel(stage.GetModelObject());
-	drawModel(stage.GetAlphaModelObject());
 
 
 

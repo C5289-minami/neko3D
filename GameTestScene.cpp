@@ -17,39 +17,39 @@
 
 void GameTestScene::Init()
 {
-    gameContext->Reset();
+	gameContext->Reset();
 
 #ifdef _DEBUG
-    Collision::RegisterDebugCanWatch(
-        this, *gameContext->GetPlayer(), gameContext->GetBoss());
+	Collision::RegisterDebugCanWatch(
+		this, *gameContext->GetPlayer(), gameContext->GetBoss());
 #endif
 
-    playerCamera_.Reset();
-    attackSphereDebugRemaining_ = 0.0f;
-    rightMouseWasDown_ = false;
+	playerCamera_.Reset();
+	attackSphereDebugRemaining_ = 0.0f;
+	rightMouseWasDown_ = false;
 
 #ifndef NDEBUG
-    activeCamera_ = nullptr;
-    freeCamera_.Reset();
-    wasFreeCameraToggleDown_ = false;
+	activeCamera_ = nullptr;
+	freeCamera_.Reset();
+	wasFreeCameraToggleDown_ = false;
 #endif
 
-    ToonSettingsManager::Load();
-    OutlineSettingsManager::Load();
+	ToonSettingsManager::Load();
+	OutlineSettingsManager::Load();
 
-    if (!modelToonRenderer_.Init())
-        DxPlus::Utils::FatalError(L"modelToonRendererの初期化失敗");
+	if (!modelToonRenderer_.Init())
+		DxPlus::Utils::FatalError(L"modelToonRendererの初期化失敗");
 
-    if (!shaderEffects_.Init(
-        DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT))
-    {
-        DxPlus::Utils::FatalError(L"shaderEffectsの初期化失敗");
-    }
+	if (!shaderEffects_.Init(
+		DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT))
+	{
+		DxPlus::Utils::FatalError(L"shaderEffectsの初期化失敗");
+	}
 
-    shaderEffects_.GetSettings().toonEnabled = true;
-    shaderEffects_.GetSettings().outlineEnabled = true;
+	shaderEffects_.GetSettings().toonEnabled = true;
+	shaderEffects_.GetSettings().outlineEnabled = true;
 
-    StartFadeIn();
+	StartFadeIn();
 }
 void GameTestScene::Update(float deltaTime)
 {
@@ -59,11 +59,11 @@ void GameTestScene::Update(float deltaTime)
 
 #ifdef _DEBUG
 	const bool rightMouseDown = (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0;
-	
+
 	if (rightMouseDown && !rightMouseWasDown_)
 		attackSphereDebugRemaining_ = 1.0f;
 	rightMouseWasDown_ = rightMouseDown;
-	
+
 	attackSphereDebugRemaining_ = (std::max)(0.0f,
 		attackSphereDebugRemaining_ - (std::max)(0.0f, deltaTime));
 #endif
@@ -114,7 +114,7 @@ void GameTestScene::Update(float deltaTime)
 
 
 		// player.Update(deltaTime, stage, stageCenterPosition);
-		
+
 #ifdef _DEBUG// Shift長押しで通常移動の速度を5倍にする（GameTest限定）
 		const bool debugDash = DxLib::CheckHitKey(KEY_INPUT_LSHIFT) != 0 ||
 			DxLib::CheckHitKey(KEY_INPUT_RSHIFT) != 0;
@@ -127,8 +127,26 @@ void GameTestScene::Update(float deltaTime)
 		// この更新だけに適用し、共有するPlayerを他のシーンへ持ち越さない。
 		player->SetDebugDashEnabled(false);
 #endif
+		// カメラ透過
 
-		stage.UpdateAlphaModel(deltaTime, *player);
+		Collision::ResetTransparentModels();// まずリセットしてから、透過対象を追加する
+
+		Collision::SetModelsBetweenTransparent(
+			playerCamera_.GetPosition(), 
+			player->GetWorldPosition() + Vec3::Up() * 30.0f,
+			gameContext->GetStage().GetCollision(),
+			0.7f
+		);
+
+		Collision::SetModelsBetweenTransparent(
+			playerCamera_.GetPosition(),
+			boss.GetWorldPosition() + Vec3::Up() * 320.0f,// 顔が見たいので少し上
+			gameContext->GetStage().GetCollision(),
+			0.7f
+		);
+
+
+
 		boss.Update(deltaTime);
 
 #ifdef _DEBUG
@@ -185,6 +203,21 @@ void GameTestScene::Update(float deltaTime)
 		finished = true;    // フェード無しの場合は finished を true にしておく必要あり
 		return;
 	}
+
+
+	// --- F2 でシェーダー全体のON/OFFを切り替える ---
+	static bool shaderToggleWasDown = false;
+	const bool shaderToggleDown =
+		DxLib::CheckHitKey(KEY_INPUT_F2) != 0;
+
+	if (shaderToggleDown && !shaderToggleWasDown)
+	{
+		shaderEffects_.SetEnabled(
+			!shaderEffects_.IsEnabled()
+		);
+	}
+
+	shaderToggleWasDown = shaderToggleDown;
 }
 
 void GameTestScene::Render() const
@@ -216,24 +249,24 @@ void GameTestScene::Render() const
 void GameTestScene::DrawImGui()
 {
 #ifndef NDEBUG
-    if (ImGui::Begin("Player Pillar Elevator"))
-    {
-        auto* player = gameContext->GetPlayer();
+	if (ImGui::Begin("Player Pillar Elevator"))
+	{
+		auto* player = gameContext->GetPlayer();
 
 #ifdef _DEBUG
-        ImGui::TextUnformatted(u8"Shift長押し：通常移動の速度を5倍（GameTest限定）");
+		ImGui::TextUnformatted(u8"Shift長押し：通常移動の速度を5倍（GameTest限定）");
 #endif
 
-        ImGui::Text("Pillar contact: %s", player->IsTouchingWall() ? "True" : "False");
+		ImGui::Text("Pillar contact: %s", player->IsTouchingWall() ? "True" : "False");
 
-        ImGui::TextUnformatted(u8"柱のエレベーター");
-        float climbingSpeed = player->GetClimbingSpeed();
-        if (ImGui::DragFloat(u8"上昇速度", &climbingSpeed, 10.0f, 0.0f, 5000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp))
-            player->SetClimbingSpeed(climbingSpeed);
-        if (ImGui::Button(u8"上昇速度を初期値に戻す"))
-            player->ResetClimbingSpeeds();
-        ImGui::TextWrapped(u8"柱の上端 - 10で到着し、小さくジャンプします。");
-   
+		ImGui::TextUnformatted(u8"柱のエレベーター");
+		float climbingSpeed = player->GetClimbingSpeed();
+		if (ImGui::DragFloat(u8"上昇速度", &climbingSpeed, 10.0f, 0.0f, 5000.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp))
+			player->SetClimbingSpeed(climbingSpeed);
+		if (ImGui::Button(u8"上昇速度を初期値に戻す"))
+			player->ResetClimbingSpeeds();
+		ImGui::TextWrapped(u8"柱の上端 - 10で到着し、小さくジャンプします。");
+
 
 		// Boss攻撃テスト
 		ImGui::Separator();
@@ -260,16 +293,16 @@ void GameTestScene::DrawImGui()
 		if (ImGui::Button(u8"TailWhip"))
 			boss.UseSkill(BossAttackType::TailWhip);
 
-        ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
-    }
-    ImGui::End();
+		ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
+	}
+	ImGui::End();
 #endif
 }
 
 void GameTestScene::End()
 {
 #ifdef _DEBUG
-    Collision::UnregisterDebugCanWatch(this);
+	Collision::UnregisterDebugCanWatch(this);
 #endif
 }
 
@@ -293,7 +326,6 @@ void GameTestScene::RenderDepth() const
 	}
 	// Stage
 	modelToonRenderer_.DrawDepth(stage.GetModelObject());
-	modelToonRenderer_.DrawDepth(stage.GetAlphaModelObject());
 
 	for (const auto& pillar : stage.GetPillarModelObjects())
 	{
@@ -344,7 +376,6 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 		{
 			preview.Draw();
 		}
-		stage.DrawAlphaModel();
 		effectManager.Draw();
 		grid.Draw();
 		room.Draw();
@@ -386,7 +417,6 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 
 	// Stage
 	drawModel(stage.GetModelObject());
-	drawModel(stage.GetAlphaModelObject());
 
 	for (const auto& pillar : stage.GetPillarModelObjects())
 	{

@@ -53,7 +53,6 @@ void ShaderTest::Init()
 	// gameContext->GetPlayer().Update(0, gameContext->GetStage());
 	gameContext->GetPlayer()->Update(0, gameContext->GetStage().GetCollision());
 	debugActorsPaused_ = false;
-	gameContext->GetStage().ResetAlphaModel(gameContext->GetPlayer()->GetPosition());
 
 
 }
@@ -105,8 +104,6 @@ void ShaderTest::Update(float deltaTime)
 	player->GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
 	if (updateActors && touching) gameContext->GetPlayer()->TakeDamage();
 
-
-	gameContext->GetStage().UpdateAlphaModel(deltaTime, *gameContext->GetPlayer());
 
 
 	// --- F2 でシェーダー全体のON/OFFを切り替える ---

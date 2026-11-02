@@ -8,6 +8,7 @@ cbuffer ToonSettings : register(b5)
     float4 LightDirection;
     float4 HalftoneColor;
     float4 HalftoneSettings;
+    float4 ModelColor;
 };
 
 struct PS_INPUT
@@ -72,5 +73,8 @@ float4 main(PS_INPUT input) : SV_TARGET
         finalColor = shadow;
     }
 
-    return float4(saturate(finalColor), texColor.a);
+    return float4(
+    saturate(finalColor),
+    texColor.a * ModelColor.a
+);
 }

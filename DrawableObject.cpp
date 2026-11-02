@@ -210,7 +210,9 @@ void ModelObject::Draw(Vec3 masterPos) const
 
     ApplyTransform(masterPos);
     ApplyCollisionColor();
-    MV1DrawModel(handle);
+    DxLib::MV1SetOpacityRate(handle, alpha);
+    DxLib::MV1DrawModel(handle);
+    DxLib::MV1SetOpacityRate(handle, 1.0f);
 }
 
 ModelObject ModelObject::WithParentTransform(

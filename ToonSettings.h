@@ -24,6 +24,11 @@ struct ToonSettings
     float halftoneSettings[4] = {
         8.0f, 0.85f, 0.0f, 0.0f
     };
+
+    // モデルの色・不透明度
+    float modelColor[4] = {
+        1.0f, 1.0f, 1.0f, 1.0f
+    };
 };
 
 inline ToonSettings g_toonSettings;

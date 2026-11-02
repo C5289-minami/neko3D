@@ -40,9 +40,6 @@ void GameSceneBattleState::Tick(float deltaTime)
     const Vec3 stageCenterPosition = stage.GetPosition();
 
 
-    // StageXV
-    stage.UpdateAlphaModel(deltaTime, *player);
-
 
     // Boss‚ÌèUŒ‚”»’è
     if (boss.UpdateHandAttack(

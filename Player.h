@@ -78,17 +78,7 @@ public:
 	void ResetDoubleJumpSpeed();
 	void StartWallJump();
 
-	// 旧仕様の突進ジャンプ用API。
-// 	void StartLungingJump(const Vec3& moveDir);
-//     // 空中にいて、まだ2回目を使っていないときだけ、とびかかれる。
-//     bool CanAirLunge() const { return gravityEnabled_ && !isGrounded_ && !doubleJumpUsed_; }
-//
-//     void StartWallJump();
-//     float GetLungingMoveSpeed() const { return lungingMoveSpeed_; }
-//     float GetLungingJumpSpeed() const { return lungingJumpSpeed_; }
-//     void SetLungingMoveSpeed(float value);
-//     void SetLungingJumpSpeed(float value);
-//     void ResetLungingSpeeds();
+
     // 壁登り・滑り落ち・壁キックは、それぞれ専用の速度を持つ。
     float GetClimbingSpeed() const { return climbingSpeed_; }
     float GetWallSlideSpeed() const { return wallSlideSpeed_; }
@@ -102,6 +92,8 @@ public:
     bool UpdatePillarElevator(float deltaTime);
     void EndPillarElevator();
     void StartPillarExitJump();
+
+
 	//ゲッター・セッター
 	float GetWallJumpMoveSpeed() const { return wallJumpMoveSpeed_; }
 	float GetWallJumpSpeed() const { return wallJumpSpeed_; }

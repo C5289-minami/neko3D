@@ -10,6 +10,7 @@ struct ModelObject;
 class Player;
 class Boss;
 #endif
+class ModelCollision;
 
 namespace Collision									// あたり判定用名前空間
 {
@@ -72,4 +73,13 @@ namespace Collision									// あたり判定用名前空間
     // 球を1個だけ描く共通処理。登録した対象の描画でも同じ処理を使う。
     void DrawDebugSphere(const Sphere& sphere, unsigned int color);
 #endif
+	// 透明化したモデルを元に戻す。シーン更新の最初に呼ぶ。
+    void ResetTransparentModels();
+	// 透明化するモデルを登録する。シーン更新の最後に呼ぶ。
+    void SetModelsBetweenTransparent(
+        const Vec3& start,
+        const Vec3& end,
+        const ModelCollision& collision,
+		const float alpha = 0.5f
+    );
 }
