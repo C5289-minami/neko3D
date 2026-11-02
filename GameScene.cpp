@@ -181,12 +181,6 @@ void GameScene::Render() const
 	{
 		DrawScene(false);
 	}
-
-	// 3Dシーンの描画後にUIを描画
-	if (GetCurrentGameState() == GameStateType::Tutorial)
-	{
-		tutorialChecklist_.Draw();
-	}
 }
 
 void GameScene::DrawImGui()

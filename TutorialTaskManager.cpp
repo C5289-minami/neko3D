@@ -14,6 +14,12 @@ void TutorialTaskManager::Init(TutorialChecklist& checklist)
     checklist_->Init();
 }
 
+void TutorialTaskManager::Update(float deltaTime)
+{
+    if (checklist_)
+        checklist_->Update(deltaTime);
+}
+
 void TutorialTaskManager::AddTask(
     TutorialType type,
     const std::wstring& text,

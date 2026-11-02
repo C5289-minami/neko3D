@@ -36,7 +36,18 @@ public:
 	void SetMoveDistance(float distance) { MoveDistance = std::max(0.0f, distance); UpdateStartMotion(); }
 	float GetMoveDistance() const { return MoveDistance; }
 	// alpha
-	void SetAlpha(int targetAlpha) { finAlpha = std::clamp(targetAlpha, 0, 255); }
+	void SetAlpha(int targetAlpha)
+	{
+		finAlpha = std::clamp(targetAlpha, 0, 255);
+		manualAlpha = false;
+	}
+
+	// 現在の透明度を直接設定する
+	void SetAlphaDirect(int value)
+	{
+		alpha = std::clamp(value, 0, 255);
+		manualAlpha = true;
+	}
 	int GetAlpha() const { return alpha; }
 	void FadeOut(float duration = -1.0f);
 	void FadeIn(float duration = -1.0f);
@@ -88,6 +99,12 @@ public:
 	void SetCenter(DxPlus::Vec2 value) { center = value; }
 	DxPlus::Vec2 GetCenter() const { return center; }
 
+	void SetAngle(float value) { angle = value; }
+	float GetAngle() const { return angle; }
+
+	void SetAngleSpeed(float value) { angleSpeed = value; }
+	float GetAngleSpeed() const { return angleSpeed; }
+
 
 	enum class UIState
 	{
@@ -102,10 +119,13 @@ protected:
 	DxPlus::Vec2 basePosition{};
 	DxPlus::Vec2 center{ 0.5f, 0.5f };
 	float scale{ 1.0f };
+	float angle{};
+	float angleSpeed{};
 	std::wstring key;
 	int alpha{ 255 };
 	int finAlpha{ 255 };
-
+	bool manualAlpha{ false };
+	
 	UIState state{ UIState::Normal };
 	//表示する条件
 	std::function<bool()> displayCondition = []() { return true; };
@@ -116,6 +136,7 @@ protected:
 	float shakeIntensity{};
 	float shakeFrequency{};
 	DxPlus::Vec2 shakeOffset{};
+
 
 	// ===============
 	// 実行時間関連

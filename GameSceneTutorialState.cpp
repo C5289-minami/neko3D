@@ -51,8 +51,6 @@ void GameSceneTutorialState::Enter()
 		taskManager_.AddTask(t.type, t.taskName, t.stampPosition, t.requiredProgress);
 	}
 
-	checklist.SetVisible(true);
-
 	previousPlayerPosition_ = player->GetWorldPosition();
 
 	// カメラを初期位置に設定
@@ -88,6 +86,7 @@ void GameSceneTutorialState::Tick(float deltaTime)
 	movement.y = 0.0f;
 
 	// Walk状態の間だけ時間を加算
+	taskManager_.Update(deltaTime);
 	if (player->GetCurrentState() == PlayerStateType::Walk)
 	{
 		taskManager_.AddProgress(TutorialType::Move, deltaTime);
@@ -112,7 +111,8 @@ void GameSceneTutorialState::Tick(float deltaTime)
 		auto& camera = gameScene_.GetTargetCamera();
 		camera.Initialize(gameScene_.GetCameraDirector().GetCurrentPose());
 
-
+		auto& checklist = gameScene_.GetTutorialChecklist();
+		checklist.SetVisible(true);
 		targetCameraSwitched_ = true;
 	}
 
