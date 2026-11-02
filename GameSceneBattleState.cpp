@@ -26,6 +26,7 @@ void GameSceneBattleState::Enter()
 
     player->SetDefMove(false);
     player->StopMove();
+    gameScene_.SetDrawPlayerShadow(true);
 }
 
 void GameSceneBattleState::Tick(float deltaTime)
@@ -38,18 +39,10 @@ void GameSceneBattleState::Tick(float deltaTime)
 
     const Vec3 stageCenterPosition = stage.GetPosition();
 
-    // Player更新
-    player->Update(
-        deltaTime,
-        stage.GetCollision(),
-        stageCenterPosition
-    );
 
     // Stage更新
     stage.UpdateAlphaModel(deltaTime, *player);
 
-    // Boss更新
-    boss.Update(deltaTime);
 
     // Bossの手攻撃判定
     if (boss.UpdateHandAttack(
@@ -126,4 +119,5 @@ void GameSceneBattleState::Tick(float deltaTime)
 
 void GameSceneBattleState::Exit()
 {
+    gameScene_.SetDrawPlayerShadow(false);
 }

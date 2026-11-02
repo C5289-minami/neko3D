@@ -164,6 +164,7 @@ public:
 	ModelAnimation& GetAnimation() { return animation_; }
 	void UpdateAnimation(float deltaTime);
 
+	Vec3 GetPillarElevatorCenter() const { return elevatorCenter_; }
 private:
     void UpdateMovement(float deltaTime);
 	// 横速度を決めた後、MoveでXYZの速度をまとめて座標に反映する。

@@ -152,6 +152,7 @@ void GameScene::Update(float deltaTime)
 
 	}
 
+
 	stateMachine_.Tick(deltaTime);
 
 	if (GetCurrentGameState() == GameStateType::Tutorial)
@@ -187,7 +188,7 @@ void GameScene::DrawImGui()
 {
 #ifndef NDEBUG
 	ImGui::Begin("GameScene Debug");
-	
+
 	// clear
 	if (ImGui::Button("Clear"))
 	{
@@ -197,7 +198,7 @@ void GameScene::DrawImGui()
 	{
 		stateMachine_.ChangeState(GameStateType::GameOver);
 	}
-	
+
 	ImGui::End();
 #endif
 }
@@ -352,20 +353,11 @@ void GameScene::DrawScene(bool toonEnabled) const
 			}
 		};
 
-
-
-
-	
-
 	// Room
 	for (const auto* allRoom : room.GetAllModelObjects())
 	{
 		drawModel(*allRoom);
 	}
-	// BossとPlayer
-	DrawPlayerShadow();
-	drawModel(boss.GetModelObject());
-	drawModel(player->GetModelObject());
 
 
 	for (const auto& preview : selectPlayers)
@@ -374,12 +366,11 @@ void GameScene::DrawScene(bool toonEnabled) const
 	}
 
 
-	effectManager.Draw();
-	grid.Draw();
-
 	// Stage
 	drawModel(stage.GetModelObject());
 	drawModel(stage.GetAlphaModelObject());
+
+
 
 	for (const auto& pillar : stage.GetPillarModelObjects())
 	{
@@ -390,9 +381,16 @@ void GameScene::DrawScene(bool toonEnabled) const
 	{
 		drawModel(model);
 	}
+	// BossとPlayer
+	drawModel(boss.GetModelObject());
+	if (drawPlayerShadow_)
+		DrawPlayerShadow();
+	drawModel(player->GetModelObject());
 
 
+	effectManager.Draw();
 	modelToonRenderer_.EndPass();
+	effectManager.Draw();
 	player->GetStateMachine().Draw();
 	DrawTutorialCollisionSpheres();
 }
@@ -420,9 +418,19 @@ void GameScene::DrawPlayerShadow() const
 	// 床へのRaycast
 	const Vec3 playerPos = player->GetWorldPosition();
 
+	// Playerの後方へ30移動
+	const float yaw = player->GetYaw();
+	const Vec3 backward(
+		-sinf(yaw) * 30.0f,
+		0.0f,
+		-cosf(yaw) * 30.0f
+	);
+
+	const Vec3 shadowPos = playerPos + backward;
+
 	Physics::RayHit hit{};
 	if (!collision->RaycastDown(
-		playerPos + Vec3::Up() * 50.0f,
+		shadowPos + Vec3::Up() * 50.0f,
 		500.0f,
 		hit))
 	{
@@ -440,7 +448,7 @@ void GameScene::DrawPlayerShadow() const
 
 	DrawOval(
 		x, y,
-		40, 12,
+		80, 18,
 		GetColor(0, 0, 0),
 		TRUE);
 
