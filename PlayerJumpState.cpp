@@ -17,8 +17,9 @@ void PlayerJumpState::Enter()
   
 }
 
-void PlayerJumpState::Tick(float)
+void PlayerJumpState::Tick(float deltaTime)
 {
+	player_.UpdateAnimation(deltaTime);
     const PlayerInput& input = player_.GetInput();
     // 踏み外し直後は通常ジャンプを優先し、猶予後は未使用の二段目を使う。
     if (input.jumpPressed && player_.TryJump())

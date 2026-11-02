@@ -12,6 +12,7 @@
 #include "ObjectTransform.h"
 #include "Consts.h"
 #include "CharSettings.h"
+#include "AnimationHandle.h"
 
 // class Stage;
 
@@ -33,8 +34,6 @@ public:
 	bool IsDamaging() const { return GetCurrentState() == PlayerStateType::Damaging; }
 	PlayerStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }
 	bool TakeDamage();
-
-	void SetAnimation(PlayerAnimType::Type type, bool loop = true);
 
 	// // ステージとの当たり判定込みの更新
 	// void Update(float deltaTime, const Stage& stage, const Vec3& movementCenter = Vec3{});
@@ -155,6 +154,16 @@ public:
 	PlayerStateMachine& GetStateMachine() { return stateMachine_; }
     const PlayerStateMachine& GetStateMachine() const { return stateMachine_; }
 
+	void SetAnimation(
+		PlayerAnimType::Type type,
+		bool loop = true,
+		bool playAfterBlend = true,
+		float blendSeconds = 0.15f
+	);
+	AnimationHandle GetAnimationHandle(PlayerAnimType::Type type) const;
+	ModelAnimation& GetAnimation() { return animation_; }
+	void UpdateAnimation(float deltaTime);
+
 private:
     void UpdateMovement(float deltaTime);
 	// 横速度を決めた後、MoveでXYZの速度をまとめて座標に反映する。
@@ -166,9 +175,6 @@ private:
 
 	int health_{ MaxHealth };
 	ModelObject model_;
-	ModelAnimation animation_;
-	int currentAnimIndex_{ static_cast<int>(PlayerAnimType::Idle) };
-	bool currentAnimLoop_{ true };
 
 	PlayerInput input_;
 	PlayerStateMachine stateMachine_;
@@ -215,4 +221,14 @@ private:
 #endif
 	// キャラクター設定
 	CharData charData;
+
+	// Animations
+	ModelAnimation animation_;
+
+	PlayerAnimType::Type currentAnimType_{ PlayerAnimType::Idle };
+	bool currentAnimLoop_{ true };
+	AnimationHandle idleAnimHandle_;
+	AnimationHandle walkAnimHandle_;
+	AnimationHandle jumpAnimHandle_;
+	AnimationHandle doubleJumpAnimHandle_;
 };
