@@ -32,6 +32,26 @@ namespace Collision
 		return IsHitSphereSphere(sphereA.center, sphereA.radius,
 			sphereB.center, sphereB.radius);
 	}
+	bool IsHitCapsuleSphere(const Capsule& capsule, const Sphere& sphere)
+	{
+		// 球の中心をカプセルの線分に投影し、線分の外なら端点に収める。
+		// 線分の長さが0なら、始点を最近点として扱う。
+		const Vec3 segment = capsule.end - capsule.start;
+		const float segmentLengthSq = segment.LengthSq();
+		float t = 0.0f;
+		if (segmentLengthSq > 0.0f)
+		{
+			t = Vec3::Dot(sphere.center - capsule.start, segment) / segmentLengthSq;
+			if (t < 0.0f) t = 0.0f;
+			if (t > 1.0f) t = 1.0f;
+		}
+		// 線分上の最近点までの距離と、両方の半径で接触を判定する。
+		const Vec3 closestPoint = capsule.start + segment * t;
+
+		const float radiusSum = capsule.radius + sphere.radius;
+
+		return (sphere.center - closestPoint).LengthSq() <= radiusSum * radiusSum;
+	}
 }
 namespace Collision
 {
