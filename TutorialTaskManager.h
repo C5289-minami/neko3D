@@ -24,6 +24,8 @@ class TutorialTaskManager
 public:
     void Init(TutorialChecklist& checklist);
 
+	void Update(float deltaTime);
+
     void AddTask(
         TutorialType type,
         const std::wstring& text,
