@@ -5,6 +5,7 @@
 #include "ModelToonRenderer.h"
 #include "ShaderEffectController.h"
 #include "Camera.h"
+#include "Collision.h"
 
 class GameTestScene final : public Scene
 {
@@ -30,6 +31,9 @@ private:
     // Shader
     ModelToonRenderer modelToonRenderer_{};
     ShaderEffectController shaderEffects_{};
+
+    // 尻尾攻撃のデバッグ描画と本判定で共有するカプセル。
+    Collision::Capsule tailWhipHitCapsule_{};
 
     // Debug
     bool rightMouseWasDown_{};

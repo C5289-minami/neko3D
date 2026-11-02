@@ -448,3 +448,4 @@ FodyWeavers.xsd
 !/tools/effekseer/bin/
 !/tools/effekseer/bin/**
 /3dgp1_debug.exe
+/Player.cpp

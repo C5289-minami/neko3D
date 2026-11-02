@@ -1,4 +1,4 @@
-ï»¿// =============================
+// =============================
 // Gameplay/Actors/Stage.cpp
 // =============================
 #include "Stage.h"
@@ -19,7 +19,7 @@
 
 namespace
 {
-    // é€éè¡¨ç¤ºã™ã‚‹ã‚¹ãƒ†ãƒ¼ã‚¸ãƒ¢ãƒ‡ãƒ«ã®å¤§ãã•ã¨ã€ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼é ­ä¸Šã®ä½™ç™½ã€‚
+    // “§‰ß•\¦‚·‚éƒXƒe[ƒWƒ‚ƒfƒ‹‚Ì‘å‚«‚³‚ÆAƒvƒŒƒCƒ„[“ªã‚Ì—]”’B
     float AlphaStageScale = 0.15f;
     float AlphaStageHeadClearance = 40.0f;
 
@@ -34,7 +34,7 @@ Stage::Stage() : ActorBase("Stage")
 
     stageModels_[0].SetModelKey(ResourceKeys::Model_stand_l);
     stageModels_[1].SetModelKey(ResourceKeys::Model_stand_m);
-    // åœ°é¢ã®å½“ãŸã‚Šåˆ¤å®šã«ä½¿ã†ãƒ¢ãƒ‡ãƒ«
+    // ’n–Ê‚Ì“–‚½‚è”»’è‚Ég‚¤ƒ‚ƒfƒ‹
     stageModel_.SetModelKey(ResourceKeys::Model_StageFbx);
 
     for (auto& model : stagePillars_) model.SetOwner(*this);
@@ -64,15 +64,15 @@ void Stage::Init()
 {
     Reset();
 }
-// æ—§ï¼šStage å°‚ç”¨ã ã£ãŸåˆ¤å®šå‡¦ç†ã€‚ç¾åœ¨ã®å‡¦ç†ã¯ ModelCollision.cpp ã«ã‚ã‚‹ã€‚
-// void Stage::SetupCollisionInfo()//å½“ãŸã‚Šåˆ¤å®šã®ã‚»ãƒƒãƒˆã‚¢ãƒƒãƒ—
+// ‹ŒFStage ê—p‚¾‚Á‚½”»’èˆ—BŒ»İ‚Ìˆ—‚Í ModelCollision.cpp ‚É‚ ‚éB
+// void Stage::SetupCollisionInfo()//“–‚½‚è”»’è‚ÌƒZƒbƒgƒAƒbƒv
 // {
-    // const auto setup = [this](const ModelObject& model)//ãƒ©ãƒ ãƒ€å¼ã§æ›¸ãæ›ãˆã‚Œã‚‹ã‚ˆã†ã«
+    // const auto setup = [this](const ModelObject& model)//ƒ‰ƒ€ƒ_®‚Å‘‚«Š·‚¦‚ê‚é‚æ‚¤‚É
     // {
         // int handle = RM().GetModel(model.GetModelKey());
         // if (handle < 0) return -1;
 
-        // // æç”»å‰ã§ã‚‚ã€ä¿å­˜æ¸ˆã¿ã®é…ç½®ãƒ»å›è»¢ãƒ»æ‹¡å¤§ç‡ã§åˆ¤å®šã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹ã€‚
+        // // •`‰æ‘O‚Å‚àA•Û‘¶Ï‚İ‚Ì”z’uE‰ñ“]EŠg‘å—¦‚Å”»’è‚Å‚«‚é‚æ‚¤‚É‚·‚éB
         // model.WithParentTransform(GetPosition(), GetRotation()).Draw();
 
         // int result = MV1SetupCollInfo(handle, -1, 8, 8, 8);
@@ -90,7 +90,7 @@ void Stage::Init()
     // {
         // stageCollisionHandles_[i] = setup(stageModels_[i]);
     // }
-    // // ã‚³ãƒªã‚¸ãƒ§ãƒ³æƒ…å ±ã¯RMã«ã‚ˆã‚‹MV1DeleteModelæ™‚ã«ãƒ¢ãƒ‡ãƒ«ã¨ä¸€ç·’ã«è§£æ”¾ã•ã‚Œã‚‹ã€‚
+    // // ƒRƒŠƒWƒ‡ƒ“î•ñ‚ÍRM‚É‚æ‚éMV1DeleteModel‚Éƒ‚ƒfƒ‹‚Æˆê‚É‰ğ•ú‚³‚ê‚éB
 // }
 
 // void Stage::RefreshCollisionInfo()
@@ -98,12 +98,12 @@ void Stage::Init()
     // const auto refresh = [this](const ModelObject& model, int handle)
     // {
         // if (handle < 0) return -1;
-        // // ãƒ¢ãƒ‡ãƒ«ãŒè§£æ”¾ãƒ»å·®ã—æ›¿ãˆã•ã‚Œã¦ã„ãŸã‚‰ã€å¤ã„ãƒãƒ³ãƒ‰ãƒ«ã¯ä½¿ã‚ãªã„ã€‚
+        // // ƒ‚ƒfƒ‹‚ª‰ğ•úE·‚µ‘Ö‚¦‚³‚ê‚Ä‚¢‚½‚çAŒÃ‚¢ƒnƒ“ƒhƒ‹‚Íg‚í‚È‚¢B
         // if (RM().GetModel(model.GetModelKey()) != handle) return -1;
 
         // model.WithParentTransform(GetPosition(), GetRotation()).Draw();
 
-		// int result = MV1RefreshCollInfo(handle, -1);// ã‚³ãƒªã‚¸ãƒ§ãƒ³æƒ…å ±ã‚’æ›´æ–°ã™ã‚‹
+		// int result = MV1RefreshCollInfo(handle, -1);// ƒRƒŠƒWƒ‡ƒ“î•ñ‚ğXV‚·‚é
         // if (result < 0) return -1;
 
         // return handle;
@@ -122,7 +122,7 @@ void Stage::Init()
 
 // void Stage::GetCollisionModelHandles(std::vector<int>& handles) const
 // {
-    // // å‘¼ã³å‡ºã—å…ƒã®é…åˆ—ã‚’ã€ç¾åœ¨ä½¿ãˆã‚‹ãƒãƒ³ãƒ‰ãƒ«ã®ä¸€è¦§ã«æ›´æ–°ã™ã‚‹ã€‚
+    // // ŒÄ‚Ño‚µŒ³‚Ì”z—ñ‚ğAŒ»İg‚¦‚éƒnƒ“ƒhƒ‹‚Ìˆê——‚ÉXV‚·‚éB
     // handles.clear();
     // handles.reserve(pillarCollisionHandles_.size() + stageCollisionHandles_.size() + 1);
 
@@ -157,7 +157,7 @@ void Stage::Init()
         // const auto result = MV1CollCheck_Capsule(
             // handle, -1, DxConv::ToVECTOR(capsuleStart), DxConv::ToVECTOR(capsuleEnd), radius);
         // const bool hit = result.HitNum > 0;
-        // // åˆ¤å®šçµæœã®é…åˆ—ã¯ã€å½“ãŸã£ãŸå ´åˆã‚‚å½“ãŸã‚‰ãªã„å ´åˆã‚‚è§£æ”¾ã™ã‚‹ã€‚
+        // // ”»’èŒ‹‰Ê‚Ì”z—ñ‚ÍA“–‚½‚Á‚½ê‡‚à“–‚½‚ç‚È‚¢ê‡‚à‰ğ•ú‚·‚éB
         // MV1CollResultPolyDimTerminate(result);
         // if (hit) return true;
     // }
@@ -170,9 +170,9 @@ void Stage::Init()
     // wallNormal = {};
     // if (wallTopY) *wallTopY = 0.0f;
 
-    // // ç§»å‹•ã®è¡çªåˆ¤å®šã‚ˆã‚Šå°‘ã—åºƒã„ç¯„å›²ã§å´é¢ã‚’æ‹¾ã†ã€‚ä½“ã®é«˜ã•ã¯å¤‰ãˆãªã„ã€‚
+    // // ˆÚ“®‚ÌÕ“Ë”»’è‚æ‚è­‚µL‚¢”ÍˆÍ‚Å‘¤–Ê‚ğE‚¤B‘Ì‚Ì‚‚³‚Í•Ï‚¦‚È‚¢B
     // const float detectionRadius = Const::PLAYER_RADIUS + Const::PLAYER_CLIMB_DETECTION_MARGIN;
-    // // Climbingã®æ™‚è¶³å…ƒãŒä¸Šã«ã‚ã‚‹ã‹ã®åˆ¤å®šã€Œ
+    // // Climbing‚Ì‘«Œ³‚ªã‚É‚ ‚é‚©‚Ì”»’èu
     // const float lowerReach = keepTopContact ? Const::PLAYER_CLIMB_TOP_HOLD_DISTANCE : 0.0f;
     // const Vec3 start = feetPosition + Vec3::Up() * (Const::PLAYER_RADIUS - lowerReach);
     // const Vec3 end = feetPosition + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
@@ -197,7 +197,7 @@ void Stage::Init()
             // const auto& poly = result.Dim[i];
             // const Vec3 normal = DxConv::ToVec3(poly.Normal).Normalized();
 
-            // // å‘ããŒãªã„é¢ã‚„ã€ä¸Šä¸‹ã‚’å‘ã„ãŸé¢ãƒ»æ–œé¢ã¯ä½¿ã‚ãªã„ã€‚
+            // // Œü‚«‚ª‚È‚¢–Ê‚âAã‰º‚ğŒü‚¢‚½–ÊEÎ–Ê‚Íg‚í‚È‚¢B
             // if (normal.LengthSq() == 0.0f || std::abs(normal.y) > 0.01f)
             // {
                 // continue;
@@ -207,17 +207,17 @@ void Stage::Init()
             // float bottom = (std::min)({ poly.Position[0].y, poly.Position[1].y, poly.Position[2].y });
 
 
-            // // è¶³å…ƒãŒä¸Šç«¯ä»˜è¿‘ã«é”ã—ã¦ã„ã‚‹ã‹
+            // // ‘«Œ³‚ªã’[•t‹ß‚É’B‚µ‚Ä‚¢‚é‚©
             // const bool atTop = feetPosition.y >= top - Const::PLAYER_SKIN;
             // if (atTop)
             // {
-                // // é€šå¸¸æ™‚ã¯ã€ã“ã®å´é¢ã‚’å£ã¨ã—ã¦æ‰±ã‚ã‚“
+                // // ’Êí‚ÍA‚±‚Ì‘¤–Ê‚ğ•Ç‚Æ‚µ‚Äˆµ‚í‚ñ
                 // if (!keepTopContact)
                 // {
                     // continue;
                 // }
 
-                // // climbingã§ä¸Šã¾ã§è¨€ã£ãŸã‚‰
+                // // climbing‚Åã‚Ü‚ÅŒ¾‚Á‚½‚ç
                 // const bool aboveTop = feetPosition.y > top + Const::PLAYER_SKIN;
                 // if (aboveTop)
                 // {
@@ -225,30 +225,30 @@ void Stage::Init()
                 // }
             // }
 
-            // // ä½“ã®é«˜ã•ã¨é‡ãªã‚‰ãªã„å´é¢ã¯ä½¿ã‚ãªã„ã€‚
+            // // ‘Ì‚Ì‚‚³‚Æd‚È‚ç‚È‚¢‘¤–Ê‚Íg‚í‚È‚¢B
             // if (headY <= bottom) continue;
 
             // Vec3 outward = Vec3(normal.x, 0.0f, normal.z).Normalized();
             // const float signedDistance = Vec3::Dot(feetPosition - DxConv::ToVec3(poly.Position[0]), outward);
-            // // ãƒ¢ãƒ‡ãƒ«ã®é¢ã®è¡¨è£ã«ã‚ˆã‚‰ãšã€å£ã‹ã‚‰ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¸å‘ãæ³•ç·šã«ãã‚ãˆã‚‹ã€‚
+            // // ƒ‚ƒfƒ‹‚Ì–Ê‚Ì•\— ‚É‚æ‚ç‚¸A•Ç‚©‚çƒvƒŒƒCƒ„[‚ÖŒü‚­–@ü‚É‚»‚ë‚¦‚éB
             // if (signedDistance < 0.0f) outward = -outward;
 
             // const float wallDirection = Vec3::Dot(direction, outward);
             // const float distance = std::abs(signedDistance);
-            // // è§’ã§è¤‡æ•°ã®é¢ã«è§¦ã‚ŒãŸå ´åˆã‚‚ã€å…¥åŠ›ãŒå‘ã‹ã£ã¦ã„ã‚‹é¢ã‚’å„ªå…ˆã™ã‚‹ã€‚
+            // // Šp‚Å•¡”‚Ì–Ê‚ÉG‚ê‚½ê‡‚àA“ü—Í‚ªŒü‚©‚Á‚Ä‚¢‚é–Ê‚ğ—Dæ‚·‚éB
             // if (!foundWall || wallDirection < bestDirection - 0.0001f ||
                 // (std::abs(wallDirection - bestDirection) <= 0.0001f &&
                     // distance < bestDistance))
             // {
-				// wallNormal = outward;           // å£ã®æ³•ç·šã¯ã€ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®é€²è¡Œæ–¹å‘ã«å‘ã‹ã†ã‚ˆã†ã«ãã‚ãˆã‚‹ã€‚
-				// bestDirection = wallDirection;  // å£ã®æ³•ç·šã¨é€²è¡Œæ–¹å‘ã®å†…ç©ãŒæœ€ã‚‚å°ã•ã„é¢ã‚’å„ªå…ˆã™ã‚‹ã€‚
-                // bestDistance = distance;        // å£ã¾ã§ã®è·é›¢ãŒæœ€ã‚‚è¿‘ã„é¢ã‚’å„ªå…ˆã™ã‚‹ã€‚
+				// wallNormal = outward;           // •Ç‚Ì–@ü‚ÍAƒvƒŒƒCƒ„[‚Ìis•ûŒü‚ÉŒü‚©‚¤‚æ‚¤‚É‚»‚ë‚¦‚éB
+				// bestDirection = wallDirection;  // •Ç‚Ì–@ü‚Æis•ûŒü‚Ì“àÏ‚ªÅ‚à¬‚³‚¢–Ê‚ğ—Dæ‚·‚éB
+                // bestDistance = distance;        // •Ç‚Ü‚Å‚Ì‹——£‚ªÅ‚à‹ß‚¢–Ê‚ğ—Dæ‚·‚éB
                 // if (wallTopY) *wallTopY = top;
-				// foundWall = true;               //  å£ã®æ³•ç·šãŒè¦‹ã¤ã‹ã£ãŸã“ã¨ã‚’è¨˜éŒ²ã™ã‚‹ã€‚
+				// foundWall = true;               //  •Ç‚Ì–@ü‚ªŒ©‚Â‚©‚Á‚½‚±‚Æ‚ğ‹L˜^‚·‚éB
             // }
         // }
 
-        // // åˆ¤å®šçµæœã‚’è§£æ”¾ã—ã¦ã‹ã‚‰ã€è¦‹ã¤ã‹ã£ãŸã‹ã©ã†ã‹ã‚’è¿”ã™ã€‚
+        // // ”»’èŒ‹‰Ê‚ğ‰ğ•ú‚µ‚Ä‚©‚çAŒ©‚Â‚©‚Á‚½‚©‚Ç‚¤‚©‚ğ•Ô‚·B
         // MV1CollResultPolyDimTerminate(result);
     // }
     // return foundWall;
@@ -260,10 +260,10 @@ void Stage::Init()
     // Vec3 move{ desiredPosition.x - oldPosition.x, 0.0f, desiredPosition.z - oldPosition.z };
     // Vec3 candidate = desiredPosition;
     // touched = false;
-    // // éš£æ¥ã™ã‚‹æŸ±ã®å´é¢ã‚‚è€ƒæ…®ã—ã¦ã€æ•°å›åˆ¤å®šã—ç›´ã™ã€‚ç§»å‹•é€Ÿåº¦ã®å¢—åŠ ã‚„é€²è¡Œæ–¹å‘ã®è‡ªå‹•è£œæ­£ã¯è¡Œã‚ãªã„ã€‚
+    // // —×Ú‚·‚é’Œ‚Ì‘¤–Ê‚àl—¶‚µ‚ÄA”‰ñ”»’è‚µ’¼‚·BˆÚ“®‘¬“x‚Ì‘‰Á‚âis•ûŒü‚Ì©“®•â³‚Ís‚í‚È‚¢B
     // for (int attempt = 0; attempt < 4; ++attempt)
     // {
-        // //ç§»å‹•ã—ã¦ã‚‚Playerã®å½“ãŸã‚Šåˆ¤å®šã‚’ç½®ã„ã¦ã‚‹
+        // //ˆÚ“®‚µ‚Ä‚àPlayer‚Ì“–‚½‚è”»’è‚ğ’u‚¢‚Ä‚é
         // const Vec3 start = candidate + Vec3::Up() * Const::PLAYER_RADIUS;
         // const Vec3 end = candidate + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
 
@@ -282,16 +282,16 @@ void Stage::Init()
                 // const auto& poly = result.Dim[i];
                 // Vec3 normal = DxConv::ToVec3(poly.Normal).Normalized();
 
-                // if (std::abs(normal.y) > 0.01f) continue; // æŸ±ã®ä¸Šä¸‹é¢ã¨æ–œé¢ã¯å¯¾è±¡å¤–ã«ã™ã‚‹ã€‚
+                // if (std::abs(normal.y) > 0.01f) continue; // ’Œ‚Ìã‰º–Ê‚ÆÎ–Ê‚Í‘ÎÛŠO‚É‚·‚éB
 
                 // float top = (std::max)(poly.Position[0].y,
                     // (std::max)(poly.Position[1].y, poly.Position[2].y));
 
-                // if (candidate.y >= top - Const::PLAYER_SKIN) continue; // æŸ±ã®ä¸Šã«ã„ã‚‹å ´åˆã¯å´é¢ã¨ã®è¡çªã‚’å‡¦ç†ã—ãªã„ã€‚
+                // if (candidate.y >= top - Const::PLAYER_SKIN) continue; // ’Œ‚Ìã‚É‚¢‚éê‡‚Í‘¤–Ê‚Æ‚ÌÕ“Ë‚ğˆ—‚µ‚È‚¢B
 
                 // normal.y = 0.0f;
                 // normal = normal.Normalized();
-				// //å£ã«å‘ã‹ã†ç§»å‹•ã®éš›ã«ã€æœ€ã‚‚å£ã«å‘ã‹ã†æ³•ç·šã‚’æ¡ç”¨ã™ã‚‹ã€‚
+				// //•Ç‚ÉŒü‚©‚¤ˆÚ“®‚ÌÛ‚ÉAÅ‚à•Ç‚ÉŒü‚©‚¤–@ü‚ğÌ—p‚·‚éB
                 // float inward = Vec3::Dot(move, normal);
 
                 // if (inward < mostInward)
@@ -299,23 +299,33 @@ void Stage::Init()
             // }
             // MV1CollResultPolyDimTerminate(result);
         // }
-        // if (wallNormal.LengthSq() == 0.0f) return candidate; // å£ã‹ã‚‰é›¢ã‚Œã‚‹ç§»å‹•ã‚‚å«ã‚€ã€‚
+        // if (wallNormal.LengthSq() == 0.0f) return candidate; // •Ç‚©‚ç—£‚ê‚éˆÚ“®‚àŠÜ‚ŞB
         // touched = true;
 
-        // // å£ã¸å…¥ã‚Šè¾¼ã‚€æˆåˆ†ã ã‘ã‚’å–ã‚Šé™¤ãã€æ¨ªæ–¹å‘ã«å¼¾ãé£›ã°ã•ãªã„ã€‚
+        // // •Ç‚Ö“ü‚è‚Ş¬•ª‚¾‚¯‚ğæ‚èœ‚«A‰¡•ûŒü‚É’e‚«”ò‚Î‚³‚È‚¢B
         // move -= wallNormal * Vec3::Dot(move, wallNormal);
         // candidate = { oldPosition.x + move.x, desiredPosition.y, oldPosition.z + move.z };
     // }
-    // // æœ€å¾Œã®å†åˆ¤å®šã§ã‚‚ç§»å‹•ã§ããªã‘ã‚Œã°ã€ã“ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã®ç§»å‹•å‰ã®æ°´å¹³ä½ç½®ã‚’ç¶­æŒã™ã‚‹ã€‚
+    // // ÅŒã‚ÌÄ”»’è‚Å‚àˆÚ“®‚Å‚«‚È‚¯‚ê‚ÎA‚±‚ÌƒtƒŒ[ƒ€‚ÌˆÚ“®‘O‚Ì…•½ˆÊ’u‚ğˆÛ‚·‚éB
     // return { oldPosition.x, desiredPosition.y, oldPosition.z };
 // }
 
 
+void Stage::UpdateArenaBounds()
+{
+	// ƒXƒe[ƒW°ƒ‚ƒfƒ‹‚ÌŠOü‚Æã–Ê‚ğAUŒ‚”ÍˆÍ‚ÌŠî€‚Æ‚µ‚Ä•Û‘¶‚·‚éB
+	const Collision::Ellipsoid arenaBounds = stageModel_.GetHitEllipsoid();
+	const Vec3 arenaCenter = GetWorldPosition();
+	arenaRadius_ = (std::max)(
+		std::abs(arenaBounds.center.x - arenaCenter.x) + arenaBounds.radii.x,
+		std::abs(arenaBounds.center.z - arenaCenter.z) + arenaBounds.radii.z);
+	arenaSurfaceY_ = arenaBounds.center.y + arenaBounds.radii.y;
+}
 void Stage::Reset()
 {
-    // åˆæœŸä½ç½®ãƒ»å›è»¢ãƒ»æ‹¡å¤§ç‡ã¯JSONãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰èª­ã¿è¾¼ã‚€
+    // ‰ŠúˆÊ’uE‰ñ“]EŠg‘å—¦‚ÍJSONƒtƒ@ƒCƒ‹‚©‚ç“Ç‚İ‚Ş
     MObjs().LoadActorTransform(*this);
-    // ãƒ¢ãƒ‡ãƒ«ã®ãƒ­ãƒ¼ãƒ‰
+    // ƒ‚ƒfƒ‹‚Ìƒ[ƒh
     for (auto& model : stagePillars_)
     {
         model.Load();
@@ -326,11 +336,13 @@ void Stage::Reset()
     }
     stageModel_.Load();
 
+	UpdateArenaBounds();
+
 
 
     // RefreshCollisionInfo();
    
-    // ãƒ¢ãƒ‡ãƒ«ã”ã¨ã«åˆ¤å®šã®å½¹å‰²ã‚’ç™»éŒ²ã™ã‚‹ã€‚å½¢ãƒ»å¤§ãã•ã¯ãƒ¢ãƒ‡ãƒ«ã‹ã‚‰å–å¾—ã•ã‚Œã‚‹ã€‚
+    // ƒ‚ƒfƒ‹‚²‚Æ‚É”»’è‚Ì–ğŠ„‚ğ“o˜^‚·‚éBŒ`E‘å‚«‚³‚Íƒ‚ƒfƒ‹‚©‚çæ“¾‚³‚ê‚éB
     collision_.Clear();
     collision_.AddModel(stageModel_, ModelCollision::Surface::Floor);
    
@@ -342,9 +354,9 @@ void Stage::Reset()
     
     collision_.Refresh();
     
-    // é€éãƒ¢ãƒ‡ãƒ«ã®é…ç½®æƒ…å ±ã¯æ¯å›ãƒªã‚»ãƒƒãƒˆ
+    // “§‰ßƒ‚ƒfƒ‹‚Ì”z’uî•ñ‚Í–ˆ‰ñƒŠƒZƒbƒg
     alphaModelReady_ = false;
-    // ãƒªã‚»ãƒƒãƒˆç›´å¾Œã¯é€éåŠ¹æœãŒæ®‹ã‚‰ãªã„ã‚ˆã†ã«ä¸é€æ˜åº¦ã‚’åˆæœŸå€¤ã¸
+    // ƒŠƒZƒbƒg’¼Œã‚Í“§‰ßŒø‰Ê‚ªc‚ç‚È‚¢‚æ‚¤‚É•s“§–¾“x‚ğ‰Šú’l‚Ö
     alphaModel_.SetAlpha(1.0f);
 }
 
@@ -354,7 +366,7 @@ void Stage::Update(float deltaTime)
 
 void Stage::Draw() const
 {
-    // æŸ±ã¨å°åº§ã‚’ãã‚Œãã‚Œæç”»
+    // ’Œ‚Æ‘äÀ‚ğ‚»‚ê‚¼‚ê•`‰æ
     for (const auto& model : stagePillars_)
     {
         model.WithParentTransform(GetPosition(), GetRotation()).Draw();
@@ -383,22 +395,22 @@ void Stage::ResetAlphaModel(const Vec3& playerPosition)
 
     MV1SetPosition(handle, VGet(0.0f, 0.0f, 0.0f));
     MV1SetRotationXYZ(handle, VGet(0.0f, 0.0f, 0.0f));
-    MV1SetScale(handle, DxConv::ToVECTOR(alphaModel_.GetScale()));// ã‚¹ã‚±ãƒ¼ãƒ«ã‚’é©ç”¨ã—ã¦ã‹ã‚‰ç¯„å›²ã‚’å–å¾—ã™ã‚‹ãŸã‚ã€å…ˆã«ã‚¹ã‚±ãƒ¼ãƒ«ã‚’ã‚»ãƒƒãƒˆã™ã‚‹ã€‚
+    MV1SetScale(handle, DxConv::ToVECTOR(alphaModel_.GetScale()));// ƒXƒP[ƒ‹‚ğ“K—p‚µ‚Ä‚©‚ç”ÍˆÍ‚ğæ“¾‚·‚é‚½‚ßAæ‚ÉƒXƒP[ƒ‹‚ğƒZƒbƒg‚·‚éB
     if (MV1SetupReferenceMesh(handle, -1, TRUE, TRUE) < 0) return;
 
     MV1RefreshReferenceMesh(handle, -1, TRUE, TRUE);
     const auto mesh = MV1GetReferenceMesh(handle, -1, TRUE, TRUE);
     const bool hasVertices = mesh.VertexNum > 0;
 
-    //ã‚¹ã‚±ãƒ¼ãƒ«é©ç”¨å¾Œã®ãƒ¢ãƒ‡ãƒ«ã®ç¯„å›²ã¨ã—ã¦ä¿å­˜ã™ã‚‹ã€‚
+    //ƒXƒP[ƒ‹“K—pŒã‚Ìƒ‚ƒfƒ‹‚Ì”ÍˆÍ‚Æ‚µ‚Ä•Û‘¶‚·‚éB
     const Vec3 minimum{ mesh.MinPosition.x, mesh.MinPosition.y, mesh.MinPosition.z };
     const Vec3 maximum{ mesh.MaxPosition.x, mesh.MaxPosition.y, mesh.MaxPosition.z };
 
-    // å‚ç…§ãƒ¡ãƒƒã‚·ãƒ¥ã¯ç¯„å›²ã‚’å–å¾—ã—ãŸã‚‰è§£æ”¾ã™ã‚‹ã€‚
-	MV1TerminateReferenceMesh(handle, -1, TRUE, TRUE);// å‚ç…§ãƒ¡ãƒƒã‚·ãƒ¥ã‚’è§£æ”¾ã—ãªã„ã¨ã€ãƒ¢ãƒ‡ãƒ«ã®ç¯„å›²ãŒæ­£ã—ãå–å¾—ã§ããªã„å ´åˆãŒã‚ã‚‹ã€‚ ã¸ã‡
+    // QÆƒƒbƒVƒ…‚Í”ÍˆÍ‚ğæ“¾‚µ‚½‚ç‰ğ•ú‚·‚éB
+	MV1TerminateReferenceMesh(handle, -1, TRUE, TRUE);// QÆƒƒbƒVƒ…‚ğ‰ğ•ú‚µ‚È‚¢‚ÆAƒ‚ƒfƒ‹‚Ì”ÍˆÍ‚ª³‚µ‚­æ“¾‚Å‚«‚È‚¢ê‡‚ª‚ ‚éB ‚Ö‚¥
     if (!hasVertices) return;
 
-   //Playerã®é ­ã®ä¸Šã«å‡ºã¦ãã‚‹
+   //Player‚Ì“ª‚Ìã‚Éo‚Ä‚­‚é
     alphaModel_.SetPosition({
         playerPosition.x - (minimum.x + maximum.x) * 0.5f,
         playerPosition.y + Const::PLAYER_HEIGHT + AlphaStageHeadClearance - minimum.y,

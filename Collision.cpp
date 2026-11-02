@@ -348,4 +348,51 @@ void Collision::DrawDebugSphere(const Sphere& sphere, unsigned int color)
 }
 
 
+// カプセルの側面と両端の半球をワイヤーフレームで描画する。
+// start・end・radiusを使い、実際のカプセル判定形状を可視化する。
+void Collision::DrawDebugCapsule(const Capsule& capsule, unsigned int color)
+{
+    if (capsule.radius <= 0.0f) return;
+
+    // 当たり判定と同じ両端・半径のカプセルを半透明で塗り、輪郭線も重ねて見やすくする。
+    DxLib::SetDrawBlendMode(DX_BLENDMODE_ALPHA, 96);
+    DxLib::DrawCapsule3D(
+        DxConv::ToVECTOR(capsule.start),
+        DxConv::ToVECTOR(capsule.end),
+        capsule.radius,
+        16,
+        color,
+        color,
+        TRUE);
+    DxLib::SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+	const Vec3 axis = capsule.end - capsule.start;// カプセルの軸方向ベクトル
+
+	if (axis.LengthSq() <= 1.0e-6f)// 軸の長さがほぼ0なら、球として描画する
+    {
+        DrawDebugSphere({ capsule.start, capsule.radius }, color);
+        return;
+    }
+
+    const Vec3 direction = axis.Normalized();
+    const Vec3 reference = std::fabs(direction.y) < 0.95f ? Vec3::Up() : Vec3{ 1.0f, 0.0f, 0.0f };
+    const Vec3 tangent = Vec3::Cross(direction, reference).Normalized();
+    const Vec3 bitangent = Vec3::Cross(direction, tangent).Normalized();
+    constexpr int ringSegments = 12;
+    constexpr float pi = 3.14159265358979323846f;
+
+    for (int i = 0; i < ringSegments; ++i)
+    {
+        const float angle = 2.0f * pi * i / ringSegments;
+        const float nextAngle = 2.0f * pi * (i + 1) / ringSegments;
+        const Vec3 radial = (tangent * std::cos(angle) + bitangent * std::sin(angle)) * capsule.radius;
+        const Vec3 nextRadial = (tangent * std::cos(nextAngle) + bitangent * std::sin(nextAngle)) * capsule.radius;
+        DxLib::DrawLine3D(DxConv::ToVECTOR(capsule.start + radial), DxConv::ToVECTOR(capsule.end + radial), color);
+        DxLib::DrawLine3D(DxConv::ToVECTOR(capsule.start + radial), DxConv::ToVECTOR(capsule.start + nextRadial), color);
+        DxLib::DrawLine3D(DxConv::ToVECTOR(capsule.end + radial), DxConv::ToVECTOR(capsule.end + nextRadial), color);
+    }
+
+    DrawDebugSphere({ capsule.start, capsule.radius }, color);
+    DrawDebugSphere({ capsule.end, capsule.radius }, color);
+}
 #endif

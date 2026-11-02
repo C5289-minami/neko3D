@@ -42,6 +42,9 @@ public:
 	ModelCollision& GetCollision() { return collision_; }
     const ModelCollision& GetCollision() const { return collision_; }
 
+	float GetArenaRadius() const { return arenaRadius_; }
+	float GetArenaSurfaceY() const { return arenaSurfaceY_; }
+
     void DrawDebugUI();
 
 	// lifecycle
@@ -56,6 +59,7 @@ public:
 	float GetAlphaModelOpacity() const { return alphaModel_.GetAlpha(); }
 
 private:
+    void UpdateArenaBounds();
     // void SetupCollisionInfo();
     // void RefreshCollisionInfo();
 
@@ -78,4 +82,6 @@ private:
 	ModelObject alphaModel_;
 	ModelObject stageModel_;
 	bool alphaModelReady_{};
+	float arenaRadius_{};
+	float arenaSurfaceY_{};
 };

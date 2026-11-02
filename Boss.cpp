@@ -45,7 +45,7 @@ void Boss::Reset()
 	phase_ = BossPhase::Phase1;
 	distance_ = 200.0f;
 	handAttackActive_ = false;
-	// 初期位置・回転・拡大率はJSONファイルから読み込む
+	// JSON設定から位置・回転・スケールを読み込む。
 	MObjs().LoadActorTransform(*this);
 	model_.Load();
 
@@ -59,7 +59,7 @@ void Boss::Reset()
 	attackHands_.clear();
 	attackHands_.resize(2);
 
-	// AnimationHandleの初期化
+	// アニメーションハンドルを初期化する。
 	const int idleModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Idle);
 	idleAnimHandle_ = AnimationHandle::FromIndex(idleModelHandle, 0);
 
@@ -71,7 +71,7 @@ void Boss::Reset()
 	damageAnimHandle_ = AnimationHandle::FromIndex(damageModelHandle, 0);
 	const int dieModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Die);
 	dieAnimHandle_ = AnimationHandle::FromIndex(dieModelHandle, 0);
-	// 成仏モデルは本体と同じテクスチャを使うため、Bossモデルのテクスチャを共有する。
+	// 死亡モデルは本体と同じテクスチャを使うため、Bossモデルのテクスチャを共有する。
 	//const int baseModelHandle = RM().GetModel(ResourceKeys::Model_Boss);
 	//const int baseTextureCount = DxLib::MV1GetTextureNum(baseModelHandle);
 	//const int dieTextureCount = DxLib::MV1GetTextureNum(dieModelHandle);
@@ -85,7 +85,7 @@ void Boss::Reset()
 	//	}
 	//}
 
-	// 初期アニメーションの再生
+	// 初期アニメーションを再生する。
 	animation_.Play3D(
 		RM().GetModel(model_.GetModelKey()),
 		GetAnimationHandle(BossAnimType::Idle),
@@ -98,17 +98,17 @@ void Boss::Reset()
 
 void Boss::TakeDamage(int damaege)
 {
-	// DamageStateをつけてBossを揺らすとか
-	// 一瞬赤くするとかしてもいいかも
-	// ここではやらない
+	// ダメージを受けたらHPを減らす。
+	// その場で停止させ、ひるみ状態へ移行する。
+	// ダメージ処理後にフェーズ移行を確認する。
 
 	health_ -= damaege;
 	velocity_ = {};
 
-	// ここにもし必殺技ならをつける
+	// ダメージを受けたらひるみ状態へ移行する。
 	stateMachine_.ChangeState(BossStateType::flinch);
 
-	// 体力が半分以下ならフェーズ2へ。
+	// HPが最大値の半分以下になるとフェーズ2へ移行する。
 	if (phase_ == BossPhase::Phase1 && health_ <= maxHealth_ / 2)
 		phase_ = BossPhase::Phase2;
 
@@ -122,8 +122,8 @@ void Boss::TakeDamage(int damaege)
 
 void Boss::Update(float deltaTime)
 {
-	// ここでAnimationのUpdateは呼ばない
-	// 速度や指定フレーム移動など管理するため、StateMachineの中で呼ぶ
+	// アニメーション更新はスキルのフェーズ処理側で行う。
+	// 再生区間や攻撃中の動作をスキル側で管理する。
 	stateMachine_.Tick(deltaTime);
 
 	position_ += velocity_ * deltaTime;
@@ -173,7 +173,7 @@ AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 	case BossAnimType::Damage: return damageAnimHandle_;
 	case BossAnimType::Die: return dieAnimHandle_;
 	default:
-		DxPlus::Utils::FatalError(L"BossHandleを取得できませんでした。GetAnimationHandleを確認して");
+		DxPlus::Utils::FatalError(L"アニメーションハンドルを取得できませんでした。GetAnimationHandleを確認してください。");
 		return {};
 	}
 }
@@ -209,6 +209,20 @@ bool Boss::UseSkill(BossAttackType type)
 }
 
 
+bool Boss::IsTailWhipHitActive() const
+{
+	return tailWhipSkill_ != nullptr && tailWhipSkill_->IsHitActive();
+}
+
+Collision::Capsule Boss::GetTailWhipHitCapsule(const Vec3& stageCenter, float stageRadius, float attackHeight) const
+{
+	if (tailWhipSkill_ != nullptr)
+	{
+		return tailWhipSkill_->GetHitCapsule(stageCenter, stageRadius, attackHeight);
+	}
+
+	return Collision::Capsule{};
+}
 void Boss::SetMoveDirection(const Vec3& moveDirection, float speed)
 {
 	Vec3 direction{ moveDirection.x, 0.0f, moveDirection.z };
@@ -265,7 +279,7 @@ float Boss::GetAnimTotalTime(BossAnimType::Type type) const
 	int modelHandle = RM().GetModel(model_.GetModelKey());
 
 	totalFlame = DxLib::MV1GetAnimTotalTime(modelHandle, index);
-	totalTime = totalFlame / Const::ANIM_FPS; // 秒数に変換
+	totalTime = totalFlame / Const::ANIM_FPS; // フレーム数を秒数に変換する。
 	return totalTime;
 }
 
@@ -281,11 +295,11 @@ void Boss::StartHandAttack()
 }
 
 bool Boss::IsHitByAttackSphere(const Collision::Sphere& sphere) const
-{//攻撃の当たり判定を確認する関数
+{
+	// 手攻撃が有効なとき、左右の手の当たり判定を確認する。
 	if (!handAttackActive_) return false;
 
 	for (const AttackData& hand : attackHands_)
-		//攻撃判定の情報を保持する配列をループして確認
 	{
 		if (Collision::IsHitSphereSphere(hand.hitSphere, sphere))
 			return true;
@@ -306,7 +320,8 @@ bool Boss::UpdateHandAttack(
 	attackHands_[0].hitSphere.radius = 50.0f;
 	attackHands_[1].hitSphere.radius = 50.0f;
 
-	Vec3 center = playerPosition + Vec3::Up() * 30.0f;// プレイヤーの頭上30.0fの位置を中心にする
+	// プレイヤーの位置より30上を中心として扱う。
+	Vec3 center = playerPosition + Vec3::Up() * 30.0f;
 	if (counter_ < 3.0f)
 	{
 		oldPos = center;
@@ -323,15 +338,14 @@ bool Boss::UpdateHandAttack(
 		}
 	}
 
-	// ステージ中心から、狙う位置へ向かう方向を求める。
+	// ステージ中心からプレイヤー位置へ向かう水平ベクトルを求める。
 	Vec3 outward = oldPos - stagePosition;
 	outward.y = 0.0f;
-	float radius = outward.Length();// ステージ中心から狙う位置までの距離
+	float radius = outward.Length(); // ステージ中心からプレイヤー位置までの水平距離。
 	if (radius < 0.001f) return false;
-	outward /= radius;// 正規化
+	outward /= radius; // ベクトルを正規化する。
 
-	// 同じ円周の左右に置いて、間隔が縮まると狙う位置へ近づく。
-
+	// 円周上の左右に手を配置し、攻撃の進行に合わせて動かす。
 	Vec3 right{ outward.z, 0.0f, -outward.x };
 	float angle = distance_ / radius;
 
@@ -346,17 +360,16 @@ bool Boss::UpdateHandAttack(
 
 	for (AttackData& hand : attackHands_)
 	{
-		if (!hand.isHit)continue;
+		if (!hand.isHit) continue;
 
-		if (Collision::IsHitSphereSphere(hand.hitSphere, Collision::Sphere{ center, 30.0f }))// プレイヤーの当たり判定は半径30.0fの球と仮定
+		// プレイヤーは半径30の球として当たり判定する。
+		if (Collision::IsHitSphereSphere(hand.hitSphere, Collision::Sphere{ center, 30.0f }))
 		{
 			attackHands_[0].isHit = false;
 			attackHands_[1].isHit = false;
 			DxPlus::Debug::SetFormatString(L"Hit by Boss Hand Attack!");
 			return true;
-
 		}
-
 	}
 	return false;
 }

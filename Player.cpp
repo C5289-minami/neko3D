@@ -146,7 +146,7 @@ void Player::SetModelKey(const std::wstring& key)
 	model_.SetModelType(ModelType::Bone);
 
 	animation_.Reset();
-
+ 
 	currentAnimIndex_ = static_cast<int>(PlayerAnimType::Idle);
 	currentAnimLoop_ = true;
 

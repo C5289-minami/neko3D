@@ -85,6 +85,9 @@ public:
 
 	// Skill
 	bool UseSkill(BossAttackType type);
+
+	bool IsTailWhipHitActive() const;
+	Collision::Capsule GetTailWhipHitCapsule(const Vec3& stageCenter, float stageRadius, float attackHeight) const;
 private:
 	ModelObject model_{};
 	Vec3 velocity_{};
