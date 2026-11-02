@@ -2,6 +2,7 @@
 
 #include "BossAttackType.h"
 #include "BossPoseSkill.h"
+#include "Consts.h"
 #include "Collision.h"
 #include "DxLib.h"
 
@@ -142,8 +143,8 @@ private:
 		bool isHit{};
 	};
 
-	static constexpr float InitialArcDistance = 200.0f;
-	static constexpr float HandHitRadius = 50.0f;
+	static constexpr float InitialArcDistance = Const::BOSS_BETWEEN_HAND_ATTACK_SIDE;
+	static constexpr float HandHitRadius = Const::BOSS_HAND_ATTACK_HIT_RADIUS;
 	static constexpr float PlayerCenterHeight = 30.0f;
 	static constexpr float PlayerHitRadius = 30.0f;
 	static constexpr float FollowTime = 3.0f;
