@@ -199,12 +199,12 @@ void Player::SetModelKey(const std::wstring& key)
 
 	animation_.Reset();
  
-	currentAnimIndex_ = static_cast<int>(PlayerAnimType::Idle);
+	currentAnimType_ = PlayerAnimType::Idle;
 	currentAnimLoop_ = true;
 
 	animation_.Play3D(
 		modelHandle,
-		currentAnimIndex_,
+		GetAnimationHandle(currentAnimType_),
 		currentAnimLoop_,
 		Const::ANIM_FPS,
 		0.0f
