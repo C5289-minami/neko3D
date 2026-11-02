@@ -19,8 +19,8 @@ namespace Const
     constexpr float PLAYER_ELEVATOR_TOP_OFFSET = 10.0f;
     constexpr float PLAYER_ELEVATOR_EXIT_JUMP_SPEED = 350.0f;
     
-    constexpr float PLAYER_JUMP_SPEED = 1000.0f;
-    constexpr float PLAYER_MOVE_SPEED = 200.0f;
+    constexpr float PLAYER_JUMP_SPEED = 1000.0f*0.7;
+    constexpr float PLAYER_MOVE_SPEED = 200.0f*1.5;
     // 突進ジャンプの仮の速度
     // constexpr float PLAYER_LUNGING_MOVE_SPEED = 600.0f;
     constexpr float PLAYER_DOUBLE_JUMP_SPEED = 800.0f;
