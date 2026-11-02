@@ -26,12 +26,21 @@ namespace Collision									// あたり判定用名前空間
 	//モデルのコンタクトを更新し、接触している間は両方のモデルをハイライト表示する。
     bool UpdateModelContact(ModelObject& a, ModelObject& b);
 
-	struct Sphere									// 球のあたり判定情報
+	struct Capsule
 	{
-		Vec3 center{};								// 中心座標
-		float radius{};							// 半径
+		Vec3 start{};
+		Vec3 end{};
+		float radius{};
+	};
+
+	struct Sphere							// 球のあたり判定情報
+	{
+		Vec3 center{};						// 中心座標
+		float radius{};					    // 半径
         Vec3 rotate{};                      //角度
 	};
+
+	bool IsHitCapsuleSphere(const Capsule& capsule, const Sphere& sphere);
 
 	bool IsHitSphereSphere(							// 球同士のあたり判定
 		const Vec3& centerA, float radiusA,

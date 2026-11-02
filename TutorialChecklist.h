@@ -16,11 +16,10 @@
 struct ChecklistItem
 {
     std::wstring text;
+    DxPlus::Vec2 stampPosition{};
     bool completed{ false };
 
     float checkScale{ 0.0f };
-
-    Motion checkMotion;
 };
 
 class TutorialChecklist
@@ -30,17 +29,15 @@ public:
     void Update(float deltaTime);
     void Draw() const;
 
-    void AddItem(const std::wstring& text);
+    void AddItem(const std::wstring& text, DxPlus::Vec2 stampPosition = {});
     void CompleteItem(std::size_t index);
 
     void SetVisible(bool visible);
 
 private:
     std::vector<ChecklistItem> items;
+    std::vector<std::wstring> stampIds;
 
-    Motion panelMotion;
-
-    DxPlus::Vec2 position{ 30.0f, 100.0f };
-
-    bool isVisible{ true };
+	DxPlus::Vec2 panelPosition{ 0.0f, 0.0f };
+	bool isVisible{ true };
 };

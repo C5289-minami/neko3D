@@ -48,7 +48,8 @@ void ResourceManager::LoadAll()
 	LoadSprite(ResourceKeys::SelectMike, L"./Data/Images/Select/mike.png");
 	LoadSprite(ResourceKeys::SelectSabi, L"./Data/Images/Select/sabi.png");
 	LoadSprite(ResourceKeys::SelectKuro, L"./Data/Images/Select/kuro.png");
-
+	LoadSprite(ResourceKeys::TutorialBack, L"./Data/Images/Tutorial/tutorial.png");
+	LoadSprite(ResourceKeys::TutorialStamp, L"./Data/Images/Tutorial/stamp.png");
 
 	// モデルの読み込み
 	LoadModel(ResourceKeys::Model_PlayerMike, L"./Data/Models/Player/mike.mv1");

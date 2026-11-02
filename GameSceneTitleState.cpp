@@ -58,6 +58,7 @@ void GameSceneTitleState::Enter()
 		startButton->SetTextScale(1.5f);
 		startButton->SetText(L"スタート");
 
+
     }
 
     if (!UIM().GetButtonUI(L"Game.ExitButton"))
@@ -78,6 +79,16 @@ void GameSceneTitleState::Enter()
     }
 	gameScene_.GetCameraDirector().SetPoseImmediate(CObjs().GetCameraPose("Title"));
 
+
+
+    selectedIndex_ = 0;
+
+    if (auto* start = UIM().GetButtonUI(L"Game.StartButton"))
+        start->SetSelected(true);
+
+    if (auto* exit = UIM().GetButtonUI(L"Game.ExitButton"))
+        exit->SetSelected(false);
+
 }
 void GameSceneTitleState::Tick(float deltaTime)
 {
@@ -85,10 +96,31 @@ void GameSceneTitleState::Tick(float deltaTime)
     gameScene_.UpdateStateCamera(deltaTime, "Title");
 
     using namespace DxPlus::Input;
-    bool enter = (GetButtonDown(PLAYER1)& BUTTON_START);
-    if (enter)
+
+    if (GetButtonDown(PLAYER1) & BUTTON_UP)
+        selectedIndex_ = 0;
+
+    if (GetButtonDown(PLAYER1) & BUTTON_DOWN)
+        selectedIndex_ = 1;
+
+    if (auto* start = UIM().GetButtonUI(L"Game.StartButton"))
+        start->SetSelected(selectedIndex_ == 0);
+
+    if (auto* exit = UIM().GetButtonUI(L"Game.ExitButton"))
+        exit->SetSelected(selectedIndex_ == 1);
+
+    if (GetButtonDown(PLAYER1) & BUTTON_START)
     {
-        stateMachine_.ChangeState(GameStateType::Select);
+        if (selectedIndex_ == 0)
+        {
+            if (auto* start = UIM().GetButtonUI(L"Game.StartButton"))
+                start->Trigger();
+        }
+        else
+        {
+            if (auto* exit = UIM().GetButtonUI(L"Game.ExitButton"))
+                exit->Trigger();
+        }
     }
 }
 
