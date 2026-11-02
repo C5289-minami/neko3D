@@ -148,19 +148,14 @@ void GameTestScene::Update(float deltaTime)
 		
 		if (tailWhipPlayerHit)
 			player->TakeDamage();
-
-#ifdef _DEBUG
-		// 1を押したら、両手攻撃を最初から試す。
-		if (GetButtonDown(PLAYER1) & BUTTON_1)
-		{
-			boss.StartHandAttack();
-		}
 		if (boss.UpdateHandAttack(deltaTime,
 			player->GetWorldPosition(),
 			stage.GetWorldPosition()))
 		{
 			player->TakeDamage();
 		}
+
+#ifdef _DEBUG
 		auto& playerStateMachine = player->GetStateMachine();
 		if (playerStateMachine.IsAttackBallActive()) // 攻撃球が飛んでいるか
 		{
@@ -227,7 +222,7 @@ void GameTestScene::Render() const
 
 #ifdef _DEBUG
 	(activeCamera_ ? activeCamera_ : &playerCamera_)->ApplyCamera();
-	gameContext->GetBoss().DrawHandAttackDebug();
+	gameContext->GetBoss().DrawClapAttackDebug();
 
 	auto& boss = gameContext->GetBoss();
 	auto* player = gameContext->GetPlayer();

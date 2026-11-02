@@ -10,7 +10,6 @@
 #include "BossAnimType.h"
 #include "ActorBase.h"
 #include "Collision.h"
-#include<vector>
 #include <memory>
 #include "BossAttackType.h"
 
@@ -23,14 +22,6 @@ enum class BossPhase
 class BossClapSkill;
 class BossSlamSkill;
 class BossTailWhipSkill;
-
-
-struct AttackData
-{
-	Collision::Sphere hitSphere;
-	bool isHit{ false };
-};
-
 
 class Boss : public ActorBase
 {
@@ -69,14 +60,13 @@ public:
 	);
 	float GetAnimTotalTime(BossAnimType::Type type) const;
 
-	void StartHandAttack();
 	bool UpdateHandAttack(float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition);
 	bool IsHitByAttackSphere(const Collision::Sphere& sphere) const;
 	int GetHealth() const { return health_; }
 	BossPhase GetPhase() const { return phase_; }
 	void TakeDamage(int damage = 1);
 #ifdef _DEBUG
-	void DrawHandAttackDebug() const;
+	void DrawClapAttackDebug() const;
 #endif
 
 	AnimationHandle GetAnimationHandle(BossAnimType::Type type) const;
@@ -103,11 +93,6 @@ private:
 	float maxDownGauge_{ 100.0f };
 	float attackPower_{ 10.0f };
 
-	float counter_{ 0.0f };
-	float distance_{ 200.0f };
-	bool handAttackActive_{ false };
-	Vec3 oldPos{};
-	std::vector<AttackData> attackHands_{};// 攻撃判定の情報を保持
 
 	// アニメーション関連
 	ModelAnimation animation_;

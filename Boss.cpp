@@ -40,11 +40,8 @@ void Boss::Init()
 void Boss::Reset()
 {
 
-	counter_ = 0.0f;
 	health_ = maxHealth_;
 	phase_ = BossPhase::Phase1;
-	distance_ = 200.0f;
-	handAttackActive_ = false;
 	// JSON設定から位置・回転・スケールを読み込む。
 	MObjs().LoadActorTransform(*this);
 	model_.Load();
@@ -55,9 +52,7 @@ void Boss::Reset()
 	SetAnimation(BossAnimType::Idle, true);
 	animation_.Reset();
 	stateMachine_.Initialize();
-
-	attackHands_.clear();
-	attackHands_.resize(2);
+	if (clapSkill_ != nullptr) clapSkill_->Reset();
 
 	// アニメーションハンドルを初期化する。
 	const int idleModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Idle);
@@ -137,25 +132,13 @@ void Boss::Draw() const
 }
 
 #ifdef _DEBUG
-void Boss::DrawHandAttackDebug() const
+void Boss::DrawClapAttackDebug() const
 {
-	if (!handAttackActive_) return;
-
-	DxLib::SetUseZBuffer3D(FALSE);
-	DxLib::SetWriteZBuffer3D(FALSE);
-
-	for (std::size_t i = 0; i < attackHands_.size(); ++i)
-	{
-		const unsigned int color = i == 0
-			? DxLib::GetColor(80, 220, 255)
-			: DxLib::GetColor(255, 120, 80);
-		Collision::DrawDebugSphere(attackHands_[i].hitSphere, color);
-	}
-
-	DxLib::SetUseZBuffer3D(TRUE);
-	DxLib::SetWriteZBuffer3D(TRUE);
+	if (clapSkill_ != nullptr)
+		clapSkill_->DrawDebug();
 }
 #endif
+
 void Boss::UpdateAnimation(float deltaTime)
 {
 	animation_.Update(deltaTime);
@@ -187,6 +170,7 @@ bool Boss::UseSkill(BossAttackType type)
 	{
 	case BossAttackType::Clap:
 		clapSkill_->Reset();
+		clapSkill_->StartHandAttack();
 		activeSkill_ = clapSkill_.get();
 		break;
 
@@ -283,93 +267,13 @@ float Boss::GetAnimTotalTime(BossAnimType::Type type) const
 	return totalTime;
 }
 
-void Boss::StartHandAttack()
-{
-	counter_ = 0.0f;
-	distance_ = 200.0f;
-	handAttackActive_ = true;
-	for (AttackData& hand : attackHands_)
-	{
-		hand.isHit = true;
-	}
-}
 
 bool Boss::IsHitByAttackSphere(const Collision::Sphere& sphere) const
 {
-	// 手攻撃が有効なとき、左右の手の当たり判定を確認する。
-	if (!handAttackActive_) return false;
-
-	for (const AttackData& hand : attackHands_)
-	{
-		if (Collision::IsHitSphereSphere(hand.hitSphere, sphere))
-			return true;
-	}
-	return false;
+	return clapSkill_ != nullptr && clapSkill_->IsHitByAttackSphere(sphere);
 }
 
-bool Boss::UpdateHandAttack(
-	float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition)
+bool Boss::UpdateHandAttack(float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition)
 {
-	if (!handAttackActive_) return false;
-	if (distance_ <= 0.0f)
-	{
-		handAttackActive_ = false;
-		return false;
-	}
-
-	attackHands_[0].hitSphere.radius = 50.0f;
-	attackHands_[1].hitSphere.radius = 50.0f;
-
-	// プレイヤーの位置より30上を中心として扱う。
-	Vec3 center = playerPosition + Vec3::Up() * 30.0f;
-	if (counter_ < 3.0f)
-	{
-		oldPos = center;
-	}
-
-	counter_ += deltaTime;
-	if (counter_ >= 3.0f)
-	{
-		distance_ -= 600.0f * deltaTime;
-
-		if (distance_ < 0.0f)
-		{
-			distance_ = 0.0f;
-		}
-	}
-
-	// ステージ中心からプレイヤー位置へ向かう水平ベクトルを求める。
-	Vec3 outward = oldPos - stagePosition;
-	outward.y = 0.0f;
-	float radius = outward.Length(); // ステージ中心からプレイヤー位置までの水平距離。
-	if (radius < 0.001f) return false;
-	outward /= radius; // ベクトルを正規化する。
-
-	// 円周上の左右に手を配置し、攻撃の進行に合わせて動かす。
-	Vec3 right{ outward.z, 0.0f, -outward.x };
-	float angle = distance_ / radius;
-
-	Vec3 circleCenter{ stagePosition.x, oldPos.y, stagePosition.z };
-	Vec3 front = outward * std::cos(angle);
-	Vec3 side = right * std::sin(angle);
-
-	attackHands_[0].hitSphere.center = circleCenter + (front - side) * radius;
-	attackHands_[1].hitSphere.center = circleCenter + (front + side) * radius;
-
-	if (counter_ < 3.0f) return false;
-
-	for (AttackData& hand : attackHands_)
-	{
-		if (!hand.isHit) continue;
-
-		// プレイヤーは半径30の球として当たり判定する。
-		if (Collision::IsHitSphereSphere(hand.hitSphere, Collision::Sphere{ center, 30.0f }))
-		{
-			attackHands_[0].isHit = false;
-			attackHands_[1].isHit = false;
-			DxPlus::Debug::SetFormatString(L"Hit by Boss Hand Attack!");
-			return true;
-		}
-	}
-	return false;
+	return clapSkill_ != nullptr && clapSkill_->UpdateHandAttack(deltaTime, playerPosition, stagePosition);
 }
