@@ -14,6 +14,7 @@ Room::Room()
 	roomModel_.SetModelKey(ResourceKeys::Model_Room);
 	pillar1_.SetModelKey(ResourceKeys::Model_PillarM);
 	pillar2_.SetModelKey(ResourceKeys::Model_PillarM);
+	chairModel_.SetModelKey(ResourceKeys::Model_Chair);
 
 	for (auto& stand: this->GetJumpStands())
 	{
@@ -30,6 +31,7 @@ Room::Room()
 	roomModel_.SetOwner(*this);
 	pillar1_.SetOwner(*this);
 	pillar2_.SetOwner(*this);
+	chairModel_.SetOwner(*this);
 	basket_.SetOwner(*this);
 
 	// •”‰®
@@ -38,8 +40,11 @@ Room::Room()
 
 	pillar1_.SetObjectId("room_pillar1");
 	pillar2_.SetObjectId("room_pillar2");
+	chairModel_.SetObjectId("room_chair");
 	pillar1_.SetObjectName("Room Pillar1");
 	pillar2_.SetObjectName("Room Pillar2");
+	chairModel_.SetObjectName("Room Chair");
+
 
 	// ’á‚¢ƒWƒƒƒ“ƒv‘ä
 	lowJumpStand_.GetJumpStandModel().SetObjectId("low_jump_stand");
@@ -74,6 +79,7 @@ void Room::Reset()
 	roomModel_.Load();
 	pillar1_.Load();
 	pillar2_.Load();
+	chairModel_.Load();
 	
 	MObjs().LoadActorTransform(basket_);
 
@@ -95,6 +101,7 @@ void Room::Draw() const
 	roomModel_.Draw();
 	pillar1_.Draw();
 	pillar2_.Draw();
+	chairModel_.Draw();
 
 	lowJumpStand_.Draw();
 	mediumJumpStand_.Draw();

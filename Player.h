@@ -101,6 +101,7 @@ public:
 	//ゲッター・セッター
 	float GetWallJumpMoveSpeed() const { return wallJumpMoveSpeed_; }
 	float GetWallJumpSpeed() const { return wallJumpSpeed_; }
+	Vec3& GetVelocity() { return velocity_; }
 	void SetWallJumpMoveSpeed(float value);
 	void SetWallJumpSpeed(float value);
 	void ResetWallJumpSpeeds();

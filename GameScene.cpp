@@ -137,7 +137,7 @@ void GameScene::Update(float deltaTime)
 			// player.Update(deltaTime, stage, stageCenterPosition);
 			player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
 
-		boss.Update(deltaTime);
+		boss.Update(deltaTime, player->GetWorldPosition());
 		// playerとbossの衝突判定
 		//const bool touching = Collision::UpdateModelContact(playerModel, bossModel);　これなし
 		//if (touching)
@@ -175,7 +175,7 @@ void GameScene::Update(float deltaTime)
 
 		Collision::SetModelsBetweenTransparent(
 			cameraDirector_.GetCurrentPose().position,
-			boss.GetWorldPosition() + Vec3::Up() * 320.0f,// 顔が見たいので少し上
+			boss.GetWorldPosition() + Vec3::Up() * 600.0f,// 顔が見たいので少し上
 			gameContext->GetStage().GetCollision()
 		);
 	}

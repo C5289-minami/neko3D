@@ -18,10 +18,12 @@ namespace
 	};
 	task tasks[] =
 	{
-		{ TutorialType::Move,		L"3秒移動する",			DxPlus::Vec2(0.0f, -452.5f + 271.0f),3.0f },
-		{ TutorialType::Jump,		L"ジャンプする",		DxPlus::Vec2(0.0f, -452.5f + 397.0f) },
-		{ TutorialType::DoubleJump,	L"二段ジャンプする",	DxPlus::Vec2(0.0f, -452.5f + 532.0f) },
-		{ TutorialType::Climb,		L"柱を登る",			DxPlus::Vec2(0.0f, -452.5f + 643.0f) }
+		{ TutorialType::Move,		L"3秒移動する",			DxPlus::Vec2(0.0f, -452.5f + 222.0f),3.0f },
+		{ TutorialType::Jump,		L"ジャンプする",		DxPlus::Vec2(0.0f, -452.5f + 331.0f) },
+		{ TutorialType::Attack,		L"攻撃する",			DxPlus::Vec2(0.0f, -452.5f + 425.0f) },
+		{ TutorialType::DoubleJump,	L"二段ジャンプする",	DxPlus::Vec2(0.0f, -452.5f + 535.0f) },
+		{ TutorialType::Climb,		L"柱を登る",			DxPlus::Vec2(0.0f, -452.5f + 661.0f) },
+		{ TutorialType::StandOnStage,	L"上に行く",		DxPlus::Vec2(0.0f, -452.5f + 776.0f) }
 	};
 
 
@@ -44,14 +46,13 @@ void GameSceneTutorialState::Enter()
 	// チェックリスト初期化
 	auto& checklist = gameScene_.GetTutorialChecklist();
 
-	taskManager_.Init(checklist);
+	gameScene_.GetTutorialTaskManager().Init(checklist);
 
 	for (const auto& t : tasks)
 	{
-		taskManager_.AddTask(t.type, t.taskName, t.stampPosition, t.requiredProgress);
+		gameScene_.GetTutorialTaskManager().AddTask(t.type, t.taskName, t.stampPosition, t.requiredProgress);
 	}
 
-	previousPlayerPosition_ = player->GetWorldPosition();
 
 	// カメラを初期位置に設定
 	auto& camera = gameScene_.GetTargetCamera();
@@ -64,7 +65,7 @@ void GameSceneTutorialState::Enter()
 	player->GetStateMachine().SetEventCallback(
 		[this](PlayerActionEvent event)
 		{
-			taskManager_.OnPlayerAction(event);
+			gameScene_.GetTutorialTaskManager().OnPlayerAction(event);
 		}
 	);
 }
@@ -75,25 +76,19 @@ void GameSceneTutorialState::Tick(float deltaTime)
 
 	auto& director = gameScene_.GetCameraDirector();
 	auto* player = gameScene_.GetGameContext()->GetPlayer();
+	auto& taskManager = gameScene_.GetTutorialTaskManager();
 
 	// =========================================
 	// 移動チュートリアル
 	// =========================================
-
-	const Vec3 currentPosition = player->GetWorldPosition();
-
-	Vec3 movement = currentPosition - previousPlayerPosition_;
-	movement.y = 0.0f;
+	
+	taskManager.Update(deltaTime);
 
 	// Walk状態の間だけ時間を加算
-	taskManager_.Update(deltaTime);
 	if (player->GetCurrentState() == PlayerStateType::Walk)
 	{
-		taskManager_.AddProgress(TutorialType::Move, deltaTime);
+		taskManager.AddProgress(TutorialType::Move, deltaTime);
 	}
-
-	// 毎フレーム更新する
-	previousPlayerPosition_ = currentPosition;
 
 	// =========================================
 	// カメラ
@@ -189,6 +184,7 @@ void GameSceneTutorialState::Tick(float deltaTime)
 		stage.GetPosition().y < playerCenter.y + settings.playerRadius)
 	{
 		stateMachine_.ChangeState(GameStateType::Battle);
+		taskManager.Complete(TutorialType::StandOnStage);// 立った瞬間に達成
 	}
 }
 
@@ -198,12 +194,8 @@ void GameSceneTutorialState::Exit()
 
 	auto* player = gameScene_.GetGameContext()->GetPlayer();
 
-	// 通知先を解除
-	player->GetStateMachine().SetEventCallback({});
-
 	player->SetDefMove(false);
 
-	gameScene_.GetTutorialChecklist().SetVisible(false);
 	gameScene_.SetDrawPlayerShadow(true);
 }
 

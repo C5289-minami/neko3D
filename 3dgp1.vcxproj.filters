@@ -744,6 +744,9 @@
     <ClInclude Include="StatusUI.h">
       <Filter>15_System\StatusUI</Filter>
     </ClInclude>
+    <ClInclude Include="SoundManager.h">
+      <Filter>10_Core\Sound</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -1054,6 +1057,9 @@
     </ClCompile>
     <ClCompile Include="StatusUI.cpp">
       <Filter>15_System\StatusUI</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundManager.cpp">
+      <Filter>10_Core\Sound</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

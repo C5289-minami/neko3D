@@ -56,7 +56,7 @@ void ResourceManager::LoadAll()
 	LoadModel(ResourceKeys::Model_PlayerSabi, L"./Data/Models/Player/sabi.mv1");
 	LoadModel(ResourceKeys::Model_PlayerKuro, L"./Data/Models/Player/kuro.mv1");
 	//Animations
-	//LoadModel(ResourceKeys::Model_PlayerAnim_Idle, L"./Data/Models/Player/Animation/player_idle.mv1");
+	LoadModel(ResourceKeys::Model_PlayerAnim_Idle, L"./Data/Models/Player/Animation/player_idle.mv1");
 	LoadModel(ResourceKeys::Model_PlayerAnim_Walk, L"./Data/Models/Player/Animation/player_walk.mv1");
 	LoadModel(ResourceKeys::Model_PlayerAnim_Jump, L"./Data/Models/Player/Animation/player_jump.mv1");
 	LoadModel(ResourceKeys::Model_PlayerAnim_Dodge, L"./Data/Models/Player/Animation/player_dodge.mv1");
@@ -78,9 +78,11 @@ void ResourceManager::LoadAll()
 	LoadModel(ResourceKeys::Model_Stage, L"./Data/Models/stage/Stage.mv1");
 	LoadModel(ResourceKeys::Model_stand_l, L"./Data/Models/stage/stand_l.mv1");
 	LoadModel(ResourceKeys::Model_stand_m, L"./Data/Models/stage/stand_m.mv1");
+
 	LoadModel(ResourceKeys::Model_Room, L"./Data/Models/Room/oheya.mv1");
 	LoadModel(ResourceKeys::Model_JumpStand, L"./Data/Models/Room/jumpstand.mv1");
 	LoadModel(ResourceKeys::Model_Basket, L"./Data/Models/Room/Basket.mv1");
+	LoadModel(ResourceKeys::Model_Chair, L"./Data/Models/Room/Chair.mv1");
 
 	//LoadModel(ResourceKeys::Model_Test, L"./Data/Models/test1.mv1");
 	// スプライトスタジオの読み込み
@@ -114,6 +116,8 @@ void ResourceManager::LoadAll()
 
 	// Effect
 	LoadEffect(ResourceKeys::Effect_Test, L"./Data/Effects/suna.efkefc", 30.0f);
+	LoadEffect(ResourceKeys::Effect_PlayerAttack, L"./Data/Effects/attack.efkefc", 30.0f);
+	LoadEffect(ResourceKeys::Effect_Impact, L"./Data/Effects/wave.efkefc", 30.0f);
 }
 
 void ResourceManager::UnloadAll()

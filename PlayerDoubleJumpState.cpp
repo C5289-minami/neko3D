@@ -3,7 +3,7 @@
 #include "Player.h"
 
 PlayerDoubleJumpState::PlayerDoubleJumpState(PlayerStateMachine& stateMachine, Player& player)
-    : PlayerBaseState(stateMachine, player)
+	: PlayerBaseState(stateMachine, player)
 {
 }
 

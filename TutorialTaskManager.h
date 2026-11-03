@@ -40,6 +40,8 @@ public:
     void Complete(TutorialType type);
 
     bool IsCompleted(TutorialType type) const;
+	bool IsAllFinished() const;
+  
 
     void OnPlayerAction(PlayerActionEvent event);
 

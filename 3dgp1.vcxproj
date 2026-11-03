@@ -215,6 +215,7 @@
     <ClInclude Include="CameraTransition.h" />
     <ClInclude Include="GameSceneGameOverState.h" />
     <ClInclude Include="PlayerActionEvent.h" />
+    <ClInclude Include="SoundManager.h" />
     <ClInclude Include="StatusUI.h" />
     <ClInclude Include="TutorialChecklist.h" />
     <ClInclude Include="GameBaseState.h" />
@@ -427,6 +428,7 @@
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="OutlineRenderer.cpp" />
     <ClCompile Include="Sound3D.cpp" />
+    <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="SpriteStudioUI.cpp" />
     <ClCompile Include="SSPlayer\common\Animator\ssplayer_effect.cpp" />
     <ClCompile Include="SSPlayer\common\Animator\ssplayer_effect2.cpp" />

@@ -69,9 +69,15 @@ public:
     {
         return tutorialChecklist_;
     }
+    TutorialTaskManager& GetTutorialTaskManager()
+    {
+        return taskManager_;
+	}
 
     // 影
 	void SetDrawPlayerShadow(bool draw) { drawPlayerShadow_ = draw; }
+
+
 private:
 
     ModelCollision tutorialCollision_;
@@ -90,10 +96,12 @@ private:
 
 	GameStateMachine stateMachine_;
 
-    TutorialCollisionSettings tutorialCollisionSettings_{};
+	TutorialCollisionSettings tutorialCollisionSettings_{}; // チュートリアルの球体設定
     void DrawTutorialCollisionSpheres() const;
-    TutorialChecklist tutorialChecklist_;
+	TutorialChecklist tutorialChecklist_; // チュートリアルのチェックリストUI
+	TutorialTaskManager taskManager_; // チュートリアルの進捗管理
 
 	// Playerの影を描画する
 	bool drawPlayerShadow_{ false };
+
 };

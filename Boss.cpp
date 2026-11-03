@@ -54,6 +54,8 @@ void Boss::Init()
 
 void Boss::Reset()
 {
+	targetPositionHistory_.clear();
+	targetHistoryTime_ = 0.0f;
 
 	health_ = maxHealth_;
 	phase_ = BossPhase::Phase1;
@@ -148,6 +150,36 @@ void Boss::Update(float deltaTime)
 
 }
 
+void Boss::Update(float deltaTime, const Vec3& targetPosition)
+{
+	Update(deltaTime);
+
+	targetHistoryTime_ += deltaTime;
+	targetPositionHistory_.push_back({ targetHistoryTime_, targetPosition });
+
+	const float laggedTime = targetHistoryTime_ - lagTimePlayer;
+	while (targetPositionHistory_.size() > 1) // 使う位置を残しながら、古い記録を片付ける
+	{
+		if (targetPositionHistory_[1].time <= laggedTime) // 次の記録も0.5秒前までのものなら
+		{
+			targetPositionHistory_.erase(targetPositionHistory_.begin()); // もっと古い先頭の記録を消す
+		}
+		else
+		{
+			break; // 先頭の記録を残して、ここで片付けを終える
+		}
+	}
+
+	// 残しておいた位置に向く方向を求める
+	Vec3 direction = targetPositionHistory_[0].position - GetWorldPosition(); 
+
+	direction.y = 0.0f;
+	if (direction.LengthSq() <= 1e-6f)
+		return;
+
+	SetYaw(std::atan2(-direction.x, -direction.z));
+}
+
 void Boss::Draw() const
 {
 	model_.ApplyCollisionColor();
@@ -157,7 +189,13 @@ void Boss::Draw() const
 #ifdef _DEBUG
 void Boss::DrawClapAttackDebug() const
 {
-	if (slamSkill_ != nullptr)
+	if (clapSkill_ != nullptr)
+		clapSkill_->DrawDebug();
+}
+
+void Boss::DrawSlamAttackDebug() const
+{
+	if (GetCurrentState() == BossStateType::Attack && activeSkill_ == slamSkill_.get() && slamSkill_ != nullptr)
 		slamSkill_->DrawDebug();
 }
 #endif
@@ -174,7 +212,7 @@ AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 	{
 	case BossAnimType::Idle:  return idleAnimHandle_;
 	case BossAnimType::TailWhip: return tailWhipAnimHandle_;
-	case BossAnimType::Clap: return atkHitAnimHnadle_;
+	case BossAnimType::Clap: return ClapAnimHandle_;
 	case BossAnimType::Slam: return atkHitAnimHnadle_;
 	case BossAnimType::Damage: return damageAnimHandle_;
 	case BossAnimType::Die: return dieAnimHandle_;
@@ -193,12 +231,12 @@ bool Boss::UseSkill(BossAttackType type)
 	{
 	case BossAttackType::Clap:
 		clapSkill_->Reset();
+		clapSkill_->StartHandAttack();
 		activeSkill_ = clapSkill_.get();
 		break;
 
 	case BossAttackType::Slam:
 		slamSkill_->Reset();
-		slamSkill_->StartHandAttack();
 		activeSkill_ = slamSkill_.get();
 		break;
 
@@ -293,10 +331,31 @@ float Boss::GetAnimTotalTime(BossAnimType::Type type) const
 
 bool Boss::IsHitByAttackSphere(const Collision::Sphere& sphere) const
 {
-	return slamSkill_ != nullptr && slamSkill_->IsHitByAttackSphere(sphere);
+	return clapSkill_ != nullptr && clapSkill_->IsHitByAttackSphere(sphere);
 }
 
 bool Boss::UpdateHandAttack(float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition)
 {
-	return slamSkill_ != nullptr && slamSkill_->UpdateHandAttack(deltaTime, playerPosition, stagePosition);
+	return clapSkill_ != nullptr && clapSkill_->UpdateHandAttack(deltaTime, playerPosition, stagePosition);
+}
+
+bool Boss::UpdateSlamAttack(const Vec3& playerPosition, const Vec3& stageCenter)
+{
+	bool hit = false;
+	if (IsSlamSkillActive())
+		hit = slamSkill_->UpdateAttack(playerPosition, stageCenter);
+	return hit;
+}
+
+bool Boss::IsSlamHitActive() const
+{
+	bool hitActive = false;
+	if (IsSlamSkillActive())
+		hitActive = slamSkill_->IsHitActive();
+	return hitActive;
+}
+
+bool Boss::IsSlamSkillActive() const
+{
+	return GetCurrentState() == BossStateType::Attack && slamSkill_ != nullptr && activeSkill_ == slamSkill_.get();
 }

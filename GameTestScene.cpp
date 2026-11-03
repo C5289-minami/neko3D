@@ -23,6 +23,7 @@ tailWhipHitCapsule_ = {};
 
 
 	playerCamera_.Reset();
+
 	attackSphereDebugRemaining_ = 0.0f;
 	rightMouseWasDown_ = false;
 
@@ -46,6 +47,8 @@ tailWhipHitCapsule_ = {};
 
 	shaderEffects_.GetSettings().toonEnabled = true;
 	shaderEffects_.GetSettings().outlineEnabled = true;
+
+
 
 	StartFadeIn();
 }
@@ -138,15 +141,18 @@ void GameTestScene::Update(float deltaTime)
 
 		Collision::SetModelsBetweenTransparent(
 			playerCamera_.GetPosition(),
-			boss.GetWorldPosition() + Vec3::Up() * 320.0f,// 顔が見たいので少し上
+			boss.GetWorldPosition() + Vec3::Up() * 600.0f,// 顔が見たいので少し上
 			gameContext->GetStage().GetCollision(),
 			0.7f
 		);
 
 
 
-		boss.Update(deltaTime);
+		boss.Update(deltaTime, player->GetWorldPosition());
 		
+		if (boss.UpdateSlamAttack(player->GetWorldPosition(), stage.GetWorldPosition()))
+			player->TakeDamage();
+
 		tailWhipHitCapsule_ = {};
 		if (boss.IsTailWhipHitActive())
 		{
@@ -192,13 +198,12 @@ void GameTestScene::Update(float deltaTime)
 		DxPlus::Debug::SetString(L"1: Hand attack test (3 sec follow)");
 #endif
 
-
 		playerCamera_.Update(player->GetWorldPosition(), boss.GetWorldPosition(), deltaTime);
 
 		if (GetButtonDown(PLAYER1) & BUTTON_L3)
 		{
-			gameContext->GetEffectManager().PlayHit(RM().GetEffect(ResourceKeys::Effect_Test),
-				player->GetPosition() + Vec3::Up() * 100.0f,
+			gameContext->GetEffectManager().PlayHit(RM().GetEffect(ResourceKeys::Effect_PlayerAttack),
+				player->GetPosition() + Vec3::Up() * 15.0f,
 				player->GetYaw() + DX_PI_F);
 		}
 		gameContext->GetEffectManager().Update(deltaTime);
@@ -257,6 +262,7 @@ void GameTestScene::Render() const
 #ifdef _DEBUG
 	(activeCamera_ ? activeCamera_ : &playerCamera_)->ApplyCamera();
 	gameContext->GetBoss().DrawClapAttackDebug();
+	gameContext->GetBoss().DrawSlamAttackDebug();
 
 	auto& boss = gameContext->GetBoss();
 	auto* player = gameContext->GetPlayer();
@@ -362,8 +368,28 @@ void GameTestScene::DrawImGui()
 		if (ImGui::Button(u8"TailWhip"))
 			boss.UseSkill(BossAttackType::TailWhip);
 
-		ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
+
+		auto& camera = playerCamera_;
+		auto& settings = camera.GetSettings();
+
+		ImGui::DragFloat(
+			u8"カメラ距離",
+			&settings.cameraDistance,
+			10.0f,
+			100.0f,
+			3000.0f
+		);
+
+		ImGui::DragFloat(
+			u8"カメラ高さ",
+			&settings.cameraHeight,
+			10.0f,
+			-1000.0f,
+			1000.0f
+		);
 	}
+		ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
+
 	ImGui::End();
 #endif
 }
