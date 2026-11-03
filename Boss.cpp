@@ -1,4 +1,4 @@
-#include "Boss.h"
+﻿#include "Boss.h"
 #include "Consts.h"
 #include "ResourceKeys.h"
 #include "ResourceManager.h"
@@ -170,7 +170,7 @@ AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 	case BossAnimType::Die: return dieAnimHandle_;
 	default:
 		DxPlus::Utils::FatalError(L"アニメーションハンドルを取得できませんでした。GetAnimationHandleを確認してください。");
-		return {};
+		return idleAnimHandle_;
 	}
 }
 

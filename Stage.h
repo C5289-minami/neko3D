@@ -7,7 +7,6 @@
 #include "Vector3.h"
 #include "ActorBase.h"
 #include "DrawableObject.h"
-#include "ResourceManager.h"
 // #include <vector>
 // #include "Player.h"
 #include "ModelCollision.h"
@@ -16,12 +15,12 @@ class Player;
 class Stage : public ActorBase
 {
 public:
-  Stage();
+	Stage();
 	~Stage() = default;
 
 	// accessor
-  int GetModelHandle() const { return RM().GetModel(stageModel_.GetModelKey()); }
-  ModelObject& GetModelObject() { return stageModel_; }
+	int GetModelHandle() const;
+	ModelObject& GetModelObject() { return stageModel_; }
 	const ModelObject& GetModelObject() const { return stageModel_; }
 	const ModelObject& GetModelSize() const { return stageModel_; }
 	std::array<ModelObject, 3>& GetPillarModelObjects() { return stagePillars_; }
@@ -29,22 +28,24 @@ public:
 	std::array<ModelObject, 2>& GetStageModelObjects() { return stageModels_; }
 	const std::array<ModelObject, 2>& GetStageModelObjects() const { return stageModels_; }
 
-    // void GetCollisionModelHandles(std::vector<int>& handles) const;//modelの判定をまとめてやる
+	// void GetCollisionModelHandles(std::vector<int>& handles) const;//modelの判定をまとめてやる
 
-    // プレイヤーのカプセルと柱L・M・Sのメッシュを判定する。
-	
-    // bool IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float radius) const;
-    // bool FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal, const Vec3& moveDirection = Vec3{},
-    // float* wallTopY = nullptr, bool keepTopContact = false) const;
-    // Vec3 SlideAlongPillars(const Vec3& oldPosition, const Vec3& desiredPosition, bool& touched) const;
-    
+	// プレイヤーのカプセルと柱L・M・Sのメッシュを判定する。
+
+	// bool IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float radius) const;
+	// bool FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal, const Vec3& moveDirection = Vec3{},
+	// float* wallTopY = nullptr, bool keepTopContact = false) const;
+	// Vec3 SlideAlongPillars(const Vec3& oldPosition, const Vec3& desiredPosition, bool& touched) const;
+
 	ModelCollision& GetCollision() { return collision_; }
-    const ModelCollision& GetCollision() const { return collision_; }
+	const ModelCollision& GetCollision() const { return collision_; }
+
+    void DrawDebugUI();
 
 	float GetArenaRadius() const { return arenaRadius_; }
 	float GetArenaSurfaceY() const { return arenaSurfaceY_; }
 
-    void DrawDebugUI();
+
 
 	// lifecycle
 	void Init() override;
@@ -54,23 +55,21 @@ public:
 
 
 private:
-    void UpdateArenaBounds();
-    // void SetupCollisionInfo();
-    // void RefreshCollisionInfo();
+	void UpdateArenaBounds();
 
-    ModelCollision collision_;
+	ModelCollision collision_;
 
 
-    std::array<ModelObject, 3> stagePillars_{};	
+	std::array<ModelObject, 3> stagePillars_{};
 
-    // std::array<int, 3> pillarCollisionHandles_{ -1, -1, -1 };
- 
-    std::array<ModelObject, 2> stageModels_{};
-    // 当たり判定に使えるモデルハンドル。未準備・失敗時は -1。
-    // std::array<int, 2> stageCollisionHandles_{ -1, -1 };
-    // int groundCollisionHandle_{ -1 };
+	// std::array<int, 3> pillarCollisionHandles_{ -1, -1, -1 };
 
-    std::string modelSettingsStatus_;
+	std::array<ModelObject, 2> stageModels_{};
+	// 当たり判定に使えるモデルハンドル。未準備・失敗時は -1。
+	// std::array<int, 2> stageCollisionHandles_{ -1, -1 };
+	// int groundCollisionHandle_{ -1 };
+
+	std::string modelSettingsStatus_;
 
 	float HightSize{ 0.0f };
 
@@ -80,3 +79,4 @@ private:
 	float arenaSurfaceY_{};
 
 };
+
