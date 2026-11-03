@@ -197,7 +197,18 @@ void Player::SetModelKey(const std::wstring& key)
 	model_.SetModelKey(key);
 	model_.SetModelType(ModelType::Bone);
 
-	Reset();
+	animation_.Reset();
+ 
+	currentAnimType_ = PlayerAnimType::Idle;
+	currentAnimLoop_ = true;
+
+	animation_.Play3D(
+		modelHandle,
+		GetAnimationHandle(currentAnimType_),
+		currentAnimLoop_,
+		Const::ANIM_FPS,
+		0.0f
+	);
 }
 
 void Player::UpdateMovement(float deltaTime)

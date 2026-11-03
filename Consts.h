@@ -48,6 +48,11 @@ namespace Const
     constexpr float BOSS_WALK_MOTION_DURATION = 3.0f;
     constexpr float BOSS_MOVE_SPEED = 200.0f;
 
+    // ボスの両手攻撃が閉じるまでに移動する弧の長さ。
+    constexpr float BOSS_BETWEEN_HAND_ATTACK_SIDE = 400.0f;
+    // ボスの手の攻撃判定の半径。
+    constexpr float BOSS_HAND_ATTACK_HIT_RADIUS = 90.0f;
+
     // ===== 物理共通 =====
     constexpr float GRAVITY = 2000.0f;
 

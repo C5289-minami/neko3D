@@ -34,7 +34,7 @@ void Boss::Init()
 	slamSkill_ = std::make_unique<BossSlamSkill>(*this);
 	tailWhipSkill_ = std::make_unique<BossTailWhipSkill>(*this);
 
-	// AnimationHandle‚Ì‰Šú‰»
+	// AnimationHandleã®åˆæœŸåŒ–
 	const int idleModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Idle);
 	idleAnimHandle_ = AnimationHandle::FromIndex(idleModelHandle, 0);
 
@@ -53,12 +53,9 @@ void Boss::Init()
 void Boss::Reset()
 {
 
-	counter_ = 0.0f;
 	health_ = maxHealth_;
 	phase_ = BossPhase::Phase1;
-	distance_ = 200.0f;
-	handAttackActive_ = false;
-	// ‰ŠúˆÊ’uE‰ñ“]EŠg‘å—¦‚ÍJSONƒtƒ@ƒCƒ‹‚©‚ç“Ç‚İ‚Ş
+	// JSONè¨­å®šã‹ã‚‰ä½ç½®ãƒ»å›è»¢ãƒ»ã‚¹ã‚±ãƒ¼ãƒ«ã‚’èª­ã¿è¾¼ã‚€ã€‚
 	MObjs().LoadActorTransform(*this);
 	model_.Load();
 
@@ -68,12 +65,21 @@ void Boss::Reset()
 	SetAnimation(BossAnimType::Idle, true);
 
 	stateMachine_.Initialize();
+	if (clapSkill_ != nullptr) clapSkill_->Reset();
 
-	attackHands_.clear();
-	attackHands_.resize(2);
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒãƒ³ãƒ‰ãƒ«ã‚’åˆæœŸåŒ–ã™ã‚‹ã€‚
+	const int idleModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Idle);
+	idleAnimHandle_ = AnimationHandle::FromIndex(idleModelHandle, 0);
 
-
-	// ¬•§ƒ‚ƒfƒ‹‚Í–{‘Ì‚Æ“¯‚¶ƒeƒNƒXƒ`ƒƒ‚ğg‚¤‚½‚ßABossƒ‚ƒfƒ‹‚ÌƒeƒNƒXƒ`ƒƒ‚ğ‹¤—L‚·‚éB
+	const int sippoModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Sippo);
+	tailWhipAnimHandle_ = AnimationHandle::FromIndex(sippoModelHandle, 0);
+	const int AtkHitModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Attck_Hit);
+	atkHitAnimHnadle_ = AnimationHandle::FromIndex(AtkHitModelHandle, 0);
+	const int damageModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Damage);
+	damageAnimHandle_ = AnimationHandle::FromIndex(damageModelHandle, 0);
+	const int dieModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Die);
+	dieAnimHandle_ = AnimationHandle::FromIndex(dieModelHandle, 0);
+	// æ­»äº¡ãƒ¢ãƒ‡ãƒ«ã¯æœ¬ä½“ã¨åŒã˜ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ä½¿ã†ãŸã‚ã€Bossãƒ¢ãƒ‡ãƒ«ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’å…±æœ‰ã™ã‚‹ã€‚
 	//const int baseModelHandle = RM().GetModel(ResourceKeys::Model_Boss);
 	//const int baseTextureCount = DxLib::MV1GetTextureNum(baseModelHandle);
 	//const int dieTextureCount = DxLib::MV1GetTextureNum(dieModelHandle);
@@ -87,8 +93,7 @@ void Boss::Reset()
 	//	}
 	//}
 
-	// ‰ŠúƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶
-	animation_.Reset();
+	// åˆæœŸã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’å†ç”Ÿã™ã‚‹ã€‚
 	animation_.Play3D(
 		RM().GetModel(model_.GetModelKey()),
 		GetAnimationHandle(BossAnimType::Idle),
@@ -101,17 +106,17 @@ void Boss::Reset()
 
 void Boss::TakeDamage(int damaege)
 {
-	// DamageState‚ğ‚Â‚¯‚ÄBoss‚ğ—h‚ç‚·‚Æ‚©
-	// ˆêuÔ‚­‚·‚é‚Æ‚©‚µ‚Ä‚à‚¢‚¢‚©‚à
-	// ‚±‚±‚Å‚Í‚â‚ç‚È‚¢
+	// ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’å—ã‘ãŸã‚‰HPã‚’æ¸›ã‚‰ã™ã€‚
+	// ãã®å ´ã§åœæ­¢ã•ã›ã€ã²ã‚‹ã¿çŠ¶æ…‹ã¸ç§»è¡Œã™ã‚‹ã€‚
+	// ãƒ€ãƒ¡ãƒ¼ã‚¸å‡¦ç†å¾Œã«ãƒ•ã‚§ãƒ¼ã‚ºç§»è¡Œã‚’ç¢ºèªã™ã‚‹ã€‚
 
 	health_ -= damaege;
 	velocity_ = {};
 
-	// ‚±‚±‚É‚à‚µ•KE‹Z‚È‚ç‚ğ‚Â‚¯‚é
+	// ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’å—ã‘ãŸã‚‰ã²ã‚‹ã¿çŠ¶æ…‹ã¸ç§»è¡Œã™ã‚‹ã€‚
 	stateMachine_.ChangeState(BossStateType::flinch);
 
-	// ‘Ì—Í‚ª”¼•ªˆÈ‰º‚È‚çƒtƒF[ƒY2‚ÖB
+	// HPãŒæœ€å¤§å€¤ã®åŠåˆ†ä»¥ä¸‹ã«ãªã‚‹ã¨ãƒ•ã‚§ãƒ¼ã‚º2ã¸ç§»è¡Œã™ã‚‹ã€‚
 	if (phase_ == BossPhase::Phase1 && health_ <= maxHealth_ / 2)
 		phase_ = BossPhase::Phase2;
 
@@ -125,8 +130,8 @@ void Boss::TakeDamage(int damaege)
 
 void Boss::Update(float deltaTime)
 {
-	// ‚±‚±‚ÅAnimation‚ÌUpdate‚ÍŒÄ‚Î‚È‚¢
-	// ‘¬“x‚âw’èƒtƒŒ[ƒ€ˆÚ“®‚È‚ÇŠÇ—‚·‚é‚½‚ßAStateMachine‚Ì’†‚ÅŒÄ‚Ô
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æ›´æ–°ã¯ã‚¹ã‚­ãƒ«ã®ãƒ•ã‚§ãƒ¼ã‚ºå‡¦ç†å´ã§è¡Œã†ã€‚
+	// å†ç”ŸåŒºé–“ã‚„æ”»æ’ƒä¸­ã®å‹•ä½œã‚’ã‚¹ã‚­ãƒ«å´ã§ç®¡ç†ã™ã‚‹ã€‚
 	stateMachine_.Tick(deltaTime);
 
 	position_ += velocity_ * deltaTime;
@@ -140,25 +145,13 @@ void Boss::Draw() const
 }
 
 #ifdef _DEBUG
-void Boss::DrawHandAttackDebug() const
+void Boss::DrawClapAttackDebug() const
 {
-	if (!handAttackActive_) return;
-
-	DxLib::SetUseZBuffer3D(FALSE);
-	DxLib::SetWriteZBuffer3D(FALSE);
-
-	for (std::size_t i = 0; i < attackHands_.size(); ++i)
-	{
-		const unsigned int color = i == 0
-			? DxLib::GetColor(80, 220, 255)
-			: DxLib::GetColor(255, 120, 80);
-		Collision::DrawDebugSphere(attackHands_[i].hitSphere, color);
-	}
-
-	DxLib::SetUseZBuffer3D(TRUE);
-	DxLib::SetWriteZBuffer3D(TRUE);
+	if (clapSkill_ != nullptr)
+		clapSkill_->DrawDebug();
 }
 #endif
+
 void Boss::UpdateAnimation(float deltaTime)
 {
 	animation_.Update(deltaTime);
@@ -176,7 +169,7 @@ AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 	case BossAnimType::Damage: return damageAnimHandle_;
 	case BossAnimType::Die: return dieAnimHandle_;
 	default:
-		DxPlus::Utils::FatalError(L"BossHandle‚ğæ“¾‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½BGetAnimationHandle‚ğŠm”F‚µ‚Ä");
+		DxPlus::Utils::FatalError(L"ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒãƒ³ãƒ‰ãƒ«ã‚’å–å¾—ã§ãã¾ã›ã‚“ã§ã—ãŸã€‚GetAnimationHandleã‚’ç¢ºèªã—ã¦ãã ã•ã„ã€‚");
 		return {};
 	}
 }
@@ -190,6 +183,7 @@ bool Boss::UseSkill(BossAttackType type)
 	{
 	case BossAttackType::Clap:
 		clapSkill_->Reset();
+		clapSkill_->StartHandAttack();
 		activeSkill_ = clapSkill_.get();
 		break;
 
@@ -212,6 +206,20 @@ bool Boss::UseSkill(BossAttackType type)
 }
 
 
+bool Boss::IsTailWhipHitActive() const
+{
+	return tailWhipSkill_ != nullptr && tailWhipSkill_->IsHitActive();
+}
+
+Collision::Capsule Boss::GetTailWhipHitCapsule(const Vec3& stageCenter, float stageRadius, float attackHeight) const
+{
+	if (tailWhipSkill_ != nullptr)
+	{
+		return tailWhipSkill_->GetHitCapsule(stageCenter, stageRadius, attackHeight);
+	}
+
+	return Collision::Capsule{};
+}
 void Boss::SetMoveDirection(const Vec3& moveDirection, float speed)
 {
 	Vec3 direction{ moveDirection.x, 0.0f, moveDirection.z };
@@ -268,98 +276,17 @@ float Boss::GetAnimTotalTime(BossAnimType::Type type) const
 	int modelHandle = RM().GetModel(model_.GetModelKey());
 
 	totalFlame = DxLib::MV1GetAnimTotalTime(modelHandle, index);
-	totalTime = totalFlame / Const::ANIM_FPS; // •b”‚É•ÏŠ·
+	totalTime = totalFlame / Const::ANIM_FPS; // ãƒ•ãƒ¬ãƒ¼ãƒ æ•°ã‚’ç§’æ•°ã«å¤‰æ›ã™ã‚‹ã€‚
 	return totalTime;
 }
 
-void Boss::StartHandAttack()
-{
-	counter_ = 0.0f;
-	distance_ = 200.0f;
-	handAttackActive_ = true;
-	for (AttackData& hand : attackHands_)
-	{
-		hand.isHit = true;
-	}
-}
 
 bool Boss::IsHitByAttackSphere(const Collision::Sphere& sphere) const
-{//UŒ‚‚Ì“–‚½‚è”»’è‚ğŠm”F‚·‚éŠÖ”
-	if (!handAttackActive_) return false;
-
-	for (const AttackData& hand : attackHands_)
-		//UŒ‚”»’è‚Ìî•ñ‚ğ•Û‚·‚é”z—ñ‚ğƒ‹[ƒv‚µ‚ÄŠm”F
-	{
-		if (Collision::IsHitSphereSphere(hand.hitSphere, sphere))
-			return true;
-	}
-	return false;
+{
+	return clapSkill_ != nullptr && clapSkill_->IsHitByAttackSphere(sphere);
 }
 
-bool Boss::UpdateHandAttack(
-	float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition)
+bool Boss::UpdateHandAttack(float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition)
 {
-	if (!handAttackActive_) return false;
-	if (distance_ <= 0.0f)
-	{
-		handAttackActive_ = false;
-		return false;
-	}
-
-	attackHands_[0].hitSphere.radius = 50.0f;
-	attackHands_[1].hitSphere.radius = 50.0f;
-
-	Vec3 center = playerPosition + Vec3::Up() * 30.0f;// ƒvƒŒƒCƒ„[‚Ì“ªã30.0f‚ÌˆÊ’u‚ğ’†S‚É‚·‚é
-	if (counter_ < 3.0f)
-	{
-		oldPos = center;
-	}
-
-	counter_ += deltaTime;
-	if (counter_ >= 3.0f)
-	{
-		distance_ -= 600.0f * deltaTime;
-
-		if (distance_ < 0.0f)
-		{
-			distance_ = 0.0f;
-		}
-	}
-
-	// ƒXƒe[ƒW’†S‚©‚çA‘_‚¤ˆÊ’u‚ÖŒü‚©‚¤•ûŒü‚ğ‹‚ß‚éB
-	Vec3 outward = oldPos - stagePosition;
-	outward.y = 0.0f;
-	float radius = outward.Length();// ƒXƒe[ƒW’†S‚©‚ç‘_‚¤ˆÊ’u‚Ü‚Å‚Ì‹——£
-	if (radius < 0.001f) return false;
-	outward /= radius;// ³‹K‰»
-
-	// “¯‚¶‰~ü‚Ì¶‰E‚É’u‚¢‚ÄAŠÔŠu‚ªk‚Ü‚é‚Æ‘_‚¤ˆÊ’u‚Ö‹ß‚Ã‚­B
-
-	Vec3 right{ outward.z, 0.0f, -outward.x };
-	float angle = distance_ / radius;
-
-	Vec3 circleCenter{ stagePosition.x, oldPos.y, stagePosition.z };
-	Vec3 front = outward * std::cos(angle);
-	Vec3 side = right * std::sin(angle);
-
-	attackHands_[0].hitSphere.center = circleCenter + (front - side) * radius;
-	attackHands_[1].hitSphere.center = circleCenter + (front + side) * radius;
-
-	if (counter_ < 3.0f) return false;
-
-	for (AttackData& hand : attackHands_)
-	{
-		if (!hand.isHit)continue;
-
-		if (Collision::IsHitSphereSphere(hand.hitSphere, Collision::Sphere{ center, 30.0f }))// ƒvƒŒƒCƒ„[‚Ì“–‚½‚è”»’è‚Í”¼Œa30.0f‚Ì‹…‚Æ‰¼’è
-		{
-			attackHands_[0].isHit = false;
-			attackHands_[1].isHit = false;
-			DxPlus::Debug::SetFormatString(L"Hit by Boss Hand Attack!");
-			return true;
-
-		}
-
-	}
-	return false;
+	return clapSkill_ != nullptr && clapSkill_->UpdateHandAttack(deltaTime, playerPosition, stagePosition);
 }

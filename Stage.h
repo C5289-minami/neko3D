@@ -41,6 +41,9 @@ public:
 	ModelCollision& GetCollision() { return collision_; }
     const ModelCollision& GetCollision() const { return collision_; }
 
+	float GetArenaRadius() const { return arenaRadius_; }
+	float GetArenaSurfaceY() const { return arenaSurfaceY_; }
+
     void DrawDebugUI();
 
 	// lifecycle
@@ -51,6 +54,7 @@ public:
 
 
 private:
+    void UpdateArenaBounds();
     // void SetupCollisionInfo();
     // void RefreshCollisionInfo();
 
@@ -71,4 +75,8 @@ private:
 	float HightSize{ 0.0f };
 
 	ModelObject stageModel_;
+
+	float arenaRadius_{};
+	float arenaSurfaceY_{};
+
 };

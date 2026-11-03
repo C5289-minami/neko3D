@@ -19,7 +19,7 @@
 #include <algorithm>
 
 // =====================================
-// ”¼“§–¾ƒ‚ƒfƒ‹ŠÇ—
+// åŠé€æ˜ãƒ¢ãƒ‡ãƒ«ç®¡ç†
 // =====================================
 namespace
 {
@@ -43,19 +43,19 @@ namespace Collision
         const Vec3& centerB,
         float radiusB)
     {
-        // 2‚Â‚Ì‹…‚Ì’†S‚Ì·‚ğ‹‚ß‚é
+        // 2ã¤ã®çƒã®ä¸­å¿ƒã®å·®ã‚’æ±‚ã‚ã‚‹
         Vec3 diff = centerB - centerA;
 
-        // 2‚Â‚Ì‹…‚Ì”¼Œa‚ğ‘«‚·
+        // 2ã¤ã®çƒã®åŠå¾„ã‚’è¶³ã™
         float radiusSum = radiusA + radiusB;
 
-        // ’†SŠÔ‹——£‚ª”¼Œa‚Ì‡ŒvˆÈ‰º‚È‚ç“–‚½‚Á‚Ä‚¢‚é
+        // ä¸­å¿ƒé–“è·é›¢ãŒåŠå¾„ã®åˆè¨ˆä»¥ä¸‹ãªã‚‰å½“ãŸã£ã¦ã„ã‚‹
         return diff.LengthSq() <= radiusSum * radiusSum;
     }
 
     bool IsHitSphereSphere(const Sphere& sphereA, const Sphere& sphereB)
     {
-        // Sphere‚Ì’†SÀ•W‚Æ”¼Œa‚ğg‚Á‚Ä”»’è‚·‚é
+        // Sphereã®ä¸­å¿ƒåº§æ¨™ã¨åŠå¾„ã‚’ä½¿ã£ã¦åˆ¤å®šã™ã‚‹
         return IsHitSphereSphere(
             sphereA.center, sphereA.radius,
             sphereB.center, sphereB.radius);
@@ -63,7 +63,7 @@ namespace Collision
 
     bool IsHitCapsuleSphere(const Capsule& capsule, const Sphere& sphere)
     {
-        // ‹…‚Ì’†S‚ğƒJƒvƒZƒ‹‚Ìü•ª‚É“Š‰e‚·‚é
+        // çƒã®ä¸­å¿ƒã‚’ã‚«ãƒ—ã‚»ãƒ«ã®ç·šåˆ†ã«æŠ•å½±ã™ã‚‹
         const Vec3 segment = capsule.end - capsule.start;
         const float segmentLengthSq = segment.LengthSq();
 
@@ -79,7 +79,7 @@ namespace Collision
             if (t > 1.0f) t = 1.0f;
         }
 
-        // ü•ªã‚ÌÅ‹ß“_
+        // ç·šåˆ†ä¸Šã®æœ€è¿‘ç‚¹
         const Vec3 closestPoint = capsule.start + segment * t;
 
         const float radiusSum = capsule.radius + sphere.radius;
@@ -92,7 +92,7 @@ namespace Collision
         const Ellipsoid& a,
         const Ellipsoid& b)
     {
-        // ”¼Œa‚ª0ˆÈ‰º‚¾‚Á‚½‚ç”»’è‚µ‚È‚¢
+        // åŠå¾„ãŒ0ä»¥ä¸‹ã ã£ãŸã‚‰åˆ¤å®šã—ãªã„
         if (a.radii.x <= 0.0f || a.radii.y <= 0.0f || a.radii.z <= 0.0f ||
             b.radii.x <= 0.0f || b.radii.y <= 0.0f || b.radii.z <= 0.0f)
         {
@@ -113,7 +113,7 @@ namespace Collision
 }
 
 // =====================================
-// Debug—p‚Ì“à•”ˆ—
+// Debugç”¨ã®å†…éƒ¨å‡¦ç†
 // =====================================
 #ifdef _DEBUG
 
@@ -178,7 +178,7 @@ namespace
         sphere.center = body.center;
         sphere.radius = body.radii.x;
 
-        // xAyAz‚Ì’†‚Åˆê”Ô‘å‚«‚¢”¼Œa‚ğg‚¤
+        // xã€yã€zã®ä¸­ã§ä¸€ç•ªå¤§ãã„åŠå¾„ã‚’ä½¿ã†
         if (body.radii.y > sphere.radius)
         {
             sphere.radius = body.radii.y;
@@ -211,7 +211,7 @@ namespace
 }
 
 // =====================================
-// Debug—p‚ÌŒöŠJŠÖ”
+// Debugç”¨ã®å…¬é–‹é–¢æ•°
 // =====================================
 
 void Collision::RegisterDebugCanWatch(
@@ -219,7 +219,7 @@ void Collision::RegisterDebugCanWatch(
     DebugSphereProvider sphereA,
     DebugSphereProvider sphereB)
 {
-    // “¯‚¶owner‚Å“o˜^‚µ’¼‚µ‚½‚Æ‚«‚Í‘O‚Ì“o˜^‚ğÁ‚·
+    // åŒã˜ownerã§ç™»éŒ²ã—ç›´ã—ãŸã¨ãã¯å‰ã®ç™»éŒ²ã‚’æ¶ˆã™
     UnregisterDebugCanWatch(owner);
 
     if (owner == nullptr) return;
@@ -244,7 +244,7 @@ void Collision::RegisterDebugCanWatch(
 
     if (owner == nullptr) return;
 
-    // Player‚ÆBoss‚ğ“o˜^‚·‚é
+    // Playerã¨Bossã‚’ç™»éŒ²ã™ã‚‹
     DebugCanWatchEntry entry;
 
     entry.owner = owner;
@@ -319,7 +319,7 @@ void Collision::UpdateDebug()
             b = entry.sphereB();
         }
 
-        // ”¼Œa‚ª—LŒø‚È‹…‚¾‚¯”»’è‚·‚é
+        // åŠå¾„ãŒæœ‰åŠ¹ãªçƒã ã‘åˆ¤å®šã™ã‚‹
         bool touching = false;
 
         if (a.radius > 0.0f && b.radius > 0.0f)
@@ -361,7 +361,7 @@ void Collision::DrawDebug()
         if (entry.state.touchingB) textB = L"true";
 
         DxPlus::Debug::SetFormatString(
-            L"ÚG %s: %s / %s: %s",
+            L"æ¥è§¦ %s: %s / %s: %s",
             entry.nameA, textA,
             entry.nameB, textB);
     }
@@ -378,7 +378,7 @@ void Collision::DrawDebugSphere(
     constexpr int equatorSegments = 32;
     constexpr float pi = 3.14159265358979323846f;
 
-    // 6–{‚Ìcü‚ğ•`‚­
+    // 6æœ¬ã®ç¸¦ç·šã‚’æã
     for (int line = 0; line < meridians; ++line)
     {
         const float longitude = 2.0f * pi * line / meridians;
@@ -402,7 +402,7 @@ void Collision::DrawDebugSphere(
         }
     }
 
-    // Ô“¹•”•ª‚ğ•`‚­
+    // èµ¤é“éƒ¨åˆ†ã‚’æã
     Vec3 previous = GetDebugSpherePoint(
         sphere, pi * 0.5f, 0.0f);
 
@@ -421,11 +421,58 @@ void Collision::DrawDebugSphere(
         previous = next;
     }
 }
+// ã‚«ãƒ—ã‚»ãƒ«ã®å´é¢ã¨ä¸¡ç«¯ã®åŠçƒã‚’ãƒ¯ã‚¤ãƒ¤ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã§æç”»ã™ã‚‹ã€‚
+// startãƒ»endãƒ»radiusã‚’ä½¿ã„ã€å®Ÿéš›ã®ã‚«ãƒ—ã‚»ãƒ«åˆ¤å®šå½¢çŠ¶ã‚’å¯è¦–åŒ–ã™ã‚‹ã€‚
+void Collision::DrawDebugCapsule(const Capsule& capsule, unsigned int color)
+{
+    if (capsule.radius <= 0.0f) return;
+
+    // å½“ãŸã‚Šåˆ¤å®šã¨åŒã˜ä¸¡ç«¯ãƒ»åŠå¾„ã®ã‚«ãƒ—ã‚»ãƒ«ã‚’åŠé€æ˜ã§å¡—ã‚Šã€è¼ªéƒ­ç·šã‚‚é‡ã­ã¦è¦‹ã‚„ã™ãã™ã‚‹ã€‚
+    DxLib::SetDrawBlendMode(DX_BLENDMODE_ALPHA, 96);
+    DxLib::DrawCapsule3D(
+        DxConv::ToVECTOR(capsule.start),
+        DxConv::ToVECTOR(capsule.end),
+        capsule.radius,
+        16,
+        color,
+        color,
+        TRUE);
+    DxLib::SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+	const Vec3 axis = capsule.end - capsule.start;// ã‚«ãƒ—ã‚»ãƒ«ã®è»¸æ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«
+
+	if (axis.LengthSq() <= 1.0e-6f)// è»¸ã®é•·ã•ãŒã»ã¼0ãªã‚‰ã€çƒã¨ã—ã¦æç”»ã™ã‚‹
+    {
+        DrawDebugSphere({ capsule.start, capsule.radius }, color);
+        return;
+    }
+
+    const Vec3 direction = axis.Normalized();
+    const Vec3 reference = std::fabs(direction.y) < 0.95f ? Vec3::Up() : Vec3{ 1.0f, 0.0f, 0.0f };
+    const Vec3 tangent = Vec3::Cross(direction, reference).Normalized();
+    const Vec3 bitangent = Vec3::Cross(direction, tangent).Normalized();
+    constexpr int ringSegments = 12;
+    constexpr float pi = 3.14159265358979323846f;
+
+    for (int i = 0; i < ringSegments; ++i)
+    {
+        const float angle = 2.0f * pi * i / ringSegments;
+        const float nextAngle = 2.0f * pi * (i + 1) / ringSegments;
+        const Vec3 radial = (tangent * std::cos(angle) + bitangent * std::sin(angle)) * capsule.radius;
+        const Vec3 nextRadial = (tangent * std::cos(nextAngle) + bitangent * std::sin(nextAngle)) * capsule.radius;
+        DxLib::DrawLine3D(DxConv::ToVECTOR(capsule.start + radial), DxConv::ToVECTOR(capsule.end + radial), color);
+        DxLib::DrawLine3D(DxConv::ToVECTOR(capsule.start + radial), DxConv::ToVECTOR(capsule.start + nextRadial), color);
+        DxLib::DrawLine3D(DxConv::ToVECTOR(capsule.end + radial), DxConv::ToVECTOR(capsule.end + nextRadial), color);
+    }
+
+    DrawDebugSphere({ capsule.start, capsule.radius }, color);
+    DrawDebugSphere({ capsule.end, capsule.radius }, color);
+}
 
 #endif // _DEBUG
 
 // =====================================
-// ƒ‚ƒfƒ‹”¼“§–¾‰»
+// ãƒ¢ãƒ‡ãƒ«åŠé€æ˜åŒ–
 // =====================================
 
 void Collision::ResetTransparentModels()
@@ -447,10 +494,11 @@ void Collision::SetModelsBetweenTransparent(
     const float alpha
 )
 {
-    // ¡‰ñRay‚É“–‚½‚Á‚½ƒ‚ƒfƒ‹‚ğæ“¾
+    // ä»Šå›Rayã«å½“ãŸã£ãŸãƒ¢ãƒ‡ãƒ«ã‚’å–å¾—
     auto hitModels = collision.GetModelsHitByRay(start, end);
 
-    // V‚µ‚­‘ÎÛ‚É‚È‚Á‚½ƒ‚ƒfƒ‹‚ğ”¼“§–¾‚É‚·‚é
+
+    // æ–°ã—ãå¯¾è±¡ã«ãªã£ãŸãƒ¢ãƒ‡ãƒ«ã‚’åŠé€æ˜ã«ã™ã‚‹
     for (ModelObject* model : hitModels)
     {
         if (model == nullptr) continue;

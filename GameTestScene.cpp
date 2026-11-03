@@ -19,10 +19,8 @@ void GameTestScene::Init()
 {
 	gameContext->Reset();
 
-#ifdef _DEBUG
-	Collision::RegisterDebugCanWatch(
-		this, *gameContext->GetPlayer(), gameContext->GetBoss());
-#endif
+tailWhipHitCapsule_ = {};
+
 
 	playerCamera_.Reset();
 	attackSphereDebugRemaining_ = 0.0f;
@@ -148,19 +146,35 @@ void GameTestScene::Update(float deltaTime)
 
 
 		boss.Update(deltaTime);
-
-#ifdef _DEBUG
-		// 1を押したら、両手攻撃を最初から試す。
-		if (GetButtonDown(PLAYER1) & BUTTON_1)
+		
+		tailWhipHitCapsule_ = {};
+		if (boss.IsTailWhipHitActive())
 		{
-			boss.StartHandAttack();
+			const Vec3 stageCenter = stage.GetWorldPosition();
+			const float stageRadius = stage.GetArenaRadius();
+			const float attackHeight = stage.GetArenaSurfaceY() + 30.0f;//床から＋30の高さで攻撃判定を作る
+
+			tailWhipHitCapsule_ = boss.GetTailWhipHitCapsule(
+				stageCenter,
+				stageRadius,
+				attackHeight);
 		}
+
+		const Collision::Sphere playerBody{ player->GetWorldPosition() + Vec3::Up() * 30.0f, 30.0f };
+		
+		bool tailWhipPlayerHit = boss.IsTailWhipHitActive() &&
+			Collision::IsHitCapsuleSphere(tailWhipHitCapsule_, playerBody);
+		
+		if (tailWhipPlayerHit)
+			player->TakeDamage();
 		if (boss.UpdateHandAttack(deltaTime,
 			player->GetWorldPosition(),
 			stage.GetWorldPosition()))
 		{
 			player->TakeDamage();
 		}
+
+#ifdef _DEBUG
 		auto& playerStateMachine = player->GetStateMachine();
 		if (playerStateMachine.IsAttackBallActive()) // 攻撃球が飛んでいるか
 		{
@@ -242,7 +256,34 @@ void GameTestScene::Render() const
 
 #ifdef _DEBUG
 	(activeCamera_ ? activeCamera_ : &playerCamera_)->ApplyCamera();
-	gameContext->GetBoss().DrawHandAttackDebug();
+	gameContext->GetBoss().DrawClapAttackDebug();
+
+	auto& boss = gameContext->GetBoss();
+	auto* player = gameContext->GetPlayer();
+	// 攻撃中の尻尾カプセルを表示する。黄色は接触中、青は未接触。
+	if (boss.IsTailWhipHitActive() && player != nullptr)
+	{
+		const Collision::Capsule& tail = tailWhipHitCapsule_;
+		const Collision::Sphere playerBody{ player->GetWorldPosition() + Vec3::Up() * 30.0f, 30.0f };
+		if (tail.radius > 0.0f)
+		{
+			const bool touching = Collision::IsHitCapsuleSphere(tail, playerBody);
+			const unsigned int capsuleColor = touching ? DxLib::GetColor(255, 220, 60) : DxLib::GetColor(80, 220, 255);
+			const unsigned int playerColor = touching ? capsuleColor : DxLib::GetColor(255, 120, 80);
+			DxPlus::Debug::SetFormatString(L"TailWhip capsule hit: %s", touching ? L"true" : L"false");
+
+			DxLib::SetUseZBuffer3D(FALSE);
+			DxLib::SetWriteZBuffer3D(FALSE);
+			Collision::DrawDebugCapsule(tail, capsuleColor);
+			Collision::DrawDebugSphere(playerBody, playerColor);
+			DxLib::SetUseZBuffer3D(TRUE);
+			DxLib::SetWriteZBuffer3D(TRUE);
+		}
+		else
+		{
+			DxPlus::Debug::SetString(L"TailWhip capsule: inactive height-limited hitbox");
+		}
+	}
 #endif
 }
 
@@ -301,9 +342,6 @@ void GameTestScene::DrawImGui()
 
 void GameTestScene::End()
 {
-#ifdef _DEBUG
-	Collision::UnregisterDebugCanWatch(this);
-#endif
 }
 
 void GameTestScene::RenderDepth() const

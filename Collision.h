@@ -72,6 +72,8 @@ namespace Collision									// あたり判定用名前空間
     void ClearDebugCanWatch();
     // 球を1個だけ描く共通処理。登録した対象の描画でも同じ処理を使う。
     void DrawDebugSphere(const Sphere& sphere, unsigned int color);
+    // 実際のカプセル判定形状をワイヤーフレームで描画する。
+    void DrawDebugCapsule(const Capsule& capsule, unsigned int color);
 #endif
 	// 透明化したモデルを元に戻す。シーン更新の最初に呼ぶ。
     void ResetTransparentModels();
