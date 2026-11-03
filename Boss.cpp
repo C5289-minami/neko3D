@@ -192,6 +192,12 @@ void Boss::DrawClapAttackDebug() const
 	if (clapSkill_ != nullptr)
 		clapSkill_->DrawDebug();
 }
+
+void Boss::DrawSlamAttackDebug() const
+{
+	if (GetCurrentState() == BossStateType::Attack && activeSkill_ == slamSkill_.get() && slamSkill_ != nullptr)
+		slamSkill_->DrawDebug();
+}
 #endif
 
 void Boss::UpdateAnimation(float deltaTime)
@@ -331,4 +337,25 @@ bool Boss::IsHitByAttackSphere(const Collision::Sphere& sphere) const
 bool Boss::UpdateHandAttack(float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition)
 {
 	return clapSkill_ != nullptr && clapSkill_->UpdateHandAttack(deltaTime, playerPosition, stagePosition);
+}
+
+bool Boss::UpdateSlamAttack(const Vec3& playerPosition, const Vec3& stageCenter)
+{
+	bool hit = false;
+	if (IsSlamSkillActive())
+		hit = slamSkill_->UpdateAttack(playerPosition, stageCenter);
+	return hit;
+}
+
+bool Boss::IsSlamHitActive() const
+{
+	bool hitActive = false;
+	if (IsSlamSkillActive())
+		hitActive = slamSkill_->IsHitActive();
+	return hitActive;
+}
+
+bool Boss::IsSlamSkillActive() const
+{
+	return GetCurrentState() == BossStateType::Attack && slamSkill_ != nullptr && activeSkill_ == slamSkill_.get();
 }
