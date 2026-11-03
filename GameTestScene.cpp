@@ -144,8 +144,8 @@ void GameTestScene::Update(float deltaTime)
 		);
 
 
-
-		boss.Update(deltaTime);
+	
+		boss.Update(deltaTime, player->GetWorldPosition());
 		
 		tailWhipHitCapsule_ = {};
 		if (boss.IsTailWhipHitActive())
