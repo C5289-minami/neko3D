@@ -55,6 +55,7 @@ namespace ResourceKeys
 	inline constexpr const wchar_t* Model_BossAnim_Attck_Hit = L"BossAnimAtkHit";
 	inline constexpr const wchar_t* Model_BossAnim_Damage = L"BossAnimDamage";
 	inline constexpr const wchar_t* Model_BossAnim_Die = L"BossAnimDie";
+	inline constexpr const wchar_t* Model_BossAnim_Nekodamashi = L"BossAnimNekodamashi";
 
 	// ===== Stage Models =====
 	inline constexpr const wchar_t* Model_PillarL = L"hashira_l";
