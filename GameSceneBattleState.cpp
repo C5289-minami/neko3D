@@ -45,6 +45,8 @@ void GameSceneBattleState::Tick(float deltaTime)
     if (taskManager.IsAllFinished())
     {
         gameScene_.GetTutorialChecklist().SetVisible(false);
+        // ’Ê’mæ‚ğ‰ğœ
+        player->GetStateMachine().SetEventCallback({});
     }
 
     // Boss‚ÌèUŒ‚”»’è

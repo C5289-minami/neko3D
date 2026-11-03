@@ -56,7 +56,7 @@ void ResourceManager::LoadAll()
 	LoadModel(ResourceKeys::Model_PlayerSabi, L"./Data/Models/Player/sabi.mv1");
 	LoadModel(ResourceKeys::Model_PlayerKuro, L"./Data/Models/Player/kuro.mv1");
 	//Animations
-	//LoadModel(ResourceKeys::Model_PlayerAnim_Idle, L"./Data/Models/Player/Animation/player_idle.mv1");
+	LoadModel(ResourceKeys::Model_PlayerAnim_Idle, L"./Data/Models/Player/Animation/player_idle.mv1");
 	LoadModel(ResourceKeys::Model_PlayerAnim_Walk, L"./Data/Models/Player/Animation/player_walk.mv1");
 	LoadModel(ResourceKeys::Model_PlayerAnim_Jump, L"./Data/Models/Player/Animation/player_jump.mv1");
 	LoadModel(ResourceKeys::Model_PlayerAnim_Dodge, L"./Data/Models/Player/Animation/player_dodge.mv1");

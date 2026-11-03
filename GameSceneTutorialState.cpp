@@ -194,9 +194,6 @@ void GameSceneTutorialState::Exit()
 
 	auto* player = gameScene_.GetGameContext()->GetPlayer();
 
-	// 通知先を解除
-	player->GetStateMachine().SetEventCallback({});
-
 	player->SetDefMove(false);
 
 	gameScene_.SetDrawPlayerShadow(true);
