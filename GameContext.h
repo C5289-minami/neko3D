@@ -71,9 +71,9 @@ public:
 
 private:
     // Colors
-    int bgRed{ 226 };
-    int bgGreen{ 162 };
-    int bgBlue{ 82 };
+    int bgRed{ 235 };
+    int bgGreen{ 235 };
+    int bgBlue{ 235 };
 
 
 
