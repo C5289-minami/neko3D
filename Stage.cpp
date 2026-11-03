@@ -59,6 +59,9 @@ Stage::Stage() : ActorBase("Stage")
     
 }
 
+// accessor
+int Stage::GetModelHandle() const { return RM().GetModel(stageModel_.GetModelKey()); }
+
 
 void Stage::Init()
 {
