@@ -59,6 +59,13 @@ bool PlayerStateMachine::TryRegisterAttackBallHit()
 	return currentType_ == PlayerStateType::Attack && attackState_.TryRegisterHit();
 }
 
+float PlayerStateMachine::GetAvoidTime() const
+{
+	return currentType_ == PlayerStateType::Damaging
+		? damagingState_.GetAvoidTime()
+		: 0.0f;
+}
+
 bool PlayerStateMachine::TryAvoid()
 {
 	if (currentType_ != PlayerStateType::DoubleJump)

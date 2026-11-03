@@ -290,6 +290,16 @@ void GameTestScene::Render() const
 void GameTestScene::DrawImGui()
 {
 #ifndef NDEBUG
+	auto toImGuiColor = [](unsigned int dxColor)
+	{
+		return ImVec4(
+			static_cast<float>((dxColor >> 16) & 0xFF) / 255.0f,
+			static_cast<float>((dxColor >> 8) & 0xFF) / 255.0f,
+			static_cast<float>(dxColor & 0xFF) / 255.0f,
+			1.0f
+		);
+	};
+
 	if (ImGui::Begin("Player Pillar Elevator"))
 	{
 		auto* player = gameContext->GetPlayer();
@@ -299,6 +309,24 @@ void GameTestScene::DrawImGui()
 #endif
 
 		ImGui::Text("Pillar contact: %s", player->IsTouchingWall() ? "True" : "False");
+
+		const float avoidTime = player->GetStateMachine().GetAvoidTime();
+		if (avoidTime > 0.0f)
+		{
+			ImGui::PushStyleColor(ImGuiCol_PlotHistogram,
+				toImGuiColor(DxLib::GetColor(255, 0, 0)));
+			ImGui::ProgressBar(avoidTime / PlayerDamagingState::AvoidTime, ImVec2(-1.0f, 0.0f), "Avoid 0.3s");
+			ImGui::PopStyleColor();
+		}
+
+		const float avoidInvTime = player->GetAvoidInvTime();
+		if (avoidInvTime > 0.0f)
+		{
+			ImGui::PushStyleColor(ImGuiCol_PlotHistogram,
+				toImGuiColor(DxLib::GetColor(255, 255, 0)));
+			ImGui::ProgressBar(avoidInvTime / Player::AvoidInvTime, ImVec2(-1.0f, 0.0f), "Invincible 0.2s");
+			ImGui::PopStyleColor();
+		}
 
 		ImGui::TextUnformatted(u8"柱のエレベーター");
 		float climbingSpeed = player->GetClimbingSpeed();

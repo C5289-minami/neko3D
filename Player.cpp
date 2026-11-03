@@ -453,16 +453,14 @@ void Player::Draw() const
 bool Player::TakeDamage()
 {
 	if (IsDead() || IsDamaging() || avoidInvTime_ > 0.0f) return false;
-	if (stateMachine_.TryAvoid()) return false;
-
 	--health_;
 	stateMachine_.ChangeState(PlayerStateType::Damaging);
 	return true;
 }
 
-void Player::ApplyAvoid(bool restoreHealth)
+void Player::ApplyAvoid()
 {
-	if (restoreHealth) ++health_;
+	++health_;
 	avoidInvTime_ = AvoidInvTime;
 }
 
