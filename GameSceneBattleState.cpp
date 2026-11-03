@@ -21,7 +21,7 @@ void GameSceneBattleState::Enter()
     // バトル用カメラへ切り替える
     gameScene_.GetCameraDirector().SwitchCamera(
         gameScene_.GetTargetCamera(),
-        1.2f
+        0.8f
     );
 
     player->SetDefMove(false);

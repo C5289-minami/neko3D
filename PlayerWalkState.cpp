@@ -53,5 +53,4 @@ void PlayerWalkState::Tick(float deltaTime)
 
 void PlayerWalkState::Exit()
 {
-	player_.StopMove();
 }
