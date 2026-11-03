@@ -37,6 +37,8 @@ void Boss::Init()
 	// AnimationHandleの初期化
 	const int idleModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Idle);
 	idleAnimHandle_ = AnimationHandle::FromIndex(idleModelHandle, 0);
+	const int clapModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Nekodamashi);
+	ClapAnimHandle_ = AnimationHandle::FromIndex(clapModelHandle, 0);
 
 	const int sippoModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Sippo);
 	tailWhipAnimHandle_ = AnimationHandle::FromIndex(sippoModelHandle, 0);
@@ -66,19 +68,27 @@ void Boss::Reset()
 
 	stateMachine_.Initialize();
 	if (clapSkill_ != nullptr) clapSkill_->Reset();
+	if (slamSkill_ != nullptr) slamSkill_->Reset();
 
 	// アニメーションハンドルを初期化する。
 	const int idleModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Idle);
 	idleAnimHandle_ = AnimationHandle::FromIndex(idleModelHandle, 0);
 
+	const int clapModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Nekodamashi);
+	ClapAnimHandle_ = AnimationHandle::FromIndex(clapModelHandle, 0);
+
 	const int sippoModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Sippo);
 	tailWhipAnimHandle_ = AnimationHandle::FromIndex(sippoModelHandle, 0);
+
 	const int AtkHitModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Attck_Hit);
 	atkHitAnimHnadle_ = AnimationHandle::FromIndex(AtkHitModelHandle, 0);
+
 	const int damageModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Damage);
 	damageAnimHandle_ = AnimationHandle::FromIndex(damageModelHandle, 0);
+
 	const int dieModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Die);
 	dieAnimHandle_ = AnimationHandle::FromIndex(dieModelHandle, 0);
+
 	// 死亡モデルは本体と同じテクスチャを使うため、Bossモデルのテクスチャを共有する。
 	//const int baseModelHandle = RM().GetModel(ResourceKeys::Model_Boss);
 	//const int baseTextureCount = DxLib::MV1GetTextureNum(baseModelHandle);
@@ -147,8 +157,8 @@ void Boss::Draw() const
 #ifdef _DEBUG
 void Boss::DrawClapAttackDebug() const
 {
-	if (clapSkill_ != nullptr)
-		clapSkill_->DrawDebug();
+	if (slamSkill_ != nullptr)
+		slamSkill_->DrawDebug();
 }
 #endif
 
@@ -183,12 +193,12 @@ bool Boss::UseSkill(BossAttackType type)
 	{
 	case BossAttackType::Clap:
 		clapSkill_->Reset();
-		clapSkill_->StartHandAttack();
 		activeSkill_ = clapSkill_.get();
 		break;
 
 	case BossAttackType::Slam:
 		slamSkill_->Reset();
+		slamSkill_->StartHandAttack();
 		activeSkill_ = slamSkill_.get();
 		break;
 
@@ -283,10 +293,10 @@ float Boss::GetAnimTotalTime(BossAnimType::Type type) const
 
 bool Boss::IsHitByAttackSphere(const Collision::Sphere& sphere) const
 {
-	return clapSkill_ != nullptr && clapSkill_->IsHitByAttackSphere(sphere);
+	return slamSkill_ != nullptr && slamSkill_->IsHitByAttackSphere(sphere);
 }
 
 bool Boss::UpdateHandAttack(float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition)
 {
-	return clapSkill_ != nullptr && clapSkill_->UpdateHandAttack(deltaTime, playerPosition, stagePosition);
+	return slamSkill_ != nullptr && slamSkill_->UpdateHandAttack(deltaTime, playerPosition, stagePosition);
 }

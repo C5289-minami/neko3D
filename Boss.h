@@ -104,6 +104,7 @@ private:
 	AnimationHandle damageAnimHandle_{};
 	AnimationHandle atkHitAnimHnadle_{};
 	AnimationHandle dieAnimHandle_{};
+	AnimationHandle ClapAnimHandle_{};
 
 	// Skill
 	std::unique_ptr<BossClapSkill> clapSkill_;
