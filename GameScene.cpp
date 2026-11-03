@@ -137,7 +137,6 @@ void GameScene::Update(float deltaTime)
 			// player.Update(deltaTime, stage, stageCenterPosition);
 			player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
 
-		stage.UpdateAlphaModel(deltaTime, *player);
 		boss.Update(deltaTime);
 		// playerとbossの衝突判定
 		//const bool touching = Collision::UpdateModelContact(playerModel, bossModel);　これなし
@@ -152,7 +151,34 @@ void GameScene::Update(float deltaTime)
 
 	}
 
+
 	stateMachine_.Tick(deltaTime);
+
+	// カメラ透過
+	Collision::ResetTransparentModels();// まずリセットしてから、透過対象を追加する
+
+	if (GetCurrentGameState() == GameStateType::Tutorial)
+	{
+		Collision::SetModelsBetweenTransparent(
+			cameraDirector_.GetCurrentPose().position,
+			player->GetWorldPosition() + Vec3::Up() * 30.0f,
+			tutorialCollision_
+		);
+	}
+	else if (GetCurrentGameState() == GameStateType::Battle)
+	{
+		Collision::SetModelsBetweenTransparent(
+			cameraDirector_.GetCurrentPose().position, 
+			player->GetWorldPosition() + Vec3::Up() * 30.0f,
+			gameContext->GetStage().GetCollision()
+		);
+
+		Collision::SetModelsBetweenTransparent(
+			cameraDirector_.GetCurrentPose().position,
+			boss.GetWorldPosition() + Vec3::Up() * 320.0f,// 顔が見たいので少し上
+			gameContext->GetStage().GetCollision()
+		);
+	}
 
 	if (GetCurrentGameState() == GameStateType::Tutorial)
 	{
@@ -187,7 +213,7 @@ void GameScene::DrawImGui()
 {
 #ifndef NDEBUG
 	ImGui::Begin("GameScene Debug");
-	
+
 	// clear
 	if (ImGui::Button("Clear"))
 	{
@@ -197,7 +223,7 @@ void GameScene::DrawImGui()
 	{
 		stateMachine_.ChangeState(GameStateType::GameOver);
 	}
-	
+
 	ImGui::End();
 #endif
 }
@@ -219,7 +245,6 @@ void GameScene::RenderDepth() const
 
 	// Stage
 	modelToonRenderer_.DrawDepth(stage.GetModelObject());
-	modelToonRenderer_.DrawDepth(stage.GetAlphaModelObject());
 
 	for (const auto& pillar : stage.GetPillarModelObjects())
 	{
@@ -320,7 +345,6 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 
 
-		stage.DrawAlphaModel();
 
 		effectManager.Draw();
 		grid.Draw();
@@ -352,20 +376,11 @@ void GameScene::DrawScene(bool toonEnabled) const
 			}
 		};
 
-
-
-
-	
-
 	// Room
 	for (const auto* allRoom : room.GetAllModelObjects())
 	{
 		drawModel(*allRoom);
 	}
-	// BossとPlayer
-	DrawPlayerShadow();
-	drawModel(boss.GetModelObject());
-	drawModel(player->GetModelObject());
 
 
 	for (const auto& preview : selectPlayers)
@@ -374,13 +389,14 @@ void GameScene::DrawScene(bool toonEnabled) const
 	}
 
 
-	effectManager.Draw();
-	grid.Draw();
+	// BossとPlayer
+	drawModel(boss.GetModelObject());
+	if (drawPlayerShadow_)
+		DrawPlayerShadow();
+	drawModel(player->GetModelObject());
 
 	// Stage
 	drawModel(stage.GetModelObject());
-	drawModel(stage.GetAlphaModelObject());
-
 	for (const auto& pillar : stage.GetPillarModelObjects())
 	{
 		drawModel(pillar);
@@ -391,8 +407,9 @@ void GameScene::DrawScene(bool toonEnabled) const
 		drawModel(model);
 	}
 
-
+	effectManager.Draw();
 	modelToonRenderer_.EndPass();
+	effectManager.Draw();
 	player->GetStateMachine().Draw();
 	DrawTutorialCollisionSpheres();
 }
@@ -420,9 +437,19 @@ void GameScene::DrawPlayerShadow() const
 	// 床へのRaycast
 	const Vec3 playerPos = player->GetWorldPosition();
 
+	// Playerの後方へ30移動
+	const float yaw = player->GetYaw();
+	const Vec3 backward(
+		-sinf(yaw) * 30.0f,
+		0.0f,
+		-cosf(yaw) * 30.0f
+	);
+
+	const Vec3 shadowPos = playerPos + backward;
+
 	Physics::RayHit hit{};
 	if (!collision->RaycastDown(
-		playerPos + Vec3::Up() * 50.0f,
+		shadowPos + Vec3::Up() * 50.0f,
 		500.0f,
 		hit))
 	{
@@ -440,7 +467,7 @@ void GameScene::DrawPlayerShadow() const
 
 	DrawOval(
 		x, y,
-		40, 12,
+		80, 18,
 		GetColor(0, 0, 0),
 		TRUE);
 

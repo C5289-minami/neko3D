@@ -53,7 +53,6 @@ void ShaderTest::Init()
 	// gameContext->GetPlayer().Update(0, gameContext->GetStage());
 	gameContext->GetPlayer()->Update(0, gameContext->GetStage().GetCollision());
 	debugActorsPaused_ = false;
-	gameContext->GetStage().ResetAlphaModel(gameContext->GetPlayer()->GetPosition());
 
 
 }
@@ -105,8 +104,6 @@ void ShaderTest::Update(float deltaTime)
 	player->GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
 	if (updateActors && touching) gameContext->GetPlayer()->TakeDamage();
 
-
-	gameContext->GetStage().UpdateAlphaModel(deltaTime, *gameContext->GetPlayer());
 
 
 	// --- F2 でシェーダー全体のON/OFFを切り替える ---
@@ -366,6 +363,11 @@ void ShaderTest::DrawImGui()
 			u8"影色の強さ",
 			&g_toonSettings.shadow[1],
 			0.0f, 1.0f
+		);
+
+		ImGui::ColorEdit3 (
+			u8"モデルの色",
+			g_toonSettings.modelColor
 		);
 
 		if (ImGui::Button(u8"保存"))

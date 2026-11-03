@@ -363,6 +363,7 @@ void OutlineRenderer::RenderPostProcess() const
     }
 
 
+
     if (outlineEnabled_)
     {
         // アウトラインを適用する。

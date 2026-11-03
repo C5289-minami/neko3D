@@ -111,9 +111,14 @@ void GameSceneTutorialState::Tick(float deltaTime)
 		auto& camera = gameScene_.GetTargetCamera();
 		camera.Initialize(gameScene_.GetCameraDirector().GetCurrentPose());
 
+		// チェックリストを表示する
 		auto& checklist = gameScene_.GetTutorialChecklist();
 		checklist.SetVisible(true);
+		// TargetCameraに切り替えたことを記録する
 		targetCameraSwitched_ = true;
+		// Playerの影を描画する
+		gameScene_.SetDrawPlayerShadow(true);
+
 	}
 
 	switch (cameraState_)
@@ -199,6 +204,7 @@ void GameSceneTutorialState::Exit()
 	player->SetDefMove(false);
 
 	gameScene_.GetTutorialChecklist().SetVisible(false);
+	gameScene_.SetDrawPlayerShadow(true);
 }
 
 void GameSceneTutorialState::FocusTutorialCamera(float deltaTime)

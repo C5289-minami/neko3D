@@ -55,12 +55,15 @@ public:
     bool FindWall(const Vec3& feetPosition, const ModelOb& modelOb, Vec3& wallNormal,
         const Vec3& moveDirection = {}, float* wallTopY = nullptr,
         float detectionMargin = 0.0f, float topHoldDistance = 0.0f,
-
         Vec3* pillarCenter = nullptr, const ModelObject** pillarModel = nullptr) const;
     bool GetPillarBounds(const ModelObject* model, Vec3& center, float& topY) const;
 
     // 種類を問わず全モデルを調べる、汎用のレイ判定。
     bool Raycast(const Vec3& start, const Vec3& end, Physics::RayHit& hit) const;
+    std::vector<ModelObject*> GetModelsHitByRay(
+        const Vec3& start,
+        const Vec3& end
+    ) const;
     // 着地用。床だけを調べる。柱は接触判定のみ。
     bool RaycastDown(const Vec3& origin, float maxDistance, Physics::RayHit& hit) const;
 
@@ -71,6 +74,7 @@ public:
     bool RaycastUp(const Vec3& origin, float maxDistance, Physics::RayHit& hit) const;
     // Refresh 後の、拡大縮小・回転を含めたモデルの幅・高さ・奥行き。
     Vec3 GetSize(const ModelObject& model) const;
+
 
 private:
     struct Entry;

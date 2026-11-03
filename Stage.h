@@ -28,7 +28,6 @@ public:
 	const std::array<ModelObject, 3>& GetPillarModelObjects() const { return stagePillars_; }
 	std::array<ModelObject, 2>& GetStageModelObjects() { return stageModels_; }
 	const std::array<ModelObject, 2>& GetStageModelObjects() const { return stageModels_; }
-	ModelObject GetAlphaModelObject() const { return alphaModel_; }
 
     // void GetCollisionModelHandles(std::vector<int>& handles) const;//modelの判定をまとめてやる
 
@@ -53,10 +52,6 @@ public:
 	void Update(float deltaTime) override;
 	void Draw() const override;
 
-	void ResetAlphaModel(const Vec3& playerPosition);
-	void UpdateAlphaModel(float deltaTime, const Player& player);
-	void DrawAlphaModel() const;
-	float GetAlphaModelOpacity() const { return alphaModel_.GetAlpha(); }
 
 private:
     void UpdateArenaBounds();
@@ -79,9 +74,9 @@ private:
 
 	float HightSize{ 0.0f };
 
-	ModelObject alphaModel_;
 	ModelObject stageModel_;
-	bool alphaModelReady_{};
+
 	float arenaRadius_{};
 	float arenaSurfaceY_{};
+
 };

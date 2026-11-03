@@ -19,7 +19,7 @@
 
 namespace
 {
-    // “§‰ß•\¦‚·‚éƒXƒe[ƒWƒ‚ƒfƒ‹‚Ì‘å‚«‚³‚ÆAƒvƒŒƒCƒ„[“ªã‚Ì—]”’B
+    // ï¿½ï¿½ï¿½ß•\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Xï¿½eï¿½[ï¿½Wï¿½ï¿½ï¿½fï¿½ï¿½ï¿½Ì‘å‚«ï¿½ï¿½ï¿½ÆAï¿½vï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½Ì—]ï¿½ï¿½ï¿½B
     float AlphaStageScale = 0.15f;
     float AlphaStageHeadClearance = 40.0f;
 
@@ -34,8 +34,8 @@ Stage::Stage() : ActorBase("Stage")
 
     stageModels_[0].SetModelKey(ResourceKeys::Model_stand_l);
     stageModels_[1].SetModelKey(ResourceKeys::Model_stand_m);
-    // ’n–Ê‚Ì“–‚½‚è”»’è‚Ég‚¤ƒ‚ƒfƒ‹
-    stageModel_.SetModelKey(ResourceKeys::Model_StageFbx);
+    // åœ°é¢ã®å½“ãŸã‚Šåˆ¤å®šã«ä½¿ã†ãƒ¢ãƒ‡ãƒ«
+    stageModel_.SetModelKey(ResourceKeys::Model_Stage);
 
     for (auto& model : stagePillars_) model.SetOwner(*this);
     for (auto& model : stageModels_) model.SetOwner(*this);
@@ -64,256 +64,11 @@ void Stage::Init()
 {
     Reset();
 }
-// ‹ŒFStage ê—p‚¾‚Á‚½”»’èˆ—BŒ»İ‚Ìˆ—‚Í ModelCollision.cpp ‚É‚ ‚éB
-// void Stage::SetupCollisionInfo()//“–‚½‚è”»’è‚ÌƒZƒbƒgƒAƒbƒv
-// {
-    // const auto setup = [this](const ModelObject& model)//ƒ‰ƒ€ƒ_®‚Å‘‚«Š·‚¦‚ê‚é‚æ‚¤‚É
-    // {
-        // int handle = RM().GetModel(model.GetModelKey());
-        // if (handle < 0) return -1;
-
-        // // •`‰æ‘O‚Å‚àA•Û‘¶Ï‚İ‚Ì”z’uE‰ñ“]EŠg‘å—¦‚Å”»’è‚Å‚«‚é‚æ‚¤‚É‚·‚éB
-        // model.WithParentTransform(GetPosition(), GetRotation()).Draw();
-
-        // int result = MV1SetupCollInfo(handle, -1, 8, 8, 8);
-        // if (result < 0) return -1;
-
-        // return handle;
-    // };
-
-    // groundCollisionHandle_ = setup(stageModel_);
-    // for (int i = 0; i < stagePillars_.size(); ++i)
-    // {
-        // pillarCollisionHandles_[i] = setup(stagePillars_[i]);
-    // }
-    // for (int i = 0; i < stageModels_.size(); ++i)
-    // {
-        // stageCollisionHandles_[i] = setup(stageModels_[i]);
-    // }
-    // // ƒRƒŠƒWƒ‡ƒ“î•ñ‚ÍRM‚É‚æ‚éMV1DeleteModel‚Éƒ‚ƒfƒ‹‚Æˆê‚É‰ğ•ú‚³‚ê‚éB
-// }
-
-// void Stage::RefreshCollisionInfo()
-// {
-    // const auto refresh = [this](const ModelObject& model, int handle)
-    // {
-        // if (handle < 0) return -1;
-        // // ƒ‚ƒfƒ‹‚ª‰ğ•úE·‚µ‘Ö‚¦‚³‚ê‚Ä‚¢‚½‚çAŒÃ‚¢ƒnƒ“ƒhƒ‹‚Íg‚í‚È‚¢B
-        // if (RM().GetModel(model.GetModelKey()) != handle) return -1;
-
-        // model.WithParentTransform(GetPosition(), GetRotation()).Draw();
-
-		// int result = MV1RefreshCollInfo(handle, -1);// ƒRƒŠƒWƒ‡ƒ“î•ñ‚ğXV‚·‚é
-        // if (result < 0) return -1;
-
-        // return handle;
-    // };
-
-    // groundCollisionHandle_ = refresh(stageModel_, groundCollisionHandle_);
-    // for (int i = 0; i < stagePillars_.size(); ++i)
-    // {
-        // pillarCollisionHandles_[i] = refresh(stagePillars_[i], pillarCollisionHandles_[i]);
-    // }
-    // for (int i = 0; i < stageModels_.size(); ++i)
-    // {
-        // stageCollisionHandles_[i] = refresh(stageModels_[i], stageCollisionHandles_[i]);
-    // }
-// }
-
-// void Stage::GetCollisionModelHandles(std::vector<int>& handles) const
-// {
-    // // ŒÄ‚Ño‚µŒ³‚Ì”z—ñ‚ğAŒ»İg‚¦‚éƒnƒ“ƒhƒ‹‚Ìˆê——‚ÉXV‚·‚éB
-    // handles.clear();
-    // handles.reserve(pillarCollisionHandles_.size() + stageCollisionHandles_.size() + 1);
-
-    // if (groundCollisionHandle_ >= 0)
-    // {
-        // handles.emplace_back(groundCollisionHandle_);
-    // }
-    // for (int handle : pillarCollisionHandles_)
-    // {
-        // if (handle >= 0)
-        // {
-            // handles.emplace_back(handle);
-        // }
-    // }
-    // for (int handle : stageCollisionHandles_)
-    // {
-        // if (handle >= 0)
-        // {
-            // handles.emplace_back(handle);
-        // }
-    // }
-// }
-
-// bool Stage::IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float radius) const
-// {
-    // if (radius <= 0.0f) return false;
-
-    // for (int handle : pillarCollisionHandles_)
-    // {
-        // if (handle < 0) continue;
-
-        // const auto result = MV1CollCheck_Capsule(
-            // handle, -1, DxConv::ToVECTOR(capsuleStart), DxConv::ToVECTOR(capsuleEnd), radius);
-        // const bool hit = result.HitNum > 0;
-        // // ”»’èŒ‹‰Ê‚Ì”z—ñ‚ÍA“–‚½‚Á‚½ê‡‚à“–‚½‚ç‚È‚¢ê‡‚à‰ğ•ú‚·‚éB
-        // MV1CollResultPolyDimTerminate(result);
-        // if (hit) return true;
-    // }
-    // return false;
-// }
-
-// bool Stage::FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal, const Vec3& moveDirection,
-    // float* wallTopY, bool keepTopContact) const
-// {
-    // wallNormal = {};
-    // if (wallTopY) *wallTopY = 0.0f;
-
-    // // ˆÚ“®‚ÌÕ“Ë”»’è‚æ‚è­‚µL‚¢”ÍˆÍ‚Å‘¤–Ê‚ğE‚¤B‘Ì‚Ì‚‚³‚Í•Ï‚¦‚È‚¢B
-    // const float detectionRadius = Const::PLAYER_RADIUS + Const::PLAYER_CLIMB_DETECTION_MARGIN;
-    // // Climbing‚Ì‘«Œ³‚ªã‚É‚ ‚é‚©‚Ì”»’èu
-    // const float lowerReach = keepTopContact ? Const::PLAYER_CLIMB_TOP_HOLD_DISTANCE : 0.0f;
-    // const Vec3 start = feetPosition + Vec3::Up() * (Const::PLAYER_RADIUS - lowerReach);
-    // const Vec3 end = feetPosition + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
-    // const float headY = feetPosition.y + Const::PLAYER_HEIGHT;
-
-    // const Vec3 direction = Vec3(moveDirection.x, 0.0f, moveDirection.z).Normalized();
-    // bool foundWall = false;
-    // float bestDirection = 2.0f;
-    // float bestDistance = detectionRadius;
-
-    // for (int handle : pillarCollisionHandles_)
-    // {
-        // if (handle < 0) continue;
-
-        // const auto result = MV1CollCheck_Capsule(handle, -1,
-            // DxConv::ToVECTOR(start),
-            // DxConv::ToVECTOR(end),
-            // detectionRadius);
-
-        // for (int i = 0; i < result.HitNum; ++i)
-        // {
-            // const auto& poly = result.Dim[i];
-            // const Vec3 normal = DxConv::ToVec3(poly.Normal).Normalized();
-
-            // // Œü‚«‚ª‚È‚¢–Ê‚âAã‰º‚ğŒü‚¢‚½–ÊEÎ–Ê‚Íg‚í‚È‚¢B
-            // if (normal.LengthSq() == 0.0f || std::abs(normal.y) > 0.01f)
-            // {
-                // continue;
-            // }
-
-            // float top = (std::max)({ poly.Position[0].y, poly.Position[1].y, poly.Position[2].y });
-            // float bottom = (std::min)({ poly.Position[0].y, poly.Position[1].y, poly.Position[2].y });
-
-
-            // // ‘«Œ³‚ªã’[•t‹ß‚É’B‚µ‚Ä‚¢‚é‚©
-            // const bool atTop = feetPosition.y >= top - Const::PLAYER_SKIN;
-            // if (atTop)
-            // {
-                // // ’Êí‚ÍA‚±‚Ì‘¤–Ê‚ğ•Ç‚Æ‚µ‚Äˆµ‚í‚ñ
-                // if (!keepTopContact)
-                // {
-                    // continue;
-                // }
-
-                // // climbing‚Åã‚Ü‚ÅŒ¾‚Á‚½‚ç
-                // const bool aboveTop = feetPosition.y > top + Const::PLAYER_SKIN;
-                // if (aboveTop)
-                // {
-                    // continue;
-                // }
-            // }
-
-            // // ‘Ì‚Ì‚‚³‚Æd‚È‚ç‚È‚¢‘¤–Ê‚Íg‚í‚È‚¢B
-            // if (headY <= bottom) continue;
-
-            // Vec3 outward = Vec3(normal.x, 0.0f, normal.z).Normalized();
-            // const float signedDistance = Vec3::Dot(feetPosition - DxConv::ToVec3(poly.Position[0]), outward);
-            // // ƒ‚ƒfƒ‹‚Ì–Ê‚Ì•\— ‚É‚æ‚ç‚¸A•Ç‚©‚çƒvƒŒƒCƒ„[‚ÖŒü‚­–@ü‚É‚»‚ë‚¦‚éB
-            // if (signedDistance < 0.0f) outward = -outward;
-
-            // const float wallDirection = Vec3::Dot(direction, outward);
-            // const float distance = std::abs(signedDistance);
-            // // Šp‚Å•¡”‚Ì–Ê‚ÉG‚ê‚½ê‡‚àA“ü—Í‚ªŒü‚©‚Á‚Ä‚¢‚é–Ê‚ğ—Dæ‚·‚éB
-            // if (!foundWall || wallDirection < bestDirection - 0.0001f ||
-                // (std::abs(wallDirection - bestDirection) <= 0.0001f &&
-                    // distance < bestDistance))
-            // {
-				// wallNormal = outward;           // •Ç‚Ì–@ü‚ÍAƒvƒŒƒCƒ„[‚Ìis•ûŒü‚ÉŒü‚©‚¤‚æ‚¤‚É‚»‚ë‚¦‚éB
-				// bestDirection = wallDirection;  // •Ç‚Ì–@ü‚Æis•ûŒü‚Ì“àÏ‚ªÅ‚à¬‚³‚¢–Ê‚ğ—Dæ‚·‚éB
-                // bestDistance = distance;        // •Ç‚Ü‚Å‚Ì‹——£‚ªÅ‚à‹ß‚¢–Ê‚ğ—Dæ‚·‚éB
-                // if (wallTopY) *wallTopY = top;
-				// foundWall = true;               //  •Ç‚Ì–@ü‚ªŒ©‚Â‚©‚Á‚½‚±‚Æ‚ğ‹L˜^‚·‚éB
-            // }
-        // }
-
-        // // ”»’èŒ‹‰Ê‚ğ‰ğ•ú‚µ‚Ä‚©‚çAŒ©‚Â‚©‚Á‚½‚©‚Ç‚¤‚©‚ğ•Ô‚·B
-        // MV1CollResultPolyDimTerminate(result);
-    // }
-    // return foundWall;
-// }
-
-// Vec3 Stage::SlideAlongPillars(const Vec3& oldPosition, const Vec3& desiredPosition, bool& touched) const
-// {
-   
-    // Vec3 move{ desiredPosition.x - oldPosition.x, 0.0f, desiredPosition.z - oldPosition.z };
-    // Vec3 candidate = desiredPosition;
-    // touched = false;
-    // // —×Ú‚·‚é’Œ‚Ì‘¤–Ê‚àl—¶‚µ‚ÄA”‰ñ”»’è‚µ’¼‚·BˆÚ“®‘¬“x‚Ì‘‰Á‚âis•ûŒü‚Ì©“®•â³‚Ís‚í‚È‚¢B
-    // for (int attempt = 0; attempt < 4; ++attempt)
-    // {
-        // //ˆÚ“®‚µ‚Ä‚àPlayer‚Ì“–‚½‚è”»’è‚ğ’u‚¢‚Ä‚é
-        // const Vec3 start = candidate + Vec3::Up() * Const::PLAYER_RADIUS;
-        // const Vec3 end = candidate + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
-
-        // Vec3 wallNormal{};
-        // float mostInward = -0.0001f;
-
-        // for (int handle : pillarCollisionHandles_)
-        // {
-            // if (handle < 0) continue;
-
-            // const auto result = MV1CollCheck_Capsule(handle, -1,
-                // DxConv::ToVECTOR(start), DxConv::ToVECTOR(end), Const::PLAYER_RADIUS);
-
-            // for (int i = 0; i < result.HitNum; ++i)
-            // {
-                // const auto& poly = result.Dim[i];
-                // Vec3 normal = DxConv::ToVec3(poly.Normal).Normalized();
-
-                // if (std::abs(normal.y) > 0.01f) continue; // ’Œ‚Ìã‰º–Ê‚ÆÎ–Ê‚Í‘ÎÛŠO‚É‚·‚éB
-
-                // float top = (std::max)(poly.Position[0].y,
-                    // (std::max)(poly.Position[1].y, poly.Position[2].y));
-
-                // if (candidate.y >= top - Const::PLAYER_SKIN) continue; // ’Œ‚Ìã‚É‚¢‚éê‡‚Í‘¤–Ê‚Æ‚ÌÕ“Ë‚ğˆ—‚µ‚È‚¢B
-
-                // normal.y = 0.0f;
-                // normal = normal.Normalized();
-				// //•Ç‚ÉŒü‚©‚¤ˆÚ“®‚ÌÛ‚ÉAÅ‚à•Ç‚ÉŒü‚©‚¤–@ü‚ğÌ—p‚·‚éB
-                // float inward = Vec3::Dot(move, normal);
-
-                // if (inward < mostInward)
-                // { mostInward = inward; wallNormal = normal; }
-            // }
-            // MV1CollResultPolyDimTerminate(result);
-        // }
-        // if (wallNormal.LengthSq() == 0.0f) return candidate; // •Ç‚©‚ç—£‚ê‚éˆÚ“®‚àŠÜ‚ŞB
-        // touched = true;
-
-        // // •Ç‚Ö“ü‚è‚Ş¬•ª‚¾‚¯‚ğæ‚èœ‚«A‰¡•ûŒü‚É’e‚«”ò‚Î‚³‚È‚¢B
-        // move -= wallNormal * Vec3::Dot(move, wallNormal);
-        // candidate = { oldPosition.x + move.x, desiredPosition.y, oldPosition.z + move.z };
-    // }
-    // // ÅŒã‚ÌÄ”»’è‚Å‚àˆÚ“®‚Å‚«‚È‚¯‚ê‚ÎA‚±‚ÌƒtƒŒ[ƒ€‚ÌˆÚ“®‘O‚Ì…•½ˆÊ’u‚ğˆÛ‚·‚éB
-    // return { oldPosition.x, desiredPosition.y, oldPosition.z };
-// }
 
 
 void Stage::UpdateArenaBounds()
 {
-	// ƒXƒe[ƒW°ƒ‚ƒfƒ‹‚ÌŠOü‚Æã–Ê‚ğAUŒ‚”ÍˆÍ‚ÌŠî€‚Æ‚µ‚Ä•Û‘¶‚·‚éB
+	// ï¿½Xï¿½eï¿½[ï¿½Wï¿½ï¿½ï¿½ï¿½ï¿½fï¿½ï¿½ï¿½ÌŠOï¿½ï¿½ï¿½Æï¿½Ê‚ï¿½ï¿½Aï¿½Uï¿½ï¿½ï¿½ÍˆÍ‚ÌŠî€ï¿½Æ‚ï¿½ï¿½Ä•Û‘ï¿½ï¿½ï¿½ï¿½ï¿½B
 	const Collision::Ellipsoid arenaBounds = stageModel_.GetHitEllipsoid();
 	const Vec3 arenaCenter = GetWorldPosition();
 	arenaRadius_ = (std::max)(
@@ -323,9 +78,9 @@ void Stage::UpdateArenaBounds()
 }
 void Stage::Reset()
 {
-    // ‰ŠúˆÊ’uE‰ñ“]EŠg‘å—¦‚ÍJSONƒtƒ@ƒCƒ‹‚©‚ç“Ç‚İ‚Ş
+    // ï¿½ï¿½ï¿½ï¿½ï¿½Ê’uï¿½Eï¿½ï¿½]ï¿½Eï¿½gï¿½å—¦ï¿½ï¿½JSONï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç‚İï¿½ï¿½ï¿½
     MObjs().LoadActorTransform(*this);
-    // ƒ‚ƒfƒ‹‚Ìƒ[ƒh
+    // ï¿½ï¿½ï¿½fï¿½ï¿½ï¿½Ìƒï¿½ï¿½[ï¿½h
     for (auto& model : stagePillars_)
     {
         model.Load();
@@ -341,96 +96,39 @@ void Stage::Reset()
 
 
     // RefreshCollisionInfo();
-   
-    // ƒ‚ƒfƒ‹‚²‚Æ‚É”»’è‚Ì–ğŠ„‚ğ“o˜^‚·‚éBŒ`E‘å‚«‚³‚Íƒ‚ƒfƒ‹‚©‚çæ“¾‚³‚ê‚éB
+
+    // ãƒ¢ãƒ‡ãƒ«ã”ã¨ã«åˆ¤å®šã®å½¹å‰²ã‚’ç™»éŒ²ã™ã‚‹ã€‚å½¢ãƒ»å¤§ãã•ã¯ãƒ¢ãƒ‡ãƒ«ã‹ã‚‰å–å¾—ã•ã‚Œã‚‹ã€‚
     collision_.Clear();
     collision_.AddModel(stageModel_, ModelCollision::Surface::Floor);
-   
+
     for (const auto& model : stagePillars_)
         collision_.AddModel(model, ModelCollision::Surface::Pillar);
-    
+
     for (const auto& model : stageModels_)
         collision_.AddModel(model, ModelCollision::Surface::Stand);
-    
-    collision_.Refresh();
-    
-    // “§‰ßƒ‚ƒfƒ‹‚Ì”z’uî•ñ‚Í–ˆ‰ñƒŠƒZƒbƒg
-    alphaModelReady_ = false;
-    // ƒŠƒZƒbƒg’¼Œã‚Í“§‰ßŒø‰Ê‚ªc‚ç‚È‚¢‚æ‚¤‚É•s“§–¾“x‚ğ‰Šú’l‚Ö
-    alphaModel_.SetAlpha(1.0f);
-}
 
+    collision_.Refresh();
+
+}
 void Stage::Update(float deltaTime)
 {
 }
 
 void Stage::Draw() const
 {
-    // ’Œ‚Æ‘äÀ‚ğ‚»‚ê‚¼‚ê•`‰æ
+    // ï¿½ï¿½ï¿½Æ‘ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ê‚¼ï¿½ï¿½`ï¿½ï¿½
     for (const auto& model : stagePillars_)
     {
-        model.WithParentTransform(GetPosition(), GetRotation()).Draw();
+        model.Draw();
     }
     for (const auto& model : stageModels_)
     {
-        model.WithParentTransform(GetPosition(), GetRotation()).Draw();
+        model.Draw();
     }
 
-    stageModel_.WithParentTransform(GetPosition(), GetRotation()).Draw();
-}
-void Stage::ResetAlphaModel(const Vec3& playerPosition)
-{
-
-    alphaModelReady_ = false;
-
-    // ResourceKeys
-    alphaModel_.SetModelKey(ResourceKeys::Model_StageAlpha);
-    alphaModel_.SetScale({ AlphaStageScale, AlphaStageScale, AlphaStageScale });
-    alphaModel_.SetRotation({});
-    alphaModel_.SetCenter({});
-    alphaModel_.SetAlpha(1.0f);
-
-    const int handle = RM().GetModel(ResourceKeys::Model_StageAlpha);
-    if (handle < 0) return;
-
-    MV1SetPosition(handle, VGet(0.0f, 0.0f, 0.0f));
-    MV1SetRotationXYZ(handle, VGet(0.0f, 0.0f, 0.0f));
-    MV1SetScale(handle, DxConv::ToVECTOR(alphaModel_.GetScale()));// ƒXƒP[ƒ‹‚ğ“K—p‚µ‚Ä‚©‚ç”ÍˆÍ‚ğæ“¾‚·‚é‚½‚ßAæ‚ÉƒXƒP[ƒ‹‚ğƒZƒbƒg‚·‚éB
-    if (MV1SetupReferenceMesh(handle, -1, TRUE, TRUE) < 0) return;
-
-    MV1RefreshReferenceMesh(handle, -1, TRUE, TRUE);
-    const auto mesh = MV1GetReferenceMesh(handle, -1, TRUE, TRUE);
-    const bool hasVertices = mesh.VertexNum > 0;
-
-    //ƒXƒP[ƒ‹“K—pŒã‚Ìƒ‚ƒfƒ‹‚Ì”ÍˆÍ‚Æ‚µ‚Ä•Û‘¶‚·‚éB
-    const Vec3 minimum{ mesh.MinPosition.x, mesh.MinPosition.y, mesh.MinPosition.z };
-    const Vec3 maximum{ mesh.MaxPosition.x, mesh.MaxPosition.y, mesh.MaxPosition.z };
-
-    // QÆƒƒbƒVƒ…‚Í”ÍˆÍ‚ğæ“¾‚µ‚½‚ç‰ğ•ú‚·‚éB
-	MV1TerminateReferenceMesh(handle, -1, TRUE, TRUE);// QÆƒƒbƒVƒ…‚ğ‰ğ•ú‚µ‚È‚¢‚ÆAƒ‚ƒfƒ‹‚Ì”ÍˆÍ‚ª³‚µ‚­æ“¾‚Å‚«‚È‚¢ê‡‚ª‚ ‚éB ‚Ö‚¥
-    if (!hasVertices) return;
-
-   //Player‚Ì“ª‚Ìã‚Éo‚Ä‚­‚é
-    alphaModel_.SetPosition({
-        playerPosition.x - (minimum.x + maximum.x) * 0.5f,
-        playerPosition.y + Const::PLAYER_HEIGHT + AlphaStageHeadClearance - minimum.y,
-        playerPosition.z - (minimum.z + maximum.z) * 0.5f
-    });
-
-    alphaModelReady_ = true;
+    stageModel_.Draw();
 }
 
-void Stage::UpdateAlphaModel(float deltaTime, const Player& player)
-{
-    if (!alphaModelReady_) return;
-
-    alphaModel_.FadeTo(player, AlphaStageFadeSpeed, deltaTime);
-}
-
-void Stage::DrawAlphaModel() const
-{
-    if (alphaModelReady_) alphaModel_.Draw();
-}
 
 
 void Stage::DrawDebugUI()

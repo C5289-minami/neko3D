@@ -1,65 +1,99 @@
 // ================================
 // Gameplay/Collision/Collision.cpp
 // ================================
+
 #include "Collision.h"
+#include "ModelCollision.h"
+#include "DrawableObject.h"
+
 #include "DxConv.h"
 #include "DxPlus/Debug.h"
-#include "Player.h"
-#include "Boss.h"
-#include <cmath>
 #include "DxLib.h"
 
+#include "Player.h"
+#include "Boss.h"
+#include "Consts.h"
+
+#include <cmath>
 #include <vector>
+#include <algorithm>
 
-namespace Collision
+// =====================================
+// åŠé€æ˜ãƒ¢ãƒ‡ãƒ«ç®¡ç†
+// =====================================
+namespace
 {
-	bool IsHitSphereSphere(const Vec3& centerA, float radiusA,
-		const Vec3& centerB, float radiusB)
-	{
-		// 2‚Â‚Ì‹…‚Ì’†S‚Ì·‚ğ‹‚ß‚é
-		Vec3 diff = centerB - centerA;
-
-		// 2‚Â‚Ì‹…‚Ì”¼Œa‚ğ‘«‚·
-		float radiusSum = radiusA + radiusB;
-
-		// ’†SŠÔ‹——£‚ª”¼Œa‚Ì‡ŒvˆÈ‰º‚È‚ç“–‚½‚Á‚Ä‚¢‚é
-		return diff.LengthSq() <= radiusSum * radiusSum;
-	}
-
-	bool IsHitSphereSphere(const Sphere& sphereA, const Sphere& sphereB)
-	{
-		// Sphere‚Ì’†SÀ•W‚Æ”¼Œa‚ğg‚Á‚Ä”»’è‚·‚é
-		return IsHitSphereSphere(sphereA.center, sphereA.radius,
-			sphereB.center, sphereB.radius);
-	}
-	bool IsHitCapsuleSphere(const Capsule& capsule, const Sphere& sphere)
-	{
-		// ‹…‚Ì’†S‚ğƒJƒvƒZƒ‹‚Ìü•ª‚É“Š‰e‚µAü•ª‚ÌŠO‚È‚ç’[“_‚Éû‚ß‚éB
-		// ü•ª‚Ì’·‚³‚ª0‚È‚çAn“_‚ğÅ‹ß“_‚Æ‚µ‚Äˆµ‚¤B
-		const Vec3 segment = capsule.end - capsule.start;
-		const float segmentLengthSq = segment.LengthSq();
-		float t = 0.0f;
-		if (segmentLengthSq > 0.0f)
-		{
-			t = Vec3::Dot(sphere.center - capsule.start, segment) / segmentLengthSq;
-			if (t < 0.0f) t = 0.0f;
-			if (t > 1.0f) t = 1.0f;
-		}
-		// ü•ªã‚ÌÅ‹ß“_‚Ü‚Å‚Ì‹——£‚ÆA—¼•û‚Ì”¼Œa‚ÅÚG‚ğ”»’è‚·‚éB
-		const Vec3 closestPoint = capsule.start + segment * t;
-
-		const float radiusSum = capsule.radius + sphere.radius;
-
-		return (sphere.center - closestPoint).LengthSq() <= radiusSum * radiusSum;
-	}
-}
-namespace Collision
-{
-    bool IsHitEllipsoidEllipsoid(const Ellipsoid& a, const Ellipsoid& b)
+    struct TransparentModelData
     {
+        ModelObject* model{};
+        float originalAlpha{ 1.0f };
+    };
 
-		// 2‚Â‚Ì‘È‰~‘Ì‚Ì”¼Œa‚ª0ˆÈ‰º‚¾‚Á‚½‚ç“–‚½‚è”»’è‚ğs‚í‚È‚¢
-		if (a.radii.x <= 0.0f || a.radii.y <= 0.0f || a.radii.z <= 0.0f ||
+    std::vector<TransparentModelData> transparentModels;
+}
+
+// =====================================
+// Collision
+// =====================================
+namespace Collision
+{
+    bool IsHitSphereSphere(
+        const Vec3& centerA,
+        float radiusA,
+        const Vec3& centerB,
+        float radiusB)
+    {
+        // 2ã¤ã®çƒã®ä¸­å¿ƒã®å·®ã‚’æ±‚ã‚ã‚‹
+        Vec3 diff = centerB - centerA;
+
+        // 2ã¤ã®çƒã®åŠå¾„ã‚’è¶³ã™
+        float radiusSum = radiusA + radiusB;
+
+        // ä¸­å¿ƒé–“è·é›¢ãŒåŠå¾„ã®åˆè¨ˆä»¥ä¸‹ãªã‚‰å½“ãŸã£ã¦ã„ã‚‹
+        return diff.LengthSq() <= radiusSum * radiusSum;
+    }
+
+    bool IsHitSphereSphere(const Sphere& sphereA, const Sphere& sphereB)
+    {
+        // Sphereã®ä¸­å¿ƒåº§æ¨™ã¨åŠå¾„ã‚’ä½¿ã£ã¦åˆ¤å®šã™ã‚‹
+        return IsHitSphereSphere(
+            sphereA.center, sphereA.radius,
+            sphereB.center, sphereB.radius);
+    }
+
+    bool IsHitCapsuleSphere(const Capsule& capsule, const Sphere& sphere)
+    {
+        // çƒã®ä¸­å¿ƒã‚’ã‚«ãƒ—ã‚»ãƒ«ã®ç·šåˆ†ã«æŠ•å½±ã™ã‚‹
+        const Vec3 segment = capsule.end - capsule.start;
+        const float segmentLengthSq = segment.LengthSq();
+
+        float t = 0.0f;
+
+        if (segmentLengthSq > 0.0f)
+        {
+            t = Vec3::Dot(
+                sphere.center - capsule.start,
+                segment) / segmentLengthSq;
+
+            if (t < 0.0f) t = 0.0f;
+            if (t > 1.0f) t = 1.0f;
+        }
+
+        // ç·šåˆ†ä¸Šã®æœ€è¿‘ç‚¹
+        const Vec3 closestPoint = capsule.start + segment * t;
+
+        const float radiusSum = capsule.radius + sphere.radius;
+
+        return (sphere.center - closestPoint).LengthSq()
+            <= radiusSum * radiusSum;
+    }
+
+    bool IsHitEllipsoidEllipsoid(
+        const Ellipsoid& a,
+        const Ellipsoid& b)
+    {
+        // åŠå¾„ãŒ0ä»¥ä¸‹ã ã£ãŸã‚‰åˆ¤å®šã—ãªã„
+        if (a.radii.x <= 0.0f || a.radii.y <= 0.0f || a.radii.z <= 0.0f ||
             b.radii.x <= 0.0f || b.radii.y <= 0.0f || b.radii.z <= 0.0f)
         {
             return false;
@@ -67,31 +101,39 @@ namespace Collision
 
         const Vec3 difference = b.center - a.center;
         const Vec3 radiiSum = a.radii + b.radii;
+
         const Vec3 normalized{
             difference.x / radiiSum.x,
             difference.y / radiiSum.y,
             difference.z / radiiSum.z
         };
+
         return normalized.LengthSq() <= 1.0f;
     }
-
-
-
 }
 
+// =====================================
+// Debugç”¨ã®å†…éƒ¨å‡¦ç†
+// =====================================
 #ifdef _DEBUG
+
 namespace
 {
     struct DebugCanWatchEntry
     {
         const void* owner{};
+
         Collision::DebugSphereProvider sphereA;
         Collision::DebugSphereProvider sphereB;
+
         const Player* player{ nullptr };
         const Boss* boss{ nullptr };
+
         Collision::DebugCanWatchState state{};
         Collision::Sphere drawSphere{};
+
         bool hasUpdated{ false };
+
         const wchar_t* nameA{ L"A" };
         const wchar_t* nameB{ L"B" };
     };
@@ -106,7 +148,6 @@ namespace
     {
         std::vector<DebugCanWatchEntry>& contacts = DebugCanWatchEntries();
 
-        // æ“ª‚©‚ç‡”Ô‚ÉA“¯‚¶owner‚Ì“o˜^‚ğ’T‚·B
         for (std::size_t i = 0; i < contacts.size(); i++)
         {
             if (contacts[i].owner == owner)
@@ -121,9 +162,11 @@ namespace
     Collision::Sphere GetPlayerDebugSphere(const Player& player)
     {
         Collision::Sphere sphere;
+
         sphere.center = player.GetPosition();
         sphere.center.y += Const::PLAYER_HEIGHT * 0.5f;
         sphere.radius = Const::PLAYER_RADIUS;
+
         return sphere;
     }
 
@@ -135,11 +178,12 @@ namespace
         sphere.center = body.center;
         sphere.radius = body.radii.x;
 
-        // xAyAz‚Ì’†‚Åˆê”Ô‘å‚«‚¢”¼Œa‚ğg‚¤B
+        // xã€yã€zã®ä¸­ã§ä¸€ç•ªå¤§ãã„åŠå¾„ã‚’ä½¿ã†
         if (body.radii.y > sphere.radius)
         {
             sphere.radius = body.radii.y;
         }
+
         if (body.radii.z > sphere.radius)
         {
             sphere.radius = body.radii.z;
@@ -148,64 +192,69 @@ namespace
         return sphere;
     }
 
-    Vec3 GetDebugSpherePoint(const Collision::Sphere& sphere, float latitude, float longitude)
+    Vec3 GetDebugSpherePoint(
+        const Collision::Sphere& sphere,
+        float latitude,
+        float longitude)
     {
         Vec3 point;
+
         point.x = std::sin(latitude) * std::cos(longitude);
         point.y = std::cos(latitude);
         point.z = std::sin(latitude) * std::sin(longitude);
+
         point = point * sphere.radius;
         point = point + sphere.center;
+
         return point;
     }
 }
 
-void Collision::RegisterDebugCanWatch(const void* owner, DebugSphereProvider sphereA, DebugSphereProvider sphereB)
+// =====================================
+// Debugç”¨ã®å…¬é–‹é–¢æ•°
+// =====================================
+
+void Collision::RegisterDebugCanWatch(
+    const void* owner,
+    DebugSphereProvider sphereA,
+    DebugSphereProvider sphereB)
 {
-    // “¯‚¶owner‚Å“o˜^‚µ’¼‚µ‚½‚Æ‚«‚ÍA‘O‚Ì“o˜^‚ğÁ‚·B
+    // åŒã˜ownerã§ç™»éŒ²ã—ç›´ã—ãŸã¨ãã¯å‰ã®ç™»éŒ²ã‚’æ¶ˆã™
     UnregisterDebugCanWatch(owner);
 
-    if (owner == nullptr)
-    {
-        return;
-    }
-    if (!sphereA)
-    {
-        return;
-    }
-    if (!sphereB)
-    {
-        return;
-    }
+    if (owner == nullptr) return;
+    if (!sphereA) return;
+    if (!sphereB) return;
 
     DebugCanWatchEntry entry;
+
     entry.owner = owner;
     entry.sphereA = sphereA;
     entry.sphereB = sphereB;
 
-    std::vector<DebugCanWatchEntry>& contacts = DebugCanWatchEntries();
-    contacts.push_back(entry);
+    DebugCanWatchEntries().push_back(entry);
 }
 
-void Collision::RegisterDebugCanWatch(const void* owner, const Player& player, const Boss& boss)
+void Collision::RegisterDebugCanWatch(
+    const void* owner,
+    const Player& player,
+    const Boss& boss)
 {
     UnregisterDebugCanWatch(owner);
 
-    if (owner == nullptr)
-    {
-        return;
-    }
+    if (owner == nullptr) return;
 
-    // ƒLƒƒƒ‰ƒNƒ^[‚ğŠo‚¦‚Ä‚¨‚«AUpdateDebug‚ÅŒ»İ‚Ì‹…‚ğæ“¾‚·‚éB
+    // Playerã¨Bossã‚’ç™»éŒ²ã™ã‚‹
     DebugCanWatchEntry entry;
+
     entry.owner = owner;
     entry.player = &player;
     entry.boss = &boss;
+
     entry.nameA = L"Player";
     entry.nameB = L"Boss";
 
-    std::vector<DebugCanWatchEntry>& contacts = DebugCanWatchEntries();
-    contacts.push_back(entry);
+    DebugCanWatchEntries().push_back(entry);
 }
 
 void Collision::UnregisterDebugCanWatch(const void* owner)
@@ -222,9 +271,11 @@ void Collision::UnregisterDebugCanWatch(const void* owner)
     }
 }
 
-Collision::DebugCanWatchState Collision::GetDebugCanWatchState(const void* owner)
+Collision::DebugCanWatchState Collision::GetDebugCanWatchState(
+    const void* owner)
 {
     DebugCanWatchEntry* entry = FindDebugCanWatch(owner);
+
     if (entry != nullptr)
     {
         return entry->state;
@@ -246,6 +297,7 @@ void Collision::UpdateDebug()
     for (std::size_t i = 0; i < contacts.size(); i++)
     {
         DebugCanWatchEntry& entry = contacts[i];
+
         Sphere a;
         Sphere b;
 
@@ -267,18 +319,17 @@ void Collision::UpdateDebug()
             b = entry.sphereB();
         }
 
-        // ”¼Œa‚ª—LŒø‚È‹…‚¾‚¯A“–‚½‚è”»’è‚ğs‚¤B
+        // åŠå¾„ãŒæœ‰åŠ¹ãªçƒã ã‘åˆ¤å®šã™ã‚‹
         bool touching = false;
-        if (a.radius > 0.0f)
+
+        if (a.radius > 0.0f && b.radius > 0.0f)
         {
-            if (b.radius > 0.0f)
-            {
-                touching = IsHitSphereSphere(a, b);
-            }
+            touching = IsHitSphereSphere(a, b);
         }
 
         entry.state.touchingA = touching;
         entry.state.touchingB = touching;
+
         entry.drawSphere = a;
         entry.hasUpdated = true;
     }
@@ -291,70 +342,92 @@ void Collision::DrawDebug()
     for (std::size_t i = 0; i < contacts.size(); i++)
     {
         const DebugCanWatchEntry& entry = contacts[i];
-        if (!entry.hasUpdated)
-        {
-            continue;
-        }
+
+        if (!entry.hasUpdated) continue;
 
         unsigned int color = DxLib::GetColor(80, 220, 255);
+
         if (entry.state.touchingA)
         {
             color = DxLib::GetColor(255, 220, 60);
         }
+
         DrawDebugSphere(entry.drawSphere, color);
 
         const wchar_t* textA = L"false";
         const wchar_t* textB = L"false";
-        if (entry.state.touchingA)
-        {
-            textA = L"true";
-        }
-        if (entry.state.touchingB)
-        {
-            textB = L"true";
-        }
 
-        DxPlus::Debug::SetFormatString(L"ÚG %s: %s / %s: %s",
-            entry.nameA, textA, entry.nameB, textB);
+        if (entry.state.touchingA) textA = L"true";
+        if (entry.state.touchingB) textB = L"true";
+
+        DxPlus::Debug::SetFormatString(
+            L"æ¥è§¦ %s: %s / %s: %s",
+            entry.nameA, textA,
+            entry.nameB, textB);
     }
 }
 
-void Collision::DrawDebugSphere(const Sphere& sphere, unsigned int color)
+void Collision::DrawDebugSphere(
+    const Sphere& sphere,
+    unsigned int color)
 {
     if (sphere.radius <= 0.0f) return;
+
     constexpr int meridians = 6;
     constexpr int arcSegments = 16;
     constexpr int equatorSegments = 32;
     constexpr float pi = 3.14159265358979323846f;
-    // “h‚è‚Â‚Ô‚µ‚â×‚©‚¢‰¡ü‚ğ•`‚©‚¸A6–{‚Ìcü‚ÅŒ`‚ğŠm”F‚·‚éB
+
+    // 6æœ¬ã®ç¸¦ç·šã‚’æã
     for (int line = 0; line < meridians; ++line)
     {
         const float longitude = 2.0f * pi * line / meridians;
-        Vec3 previous = GetDebugSpherePoint(sphere, 0.0f, longitude);
+
+        Vec3 previous = GetDebugSpherePoint(
+            sphere, 0.0f, longitude);
+
         for (int segment = 1; segment <= arcSegments; ++segment)
         {
-            const Vec3 next = GetDebugSpherePoint(sphere, pi * segment / arcSegments, longitude);
-            DxLib::DrawLine3D(DxConv::ToVECTOR(previous), DxConv::ToVECTOR(next), color);
+            const Vec3 next = GetDebugSpherePoint(
+                sphere,
+                pi * segment / arcSegments,
+                longitude);
+
+            DxLib::DrawLine3D(
+                DxConv::ToVECTOR(previous),
+                DxConv::ToVECTOR(next),
+                color);
+
             previous = next;
         }
     }
-    Vec3 previous = GetDebugSpherePoint(sphere, pi * 0.5f, 0.0f);
+
+    // èµ¤é“éƒ¨åˆ†ã‚’æã
+    Vec3 previous = GetDebugSpherePoint(
+        sphere, pi * 0.5f, 0.0f);
+
     for (int segment = 1; segment <= equatorSegments; ++segment)
     {
-        const Vec3 next = GetDebugSpherePoint(sphere, pi * 0.5f, 2.0f * pi * segment / equatorSegments);
-        DxLib::DrawLine3D(DxConv::ToVECTOR(previous), DxConv::ToVECTOR(next), color);
+        const Vec3 next = GetDebugSpherePoint(
+            sphere,
+            pi * 0.5f,
+            2.0f * pi * segment / equatorSegments);
+
+        DxLib::DrawLine3D(
+            DxConv::ToVECTOR(previous),
+            DxConv::ToVECTOR(next),
+            color);
+
         previous = next;
     }
 }
-
-
-// ƒJƒvƒZƒ‹‚Ì‘¤–Ê‚Æ—¼’[‚Ì”¼‹…‚ğƒƒCƒ„[ƒtƒŒ[ƒ€‚Å•`‰æ‚·‚éB
-// startEendEradius‚ğg‚¢AÀÛ‚ÌƒJƒvƒZƒ‹”»’èŒ`ó‚ğ‰Â‹‰»‚·‚éB
+// ã‚«ãƒ—ã‚»ãƒ«ã®å´é¢ã¨ä¸¡ç«¯ã®åŠçƒã‚’ãƒ¯ã‚¤ãƒ¤ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã§æç”»ã™ã‚‹ã€‚
+// startãƒ»endãƒ»radiusã‚’ä½¿ã„ã€å®Ÿéš›ã®ã‚«ãƒ—ã‚»ãƒ«åˆ¤å®šå½¢çŠ¶ã‚’å¯è¦–åŒ–ã™ã‚‹ã€‚
 void Collision::DrawDebugCapsule(const Capsule& capsule, unsigned int color)
 {
     if (capsule.radius <= 0.0f) return;
 
-    // “–‚½‚è”»’è‚Æ“¯‚¶—¼’[E”¼Œa‚ÌƒJƒvƒZƒ‹‚ğ”¼“§–¾‚Å“h‚èA—ÖŠsü‚àd‚Ë‚ÄŒ©‚â‚·‚­‚·‚éB
+    // å½“ãŸã‚Šåˆ¤å®šã¨åŒã˜ä¸¡ç«¯ãƒ»åŠå¾„ã®ã‚«ãƒ—ã‚»ãƒ«ã‚’åŠé€æ˜ã§å¡—ã‚Šã€è¼ªéƒ­ç·šã‚‚é‡ã­ã¦è¦‹ã‚„ã™ãã™ã‚‹ã€‚
     DxLib::SetDrawBlendMode(DX_BLENDMODE_ALPHA, 96);
     DxLib::DrawCapsule3D(
         DxConv::ToVECTOR(capsule.start),
@@ -366,9 +439,9 @@ void Collision::DrawDebugCapsule(const Capsule& capsule, unsigned int color)
         TRUE);
     DxLib::SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
-	const Vec3 axis = capsule.end - capsule.start;// ƒJƒvƒZƒ‹‚Ì²•ûŒüƒxƒNƒgƒ‹
+	const Vec3 axis = capsule.end - capsule.start;// ã‚«ãƒ—ã‚»ãƒ«ã®è»¸æ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«
 
-	if (axis.LengthSq() <= 1.0e-6f)// ²‚Ì’·‚³‚ª‚Ù‚Ú0‚È‚çA‹…‚Æ‚µ‚Ä•`‰æ‚·‚é
+	if (axis.LengthSq() <= 1.0e-6f)// è»¸ã®é•·ã•ãŒã»ã¼0ãªã‚‰ã€çƒã¨ã—ã¦æç”»ã™ã‚‹
     {
         DrawDebugSphere({ capsule.start, capsule.radius }, color);
         return;
@@ -395,4 +468,56 @@ void Collision::DrawDebugCapsule(const Capsule& capsule, unsigned int color)
     DrawDebugSphere({ capsule.start, capsule.radius }, color);
     DrawDebugSphere({ capsule.end, capsule.radius }, color);
 }
-#endif
+
+#endif // _DEBUG
+
+// =====================================
+// ãƒ¢ãƒ‡ãƒ«åŠé€æ˜åŒ–
+// =====================================
+
+void Collision::ResetTransparentModels()
+{
+    for (TransparentModelData& data : transparentModels)
+    {
+        if (data.model != nullptr)
+        {
+            data.model->SetAlpha(data.originalAlpha);
+        }
+    }
+    transparentModels.clear();
+}   
+
+void Collision::SetModelsBetweenTransparent(
+    const Vec3& start,
+    const Vec3& end,
+    const ModelCollision& collision,
+    const float alpha
+)
+{
+    // ä»Šå›Rayã«å½“ãŸã£ãŸãƒ¢ãƒ‡ãƒ«ã‚’å–å¾—
+    auto hitModels = collision.GetModelsHitByRay(start, end);
+
+
+    // æ–°ã—ãå¯¾è±¡ã«ãªã£ãŸãƒ¢ãƒ‡ãƒ«ã‚’åŠé€æ˜ã«ã™ã‚‹
+    for (ModelObject* model : hitModels)
+    {
+        if (model == nullptr) continue;
+
+        const auto it = std::find_if(
+            transparentModels.begin(),
+            transparentModels.end(),
+            [model](const TransparentModelData& data)
+            {
+                return data.model == model;
+            });
+
+        if (it != transparentModels.end()) continue;
+
+        transparentModels.push_back({
+            model,
+            model->GetAlpha()
+            });
+
+        model->SetAlpha(alpha);
+    }
+}

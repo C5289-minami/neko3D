@@ -10,6 +10,7 @@ struct ModelObject;
 class Player;
 class Boss;
 #endif
+class ModelCollision;
 
 namespace Collision									// あたり判定用名前空間
 {
@@ -74,4 +75,13 @@ namespace Collision									// あたり判定用名前空間
     // 実際のカプセル判定形状をワイヤーフレームで描画する。
     void DrawDebugCapsule(const Capsule& capsule, unsigned int color);
 #endif
+	// 透明化したモデルを元に戻す。シーン更新の最初に呼ぶ。
+    void ResetTransparentModels();
+	// 透明化するモデルを登録する。シーン更新の最後に呼ぶ。
+    void SetModelsBetweenTransparent(
+        const Vec3& start,
+        const Vec3& end,
+        const ModelCollision& collision,
+		const float alpha = 0.7f
+    );
 }

@@ -199,6 +199,12 @@ void ModelToonRenderer::Draw(
 
 void ModelToonRenderer::DrawDepth(const ModelObject& model) const
 {
+	// 半透明モデルは描画しない
+    if (model.GetAlpha() < 1.0f)
+    {
+        return;
+	}
+
     auto it = depthObjectIds_.find(&model);
 
     if (it == depthObjectIds_.end())
@@ -213,6 +219,11 @@ void ModelToonRenderer::DrawDepth(
     const ModelObject& model,
     int objectId) const
 {
+    // 半透明モデルは描画しない
+    if (model.GetAlpha() < 1.0f)
+    {
+        return;
+    }
     if (depthObjectIdConstantBuffer_ < 0)
     {
         return;
@@ -273,9 +284,25 @@ void ModelToonRenderer::DrawTriangleLists(
     const int handle = RM().GetModel(model.GetModelKey());
     if (handle < 0) return;
 
-    // モデル描画でZバッファーを使用し、深度を書き込む
+    // モデルごとの不透明度をシェーダーに渡す
+    auto* settings = static_cast<ToonSettings*>(
+        GetBufferShaderConstantBuffer(toonConstantBuffer_));
+
+    if (settings == nullptr) return;
+
+
+    settings->modelColor[3] = model.GetAlpha();
+
+    UpdateShaderConstantBuffer(toonConstantBuffer_);
+
+    // Zバッファを使用する
     MV1SetUseZBuffer(handle, TRUE);
-    MV1SetWriteZBuffer(handle, TRUE);
+
+    // 不透明モデルだけZを書き込む
+    MV1SetWriteZBuffer(handle, model.GetAlpha() >= 1.0f ? TRUE : FALSE);
+
+    // モデルの不透明度を設定
+    MV1SetOpacityRate(handle, model.GetAlpha());
 
     model.ApplyTransform();
     model.ApplyCollisionColor();

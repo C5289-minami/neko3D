@@ -340,27 +340,12 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 	}
 	if (IsPillarElevatorActive()) input_.jumpPressed = false;
 	UpdateMovement(deltaTime);
-	// 旧仕様：中心へ寄せるだけの処理。
-// 	const bool snapToPillar = touchingWall_ && input_.jumpPressing && !IsDead() && !IsDamaging();
-// 	// 柱に触れているときのSpaceは、通常ジャンプより中心への吸着を優先する。
-// 	if (snapToPillar) input_.jumpPressed = false;
-//
-// 	UpdateMovement(deltaTime);
-// 	if (snapToPillar)
-// 	{
-/// 		// 高さは動かさず、横方向だけ柱の中心へ寄せる。
-/// 		position_.x = pillarCenter.x;
-/// 		position_.z = pillarCenter.z;
-/// 		StopMove();
-/// 	}
-
-	// // ステージの柱に沿ってスライドさせる
-	// position_ = stage.SlideAlongPillars(oldPosition, position_, touchingPillar);
-	// 登録されたモデルの壁に沿ってスライドさせる
-	const Vec3 desiredPosition = position_;
-	position_ = collision.SlideAlongWalls(oldPosition, position_, modelOb, touchingModel_);
-	if (IsPillarElevatorActive() && (position_ - desiredPosition).LengthSq() > Const::PLAYER_SKIN * Const::PLAYER_SKIN)
-		EndPillarElevator();
+	
+	// のぼり中は、壁の上端に吸着するように位置を補正する。
+	if (!IsPillarElevatorActive())
+	{
+		position_ = collision.SlideAlongWalls(oldPosition, position_, modelOb, touchingModel_);
+	}
 
 	const float dy = position_.y - previousY;
 
@@ -910,8 +895,12 @@ void Player::StartPillarElevator(const ModelObject* pillar, const Vec3& center, 
 	elevatorInputConsumed_ = true;
 	coyoteTimeRemaining_ = 0.0f;
 
-	position_.x = center.x;
-	position_.z = center.z;
+	// 位置を変えないようにする
+	//position_.x = center.x;
+	//position_.z = center.z;
+	
+	// 柱に体を向ける
+	yaw_ = std::atan2(center.x - position_.x, center.z - position_.z);
 
 	isGrounded_ = false;
 	stateMachine_.ChangeState(PlayerStateType::Climbing);
@@ -922,8 +911,13 @@ bool Player::UpdatePillarElevator(float deltaTime)
 	StopMove();
 	velocity_.y = 0.0f;
 	isGrounded_ = false;
-	position_.x = elevatorCenter_.x;
-	position_.z = elevatorCenter_.z;
+	// 位置を変えないようにする
+	//position_.x = elevatorCenter_.x;
+	//position_.z = elevatorCenter_.z;
+
+	// Animが来てないので仮で上に向ける
+	pitch_ = -DX_PI_F * 0.5f;
+
 	if (deltaTime <= 0.0f) return false;
 	position_.y = (std::min)(elevatorTopY_, position_.y + climbingSpeed_ * deltaTime);
 	return position_.y >= elevatorTopY_;
@@ -932,6 +926,8 @@ bool Player::UpdatePillarElevator(float deltaTime)
 void Player::EndPillarElevator()
 {
 	elevatorPillar_ = nullptr;
+
+	pitch_ = 0.0f;
 }
 
 void Player::StartPillarExitJump()
