@@ -80,6 +80,8 @@ namespace ResourceKeys
 
 	// ===== Effects =====
 	inline constexpr const wchar_t* Effect_Test = L"EffectTest";
+	inline constexpr const wchar_t* Effect_Impact = L"EffectImpact";
+	inline constexpr const wchar_t* Effect_PlayerAttack = L"EffectAttack";
 
 	// ===== Musics / Sounds =====
 	inline constexpr const wchar_t* Sound_BossBite = L"SoundBossBite";
