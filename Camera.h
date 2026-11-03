@@ -445,8 +445,8 @@ namespace Camera
 
 	struct TargetCameraSettings
 	{
-		float cameraDistance{ 900.0f };
-		float cameraHeight{ 420.0f };
+		float cameraDistance{ 600.0f };
+		float cameraHeight{ 200.0f };
 		float targetHeight{ 110.0f };
 		float followSpeed{ 5.0f };
 	};
@@ -479,8 +479,7 @@ namespace Camera
 			Vec3 awayFromBoss =
 				playerPosition - bossPosition;
 
-			awayFromBoss.y = 0.0f;
-
+			// プレイヤーとボスがほぼ同じ位置にいる場合、正規化できないので、適当な方向を設定する
 			if (awayFromBoss.LengthSq() < 0.001f)
 			{
 				awayFromBoss = {
@@ -493,7 +492,8 @@ namespace Camera
 			{
 				awayFromBoss = awayFromBoss.Normalized();
 			}
-
+			
+			// プレイヤーとボスの中間点を注視点にする
 			const Vec3 desiredPosition =
 				playerPosition
 				+ awayFromBoss * settings_.cameraDistance
@@ -501,20 +501,20 @@ namespace Camera
 					0.0f,
 					settings_.cameraHeight,
 					0.0f);
-
+			// プレイヤーとボスの中間点を注視点にする
 			const Vec3 desiredTarget =
 				(playerPosition + bossPosition) * 0.5f
 				+ Vec3(
 					0.0f,
 					settings_.targetHeight,
 					0.0f);
-
+			// 追従カメラの位置を滑らかに更新
 			const float followAmount =
 				std::clamp(
 					settings_.followSpeed * deltaTime,
 					0.0f,
 					1.0f);
-
+			// 追従カメラの位置を滑らかに更新
 			followPosition_ +=
 				(desiredPosition - followPosition_) *
 				followAmount;

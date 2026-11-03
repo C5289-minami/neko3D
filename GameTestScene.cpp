@@ -23,6 +23,7 @@ tailWhipHitCapsule_ = {};
 
 
 	playerCamera_.Reset();
+
 	attackSphereDebugRemaining_ = 0.0f;
 	rightMouseWasDown_ = false;
 
@@ -46,6 +47,8 @@ tailWhipHitCapsule_ = {};
 
 	shaderEffects_.GetSettings().toonEnabled = true;
 	shaderEffects_.GetSettings().outlineEnabled = true;
+
+
 
 	StartFadeIn();
 }
@@ -138,7 +141,7 @@ void GameTestScene::Update(float deltaTime)
 
 		Collision::SetModelsBetweenTransparent(
 			playerCamera_.GetPosition(),
-			boss.GetWorldPosition() + Vec3::Up() * 320.0f,// 顔が見たいので少し上
+			boss.GetWorldPosition() + Vec3::Up() * 550.0f,// 顔が見たいので少し上
 			gameContext->GetStage().GetCollision(),
 			0.7f
 		);
@@ -334,8 +337,28 @@ void GameTestScene::DrawImGui()
 		if (ImGui::Button(u8"TailWhip"))
 			boss.UseSkill(BossAttackType::TailWhip);
 
-		ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
+
+		auto& camera = playerCamera_;
+		auto& settings = camera.GetSettings();
+
+		ImGui::DragFloat(
+			u8"カメラ距離",
+			&settings.cameraDistance,
+			10.0f,
+			100.0f,
+			3000.0f
+		);
+
+		ImGui::DragFloat(
+			u8"カメラ高さ",
+			&settings.cameraHeight,
+			10.0f,
+			-1000.0f,
+			1000.0f
+		);
 	}
+		ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
+
 	ImGui::End();
 #endif
 }
