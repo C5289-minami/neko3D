@@ -33,9 +33,6 @@ void RoomTestScene::Init()
 		targetCamera_.Reset();
 		cameraDirector_.Reset();
 
-		// 演出用アングルA：プレイヤーの右後ろから見上げる
-		auto* player = gameContext->GetPlayer();
-
 		Camera::CameraPose shotA{};
 		shotA.fieldOfViewDegrees = 150.0f;
 
@@ -82,7 +79,6 @@ void RoomTestScene::Update(float deltaTime)
 
 	auto& room = gameContext->GetRoom();
 	auto* player = gameContext->GetPlayer();
-	auto& stage = gameContext->GetStage();
 
 	float posY = player->GetPosition().y;
 	player->Update(deltaTime * 0.5f);
@@ -318,7 +314,6 @@ void RoomTestScene::DrawImGui()
 void RoomTestScene::RenderDepth() const
 {
 	auto& room = gameContext->GetRoom();
-	auto* player = gameContext->GetPlayer();
 	auto& stage = gameContext->GetStage();
 	auto& boss = gameContext->GetBoss();
 
