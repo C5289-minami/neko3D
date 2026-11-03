@@ -148,8 +148,9 @@ void GameTestScene::Update(float deltaTime)
 
 
 
-		boss.Update(deltaTime, player->GetWorldPosition());
-		
+		boss.Update(deltaTime);
+		boss.TurnToTarget(player->GetWorldPosition(), deltaTime);
+
 		if (boss.UpdateSlamAttack(player->GetWorldPosition(), stage.GetWorldPosition()))
 			player->TakeDamage();
 
