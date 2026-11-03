@@ -189,8 +189,8 @@ void Boss::Draw() const
 #ifdef _DEBUG
 void Boss::DrawClapAttackDebug() const
 {
-	if (slamSkill_ != nullptr)
-		slamSkill_->DrawDebug();
+	if (clapSkill_ != nullptr)
+		clapSkill_->DrawDebug();
 }
 #endif
 
@@ -206,7 +206,7 @@ AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 	{
 	case BossAnimType::Idle:  return idleAnimHandle_;
 	case BossAnimType::TailWhip: return tailWhipAnimHandle_;
-	case BossAnimType::Clap: return atkHitAnimHnadle_;
+	case BossAnimType::Clap: return ClapAnimHandle_;
 	case BossAnimType::Slam: return atkHitAnimHnadle_;
 	case BossAnimType::Damage: return damageAnimHandle_;
 	case BossAnimType::Die: return dieAnimHandle_;
@@ -225,12 +225,12 @@ bool Boss::UseSkill(BossAttackType type)
 	{
 	case BossAttackType::Clap:
 		clapSkill_->Reset();
+		clapSkill_->StartHandAttack();
 		activeSkill_ = clapSkill_.get();
 		break;
 
 	case BossAttackType::Slam:
 		slamSkill_->Reset();
-		slamSkill_->StartHandAttack();
 		activeSkill_ = slamSkill_.get();
 		break;
 
@@ -325,10 +325,10 @@ float Boss::GetAnimTotalTime(BossAnimType::Type type) const
 
 bool Boss::IsHitByAttackSphere(const Collision::Sphere& sphere) const
 {
-	return slamSkill_ != nullptr && slamSkill_->IsHitByAttackSphere(sphere);
+	return clapSkill_ != nullptr && clapSkill_->IsHitByAttackSphere(sphere);
 }
 
 bool Boss::UpdateHandAttack(float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition)
 {
-	return slamSkill_ != nullptr && slamSkill_->UpdateHandAttack(deltaTime, playerPosition, stagePosition);
+	return clapSkill_ != nullptr && clapSkill_->UpdateHandAttack(deltaTime, playerPosition, stagePosition);
 }
