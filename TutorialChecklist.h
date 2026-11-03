@@ -41,6 +41,7 @@ public:
 
     void AddItem(const std::wstring& text, DxPlus::Vec2 stampPosition = {});
     void CompleteItem(std::size_t index);
+    bool IsAllStampFinished() const;
 
     void SetVisible(bool visible);
 

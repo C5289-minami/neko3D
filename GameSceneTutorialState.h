@@ -40,7 +40,6 @@ private:
 	TutorialCameraState cameraState_ =
 		TutorialCameraState::LookPlayer;
 
-	TutorialTaskManager taskManager_;
 
-	Vec3 previousPlayerPosition_{};
+
 };

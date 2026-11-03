@@ -14,7 +14,6 @@ void PlayerJumpState::Enter()
 	player_.SetAnimation(PlayerAnimType::Jump, false);
 	// 落下開始でもこの状態を使う。上向きの初速はTryJumpが設定する。
 	DxPlus::Debug::SetFormatString(L"PlayerJumpState::Enter");
-
 }
 
 void PlayerJumpState::Tick(float deltaTime)

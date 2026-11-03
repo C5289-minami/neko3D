@@ -772,6 +772,7 @@ bool Player::TryJump()
 	{
 		stateMachine_.ChangeState(PlayerStateType::Jump);
 		JumpAction();
+		stateMachine_.NotifyEvent(PlayerActionEvent::Jumped);
 		return true;
 	}
 	if (CanDoubleJump())
