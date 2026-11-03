@@ -626,8 +626,6 @@ void Player::UpdateHorizontalVelocity(float deltaTime)
 	if (debugDashEnabled_) moveSpeed *= 5.0f;//(shift中)
 #endif
 
-	if (isDoubleJump) moveSpeed *= 3.0f;
-
 	if (isdefMove_)
 	{
 		// 移動と同じ、カメラ基準の入力方向を使う。

@@ -10,8 +10,8 @@ PlayerDoubleJumpState::PlayerDoubleJumpState(PlayerStateMachine& stateMachine, P
 void PlayerDoubleJumpState::Enter()
 {
     player_.StopMove();
+	player_.SetMoveRate(3.0f);
     player_.SetAnimation(PlayerAnimType::Double_Jump, false);
-	player_.GetAnimation().PlayTo(0.0f, Const::ANIM_FPS, 1.0f);
     player_.StartDoubleJump();
     stateMachine_.NotifyEvent(PlayerActionEvent::DoubleJumped);
     DxPlus::Debug::SetFormatString(L"PlayerDoubleJumpState::Enter");
@@ -31,7 +31,10 @@ void PlayerDoubleJumpState::Tick(float deltaTime)
     }
 
     // 空中でも方向入力を読み取り、Player側で横速度に反映する。
-    player_.SetMoveDirection(player_.GetInput().moveDir);
+	if (player_.GetInput().isMoving)
+    {
+        player_.SetMoveDirection(player_.GetInput().moveDir);
+    }
 
     // Spaceを連打しても、着地するまで追加のジャンプはしない。
     DxPlus::Debug::SetFormatString(L"state:double_jump");
@@ -40,5 +43,6 @@ void PlayerDoubleJumpState::Tick(float deltaTime)
 void PlayerDoubleJumpState::Exit()
 {
     player_.StopMove();
+    player_.SetMoveRate(1.0f);
     DxPlus::Debug::SetFormatString(L"PlayerDoubleJumpState::Exit");
 }

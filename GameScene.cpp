@@ -175,7 +175,7 @@ void GameScene::Update(float deltaTime)
 
 		Collision::SetModelsBetweenTransparent(
 			cameraDirector_.GetCurrentPose().position,
-			boss.GetWorldPosition() + Vec3::Up() * 320.0f,// 顔が見たいので少し上
+			boss.GetWorldPosition() + Vec3::Up() * 600.0f,// 顔が見たいので少し上
 			gameContext->GetStage().GetCollision()
 		);
 	}
