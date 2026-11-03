@@ -43,6 +43,10 @@ void BossAI::Reset()
 
 void BossAI::Update(float deltaTime)
 {
+#ifndef NDEBUG
+	return;
+#endif
+
     // 個別スキルのクールダウン更新
     for (auto& cooldown : skillCooldowns_)
         cooldown->Update(deltaTime);
@@ -104,10 +108,12 @@ void BossAI::TurnToTarget(Vec3 targetPosition, float deltaTime)
 
 	// yawDiff を -π から π の範囲に正規化
 	NormalizeAngle(yawError);
+    float rotationSpeed = 0.5f; // 回転速度（ラジアン/秒）
+    if (std::abs(yawError) < 120.0f * DxPlus::Deg2Rad)rotationSpeed = 1.0f;
 
     if (std::abs(yawError) > 0.1f) // ある程度の差がある場合のみ回転
     {
-        float rotationSpeed = 0.4f; // 回転速度（ラジアン/秒）
+       
         float rotationAmount = rotationSpeed * deltaTime;
         if (yawError > 0)
             boss_.SetYaw(boss_.GetYaw() + std::min(rotationAmount, yawError));
