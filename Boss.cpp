@@ -13,7 +13,7 @@
 #include "BossSlamSkill.h"
 
 Boss::Boss()
-	: ActorBase("Boss"), stateMachine_(*this)
+	: ActorBase("Boss"), stateMachine_(*this), ai_(*this)
 {
 	model_.SetOwner(*this);
 	model_.SetModelKey(ResourceKeys::Model_Boss);
@@ -54,8 +54,6 @@ void Boss::Init()
 
 void Boss::Reset()
 {
-	targetPositionHistory_.clear();
-	targetHistoryTime_ = 0.0f;
 
 	health_ = maxHealth_;
 	phase_ = BossPhase::Phase1;
@@ -69,6 +67,8 @@ void Boss::Reset()
 	SetAnimation(BossAnimType::Idle, true);
 
 	stateMachine_.Initialize();
+	
+	ai_.Reset();
 	if (clapSkill_ != nullptr) clapSkill_->Reset();
 	if (slamSkill_ != nullptr) slamSkill_->Reset();
 
@@ -144,41 +144,21 @@ void Boss::Update(float deltaTime)
 {
 	// アニメーション更新はスキルのフェーズ処理側で行う。
 	// 再生区間や攻撃中の動作をスキル側で管理する。
+	
+	// AIの更新
+	ai_.Update(deltaTime);
 	stateMachine_.Tick(deltaTime);
+	
 
 	position_ += velocity_ * deltaTime;
 
 }
 
-void Boss::Update(float deltaTime, const Vec3& targetPosition)
+void Boss::TurnToTarget(const Vec3& targetPosition, float deltaTime)
 {
-	Update(deltaTime);
-
-	targetHistoryTime_ += deltaTime;
-	targetPositionHistory_.push_back({ targetHistoryTime_, targetPosition });
-
-	const float laggedTime = targetHistoryTime_ - lagTimePlayer;
-	while (targetPositionHistory_.size() > 1) // 使う位置を残しながら、古い記録を片付ける
-	{
-		if (targetPositionHistory_[1].time <= laggedTime) // 次の記録も0.5秒前までのものなら
-		{
-			targetPositionHistory_.erase(targetPositionHistory_.begin()); // もっと古い先頭の記録を消す
-		}
-		else
-		{
-			break; // 先頭の記録を残して、ここで片付けを終える
-		}
-	}
-
-	// 残しておいた位置に向く方向を求める
-	Vec3 direction = targetPositionHistory_[0].position - GetWorldPosition(); 
-
-	direction.y = 0.0f;
-	if (direction.LengthSq() <= 1e-6f)
-		return;
-
-	SetYaw(std::atan2(-direction.x, -direction.z));
+	ai_.TurnToTarget(targetPosition,deltaTime);
 }
+
 
 void Boss::Draw() const
 {

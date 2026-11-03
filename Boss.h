@@ -13,6 +13,7 @@
 #include <memory>
 #include <vector>
 #include "BossAttackType.h"
+#include "BossAI.h"
 
 enum class BossPhase
 {
@@ -35,8 +36,9 @@ public:
 	void Init() override;
 	void Reset()override;
 	void Update(float deltaTime)override;
-	void Update(float deltaTime, const Vec3& targetPosition);
+	void TurnToTarget(const Vec3& targetPosition, float deltaTime);
 	void Draw() const override;
+	
 
 	void ClearActiveSkill() { activeSkill_ = nullptr; }
 
@@ -87,16 +89,6 @@ public:
 private:
 	bool IsSlamSkillActive() const;
 
-	struct TargetPositionSample//時差のために追加
-	{
-		float time{};
-		Vec3 position{};
-	};
-
-	static constexpr float lagTimePlayer = 0.5f;
-	std::vector<TargetPositionSample> targetPositionHistory_;
-	float targetHistoryTime_{};
-
 	ModelObject model_{};
 	Vec3 velocity_{};
 	IAttackSkill* activeSkill_{ nullptr };
@@ -128,4 +120,6 @@ private:
 	std::unique_ptr<BossClapSkill> clapSkill_;
 	std::unique_ptr<BossSlamSkill> slamSkill_;
 	std::unique_ptr<BossTailWhipSkill> tailWhipSkill_;
+
+	BossAI ai_; // AI
 };

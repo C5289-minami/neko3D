@@ -193,6 +193,7 @@
     <ClInclude Include="AttackStateMachine.h" />
     <ClInclude Include="AttackStateType.h" />
     <ClInclude Include="Basket.h" />
+    <ClInclude Include="BossAI.h" />
     <ClInclude Include="BossAnimType.h" />
     <ClInclude Include="BossSlamSkill.h" />
     <ClInclude Include="Boss.h" />
@@ -345,6 +346,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ActorBase.cpp" />
+    <ClCompile Include="BossAI.cpp" />
     <ClCompile Include="BossDieState.cpp" />
     <ClCompile Include="BossFlinchState.cpp" />
     <ClCompile Include="BossPoseSkill.cpp" />
