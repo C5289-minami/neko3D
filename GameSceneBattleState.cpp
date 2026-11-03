@@ -36,10 +36,18 @@ void GameSceneBattleState::Tick(float deltaTime)
     auto* player = gameContext->GetPlayer();
     auto& boss = gameContext->GetBoss();
     auto& stage = gameContext->GetStage();
+	auto& taskManager = gameScene_.GetTutorialTaskManager();
 
     const Vec3 stageCenterPosition = stage.GetPosition();
 
+    taskManager.Update(deltaTime);
 
+    if (taskManager.IsAllFinished())
+    {
+        gameScene_.GetTutorialChecklist().SetVisible(false);
+        // ’Ê’mæ‚ğ‰ğœ
+        player->GetStateMachine().SetEventCallback({});
+    }
 
     // Boss‚ÌèUŒ‚”»’è
     if (boss.UpdateHandAttack(

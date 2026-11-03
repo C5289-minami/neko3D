@@ -82,6 +82,19 @@ bool TutorialTaskManager::IsCompleted(TutorialType type) const
     return index != -1 && objectives_[index].completed;
 }
 
+bool TutorialTaskManager::IsAllFinished() const
+{
+    if (objectives_.empty() || !checklist_) return false;
+
+    for (const auto& objective : objectives_)
+    {
+        if (!objective.completed)
+            return false;
+    }
+
+    return checklist_->IsAllStampFinished();
+}
+
 void TutorialTaskManager::OnPlayerAction(PlayerActionEvent event)
 {
     switch (event)
@@ -89,11 +102,12 @@ void TutorialTaskManager::OnPlayerAction(PlayerActionEvent event)
     case PlayerActionEvent::Jumped:
         Complete(TutorialType::Jump);
         break;
-
+	case PlayerActionEvent::Attacked:
+        Complete(TutorialType::Attack);
+		break;
     case PlayerActionEvent::DoubleJumped:
         Complete(TutorialType::DoubleJump);
         break;
-
     case PlayerActionEvent::ReachedPillarTop:
         Complete(TutorialType::Climb);
         break;

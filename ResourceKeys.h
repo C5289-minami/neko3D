@@ -46,9 +46,9 @@ namespace ResourceKeys
 	inline constexpr const wchar_t* Model_PlayerAnim_Dodge = L"PlayerAnimDodge";
 	inline constexpr const wchar_t* Model_PlayerAnim_Attack = L"PlayerAnimAttack";
 
+
+
 	inline constexpr const wchar_t* Model_Boss = L"ModelBoss";
-	inline constexpr const wchar_t* Model_Room = L"ModelRoom";
-	inline constexpr const wchar_t* Model_Basket = L"ModelBasket";
 	// Boss Anim
 	inline constexpr const wchar_t* Model_BossAnim_Idle = L"BossAnimIdle";
 	inline constexpr const wchar_t* Model_BossAnim_Sippo = L"BossAnimSippo";
@@ -65,6 +65,10 @@ namespace ResourceKeys
 	inline constexpr const wchar_t* Model_stand_l = L"stand_l";
 	inline constexpr const wchar_t* Model_stand_m = L"stand_m";
 	inline constexpr const wchar_t* Model_JumpStand = L"JumpStand";
+	// Room
+	inline constexpr const wchar_t* Model_Room = L"ModelRoom";
+	inline constexpr const wchar_t* Model_Basket = L"ModelBasket";
+	inline constexpr const wchar_t* Model_Chair = L"ModelChair";
 
 	// ===== SpriteStudio =====
 	inline constexpr const wchar_t* SpriteStudio_Gauge = L"Gauge";
