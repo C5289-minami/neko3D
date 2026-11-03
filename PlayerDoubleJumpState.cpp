@@ -9,6 +9,7 @@ PlayerDoubleJumpState::PlayerDoubleJumpState(PlayerStateMachine& stateMachine, P
 
 void PlayerDoubleJumpState::Enter()
 {
+    avoidTimer_ = AvoidTime;
     player_.StopMove();
     player_.SetAnimation(PlayerAnimType::Double_Jump, false);
 	player_.GetAnimation().PlayTo(0.0f, Const::ANIM_FPS, 1.0f);
@@ -19,6 +20,7 @@ void PlayerDoubleJumpState::Enter()
 
 void PlayerDoubleJumpState::Tick(float deltaTime)
 {
+    avoidTimer_ = (std::max)(0.0f, avoidTimer_ - (std::max)(0.0f, deltaTime));
     player_.UpdateAnimation(deltaTime);
 
     if (player_.IsGrounded() || !player_.IsGravityEnabled())
@@ -35,6 +37,15 @@ void PlayerDoubleJumpState::Tick(float deltaTime)
 
     // Spaceを連打しても、着地するまで追加のジャンプはしない。
     DxPlus::Debug::SetFormatString(L"state:double_jump");
+}
+
+bool PlayerDoubleJumpState::TryAvoid()
+{
+    if (avoidTimer_ <= 0.0f) return false;
+
+    avoidTimer_ = 0.0f;
+    player_.ApplyAvoid(false);
+    return true;
 }
 
 void PlayerDoubleJumpState::Exit()

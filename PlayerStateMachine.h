@@ -32,6 +32,7 @@ public:
 	bool IsAttackBallActive() const;
 	const Collision::Sphere& GetAttackBallSphere() const;
 	bool TryRegisterAttackBallHit();
+	bool TryAvoid();
 
 	PlayerStateType GetCurrentType() const { return currentType_; };
 
