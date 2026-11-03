@@ -54,6 +54,8 @@ void Boss::Init()
 
 void Boss::Reset()
 {
+	targetPositionHistory_.clear();
+	targetHistoryTime_ = 0.0f;
 
 	health_ = maxHealth_;
 	phase_ = BossPhase::Phase1;
@@ -152,7 +154,25 @@ void Boss::Update(float deltaTime, const Vec3& targetPosition)
 {
 	Update(deltaTime);
 
-	Vec3 direction = targetPosition - GetWorldPosition();
+	targetHistoryTime_ += deltaTime;
+	targetPositionHistory_.push_back({ targetHistoryTime_, targetPosition });
+
+	const float laggedTime = targetHistoryTime_ - lagTimePlayer;
+	while (targetPositionHistory_.size() > 1) // 使う位置を残しながら、古い記録を片付ける
+	{
+		if (targetPositionHistory_[1].time <= laggedTime) // 次の記録も0.5秒前までのものなら
+		{
+			targetPositionHistory_.erase(targetPositionHistory_.begin()); // もっと古い先頭の記録を消す
+		}
+		else
+		{
+			break; // 先頭の記録を残して、ここで片付けを終える
+		}
+	}
+
+	// 残しておいた位置に向く方向を求める
+	Vec3 direction = targetPositionHistory_[0].position - GetWorldPosition(); 
+
 	direction.y = 0.0f;
 	if (direction.LengthSq() <= 1e-6f)
 		return;
