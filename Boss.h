@@ -34,6 +34,7 @@ public:
 	void Init() override;
 	void Reset()override;
 	void Update(float deltaTime)override;
+	void Update(float deltaTime, const Vec3& targetPosition);
 	void Draw() const override;
 
 	void ClearActiveSkill() { activeSkill_ = nullptr; }

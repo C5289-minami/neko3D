@@ -148,6 +148,18 @@ void Boss::Update(float deltaTime)
 
 }
 
+void Boss::Update(float deltaTime, const Vec3& targetPosition)
+{
+	Update(deltaTime);
+
+	Vec3 direction = targetPosition - GetWorldPosition();
+	direction.y = 0.0f;
+	if (direction.LengthSq() <= 1e-6f)
+		return;
+
+	SetYaw(std::atan2(-direction.x, -direction.z));
+}
+
 void Boss::Draw() const
 {
 	model_.ApplyCollisionColor();
