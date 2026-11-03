@@ -35,7 +35,7 @@ void GameContext::Init()
 		modelObjects.Add(jumpStand->GetPillarModel(), *jumpStand);
 
 	}
-
+	modelObjects.Add(room_.GetChairObject(), room_);
 	modelObjects.Add(room_.GetBasket().GetModelObject(), room_.GetBasket());
 
 	CharSettingsManager::Load();
