@@ -240,31 +240,6 @@ void Player::UpdateMovement(float deltaTime)
 	}
 
 
-	// 段階実装：接触のTrue/Falseだけを残し、壁登りへの自動遷移は停止する。
-//     // 移動入力を離している間は、壁登り用の接触状態を解除する。
-//     if (!input_.isMoving)
-//     {
-//         touchingWall_ = false;
-//     }
-
-// 	bool NearTheWall = false;
-// 	if (input_.isMoving)
-// 	{
-// 		Vec3 moveDirection = GetWorldMoveDirection(input_.moveDir);
-// 		float wallDirection = Vec3::Dot(moveDirection, wallNormal_);//壁の法線と移動方向の内積を計算して、壁に対してどの方向に向かっているかを判定する
-
-// 		if (wallDirection < -0.25f)
-// 		{
-// 			NearTheWall = true;
-// 		}
-// 	}
-// 	//か
-// 	if (touchingWall_ && gravityEnabled_ && !IsDead() && !IsDamaging() &&
-// 		GetCurrentState() != PlayerStateType::WallJump &&
-// 		NearTheWall)
-// 	{
-// 		stateMachine_.ChangeState(PlayerStateType::Climbing);
-// 	}
 
 	DxPlus::Debug::SetFormatString(L"CharacterSetting: %s", charData.name.c_str());
 
@@ -643,7 +618,10 @@ void Player::UpdateHorizontalVelocity(float deltaTime)
 
 	if (isDoubleJump && moveInput_.LengthSq() == 0.0f) return;
 
-	float moveSpeed = Const::PLAYER_MOVE_SPEED;//通常移動速度
+	// 移動速度
+	float moveSpeed = Const::PLAYER_MOVE_SPEED * moveRate_;
+
+
 #ifdef _DEBUG//debugモードでは、移動速度を5倍にする
 	if (debugDashEnabled_) moveSpeed *= 5.0f;//(shift中)
 #endif
@@ -742,52 +720,6 @@ void Player::StartDoubleJump()
 	isGrounded_ = false;
 }
 
-// 旧仕様：空中で入力方向へ突進する処理。
-// void Player::SetLungingMoveSpeed(float value)
-// {
-// 	if (std::isfinite(value)) lungingMoveSpeed_ = (std::max)(0.0f, value);
-// }
-//
-// void Player::SetLungingJumpSpeed(float value)
-// {
-// 	if (std::isfinite(value)) lungingJumpSpeed_ = (std::max)(0.0f, value);
-// }
-//
-// void Player::ResetLungingSpeeds()
-// {
-// 	lungingMoveSpeed_ = Const::PLAYER_LUNGING_MOVE_SPEED;
-// 	lungingJumpSpeed_ = Const::PLAYER_LUNGING_JUMP_SPEED;
-// }
-//
-// void Player::StartLungingJump(const Vec3& moveDir)
-// {
-//     // 地面にいるときや、すでに2回目を使った後は発動させない。
-//     if (!CanAirLunge())
-//     {
-//         return;
-//     }
-//
-//     // 発動したことを覚える。着地するまで、もう一度は使えない。
-//     doubleJumpUsed_ = true;
-//     StopMove();
-//
-//     // 2回目のSpaceを押した瞬間の方向を保存する。
-//     Vec3 moveInput = moveDir;
-//     // 方向キーを押していなければ、前へとびかかる。
-//     // 円周移動ではボス方向、通常移動ではカメラが向いている方向になる。
-//     if (moveInput.LengthSq() == 0.0f)
-//     {
-//         moveInput = Vec3(0.0f, 0.0f, 1.0f);
-//     }
-// 	// 左右と前後が同時に入力された場合、左右を優先して斜め移動を防ぐ
-// 	if (moveInput.x != 0.0f)
-// 		moveInput.z = 0.0f;
-//
-//     SetMoveDirection(moveInput);
-//     // 落下中でも上向きの速度に入れ直すので、空中でもう一度跳べる。
-//     velocity_.y = lungingJumpSpeed_;
-//     isGrounded_ = false;
-// }
 
 void Player::SetClimbingSpeed(float value)
 {

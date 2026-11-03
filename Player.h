@@ -43,6 +43,7 @@ public:
 	// 移動
 	void SetMoveDirection(const Vec3& moveDir);
 	void StopMove();
+	void SetMoveRate(float rate) { moveRate_ = rate; }
 	void SetVerticalSpeed(float speed) { velocity_.y = speed; }
 	bool IsTouchingWall() const { return touchingWall_; }
 	const Vec3& GetWallNormal() const { return wallNormal_; }
@@ -185,6 +186,7 @@ private:
 	Vec3 movementCenter_{}; // 足場の中心
 	Vec3 moveInput_{};      // Xは左右、Zは前後の入力
 	Vec3 velocity_{ 0.0f, 0.0f, 0.0f }; // 当たり判定で補正する前の移動速度（ワールド座標）
+	float moveRate_{ 1.0f }; // 移動速度の倍率
 
     //const float Wall_MARGIN = Const::PLAYER_RADIUS + Const::PLAYER_HEIGHT;
     //おれらにはModelCollisionのやつがあることを思い出した
