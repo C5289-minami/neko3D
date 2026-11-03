@@ -63,12 +63,16 @@ public:
 	float GetAnimTotalTime(BossAnimType::Type type) const;
 
 	bool UpdateHandAttack(float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition);
+	// 毎フレーム Boss::Update 後に呼ぶ。着弾中の初回命中だけ true。
+	bool UpdateSlamAttack(const Vec3& playerPosition, const Vec3& stageCenter);
+	bool IsSlamHitActive() const;
 	bool IsHitByAttackSphere(const Collision::Sphere& sphere) const;
 	int GetHealth() const { return health_; }
 	BossPhase GetPhase() const { return phase_; }
 	void TakeDamage(int damage = 1);
 #ifdef _DEBUG
 	void DrawClapAttackDebug() const;
+	void DrawSlamAttackDebug() const;
 #endif
 
 	AnimationHandle GetAnimationHandle(BossAnimType::Type type) const;
@@ -81,6 +85,8 @@ public:
 	bool IsTailWhipHitActive() const;
 	Collision::Capsule GetTailWhipHitCapsule(const Vec3& stageCenter, float stageRadius, float attackHeight) const;
 private:
+	bool IsSlamSkillActive() const;
+
 	struct TargetPositionSample//時差のために追加
 	{
 		float time{};

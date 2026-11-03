@@ -147,9 +147,12 @@ void GameTestScene::Update(float deltaTime)
 		);
 
 
-	
+
 		boss.Update(deltaTime, player->GetWorldPosition());
 		
+		if (boss.UpdateSlamAttack(player->GetWorldPosition(), stage.GetWorldPosition()))
+			player->TakeDamage();
+
 		tailWhipHitCapsule_ = {};
 		if (boss.IsTailWhipHitActive())
 		{
@@ -194,7 +197,6 @@ void GameTestScene::Update(float deltaTime)
 		DxPlus::Debug::SetFormatString(L"Boss HP: %d / %d", boss.GetHealth(), Boss::MaxHealth);
 		DxPlus::Debug::SetString(L"1: Hand attack test (3 sec follow)");
 #endif
-
 
 		playerCamera_.Update(player->GetWorldPosition(), boss.GetWorldPosition(), deltaTime);
 
@@ -260,6 +262,7 @@ void GameTestScene::Render() const
 #ifdef _DEBUG
 	(activeCamera_ ? activeCamera_ : &playerCamera_)->ApplyCamera();
 	gameContext->GetBoss().DrawClapAttackDebug();
+	gameContext->GetBoss().DrawSlamAttackDebug();
 
 	auto& boss = gameContext->GetBoss();
 	auto* player = gameContext->GetPlayer();
