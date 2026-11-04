@@ -264,6 +264,7 @@ void Player::UpdateMovement(float deltaTime)
 		Move(deltaTime);
 		isGrounded_ = false;
 	}
+	fallAndResetPosition(deltaTime,position_);
 }
 
 // void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCenter)
@@ -661,6 +662,7 @@ void Player::UpdateHorizontalVelocity(float deltaTime)
 	{
 		UpdateStageMoveVelocity(moveSpeed, deltaTime);
 	}
+
 }
 
 void Player::Move(float deltaTime)
@@ -669,6 +671,20 @@ void Player::Move(float deltaTime)
 	position_ += velocity_ * deltaTime;
 	// 上下の速度は向きに含めず、横に進む方向へ回転する。
 	TurnTowards(Vec3(velocity_.x, 0.0f, velocity_.z), deltaTime);
+}
+
+void Player::fallAndResetPosition(float deltaTime,Vec3& PlayerPos)
+{
+	position_ = PlayerPos;
+
+	Vec3 oldPos = position_;
+
+	Vec3 pos= model_.GetPosition();
+	if (position_.y <= pos.y-100.0f)
+	{
+		position_ = oldPos;
+	}
+
 }
 
 void Player::UpdateStageMoveVelocity(float moveSpeed, float deltaTime)
