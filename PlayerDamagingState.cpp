@@ -19,16 +19,22 @@ void PlayerDamagingState::Enter()
 void PlayerDamagingState::Tick(float deltaTime)
 {
     const float elapsed = (std::max)(0.0f, deltaTime);
-    if (avoidTimer_ > 0.0f && elapsed <= avoidTimer_ &&
-        player_.GetInput().jumpPressed && !player_.CanGroundJump() &&
-        player_.CanDoubleJump())
+    if (avoidTimer_ > 0.0f)
     {
-        player_.ApplyAvoid(true);
-        avoidTimer_ = 0.0f;
-        stateMachine_.ChangeState(PlayerStateType::DoubleJump);
-        return;
+        if (elapsed <= avoidTimer_ && player_.GetInput().jumpPressed &&
+            !player_.CanGroundJump() && player_.CanDoubleJump())
+        {
+            avoidTimer_ = 0.0f;
+			player_.ApplyAvoid();//被弾回避の処理を行う
+            stateMachine_.ChangeState(PlayerStateType::DoubleJump);
+            return;
+        }
+
+        // 受付が終わったフレームだけ、保留していたダメージを適用する。
+        avoidTimer_ = (std::max)(0.0f, avoidTimer_ - elapsed);
+        if (avoidTimer_ == 0.0f)
+            player_.AddDamage();
     }
-    avoidTimer_ = (std::max)(0.0f, avoidTimer_ - elapsed);
 
     player_.StopMove();
     remainingTime_ -= elapsed;

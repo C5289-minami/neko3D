@@ -159,7 +159,9 @@ void Player::SetStartPosition(const Vec3& position)
 // 最初の場所を覚えておいて、Rでそこに戻すようにした。
 void Player::ResetPosition()
 {
-	stateMachine_.ChangeState(PlayerStateType::Idle);
+	// 位置だけを戻すときは、保留中の被弾判定を続ける。
+	if (stateMachine_.GetAvoidTime() <= 0.0f)
+		stateMachine_.ChangeState(PlayerStateType::Idle);
 	EndPillarElevator();
 	StopMove();
 	position_ = startPosition_;
@@ -453,16 +455,18 @@ void Player::Draw() const
 bool Player::TakeDamage()
 {
 	if (IsDead() || IsDamaging() || avoidInvTime_ > 0.0f) return false;
-	if (stateMachine_.TryAvoid()) return false;
 
-	--health_;
 	stateMachine_.ChangeState(PlayerStateType::Damaging);
 	return true;
 }
 
-void Player::ApplyAvoid(bool restoreHealth)
+void Player::AddDamage()
 {
-	if (restoreHealth) ++health_;
+	--health_;
+}
+
+void Player::ApplyAvoid()
+{
 	avoidInvTime_ = AvoidInvTime;
 }
 
