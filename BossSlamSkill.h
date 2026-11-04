@@ -26,6 +26,7 @@ public:
 	{
 		BossPoseSkill::Reset();
 
+		phase_ = AttackStateType::None;
 		hitCapsules_ = {};
 
 		targetLocked_ = false;
@@ -157,6 +158,8 @@ private:
 
 	void EnterPhase(AttackStateType phase) override
 	{
+		phase_ = phase;
+
 		switch (phase)
 		{
 		case AttackStateType::PreAction:
@@ -172,6 +175,7 @@ private:
 			boss_.GetAnimation().PlayTo(8.0f);
 			break;
 		case AttackStateType::Recovery:
+			hitActive_ = true;
 		case AttackStateType::Return:
 			// アニメーションの再生を開始する
 			boss_.GetAnimation().Start();
