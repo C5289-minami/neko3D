@@ -203,7 +203,7 @@ void GameTestScene::Update(float deltaTime)
 
 		if (GetButtonDown(PLAYER1) & BUTTON_L3)
 		{
-			gameContext->GetEffectManager().PlayHit(RM().GetEffect(ResourceKeys::Effect_PlayerAttack),
+			gameContext->GetEffectManager().PlayHit(RM().GetEffect(ResourceKeys::Effect_Impact),
 				player->GetPosition() + Vec3::Up() * 15.0f,
 				player->GetYaw() + DX_PI_F);
 		}
