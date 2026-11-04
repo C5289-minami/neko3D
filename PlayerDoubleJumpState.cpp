@@ -9,39 +9,47 @@ PlayerDoubleJumpState::PlayerDoubleJumpState(PlayerStateMachine& stateMachine, P
 
 void PlayerDoubleJumpState::Enter()
 {
-	player_.StopMove();
-	player_.SetMoveRate(3.0f);
-	player_.SetAnimation(PlayerAnimType::Double_Jump, false);
-	player_.StartDoubleJump();
-	stateMachine_.NotifyEvent(PlayerActionEvent::DoubleJumped);
-	DxPlus::Debug::SetFormatString(L"PlayerDoubleJumpState::Enter");
+    avoidTimer_ = AvoidTime;
+    player_.StopMove();
+    player_.SetAnimation(PlayerAnimType::Double_Jump, false);
+	player_.GetAnimation().PlayTo(0.0f, Const::ANIM_FPS, 1.0f);
+    player_.StartDoubleJump();
+    stateMachine_.NotifyEvent(PlayerActionEvent::DoubleJumped);
+    DxPlus::Debug::SetFormatString(L"PlayerDoubleJumpState::Enter");
 }
 
 void PlayerDoubleJumpState::Tick(float deltaTime)
 {
-	player_.UpdateAnimation(deltaTime);
+    avoidTimer_ = (std::max)(0.0f, avoidTimer_ - (std::max)(0.0f, deltaTime));
+    player_.UpdateAnimation(deltaTime);
 
-	if (player_.IsGrounded() || !player_.IsGravityEnabled())
-	{
-		if (player_.GetInput().isMoving)
-			stateMachine_.ChangeState(PlayerStateType::Walk);
-		else
-			stateMachine_.ChangeState(PlayerStateType::Idle);
-		return;
-	}
+    if (player_.IsGrounded() || !player_.IsGravityEnabled())
+    {
+        if (player_.GetInput().isMoving)
+            stateMachine_.ChangeState(PlayerStateType::Walk);
+        else
+            stateMachine_.ChangeState(PlayerStateType::Idle);
+        return;
+    }
 
-	// 空中でも方向入力を読み取り、Player側で横速度に反映する。
+    // 空中でも方向入力を読み取り、Player側で横速度に反映する。
+    player_.SetMoveDirection(player_.GetInput().moveDir);
 
-	player_.SetMoveDirection(player_.GetInput().moveDir);
+    // Spaceを連打しても、着地するまで追加のジャンプはしない。
+    DxPlus::Debug::SetFormatString(L"state:double_jump");
+}
 
+bool PlayerDoubleJumpState::TryAvoid()
+{
+    if (avoidTimer_ <= 0.0f) return false;
 
-	// Spaceを連打しても、着地するまで追加のジャンプはしない。
-	DxPlus::Debug::SetFormatString(L"state:double_jump");
+    avoidTimer_ = 0.0f;
+    player_.ApplyAvoid(false);
+    return true;
 }
 
 void PlayerDoubleJumpState::Exit()
 {
-	player_.StopMove();
-	player_.SetMoveRate(1.0f);
-	DxPlus::Debug::SetFormatString(L"PlayerDoubleJumpState::Exit");
+    player_.StopMove();
+    DxPlus::Debug::SetFormatString(L"PlayerDoubleJumpState::Exit");
 }

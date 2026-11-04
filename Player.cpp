@@ -104,6 +104,7 @@ void Player::Reset()
 {
 
 	health_ = MaxHealth;
+	avoidInvTime_ = 0.0f;
 	// wasTouchingPillar_ = false;
 	wasTouchingModel_ = false;
 
@@ -213,6 +214,8 @@ void Player::SetModelKey(const std::wstring& key)
 
 void Player::UpdateMovement(float deltaTime)
 {
+	const float elapsed = (std::max)(0.0f, deltaTime);
+	avoidInvTime_ = (std::max)(0.0f, avoidInvTime_ - elapsed);
 
 	// 前のフレームで床に着いたら、2回目のジャンプを再び使えるようにする。
 	// 空中で被弾してステートが変わっても、このフラグはリセットしない。
@@ -225,7 +228,7 @@ void Player::UpdateMovement(float deltaTime)
 	else
 	{
 		coyoteTimeRemaining_ = (std::max)(0.0f,//コヨーテタイムの残り時間を減らす。0未満にならないようにする。
-			coyoteTimeRemaining_ - (std::max)(0.0f, deltaTime));
+			coyoteTimeRemaining_ - elapsed);
 	}
 
 	// 歩いて足場を離れた場合も、通常ジャンプ中と同じ空中入力を受け付ける。
@@ -449,11 +452,18 @@ void Player::Draw() const
 
 bool Player::TakeDamage()
 {
-	if (IsDead() || IsDamaging()) return false;
+	if (IsDead() || IsDamaging() || avoidInvTime_ > 0.0f) return false;
+	if (stateMachine_.TryAvoid()) return false;
 
 	--health_;
 	stateMachine_.ChangeState(PlayerStateType::Damaging);
 	return true;
+}
+
+void Player::ApplyAvoid(bool restoreHealth)
+{
+	if (restoreHealth) ++health_;
+	avoidInvTime_ = AvoidInvTime;
 }
 
 void Player::DrawStatus() const
