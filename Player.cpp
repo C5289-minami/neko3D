@@ -309,8 +309,11 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 		float topY{};
 		if (collision.GetPillarBounds(elevatorPillar_, elevatorCenter_, topY))
 			elevatorTopY_ = topY - Const::PLAYER_ELEVATOR_TOP_OFFSET;
-		else
+		else if (GetPosition().y > elevatorTopY_)
+		{
 			EndPillarElevator();
+			input_.isMoving = false;
+		}
 	}
 	if (canStartElevator && touchingWall_)
 	{
