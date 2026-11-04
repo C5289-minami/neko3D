@@ -747,6 +747,7 @@
     <ClInclude Include="SoundManager.h">
       <Filter>10_Core\Sound</Filter>
     </ClInclude>
+    <ClInclude Include="BossAI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -1061,6 +1062,7 @@
     <ClCompile Include="SoundManager.cpp">
       <Filter>10_Core\Sound</Filter>
     </ClCompile>
+    <ClCompile Include="BossAI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Config\toon.json">

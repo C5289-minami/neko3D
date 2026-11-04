@@ -6,6 +6,7 @@
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
 #include "StatusUI.h"
+#include "UIManager.h"
 
 GameSceneBattleState::GameSceneBattleState(
     GameStateMachine& gameStateMachine,
@@ -26,6 +27,7 @@ void GameSceneBattleState::Enter()
 
     player->SetDefMove(false);
     player->StopMove();
+    StatusUI::InitBoss();
     gameScene_.SetDrawPlayerShadow(true);
 }
 
@@ -99,6 +101,8 @@ void GameSceneBattleState::Tick(float deltaTime)
 
     // エフェクト更新
     gameContext->GetEffectManager().Update(deltaTime);
+    StatusUI::SyncStatusBar(L"BossHealthGauge", boss.GetHealthProgress());
+    StatusUI::SyncStatusBar(L"BossDownGauge", boss.GetDownGaugeProgress());
 
     //// ステータスUI更新
     //StatusUI::SyncStatusBar(
@@ -125,4 +129,7 @@ void GameSceneBattleState::Tick(float deltaTime)
 void GameSceneBattleState::Exit()
 {
     gameScene_.SetDrawPlayerShadow(false);
+    UIM().RemoveUI(L"BossStatusBackground");
+    UIM().RemoveUI(L"BossHealthGauge");
+    UIM().RemoveUI(L"BossDownGauge");
 }

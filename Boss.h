@@ -70,8 +70,17 @@ public:
 	bool IsSlamHitActive() const;
 	bool IsHitByAttackSphere(const Collision::Sphere& sphere) const;
 	int GetHealth() const { return health_; }
+    float GetHealthProgress() const { return maxHealth_ > 0 ? static_cast<float>(health_) / maxHealth_ : 0.0f; }
 	BossPhase GetPhase() const { return phase_; }
 	void TakeDamage(int damage = 1);
+
+	void SetDownGauge(float value) { downGauge_ = (std::max)(0.0f, (std::min)(maxDownGauge_, value)); }
+    float GetDownGaugeProgress() const { return maxDownGauge_ > 0.0f ? downGauge_ / maxDownGauge_ : 0.0f; }
+    void ResetDownGauge() { downGauge_ = maxDownGauge_; }
+	void UpdateDown(float deltaTime);
+
+
+
 #ifdef _DEBUG
 	void DrawClapAttackDebug() const;
 	void DrawSlamAttackDebug() const;
@@ -102,7 +111,10 @@ private:
 	int maxHealth_{ MaxHealth };
 	float downGauge_{ 0.0f };
 	float maxDownGauge_{ 100.0f };
+    bool damageTakenThisFrame_{};
 	float attackPower_{ 10.0f };
+
+
 
 
 	// アニメーション関連
@@ -112,7 +124,7 @@ private:
 	bool currentAnimLoop_{ true };
 	AnimationHandle idleAnimHandle_{};
 	AnimationHandle tailWhipAnimHandle_{};
-	AnimationHandle damageAnimHandle_{};
+	AnimationHandle downAnimHandle_{};
 	AnimationHandle atkHitAnimHnadle_{};
 	AnimationHandle dieAnimHandle_{};
 	AnimationHandle ClapAnimHandle_{};

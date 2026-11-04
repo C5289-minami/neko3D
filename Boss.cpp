@@ -12,6 +12,7 @@
 #include "BossTailWhipSkill.h"
 #include "BossSlamSkill.h"
 
+
 Boss::Boss()
 	: ActorBase("Boss"), stateMachine_(*this), ai_(*this)
 {
@@ -44,8 +45,8 @@ void Boss::Init()
 	tailWhipAnimHandle_ = AnimationHandle::FromIndex(sippoModelHandle, 0);
 	const int AtkHitModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Attck_Hit);
 	atkHitAnimHnadle_ = AnimationHandle::FromIndex(AtkHitModelHandle, 0);
-	const int damageModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Damage);
-	damageAnimHandle_ = AnimationHandle::FromIndex(damageModelHandle, 0);
+	const int downModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Down);
+	downAnimHandle_ = AnimationHandle::FromIndex(downModelHandle, 0);
 	const int dieModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Die);
 	dieAnimHandle_ = AnimationHandle::FromIndex(dieModelHandle, 0);
 
@@ -54,6 +55,8 @@ void Boss::Init()
 
 void Boss::Reset()
 {
+	downGauge_ = maxDownGauge_;
+    damageTakenThisFrame_ = false;
 
 	health_ = maxHealth_;
 	phase_ = BossPhase::Phase1;
@@ -89,8 +92,8 @@ void Boss::Reset()
 	const int AtkHitModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Attck_Hit);
 	atkHitAnimHnadle_ = AnimationHandle::FromIndex(AtkHitModelHandle, 0);
 
-	const int damageModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Damage);
-	damageAnimHandle_ = AnimationHandle::FromIndex(damageModelHandle, 0);
+	const int downModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Down);
+	downAnimHandle_ = AnimationHandle::FromIndex(downModelHandle, 0);
 
 	const int dieModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Die);
 	dieAnimHandle_ = AnimationHandle::FromIndex(dieModelHandle, 0);
@@ -120,17 +123,19 @@ void Boss::Reset()
 
 }
 
-void Boss::TakeDamage(int damaege)
+void Boss::TakeDamage(int damage)
 {
+    damageTakenThisFrame_ = true;
 	// ダメージを受けたらHPを減らす。
-	// その場で停止させ、ひるみ状態へ移行する。
+	// ダメージを受けると移動を止め、ゲージを減らす。
 	// ダメージ処理後にフェーズ移行を確認する。
 
-	health_ -= damaege;
+
+	health_ -= damage;
 	velocity_ = {};
 
-	// ダメージを受けたらひるみ状態へ移行する。
-	stateMachine_.ChangeState(BossStateType::flinch);
+	
+
 
 	// HPが最大値の半分以下になるとフェーズ2へ移行する。
 	if (phase_ == BossPhase::Phase1 && health_ <= maxHealth_ / 2)
@@ -140,6 +145,34 @@ void Boss::TakeDamage(int damaege)
 	{
 		health_ = 0;
 		stateMachine_.ChangeState(BossStateType::Die);
+	}
+
+}
+
+void Boss::UpdateDown(float deltaTime)
+{
+	float AccumulationCounter = 1.0f * deltaTime; // 累積カウンターを更新する。
+	if(health_ <= 0&&downGauge_<=0)
+		return;
+	
+
+	downGauge_ -= deltaTime * 10.0f; // ダウンゲージの減少速度を調整する。
+
+	if(AccumulationCounter >= 5.0f)
+	{
+		downGauge_ -= 5.0f;			// 5秒ごとにさらに減少させる。
+		AccumulationCounter = 0.0f; // カウンターをリセットする。
+	}
+    if (damageTakenThisFrame_)
+    {
+        downGauge_ -= 20.0f;
+        damageTakenThisFrame_ = false;
+    } // ダメージを受けた瞬間にさらに減少させる。
+
+	if(downGauge_ <= 0.0f)
+	{
+		downGauge_ = 0.0f;
+		stateMachine_.ChangeState(BossStateType::Flinch);
 	}
 
 }
@@ -163,7 +196,16 @@ void Boss::Update(float deltaTime)
 
 	position_ += velocity_ * deltaTime;
 
+	if (damageTakenThisFrame_) UpdateDown(deltaTime);
+
+    if (health_ > 0 && downGauge_ <= 0.0f &&
+        stateMachine_.GetCurrentType() != BossStateType::Flinch)
+    {
+        stateMachine_.ChangeState(BossStateType::Flinch);
+    }
+
 }
+
 
 void Boss::TurnToTarget(const Vec3& targetPosition, float deltaTime)
 {
@@ -205,7 +247,7 @@ AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 	case BossAnimType::TailWhip: return tailWhipAnimHandle_;
 	case BossAnimType::Clap: return ClapAnimHandle_;
 	case BossAnimType::Slam: return atkHitAnimHnadle_;
-	case BossAnimType::Damage: return damageAnimHandle_;
+	case BossAnimType::Flach: return downAnimHandle_;
 	case BossAnimType::Die: return dieAnimHandle_;
 	default:
 		DxPlus::Utils::FatalError(L"アニメーションハンドルを取得できませんでした。GetAnimationHandleを確認してください。");
@@ -215,8 +257,11 @@ AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 
 bool Boss::UseSkill(BossAttackType type)
 {
-	if (stateMachine_.GetCurrentType() == BossStateType::Attack)
-		return false;
+    const BossStateType currentState = stateMachine_.GetCurrentType();
+    if (currentState == BossStateType::Attack ||
+        currentState == BossStateType::Flinch ||
+        currentState == BossStateType::Die)
+        return false;
 
 	switch (type)
 	{

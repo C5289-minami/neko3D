@@ -138,6 +138,10 @@ void GameScene::Update(float deltaTime)
 			player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
 
 		boss.Update(deltaTime);
+
+		if (GetCurrentGameState() == GameStateType::Battle &&
+			boss.UpdateSlamAttack(player->GetWorldPosition(), stage.GetWorldPosition()))
+			player->TakeDamage();
 		// playerとbossの衝突判定
 		//const bool touching = Collision::UpdateModelContact(playerModel, bossModel);　これなし
 		//if (touching)

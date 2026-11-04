@@ -41,7 +41,7 @@ State* BossStateMachine::FindState(BossStateType type)
         return &moveState_;
 	case BossStateType::Attack:
 		return &attackState_;
-	case BossStateType::flinch:
+	case BossStateType::Flinch:
 		return &flinchState_;
 	case BossStateType::Die:
 		return &dieState_;

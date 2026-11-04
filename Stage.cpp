@@ -19,7 +19,6 @@
 
 namespace
 {
-    // ���ߕ\������X�e�[�W���f���̑傫���ƁA�v���C���[����̗]���B
     float AlphaStageScale = 0.15f;
     float AlphaStageHeadClearance = 40.0f;
 
@@ -71,7 +70,6 @@ void Stage::Init()
 
 void Stage::UpdateArenaBounds()
 {
-	// �X�e�[�W�����f���̊O���Ə�ʂ��A�U���͈͂̊�Ƃ��ĕۑ�����B
 	const Collision::Ellipsoid arenaBounds = stageModel_.GetHitEllipsoid();
 	const Vec3 arenaCenter = GetWorldPosition();
 	arenaRadius_ = (std::max)(
@@ -81,9 +79,7 @@ void Stage::UpdateArenaBounds()
 }
 void Stage::Reset()
 {
-    // �����ʒu�E��]�E�g�嗦��JSON�t�@�C������ǂݍ���
     MObjs().LoadActorTransform(*this);
-    // ���f���̃��[�h
     for (auto& model : stagePillars_)
     {
         model.Load();
@@ -119,7 +115,6 @@ void Stage::Update(float deltaTime)
 
 void Stage::Draw() const
 {
-    // ���Ƒ�������ꂼ��`��
     for (const auto& model : stagePillars_)
     {
         model.Draw();
