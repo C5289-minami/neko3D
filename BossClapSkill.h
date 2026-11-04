@@ -71,7 +71,7 @@ public:
 		Vec3 outward = targetPosition_ - stagePosition;
 		outward.y = 0.0f;
 		const float radius = outward.Length();
-		if (radius < 0.001f)
+		if (radius < 1000.0f * Const::EPS)
 			return false;
 		outward /= radius;
 

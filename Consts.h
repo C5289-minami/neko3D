@@ -60,7 +60,7 @@ namespace Const
 
     // ===== ƒQ[ƒ€“à‹¤’Ê =====
     constexpr int FPS_CAP = 480;
-    constexpr float EPS = 1e-3f;
+    constexpr float EPS = 1e-6f;
     constexpr float ANIM_FPS = 24.0f;
 
     // ===== ƒJƒƒ‰ =====

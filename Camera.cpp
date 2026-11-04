@@ -1,5 +1,6 @@
 
 #include "Camera.h"
+#include "Consts.h"
 
 #include <algorithm>
 #include <cmath>
@@ -68,7 +69,7 @@ namespace Camera
             -forward.x
         };
 
-        if (right.LengthSq() < 0.000001f)
+        if (right.LengthSq() < Const::EPS)
         {
             right = { 1.0f, 0.0f, 0.0f };
         }
@@ -167,7 +168,7 @@ namespace Camera
             -forward.x
         };
 
-        if (right.LengthSq() < 0.000001f)
+        if (right.LengthSq() < Const::EPS)
         {
             right = { 1.0f, 0.0f, 0.0f };
         }

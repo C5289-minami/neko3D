@@ -1,4 +1,5 @@
 #include "ActorBase.h"
+#include "Consts.h"
 
 #include <algorithm>
 #include <array>
@@ -70,7 +71,7 @@ namespace
     {
         const float y = std::asin(std::clamp(-matrix[2][0], -1.0f, 1.0f));
         const float cosY = std::cos(y);
-        if (std::abs(cosY) > 0.00001f)
+        if (std::abs(cosY) > Const::EPS)
         {
             return {
                 std::atan2(matrix[2][1], matrix[2][2]),

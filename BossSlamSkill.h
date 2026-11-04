@@ -4,6 +4,7 @@
 #include "BossPoseSkill.h"
 #include "DxLib.h"
 #include "DxPlus/Debug.h"
+#include "Consts.h"
 
 #include <algorithm>
 #include <array>
@@ -47,7 +48,7 @@ public:
 			playerFromCenter.y = 0.0f;
 
 			const float orbitRadius = playerFromCenter.Length();
-			if (orbitRadius > 0.001f)
+			if (orbitRadius > Const::EPS)
 			{
 				//プレイヤーを向く角度を得る。
 				const float playerAngle = std::atan2(playerFromCenter.z, playerFromCenter.x);
