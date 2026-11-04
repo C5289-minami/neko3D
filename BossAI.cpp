@@ -67,7 +67,7 @@ void BossAI::Reset()
 
     attackCooldown_ = attackCooldownTime_;
 
-    // 最初は全スキル使用可能
+    // Reset all skill cooldowns.
     for (auto& cooldown : skillCooldowns_)
         cooldown->remainingTime_ = 0.0f;
 }
