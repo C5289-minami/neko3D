@@ -6,6 +6,7 @@
 #include "BossWalkState.h"
 #include "BossAttackState.h"
 #include "BossFlinchState.h"
+#include "BossDownState.h"
 #include "BossDieState.h"
 
 class Boss;
@@ -28,5 +29,6 @@ private:
     BossWalkState moveState_;
 	BossAttackState attackState_;
 	BossFlinchState flinchState_;
+    BossDownState downState_;
 	BossDieState dieState_;
 };

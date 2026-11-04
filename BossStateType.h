@@ -5,7 +5,8 @@ enum class BossStateType
     None,
     Idle,
     Walk,
+    Down,
 	Attack,
-    flinch, // ‹¯‚Ý
-	Die,    // Ž€–S
+    flinch, // ï¿½ï¿½ï¿½ï¿½
+	Die,    // ï¿½ï¿½ï¿½S
 };

@@ -6,6 +6,7 @@
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
 #include "StatusUI.h"
+#include "UIManager.h"
 
 GameSceneBattleState::GameSceneBattleState(
     GameStateMachine& gameStateMachine,
@@ -18,7 +19,7 @@ void GameSceneBattleState::Enter()
 {
     auto* player = gameScene_.GetGameContext()->GetPlayer();
 
-    // ƒoƒgƒ‹—pƒJƒƒ‰‚ÖØ‚è‘Ö‚¦‚é
+    // ï¿½oï¿½gï¿½ï¿½ï¿½pï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½ÖØ‚ï¿½Ö‚ï¿½ï¿½ï¿½
     gameScene_.GetCameraDirector().SwitchCamera(
         gameScene_.GetTargetCamera(),
         0.8f
@@ -26,6 +27,7 @@ void GameSceneBattleState::Enter()
 
     player->SetDefMove(false);
     player->StopMove();
+    StatusUI::InitBoss();
     gameScene_.SetDrawPlayerShadow(true);
 }
 
@@ -45,11 +47,11 @@ void GameSceneBattleState::Tick(float deltaTime)
     if (taskManager.IsAllFinished())
     {
         gameScene_.GetTutorialChecklist().SetVisible(false);
-        // ’Ê’mæ‚ğ‰ğœ
+        // ï¿½Ê’mï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         player->GetStateMachine().SetEventCallback({});
     }
 
-    // Boss‚ÌèUŒ‚”»’è
+    // Bossï¿½Ìï¿½Uï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     if (boss.UpdateHandAttack(
         deltaTime,
         player->GetWorldPosition(),
@@ -58,7 +60,7 @@ void GameSceneBattleState::Tick(float deltaTime)
         player->TakeDamage();
     }
 
-    // Player‚ÌUŒ‚‹…‚ÆBoss‚Ìè‚Ì“–‚½‚è”»’è
+    // Playerï¿½ÌUï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Bossï¿½Ìï¿½Ì“ï¿½ï¿½ï¿½ï¿½è”»ï¿½ï¿½
     auto& playerStateMachine = player->GetStateMachine();
 
     if (playerStateMachine.IsAttackBallActive())
@@ -68,7 +70,7 @@ void GameSceneBattleState::Tick(float deltaTime)
 
         if (boss.IsHitByAttackSphere(attackBall))
         {
-            // “¯‚¶UŒ‚‹…‚É‚æ‚é˜A‘±ƒ_ƒ[ƒW‚ğ–h~
+            // ï¿½ï¿½ï¿½ï¿½ï¿½Uï¿½ï¿½ï¿½ï¿½ï¿½É‚ï¿½ï¿½Aï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½[ï¿½Wï¿½ï¿½hï¿½~
             if (playerStateMachine.TryRegisterAttackBallHit())
             {
                 boss.TakeDamage();
@@ -76,7 +78,7 @@ void GameSceneBattleState::Tick(float deltaTime)
         }
     }
 
-    // ƒJƒƒ‰XV
+    // ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½Xï¿½V
     gameScene_.GetTargetCamera().Update(
         player->GetPosition(),
         boss.GetWorldPosition(),
@@ -85,7 +87,7 @@ void GameSceneBattleState::Tick(float deltaTime)
 
     gameScene_.GetCameraDirector().Update(deltaTime);
 
-    // L3‚ÅƒqƒbƒgƒGƒtƒFƒNƒg‚ğÄ¶
+    // L3ï¿½Åƒqï¿½bï¿½gï¿½Gï¿½tï¿½Fï¿½Nï¿½gï¿½ï¿½ï¿½Äï¿½
     using namespace DxPlus::Input;
 
     if (GetButtonDown(PLAYER1) & BUTTON_L3)
@@ -97,10 +99,12 @@ void GameSceneBattleState::Tick(float deltaTime)
         );
     }
 
-    // ƒGƒtƒFƒNƒgXV
+    // ï¿½Gï¿½tï¿½Fï¿½Nï¿½gï¿½Xï¿½V
     gameContext->GetEffectManager().Update(deltaTime);
+    StatusUI::SyncStatusBar(L"BossHealthGauge", boss.GetHealthProgress());
+    StatusUI::SyncStatusBar(L"BossDownGauge", boss.GetDownGaugeProgress());
 
-    //// ƒXƒe[ƒ^ƒXUIXV
+    //// ï¿½Xï¿½eï¿½[ï¿½^ï¿½XUIï¿½Xï¿½V
     //StatusUI::SyncStatusBar(
     //    L"PlayerHealthGauge",
     //    static_cast<float>(player->GetHealth()) / Player::MaxHealth
@@ -125,4 +129,7 @@ void GameSceneBattleState::Tick(float deltaTime)
 void GameSceneBattleState::Exit()
 {
     gameScene_.SetDrawPlayerShadow(false);
+    UIM().RemoveUI(L"BossStatusBackground");
+    UIM().RemoveUI(L"BossHealthGauge");
+    UIM().RemoveUI(L"BossDownGauge");
 }
