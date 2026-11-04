@@ -1,7 +1,8 @@
 #pragma once
+
 #include "BossAttackType.h"
 #include <vector>
-#include "Vector3.h"    
+#include "Vector3.h"
 
 class Boss;
 
@@ -9,38 +10,48 @@ class BossAI
 {
 public:
     explicit BossAI(Boss& boss);
+
     void Reset();
     void Update(float deltaTime);
+    void TurnToTarget(Vec3 targetPosition, float deltaTime);
 
-	void TurnToTarget(Vec3 targetPosition, float deltaTime);
 private:
     Boss& boss_;
 
-
     struct SkillCooldown
     {
-        SkillCooldown(float maxcooldown, BossAttackType type):
-            remainingTime_(0.0f),
-            cooldownTime_(maxcooldown),
-			type_(type)
-		{
-		}
-		float remainingTime_{};// 残りクールダウン時間
-        const float cooldownTime_{};// クールダウン時間
+        SkillCooldown(float cooldown, BossAttackType type)
+            : remainingTime_(0.0f),
+            cooldown_(cooldown),
+            type_(type)
+        {
+        }
+
+        float remainingTime_{};       // 残りクールダウン
+        const float cooldown_{};      // 最大クールダウン
+        BossAttackType type_{};
+
         void Update(float deltaTime)
         {
-            if (remainingTime_ > 0.0f)
-                remainingTime_ -= deltaTime;
-		}
-		bool IsReady() const { return remainingTime_ <= 0.0f; }
+            remainingTime_ -= deltaTime;
+            if (remainingTime_ < 0.0f)
+				remainingTime_ = 0.0f;
+        }
 
-		BossAttackType type_{};
+        bool IsReady() const
+        {
+            return remainingTime_ <= 0.0f;
+        }
+
+        void StartCooldown()
+        {
+            remainingTime_ = cooldown_;
+        }
     };
 
     SkillCooldown clapCooldown_;
     SkillCooldown slamCooldown_;
     SkillCooldown tailWhipCooldown_;
-
 
     std::vector<SkillCooldown*> skillCooldowns_{
         &clapCooldown_,
@@ -48,8 +59,15 @@ private:
         &tailWhipCooldown_
     };
 
+    // 現在実行中のスキル
+    SkillCooldown* activeSkillCooldown_{};
 
     // 攻撃全体のクールダウン
     float attackCooldown_{};
     float attackCooldownTime_{ 2.0f };
+
+    // スキルが使用できない場合の再確認間隔
+    float retryInterval_{ 0.1f };
+
+    bool isSkillActive_{ false };
 };

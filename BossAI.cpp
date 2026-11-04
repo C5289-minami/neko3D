@@ -2,12 +2,37 @@
 
 #include "BossAI.h"
 #include "Boss.h"
+
 #include <random>
 #include <algorithm>
-#include "GameContext.h"
+#include <cmath>
 
-// スキルが終わってからクールダウンに変更
-// 回転と移動を適応
+#include "DxPlus/DxPlus.h"
+
+
+// ===========================================================================
+// BossAI 仕様
+// ===========================================================================
+//
+// 【攻撃管理】
+// ・使用可能なスキルからランダムに1つ選択して発動する。
+// ・スキル実行中は、ほかのスキルを発動しない。
+// ・スキルの帰りモーションが終了すると、スキル実行中状態を解除する。
+//
+// 【個別クールダウン】
+// ・クールダウンはスキルの帰りモーション終了後から開始する。
+// ・スキル実行中は個別クールダウンを更新しない。
+// ・クールダウンが0秒以下になると、そのスキルを再使用できる。
+// ・使用可能なスキルのみ抽選対象とする。
+//
+// 【全体クールダウン】
+// ・攻撃終了後、5秒間は次の攻撃を行わない。
+// ・全体クールダウン中は個別クールダウンのみ更新する。
+// ・使用可能なスキルがない場合は、0.1秒後に再抽選する。
+// ・スキル発動に失敗した場合も、0.1秒後に再試行する。
+//
+// ===========================================================================
+
 
 namespace
 {
@@ -27,25 +52,53 @@ namespace
 
 BossAI::BossAI(Boss& boss)
     : boss_(boss),
-    clapCooldown_(10, BossAttackType::Clap),
-    slamCooldown_(10, BossAttackType::Slam),
-    tailWhipCooldown_(20, BossAttackType::TailWhip)
+    clapCooldown_(10.0f, BossAttackType::Clap),
+    slamCooldown_(10.0f, BossAttackType::Slam),
+    tailWhipCooldown_(20.0f, BossAttackType::TailWhip)
 {
-    attackCooldown_ = 5.0f;
+    attackCooldownTime_ = 5.0f;
+    Reset();
 }
 
 void BossAI::Reset()
 {
-    attackCooldown_ = 0.0f;
+    isSkillActive_ = false;
+    activeSkillCooldown_ = nullptr;
+
+    attackCooldown_ = attackCooldownTime_;
+
+    // 最初は全スキル使用可能
     for (auto& cooldown : skillCooldowns_)
         cooldown->remainingTime_ = 0.0f;
 }
 
 void BossAI::Update(float deltaTime)
 {
-#ifndef NDEBUG
-	return;
-#endif
+    DxPlus::Debug::SetFormatString(
+        L"BossAI: Clap %.1f, Slam %.1f, TailWhip %.1f",
+        clapCooldown_.remainingTime_,
+        slamCooldown_.remainingTime_,
+        tailWhipCooldown_.remainingTime_
+    );
+
+    // スキル実行中
+    if (isSkillActive_)
+    {
+        if (boss_.GetActiveSkill() && !boss_.GetActiveSkill()->IsReturnFinished())
+            return;
+
+        // 使用したスキルのクールダウンを開始
+        if (activeSkillCooldown_)
+            activeSkillCooldown_->StartCooldown();
+
+        // スキル終了
+        isSkillActive_ = false;
+        activeSkillCooldown_ = nullptr;
+
+        // 攻撃後の待機時間を設定
+        attackCooldown_ = attackCooldownTime_;
+        return;
+    }
 
     // 個別スキルのクールダウン更新
     for (auto& cooldown : skillCooldowns_)
@@ -54,7 +107,7 @@ void BossAI::Update(float deltaTime)
     // 攻撃全体のクールダウン更新
     if (attackCooldown_ > 0.0f)
     {
-        attackCooldown_ -= deltaTime;
+        attackCooldown_ = std::max(0.0f, attackCooldown_ - deltaTime);
         return;
     }
 
@@ -67,59 +120,63 @@ void BossAI::Update(float deltaTime)
             availableSkills.push_back(cooldown);
     }
 
-    // 使用可能なスキルがなければ再抽選を待つ
+    // 使用可能なスキルがなければ再確認
     if (availableSkills.empty())
     {
-        attackCooldown_ = attackCooldownTime_;
+        attackCooldown_ = retryInterval_;
         return;
     }
 
     // ランダムにスキルを選択
     std::uniform_int_distribution<int> distribution(
-        0, static_cast<int>(availableSkills.size()) - 1
+        0,
+        static_cast<int>(availableSkills.size()) - 1
     );
 
     SkillCooldown* selectedSkill =
         availableSkills[distribution(randomEngine)];
 
-    // スキル発動を試す
+    // スキル発動
     if (boss_.UseSkill(selectedSkill->type_))
     {
-        selectedSkill->remainingTime_ = selectedSkill->cooldownTime_;
+        activeSkillCooldown_ = selectedSkill;
+        isSkillActive_ = true;
+    }
+    else
+    {
+        // 発動失敗時は少し待って再試行
+        attackCooldown_ = retryInterval_;
     }
 
-    // 成功・失敗どちらでも次の攻撃まで待つ
-    attackCooldown_ = attackCooldownTime_;
-
+   
 }
 
 void BossAI::TurnToTarget(Vec3 targetPosition, float deltaTime)
 {
-	Vec3 bossPosition = boss_.GetWorldPosition();
+    Vec3 bossPosition = boss_.GetWorldPosition();
 
-	// ターゲットまでのRadian角度を計算
-    float yawError =
-        NormalizeAngle(
-            std::atan2(targetPosition.x - bossPosition.x,
-                targetPosition.z - bossPosition.z)
-            - boss_.GetYaw());
+    // ターゲットまでの角度を計算
+    float yawError = NormalizeAngle(
+        std::atan2(
+            targetPosition.x - bossPosition.x,
+            targetPosition.z - bossPosition.z
+        ) - boss_.GetYaw()
+    );
 
-    yawError *= -1;
+    yawError *= -1.0f;
 
-	// yawDiff を -π から π の範囲に正規化
-	NormalizeAngle(yawError);
-    float rotationSpeed = 0.5f; // 回転速度（ラジアン/秒）
-    if (std::abs(yawError) < 120.0f * DxPlus::Deg2Rad)rotationSpeed = 1.0f;
+    float rotationSpeed = 0.5f;
 
-    if (std::abs(yawError) > 0.1f) // ある程度の差がある場合のみ回転
+    if (std::abs(yawError) < 120.0f * DxPlus::Deg2Rad)
+        rotationSpeed = 1.0f;
+
+    if (std::abs(yawError) > 0.1f)
     {
-       
         float rotationAmount = rotationSpeed * deltaTime;
-        if (yawError > 0)
+
+        if (yawError > 0.0f)
             boss_.SetYaw(boss_.GetYaw() + std::min(rotationAmount, yawError));
         else
             boss_.SetYaw(boss_.GetYaw() - std::min(rotationAmount, -yawError));
-	}
-
+    }
 }
-

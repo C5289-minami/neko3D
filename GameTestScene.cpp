@@ -19,7 +19,7 @@ void GameTestScene::Init()
 {
 	gameContext->Reset();
 
-tailWhipHitCapsule_ = {};
+	tailWhipHitCapsule_ = {};
 
 
 	playerCamera_.Reset();
@@ -133,7 +133,7 @@ void GameTestScene::Update(float deltaTime)
 		Collision::ResetTransparentModels();// まずリセットしてから、透過対象を追加する
 
 		Collision::SetModelsBetweenTransparent(
-			playerCamera_.GetPosition(), 
+			playerCamera_.GetPosition(),
 			player->GetWorldPosition() + Vec3::Up() * 30.0f,
 			gameContext->GetStage().GetCollision(),
 			0.7f
@@ -168,10 +168,10 @@ void GameTestScene::Update(float deltaTime)
 		}
 
 		const Collision::Sphere playerBody{ player->GetWorldPosition() + Vec3::Up() * 30.0f, 30.0f };
-		
+
 		bool tailWhipPlayerHit = boss.IsTailWhipHitActive() &&
 			Collision::IsHitCapsuleSphere(tailWhipHitCapsule_, playerBody);
-		
+
 		if (tailWhipPlayerHit)
 			player->TakeDamage();
 		if (boss.UpdateHandAttack(deltaTime,
@@ -297,6 +297,7 @@ void GameTestScene::Render() const
 void GameTestScene::DrawImGui()
 {
 #ifndef NDEBUG
+
 	auto toImGuiColor = [](unsigned int dxColor)
 	{
 		return ImVec4(
@@ -307,7 +308,8 @@ void GameTestScene::DrawImGui()
 		);
 	};
 
-	if (ImGui::Begin("Player Pillar Elevator"))
+if (ImGui::Begin("Debug"))
+
 	{
 		auto* player = gameContext->GetPlayer();
 
@@ -372,26 +374,31 @@ void GameTestScene::DrawImGui()
 
 		auto& camera = playerCamera_;
 		auto& settings = camera.GetSettings();
+		if (ImGui::TreeNode(u8"TargetCamera Settings"))
+		{
+			ImGui::DragFloat(
+				u8"カメラ距離",
+				&settings.cameraDistance,
+				10.0f,
+				100.0f,
+				3000.0f
+			);
 
-		ImGui::DragFloat(
-			u8"カメラ距離",
-			&settings.cameraDistance,
-			10.0f,
-			100.0f,
-			3000.0f
-		);
+			ImGui::DragFloat(
+				u8"カメラ高さ",
+				&settings.cameraHeight,
+				10.0f,
+				-1000.0f,
+				1000.0f
+			);
+			ImGui::TreePop();
+		}
+		ImGui::Checkbox(u8"bossAIEnabled", &boss.IsAIActive());
 
-		ImGui::DragFloat(
-			u8"カメラ高さ",
-			&settings.cameraHeight,
-			10.0f,
-			-1000.0f,
-			1000.0f
-		);
-	}
 		ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
 
-	ImGui::End();
+		ImGui::End();
+	}
 #endif
 }
 

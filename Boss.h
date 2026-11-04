@@ -75,6 +75,7 @@ public:
 #ifdef _DEBUG
 	void DrawClapAttackDebug() const;
 	void DrawSlamAttackDebug() const;
+	bool& IsAIActive() { return activeAI; }
 #endif
 
 	AnimationHandle GetAnimationHandle(BossAnimType::Type type) const;
@@ -122,4 +123,7 @@ private:
 	std::unique_ptr<BossTailWhipSkill> tailWhipSkill_;
 
 	BossAI ai_; // AI
+#ifndef NDEBUG
+	bool activeAI{ false }; // デバッグ用。falseにするとAIが無効化される。
+#endif
 };

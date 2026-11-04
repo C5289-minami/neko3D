@@ -68,6 +68,10 @@ void Boss::Reset()
 
 	stateMachine_.Initialize();
 	
+#ifndef NDEBUG
+	activeAI = false;
+#endif // !NDEBUG
+
 	ai_.Reset();
 	if (clapSkill_ != nullptr) clapSkill_->Reset();
 	if (slamSkill_ != nullptr) slamSkill_->Reset();
@@ -146,7 +150,14 @@ void Boss::Update(float deltaTime)
 	// 再生区間や攻撃中の動作をスキル側で管理する。
 	
 	// AIの更新
-	ai_.Update(deltaTime);
+	
+#ifndef NDEBUG
+	if (activeAI)
+#endif
+	{
+		ai_.Update(deltaTime);
+	}
+
 	stateMachine_.Tick(deltaTime);
 	
 
@@ -232,6 +243,7 @@ bool Boss::UseSkill(BossAttackType type)
 	stateMachine_.ChangeState(BossStateType::Attack);
 	return stateMachine_.GetCurrentType() == BossStateType::Attack;
 }
+
 
 
 bool Boss::IsTailWhipHitActive() const
