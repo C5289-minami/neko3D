@@ -195,7 +195,6 @@
     <ClInclude Include="Basket.h" />
     <ClInclude Include="BossAI.h" />
     <ClInclude Include="BossAnimType.h" />
-    <ClInclude Include="BossDownState.h" />
     <ClInclude Include="BossSlamSkill.h" />
     <ClInclude Include="Boss.h" />
     <ClInclude Include="BossAttackState.h" />
@@ -350,7 +349,6 @@
     <ClCompile Include="BossAI.cpp" />
     <ClCompile Include="BossDieState.cpp" />
     <ClCompile Include="BossFlinchState.cpp" />
-    <ClCompile Include="BossDownState.cpp" />
     <ClCompile Include="BossPoseSkill.cpp" />
     <ClCompile Include="ButtonLabel.cpp" />
     <ClCompile Include="Camera.cpp" />

@@ -280,9 +280,6 @@
     <Filter Include="15_System\StatusUI">
       <UniqueIdentifier>{261a606d-a6ff-4292-9a19-ccdb71fb63e9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="40_Gameplay\Actors\Boss\State\Down">
-      <UniqueIdentifier>{ec96cd7e-ad91-4fd7-b6cf-e7c4297fbfbd}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -751,9 +748,6 @@
       <Filter>10_Core\Sound</Filter>
     </ClInclude>
     <ClInclude Include="BossAI.h" />
-    <ClInclude Include="BossDownState.h">
-      <Filter>40_Gameplay\Actors\Boss\State\Down</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -1061,9 +1055,6 @@
     </ClCompile>
     <ClCompile Include="BossFlinchState.cpp">
       <Filter>40_Gameplay\Actors\Boss\State\flinch</Filter>
-    </ClCompile>
-    <ClCompile Include="BossDownState.cpp">
-      <Filter>40_Gameplay\Actors\Boss\State\Down</Filter>
     </ClCompile>
     <ClCompile Include="StatusUI.cpp">
       <Filter>15_System\StatusUI</Filter>

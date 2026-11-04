@@ -1,4 +1,4 @@
-#include "BossFlinchState.h"
+ï»¿#include "BossFlinchState.h"
 #include "Boss.h"
 #include "Consts.h"
 
@@ -11,22 +11,22 @@ BossFlinchState::BossFlinchState(BossStateMachine& stateMachine, Boss& boss)
 
 void BossFlinchState::Enter()
 {
-	boss_.SetAnimation(BossAnimType::Damage, false);
+    remainingSeconds_ = FlinchDurationSeconds;
+    boss_.StopMove();
+    boss_.SetAnimation(BossAnimType::Flach, false);
 }
 
 void BossFlinchState::Tick(float deltaTime)
 {
-	DxPlus::Debug::SetString(L"CurrentBossState:Flinch");
-	boss_.UpdateAnimation(deltaTime);
-
-	if (boss_.GetAnimation().IsFinished())
-	{
-		// Boss‚ÌƒtƒŠƒ“ƒgˆ—‚ªI—¹‚µ‚½‚çAŸ‚Ìó‘Ô‚É‘JˆÚ‚·‚é
-		stateMachine_.ChangeState(BossStateType::Idle);
-	}
-
+    DxPlus::Debug::SetString(L"CurrentBossState:Flinch");
+    boss_.UpdateAnimation(deltaTime);
+    remainingSeconds_ -= deltaTime;
+    if (remainingSeconds_ <= 0.0f)
+        stateMachine_.ChangeState(BossStateType::Idle);
 }
 
 void BossFlinchState::Exit()
 {
+    if (boss_.GetHealth() > 0)
+        boss_.ResetDownGauge();
 }

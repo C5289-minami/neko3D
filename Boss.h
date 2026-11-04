@@ -124,7 +124,7 @@ private:
 	bool currentAnimLoop_{ true };
 	AnimationHandle idleAnimHandle_{};
 	AnimationHandle tailWhipAnimHandle_{};
-	AnimationHandle damageAnimHandle_{};
+	AnimationHandle downAnimHandle_{};
 	AnimationHandle atkHitAnimHnadle_{};
 	AnimationHandle dieAnimHandle_{};
 	AnimationHandle ClapAnimHandle_{};
