@@ -34,7 +34,8 @@ public:
 	bool IsDamaging() const { return GetCurrentState() == PlayerStateType::Damaging; }
 	PlayerStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }
 	bool TakeDamage();
-	void ApplyAvoid(bool restoreHealth);
+	void AddDamage();
+	void ApplyAvoid();
 	float GetAvoidInvTime() const { return avoidInvTime_; }
 
 	// // ステージとの当たり判定込みの更新
