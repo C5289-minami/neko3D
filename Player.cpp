@@ -635,6 +635,7 @@ void Player::UpdateHorizontalVelocity(float deltaTime)
 #ifdef _DEBUG//debugモードでは、移動速度を5倍にする
 	if (debugDashEnabled_) moveSpeed *= 5.0f;//(shift中)
 #endif
+	if (isDoubleJump) moveSpeed *= 3.0f;
 
 	if (isdefMove_)
 	{
@@ -745,6 +746,30 @@ void Player::ResetClimbingSpeeds()
 	climbingSpeed_ = Const::PLAYER_ELEVATOR_SPEED;
 	wallSlideSpeed_ = Const::PLAYER_WALL_SLIDE_SPEED;
 }
+
+Player::GroundType Player::CheckFloor(
+	const ModelObject& planet,
+	const ModelObject& firstFloor)
+{
+	if (onSecondFloor)
+	{
+		// 一階専用の床より下に戻って接地したら一階判定
+		if (isGrounded_ &&
+			position_.y <= firstFloor.GetPosition().y + 100.0f) // 少し余裕を持たせる
+		{
+			onSecondFloor = false;
+		}
+	}
+	// 二階専用の床より上に移動して接地したら二階判定
+	else if (isGrounded_ && position_.y > planet.GetPosition().y)
+	{
+		onSecondFloor = true;
+	}
+
+	DxPlus::Debug::SetString(onSecondFloor ? L"二階" : L"一階");
+
+	return onSecondFloor ? GroundType::UpFloor : GroundType::DownFloor;
+};
 
 void Player::SetWallJumpMoveSpeed(float value)
 {

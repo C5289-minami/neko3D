@@ -123,7 +123,11 @@ void GameTestScene::Update(float deltaTime)
 #endif
 
 		player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
-
+		for (auto& obj : stage.GetStageModelObjects())
+		{
+			player->CheckFloor(obj, stage.GetModelObject());
+		}
+	
 #ifdef _DEBUG
 		// この更新だけに適用し、共有するPlayerを他のシーンへ持ち越さない。
 		player->SetDebugDashEnabled(false);
@@ -203,7 +207,7 @@ void GameTestScene::Update(float deltaTime)
 
 		if (GetButtonDown(PLAYER1) & BUTTON_L3)
 		{
-			gameContext->GetEffectManager().PlayHit(RM().GetEffect(ResourceKeys::Effect_Impact),
+			gameContext->GetEffectManager().PlayHit(RM().GetEffect(ResourceKeys::Effect_PlayerAttack),
 				player->GetPosition() + Vec3::Up() * 15.0f,
 				player->GetYaw() + DX_PI_F);
 		}
@@ -299,16 +303,16 @@ void GameTestScene::DrawImGui()
 #ifndef NDEBUG
 
 	auto toImGuiColor = [](unsigned int dxColor)
-	{
-		return ImVec4(
-			static_cast<float>((dxColor >> 16) & 0xFF) / 255.0f,
-			static_cast<float>((dxColor >> 8) & 0xFF) / 255.0f,
-			static_cast<float>(dxColor & 0xFF) / 255.0f,
-			1.0f
-		);
-	};
+		{
+			return ImVec4(
+				static_cast<float>((dxColor >> 16) & 0xFF) / 255.0f,
+				static_cast<float>((dxColor >> 8) & 0xFF) / 255.0f,
+				static_cast<float>(dxColor & 0xFF) / 255.0f,
+				1.0f
+			);
+		};
 
-if (ImGui::Begin("Debug"))
+	if (ImGui::Begin("Debug"))
 
 	{
 		auto* player = gameContext->GetPlayer();
