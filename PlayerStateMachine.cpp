@@ -66,14 +66,6 @@ float PlayerStateMachine::GetAvoidTime() const
 		: 0.0f;
 }
 
-bool PlayerStateMachine::TryAvoid()
-{
-	if (currentType_ != PlayerStateType::DoubleJump)
-		return false;
-
-	return doubleJumpState_.TryAvoid();
-}
-
 void PlayerStateMachine::Draw() const
 {
 	if (currentType_ == PlayerStateType::Attack)
