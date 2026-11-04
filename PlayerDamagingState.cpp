@@ -23,7 +23,7 @@ void PlayerDamagingState::Tick(float deltaTime)
         player_.GetInput().jumpPressed && !player_.CanGroundJump() &&
         player_.CanDoubleJump())
     {
-        player_.ApplyAvoid();
+        player_.ApplyAvoid(true);
         avoidTimer_ = 0.0f;
         stateMachine_.ChangeState(PlayerStateType::DoubleJump);
         return;
