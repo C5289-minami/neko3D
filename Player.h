@@ -34,6 +34,8 @@ public:
 	bool IsDamaging() const { return GetCurrentState() == PlayerStateType::Damaging; }
 	PlayerStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }
 	bool TakeDamage();
+	void ApplyAvoid(bool restoreHealth);
+	float GetAvoidInvTime() const { return avoidInvTime_; }
 
 	// // ステージとの当たり判定込みの更新
 	// void Update(float deltaTime, const Stage& stage, const Vec3& movementCenter = Vec3{});
@@ -67,6 +69,7 @@ public:
 
 	// ジャンプ
 	static constexpr float CoyoteTime = 0.1f;
+	static constexpr float AvoidInvTime = 0.2f;
 	bool CanGroundJump() const { return gravityEnabled_ && (isGrounded_ || coyoteTimeRemaining_ > 0.0f); }
 	// 地上・踏み外し直後は通常ジャンプ、それ以外の空中では二段ジャンプ。
 	bool TryJump();
@@ -169,6 +172,7 @@ private:
 	void UpdateStageMoveVelocity(float moveSpeed, float deltaTime);
 
 	int health_{ MaxHealth };
+	float avoidInvTime_{ 0.0f };
 	ModelObject model_;
 
 	PlayerInput input_;
