@@ -97,6 +97,16 @@ public:
     void EndPillarElevator();
     void StartPillarExitJump();
 
+	// 階層判定
+	enum class GroundType
+	{
+		None,
+		DownFloor,
+		UpFloor,	// 上の足場に着地したときの判定
+	};
+	GroundType CheckFloor(
+		const ModelObject& planet,
+		const ModelObject& firstFloor);
 
 	//ゲッター・セッター
 	float GetWallJumpMoveSpeed() const { return wallJumpMoveSpeed_; }
@@ -109,6 +119,7 @@ public:
 	void SetGround(bool grounded) { isGrounded_ = grounded; }
 	bool IsGravityEnabled() const { return gravityEnabled_; }
 	void SetGravityEnabled(bool enabled);
+	bool IsSecondFloor() const { return onSecondFloor; }
 
 	void SetPosition(const Vec3& position)
 	{
@@ -231,4 +242,7 @@ private:
 	AnimationHandle walkAnimHandle_;
 	AnimationHandle jumpAnimHandle_;
 	AnimationHandle doubleJumpAnimHandle_;
+
+
+	bool onSecondFloor{ false }; // 上の足場に着地したときの判定
 };
