@@ -179,6 +179,8 @@ private:
 	void UpdateHorizontalVelocity(float deltaTime);//nyuuryokukei
 	void Move(float deltaTime);
 
+	void fallAndResetPosition(float deltaTime,Vec3& PlayerPos);
+
 	// ステージ中心を基準に、円周移動・前後移動の横速度を設定する。
 	void UpdateStageMoveVelocity(float moveSpeed, float deltaTime);
 
