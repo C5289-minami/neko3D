@@ -105,7 +105,5 @@ private:
 	bool drawPlayerShadow_{ false };
 	// ボス本体のカプセルに前フレームから接触しているか。
 	bool wasTouchingBossBody_{ false };
-    // ダブルジャンプで触れ始めたときの復帰を一度だけ行う。
-    bool wasDoubleJumpContact_{};
 
 };

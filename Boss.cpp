@@ -46,7 +46,7 @@ void Boss::Init()
 	const int AtkHitModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Attck_Hit);
 	atkHitAnimHnadle_ = AnimationHandle::FromIndex(AtkHitModelHandle, 0);
 	const int downModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Down);
-	downAnimHandle_ = AnimationHandle::FromIndex(downModelHandle, 0);
+	flachAnimHandle_ = AnimationHandle::FromIndex(downModelHandle, 0);
 	const int dieModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Die);
 	dieAnimHandle_ = AnimationHandle::FromIndex(dieModelHandle, 0);
 
@@ -96,7 +96,7 @@ void Boss::Reset()
 	atkHitAnimHnadle_ = AnimationHandle::FromIndex(AtkHitModelHandle, 0);
 
 	const int downModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Down);
-	downAnimHandle_ = AnimationHandle::FromIndex(downModelHandle, 0);
+	flachAnimHandle_ = AnimationHandle::FromIndex(downModelHandle, 0);
 
 	const int dieModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Die);
 	dieAnimHandle_ = AnimationHandle::FromIndex(dieModelHandle, 0);
@@ -291,7 +291,7 @@ AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 	case BossAnimType::TailWhip: return tailWhipAnimHandle_;
 	case BossAnimType::Clap: return ClapAnimHandle_;
 	case BossAnimType::Slam: return atkHitAnimHnadle_;
-	case BossAnimType::Flach: return downAnimHandle_;
+	case BossAnimType::Flach: return flachAnimHandle_;
 	case BossAnimType::Die: return dieAnimHandle_;
 	default:
 		DxPlus::Utils::FatalError(L"アニメーションハンドルを取得できませんでした。GetAnimationHandleを確認してください。");
