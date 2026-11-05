@@ -972,3 +972,25 @@ void Player::ForceFallFromPillar()
 
 	stateMachine_.ChangeState(PlayerStateType::Jump);
 }
+
+void Player::CameraShakeRequest(
+	CameraShakeType type,
+	float duration,
+	float strength,
+	float frequency)
+{
+	cameraShakeRequest_ = type;
+	cameraShakeDuration_ = duration;
+	cameraShakeStrength_ = strength;
+	cameraShakeFrequency_ = frequency;
+}
+
+CameraShakeType Player::GetCameraShakeRequest() const
+{
+	return cameraShakeRequest_;
+}
+
+void Player::ResetCameraShakeRequest()
+{
+	cameraShakeRequest_ = CameraShakeType::None;
+}

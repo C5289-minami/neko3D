@@ -14,6 +14,7 @@
 #include <vector>
 #include "BossAttackType.h"
 #include "BossAI.h"
+#include "CameraShakeType.h"
 
 enum class BossPhase
 {
@@ -81,7 +82,22 @@ public:
     void ResetDownGauge() { downGauge_ = maxDownGauge_; }
 	void UpdateDown(float deltaTime);
 
+	// camera
 
+	// camera
+	void CameraShakeRequest(
+		CameraShakeType type,
+		float duration = 0.25f,
+		float strength = 20.0f,
+		float frequency = 20.0f
+	);
+
+	CameraShakeType GetCameraShakeRequest() const;
+	float GetCameraShakeDuration() const { return cameraShakeDuration_; }
+	float GetCameraShakeStrength() const { return cameraShakeStrength_; }
+	float GetCameraShakeFrequency() const { return cameraShakeFrequency_; }
+
+	void ResetCameraShakeRequest();
 
 #ifdef _DEBUG
 	void DrawClapAttackDebug() const;
@@ -96,7 +112,6 @@ public:
 	// Skill
 	bool UseSkill(BossAttackType type);
 	bool IsTailWhipActive() const;
-
 	bool IsTailWhipHitActive() const;
 	Collision::Capsule GetTailWhipHitCapsule(const Vec3& stageCenter, float stageRadius, float attackHeight) const;
 private:
@@ -117,8 +132,10 @@ private:
     bool damageTakenThisFrame_{};
 	float attackPower_{ 10.0f };
 
-
-
+	CameraShakeType cameraShakeRequest_{ CameraShakeType::None };
+	float cameraShakeDuration_{ 0.25f };
+	float cameraShakeStrength_{ 20.0f };
+	float cameraShakeFrequency_{ 20.0f };
 
 	// アニメーション関連
 	ModelAnimation animation_;
@@ -141,4 +158,5 @@ private:
 #ifndef NDEBUG
 	bool activeAI{ false }; // デバッグ用。falseにするとAIが無効化される。
 #endif
+
 };

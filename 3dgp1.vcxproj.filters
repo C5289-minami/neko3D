@@ -753,6 +753,9 @@
     <ClInclude Include="BossAI.h">
       <Filter>40_Gameplay\Actors\Boss\AI</Filter>
     </ClInclude>
+    <ClInclude Include="CameraShakeType.h">
+      <Filter>10_Core\Camera\CameraShake</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">

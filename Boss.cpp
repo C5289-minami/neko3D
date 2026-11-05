@@ -219,7 +219,29 @@ void Boss::Draw() const
 	model_.Draw();
 }
 
+void Boss::CameraShakeRequest(
+	CameraShakeType type,
+	float duration,
+	float strength,
+	float frequency)
+{
+	cameraShakeRequest_ = type;
+	cameraShakeDuration_ = duration;
+	cameraShakeStrength_ = strength;
+	cameraShakeFrequency_ = frequency;
+}
+
+CameraShakeType Boss::GetCameraShakeRequest() const
+{
+	return cameraShakeRequest_;
+}
+
+void Boss::ResetCameraShakeRequest()
+{
+	cameraShakeRequest_ = CameraShakeType::None;
+}
 #ifdef _DEBUG
+
 void Boss::DrawClapAttackDebug() const
 {
 	if (clapSkill_ != nullptr)

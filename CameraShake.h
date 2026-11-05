@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "Vector3.h"
 #include "CameraPose.h"
+#include "CameraShakeType.h"
 
 class CameraShake
 {
@@ -32,17 +33,11 @@ public:
     Vec3 Update(float deltaTime, const Camera::CameraPose& pose);
 
 private:
-    enum class Type
-    {
-        Horizontal,
-        Vertical,
-        Mixed
-    };
 
-    void Start(Type type, float duration, float strength, float frequency);
+    void Start(CameraShakeType type, float duration, float strength, float frequency);
     float GetWave(float time, float phase) const;
 
-    Type type_{ Type::Mixed };
+    CameraShakeType type_{ CameraShakeType::Mixed };
 
     float elapsed_{ 0.0f };
     float duration_{ 0.0f };

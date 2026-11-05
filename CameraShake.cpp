@@ -13,7 +13,7 @@ void CameraShake::StartHorizontal(
     float strength,
     float frequency)
 {
-    Start(Type::Horizontal, duration, strength, frequency);
+    Start(CameraShakeType::Horizontal, duration, strength, frequency);
 }
 
 void CameraShake::StartVertical(
@@ -21,7 +21,7 @@ void CameraShake::StartVertical(
     float strength,
     float frequency)
 {
-    Start(Type::Vertical, duration, strength, frequency);
+    Start(CameraShakeType::Vertical, duration, strength, frequency);
 }
 
 void CameraShake::StartMixed(
@@ -29,11 +29,11 @@ void CameraShake::StartMixed(
     float strength,
     float frequency) 
 {
-    Start(Type::Mixed, duration, strength, frequency);
+    Start(CameraShakeType::Mixed, duration, strength, frequency);
 }
 
 void CameraShake::Start(
-    Type type,
+    CameraShakeType type,
     float duration,
     float strength,
     float frequency)
@@ -99,15 +99,15 @@ Vec3 CameraShake::Update(
 
     switch (type_)
     {
-    case Type::Horizontal:
+    case CameraShakeType::Horizontal:
         horizontal = horizontalWave * amplitude;
         break;
 
-    case Type::Vertical:
+    case CameraShakeType::Vertical:
         vertical = verticalWave * amplitude;
         break;
 
-    case Type::Mixed:
+    case CameraShakeType::Mixed:
         horizontal = horizontalWave * amplitude;
         vertical = verticalWave * amplitude;
         break;
