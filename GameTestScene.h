@@ -8,6 +8,9 @@
 #include "Collision.h"
 #include "CameraDirector.h"
 
+class Boss;
+class Player;
+
 class GameTestScene final : public Scene
 {
 public:

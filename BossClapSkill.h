@@ -269,6 +269,7 @@ private:
 		case AttackStateType::Aiming:
 			break;
 		case AttackStateType::Attack:
+			boss_.CameraShakeRequest(CameraShakeType::Mixed, 0.5f, 20.0f, 20.0f);
 			break;
 		case AttackStateType::Recovery:
 			break;
