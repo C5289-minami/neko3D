@@ -194,12 +194,8 @@ void GameTestScene::Update(float deltaTime)
 		boss.Update(deltaTime);
 		boss.TurnToTarget(player->GetWorldPosition(), deltaTime);
 
-		if (boss.UpdateSlamAttack(
-			player->GetWorldPosition(),
-			stage.GetWorldPosition()))
-		{
-			player->TakeDamage();
-		}
+		const bool slamHitPlayer = boss.UpdateSlamAttack(
+			player->GetWorldPosition(), stage.GetWorldPosition());
 
 		UpdateTailWhipGimmick();
 
@@ -223,21 +219,10 @@ void GameTestScene::Update(float deltaTime)
 			boss.IsTailWhipHitActive() &&
 			Collision::IsHitCapsuleSphere(tailWhipHitCapsule_, playerBody);
 
-		if (tailWhipPlayerHit)
-		{
-			player->TakeDamage();
-			Vec3 outward = player->GetWorldPosition() - stage.GetWorldPosition();
-			outward.y = 0.0f;
-			player->ApplyKnockback(outward, 5000.0f, 0.3f);
-		}
-
-		if (boss.UpdateHandAttack(
+		const bool handHitPlayer = boss.UpdateHandAttack(
 			deltaTime,
 			player->GetWorldPosition(),
-			stage.GetWorldPosition()))
-		{
-			player->TakeDamage();
-		}
+			stage.GetWorldPosition());
 
 		// 死亡判定
 		// 死んだ演出さえも終わったのなら
@@ -253,7 +238,6 @@ void GameTestScene::Update(float deltaTime)
 		// =============================
 		// Playerの攻撃判定（デバッグ）
 		// =============================
-#ifdef _DEBUG
 		auto& playerStateMachine = player->GetStateMachine();
 
 		if (playerStateMachine.IsAttackBallActive())
@@ -261,13 +245,26 @@ void GameTestScene::Update(float deltaTime)
 			const auto& attackBall =
 				playerStateMachine.GetAttackBallSphere();
 
-			if (boss.IsHitByAttackSphere(attackBall))
+			if (boss.IsHitByAttackSphere(attackBall, tailWhipHitCapsule_))
 			{
 				if (playerStateMachine.TryRegisterAttackBallHit())
 					boss.TakeDamage();
 			}
 		}
 
+		// プレイヤーが被ダメージ状態に移る前に、攻撃の命中を登録する。
+		if (handHitPlayer || slamHitPlayer)
+			player->TakeDamage();
+
+		if (tailWhipPlayerHit)
+		{
+			player->TakeDamage();
+			Vec3 outward = player->GetWorldPosition() - stage.GetWorldPosition();
+			outward.y = 0.0f;
+			player->ApplyKnockback(outward, 5000.0f, 0.3f);
+		}
+
+#ifdef _DEBUG
 		DxPlus::Debug::SetFormatString(
 			L"Boss HP: %d / %d",
 			boss.GetHealth(),

@@ -171,9 +171,6 @@ void GameScene::Update(float deltaTime)
 			wasDoubleJumpContact_ = false;
 		}
 
-		if (GetCurrentGameState() == GameStateType::Battle &&
-			boss.UpdateSlamAttack(player->GetWorldPosition(), stage.GetWorldPosition()))
-			player->TakeDamage();
 		// playerとbossの衝突判定
 		//const bool touching = Collision::UpdateModelContact(playerModel, bossModel);　これなし
 		//if (touching)

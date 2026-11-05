@@ -52,23 +52,29 @@ void GameSceneBattleState::Tick(float deltaTime)
     }
 
     // Boss‚ÌŽèUŒ‚”»’è
-    if (boss.UpdateHandAttack(
+    const bool slamHitPlayer = boss.UpdateSlamAttack(
+        player->GetWorldPosition(), stage.GetWorldPosition());
+    const bool handHitPlayer = boss.UpdateHandAttack(
         deltaTime,
         player->GetWorldPosition(),
-        stage.GetWorldPosition()))
-    {
-        player->TakeDamage();
-    }
+        stage.GetWorldPosition());
 
     // Player‚ÌUŒ‚‹…‚ÆBoss‚ÌŽè‚Ì“–‚½‚è”»’è
     auto& playerStateMachine = player->GetStateMachine();
 
     if (playerStateMachine.IsAttackBallActive())
     {
+        Collision::Capsule tailWhipCapsule{};
+        if (boss.IsTailWhipActive() && boss.IsTailWhipHitActive())
+        {
+            tailWhipCapsule = boss.GetTailWhipHitCapsule(
+                stage.GetWorldPosition(), stage.GetArenaRadius(), stage.GetArenaSurfaceY() + 30.0f);
+        }
+
         const auto& attackBall =
             playerStateMachine.GetAttackBallSphere();
 
-        if (boss.IsHitByAttackSphere(attackBall))
+        if (boss.IsHitByAttackSphere(attackBall, tailWhipCapsule))
         {
             // “¯‚¶UŒ‚‹…‚É‚æ‚é˜A‘±ƒ_ƒ[ƒW‚ð–hŽ~
             if (playerStateMachine.TryRegisterAttackBallHit())
@@ -79,6 +85,12 @@ void GameSceneBattleState::Tick(float deltaTime)
     }
 
     // ƒJƒƒ‰XV
+    // ƒvƒŒƒCƒ„[‚ª”íƒ_ƒ[ƒWó‘Ô‚ÉˆÚ‚é‘O‚ÉAUŒ‚‚Ì–½’†‚ð“o˜^‚·‚éB
+    if (handHitPlayer || slamHitPlayer)
+    {
+        player->TakeDamage();
+    }
+
     gameScene_.GetTargetCamera().Update(
         player->GetPosition(),
         boss.GetWorldPosition(),
