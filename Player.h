@@ -96,6 +96,8 @@ public:
     bool UpdatePillarElevator(float deltaTime);
     void EndPillarElevator();
     void StartPillarExitJump();
+	void ForceFallFromPillar();
+
 
 	// 階層判定
 	enum class GroundType
@@ -107,6 +109,8 @@ public:
 	GroundType CheckFloor(
 		const ModelObject& planet,
 		const ModelObject& firstFloor);
+
+	void ApplyKnockback(const Vec3& direction, float power, float duration);
 
 	//ゲッター・セッター
 	float GetWallJumpMoveSpeed() const { return wallJumpMoveSpeed_; }
@@ -243,6 +247,10 @@ private:
 	AnimationHandle jumpAnimHandle_;
 	AnimationHandle doubleJumpAnimHandle_;
 
+
+	// ノックバック
+	Vec3 knockbackVelocity_{};
+	float knockbackTime_ = 0.0f;
 
 	bool onSecondFloor{ false }; // 上の足場に着地したときの判定
 };

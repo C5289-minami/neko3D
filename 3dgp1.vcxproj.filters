@@ -280,6 +280,9 @@
     <Filter Include="15_System\StatusUI">
       <UniqueIdentifier>{261a606d-a6ff-4292-9a19-ccdb71fb63e9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="40_Gameplay\Actors\Boss\AI">
+      <UniqueIdentifier>{e00af25a-1546-47b0-997a-118885126581}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -747,7 +750,9 @@
     <ClInclude Include="SoundManager.h">
       <Filter>10_Core\Sound</Filter>
     </ClInclude>
-    <ClInclude Include="BossAI.h" />
+    <ClInclude Include="BossAI.h">
+      <Filter>40_Gameplay\Actors\Boss\AI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -1062,7 +1067,9 @@
     <ClCompile Include="SoundManager.cpp">
       <Filter>10_Core\Sound</Filter>
     </ClCompile>
-    <ClCompile Include="BossAI.cpp" />
+    <ClCompile Include="BossAI.cpp">
+      <Filter>40_Gameplay\Actors\Boss\AI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Config\toon.json">
