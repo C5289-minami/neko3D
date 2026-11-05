@@ -30,7 +30,6 @@ public:
     int GetBgBlue() const { return bgBlue; }		// ”wŒiFB‚ğæ“¾
     void SetBgBlue(int b) { bgBlue = b; }		// ”wŒiFB‚ğİ’è
 
-    void DrawStageDebugUI() { stage.DrawDebugUI(); }
 
     // Grid
     Grid& GetGrid() { return grid; }
@@ -38,7 +37,11 @@ public:
 
 	Boss& GetBoss() { return boss; }
     Player* GetPlayer() { return activePlayer; }
-    void SetActivePlayer(Player& player) { activePlayer = &player; }
+    void SetActivePlayer(Player& player)
+    {
+        activePlayer = &player;
+        boss.SetPlayer(player);
+    }
 	Stage& GetStage() { return stage; }
 	EffectManager& GetEffectManager() { return effectManager; }
 	Room& GetRoom() { return room_; }

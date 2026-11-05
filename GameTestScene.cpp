@@ -48,7 +48,7 @@ void GameTestScene::Init()
 	shaderEffects_.GetSettings().toonEnabled = true;
 	shaderEffects_.GetSettings().outlineEnabled = true;
 
-
+	wasTailWhipActive_ = false;
 
 	StartFadeIn();
 }
@@ -112,7 +112,7 @@ void GameTestScene::Update(float deltaTime)
 		auto& boss = gameContext->GetBoss();
 		auto& stage = gameContext->GetStage();
 		const Vec3 stageCenterPosition = stage.GetPosition();
-
+		stage.Update(deltaTime);
 
 		// player.Update(deltaTime, stage, stageCenterPosition);
 
@@ -126,6 +126,13 @@ void GameTestScene::Update(float deltaTime)
 		for (auto& obj : stage.GetStageModelObjects())
 		{
 			player->CheckFloor(obj, stage.GetModelObject());
+		}
+		for (auto& pillar : stage.GetPillarModelObjects())
+		{
+			ModelObject deltaPillar = pillar;
+			deltaPillar.SetPosition({ 0.0f,deltaPillar.GetPosition().y * 2,0.0f }); // 無理やりだけど、Centerが中心なのでその分あげて上の判定あげてる
+			player->CheckFloor(deltaPillar, stage.GetModelObject());
+
 		}
 	
 #ifdef _DEBUG
@@ -157,6 +164,7 @@ void GameTestScene::Update(float deltaTime)
 
 		if (boss.UpdateSlamAttack(player->GetWorldPosition(), stage.GetWorldPosition()))
 			player->TakeDamage();
+		UpdateTailWhipGimmick();
 
 		tailWhipHitCapsule_ = {};
 		if (boss.IsTailWhipHitActive())
@@ -227,6 +235,8 @@ void GameTestScene::Update(float deltaTime)
 		finished = true;    // フェード無しの場合は finished を true にしておく必要あり
 		return;
 	}
+	
+	
 
 
 	// --- F2 でシェーダー全体のON/OFFを切り替える ---
@@ -397,6 +407,16 @@ void GameTestScene::DrawImGui()
 			ImGui::TreePop();
 		}
 		ImGui::Checkbox(u8"bossAIEnabled", &boss.IsAIActive());
+		// Stage Gimmick Test
+		ImGui::Separator();
+		ImGui::TextUnformatted(u8"Stage Gimmick Test");
+
+		auto& stage = gameContext->GetStage();
+
+		if (ImGui::Button(u8"Stage Shake"))
+			stage.StartShake();
+		if (ImGui::Button(u8"knock Back"))
+			player->ApplyKnockback({ 1,0,0 }, 10000, 0.1f);
 
 		ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
 
@@ -409,6 +429,26 @@ void GameTestScene::End()
 {
 }
 
+void GameTestScene::UpdateTailWhipGimmick()
+{
+	auto& boss = gameContext->GetBoss();
+	auto& stage = gameContext->GetStage();
+	auto* player = gameContext->GetPlayer();
+
+	const bool isTailWhipActive = boss.IsTailWhipHitActive();
+
+	if (isTailWhipActive && !wasTailWhipActive_)
+	{
+		stage.StartShake();
+
+		Vec3 outward = player->GetWorldPosition() - stage.GetWorldPosition();
+		outward.y = 0.0f;
+
+		player->ApplyKnockback(outward, 5000.0f, 0.3f);
+	}
+
+	wasTailWhipActive_ = isTailWhipActive;
+}
 void GameTestScene::RenderDepth() const
 {
 #ifndef NDEBUG

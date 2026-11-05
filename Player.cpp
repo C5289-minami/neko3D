@@ -257,6 +257,18 @@ void Player::UpdateMovement(float deltaTime)
 	{
 		UpdateHorizontalVelocity(deltaTime);
 
+		if (knockbackTime_ > 0.0f)
+		{
+			knockbackTime_ = (std::max)(0.0f, knockbackTime_ - elapsed);
+
+			velocity_.x = knockbackVelocity_.x;
+			velocity_.z = knockbackVelocity_.z;
+		}
+		else
+		{
+			knockbackVelocity_ = {};
+		}
+
 		if (gravityEnabled_ && GetCurrentState() != PlayerStateType::Climbing)
 		{
 			velocity_.y -= Const::GRAVITY * deltaTime;
@@ -792,7 +804,27 @@ Player::GroundType Player::CheckFloor(
 	DxPlus::Debug::SetString(onSecondFloor ? L"二階" : L"一階");
 
 	return onSecondFloor ? GroundType::UpFloor : GroundType::DownFloor;
-};
+}
+
+void Player::ApplyKnockback(const Vec3& direction, float power, float duration)
+{
+	Vec3 outward = direction;
+	outward.y = 0.0f;
+
+	if (outward.LengthSq() <= 0.000001f) return;
+
+	outward = outward.Normalized();
+
+	knockbackVelocity_ = outward * power;
+	knockbackTime_ = duration;
+
+	velocity_.y = 0.0f;
+	isGrounded_ = false;
+	EndPillarElevator();
+
+	stateMachine_.ChangeState(PlayerStateType::Jump);
+}
+;
 
 void Player::SetWallJumpMoveSpeed(float value)
 {
@@ -925,4 +957,18 @@ void Player::StartPillarExitJump()
 	isGrounded_ = false;
 	elevatorInputConsumed_ = true;
 	coyoteTimeRemaining_ = 0.0f;
+}
+
+void Player::ForceFallFromPillar()
+{
+	if (!IsPillarElevatorActive()) return;
+
+	EndPillarElevator();
+	StopMove();
+
+	velocity_.y = 0.0f;
+	isGrounded_ = false;
+	coyoteTimeRemaining_ = 0.0f;
+
+	stateMachine_.ChangeState(PlayerStateType::Jump);
 }

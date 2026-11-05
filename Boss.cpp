@@ -289,6 +289,12 @@ bool Boss::UseSkill(BossAttackType type)
 	return stateMachine_.GetCurrentType() == BossStateType::Attack;
 }
 
+bool Boss::IsTailWhipActive() const
+{
+	return GetCurrentState() == BossStateType::Attack &&
+		tailWhipSkill_ != nullptr &&
+		activeSkill_ == tailWhipSkill_.get();
+}
 
 
 bool Boss::IsTailWhipHitActive() const
