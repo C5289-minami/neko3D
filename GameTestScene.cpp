@@ -108,7 +108,6 @@ void GameTestScene::Update(float deltaTime)
 	const bool shiftHeld = DxLib::CheckHitKey(KEY_INPUT_LSHIFT) != 0 ||
 		DxLib::CheckHitKey(KEY_INPUT_RSHIFT) != 0;
 	if (DxLib::CheckHitKey(KEY_INPUT_R) != 0 && !shiftHeld)
-	{
 		freeCamera_.ResetView();
 
 	if (DxLib::CheckHitKey(KEY_INPUT_F) != 0)
