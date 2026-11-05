@@ -42,7 +42,7 @@ public:
 		constexpr float tau = 2.0f * DxPlus::PI;
 		constexpr float capsuleRadius = 45.0f * 0.5f;
 
-		const float yaw = boss_.GetWorldRotation().y - (tau * sweepProgress_);
+		const float yaw = boss_.GetYaw() - (tau * sweepProgress_);
 		const Vec3 direction{ std::sin(yaw), 0.0f, std::cos(yaw) };
 
 		const Vec3 start{ stageCenter.x, attackHeight, stageCenter.z };

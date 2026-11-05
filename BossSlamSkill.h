@@ -13,7 +13,7 @@
 namespace BossSlam
 {
 	// 当たり判定
-	constexpr float HitRadius = 100.0f;
+	constexpr float HitRadius = 160.0f;
 	constexpr float HitHalfLength = 2.0f;
 	constexpr float CapsuleArcSpacing = 106.0f;
 	constexpr float HitDuration = 0.12f;
@@ -52,7 +52,7 @@ public:
 			(phase_ == AttackStateType::PreAction ||
 				phase_ == AttackStateType::Aiming))
 		{
-			UpdateHitCapsules(playerPosition,stageCenter);
+			UpdateHitCapsules(playerPosition, stageCenter);
 		}
 
 		if (!targetLocked_ && phase_ == AttackStateType::Attack)
@@ -97,6 +97,7 @@ public:
 
 		return true;
 	}
+
 	std::array<Collision::Capsule, 2> GetHitCapsules() const
 	{
 		if (phase_ == AttackStateType::Return || (phase_ == AttackStateType::Recovery && !hitActive_))
@@ -117,7 +118,7 @@ public:
 			? (std::max)(0.0f, BossSlam::HitDuration - GetPhaseMotion(AttackStateType::Recovery).GetElapsedTime())
 			: 0.0f;
 		DxPlus::Debug::SetFormatString(
-			L"ダイパン　照準残り %.2f秒 ／ %s ／ 判定残り %.2f秒",
+			L"ダイパン 照準残り %.2f秒 ／ %s ／ 判定残り %.2f秒",
 			aimRemaining,
 			dodging ? L"振り下ろし中" : L"振り下ろし待機",
 			hitRemaining);
@@ -145,7 +146,6 @@ private:
 	float attackRadius_{};
 	float attackHeight_{};
 
-
 	void EnterPhase(AttackStateType phase) override
 	{
 		phase_ = phase;
@@ -153,45 +153,35 @@ private:
 		switch (phase)
 		{
 		case AttackStateType::PreAction:
-			// AnimTypeをSlamに設定し、アニメーションを再生する
 			boss_.SetAnimation(BossAnimType::Slam, false);
 			boss_.GetAnimation().PlayTo(0.0f, Const::ANIM_FPS, 3.0f);
 			break;
 		case AttackStateType::Aiming:
-			// アニメーションの再生位置を設定する
 			boss_.GetAnimation().PlayTo(0.0f);
 			break;
 		case AttackStateType::Attack:
 			boss_.GetAnimation().PlayTo(6.0f);
-          boss_.StopRotation();
+			boss_.StopRotation();
 			break;
 		case AttackStateType::Recovery:
 			hitActive_ = true;
 			break;
 		case AttackStateType::Return:
-			// アニメーションの再生を開始する
 			boss_.GetAnimation().Start();
 			break;
 		}
 	}
+
 	void ApplyPhase(AttackStateType phase, float progress) override
 	{
-		auto& animation = boss_.GetAnimation();
-
 		switch (phase)
 		{
 		case AttackStateType::PreAction:
-			break;
-
 		case AttackStateType::Aiming:
-			break;
-
 		case AttackStateType::Attack:
 			break;
-
 		case AttackStateType::Recovery:
-			// 着弾後の有効時間を過ぎたら、命中判定を止める。
-          hitActive_ = GetPhaseMotion(phase).GetElapsedTime() < BossSlam::HitDuration;
+			hitActive_ = GetPhaseMotion(phase).GetElapsedTime() < BossSlam::HitDuration;
 			break;
 		case AttackStateType::Return:
 			break;
@@ -203,15 +193,12 @@ private:
 		switch (phase)
 		{
 		case AttackStateType::PreAction:
-			break;
 		case AttackStateType::Aiming:
 			break;
 		case AttackStateType::Attack:
-			// 多分ここは攻撃当たった瞬間...
-			boss_.CameraShakeRequest(CameraShakeType::Mixed, 0.3f, 40.0f,40.0f);
+			boss_.CameraShakeRequest(CameraShakeType::Mixed, 0.3f, 40.0f, 40.0f);
 			break;
 		case AttackStateType::Recovery:
-			// 硬直の終了や攻撃の中断で、命中判定を閉じる。
 			hitActive_ = false;
 			break;
 		case AttackStateType::Return:
@@ -219,50 +206,10 @@ private:
 			break;
 		}
 	}
+
 	void LockAttackPosition(const Vec3& playerPosition, const Vec3& stageCenter)
 	{
-		Vec3 playerFromCenter = playerPosition - stageCenter;
-		playerFromCenter.y = 0.0f;
-
-		attackRadius_ = playerFromCenter.Length();
-		attackHeight_ = playerPosition.y;
-
-		const float yaw = boss_.GetYaw();
-
-		attackForward_ = {
-			-std::sin(yaw),
-			0.0f,
-			-std::cos(yaw)
-		};
-
-		const Vec3 right{
-			attackForward_.z,
-			0.0f,
-			-attackForward_.x
-		};
-
-		const Vec3 center{
-			stageCenter.x + attackForward_.x * attackRadius_,
-			attackHeight_,
-			stageCenter.z + attackForward_.z * attackRadius_
-		};
-
-		for (int i = 0; i < static_cast<int>(hitCapsules_.size()); ++i)
-		{
-			const float side = (i == 0) ? -1.0f : 1.0f;
-
-			const Vec3 capsuleCenter =
-				center + right * (BossSlam::CapsuleArcSpacing * 0.5f * side);
-
-			const Vec3 along = right * BossSlam::HitHalfLength;
-
-			hitCapsules_[i] = {
-				capsuleCenter - along,
-				capsuleCenter + along,
-				BossSlam::HitRadius
-			};
-		}
-
+		UpdateHitCapsules(playerPosition, stageCenter);
 		targetLocked_ = true;
 	}
 
@@ -293,7 +240,7 @@ private:
 
 		const Vec3 center{
 			stageCenter.x + attackForward_.x * orbitRadius,
-			playerPosition.y,
+			stageCenter.y,
 			stageCenter.z + attackForward_.z * orbitRadius
 		};
 
@@ -312,4 +259,5 @@ private:
 				BossSlam::HitRadius
 			};
 		}
-	}};
+	}
+};
