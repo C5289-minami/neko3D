@@ -171,7 +171,7 @@ public:
 	const ModelObject& GetModelObject() const { return model_; }
 	const PlayerInput& GetInput() const { return input_; }
 
-	// 必殺ゲージは仮。増加タイミングは後で決める
+	// 必殺ゲージ
 	static constexpr float UltimateGaugeMax = Const::PLAYER_ULTIMATE_GAUGE_MAX;
 	float GetUltimateGauge() const { return ultimateGauge_; }
 	void SetUltimateGauge(float value);

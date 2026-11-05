@@ -41,6 +41,9 @@ void GameSceneBattleState::Tick(float deltaTime)
     auto& stage = gameContext->GetStage();
 	auto& taskManager = gameScene_.GetTutorialTaskManager();
 
+    if (!player->IsDead() && boss.GetHealth() > 0)
+        player->AddUltimateGauge(Const::PLAYER_ULTIMATE_GAUGE_PER_SECOND * deltaTime);
+
     const Vec3 stageCenterPosition = stage.GetPosition();
 
     taskManager.Update(deltaTime);

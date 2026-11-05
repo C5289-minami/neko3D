@@ -18,6 +18,9 @@ namespace Const
     constexpr float PLAYER_ULTIMATE_GAUGE_MAX = 100.0f;
     constexpr float PLAYER_ULTIMATE_GAUGE_INITIAL = 0.0f;
     constexpr float PLAYER_ULTIMATE_GAUGE_AFTER_USE = 0.0f;
+    // í“¬’†‚Ì1•b‚ ‚½‚è‚Ì‘‰Á—Ê‚ÆA’ÊíUŒ‚1‰ñ‚Ì–½’†‚Å‘‚¦‚é—ÊB
+    constexpr float PLAYER_ULTIMATE_GAUGE_PER_SECOND = 3.0f;
+    constexpr float PLAYER_ULTIMATE_GAUGE_PER_HIT = 20.0f;
 
     static_assert(PLAYER_MAX_HEALTH > 0);
     static_assert(PLAYER_ULTIMATE_GAUGE_MAX > 0.0f);

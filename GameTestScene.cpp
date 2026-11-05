@@ -192,6 +192,9 @@ void GameTestScene::Update(float deltaTime)
 		boss.Update(deltaTime);
 		boss.TurnToTarget(player->GetWorldPosition(), deltaTime);
 
+		if (!player->IsDead() && boss.GetHealth() > 0)
+			player->AddUltimateGauge(Const::PLAYER_ULTIMATE_GAUGE_PER_SECOND * deltaTime);
+
 		const bool slamHitPlayer = boss.UpdateSlamAttack(
 			player->GetWorldPosition(), stage.GetWorldPosition());
 
@@ -258,6 +261,10 @@ void GameTestScene::Update(float deltaTime)
 			L"Boss HP: %d / %d",
 			boss.GetHealth(),
 			Boss::MaxHealth);
+		DxPlus::Debug::SetFormatString(
+			L"Ult: %.1f / %.1f",
+			player->GetUltimateGauge(),
+			Player::UltimateGaugeMax);
 
 		DxPlus::Debug::SetString(
 			L"1: Hand attack test (3 sec follow)");
