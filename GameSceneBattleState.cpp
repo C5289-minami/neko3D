@@ -6,6 +6,7 @@
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
 #include "StatusUI.h"
+#include "Consts.h"
 #include "UIManager.h"
 
 GameSceneBattleState::GameSceneBattleState(
@@ -79,17 +80,17 @@ void GameSceneBattleState::Tick(float deltaTime)
             // 同じ攻撃球による連続ダメージを防止
             if (playerStateMachine.TryRegisterAttackBallHit())
             {
-                boss.TakeDamage();
+                boss.TakeDamage(Const::PLAYER_NORMAL_ATTACK_DAMAGE);
             }
         }
     }
 
     // カメラ更新
     // プレイヤーが被ダメージ状態に移る前に、攻撃の命中を登録する。
-    if (handHitPlayer || slamHitPlayer)
-    {
-        player->TakeDamage();
-    }
+    if (handHitPlayer)
+        player->TakeDamage(Const::BOSS_CLAP_DAMAGE);
+    else if (slamHitPlayer)
+        player->TakeDamage(Const::BOSS_SLAM_DAMAGE);
 
     gameScene_.GetTargetCamera().Update(
         player->GetPosition(),

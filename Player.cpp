@@ -115,6 +115,7 @@ void Player::Reset()
 {
 
 	health_ = MaxHealth;
+	addDamage_ = 0;
 	avoidInvTime_ = 0.0f;
 	// wasTouchingPillar_ = false;
 	wasTouchingModel_ = false;
@@ -129,7 +130,7 @@ void Player::Reset()
 #endif
 
 	model_.collisionHighlighted = false;
-	ultimateGauge_ = 0.0f;
+	ultimateGauge_ = Const::PLAYER_ULTIMATE_GAUGE_INITIAL;
 	// 初期位置・回転・拡大率は既定値を設定した後にJSONから読み込む
 	MObjs().LoadActorTransform(*this);
 	model_.Load();
@@ -566,21 +567,24 @@ void Player::Draw() const
 }
 
 
-bool Player::TakeDamage()
+bool Player::TakeDamage(int damage)
 {
-	if (IsDead() || IsDamaging() || avoidInvTime_ > 0.0f) return false;
+	if (damage <= 0 || IsDead() || IsDamaging() || avoidInvTime_ > 0.0f) return false;
 
+	addDamage_ = damage;
 	stateMachine_.ChangeState(PlayerStateType::Damaging);
 	return true;
 }
 
 void Player::AddDamage()
 {
-	--health_;
+	health_ = (std::max)(0, health_ - addDamage_);
+	addDamage_ = 0;
 }
 
 void Player::ApplyAvoid()
 {
+	addDamage_ = 0;
 	avoidInvTime_ = AvoidInvTime;
 }
 
@@ -607,7 +611,7 @@ void Player::AddUltimateGauge(float amount)//Ultゲージを増やす
 bool Player::TryUseUltimateGauge()
 {
 	if (!CanUseUltimate()) return false;
-	ultimateGauge_ = 0.0f;
+	ultimateGauge_ = Const::PLAYER_ULTIMATE_GAUGE_AFTER_USE;
 	return true;
 }
 

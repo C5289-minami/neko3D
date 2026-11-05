@@ -159,30 +159,19 @@ void Boss::ApplyDownGaugeDamage(float damage)
 
 void Boss::UpdateDown(float deltaTime)
 {
-	float AccumulationCounter = 1.0f * deltaTime; // 累積カウンターを更新する。
-	if(health_ <= 0&&downGauge_<=0)
+	if (health_ <= 0 && downGauge_ <= 0.0f)
 		return;
-	
 
-	downGauge_ -= deltaTime * 10.0f; // ダウンゲージの減少速度を調整する。
-
-	if(AccumulationCounter >= 5.0f)
+	float reduction = deltaTime * Const::BOSS_DOWN_GAUGE_HIT_FRAME_REDUCTION_PER_SECOND;
+	if (deltaTime >= Const::BOSS_DOWN_GAUGE_LONG_FRAME_SECONDS)
+		reduction += Const::BOSS_DOWN_GAUGE_LONG_FRAME_REDUCTION;
+	if (damageTakenThisFrame_)
 	{
-		downGauge_ -= 5.0f;			// 5秒ごとにさらに減少させる。
-		AccumulationCounter = 0.0f; // カウンターをリセットする。
-	}
-    if (damageTakenThisFrame_)
-    {
-        downGauge_ -= 20.0f;
-        damageTakenThisFrame_ = false;
-    } // ダメージを受けた瞬間にさらに減少させる。
-
-	if(downGauge_ <= 0.0f)
-	{
-		downGauge_ = 0.0f;
-		stateMachine_.ChangeState(BossStateType::Flinch);
+		reduction += Const::BOSS_DOWN_GAUGE_HIT_REDUCTION;
+		damageTakenThisFrame_ = false;
 	}
 
+	SetDownGauge(downGauge_ - reduction);
 }
 
 void Boss::Update(float deltaTime)

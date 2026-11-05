@@ -8,6 +8,27 @@ namespace Const
 {
     // ===== プレイヤー関連 =====
 
+    // 戦闘の調整値。HPとダメージは整数で、時間の単位は秒。
+    constexpr int PLAYER_MAX_HEALTH = 5;
+    constexpr int PLAYER_NORMAL_ATTACK_DAMAGE = 1;
+    constexpr float PLAYER_DAMAGE_RECOVERY_SECONDS = 0.5f;
+    constexpr float PLAYER_AVOID_WINDOW_SECONDS = 0.3f;
+    constexpr float PLAYER_AVOID_INVINCIBILITY_SECONDS = 0.2f;
+
+    constexpr float PLAYER_ULTIMATE_GAUGE_MAX = 100.0f;
+    constexpr float PLAYER_ULTIMATE_GAUGE_INITIAL = 0.0f;
+    constexpr float PLAYER_ULTIMATE_GAUGE_AFTER_USE = 0.0f;
+
+    static_assert(PLAYER_MAX_HEALTH > 0);
+    static_assert(PLAYER_ULTIMATE_GAUGE_MAX > 0.0f);
+    static_assert(PLAYER_ULTIMATE_GAUGE_INITIAL >= 0.0f &&
+        PLAYER_ULTIMATE_GAUGE_INITIAL <= PLAYER_ULTIMATE_GAUGE_MAX);
+    static_assert(PLAYER_ULTIMATE_GAUGE_AFTER_USE >= 0.0f &&
+        PLAYER_ULTIMATE_GAUGE_AFTER_USE < PLAYER_ULTIMATE_GAUGE_MAX);
+    static_assert(PLAYER_DAMAGE_RECOVERY_SECONDS >= 0.0f &&
+        PLAYER_AVOID_WINDOW_SECONDS >= 0.0f &&
+        PLAYER_AVOID_INVINCIBILITY_SECONDS >= 0.0f);
+
     constexpr float PLAYER_TURN_RATE_90 = 6.0f;
     constexpr float PLAYER_TURN_RATE_180 = 120.0f;
     constexpr float PLAYER_ROTATE_SPEED = DxPlus::Deg2Rad * 180.0f;
@@ -44,6 +65,23 @@ namespace Const
     constexpr float PLAYER_CLIMB_TOP_HOLD_DISTANCE = PLAYER_RADIUS;
 
     // ===== 敵関連 =====
+    constexpr int BOSS_MAX_HEALTH = 4;
+    constexpr int BOSS_CLAP_DAMAGE = 1;
+    constexpr int BOSS_SLAM_DAMAGE = 1;
+    constexpr int BOSS_TAIL_WHIP_DAMAGE = 1;
+
+    constexpr float BOSS_DOWN_GAUGE_MAX = 100.0f;
+    constexpr float BOSS_DOWN_GAUGE_HIT_REDUCTION = 20.0f;
+    // フレーム時間に応じた減少は、ボスがダメージを受けたときだけ適用する。
+    constexpr float BOSS_DOWN_GAUGE_HIT_FRAME_REDUCTION_PER_SECOND = 10.0f;
+    constexpr float BOSS_DOWN_GAUGE_LONG_FRAME_SECONDS = 5.0f;
+    constexpr float BOSS_DOWN_GAUGE_LONG_FRAME_REDUCTION = 5.0f;
+    constexpr float BOSS_FLINCH_HOLD_SECONDS = 5.0f;
+
+    static_assert(BOSS_MAX_HEALTH > 0 && BOSS_DOWN_GAUGE_MAX > 0.0f);
+    static_assert(PLAYER_NORMAL_ATTACK_DAMAGE >= 0 && BOSS_CLAP_DAMAGE >= 0 &&
+        BOSS_SLAM_DAMAGE >= 0 && BOSS_TAIL_WHIP_DAMAGE >= 0);
+
     constexpr float BOSS_MODEL_SCALE = 1.0f;
     // ボス本体のカプセル。ステージ中心を基準とするワールド座標の大きさ。
     constexpr float BOSS_BODY_RADIUS = 200.0f;     // 本体の半径（太さ）。
