@@ -231,6 +231,20 @@ void ModelAnimation::Play3D(
 			);
 		}
 
+		// Ä¶I—¹Ï‚İ‚È‚çæ“ª‚©‚çÄ¶‚µ’¼‚·B
+		if (finished_)
+		{
+			currentElapsed_ = 0.0f;
+			speedScale_ = speedScale;
+			loop_ = loop;
+
+			playEndTime_ = -1.0f;
+			isPlaying_ = playImmediately;
+			finished_ = false;
+
+			SetAnimationTime(currentAnimation_, 0.0f);
+		}
+
 		return;
 	}
 

@@ -10,30 +10,30 @@ PlayerWalkState::PlayerWalkState(PlayerStateMachine& stateMachine, Player& playe
 
 void PlayerWalkState::Enter()
 {
-   player_.SetAnimation(PlayerAnimType::Walk, true);
+	player_.SetAnimation(PlayerAnimType::Walk, true);
 }
 
 void PlayerWalkState::Tick(float deltaTime)
 {
-    player_.UpdateAnimation(deltaTime);
+	player_.UpdateAnimation(deltaTime);
 
 	const PlayerInput& move = player_.GetInput();
-    // ゲージ100で右クリックすると必殺技
-    if (move.ultimatePressed && player_.CanUseUltimate())
-    {
-        stateMachine_.ChangeState(PlayerStateType::UltimateAttack);
-        return;
-    }
-    // 左クリックで通常攻撃
-    if (move.attackPressed)
-    {
-        stateMachine_.ChangeState(PlayerStateType::Attack);
-        return;
-    }
-    if (move.jumpPressed && player_.TryJump())
-    {
-        return;
-    }
+	// ゲージ100で右クリックすると必殺技
+	if (move.ultimatePressed && player_.CanUseUltimate())
+	{
+		stateMachine_.ChangeState(PlayerStateType::UltimateAttack);
+		return;
+	}
+	// 左クリックで通常攻撃
+	if (move.attackPressed)
+	{
+		stateMachine_.ChangeState(PlayerStateType::Attack);
+		return;
+	}
+	if (move.jumpPressed && player_.TryJump())
+	{
+		return;
+	}
 	if (move.groomingPressed)
 	{
 		stateMachine_.ChangeState(PlayerStateType::Grooming);

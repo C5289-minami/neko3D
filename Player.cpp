@@ -43,8 +43,8 @@ void Player::SetAnimation(
 	float blendSeconds 
 )
 {
-	if (currentAnimType_ == type && currentAnimLoop_ == loop)
-		return;
+	//if (currentAnimType_ == type && currentAnimLoop_ == loop)
+	//	return;
 
 	currentAnimType_ = type;
 	currentAnimLoop_ = loop;
@@ -900,16 +900,19 @@ bool Player::TryJump()
 {
 	if (CanGroundJump())
 	{
+
 		stateMachine_.ChangeState(PlayerStateType::Jump);
 		JumpAction();
 		stateMachine_.NotifyEvent(PlayerActionEvent::Jumped);
 		return true;
 	}
+
 	if (CanDoubleJump())
 	{
 		stateMachine_.ChangeState(PlayerStateType::DoubleJump);
 		return true;
 	}
+
 	return false;
 }
 
