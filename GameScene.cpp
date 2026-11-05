@@ -138,13 +138,15 @@ void GameScene::Update(float deltaTime)
 
 		boss.Update(deltaTime);
 
-		// バトル中、ボス本体に触れ始めた瞬間だけ安全な位置へ戻す。
+		// ダブルジャンプ中にボス本体へ触れた瞬間だけ、安全な位置へ戻す。
 		if (GetCurrentGameState() == GameStateType::Battle)
 		{
-			const bool touchingBossBody = stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
-			if (touchingBossBody && !wasTouchingBossBody_)
+			const bool doubleJumpContact =
+				player->GetCurrentState() == PlayerStateType::DoubleJump &&
+				stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
+			if (doubleJumpContact && !wasTouchingBossBody_)
 				player->ReturnToLastSafePosition(stage.GetCollision());
-			wasTouchingBossBody_ = touchingBossBody;
+			wasTouchingBossBody_ = doubleJumpContact;
 		}
 		else
 		{

@@ -150,11 +150,13 @@ void GameTestScene::Update(float deltaTime)
 		player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
 		player->CheckFloor();
 
-		// ボス本体に触れ始めた瞬間だけ、安全だった位置へ戻す。
-		const bool touchingBossBody = stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
-		if (touchingBossBody && !wasTouchingBossBody_)
+		// ダブルジャンプ中にボス本体へ触れた瞬間だけ、安全だった位置へ戻す。
+		const bool doubleJumpContact =
+			player->GetCurrentState() == PlayerStateType::DoubleJump &&
+			stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
+		if (doubleJumpContact && !wasTouchingBossBody_)
 			player->ReturnToLastSafePosition(stage.GetCollision());
-		wasTouchingBossBody_ = touchingBossBody;
+		wasTouchingBossBody_ = doubleJumpContact;
 
 #ifdef _DEBUG
 		player->SetDebugDashEnabled(false);
