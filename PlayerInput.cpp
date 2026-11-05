@@ -28,11 +28,14 @@ void PlayerInput::Update()
     // 押している間ずっとtrue。柱を登るための長押しはこちらを使う。
     jumpPressing = (button & BUTTON_TRIGGER1) != 0;
 
+
+
     // Rキーの入力
     RkeyPressed = (buttonDown & BUTTON_R) != 0;
 	
 	// 左クリックの攻撃入力
-	attackPressed = (buttonDown & BUTTON_TRIGGER3) != 0;
+	//attackPressed = (buttonDown & BUTTON_TRIGGER3) != 0;
+	attackPressed = (buttonDown & BUTTON_START) != 0;	//Enterキーで攻撃するように変更
 	ultimatePressed = (buttonDown & BUTTON_TRIGGER4) != 0;
 	groomingPressed = (buttonDown & BUTTON_R1) != 0;
 
