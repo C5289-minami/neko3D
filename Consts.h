@@ -62,6 +62,7 @@ namespace Const
     // ƒ{ƒX‚Ìè‚ÌUŒ‚”»’è‚Ì”¼ŒaB
     constexpr float BOSS_HAND_ATTACK_HIT_RADIUS = 90.0f;
 
+
     // ===== •¨—‹¤’Ê =====
     constexpr float GRAVITY = 2000.0f;
 
