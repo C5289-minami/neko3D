@@ -165,6 +165,8 @@ void Player::SetStartPosition(const Vec3& position)
 {
 	SetPosition(position);
 	startPosition_ = position;
+	lastGroundedPosition_ = position;
+	lastFirstFloorPosition_ = position;
 }
 
 void Player::ResetPosition()
@@ -179,6 +181,8 @@ void Player::RestorePosition(const Vec3& position)
 	StopMove();
 	position_ = position;
 	velocity_ = {};
+	knockbackVelocity_ = {};
+	knockbackTime_ = 0.0f;
 	isGrounded_ = false;
 	onFirstFloor = false;
 	onSecondFloor = false;
@@ -507,11 +511,18 @@ void Player::UpdateFallRecovery(const ModelCollision& collision, const ModelColl
 	
 	if (velocity_.y > 0.0f || fallDistance < Const::PLAYER_FALL_RECOVERY_DISTANCE) return;
 
+	ReturnToLastSafePosition(collision);
+}
+
+void Player::ReturnToLastSafePosition(const ModelCollision& collision)
+{
+	if (IsDead() || !collision.HasFallRecoveryFloor()) return;
+
 	Vec3 recoveryPosition = lastGroundedPosition_;
 	recoveryPosition.y = lastFirstFloorPosition_.y;
 
 	// 同じ X・Z に1階の床がなければ、最後に立てた1階の位置へ戻す。
-	if (!collision.CanLandOnFallRecoveryFloor(recoveryPosition, body.skin, GroundSnapDistance, WalkableNormalY))
+	if (!collision.CanLandOnFallRecoveryFloor(recoveryPosition, Const::PLAYER_SKIN, GroundSnapDistance, WalkableNormalY))
 		recoveryPosition = lastFirstFloorPosition_;
 
 	recoveryPosition.y += Const::PLAYER_FALL_RECOVERY_HEIGHT_OFFSET;

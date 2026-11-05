@@ -100,15 +100,13 @@ void Stage::Reset()
 
 
 
-	// RefreshCollisionInfo();
-
-	// モデルごとに判定の役割を登録する。形・大きさはモデルから取得される。
+	// 床の復帰判定と、柱の登り判定を一緒に登録する。
 	collision_.Clear();
-	collision_.AddModel(stageModel_, ModelCollision::Surface::Floor);
-
-    // モデルごとに判定の役割を登録する。形・大きさはモデルから取得される。
-    collision_.Clear();
-    collision_.AddFallRecoveryFloor(stageModel_);
+	UpdateBossBodyCollision();
+	collision_.AddFallRecoveryFloor(stageModel_);
+	// 柱の登録がなかったから作ったよ
+	for (const auto& model : stagePillars_)
+		collision_.AddModel(model, ModelCollision::Surface::Pillar);
 
 	for (const auto& model : stageModels_)
 		collision_.AddModel(model, ModelCollision::Surface::Stand);
@@ -135,6 +133,29 @@ void Stage::Reset()
 void Stage::Update(float deltaTime)
 {
 	UpdateShake(deltaTime);
+	UpdateBossBodyCollision();
+}
+
+void Stage::UpdateBossBodyCollision()
+{
+	// ステージ中心に置く縦向きカプセル
+	const float radius = bossBodySettings_.radius;
+	const float height = (std::max)(bossBodySettings_.height, radius * 2.0f);
+	const Vec3 bottom = GetWorldPosition() + Vec3::Up() * bossBodySettings_.yOffset;
+	collision_.SetContactCapsule({
+		bottom + Vec3::Up() * radius,
+		bottom + Vec3::Up() * (height - radius),
+		radius });
+}
+
+void Stage::SetBossBodySettings(const BossBodySettings& settings)
+{
+	if (!std::isfinite(settings.radius) || !std::isfinite(settings.height) ||
+		!std::isfinite(settings.yOffset) || settings.radius <= 0.0f) return;
+	// 本体のサイズを調整
+	bossBodySettings_ = settings;
+	bossBodySettings_.height = (std::max)(settings.height, settings.radius * 2.0f);
+	UpdateBossBodyCollision();
 }
 
 void Stage::Draw() const

@@ -38,6 +38,10 @@ public:
 	void AddDamage();
 	void ApplyAvoid();
 	float GetAvoidInvTime() const { return avoidInvTime_; }
+	Collision::Sphere GetHitSphere() const
+	{
+		return { GetWorldPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT * 0.5f), Const::PLAYER_RADIUS };
+	}
 
 	// // ステージとの当たり判定込みの更新
 	// void Update(float deltaTime, const Stage& stage, const Vec3& movementCenter = Vec3{});
@@ -148,6 +152,8 @@ public:
     // 開始場所を変えるときは、Rで戻る場所も一緒に変える。
     void SetStartPosition(const Vec3& position);
     void ResetPosition();
+	// 落下時と同じ、記録済みの安全な1階の位置へ戻す。
+	void ReturnToLastSafePosition(const ModelCollision& collision);
 	ObjectTransform GetTransform() const
 	{
 		return { model_.GetScale(), GetPosition(), GetRotation() };
@@ -199,7 +205,8 @@ public:
 	Vec3 GetPillarElevatorCenter() const { return elevatorCenter_; }
 private:
     void UpdateMovement(float deltaTime);
-	void UpdateFallRecovery(const ModelCollision& collision, const ModelCollision::ModelOb& body, bool landedOnFirstFloor);
+	void UpdateFallRecovery(const ModelCollision& collision, const ModelCollision::ModelOb& body,
+		bool landedOnFirstFloor);
 	void RestorePosition(const Vec3& position);
 	// 横速度を決めた後、MoveでXYZの速度をまとめて座標に反映する。
 	void UpdateHorizontalVelocity(float deltaTime);//nyuuryokukei

@@ -45,6 +45,7 @@ private:
     bool rightMouseWasDown_{};
     float attackSphereDebugRemaining_{};
     bool debugActorsPaused_{};
+    bool showBossBodyCapsule_{ true };
 
     // Rendering
     void DrawScene(bool toonEnabled) const;

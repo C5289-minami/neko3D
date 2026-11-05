@@ -184,10 +184,7 @@ void GameTestScene::Update(float deltaTime)
 				attackHeight);
 		}
 
-		const Collision::Sphere playerBody{
-			player->GetWorldPosition() + Vec3::Up() * 30.0f,
-			30.0f
-		};
+		const Collision::Sphere playerBody = player->GetHitSphere();
 
 		const bool tailWhipPlayerHit =
 			boss.IsTailWhipHitActive() &&
@@ -347,6 +344,17 @@ void GameTestScene::Render() const
 
 	auto& boss = gameContext->GetBoss();
 	auto* player = gameContext->GetPlayer();
+	if (showBossBodyCapsule_)
+	{
+		const auto& bodyCollision = gameContext->GetStage().GetCollision();
+		const bool touchingBody = player != nullptr && bodyCollision.IsTouchingCapsule(player->GetHitSphere());
+		DxLib::SetUseZBuffer3D(FALSE);
+		DxLib::SetWriteZBuffer3D(FALSE);
+		Collision::DrawDebugCapsule(bodyCollision.GetContactCapsule(),
+			touchingBody ? DxLib::GetColor(255, 220, 60) : DxLib::GetColor(80, 220, 255));
+		DxLib::SetUseZBuffer3D(TRUE);
+		DxLib::SetWriteZBuffer3D(TRUE);
+	}
 	// 攻撃中の尻尾カプセルを表示する。黄色は接触中、青は未接触。
 	if (boss.IsTailWhipHitActive() && player != nullptr)
 	{
@@ -478,6 +486,27 @@ void GameTestScene::DrawImGui()
 		ImGui::TextUnformatted(u8"Stage Gimmick Test");
 
 		auto& stage = gameContext->GetStage();
+
+		ImGui::Separator();
+		if (ImGui::CollapsingHeader(u8"ボス本体の当たり判定", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::Checkbox(u8"カプセルの枠を表示", &showBossBodyCapsule_);
+			auto body = stage.GetBossBodySettings();
+			bool changed = ImGui::DragFloat(u8"本体の半径", &body.radius, 1.0f, 1.0f, 5000.0f,
+				"%.1f", ImGuiSliderFlags_AlwaysClamp);
+			changed |= ImGui::DragFloat(u8"本体の全高", &body.height, 1.0f, body.radius * 2.0f, 10000.0f,
+				"%.1f", ImGuiSliderFlags_AlwaysClamp);
+			changed |= ImGui::DragFloat(u8"底の高さオフセット", &body.yOffset, 1.0f, -5000.0f, 5000.0f,
+				"%.1f", ImGuiSliderFlags_AlwaysClamp);
+			if (changed) stage.SetBossBodySettings(body);
+			if (ImGui::Button(u8"本体の判定を初期値に戻す")) stage.ResetBossBodySettings();
+			const auto& capsule = stage.GetCollision().GetContactCapsule();
+			const Vec3 center = (capsule.start + capsule.end) * 0.5f;
+			ImGui::Text(u8"中心座標：X %.1f / Y %.1f / Z %.1f", center.x, center.y, center.z);
+			ImGui::TextUnformatted(stage.GetCollision().IsTouchingCapsule(player->GetHitSphere())
+				? u8"プレイヤー：接触中（黄色）" : u8"プレイヤー：接触なし（青色）");
+			ImGui::TextWrapped(u8"全高は上下の丸い部分を含み、半径の2倍以上になります。変更は実行中のみ有効です。");
+		}
 
 		if (ImGui::Button(u8"Stage Shake"))
 			stage.StartShake();

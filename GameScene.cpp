@@ -117,9 +117,6 @@ void GameScene::Update(float deltaTime)
 	auto* player = gameContext->GetPlayer();
 	auto& boss = gameContext->GetBoss();
 	auto& stage = gameContext->GetStage();
-	// モデル取得
-	ModelObject& playerModel = player->GetModelObject();
-	ModelObject& bossModel = boss.GetModelObject();
 
 	// actors
 	{

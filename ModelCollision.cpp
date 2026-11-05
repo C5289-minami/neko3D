@@ -42,7 +42,14 @@ void ModelCollision::Clear()
 
 	models_.clear();
 	fallRecoveryFloor_ = nullptr;
+	contactCapsule_ = {};
 
+}
+
+bool ModelCollision::IsTouchingCapsule(const Collision::Sphere& sphere) const
+{
+    return contactCapsule_.radius > 0.0f && sphere.radius > 0.0f &&
+        Collision::IsHitCapsuleSphere(contactCapsule_, sphere);
 }
 
 bool ModelCollision::Refresh()
