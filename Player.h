@@ -127,6 +127,8 @@ public:
 		UpFloor,	// 上の足場に着地したときの判定
 	};
 	GroundType CheckFloor() const;//
+	// ジャンプを始めた階。空中でも着地するまで保持する。
+	GroundType GetJumpStartFloor() const { return jumpStartFloor_; }
 
 	void ApplyKnockback(const Vec3& direction, float power, float duration);
 
@@ -253,6 +255,8 @@ private:
 	// false：ダブルジャンプをまだ使っていない。true：使用済み。
 	// 着地するまでtrueを保ち、Spaceを連打しても3回目は出せないようにする。
 	bool doubleJumpUsed_{ false };
+	GroundType lastGroundFloor_{ GroundType::None };
+	GroundType jumpStartFloor_{ GroundType::None };
 	float coyoteTimeRemaining_{ 0.0f };
 
 	bool touchingWall_{ false };

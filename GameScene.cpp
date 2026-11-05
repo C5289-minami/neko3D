@@ -23,6 +23,7 @@ void GameScene::Init()
 {
 	gameContext->Reset();
 	wasTouchingBossBody_ = false;
+	wasDoubleJumpContact_ = false;
 
 	// チュートリアルも、使いたいモデルを登録するだけで同じ判定を利用できる。
 	tutorialCollision_.Clear();
@@ -110,6 +111,7 @@ void GameScene::Update(float deltaTime)
 		GetCurrentGameState() != GameStateType::Battle)
 	{
 		wasTouchingBossBody_ = false;
+		wasDoubleJumpContact_ = false;
 		stateMachine_.Tick(deltaTime);
 		gameContext->GetEffectManager().Update(deltaTime);
 		return;
@@ -138,19 +140,35 @@ void GameScene::Update(float deltaTime)
 
 		boss.Update(deltaTime);
 
-		// ダブルジャンプ中にボス本体へ触れた瞬間だけ、安全な位置へ戻す。
+		// バトル中だけボス本体へのジャンプ接触を処理する。
 		if (GetCurrentGameState() == GameStateType::Battle)
 		{
-			const bool doubleJumpContact =
-				player->GetCurrentState() == PlayerStateType::DoubleJump &&
-				stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
-			if (doubleJumpContact && !wasTouchingBossBody_)
+			// ジャンプ接触は一度だけゲージを減らし、二段目だけプレイヤーを戻す。
+			//GameTestCpp見て
+			const bool touchingBody = stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
+			const auto startFloor = player->GetJumpStartFloor();
+			const bool normalJump = !player->IsGrounded() &&
+				player->GetCurrentState() == PlayerStateType::Jump && startFloor != Player::GroundType::None;
+			const bool doubleJump = !player->IsGrounded() &&
+				player->GetCurrentState() == PlayerStateType::DoubleJump;
+			const bool jumpContact = touchingBody && (normalJump || doubleJump);
+			const bool doubleJumpContact = touchingBody && doubleJump;
+			if (jumpContact && !wasTouchingBossBody_)
+			{
+				if (normalJump)
+					boss.ApplyDownGaugeDamage(Const::BOSS_JUMP_DOWN_DAMAGE);
+				else if (startFloor == Player::GroundType::UpFloor)
+					boss.ApplyDownGaugeDamage(Const::BOSS_UPPER_DOUBLE_JUMP_DOWN_DAMAGE);
+			}
+			if (doubleJumpContact && !wasDoubleJumpContact_)
 				player->ReturnToLastSafePosition(stage.GetCollision());
-			wasTouchingBossBody_ = doubleJumpContact;
+			wasTouchingBossBody_ = jumpContact;
+			wasDoubleJumpContact_ = doubleJumpContact;
 		}
 		else
 		{
 			wasTouchingBossBody_ = false;
+			wasDoubleJumpContact_ = false;
 		}
 
 		if (GetCurrentGameState() == GameStateType::Battle &&

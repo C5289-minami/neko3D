@@ -82,6 +82,8 @@ public:
     float GetDownGaugeProgress() const { return maxDownGauge_ > 0.0f ? downGauge_ / maxDownGauge_ : 0.0f; }
     void ResetDownGauge() { downGauge_ = maxDownGauge_; }
 	void UpdateDown(float deltaTime);
+	// HPを減らさず、怯み用のダウンゲージだけを減らす。
+	void ApplyDownGaugeDamage(float damage);
 
 	// camera
 	void CameraShakeRequest(
