@@ -482,6 +482,7 @@ void Player::UpdateFallRecovery(const ModelCollision& collision, const ModelColl
 	if (!collision.CanLandOnFallRecoveryFloor(recoveryPosition, body.skin, GroundSnapDistance, WalkableNormalY))
 		recoveryPosition = lastFirstFloorPosition_;
 
+	recoveryPosition.y += Const::PLAYER_FALL_RECOVERY_HEIGHT_OFFSET;
 	RestorePosition(recoveryPosition);
 }
 
