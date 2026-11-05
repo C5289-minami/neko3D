@@ -473,7 +473,7 @@ void Player::UpdateFallRecovery(const ModelCollision& collision, const ModelColl
 	}
 
 	// 1階に着地できる高さを通り過ぎるまで、通常どおり落下させる。
-	if (velocity_.y > 0.0f || !collision.IsBelowFallRecoveryFloor(position_.y, body.height)) return;
+	if (velocity_.y > 0.0f || !collision.IsBelowFallRecoveryFloor(position_.y, Const::PLAYER_FALL_RECOVERY_DISTANCE)) return;
 
 	Vec3 recoveryPosition = lastGroundedPosition_;
 	recoveryPosition.y = lastFirstFloorPosition_.y;
