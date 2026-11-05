@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include "Vector3.h"
+#include "Consts.h"
 
 struct Matrix4
 {
@@ -158,9 +159,9 @@ struct Matrix4
     {
         const Vec3 scale = GetScale();
 
-        if (scale.x < 0.000001f ||
-            scale.y < 0.000001f ||
-            scale.z < 0.000001f)
+        if (scale.x < Const::EPS ||
+            scale.y < Const::EPS ||
+            scale.z < Const::EPS)
         {
             return {};
         }
@@ -179,7 +180,7 @@ struct Matrix4
         const float y =
             std::asin(std::clamp(-r02, -1.0f, 1.0f));
 
-        if (std::abs(std::cos(y)) > 0.00001f)
+        if (std::abs(std::cos(y)) > Const::EPS)
         {
             return {
                 std::atan2(r12, r22),

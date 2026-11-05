@@ -441,7 +441,7 @@ void Collision::DrawDebugCapsule(const Capsule& capsule, unsigned int color)
 
 	const Vec3 axis = capsule.end - capsule.start;// カプセルの軸方向ベクトル
 
-	if (axis.LengthSq() <= 1.0e-6f)// 軸の長さがほぼ0なら、球として描画する
+	if (axis.LengthSq() <= Const::EPS)// 軸の長さがほぼ0なら、球として描画する
     {
         DrawDebugSphere({ capsule.start, capsule.radius }, color);
         return;

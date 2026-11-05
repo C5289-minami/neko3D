@@ -6,6 +6,7 @@
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
 #include "DxConv.h"
+#include "Consts.h"
 
 float Enemy::GetHpRate() const
 {
@@ -50,7 +51,7 @@ void Enemy::Update(float deltaTime, const Vec3& playerPos)
 
     bool isMove = false;
 
-    if (knockbackVelocity.LengthSq() > 0.00001f)
+    if (knockbackVelocity.LengthSq() > Const::EPS)
     {
         position += knockbackVelocity * deltaTime;
 
@@ -223,7 +224,7 @@ void Enemy::ApplyKnockback(const Vec3& direction, float speed)
     Vec3 knockbackDir = direction;
     knockbackDir.y = 0.0f;
 
-    if (knockbackDir.LengthSq() >= 0.00001f)
+    if (knockbackDir.LengthSq() >= ?onst::EPS)
     {
         knockbackDir = knockbackDir.Normalized();
     }

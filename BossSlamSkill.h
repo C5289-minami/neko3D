@@ -4,6 +4,7 @@
 #include "BossPoseSkill.h"
 #include "DxLib.h"
 #include "DxPlus/Debug.h"
+#include "Consts.h"
 
 #include <algorithm>
 #include <array>
@@ -26,6 +27,7 @@ public:
 	{
 		BossPoseSkill::Reset();
 
+		phase_ = AttackStateType::None;
 		hitCapsules_ = {};
 
 		targetLocked_ = false;
@@ -46,7 +48,7 @@ public:
 			playerFromCenter.y = 0.0f;
 
 			const float orbitRadius = playerFromCenter.Length();
-			if (orbitRadius > 0.001f)
+			if (orbitRadius > Const::EPS)
 			{
 				//プレイヤーを向く角度を得る。
 				const float playerAngle = std::atan2(playerFromCenter.z, playerFromCenter.x);
@@ -157,6 +159,8 @@ private:
 
 	void EnterPhase(AttackStateType phase) override
 	{
+		phase_ = phase;
+
 		switch (phase)
 		{
 		case AttackStateType::PreAction:
@@ -172,6 +176,7 @@ private:
 			boss_.GetAnimation().PlayTo(8.0f);
 			break;
 		case AttackStateType::Recovery:
+			hitActive_ = true;
 		case AttackStateType::Return:
 			// アニメーションの再生を開始する
 			boss_.GetAnimation().Start();

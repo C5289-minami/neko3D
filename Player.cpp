@@ -521,7 +521,7 @@ Vec3 Player::GetWorldMoveDirection(const Vec3& moveDir) const//Plyaerがどこ�
 	Vec3 forward = movementCenter_ - GetPosition();
 	forward.y = 0.0f;
 
-	if (forward.LengthSq() < 0.000001f)
+	if (forward.LengthSq() < Const::EPS)
 		forward = Vec3(std::sin(GetYaw()), 0.0f, std::cos(GetYaw()));
 	else
 		forward = forward.Normalized();
@@ -699,7 +699,7 @@ void Player::UpdateStageMoveVelocity(float moveSpeed, float deltaTime)
 	Vec3 forward = movementCenter_ - position_;
 	forward.y = 0.0f;
 	const float radius = forward.Length();
-	if (radius < 0.001f)
+	if (radius <Const::EPS)
 	{
 		forward = Vec3(std::sin(GetYaw()), 0.0f, std::cos(GetYaw()));
 	}
