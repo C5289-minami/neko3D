@@ -74,9 +74,7 @@ void Boss::Reset()
 
 	stateMachine_.Initialize();
 
-#ifndef NDEBUG
 	activeAI = false;
-#endif // !NDEBUG
 
 	ai_.Reset();
 	if (clapSkill_ != nullptr) clapSkill_->Reset();
@@ -195,9 +193,7 @@ void Boss::Update(float deltaTime)
 
 	// AIの更新
 
-#ifndef NDEBUG
-	if (activeAI)
-#endif
+  if (activeAI)
 	{
 		ai_.Update(deltaTime);
 	}
