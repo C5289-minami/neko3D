@@ -123,17 +123,7 @@ void GameTestScene::Update(float deltaTime)
 #endif
 
 		player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
-		for (auto& obj : stage.GetStageModelObjects())
-		{
-			player->CheckFloor(obj, stage.GetModelObject());
-		}
-		for (auto& pillar : stage.GetPillarModelObjects())
-		{
-			ModelObject deltaPillar = pillar;
-			deltaPillar.SetPosition({ 0.0f,deltaPillar.GetPosition().y * 2,0.0f }); // 無理やりだけど、Centerが中心なのでその分あげて上の判定あげてる
-			player->CheckFloor(deltaPillar, stage.GetModelObject());
-
-		}
+		player->CheckFloor();
 	
 #ifdef _DEBUG
 		// この更新だけに適用し、共有するPlayerを他のシーンへ持ち越さない。
