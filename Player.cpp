@@ -839,6 +839,25 @@ Player::GroundType Player::CheckFloor() const
 	return GroundType::None;
 }
 
+void Player::ApplyKnockback(const Vec3& direction, float power, float duration)
+{
+	Vec3 outward = direction;
+	outward.y = 0.0f;
+
+	if (outward.LengthSq() <= 0.000001f) return;
+
+	outward = outward.Normalized();
+
+	knockbackVelocity_ = outward * power;
+	knockbackTime_ = duration;
+
+	velocity_.y = 0.0f;
+	isGrounded_ = false;
+	EndPillarElevator();
+
+	stateMachine_.ChangeState(PlayerStateType::Jump);
+}
+
 void Player::SetWallJumpMoveSpeed(float value)
 {
 	if (std::isfinite(value)) wallJumpMoveSpeed_ = (std::max)(0.0f, value);
