@@ -18,7 +18,9 @@ GameSceneBattleState::GameSceneBattleState(
 
 void GameSceneBattleState::Enter()
 {
-    auto* player = gameScene_.GetGameContext()->GetPlayer();
+    auto* gameContext = gameScene_.GetGameContext();
+    auto* player = gameContext->GetPlayer();
+    gameContext->ClearUltimateProjectiles();
 
     // バトル用カメラへ切り替える
     gameScene_.GetCameraDirector().SwitchCamera(
@@ -43,6 +45,7 @@ void GameSceneBattleState::Tick(float deltaTime)
 
     if (!player->IsDead() && boss.GetHealth() > 0)
         player->AddUltimateGauge(Const::PLAYER_ULTIMATE_GAUGE_PER_SECOND * deltaTime);
+    gameContext->UpdateUltimateProjectiles(deltaTime);
 
     const Vec3 stageCenterPosition = stage.GetPosition();
 
@@ -144,6 +147,7 @@ void GameSceneBattleState::Tick(float deltaTime)
 
 void GameSceneBattleState::Exit()
 {
+    gameScene_.GetGameContext()->ClearUltimateProjectiles();
     gameScene_.SetDrawPlayerShadow(false);
     UIM().RemoveUI(L"BossStatusBackground");
     UIM().RemoveUI(L"BossHealthGauge");

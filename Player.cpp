@@ -12,6 +12,7 @@
 #include "EffectManager.h"
 #include <algorithm>
 #include <iostream>
+#include <utility>
 
 #include <tchar.h>
 #include <cstdio>
@@ -131,6 +132,7 @@ void Player::Reset()
 
 	model_.collisionHighlighted = false;
 	ultimateGauge_ = Const::PLAYER_ULTIMATE_GAUGE_INITIAL;
+	ultimateShotOrigin_.reset();
 	// 初期位置・回転・拡大率は既定値を設定した後にJSONから読み込む
 	MObjs().LoadActorTransform(*this);
 	model_.Load();
@@ -613,6 +615,16 @@ bool Player::TryUseUltimateGauge()
 	if (!CanUseUltimate()) return false;
 	ultimateGauge_ = Const::PLAYER_ULTIMATE_GAUGE_AFTER_USE;
 	return true;
+}
+
+void Player::RequestUltimateShot()
+{
+	ultimateShotOrigin_ = GetWorldPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT * 0.5f);
+}
+
+std::optional<Vec3> Player::TakeUltimateShotOrigin()
+{
+	return std::exchange(ultimateShotOrigin_, std::nullopt);
 }
 
 void Player::SetMoveDirection(const Vec3& moveDir)

@@ -423,6 +423,9 @@
     <ClInclude Include="PlayerUltimateAttackState.h">
       <Filter>40_Gameplay\Actors\Player\State\UltimateAttack</Filter>
     </ClInclude>
+    <ClInclude Include="PlayerUltimateEffect.h">
+      <Filter>40_Gameplay\Actors\Player\State\UltimateAttack</Filter>
+    </ClInclude>
     <ClInclude Include="PlayerAttackState.h">
       <Filter>40_Gameplay\Actors\Player\State\Attack</Filter>
     </ClInclude>
@@ -861,6 +864,9 @@
       <Filter>40_Gameplay\Actors\Player\State\Idle</Filter>
     </ClCompile>
     <ClCompile Include="PlayerUltimateAttackState.cpp">
+      <Filter>40_Gameplay\Actors\Player\State\UltimateAttack</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerUltimateEffect.cpp">
       <Filter>40_Gameplay\Actors\Player\State\UltimateAttack</Filter>
     </ClCompile>
     <ClCompile Include="PlayerAttackState.cpp">

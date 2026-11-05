@@ -455,6 +455,7 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 void GameScene::End()
 {
+	gameContext->ClearUltimateProjectiles();
 	tutorialCollision_.Clear();
 }
 

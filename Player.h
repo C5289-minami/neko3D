@@ -14,6 +14,7 @@
 #include "CharSettings.h"
 #include "AnimationHandle.h"
 #include "CameraShakeType.h"
+#include <optional>
 
 // class Stage;
 
@@ -184,6 +185,8 @@ public:
 		return ultimateGauge_ >= UltimateGaugeMax;
 	}
 	bool TryUseUltimateGauge();
+	void RequestUltimateShot();
+	std::optional<Vec3> TakeUltimateShotOrigin();
 
 	// キャラクター設定
 	CharData& GetCharData() { return charData; }
@@ -230,6 +233,7 @@ private:
 	PlayerInput input_;
 	PlayerStateMachine stateMachine_;
 	float ultimateGauge_{ Const::PLAYER_ULTIMATE_GAUGE_INITIAL };
+	std::optional<Vec3> ultimateShotOrigin_;
 	// float lungingMoveSpeed_{ Const::PLAYER_LUNGING_MOVE_SPEED };
 	float doubleJumpSpeed_{ Const::PLAYER_DOUBLE_JUMP_SPEED };
 	// float climbingSpeed_{ Const::PLAYER_CLIMBING_SPEED };

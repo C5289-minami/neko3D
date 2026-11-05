@@ -22,7 +22,17 @@ namespace Const
     constexpr float PLAYER_ULTIMATE_GAUGE_PER_SECOND = 3.0f;
     constexpr float PLAYER_ULTIMATE_GAUGE_PER_HIT = 20.0f;
 
+    // •KŽE‹Z‚Ì’eB‘¬“x‚Í1•b‚ ‚½‚è‚ÌˆÚ“®‹——£B
+    constexpr int PLAYER_ULTIMATE_DAMAGE = 2;
+    constexpr float PLAYER_ULTIMATE_PROJECTILE_SPEED = 1500.0f;
+    constexpr float PLAYER_ULTIMATE_PROJECTILE_RADIUS = 45.0f;
+    constexpr float PLAYER_ULTIMATE_PROJECTILE_LIFETIME_SECONDS = 3.0f;
+
     static_assert(PLAYER_MAX_HEALTH > 0);
+    static_assert(PLAYER_ULTIMATE_DAMAGE >= 0);
+    static_assert(PLAYER_ULTIMATE_PROJECTILE_SPEED > 0.0f &&
+        PLAYER_ULTIMATE_PROJECTILE_RADIUS > 0.0f &&
+        PLAYER_ULTIMATE_PROJECTILE_LIFETIME_SECONDS > 0.0f);
     static_assert(PLAYER_ULTIMATE_GAUGE_MAX > 0.0f);
     static_assert(PLAYER_ULTIMATE_GAUGE_INITIAL >= 0.0f &&
         PLAYER_ULTIMATE_GAUGE_INITIAL <= PLAYER_ULTIMATE_GAUGE_MAX);

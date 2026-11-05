@@ -194,6 +194,7 @@ void GameTestScene::Update(float deltaTime)
 
 		if (!player->IsDead() && boss.GetHealth() > 0)
 			player->AddUltimateGauge(Const::PLAYER_ULTIMATE_GAUGE_PER_SECOND * deltaTime);
+		gameContext->UpdateUltimateProjectiles(deltaTime);
 
 		const bool slamHitPlayer = boss.UpdateSlamAttack(
 			player->GetWorldPosition(), stage.GetWorldPosition());
@@ -560,6 +561,7 @@ void GameTestScene::DrawImGui()
 
 void GameTestScene::End()
 {
+	gameContext->ClearUltimateProjectiles();
 }
 
 void GameTestScene::UpdateTailWhipGimmick()
