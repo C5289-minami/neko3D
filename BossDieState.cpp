@@ -6,7 +6,7 @@
 
 namespace Const
 {
-	constexpr float BossDieUpLen = 1600.0f;
+	constexpr float BossDieUpLen = 1000.0f;
 	constexpr float BossDieFadeOutDuration = 8.0f;
 }
 

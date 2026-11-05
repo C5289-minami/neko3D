@@ -3,7 +3,9 @@
 #include "DrawableObject.h"
 #include "DxLib.h"
 #include "ToonSettings.h"
+#include "OutlineSettings.h"
 #include "ResourceManager.h"
+#include <algorithm>
 
 
 namespace
@@ -20,7 +22,7 @@ namespace
         L"./Data/Shader/Bin/ModelVS_Bone.vso";
 
     constexpr const wchar_t* BoneVertexShaderNMapPath =
-		L"./Data/Shader/Bin/ModelVS_BoneNMap.vso";
+        L"./Data/Shader/Bin/ModelVS_BoneNMap.vso";
 
     constexpr const wchar_t* BoneVertexShader8FramePath =
         L"./Data/Shader/Bin/ModelVS_Bone8Frame.vso";
@@ -50,7 +52,7 @@ bool ModelToonRenderer::Init()
     pixelShader_ = LoadPixelShader(PixelShaderPath);
     vertexShader_ = LoadVertexShader(VertexShaderPath);
     vertexShaderBone_ = LoadVertexShader(BoneVertexShaderPath);
-	vertexShaderBoneNMap_ = LoadVertexShader(BoneVertexShaderNMapPath);
+    vertexShaderBoneNMap_ = LoadVertexShader(BoneVertexShaderNMapPath);
     vertexShaderBone8Frame_ =
         LoadVertexShader(BoneVertexShader8FramePath);
     vertexShaderBone8FrameNMap_ =
@@ -65,7 +67,7 @@ bool ModelToonRenderer::Init()
     if (pixelShader_ < 0 ||
         vertexShader_ < 0 ||
         vertexShaderBone_ < 0 ||
-		vertexShaderBoneNMap_ < 0 ||
+        vertexShaderBoneNMap_ < 0 ||
         vertexShaderBone8Frame_ < 0 ||
         vertexShaderBone8FrameNMap_ < 0 ||
         depthObjectIdConstantBuffer_ < 0 ||
@@ -115,13 +117,20 @@ void ModelToonRenderer::Release() noexcept
     {
         DeleteShader(vertexShaderBoneNMap_);
         vertexShaderBoneNMap_ = -1;
-	}
+    }
 
     if (vertexShaderBone8Frame_ >= 0)
     {
         DeleteShader(vertexShaderBone8Frame_);
         vertexShaderBone8Frame_ = -1;
     }
+
+    if (vertexShaderBone8FrameNMap_ >= 0)
+    {
+        DeleteShader(vertexShaderBone8FrameNMap_);
+        vertexShaderBone8FrameNMap_ = -1;
+    }
+
     if (depthObjectIdConstantBuffer_ >= 0)
     {
         DeleteShaderConstantBuffer(depthObjectIdConstantBuffer_);
@@ -194,39 +203,55 @@ void ModelToonRenderer::Draw(
 
     SetUsePixelShader(pixelShader_);
 
-    DrawTriangleLists(model);
+    DrawTriangleLists(model, false);
 }
 
 void ModelToonRenderer::DrawDepth(const ModelObject& model) const
 {
-	// 半透明モデルは描画しない
-    if (model.GetAlpha() < 1.0f)
+    // 完全に透明（0.0f以下）のときだけスキップする
+    if (model.GetAlpha() <= 0.0f)
     {
         return;
-	}
+    }
 
     auto it = depthObjectIds_.find(&model);
 
     if (it == depthObjectIds_.end())
     {
-        const int objectId = nextDepthObjectId_++;
+        const int objectId = (std::min)(nextDepthObjectId_++, MAX_OUTLINE_OBJECTS);
         it = depthObjectIds_.emplace(&model, objectId).first;
     }
 
     DrawDepth(model, it->second);
 }
+
 void ModelToonRenderer::DrawDepth(
     const ModelObject& model,
     int objectId) const
 {
-    // 半透明モデルは描画しない
-    if (model.GetAlpha() < 1.0f)
+    // 完全に透明（0.0f以下）のときだけスキップする
+    if (model.GetAlpha() <= 0.0f)
     {
         return;
     }
     if (depthObjectIdConstantBuffer_ < 0)
     {
         return;
+    }
+
+    // --------------------------------------------------------
+    // モデル固有のアウトライン設定と SetAlpha の値をテーブルへ反映
+    // --------------------------------------------------------
+    if (objectId >= 1 && objectId <= MAX_OUTLINE_OBJECTS)
+    {
+        OutlineSettings modelOutline = model.GetOutlineSettings();
+
+        const float modelAlpha = std::clamp(model.GetAlpha(), 0.0f, 1.0f);
+        modelOutline.outerOpacity *= modelAlpha;
+        modelOutline.innerOpacity *= modelAlpha;
+        modelOutline.outlineColor[3] *= modelAlpha;
+
+        g_outlineSettingsTable.table[objectId] = modelOutline;
     }
 
     auto* settings = static_cast<DepthObjectIdConstants*>(
@@ -250,7 +275,8 @@ void ModelToonRenderer::DrawDepth(
         7
     );
 
-    DrawTriangleLists(model);
+    // 深度・オブジェクトIDパスでは半透明モデルでもZバッファへ書き込む
+    DrawTriangleLists(model, true);
 }
 
 
@@ -278,7 +304,8 @@ void ModelToonRenderer::SetVertexShader(ModelType type) const
 // ============================================================
 
 void ModelToonRenderer::DrawTriangleLists(
-    const ModelObject& model
+    const ModelObject& model,
+    bool forceWriteZ
 ) const
 {
     const int handle = RM().GetModel(model.GetModelKey());
@@ -298,8 +325,8 @@ void ModelToonRenderer::DrawTriangleLists(
     // Zバッファを使用する
     MV1SetUseZBuffer(handle, TRUE);
 
-    // 不透明モデルだけZを書き込む
-    MV1SetWriteZBuffer(handle, model.GetAlpha() >= 1.0f ? TRUE : FALSE);
+    // 深度パス（forceWriteZ == true）または不透明モデルならZを書き込む
+    MV1SetWriteZBuffer(handle, (forceWriteZ || model.GetAlpha() >= 1.0f) ? TRUE : FALSE);
 
     // モデルの不透明度を設定
     MV1SetOpacityRate(handle, model.GetAlpha());

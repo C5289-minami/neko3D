@@ -1,113 +1,149 @@
-    #pragma once
+#pragma once
 
-    #include <algorithm>
-    #include <string>
+#include <algorithm>
+#include <string>
 
-    #include "DxPlus/Vector2.h"
-    #include "Vector3.h"
-    #include "Matrix.h"
-    #include "Collision.h"
-    #include "ModelType.h"
+#include "DxPlus/Vector2.h"
+#include "Vector3.h"
+#include "Matrix.h"
+#include "Collision.h"
+#include "ModelType.h"
 
-    class ActorBase;
+#include "OutlineSettings.h"
 
-    struct ImageObject
-    {
-        std::wstring imageKey;
-        DxPlus::Vec2 position{};
-        DxPlus::Vec2 scale{ 1.0f, 1.0f };
-        DxPlus::Vec2 center{ 0.5f, 0.5f };
-        float rotation{};
+class ActorBase;
 
-        DxPlus::Vec2 GetSize() const;
-        void Draw(DxPlus::Vec2 masterPos = { 0.0f, 0.0f }) const;
-    };
+struct ImageObject
+{
+	std::wstring imageKey;
+	DxPlus::Vec2 position{};
+	DxPlus::Vec2 scale{ 1.0f, 1.0f };
+	DxPlus::Vec2 center{ 0.5f, 0.5f };
+	float rotation{};
 
-    struct ModelObject
-    {
-        bool collisionHighlighted{ false };
-        const ActorBase* owner_{ nullptr };
+	DxPlus::Vec2 GetSize() const;
+	void Draw(DxPlus::Vec2 masterPos = { 0.0f, 0.0f }) const;
+};
 
-        void Init();
-        void Draw(Vec3 masterPos = {}) const;
+struct ModelObject
+{
+	bool collisionHighlighted{ false };
+	const ActorBase* owner_{ nullptr };
 
-        // JSON
-        bool Load(const std::string& filePath = "./Data/Config/model_objects.json");
-        bool Save(const std::string& filePath = "./Data/Config/model_objects.json") const;
+	void Init();
+	void Draw(Vec3 masterPos = {}) const;
 
-        // 変換
-        void ApplyTransform(Vec3 masterPos = {}) const;
-        void ApplyCollisionColor() const;
+	// JSON
+	bool Load(const std::string& filePath = "./Data/Config/model_objects.json");
+	bool Save(const std::string& filePath = "./Data/Config/model_objects.json") const;
 
-        // 当たり判定
-        Collision::Ellipsoid GetHitEllipsoid() const;
-        Vec3 GetSize() const { return GetHitEllipsoid().radii * 2.0f; }
+	// 変換
+	void ApplyTransform(Vec3 masterPos = {}) const;
+	void ApplyCollisionColor() const;
 
-        // 親子関係
-        void SetOwner(const ActorBase& owner) { owner_ = &owner; }
-        ModelObject WithParentTransform(const Vec3& parentPosition, const Vec3& parentRotation) const;
+	// 当たり判定
+	Collision::Ellipsoid GetHitEllipsoid() const;
+	Vec3 GetSize() const { return GetHitEllipsoid().radii * 2.0f; }
 
-        // アルファ値
-        void SetAlpha(float value) { alpha = (std::max)(0.0f, (std::min)(1.0f, value)); }
-        void GetAlpha(float& outValue) const { outValue = alpha; }
-        float GetAlpha() const { return alpha; }
-        void FadeTo(const ActorBase& player, float speed, float deltaTime);
+	// 親子関係
+	void SetOwner(const ActorBase& owner) { owner_ = &owner; }
+	ModelObject WithParentTransform(const Vec3& parentPosition, const Vec3& parentRotation) const;
 
-        // モデルキー
-        const std::wstring& GetModelKey() const { return modelKey; }
-        void SetModelKey(const std::wstring& value) { modelKey = value; }
+	// アルファ値
+	void SetAlpha(float value) { alpha = (std::max)(0.0f, (std::min)(1.0f, value)); }
+	void GetAlpha(float& outValue) const { outValue = alpha; }
+	float GetAlpha() const { return alpha; }
+	void FadeTo(const ActorBase& player, float speed, float deltaTime);
 
-        // 変換行列は必要なときに生成
-        Matrix4 GetTransformMatrix() const
-        {
-            return Matrix4::CreateScale(scale)
-                * Matrix4::CreateRotationXYZ(rotation)
-                * Matrix4::CreateTranslation(position);
-        }
+	// モデルキー
+	const std::wstring& GetModelKey() const { return modelKey; }
+	void SetModelKey(const std::wstring& value) { modelKey = value; }
 
-        Matrix4 GetWorldMatrix() const;
+	// 変換行列は必要なときに生成
+	Matrix4 GetTransformMatrix() const
+	{
+		return Matrix4::CreateScale(scale)
+			* Matrix4::CreateRotationXYZ(rotation)
+			* Matrix4::CreateTranslation(position);
+	}
 
-        // 位置
-        Vec3 GetPosition() const { return position; }
-        void SetPosition(const Vec3& value) { position = value; }
+	Matrix4 GetWorldMatrix() const;
 
-        // スケール
-        Vec3 GetScale() const { return scale; }
-        void SetScale(const Vec3& value) { scale = value; }
+	// 位置
+	Vec3 GetPosition() const { return position; }
+	void SetPosition(const Vec3& value) { position = value; }
 
-        // 回転
-        Vec3 GetRotation() const { return rotation; }
-        void SetRotation(const Vec3& value) { rotation = value; }
+	// スケール
+	Vec3 GetScale() const { return scale; }
+	void SetScale(const Vec3& value) { scale = value; }
 
-        // 回転中心
-        Vec3 GetCenter() const { return center; }
-        void SetCenter(const Vec3& value) { center = value; }
+	// 回転
+	Vec3 GetRotation() const { return rotation; }
+	void SetRotation(const Vec3& value) { rotation = value; }
 
-        // オブジェクト識別情報
-        const std::string& GetObjectName() const { return objectName; }
-        void SetObjectName(const std::string& value) { objectName = value; }
-        const std::string& GetObjectId() const { return objectId; }
-        void SetObjectId(const std::string& value) { objectId = value; }
+	// 回転中心
+	Vec3 GetCenter() const { return center; }
+	void SetCenter(const Vec3& value) { center = value; }
 
-        // モデルの種類
-        ModelType GetModelType() const { return modelType_; }
-        void SetModelType(ModelType type) { modelType_ = type; }
+	// オブジェクト識別情報
+	const std::string& GetObjectName() const { return objectName; }
+	void SetObjectName(const std::string& value) { objectName = value; }
+	const std::string& GetObjectId() const { return objectId; }
+	void SetObjectId(const std::string& value) { objectId = value; }
 
-    private:
-        // 内部管理
-        std::string objectName;
-        std::string objectId;
-        std::wstring modelKey;
+	// モデルの種類
+	ModelType GetModelType() const { return modelType_; }
+	void SetModelType(ModelType type) { modelType_ = type; }
 
-        // 変換情報
-        Vec3 position{};
-        Vec3 scale{ 1.0f, 1.0f, 1.0f };
-        Vec3 rotation{};
+	// アウトライン設定
+	void SetOutlineSettings(const OutlineSettings& value)
+	{
+		outlineSettings_ = value;
+		useCustomOutlineSettings_ = true;
+	}
 
-        // 回転中心
-        Vec3 center{};
+	const OutlineSettings& GetOutlineSettings() const
+	{
+		return useCustomOutlineSettings_ ? outlineSettings_ : g_outlineSettings;
+	}
 
-        // 描画設定
-        float alpha{ 1.0f };
-        ModelType modelType_ = ModelType::Model;
-    };
+	void ResetOutlineSettings()
+	{
+		useCustomOutlineSettings_ = false;
+	}
+
+	bool HasCustomOutlineSettings() const
+	{
+		return useCustomOutlineSettings_;
+	}
+
+	// アウトラインの透明度
+	void SetOuterOpacity(float value);
+	void SetInnerOpacity(float value);
+	void SetOutlineOpacity(float value);
+
+private:
+	// 内部管理
+	std::string objectName;
+	std::string objectId;
+	std::wstring modelKey;
+
+	// 変換情報
+	Vec3 position{};
+	Vec3 scale{ 1.0f, 1.0f, 1.0f };
+	Vec3 rotation{};
+
+	// 回転中心
+	Vec3 center{};
+
+	// 描画設定
+	float alpha{ 1.0f };
+	ModelType modelType_ = ModelType::Model;
+
+
+	// アウトライン設定
+	OutlineSettings outlineSettings_{};
+	bool useCustomOutlineSettings_{ false };
+
+	void EnableCustomOutlineSettings();
+};

@@ -3,9 +3,6 @@
 #include <unordered_map>
 #include <vector>
 
-
-
-
 struct ModelObject;
 
 // モデルのトゥーン描画を管理するクラス
@@ -34,7 +31,7 @@ public:
 
     // 指定したモデルをトゥーン描画する
     void Draw(const ModelObject& model) const;
-  
+
     // 深度パス用の描画。オブジェクトIDは自動割り当て
     void DrawDepth(const ModelObject& model) const;
     // オブジェクトIDを指定して深度パス用に描画
@@ -46,7 +43,7 @@ public:
 
 private:
     // 頂点タイプを判定し、リストごとに描画する
-    void DrawTriangleLists(const ModelObject& model) const;
+    void DrawTriangleLists(const ModelObject& model, bool forceWriteZ = false) const;
 
     // トゥーンの色を計算するピクセルシェーダー
     int pixelShader_{ -1 };
