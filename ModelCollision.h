@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Vector3.h"
 #include "Raycast.h"
+#include "Collision.h"
 #include <vector>
 
 struct ModelObject;
@@ -39,6 +40,10 @@ public:
     //  AddModel(pillar, Surface::Pillar);
     void AddModel(const ModelObject& model, Surface surface);
     void AddFallRecoveryFloor(const ModelObject& model);
+    // 手動で置く接触判定。床・壁には含めない。
+    void SetContactCapsule(const Collision::Capsule& capsule) { contactCapsule_ = capsule; }
+    const Collision::Capsule& GetContactCapsule() const { return contactCapsule_; }
+    bool IsTouchingCapsule(const Collision::Sphere& sphere) const;
     void Clear();
 
     // 判定前に位置・回転・拡大率を反映する。描画する必要はない。
@@ -108,4 +113,5 @@ private:
     };
     std::vector<Entry> models_;
     const ModelObject* fallRecoveryFloor_{ nullptr };
+    Collision::Capsule contactCapsule_{};
 };

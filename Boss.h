@@ -72,7 +72,8 @@ public:
 	// 毎フレーム Boss::Update 後に呼ぶ。着弾中の初回命中だけ true。
 	bool UpdateSlamAttack(const Vec3& playerPosition, const Vec3& stageCenter);
 	bool IsSlamHitActive() const;
-	bool IsHitByAttackSphere(const Collision::Sphere& sphere) const;
+	// 有効なClap・Slam・TailWhipの攻撃判定とプレイヤーの攻撃球が重なるか調べる。
+	bool IsHitByAttackSphere(const Collision::Sphere& sphere, const Collision::Capsule& tailWhipCapsule) const;
 	int GetHealth() const { return health_; }
     float GetHealthProgress() const { return maxHealth_ > 0 ? static_cast<float>(health_) / maxHealth_ : 0.0f; }
 	BossPhase GetPhase() const { return phase_; }
@@ -82,6 +83,8 @@ public:
     float GetDownGaugeProgress() const { return maxDownGauge_ > 0.0f ? downGauge_ / maxDownGauge_ : 0.0f; }
     void ResetDownGauge() { downGauge_ = maxDownGauge_; }
 	void UpdateDown(float deltaTime);
+	// HPを減らさず、怯み用のダウンゲージだけを減らす。
+	void ApplyDownGaugeDamage(float damage);
 
 	// camera
 	void CameraShakeRequest(

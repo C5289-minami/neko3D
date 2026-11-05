@@ -9,6 +9,7 @@
 #include "DrawableObject.h"
 #include "ModelCollision.h"
 #include "Motion.h"
+#include "Consts.h"
 
 class Stage : public ActorBase
 {
@@ -36,6 +37,17 @@ public:
     float GetArenaRadius() const { return arenaRadius_; }
     float GetArenaSurfaceY() const { return arenaSurfaceY_; }
 
+    // ボス本体のカプセル。全高は上下の丸い部分も含む。
+    struct BossBodySettings
+    {
+        float radius{ Const::BOSS_BODY_RADIUS };
+        float height{ Const::BOSS_BODY_HEIGHT };
+        float yOffset{ Const::BOSS_BODY_Y_OFFSET };
+    };
+    const BossBodySettings& GetBossBodySettings() const { return bossBodySettings_; }
+    void SetBossBodySettings(const BossBodySettings& settings);
+    void ResetBossBodySettings() { SetBossBodySettings({}); }
+
     // Lifecycle
     void Init() override;
     void Reset() override;
@@ -47,9 +59,11 @@ public:
 
 private:
     void UpdateArenaBounds();
+    void UpdateBossBodyCollision();
     void UpdateShake(float deltaTime);
 
     ModelCollision collision_;
+    BossBodySettings bossBodySettings_{};
 
     ModelObject stageModel_;
     std::array<ModelObject, 3> stagePillars_{};

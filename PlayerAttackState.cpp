@@ -90,7 +90,9 @@ void PlayerAttackState::Draw() const
 #ifdef _DEBUG
 	if (!ballActive_) return;
 
-	const unsigned int color = DxLib::GetColor(0, 0, 0);
+	const unsigned int color = hasHitTarget_
+		? DxLib::GetColor(80, 255, 100)
+		: DxLib::GetColor(255, 230, 80);
 	DxLib::DrawSphere3D(
 		DxConv::ToVECTOR(attackSphere_.center),
 		attackSphere_.radius,

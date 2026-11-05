@@ -152,6 +152,14 @@ void Boss::TakeDamage(int damage)
 
 }
 
+void Boss::ApplyDownGaugeDamage(float damage)
+{
+	if (health_ <= 0 || !std::isfinite(damage) || damage <= 0.0f) return;
+	SetDownGauge(downGauge_ - damage);
+	if (downGauge_ <= 0.0f && GetCurrentState() != BossStateType::Flinch)
+		stateMachine_.ChangeState(BossStateType::Flinch);
+}
+
 void Boss::UpdateDown(float deltaTime)
 {
 	float AccumulationCounter = 1.0f * deltaTime; // 累積カウンターを更新する。
@@ -407,9 +415,31 @@ float Boss::GetAnimTotalTime(BossAnimType::Type type) const
 }
 
 
-bool Boss::IsHitByAttackSphere(const Collision::Sphere& sphere) const
+bool Boss::IsHitByAttackSphere(const Collision::Sphere& sphere, const Collision::Capsule& tailWhipCapsule) const
 {
-	return clapSkill_ != nullptr && clapSkill_->IsHitByAttackSphere(sphere);
+	if (health_ <= 0 || GetCurrentState() != BossStateType::Attack || sphere.radius <= 0.0f)
+		return false;
+
+	if (clapSkill_ != nullptr && activeSkill_ == clapSkill_.get())
+		return clapSkill_->IsHitByAttackSphere(sphere);
+
+	if (IsSlamHitActive())
+	{
+		// Slam攻撃が有効な場合、Slamの当たり判定カプセルとプレイヤーの攻撃球が重なるか調べる。
+		for (const auto& capsule : slamSkill_->GetHitCapsules())
+		{
+			if (capsule.radius > 0.0f && Collision::IsHitCapsuleSphere(capsule, sphere))
+				return true;
+		}
+	}
+
+	if (IsTailWhipActive() && IsTailWhipHitActive())// 尻尾攻撃が有効な場合、尻尾の当たり判定カプセルとプレイヤーの攻撃球が重なるか調べる。
+	{
+		return tailWhipCapsule.radius > 0.0f &&
+			Collision::IsHitCapsuleSphere(tailWhipCapsule, sphere);
+	}
+
+	return false;
 }
 
 bool Boss::UpdateHandAttack(float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition)

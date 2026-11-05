@@ -19,6 +19,8 @@
 void GameTestScene::Init()
 {
 	gameContext->Reset();
+	wasTouchingBossBody_ = false;
+	wasDoubleJumpContact_ = false;
 
 	tailWhipHitCapsule_ = {};
 
@@ -107,7 +109,9 @@ void GameTestScene::Update(float deltaTime)
 
 	wasFreeCameraToggleDown_ = toggleDown;
 
-	if (DxLib::CheckHitKey(KEY_INPUT_R) != 0)
+	const bool shiftHeld = DxLib::CheckHitKey(KEY_INPUT_LSHIFT) != 0 ||
+		DxLib::CheckHitKey(KEY_INPUT_RSHIFT) != 0;
+	if (DxLib::CheckHitKey(KEY_INPUT_R) != 0 && !shiftHeld)
 		freeCamera_.ResetView();
 
 	if (DxLib::CheckHitKey(KEY_INPUT_F) != 0)
@@ -151,6 +155,33 @@ void GameTestScene::Update(float deltaTime)
 		player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
 		player->CheckFloor();
 
+		// ジャンプ接触は一度だけゲージを減らし、二段目だけプレイヤーを戻す。
+		const bool touchingBody = stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
+		const auto startFloor = player->GetJumpStartFloor();
+		
+		const bool normalJump = !player->IsGrounded() &&
+			player->GetCurrentState() == PlayerStateType::Jump && startFloor != Player::GroundType::None;
+		
+		const bool doubleJump = !player->IsGrounded() &&
+			player->GetCurrentState() == PlayerStateType::DoubleJump;
+		// ジャンプ接触の判定
+		const bool jumpContact = touchingBody && (normalJump || doubleJump);
+		// 二段ジャンプ接触の判定
+		const bool doubleJumpContact = touchingBody && doubleJump;
+		if (jumpContact && !wasTouchingBossBody_)
+		{
+			if (normalJump)
+				boss.ApplyDownGaugeDamage(Const::BOSS_JUMP_DOWN_DAMAGE);
+			else if (startFloor == Player::GroundType::UpFloor)
+				boss.ApplyDownGaugeDamage(Const::BOSS_UPPER_DOUBLE_JUMP_DOWN_DAMAGE);
+		}
+		// 二段ジャンプ接触で、前回接触していなければ安全な位置へ戻す
+		if (doubleJumpContact && !wasDoubleJumpContact_)
+			player->ReturnToLastSafePosition(stage.GetCollision());
+		// 前回の接触状態を更新
+		wasTouchingBossBody_ = jumpContact;
+		wasDoubleJumpContact_ = doubleJumpContact;
+
 #ifdef _DEBUG
 		player->SetDebugDashEnabled(false);
 #endif
@@ -163,12 +194,8 @@ void GameTestScene::Update(float deltaTime)
 		boss.Update(deltaTime);
 		boss.TurnToTarget(player->GetWorldPosition(), deltaTime);
 
-		if (boss.UpdateSlamAttack(
-			player->GetWorldPosition(),
-			stage.GetWorldPosition()))
-		{
-			player->TakeDamage();
-		}
+		const bool slamHitPlayer = boss.UpdateSlamAttack(
+			player->GetWorldPosition(), stage.GetWorldPosition());
 
 		UpdateTailWhipGimmick();
 
@@ -186,30 +213,16 @@ void GameTestScene::Update(float deltaTime)
 				attackHeight);
 		}
 
-		const Collision::Sphere playerBody{
-			player->GetWorldPosition() + Vec3::Up() * 30.0f,
-			30.0f
-		};
+		const Collision::Sphere playerBody = player->GetHitSphere();
 
 		const bool tailWhipPlayerHit =
 			boss.IsTailWhipHitActive() &&
 			Collision::IsHitCapsuleSphere(tailWhipHitCapsule_, playerBody);
 
-		if (tailWhipPlayerHit)
-		{
-			player->TakeDamage();
-			Vec3 outward = player->GetWorldPosition() - stage.GetWorldPosition();
-			outward.y = 0.0f;
-			player->ApplyKnockback(outward, 5000.0f, 0.3f);
-		}
-
-		if (boss.UpdateHandAttack(
+		const bool handHitPlayer = boss.UpdateHandAttack(
 			deltaTime,
 			player->GetWorldPosition(),
-			stage.GetWorldPosition()))
-		{
-			player->TakeDamage();
-		}
+			stage.GetWorldPosition());
 
 		// 死亡判定
 		// 死んだ演出さえも終わったのなら
@@ -225,7 +238,6 @@ void GameTestScene::Update(float deltaTime)
 		// =============================
 		// Playerの攻撃判定（デバッグ）
 		// =============================
-#ifdef _DEBUG
 		auto& playerStateMachine = player->GetStateMachine();
 
 		if (playerStateMachine.IsAttackBallActive())
@@ -233,13 +245,26 @@ void GameTestScene::Update(float deltaTime)
 			const auto& attackBall =
 				playerStateMachine.GetAttackBallSphere();
 
-			if (boss.IsHitByAttackSphere(attackBall))
+			if (boss.IsHitByAttackSphere(attackBall, tailWhipHitCapsule_))
 			{
 				if (playerStateMachine.TryRegisterAttackBallHit())
 					boss.TakeDamage();
 			}
 		}
 
+		// プレイヤーが被ダメージ状態に移る前に、攻撃の命中を登録する。
+		if (handHitPlayer || slamHitPlayer)
+			player->TakeDamage();
+
+		if (tailWhipPlayerHit)
+		{
+			player->TakeDamage();
+			Vec3 outward = player->GetWorldPosition() - stage.GetWorldPosition();
+			outward.y = 0.0f;
+			player->ApplyKnockback(outward, 5000.0f, 0.3f);
+		}
+
+#ifdef _DEBUG
 		DxPlus::Debug::SetFormatString(
 			L"Boss HP: %d / %d",
 			boss.GetHealth(),
@@ -396,6 +421,17 @@ void GameTestScene::Render() const
 
 	auto& boss = gameContext->GetBoss();
 	auto* player = gameContext->GetPlayer();
+	if (showBossBodyCapsule_)
+	{
+		const auto& bodyCollision = gameContext->GetStage().GetCollision();
+		const bool touchingBody = player != nullptr && bodyCollision.IsTouchingCapsule(player->GetHitSphere());
+		DxLib::SetUseZBuffer3D(FALSE);
+		DxLib::SetWriteZBuffer3D(FALSE);
+		Collision::DrawDebugCapsule(bodyCollision.GetContactCapsule(),
+			touchingBody ? DxLib::GetColor(255, 220, 60) : DxLib::GetColor(80, 220, 255));
+		DxLib::SetUseZBuffer3D(TRUE);
+		DxLib::SetWriteZBuffer3D(TRUE);
+	}
 	// 攻撃中の尻尾カプセルを表示する。黄色は接触中、青は未接触。
 	if (boss.IsTailWhipHitActive() && player != nullptr)
 	{
@@ -444,6 +480,7 @@ void GameTestScene::DrawImGui()
 
 #ifdef _DEBUG
 		ImGui::TextUnformatted(u8"Shift長押し：通常移動の速度を5倍（GameTest限定）");
+		ImGui::TextUnformatted(u8"Shift + R：プレイヤー位置に毛玉エフェクト再生");
 #endif
 
 		ImGui::Text("Pillar contact: %s", player->IsTouchingWall() ? "True" : "False");
@@ -527,6 +564,27 @@ void GameTestScene::DrawImGui()
 		ImGui::TextUnformatted(u8"Stage Gimmick Test");
 
 		auto& stage = gameContext->GetStage();
+
+		ImGui::Separator();
+		if (ImGui::CollapsingHeader(u8"ボス本体の当たり判定", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::Checkbox(u8"カプセルの枠を表示", &showBossBodyCapsule_);
+			auto body = stage.GetBossBodySettings();
+			bool changed = ImGui::DragFloat(u8"本体の半径", &body.radius, 1.0f, 1.0f, 5000.0f,
+				"%.1f", ImGuiSliderFlags_AlwaysClamp);
+			changed |= ImGui::DragFloat(u8"本体の全高", &body.height, 1.0f, body.radius * 2.0f, 10000.0f,
+				"%.1f", ImGuiSliderFlags_AlwaysClamp);
+			changed |= ImGui::DragFloat(u8"底の高さオフセット", &body.yOffset, 1.0f, -5000.0f, 5000.0f,
+				"%.1f", ImGuiSliderFlags_AlwaysClamp);
+			if (changed) stage.SetBossBodySettings(body);
+			if (ImGui::Button(u8"本体の判定を初期値に戻す")) stage.ResetBossBodySettings();
+			const auto& capsule = stage.GetCollision().GetContactCapsule();
+			const Vec3 center = (capsule.start + capsule.end) * 0.5f;
+			ImGui::Text(u8"中心座標：X %.1f / Y %.1f / Z %.1f", center.x, center.y, center.z);
+			ImGui::TextUnformatted(stage.GetCollision().IsTouchingCapsule(player->GetHitSphere())
+				? u8"プレイヤー：接触中（黄色）" : u8"プレイヤー：接触なし（青色）");
+			ImGui::TextWrapped(u8"全高は上下の丸い部分を含み、半径の2倍以上になります。変更は実行中のみ有効です。");
+		}
 
 		if (ImGui::Button(u8"Stage Shake"))
 			stage.StartShake();
