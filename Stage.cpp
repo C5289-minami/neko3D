@@ -176,6 +176,7 @@ void Stage::UpdateShake(float deltaTime)
 
 	if (tiltMotion_.IsFinished() && !isReturning_)
 	{
+		tiltMotion_.SetDuration(tiltMotion_.GetDuration() * 3.0f); // 戻りは遅くする
 		tiltMotion_.StartReverse();
 		isReturning_ = true;
 	}
