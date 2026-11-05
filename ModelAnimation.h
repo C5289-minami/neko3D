@@ -32,6 +32,8 @@ public:
 		bool playImmediately = true
 	);
 
+	void Restart() { SetTime(0.0f); Start(speedScale_); }
+
 	// 再生時間とブレンドを更新する。
 	void Update(float deltaTime);
 

@@ -11,7 +11,6 @@ void PlayerDoubleJumpState::Enter()
 {
     player_.StopMove();
     player_.SetAnimation(PlayerAnimType::Double_Jump, false);
-	player_.GetAnimation().PlayTo(0.0f, Const::ANIM_FPS, 1.0f);
     player_.StartDoubleJump();
     stateMachine_.NotifyEvent(PlayerActionEvent::DoubleJumped);
     DxPlus::Debug::SetFormatString(L"PlayerDoubleJumpState::Enter");
