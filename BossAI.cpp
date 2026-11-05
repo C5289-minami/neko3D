@@ -181,6 +181,8 @@ void BossAI::Update(float deltaTime)
 
 void BossAI::TurnToTarget(Vec3 targetPosition, float deltaTime)
 {
+    if (!boss_.IsRotation())return;
+
     Vec3 bossPosition = boss_.GetWorldPosition();
 
     // ターゲットまでの角度を計算

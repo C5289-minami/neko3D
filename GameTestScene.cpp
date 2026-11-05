@@ -172,6 +172,8 @@ void GameTestScene::Update(float deltaTime)
 		// =============================
 		// Boss更新・攻撃判定
 		// =============================
+		// Clapの目標位置を更新
+		boss.UpdateClapTargetPosition(player->GetWorldPosition());
 		boss.Update(deltaTime);
 		boss.TurnToTarget(player->GetWorldPosition(), deltaTime);
 
@@ -655,6 +657,8 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 void GameTestScene::DrawAttackSphereDebug() const
 {
 #ifdef _DEBUG
+    gameContext->GetBoss().DrawSlamAttackDebug();
+
 	if (attackSphereDebugRemaining_ <= 0.0f) return;
 
 	const auto* player = gameContext->GetPlayer();

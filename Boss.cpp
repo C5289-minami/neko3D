@@ -260,6 +260,16 @@ void Boss::UpdateAnimation(float deltaTime)
 	animation_.Update(deltaTime);
 }
 
+void Boss::StartRotation()
+{
+	isRotationEnabled_ = true;
+}
+
+void Boss::StopRotation()
+{
+	isRotationEnabled_ = false;
+}
+
 AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 {
 
@@ -289,7 +299,6 @@ bool Boss::UseSkill(BossAttackType type)
 	{
 	case BossAttackType::Clap:
 		clapSkill_->Reset();
-		clapSkill_->StartHandAttack();
 		activeSkill_ = clapSkill_.get();
 		break;
 
@@ -401,9 +410,14 @@ bool Boss::IsHitByAttackSphere(const Collision::Sphere& sphere) const
 
 bool Boss::UpdateHandAttack(float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition)
 {
-	return clapSkill_ != nullptr && clapSkill_->UpdateHandAttack(deltaTime, playerPosition, stagePosition);
+	return clapSkill_ != nullptr && clapSkill_->UpdateHandAttack(playerPosition, stagePosition);
 }
 
+void Boss::UpdateClapTargetPosition(const Vec3& playerPosition)
+{
+	if (clapSkill_ != nullptr)
+		clapSkill_->UpdateTargetPosition(playerPosition);
+}
 bool Boss::UpdateSlamAttack(const Vec3& playerPosition, const Vec3& stageCenter)
 {
 	bool hit = false;

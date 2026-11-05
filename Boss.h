@@ -68,6 +68,7 @@ public:
 	float GetAnimTotalTime(BossAnimType::Type type) const;
 
 	bool UpdateHandAttack(float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition);
+	void UpdateClapTargetPosition(const Vec3& playerPosition);
 	// 毎フレーム Boss::Update 後に呼ぶ。着弾中の初回命中だけ true。
 	bool UpdateSlamAttack(const Vec3& playerPosition, const Vec3& stageCenter);
 	bool IsSlamHitActive() const;
@@ -81,8 +82,6 @@ public:
     float GetDownGaugeProgress() const { return maxDownGauge_ > 0.0f ? downGauge_ / maxDownGauge_ : 0.0f; }
     void ResetDownGauge() { downGauge_ = maxDownGauge_; }
 	void UpdateDown(float deltaTime);
-
-	// camera
 
 	// camera
 	void CameraShakeRequest(
@@ -108,6 +107,11 @@ public:
 	AnimationHandle GetAnimationHandle(BossAnimType::Type type) const;
 	ModelAnimation& GetAnimation() { return animation_; }
 	void UpdateAnimation(float deltaTime);
+
+	// Turn
+	void StartRotation();
+	void StopRotation();
+	bool IsRotation() const { return isRotationEnabled_; };
 
 	// Skill
 	bool UseSkill(BossAttackType type);
@@ -158,5 +162,7 @@ private:
 #ifndef NDEBUG
 	bool activeAI{ false }; // デバッグ用。falseにするとAIが無効化される。
 #endif
+	// Turn
+	    bool isRotationEnabled_ = true;
 
 };

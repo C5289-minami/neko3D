@@ -18,6 +18,7 @@ public:
     void Update(float deltaTime);
     void TurnToTarget(Vec3 targetPosition, float deltaTime);
 
+
 private:
     Boss& boss_;
     Player* player_{ nullptr };

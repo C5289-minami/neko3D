@@ -72,6 +72,7 @@ private:
 			// AnimTypeをTailWhipに設定し、アニメーションを再生する。
 			boss_.SetAnimation(BossAnimType::TailWhip, false, true);
 			boss_.GetAnimation().PlayTo(0.0f, Const::ANIM_FPS, 1.0f);
+			boss_.StopRotation();
 			break;
 		case AttackStateType::Aiming:
 			// アニメーションの再生位置を設定する。
@@ -125,6 +126,7 @@ private:
 		case AttackStateType::Recovery:
 			break;
 		case AttackStateType::Return:
+			boss_.StartRotation();
 			break;
 		}
 	}

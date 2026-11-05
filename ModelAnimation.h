@@ -68,6 +68,8 @@ public:
 			? (std::max)(0.0f, speedScale)
 			: Const::ANIM_FPS;
 	}
+
+	float GetCurrentTime() const { return currentElapsed_; }
 private:
 	class AttachedAnimation
 	{
