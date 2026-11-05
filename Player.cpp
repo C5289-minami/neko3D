@@ -143,6 +143,8 @@ void Player::Reset()
 	// ゲームをやり直したときも、ダブルジャンプを使える状態に戻す。
 	doubleJumpUsed_ = false;
 	coyoteTimeRemaining_ = 0.0f;
+	lastGroundFloor_ = GroundType::None;
+	jumpStartFloor_ = GroundType::None;
 
 	// 空中から開始し、ステージへのレイキャストで接地させる。
 	isGrounded_ = false;
@@ -166,6 +168,8 @@ void Player::SetStartPosition(const Vec3& position)
 {
 	SetPosition(position);
 	startPosition_ = position;
+	lastGroundedPosition_ = position;
+	lastFirstFloorPosition_ = position;
 }
 
 void Player::ResetPosition()
@@ -175,11 +179,15 @@ void Player::ResetPosition()
 
 void Player::RestorePosition(const Vec3& position)
 {
+	lastGroundFloor_ = GroundType::None;
+	jumpStartFloor_ = GroundType::None;
 	stateMachine_.ChangeState(PlayerStateType::Idle);
 	EndPillarElevator();
 	StopMove();
 	position_ = position;
 	velocity_ = {};
+	knockbackVelocity_ = {};
+	knockbackTime_ = 0.0f;
 	isGrounded_ = false;
 	onFirstFloor = false;
 	onSecondFloor = false;
@@ -511,9 +519,14 @@ void Player::UpdateFallRecovery(const ModelCollision& collision, const ModelColl
 	{
 		onFirstFloor = landedOnFirstFloor;
 		onSecondFloor = !onFirstFloor;
-		// 端で足元だけが接地していても、安全だった復帰先を上書きしない。
-		const bool safeGround = !onFirstFloor ||
-			collision.HasFallRecoverySupport(position_, body, WalkableNormalY);
+		
+		lastGroundFloor_ = onFirstFloor ? GroundType::DownFloor : GroundType::UpFloor;
+		jumpStartFloor_ = GroundType::None;
+		// ボス本体の中や床の端を復帰先にせず、接触前の安全な位置を残す。
+		const bool outsideBossBody = !collision.IsTouchingCapsule(GetHitSphere());
+		// onFirstFloor は、落下中に1階の床に着地したかどうかを示す。
+		const bool safeGround = outsideBossBody &&
+			(!onFirstFloor || collision.HasFallRecoverySupport(position_, body, WalkableNormalY));
 		
 		if (safeGround)
 		{
@@ -528,11 +541,18 @@ void Player::UpdateFallRecovery(const ModelCollision& collision, const ModelColl
 	
 	if (velocity_.y > 0.0f || fallDistance < Const::PLAYER_FALL_RECOVERY_DISTANCE) return;
 
+	ReturnToLastSafePosition(collision);
+}
+
+void Player::ReturnToLastSafePosition(const ModelCollision& collision)
+{
+	if (IsDead() || !collision.HasFallRecoveryFloor()) return;
+
 	Vec3 recoveryPosition = lastGroundedPosition_;
 	recoveryPosition.y = lastFirstFloorPosition_.y;
 
 	// 同じ X・Z に1階の床がなければ、最後に立てた1階の位置へ戻す。
-	if (!collision.CanLandOnFallRecoveryFloor(recoveryPosition, body.skin, GroundSnapDistance, WalkableNormalY))
+	if (!collision.CanLandOnFallRecoveryFloor(recoveryPosition, Const::PLAYER_SKIN, GroundSnapDistance, WalkableNormalY))
 		recoveryPosition = lastFirstFloorPosition_;
 
 	recoveryPosition.y += Const::PLAYER_FALL_RECOVERY_HEIGHT_OFFSET;
@@ -828,6 +848,7 @@ void Player::ResetDoubleJumpSpeed()
 void Player::StartDoubleJump()
 {
 	if (!CanDoubleJump()) return;
+	jumpStartFloor_ = lastGroundFloor_;
 
 	doubleJumpUsed_ = true;
 	coyoteTimeRemaining_ = 0.0f;
@@ -874,6 +895,7 @@ void Player::ApplyKnockback(const Vec3& direction, float power, float duration)
 	//outward.y = 0.0f;
 
 	if (outward.LengthSq() <= 0.000001f) return;
+	jumpStartFloor_ = GroundType::None;
 
 	outward = outward.Normalized();
 
@@ -940,6 +962,7 @@ bool Player::TryJump()
 bool Player::JumpAction()
 {
 	if (!CanGroundJump())return false;
+	jumpStartFloor_ = lastGroundFloor_;
 
 	velocity_.y = Const::PLAYER_JUMP_SPEED;
 	isGrounded_ = false;
@@ -1030,6 +1053,7 @@ void Player::EndPillarElevator()
 
 void Player::StartPillarExitJump()
 {
+	jumpStartFloor_ = GroundType::None;
 	velocity_.y = Const::PLAYER_ELEVATOR_EXIT_JUMP_SPEED;
 	isGrounded_ = false;
 	elevatorInputConsumed_ = true;
@@ -1039,6 +1063,7 @@ void Player::StartPillarExitJump()
 void Player::ForceFallFromPillar()
 {
 	if (!IsPillarElevatorActive()) return;
+	jumpStartFloor_ = GroundType::None;
 
 	EndPillarElevator();
 	StopMove();

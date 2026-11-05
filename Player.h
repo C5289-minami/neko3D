@@ -38,6 +38,10 @@ public:
 	void AddDamage();
 	void ApplyAvoid();
 	float GetAvoidInvTime() const { return avoidInvTime_; }
+	Collision::Sphere GetHitSphere() const
+	{
+		return { GetWorldPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT * 0.5f), Const::PLAYER_RADIUS };
+	}
 
 	// // ステージとの当たり判定込みの更新
 	// void Update(float deltaTime, const Stage& stage, const Vec3& movementCenter = Vec3{});
@@ -123,6 +127,8 @@ public:
 		UpFloor,	// 上の足場に着地したときの判定
 	};
 	GroundType CheckFloor() const;//
+	// ジャンプを始めた階。空中でも着地するまで保持する。
+	GroundType GetJumpStartFloor() const { return jumpStartFloor_; }
 
 	void ApplyKnockback(const Vec3& direction, float power, float duration);
 
@@ -143,11 +149,13 @@ public:
 	{
 		ActorBase::SetPosition(position);
 	}
-	// 攻撃球の出現位置。攻撃処理とGameTestSceneのデバッグ表示で共通して使う。
-	Vec3 GetAttackBallSpawnPosition() const;
-	// 開始場所を変えるときは、Rで戻る場所も一緒に変える。
-	void SetStartPosition(const Vec3& position);
-	void ResetPosition();
+    // 攻撃球の出現位置。攻撃処理とGameTestSceneのデバッグ表示で共通して使う。
+    Vec3 GetAttackBallSpawnPosition() const;
+    // 開始場所を変えるときは、Rで戻る場所も一緒に変える。
+    void SetStartPosition(const Vec3& position);
+    void ResetPosition();
+	// 落下時と同じ、記録済みの安全な1階の位置へ戻す。
+	void ReturnToLastSafePosition(const ModelCollision& collision);
 	ObjectTransform GetTransform() const
 	{
 		return { model_.GetScale(), GetPosition(), GetRotation() };
@@ -198,8 +206,9 @@ public:
 
 	Vec3 GetPillarElevatorCenter() const { return elevatorCenter_; }
 private:
-	void UpdateMovement(float deltaTime);
-	void UpdateFallRecovery(const ModelCollision& collision, const ModelCollision::ModelOb& body, bool landedOnFirstFloor);
+    void UpdateMovement(float deltaTime);
+	void UpdateFallRecovery(const ModelCollision& collision, const ModelCollision::ModelOb& body,
+		bool landedOnFirstFloor);
 	void RestorePosition(const Vec3& position);
 	// 横速度を決めた後、MoveでXYZの速度をまとめて座標に反映する。
 	void UpdateHorizontalVelocity(float deltaTime);//nyuuryokukei
@@ -249,6 +258,8 @@ private:
 	// false：ダブルジャンプをまだ使っていない。true：使用済み。
 	// 着地するまでtrueを保ち、Spaceを連打しても3回目は出せないようにする。
 	bool doubleJumpUsed_{ false };
+	GroundType lastGroundFloor_{ GroundType::None };
+	GroundType jumpStartFloor_{ GroundType::None };
 	float coyoteTimeRemaining_{ 0.0f };
 
 	bool touchingWall_{ false };

@@ -149,6 +149,14 @@ void Boss::TakeDamage(int damage)
 
 }
 
+void Boss::ApplyDownGaugeDamage(float damage)
+{
+	if (health_ <= 0 || !std::isfinite(damage) || damage <= 0.0f) return;
+	SetDownGauge(downGauge_ - damage);
+	if (downGauge_ <= 0.0f && GetCurrentState() != BossStateType::Flinch)
+		stateMachine_.ChangeState(BossStateType::Flinch);
+}
+
 void Boss::UpdateDown(float deltaTime)
 {
 	float AccumulationCounter = 1.0f * deltaTime; // 累積カウンターを更新する。
