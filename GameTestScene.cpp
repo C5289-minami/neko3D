@@ -23,11 +23,13 @@ void GameTestScene::Init()
 	tailWhipHitCapsule_ = {};
 
 
-	playerCamera_.Reset();
 
 	attackSphereDebugRemaining_ = 0.0f;
 	rightMouseWasDown_ = false;
 
+	playerCamera_.Reset();
+	bossDieCamera_.Reset();
+	bossDownCamera_.Reset();
 	cameraDirector_.Reset();
 #ifndef NDEBUG
 	freeCamera_.Reset();
@@ -209,6 +211,17 @@ void GameTestScene::Update(float deltaTime)
 			player->TakeDamage();
 		}
 
+		// 死亡判定
+		// 死んだ演出さえも終わったのなら
+		if (!boss.IsActive())
+		{
+			//クリア
+
+			// 仮でReset
+			gameContext->Reset();
+			Init();
+		}
+
 		// =============================
 		// Playerの攻撃判定（デバッグ）
 		// =============================
@@ -237,14 +250,50 @@ void GameTestScene::Update(float deltaTime)
 #endif
 
 		// =============================
-		// カメラシェイク・カメラ更新
+		// カメラシェイク
 		// =============================
 		UpdateCameraShake(boss, *player);
 
-		playerCamera_.Update(
-			player->GetWorldPosition(),
-			boss.GetWorldPosition(),
-			deltaTime);
+		// =============================
+		// カメラ更新・切り替え
+		// =============================
+		if (boss.IsDead())
+		{
+			bossDieCamera_.SetTarget(boss.GetWorldPosition());
+
+			if (cameraDirector_.GetActiveCamera() != &bossDieCamera_)
+			{
+				bossDieCamera_.Initialize(cameraDirector_.GetCurrentPose());
+				cameraDirector_.SwitchCamera(bossDieCamera_, 1.2f);
+			}
+		}
+		else if (boss.IsDowned())
+		{
+			bossDownCamera_.Update(
+				player->GetWorldPosition(),
+				boss.GetWorldPosition(),
+				deltaTime);
+
+			if (cameraDirector_.GetActiveCamera() != &bossDownCamera_)
+			{
+				bossDownCamera_.Initialize(cameraDirector_.GetCurrentPose());
+				cameraDirector_.SwitchCamera(bossDownCamera_, 1.2f);
+			}
+		}
+		else
+		{
+			playerCamera_.Update(
+				player->GetWorldPosition(),
+				boss.GetWorldPosition(),
+				deltaTime);
+
+			playerCamera_.SetFieldOfView(60.0f);
+
+			if (cameraDirector_.GetActiveCamera() != &playerCamera_)
+			{
+				cameraDirector_.SwitchCamera(playerCamera_, 1.2f);
+			}
+		}
 
 		// =============================
 		// カメラ透過
@@ -605,6 +654,13 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 			}
 		};
 
+	// Room
+	for (const auto* allRoom : room.GetAllModelObjects())
+	{
+		drawModel(*allRoom);
+	}
+
+
 	// BossとPlayer
 	drawModel(boss.GetModelObject());
 	drawModel(player->GetModelObject());
@@ -613,12 +669,6 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	for (const auto& preview : selectPlayers)
 	{
 		drawModel(preview.GetModelObject());
-	}
-
-	// Room
-	for (const auto* allRoom : room.GetAllModelObjects())
-	{
-		drawModel(*allRoom);
 	}
 
 	// Stage

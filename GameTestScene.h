@@ -27,7 +27,8 @@ public:
 private:
     // Camera
     Camera::TargetCamera playerCamera_;
-
+	Camera::TargetCamera bossDieCamera_;
+	Camera::TargetCamera bossDownCamera_;
     Camera::CameraDirector cameraDirector_{ playerCamera_ };
 #ifndef NDEBUG
     Camera::FreeCamera freeCamera_;
