@@ -1,4 +1,4 @@
-#include "PlayerStateMachine.h"
+﻿#include "PlayerStateMachine.h"
 #include "Player.h"
 #include <utility>
 
@@ -64,14 +64,6 @@ float PlayerStateMachine::GetAvoidTime() const
 	return currentType_ == PlayerStateType::Damaging
 		? damagingState_.GetAvoidTime()
 		: 0.0f;
-}
-
-bool PlayerStateMachine::TryAvoid()
-{
-	if (currentType_ != PlayerStateType::DoubleJump)
-		return false;
-
-	return doubleJumpState_.TryAvoid();
 }
 
 void PlayerStateMachine::Draw() const

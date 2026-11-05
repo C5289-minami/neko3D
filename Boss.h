@@ -14,6 +14,7 @@
 #include <vector>
 #include "BossAttackType.h"
 #include "BossAI.h"
+#include "CameraShakeType.h"
 
 enum class BossPhase
 {
@@ -24,6 +25,8 @@ enum class BossPhase
 class BossClapSkill;
 class BossSlamSkill;
 class BossTailWhipSkill;
+class Player;
+
 
 class Boss : public ActorBase
 {
@@ -39,7 +42,7 @@ public:
 	void TurnToTarget(const Vec3& targetPosition, float deltaTime);
 	void Draw() const override;
 	
-
+	void SetPlayer(Player& player) { ai_.SetPlayer(player); }
 	void ClearActiveSkill() { activeSkill_ = nullptr; }
 
 	void SetMoveDirection(const Vec3& moveDirection, float speed);
@@ -65,6 +68,7 @@ public:
 	float GetAnimTotalTime(BossAnimType::Type type) const;
 
 	bool UpdateHandAttack(float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition);
+	void UpdateClapTargetPosition(const Vec3& playerPosition);
 	// 毎フレーム Boss::Update 後に呼ぶ。着弾中の初回命中だけ true。
 	bool UpdateSlamAttack(const Vec3& playerPosition, const Vec3& stageCenter);
 	bool IsSlamHitActive() const;
@@ -79,7 +83,20 @@ public:
     void ResetDownGauge() { downGauge_ = maxDownGauge_; }
 	void UpdateDown(float deltaTime);
 
+	// camera
+	void CameraShakeRequest(
+		CameraShakeType type,
+		float duration = 0.25f,
+		float strength = 20.0f,
+		float frequency = 20.0f
+	);
 
+	CameraShakeType GetCameraShakeRequest() const;
+	float GetCameraShakeDuration() const { return cameraShakeDuration_; }
+	float GetCameraShakeStrength() const { return cameraShakeStrength_; }
+	float GetCameraShakeFrequency() const { return cameraShakeFrequency_; }
+
+	void ResetCameraShakeRequest();
 
 #ifdef _DEBUG
 	void DrawClapAttackDebug() const;
@@ -91,9 +108,14 @@ public:
 	ModelAnimation& GetAnimation() { return animation_; }
 	void UpdateAnimation(float deltaTime);
 
+	// Turn
+	void StartRotation();
+	void StopRotation();
+	bool IsRotation() const { return isRotationEnabled_; };
+
 	// Skill
 	bool UseSkill(BossAttackType type);
-
+	bool IsTailWhipActive() const;
 	bool IsTailWhipHitActive() const;
 	Collision::Capsule GetTailWhipHitCapsule(const Vec3& stageCenter, float stageRadius, float attackHeight) const;
 private:
@@ -114,8 +136,10 @@ private:
     bool damageTakenThisFrame_{};
 	float attackPower_{ 10.0f };
 
-
-
+	CameraShakeType cameraShakeRequest_{ CameraShakeType::None };
+	float cameraShakeDuration_{ 0.25f };
+	float cameraShakeStrength_{ 20.0f };
+	float cameraShakeFrequency_{ 20.0f };
 
 	// アニメーション関連
 	ModelAnimation animation_;
@@ -138,4 +162,7 @@ private:
 #ifndef NDEBUG
 	bool activeAI{ false }; // デバッグ用。falseにするとAIが無効化される。
 #endif
+	// Turn
+	    bool isRotationEnabled_ = true;
+
 };

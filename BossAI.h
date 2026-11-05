@@ -5,18 +5,23 @@
 #include "Vector3.h"
 
 class Boss;
+class Player;
 
 class BossAI
 {
 public:
     explicit BossAI(Boss& boss);
 
+    void SetPlayer(Player& player) { player_ = &player; }
+
     void Reset();
     void Update(float deltaTime);
     void TurnToTarget(Vec3 targetPosition, float deltaTime);
 
+
 private:
     Boss& boss_;
+    Player* player_{ nullptr };
 
     struct SkillCooldown
     {

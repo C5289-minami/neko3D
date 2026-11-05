@@ -2,6 +2,7 @@
 
 #include "BossAI.h"
 #include "Boss.h"
+#include "Player.h"
 
 #include <random>
 #include <algorithm>
@@ -111,6 +112,32 @@ void BossAI::Update(float deltaTime)
         attackCooldown_ = std::max(0.0f, attackCooldown_ - deltaTime);
         return;
     }
+    // ============================
+	// 攻撃の抽選と発動
+	// ============================ 
+
+    // 二階にいる場合は、しっぽ攻撃を優先
+    if (player_ != nullptr && player_->IsSecondFloor())
+    {
+        // クールダウンは無効
+     /*   if (!tailWhipCooldown_.IsReady())
+        {
+            attackCooldown_ = retryInterval_;
+            return;
+        }*/
+
+        if (boss_.UseSkill(BossAttackType::TailWhip))
+        {
+            activeSkillCooldown_ = &tailWhipCooldown_;
+            isSkillActive_ = true;
+        }
+        else
+        {
+            attackCooldown_ = retryInterval_;
+        }
+
+        return;
+    }
 
     // 使用可能なスキルを集める
     std::vector<SkillCooldown*> availableSkills;
@@ -154,6 +181,8 @@ void BossAI::Update(float deltaTime)
 
 void BossAI::TurnToTarget(Vec3 targetPosition, float deltaTime)
 {
+    if (!boss_.IsRotation())return;
+
     Vec3 bossPosition = boss_.GetWorldPosition();
 
     // ターゲットまでの角度を計算

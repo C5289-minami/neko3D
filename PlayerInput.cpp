@@ -39,8 +39,14 @@ void PlayerInput::Update()
     shiftRKeyPressed = rKeyDown && shiftPressing;
 	
 	// 左クリックの攻撃入力
-	attackPressed = (buttonDown & BUTTON_TRIGGER3) != 0;
+	//attackPressed = (buttonDown & BUTTON_TRIGGER3) != 0;
+	attackPressed = (buttonDown & BUTTON_START) != 0;	//Enterキーで攻撃するように変更
 	ultimatePressed = (buttonDown & BUTTON_TRIGGER4) != 0;
+#ifdef _DEBUG
+	debugUltimatePressed = attackPressed && DxLib::CheckHitKey(KEY_INPUT_LSHIFT) != 0;
+	ultimatePressed = ultimatePressed || debugUltimatePressed;
+	attackPressed = attackPressed && !debugUltimatePressed;
+#endif
 	groomingPressed = (buttonDown & BUTTON_R1) != 0;
 
 	isMoving = (moveDir.LengthSq() > 0.0f);

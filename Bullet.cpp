@@ -51,8 +51,8 @@ void Bullet::UpdateHoming(float deltaTime, const Vec3& targetPosition, float tur
 	Vec3 toTarget = targetPosition - position;
 
 	// 現在方向とターゲット方向を混ぜて、ゆるやかに曲げる
-	if (toTarget.LengthSq() > 0.0001f &&
-		velocity.LengthSq() > 0.0001f)
+	if (toTarget.LengthSq() > Const::EPS &&
+		velocity.LengthSq() > Const::EPS)
 	{
 		Vec3 currentDir = velocity.Normalized();
 		Vec3 targetDir = toTarget.Normalized();
@@ -62,7 +62,7 @@ void Bullet::UpdateHoming(float deltaTime, const Vec3& targetPosition, float tur
 
 		Vec3 newDir = currentDir * (1.0f - t) + targetDir * t;
 
-		if (newDir.LengthSq() > 0.0001f)
+		if (newDir.LengthSq() > Const::EPS)
 		{
 			velocity = newDir.Normalized() * speed;
 		}
@@ -104,7 +104,7 @@ void Bullet::DrawHoming() const
 	// 速度から進行方向を作る
 	Vec3 direction = velocity;
 
-	if (direction.LengthSq() < Const::EPS * Const::EPS)
+	if (direction.LengthSq() <= Const::EPS)
 	{
 		direction = { 0.0f, 0.0f, 1.0f };
 	}

@@ -356,6 +356,9 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 
 		DrawTutorialCollisionSpheres();
+    #ifdef _DEBUG
+     boss.DrawSlamAttackDebug();
+ #endif
 		return;
 	}
 
@@ -416,6 +419,9 @@ void GameScene::DrawScene(bool toonEnabled) const
 	effectManager.Draw();
 	player->GetStateMachine().Draw();
 	DrawTutorialCollisionSpheres();
+  #ifdef _DEBUG
+   boss.DrawSlamAttackDebug();
+   #endif
 }
 
 void GameScene::End()

@@ -59,8 +59,9 @@ void ResourceManager::LoadAll()
 	LoadModel(ResourceKeys::Model_PlayerAnim_Idle, L"./Data/Models/Player/Animation/player_idle.mv1");
 	LoadModel(ResourceKeys::Model_PlayerAnim_Walk, L"./Data/Models/Player/Animation/player_walk.mv1");
 	LoadModel(ResourceKeys::Model_PlayerAnim_Jump, L"./Data/Models/Player/Animation/player_jump.mv1");
-	LoadModel(ResourceKeys::Model_PlayerAnim_Dodge, L"./Data/Models/Player/Animation/player_dodge.mv1");
-	//LoadModel(ResourceKeys::Model_PlayerAnim_Attack, L"./Data/Models/Player/Animation/player_attack.mv1");
+	LoadModel(ResourceKeys::Model_PlayerAnim_Dodge, L"./Data/Models/Player/Animation/player_blink.mv1");
+	LoadModel(ResourceKeys::Model_PlayerAnim_Attack, L"./Data/Models/Player/Animation/player_attack.mv1");
+	LoadModel(ResourceKeys::Model_PlayerAnim_Ult, L"./Data/Models/Player/Animation/player_ult.mv1");
 
 
 	LoadModel(ResourceKeys::Model_Boss, L"./Data/Models/Boss/boss.mv1");
@@ -78,6 +79,7 @@ void ResourceManager::LoadAll()
 	LoadModel(ResourceKeys::Model_Stage, L"./Data/Models/stage/Stage.mv1");
 	LoadModel(ResourceKeys::Model_stand_l, L"./Data/Models/stage/stand_l.mv1");
 	LoadModel(ResourceKeys::Model_stand_m, L"./Data/Models/stage/stand_m.mv1");
+	LoadModel(ResourceKeys::Model_stand_s, L"./Data/Models/stage/stand_s.mv1");
 
 	LoadModel(ResourceKeys::Model_Room, L"./Data/Models/Room/oheya.mv1");
 	LoadModel(ResourceKeys::Model_JumpStand, L"./Data/Models/Room/jumpstand.mv1");

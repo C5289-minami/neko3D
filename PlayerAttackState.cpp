@@ -14,7 +14,8 @@ PlayerAttackState::PlayerAttackState(PlayerStateMachine& stateMachine, Player& p
 void PlayerAttackState::Enter()
 {
 	//player_.StopMove();
-	//player_.SetAnimation(PlayerAnimType::Attack, false);
+	player_.SetAnimation(PlayerAnimType::Attack, false);
+	player_.GetAnimation().Start();
 	player_.SetMoveRate(0.5f);
 	
 	attackSphere_.center = player_.GetAttackBallSpawnPosition();
@@ -24,6 +25,8 @@ void PlayerAttackState::Enter()
 	hasHitTarget_ = false;
 	stateMachine_.NotifyEvent(PlayerActionEvent::Attacked);
 	ballActive_ = !player_.IsDead();
+
+	player_.CameraShakeRequest(CameraShakeType::Vertical,0.1f,5.0f,5.0f);
 
 	DxPlus::Debug::SetFormatString(L"PlayerAttackState::Enter");
 }
@@ -35,6 +38,7 @@ void PlayerAttackState::Tick(float deltaTime)
 		stateMachine_.ChangeState(PlayerStateType::Die);
 		return;
 	}
+	player_.UpdateAnimation(deltaTime);
 	const PlayerInput& input = player_.GetInput();
 	if (input.ultimatePressed && player_.CanUseUltimate())
 	{
@@ -42,16 +46,16 @@ void PlayerAttackState::Tick(float deltaTime)
 		return;
 	}
 
+	player_.SetMoveDirection(input.moveDir);
+
 	if (ballActive_)//çUåÇíÜÇ»ÇÁçXêV
 	{
 		const float step = (std::max)(0.0f, deltaTime);
 		elapsed_ += step;
 		ballActive_ = elapsed_ < Const::PLAYER_ATTACK_BALL_LIFETIME;
-
-		player_.SetMoveDirection(input.moveDir);
 	}
 
-	if (!ballActive_)
+	if (!ballActive_ && player_.GetAnimation().IsFinished())
 	{
 		stateMachine_.ChangeState(input.isMoving
 			? PlayerStateType::Walk

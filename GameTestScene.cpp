@@ -14,6 +14,7 @@
 #endif
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
+#include "CameraShakeType.h"
 
 void GameTestScene::Init()
 {
@@ -27,8 +28,8 @@ void GameTestScene::Init()
 	attackSphereDebugRemaining_ = 0.0f;
 	rightMouseWasDown_ = false;
 
+	cameraDirector_.Reset();
 #ifndef NDEBUG
-	activeCamera_ = nullptr;
 	freeCamera_.Reset();
 	wasFreeCameraToggleDown_ = false;
 #endif
@@ -48,7 +49,7 @@ void GameTestScene::Init()
 	shaderEffects_.GetSettings().toonEnabled = true;
 	shaderEffects_.GetSettings().outlineEnabled = true;
 
-
+	wasTailWhipActive_ = false;
 
 	StartFadeIn();
 }
@@ -56,34 +57,52 @@ void GameTestScene::Update(float deltaTime)
 {
 	using namespace DxPlus::Input;
 
-	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
+	// =============================
+	// 基本設定・デバッグ入力
+	// =============================
+	DxLib::SetBackgroundColor(
+		gameContext->GetBgRed(),
+		gameContext->GetBgGreen(),
+		gameContext->GetBgBlue());
 
 #ifdef _DEBUG
-	const bool rightMouseDown = (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0;
+	const bool rightMouseDown =
+		(DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0;
 
 	if (rightMouseDown && !rightMouseWasDown_)
 		attackSphereDebugRemaining_ = 1.0f;
+
 	rightMouseWasDown_ = rightMouseDown;
 
-	attackSphereDebugRemaining_ = (std::max)(0.0f,
+	attackSphereDebugRemaining_ = (std::max)(
+		0.0f,
 		attackSphereDebugRemaining_ - (std::max)(0.0f, deltaTime));
 #endif
 
+	// =============================
+	// FreeCamera
+	// =============================
 #ifndef NDEBUG
-	const bool toggleDown = DxLib::CheckHitKey(KEY_INPUT_LALT) != 0 &&
-
+	const bool toggleDown =
+		DxLib::CheckHitKey(KEY_INPUT_LALT) != 0 &&
 		DxLib::CheckHitKey(KEY_INPUT_RETURN) != 0;
 
 	if (toggleDown && !wasFreeCameraToggleDown_)
 	{
-		if (activeCamera_)
-			activeCamera_ = nullptr;
+		if (cameraDirector_.GetActiveCamera() == &freeCamera_)
+		{
+			cameraDirector_.SwitchCamera(playerCamera_);
+		}
 		else
 		{
-			freeCamera_.Initialize(playerCamera_.GetPosition(), playerCamera_.GetTarget());
-			activeCamera_ = &freeCamera_;
+			freeCamera_.Initialize(
+				playerCamera_.GetPosition(),
+				playerCamera_.GetTarget());
+
+			cameraDirector_.SwitchCamera(freeCamera_);
 		}
 	}
+
 	wasFreeCameraToggleDown_ = toggleDown;
 
 	const bool shiftHeld = DxLib::CheckHitKey(KEY_INPUT_LSHIFT) != 0 ||
@@ -91,18 +110,17 @@ void GameTestScene::Update(float deltaTime)
 	if (DxLib::CheckHitKey(KEY_INPUT_R) != 0 && !shiftHeld)
 	{
 		freeCamera_.ResetView();
-	}
+
 	if (DxLib::CheckHitKey(KEY_INPUT_F) != 0)
-	{
 		freeCamera_.FocusAt(gameContext->GetPlayer()->GetPosition());
-	}
-	DxPlus::Debug::SetString(L" R: Transformリセット, F: FreeCameraをプレイヤーにフォーカス");
 
+	DxPlus::Debug::SetString(
+		L" R: Transformリセット, F: FreeCameraをプレイヤーにフォーカス");
 
-
-	if (activeCamera_ == &freeCamera_)
+	if (cameraDirector_.GetActiveCamera() == &freeCamera_)
 	{
-		if (!freeCamera_.IsSceneViewActive() && (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
+		if (!freeCamera_.IsSceneViewActive() &&
+			(DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
 		{
 			freeCamera_.Update(deltaTime);
 		}
@@ -113,59 +131,55 @@ void GameTestScene::Update(float deltaTime)
 		auto* player = gameContext->GetPlayer();
 		auto& boss = gameContext->GetBoss();
 		auto& stage = gameContext->GetStage();
-		const Vec3 stageCenterPosition = stage.GetPosition();
 
+		// =============================
+		// Stage更新
+		// =============================
+		stage.Update(deltaTime);
 
-		// player.Update(deltaTime, stage, stageCenterPosition);
-
-#ifdef _DEBUG// Shift長押しで通常移動の速度を5倍にする（GameTest限定）
-		const bool debugDash = DxLib::CheckHitKey(KEY_INPUT_LSHIFT) != 0 ||
+		// =============================
+		// Player更新・床判定
+		// =============================
+#ifdef _DEBUG
+		const bool debugDash =
+			DxLib::CheckHitKey(KEY_INPUT_LSHIFT) != 0 ||
 			DxLib::CheckHitKey(KEY_INPUT_RSHIFT) != 0;
+
 		player->SetDebugDashEnabled(debugDash);
 #endif
 
+		const Vec3 stageCenterPosition = stage.GetPosition();
 		player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
-		for (auto& obj : stage.GetStageModelObjects())
-		{
-			player->CheckFloor(obj, stage.GetModelObject());
-		}
-	
+		player->CheckFloor();
+
 #ifdef _DEBUG
-		// この更新だけに適用し、共有するPlayerを他のシーンへ持ち越さない。
 		player->SetDebugDashEnabled(false);
 #endif
-		// カメラ透過
 
-		Collision::ResetTransparentModels();// まずリセットしてから、透過対象を追加する
-
-		Collision::SetModelsBetweenTransparent(
-			playerCamera_.GetPosition(),
-			player->GetWorldPosition() + Vec3::Up() * 30.0f,
-			gameContext->GetStage().GetCollision(),
-			0.7f
-		);
-
-		Collision::SetModelsBetweenTransparent(
-			playerCamera_.GetPosition(),
-			boss.GetWorldPosition() + Vec3::Up() * 600.0f,// 顔が見たいので少し上
-			gameContext->GetStage().GetCollision(),
-			0.7f
-		);
-
-
-
+		// =============================
+		// Boss更新・攻撃判定
+		// =============================
+		// Clapの目標位置を更新
+		boss.UpdateClapTargetPosition(player->GetWorldPosition());
 		boss.Update(deltaTime);
 		boss.TurnToTarget(player->GetWorldPosition(), deltaTime);
 
-		if (boss.UpdateSlamAttack(player->GetWorldPosition(), stage.GetWorldPosition()))
+		if (boss.UpdateSlamAttack(
+			player->GetWorldPosition(),
+			stage.GetWorldPosition()))
+		{
 			player->TakeDamage();
+		}
+
+		UpdateTailWhipGimmick();
 
 		tailWhipHitCapsule_ = {};
+
 		if (boss.IsTailWhipHitActive())
 		{
 			const Vec3 stageCenter = stage.GetWorldPosition();
 			const float stageRadius = stage.GetArenaRadius();
-			const float attackHeight = stage.GetArenaSurfaceY() + 30.0f;//床から＋30の高さで攻撃判定を作る
+			const float attackHeight = stage.GetArenaSurfaceY() + 30.0f;
 
 			tailWhipHitCapsule_ = boss.GetTailWhipHitCapsule(
 				stageCenter,
@@ -173,75 +187,138 @@ void GameTestScene::Update(float deltaTime)
 				attackHeight);
 		}
 
-		const Collision::Sphere playerBody{ player->GetWorldPosition() + Vec3::Up() * 30.0f, 30.0f };
+		const Collision::Sphere playerBody{
+			player->GetWorldPosition() + Vec3::Up() * 30.0f,
+			30.0f
+		};
 
-		bool tailWhipPlayerHit = boss.IsTailWhipHitActive() &&
+		const bool tailWhipPlayerHit =
+			boss.IsTailWhipHitActive() &&
 			Collision::IsHitCapsuleSphere(tailWhipHitCapsule_, playerBody);
 
 		if (tailWhipPlayerHit)
+		{
 			player->TakeDamage();
-		if (boss.UpdateHandAttack(deltaTime,
+			Vec3 outward = player->GetWorldPosition() - stage.GetWorldPosition();
+			outward.y = 0.0f;
+			player->ApplyKnockback(outward, 5000.0f, 0.3f);
+		}
+
+		if (boss.UpdateHandAttack(
+			deltaTime,
 			player->GetWorldPosition(),
 			stage.GetWorldPosition()))
 		{
 			player->TakeDamage();
 		}
 
+		// =============================
+		// Playerの攻撃判定（デバッグ）
+		// =============================
 #ifdef _DEBUG
 		auto& playerStateMachine = player->GetStateMachine();
-		if (playerStateMachine.IsAttackBallActive()) // 攻撃球が飛んでいるか
+
+		if (playerStateMachine.IsAttackBallActive())
 		{
-			const auto& attackBall = playerStateMachine.GetAttackBallSphere();
-			const bool hitBossHand = boss.IsHitByAttackSphere(attackBall); // 左右どちらかの手に当たったか
-			if (hitBossHand) // 当たった場合だけダメージ処理へ
+			const auto& attackBall =
+				playerStateMachine.GetAttackBallSphere();
+
+			if (boss.IsHitByAttackSphere(attackBall))
 			{
-				// 同じ攻撃球で何度もHPが減らないよう、命中を一度だけ記録する。
-				const bool firstHitForThisBall = playerStateMachine.TryRegisterAttackBallHit(); // この球の初回命中か
-				if (firstHitForThisBall)
+				if (playerStateMachine.TryRegisterAttackBallHit())
 					boss.TakeDamage();
 			}
 		}
-		DxPlus::Debug::SetFormatString(L"Boss HP: %d / %d", boss.GetHealth(), Boss::MaxHealth);
-		DxPlus::Debug::SetString(L"1: Hand attack test (3 sec follow)");
+
+		DxPlus::Debug::SetFormatString(
+			L"Boss HP: %d / %d",
+			boss.GetHealth(),
+			Boss::MaxHealth);
+
+		DxPlus::Debug::SetString(
+			L"1: Hand attack test (3 sec follow)");
 #endif
 
-		playerCamera_.Update(player->GetWorldPosition(), boss.GetWorldPosition(), deltaTime);
+		// =============================
+		// カメラシェイク・カメラ更新
+		// =============================
+		UpdateCameraShake(boss, *player);
 
+		playerCamera_.Update(
+			player->GetWorldPosition(),
+			boss.GetWorldPosition(),
+			deltaTime);
+
+		// =============================
+		// カメラ透過
+		// =============================
+		Collision::ResetTransparentModels();
+
+		Collision::SetModelsBetweenTransparent(
+			playerCamera_.GetPosition(),
+			player->GetWorldPosition() + Vec3::Up() * 30.0f,
+			stage.GetCollision(),
+			0.7f);
+
+		Collision::SetModelsBetweenTransparent(
+			playerCamera_.GetPosition(),
+			boss.GetWorldPosition() + Vec3::Up() * 600.0f,
+			stage.GetCollision(),
+			0.7f);
+
+		// =============================
+		// 入力・エフェクト
+		// =============================
 		if (GetButtonDown(PLAYER1) & BUTTON_L3)
 		{
-			gameContext->GetEffectManager().PlayHit(RM().GetEffect(ResourceKeys::Effect_PlayerAttack),
+			gameContext->GetEffectManager().PlayHit(
+				RM().GetEffect(ResourceKeys::Effect_PlayerAttack),
 				player->GetPosition() + Vec3::Up() * 15.0f,
 				player->GetYaw() + DX_PI_F);
 		}
+
 		gameContext->GetEffectManager().Update(deltaTime);
 	}
 
+	// =============================
+	// CameraDirector更新
+	// =============================
+	cameraDirector_.Update(deltaTime);
+
 #ifndef NDEBUG
 	// 数値入力中はシーン切り替えのキーを無視する
-	if (ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard) return;
+	if (ImGui::GetCurrentContext() &&
+		ImGui::GetIO().WantCaptureKeyboard)
+	{
+		return;
+	}
 #endif
 
-	int buttonDown = GetButtonDown(PLAYER1);
+	// =============================
+	// シーン遷移
+	// =============================
+	const int buttonDown = GetButtonDown(PLAYER1);
+
 	if (buttonDown & BUTTON_SELECT)
 	{
-		Scene* resultScene = SceneManager::GetInstance().GetScene(SceneID::Result);
+		Scene* resultScene =
+			SceneManager::GetInstance().GetScene(SceneID::Result);
+
 		SetNextScene(resultScene);
-		finished = true;    // フェード無しの場合は finished を true にしておく必要あり
+		finished = true;
 		return;
 	}
 
-
-	// --- F2 でシェーダー全体のON/OFFを切り替える ---
+	// =============================
+	// シェーダー切り替え
+	// =============================
 	static bool shaderToggleWasDown = false;
+
 	const bool shaderToggleDown =
 		DxLib::CheckHitKey(KEY_INPUT_F2) != 0;
 
 	if (shaderToggleDown && !shaderToggleWasDown)
-	{
-		shaderEffects_.SetEnabled(
-			!shaderEffects_.IsEnabled()
-		);
-	}
+		shaderEffects_.SetEnabled(!shaderEffects_.IsEnabled());
 
 	shaderToggleWasDown = shaderToggleDown;
 }
@@ -267,7 +344,7 @@ void GameTestScene::Render() const
 	}
 
 #ifdef _DEBUG
-	(activeCamera_ ? activeCamera_ : &playerCamera_)->ApplyCamera();
+	cameraDirector_.ApplyRenderPose();
 	gameContext->GetBoss().DrawClapAttackDebug();
 	gameContext->GetBoss().DrawSlamAttackDebug();
 
@@ -400,6 +477,16 @@ void GameTestScene::DrawImGui()
 			ImGui::TreePop();
 		}
 		ImGui::Checkbox(u8"bossAIEnabled", &boss.IsAIActive());
+		// Stage Gimmick Test
+		ImGui::Separator();
+		ImGui::TextUnformatted(u8"Stage Gimmick Test");
+
+		auto& stage = gameContext->GetStage();
+
+		if (ImGui::Button(u8"Stage Shake"))
+			stage.StartShake();
+		if (ImGui::Button(u8"knock Back"))
+			player->ApplyKnockback({ 1,0,0 }, 10000, 0.1f);
 
 		ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
 
@@ -412,13 +499,30 @@ void GameTestScene::End()
 {
 }
 
+void GameTestScene::UpdateTailWhipGimmick()
+{
+	auto& boss = gameContext->GetBoss();
+	auto& stage = gameContext->GetStage();
+	auto* player = gameContext->GetPlayer();
+
+	const bool isTailWhipActive = boss.IsTailWhipHitActive();
+
+	if (isTailWhipActive && !wasTailWhipActive_)
+	{
+		stage.StartShake();
+
+		Vec3 outward = player->GetWorldPosition() - stage.GetWorldPosition();
+		outward.y = 0.0f;
+
+		if (player->IsSecondFloor())
+			player->ApplyKnockback(outward, 5000.0f, 0.3f);
+	}
+
+	wasTailWhipActive_ = isTailWhipActive;
+}
 void GameTestScene::RenderDepth() const
 {
-#ifndef NDEBUG
-	(activeCamera_ ? activeCamera_ : &playerCamera_)->ApplyCamera();
-#else
-	playerCamera_.ApplyCamera();
-#endif
+	cameraDirector_.ApplyRenderPose();
 
 	const auto& boss = gameContext->GetBoss();
 	const auto* player = gameContext->GetPlayer();
@@ -455,11 +559,7 @@ void GameTestScene::RenderDepth() const
 
 void GameTestScene::DrawScene(bool toonEnabled) const
 {
-#ifndef NDEBUG
-	(activeCamera_ ? activeCamera_ : &playerCamera_)->ApplyCamera();
-#else
-	playerCamera_.ApplyCamera();
-#endif
+	cameraDirector_.ApplyRenderPose();
 
 	const auto& boss = gameContext->GetBoss();
 	const auto* player = gameContext->GetPlayer();
@@ -551,6 +651,8 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 void GameTestScene::DrawAttackSphereDebug() const
 {
 #ifdef _DEBUG
+	gameContext->GetBoss().DrawSlamAttackDebug();
+
 	if (attackSphereDebugRemaining_ <= 0.0f) return;
 
 	const auto* player = gameContext->GetPlayer();
@@ -565,3 +667,33 @@ void GameTestScene::DrawAttackSphereDebug() const
 #endif
 }
 
+void GameTestScene::UpdateCameraShake(Boss& boss, Player& player)
+{
+	auto applyShake = [this](auto& actor)
+		{
+			const auto type = actor.GetCameraShakeRequest();
+			if (type == CameraShakeType::None) return;
+
+			const float duration = actor.GetCameraShakeDuration();
+			const float strength = actor.GetCameraShakeStrength();
+			const float frequency = actor.GetCameraShakeFrequency();
+
+			switch (type)
+			{
+			case CameraShakeType::Horizontal:
+				cameraDirector_.StartHorizontalShake(duration, strength, frequency);
+				break;
+			case CameraShakeType::Vertical:
+				cameraDirector_.StartVerticalShake(duration, strength, frequency);
+				break;
+			case CameraShakeType::Mixed:
+				cameraDirector_.StartMixedShake(duration, strength, frequency);
+				break;
+			}
+
+			actor.ResetCameraShakeRequest();
+		};
+
+	applyShake(boss);
+	applyShake(player);
+}

@@ -4,10 +4,20 @@
 #include "BossPoseSkill.h"
 #include "DxLib.h"
 #include "DxPlus/Debug.h"
+#include "Consts.h"
 
 #include <algorithm>
 #include <array>
 #include <cmath>
+
+namespace BossSlam
+{
+	// 当たり判定
+	constexpr float HitRadius = 100.0f;
+	constexpr float HitHalfLength = 2.0f;
+	constexpr float CapsuleArcSpacing = 106.0f;
+	constexpr float HitDuration = 0.12f;
+}
 
 class BossSlamSkill final : public BossPoseSkill
 {
@@ -25,72 +35,49 @@ public:
 	void Reset()
 	{
 		BossPoseSkill::Reset();
-
+		phase_ = AttackStateType::None;
 		hitCapsules_ = {};
-
 		targetLocked_ = false;
 		hitActive_ = false;
 		hitRegistered_ = false;
+		attackForward_ = {};
+		attackRadius_ = 0.0f;
+		attackHeight_ = 0.0f;
 	}
 
 	// プレイヤーの足元とステージ中心のワールド座標をつかう
 	bool UpdateAttack(const Vec3& playerPosition, const Vec3& stageCenter)
 	{
-		if (!targetLocked_ && (phase_ == AttackStateType::PreAction ||
-			phase_ == AttackStateType::Aiming || phase_ == AttackStateType::Attack))
+		if (!targetLocked_ &&
+			(phase_ == AttackStateType::PreAction ||
+				phase_ == AttackStateType::Aiming))
 		{
-			hitCapsules_ = {};
+			UpdateHitCapsules(playerPosition,stageCenter);
+		}
 
-			//中心からプレイヤーまでの距離と向きを求める
-			Vec3 playerFromCenter = playerPosition - stageCenter;
-			playerFromCenter.y = 0.0f;
-
-			const float orbitRadius = playerFromCenter.Length();
-			if (orbitRadius > 0.001f)
-			{
-				//プレイヤーを向く角度を得る。
-				const float playerAngle = std::atan2(playerFromCenter.z, playerFromCenter.x);
-
-				const float halfSpacingAngle = (std::min)(CapsuleArcSpacing * 0.5f / orbitRadius, 1.0f);
-				for (int i = 0; i < hitCapsules_.size(); ++i)
-				{
-					//二個挟むから一個置いた反対側へ
-					const float sideDirection = (i == 0) ? -1.0f : 1.0f;
-					const float capsuleAngle = playerAngle + halfSpacingAngle * sideDirection;
-
-					// プレイヤーと同じ円周半径を保ち、足元の高さにカプセル中心を置く。
-					const Vec3 capsuleCenter{
-						stageCenter.x + std::cos(capsuleAngle) * orbitRadius,
-						playerPosition.y,
-						stageCenter.z + std::sin(capsuleAngle) * orbitRadius
-					};
-
-					// カプセルの長い向きを円周に沿わせる。
-					const Vec3 alongStage{
-						-std::sin(capsuleAngle) * HitHalfLength,
-						0.0f,
-						 std::cos(capsuleAngle) * HitHalfLength
-					};
-					hitCapsules_[i] = { capsuleCenter - alongStage, capsuleCenter + alongStage, HitRadius };
-				}
-			}
-			// 振り下ろし開始時に位置と向きを固定する。
-			targetLocked_ = phase_ == AttackStateType::Attack;
+		if (!targetLocked_ && phase_ == AttackStateType::Attack)
+		{
+			LockAttackPosition(playerPosition, stageCenter);
 		}
 
 		if (!IsHitActive() || hitRegistered_)
 			return false;
 
 		const Collision::Sphere playerBody{
-			playerPosition + Vec3::Up() * (Const::PLAYER_HEIGHT * 0.5f), Const::PLAYER_RADIUS };
+			playerPosition + Vec3::Up() * (Const::PLAYER_HEIGHT * 0.5f),
+			Const::PLAYER_RADIUS
+		};
+
 		for (const auto& capsule : hitCapsules_)
 		{
-			if (capsule.radius > 0.0f && Collision::IsHitCapsuleSphere(capsule, playerBody))
+			if (capsule.radius > 0.0f &&
+				Collision::IsHitCapsuleSphere(capsule, playerBody))
 			{
 				hitRegistered_ = true;
 				return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -124,11 +111,16 @@ public:
 		const bool aiming = phase_ == AttackStateType::Aiming;
 		const bool dodging = phase_ == AttackStateType::Attack;
 		const float aimRemaining = aiming
-			? GetPhaseMotion(AttackStateType::Aiming).GetDuration() - GetPhaseMotion(AttackStateType::Aiming).GetElapsedTime() : 0.0f;
+			? GetPhaseMotion(AttackStateType::Aiming).GetDuration() - GetPhaseMotion(AttackStateType::Aiming).GetElapsedTime()
+			: 0.0f;
 		const float hitRemaining = IsHitActive()
-			? (std::max)(0.0f, HitDuration - GetPhaseMotion(AttackStateType::Recovery).GetElapsedTime()) : 0.0f;
-		DxPlus::Debug::SetFormatString(L"ダイパン　照準残り %.2f秒 ／ %s ／ 判定残り %.2f秒",
-			aimRemaining, dodging ? L"振り下ろし中" : L"振り下ろし待機", hitRemaining);
+			? (std::max)(0.0f, BossSlam::HitDuration - GetPhaseMotion(AttackStateType::Recovery).GetElapsedTime())
+			: 0.0f;
+		DxPlus::Debug::SetFormatString(
+			L"ダイパン　照準残り %.2f秒 ／ %s ／ 判定残り %.2f秒",
+			aimRemaining,
+			dodging ? L"振り下ろし中" : L"振り下ろし待機",
+			hitRemaining);
 
 		// 青は追従中、黄は固定後の振り下ろし中、オレンジは命中判定中。
 		const unsigned int color = IsHitActive()
@@ -143,20 +135,21 @@ public:
 #endif
 
 private:
-	static constexpr float HitRadius = 50.0f*2;			// 各カプセルの半径。
-	static constexpr float HitHalfLength = 2.0f;		// 各カプセルの中心線の半分の長さ。
-	static constexpr float CapsuleArcSpacing = 106.0f;	// 2つの中心間の円周上の距離。値を大きくすると間隔が広がる。
-	static constexpr float HitDuration = 0.12f;			//着弾後に命中判定を出す秒数。
-
 	AttackStateType phase_{ AttackStateType::None };
 	std::array<Collision::Capsule, 2> hitCapsules_{};
 	bool targetLocked_{};
 	bool hitActive_{};
 	bool hitRegistered_{};
 
+	Vec3 attackForward_{};
+	float attackRadius_{};
+	float attackHeight_{};
+
 
 	void EnterPhase(AttackStateType phase) override
 	{
+		phase_ = phase;
+
 		switch (phase)
 		{
 		case AttackStateType::PreAction:
@@ -169,9 +162,12 @@ private:
 			boss_.GetAnimation().PlayTo(0.0f);
 			break;
 		case AttackStateType::Attack:
-			boss_.GetAnimation().PlayTo(8.0f);
+			boss_.GetAnimation().PlayTo(6.0f);
+          boss_.StopRotation();
 			break;
 		case AttackStateType::Recovery:
+			hitActive_ = true;
+			break;
 		case AttackStateType::Return:
 			// アニメーションの再生を開始する
 			boss_.GetAnimation().Start();
@@ -195,7 +191,7 @@ private:
 
 		case AttackStateType::Recovery:
 			// 着弾後の有効時間を過ぎたら、命中判定を止める。
-			hitActive_ = GetPhaseMotion(phase).GetElapsedTime() < HitDuration;
+          hitActive_ = GetPhaseMotion(phase).GetElapsedTime() < BossSlam::HitDuration;
 			break;
 		case AttackStateType::Return:
 			break;
@@ -211,13 +207,109 @@ private:
 		case AttackStateType::Aiming:
 			break;
 		case AttackStateType::Attack:
+			// 多分ここは攻撃当たった瞬間...
+			boss_.CameraShakeRequest(CameraShakeType::Mixed, 0.3f, 40.0f,40.0f);
 			break;
 		case AttackStateType::Recovery:
 			// 硬直の終了や攻撃の中断で、命中判定を閉じる。
 			hitActive_ = false;
 			break;
 		case AttackStateType::Return:
+			boss_.StartRotation();
 			break;
 		}
 	}
-};
+	void LockAttackPosition(const Vec3& playerPosition, const Vec3& stageCenter)
+	{
+		Vec3 playerFromCenter = playerPosition - stageCenter;
+		playerFromCenter.y = 0.0f;
+
+		attackRadius_ = playerFromCenter.Length();
+		attackHeight_ = playerPosition.y;
+
+		const float yaw = boss_.GetYaw();
+
+		attackForward_ = {
+			-std::sin(yaw),
+			0.0f,
+			-std::cos(yaw)
+		};
+
+		const Vec3 right{
+			attackForward_.z,
+			0.0f,
+			-attackForward_.x
+		};
+
+		const Vec3 center{
+			stageCenter.x + attackForward_.x * attackRadius_,
+			attackHeight_,
+			stageCenter.z + attackForward_.z * attackRadius_
+		};
+
+		for (int i = 0; i < static_cast<int>(hitCapsules_.size()); ++i)
+		{
+			const float side = (i == 0) ? -1.0f : 1.0f;
+
+			const Vec3 capsuleCenter =
+				center + right * (BossSlam::CapsuleArcSpacing * 0.5f * side);
+
+			const Vec3 along = right * BossSlam::HitHalfLength;
+
+			hitCapsules_[i] = {
+				capsuleCenter - along,
+				capsuleCenter + along,
+				BossSlam::HitRadius
+			};
+		}
+
+		targetLocked_ = true;
+	}
+
+	void UpdateHitCapsules(const Vec3& playerPosition, const Vec3& stageCenter)
+	{
+		hitCapsules_ = {};
+
+		Vec3 playerFromCenter = playerPosition - stageCenter;
+		playerFromCenter.y = 0.0f;
+
+		const float orbitRadius = playerFromCenter.Length();
+		if (orbitRadius <= Const::EPS)
+			return;
+
+		const float yaw = boss_.GetYaw();
+
+		attackForward_ = {
+			-std::sin(yaw),
+			0.0f,
+			-std::cos(yaw)
+		};
+
+		const Vec3 right{
+			attackForward_.z,
+			0.0f,
+			-attackForward_.x
+		};
+
+		const Vec3 center{
+			stageCenter.x + attackForward_.x * orbitRadius,
+			playerPosition.y,
+			stageCenter.z + attackForward_.z * orbitRadius
+		};
+
+		for (int i = 0; i < static_cast<int>(hitCapsules_.size()); ++i)
+		{
+			const float side = (i == 0) ? -1.0f : 1.0f;
+
+			const Vec3 capsuleCenter =
+				center + right * (BossSlam::CapsuleArcSpacing * 0.5f * side);
+
+			const Vec3 along = right * BossSlam::HitHalfLength;
+
+			hitCapsules_[i] = {
+				capsuleCenter - along,
+				capsuleCenter + along,
+				BossSlam::HitRadius
+			};
+		}
+	}};

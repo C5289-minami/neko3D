@@ -480,7 +480,7 @@ namespace Camera
 				playerPosition - bossPosition;
 
 			// プレイヤーとボスがほぼ同じ位置にいる場合、正規化できないので、適当な方向を設定する
-			if (awayFromBoss.LengthSq() < 0.001f)
+			if (awayFromBoss.LengthSq() < 1000.0f * Const::EPS)
 			{
 				awayFromBoss = {
 					0.0f,
@@ -603,7 +603,7 @@ namespace Camera
 			const Vec3 direction =
 				(point - position_).Normalized();
 
-			if (direction.LengthSq() < 0.000001f)
+			if (direction.LengthSq() < Const::EPS)
 				return;
 
 			const Vec3 current =

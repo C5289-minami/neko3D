@@ -29,6 +29,8 @@ namespace Const
 
     constexpr float PLAYER_HEIGHT = 60.0f;
     constexpr float PLAYER_SKIN = 1.0f;
+    constexpr float PLAYER_FALL_RECOVERY_DISTANCE = 40.0f;//óéÇøÇÈïùÇÃåvéZÇÃÇΩÇﬂÇ…í«â¡Çµ
+    constexpr float PLAYER_FALL_RECOVERY_HEIGHT_OFFSET = 10.0f;
     constexpr float PLAYER_RADIUS = 30.0f;
     constexpr float PLAYER_ATTACK_BALL_LIFETIME = 0.6f;
     constexpr float PLAYER_ATTACK_BALL_RADIUS = PLAYER_RADIUS;
@@ -60,7 +62,7 @@ namespace Const
 
     // ===== ÉQÅ[ÉÄì‡ã§í  =====
     constexpr int FPS_CAP = 480;
-    constexpr float EPS = 1e-3f;
+    constexpr float EPS = 1e-6f;
     constexpr float ANIM_FPS = 24.0f;
 
     // ===== ÉJÉÅÉâ =====

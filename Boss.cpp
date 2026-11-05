@@ -219,7 +219,29 @@ void Boss::Draw() const
 	model_.Draw();
 }
 
+void Boss::CameraShakeRequest(
+	CameraShakeType type,
+	float duration,
+	float strength,
+	float frequency)
+{
+	cameraShakeRequest_ = type;
+	cameraShakeDuration_ = duration;
+	cameraShakeStrength_ = strength;
+	cameraShakeFrequency_ = frequency;
+}
+
+CameraShakeType Boss::GetCameraShakeRequest() const
+{
+	return cameraShakeRequest_;
+}
+
+void Boss::ResetCameraShakeRequest()
+{
+	cameraShakeRequest_ = CameraShakeType::None;
+}
 #ifdef _DEBUG
+
 void Boss::DrawClapAttackDebug() const
 {
 	if (clapSkill_ != nullptr)
@@ -236,6 +258,16 @@ void Boss::DrawSlamAttackDebug() const
 void Boss::UpdateAnimation(float deltaTime)
 {
 	animation_.Update(deltaTime);
+}
+
+void Boss::StartRotation()
+{
+	isRotationEnabled_ = true;
+}
+
+void Boss::StopRotation()
+{
+	isRotationEnabled_ = false;
 }
 
 AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
@@ -267,7 +299,6 @@ bool Boss::UseSkill(BossAttackType type)
 	{
 	case BossAttackType::Clap:
 		clapSkill_->Reset();
-		clapSkill_->StartHandAttack();
 		activeSkill_ = clapSkill_.get();
 		break;
 
@@ -289,6 +320,12 @@ bool Boss::UseSkill(BossAttackType type)
 	return stateMachine_.GetCurrentType() == BossStateType::Attack;
 }
 
+bool Boss::IsTailWhipActive() const
+{
+	return GetCurrentState() == BossStateType::Attack &&
+		tailWhipSkill_ != nullptr &&
+		activeSkill_ == tailWhipSkill_.get();
+}
 
 
 bool Boss::IsTailWhipHitActive() const
@@ -373,9 +410,14 @@ bool Boss::IsHitByAttackSphere(const Collision::Sphere& sphere) const
 
 bool Boss::UpdateHandAttack(float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition)
 {
-	return clapSkill_ != nullptr && clapSkill_->UpdateHandAttack(deltaTime, playerPosition, stagePosition);
+	return clapSkill_ != nullptr && clapSkill_->UpdateHandAttack(playerPosition, stagePosition);
 }
 
+void Boss::UpdateClapTargetPosition(const Vec3& playerPosition)
+{
+	if (clapSkill_ != nullptr)
+		clapSkill_->UpdateTargetPosition(playerPosition);
+}
 bool Boss::UpdateSlamAttack(const Vec3& playerPosition, const Vec3& stageCenter)
 {
 	bool hit = false;
