@@ -270,10 +270,47 @@ const ModelCollision::Entry* ModelCollision::GetFallRecoveryFloor() const
 	return nullptr;
 }
 
-bool ModelCollision::IsBelowFallRecoveryFloor(float y, float clearance) const
+bool ModelCollision::HasFallRecoverySupport(const Vec3& position, const ModelOb& body,
+	float walkableNormalY) const
 {
 	const auto* floor = GetFallRecoveryFloor();
-	return floor && y < floor->center.y - floor->radii.y - clearance;
+	if (!floor || !body.IsValid()) return false;
+
+	// 今の位置を4つコピーして、調べる場所を前後左右に動かす。
+	Vec3 checkPositions[] = { position, position, position, position };
+	checkPositions[0].x += body.radius; // 右
+	checkPositions[1].x -= body.radius; // 左
+	checkPositions[2].z += body.radius; // 奥
+	checkPositions[3].z -= body.radius; // 手前
+
+	// 床を調べる線が、体の半径と余白のぶんだけ上下に届くようにする。
+	const Vec3 rayHeight = Vec3::Up() * (body.radius + body.skin);
+
+	// 上で作った4か所を、1か所ずつ調べる。
+	for (const Vec3& checkPosition : checkPositions)
+	{
+		// 調べる場所の上から下へ、線を飛ばす。
+		const Vec3 rayStart = checkPosition + rayHeight;
+		const Vec3 rayEnd = checkPosition - rayHeight;
+		Physics::RayHit hit{};
+		const bool foundFloor = Physics::Raycast(floor->handle, rayStart, rayEnd, hit);
+
+		// 1か所でも床がなければ、この位置を復帰先として記録しない。
+		if (!foundFloor)
+		{
+			return false;
+		}
+
+		// 床があっても、立てない傾きなら復帰先として記録しない。
+		const bool isWalkable = hit.normal.y >= walkableNormalY;
+		if (!isWalkable)
+		{
+			return false;
+		}
+	}
+
+	// 4か所すべてに立てる床があるので、今のプレイヤーの位置を記録できる。
+	return true;
 }
 
 bool ModelCollision::CanLandOnFallRecoveryFloor(const Vec3& position, float skin,

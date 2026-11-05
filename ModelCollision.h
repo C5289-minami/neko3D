@@ -70,7 +70,7 @@ public:
         bool* hitRecoveryFloor = nullptr) const;
 
     bool HasFallRecoveryFloor() const { return fallRecoveryFloor_ != nullptr; }
-    bool IsBelowFallRecoveryFloor(float y, float clearance) const;
+    bool HasFallRecoverySupport(const Vec3& position, const ModelOb& body, float walkableNormalY) const;
     bool CanLandOnFallRecoveryFloor(const Vec3& position, float skin, float snapDistance, float walkableNormalY) const;
 
     // 柱の上面だけへの着地。足元の調整量だけ判定面を下げる。

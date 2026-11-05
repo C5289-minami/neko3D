@@ -464,16 +464,24 @@ void Player::UpdateFallRecovery(const ModelCollision& collision, const ModelColl
 
 	if (isGrounded_)
 	{
-		// 接地している間の最後の位置を覚え、空中に出たらその位置を保持する。
-		lastGroundedPosition_ = position_;
 		onFirstFloor = landedOnFirstFloor;
 		onSecondFloor = !onFirstFloor;
-		if (onFirstFloor) lastFirstFloorPosition_ = position_;
-		return;
+		// 端で足元だけが接地していても、安全だった復帰先を上書きしない。
+		const bool safeGround = !onFirstFloor ||
+			collision.HasFallRecoverySupport(position_, body, WalkableNormalY);
+		
+		if (safeGround)
+		{
+			lastGroundedPosition_ = position_;
+			if (onFirstFloor) lastFirstFloorPosition_ = position_;
+			return;
+		}
 	}
 
-	// 1階に着地できる高さを通り過ぎるまで、通常どおり落下させる。
-	if (velocity_.y > 0.0f || !collision.IsBelowFallRecoveryFloor(position_.y, Const::PLAYER_FALL_RECOVERY_DISTANCE)) return;
+	// 最後に安全に立てた1階の高さから、指定した距離だけ下がったら復帰する。
+	const float fallDistance = lastFirstFloorPosition_.y - position_.y;
+	
+	if (velocity_.y > 0.0f || fallDistance < Const::PLAYER_FALL_RECOVERY_DISTANCE) return;
 
 	Vec3 recoveryPosition = lastGroundedPosition_;
 	recoveryPosition.y = lastFirstFloorPosition_.y;
