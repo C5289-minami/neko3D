@@ -1,6 +1,7 @@
 #pragma once
 #include "BossBaseState.h"
 #include "Motion.h"
+#include "Vector3.h"
 
 class BossDieState : public BossBaseState
 {
@@ -11,4 +12,7 @@ public:
     void Tick(float deltaTime) override;
     void Exit() override;
 private:
+    Motion dieMotion_;
+    Vec3 startPosition_;
+    float startAlpha_{};
 };

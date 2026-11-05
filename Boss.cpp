@@ -55,8 +55,11 @@ void Boss::Init()
 
 void Boss::Reset()
 {
+	isActive_ = true;
+	model_.SetAlpha(1.0f);
+
 	downGauge_ = maxDownGauge_;
-    damageTakenThisFrame_ = false;
+	damageTakenThisFrame_ = false;
 
 	health_ = maxHealth_;
 	phase_ = BossPhase::Phase1;
@@ -70,7 +73,7 @@ void Boss::Reset()
 	SetAnimation(BossAnimType::Idle, true);
 
 	stateMachine_.Initialize();
-	
+
 #ifndef NDEBUG
 	activeAI = false;
 #endif // !NDEBUG
@@ -125,7 +128,7 @@ void Boss::Reset()
 
 void Boss::TakeDamage(int damage)
 {
-    damageTakenThisFrame_ = true;
+	damageTakenThisFrame_ = true;
 	// ダメージを受けたらHPを減らす。
 	// ダメージを受けると移動を止め、ゲージを減らす。
 	// ダメージ処理後にフェーズ移行を確認する。
@@ -134,7 +137,7 @@ void Boss::TakeDamage(int damage)
 	health_ -= damage;
 	velocity_ = {};
 
-	
+
 
 
 	// HPが最大値の半分以下になるとフェーズ2へ移行する。
@@ -160,24 +163,24 @@ void Boss::ApplyDownGaugeDamage(float damage)
 void Boss::UpdateDown(float deltaTime)
 {
 	float AccumulationCounter = 1.0f * deltaTime; // 累積カウンターを更新する。
-	if(health_ <= 0&&downGauge_<=0)
+	if (health_ <= 0 && downGauge_ <= 0)
 		return;
-	
+
 
 	downGauge_ -= deltaTime * 10.0f; // ダウンゲージの減少速度を調整する。
 
-	if(AccumulationCounter >= 5.0f)
+	if (AccumulationCounter >= 5.0f)
 	{
 		downGauge_ -= 5.0f;			// 5秒ごとにさらに減少させる。
 		AccumulationCounter = 0.0f; // カウンターをリセットする。
 	}
-    if (damageTakenThisFrame_)
-    {
-        downGauge_ -= 20.0f;
-        damageTakenThisFrame_ = false;
-    } // ダメージを受けた瞬間にさらに減少させる。
+	if (damageTakenThisFrame_)
+	{
+		downGauge_ -= 20.0f;
+		damageTakenThisFrame_ = false;
+	} // ダメージを受けた瞬間にさらに減少させる。
 
-	if(downGauge_ <= 0.0f)
+	if (downGauge_ <= 0.0f)
 	{
 		downGauge_ = 0.0f;
 		stateMachine_.ChangeState(BossStateType::Flinch);
@@ -189,9 +192,9 @@ void Boss::Update(float deltaTime)
 {
 	// アニメーション更新はスキルのフェーズ処理側で行う。
 	// 再生区間や攻撃中の動作をスキル側で管理する。
-	
+
 	// AIの更新
-	
+
 #ifndef NDEBUG
 	if (activeAI)
 #endif
@@ -200,24 +203,24 @@ void Boss::Update(float deltaTime)
 	}
 
 	stateMachine_.Tick(deltaTime);
-	
+
 
 	position_ += velocity_ * deltaTime;
 
 	if (damageTakenThisFrame_) UpdateDown(deltaTime);
 
-    if (health_ > 0 && downGauge_ <= 0.0f &&
-        stateMachine_.GetCurrentType() != BossStateType::Flinch)
-    {
-        stateMachine_.ChangeState(BossStateType::Flinch);
-    }
+	if (health_ > 0 && downGauge_ <= 0.0f &&
+		stateMachine_.GetCurrentType() != BossStateType::Flinch)
+	{
+		stateMachine_.ChangeState(BossStateType::Flinch);
+	}
 
 }
 
 
 void Boss::TurnToTarget(const Vec3& targetPosition, float deltaTime)
 {
-	ai_.TurnToTarget(targetPosition,deltaTime);
+	ai_.TurnToTarget(targetPosition, deltaTime);
 }
 
 
@@ -270,6 +273,7 @@ void Boss::UpdateAnimation(float deltaTime)
 
 void Boss::StartRotation()
 {
+
 	isRotationEnabled_ = true;
 }
 
@@ -297,11 +301,11 @@ AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 
 bool Boss::UseSkill(BossAttackType type)
 {
-    const BossStateType currentState = stateMachine_.GetCurrentType();
-    if (currentState == BossStateType::Attack ||
-        currentState == BossStateType::Flinch ||
-        currentState == BossStateType::Die)
-        return false;
+	const BossStateType currentState = stateMachine_.GetCurrentType();
+	if (currentState == BossStateType::Attack ||
+		currentState == BossStateType::Flinch ||
+		currentState == BossStateType::Die)
+		return false;
 
 	switch (type)
 	{

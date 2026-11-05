@@ -115,6 +115,9 @@ public:
 	void StopRotation();
 	bool IsRotation() const { return isRotationEnabled_; };
 
+	bool IsDead() const { return health_ <= 0; }
+	bool IsDowned() const { return downGauge_ <= 0.0f; }
+
 	// Skill
 	bool UseSkill(BossAttackType type);
 	bool IsTailWhipActive() const;
