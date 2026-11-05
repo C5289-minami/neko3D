@@ -213,6 +213,7 @@
     <ClInclude Include="CameraObjectManager.h" />
     <ClInclude Include="CameraPose.h" />
     <ClInclude Include="CameraShake.h" />
+    <ClInclude Include="CameraShakeType.h" />
     <ClInclude Include="CameraTransition.h" />
     <ClInclude Include="GameSceneGameOverState.h" />
     <ClInclude Include="PlayerActionEvent.h" />

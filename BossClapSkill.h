@@ -7,6 +7,22 @@
 #include "DxLib.h"
 
 #include <array>
+#include <algorithm>
+
+namespace BossClap
+{
+	// 秒数
+	constexpr float AimDurationSeconds = 2.0f;
+
+	// アニメーション時間
+	constexpr float AttackStartFrame = 43.0f;
+	constexpr float AttackEndFrame = 52.0f;
+
+	// 当たり判定
+	constexpr float PlayerCenterHeight = 30.0f;
+	constexpr float PlayerHitRadius = 30.0f;
+}
+
 
 class BossClapSkill final : public BossPoseSkill
 {
@@ -17,7 +33,8 @@ public:
 		: BossPoseSkill(boss)
 	{
 		SetFinishCondition(AttackStateType::PreAction, PhaseFinishCondition::AnimationFinished);
-		SetFinishCondition(AttackStateType::Aiming, PhaseFinishCondition::AnimationFinished);
+		SetFinishCondition(AttackStateType::Aiming, PhaseFinishCondition::MotionFinished);
+		GetPhaseMotion(AttackStateType::Aiming).SetDuration(BossClap::AimDurationSeconds);
 		SetFinishCondition(AttackStateType::Attack, PhaseFinishCondition::AnimationFinished);
 		SetFinishCondition(AttackStateType::Return, PhaseFinishCondition::AnimationFinished);
 	}
@@ -25,7 +42,6 @@ public:
 	void Reset()
 	{
 		BossPoseSkill::Reset();
-		counter_ = 0.0f;
 		distance_ = InitialArcDistance;
 		handAttackActive_ = false;
 		for (AttackHand& hand : hands_)
@@ -33,72 +49,113 @@ public:
 			hand.hitSphere = {};
 			hand.isHit = false;
 		}
+		attackRadius_ = 0.0f;
+		attackForward_ = {};
+		attackRadiusInitialized_ = false;
 	}
 
 	void StartHandAttack()
 	{
-		counter_ = 0.0f;
 		distance_ = InitialArcDistance;
 		handAttackActive_ = true;
+		attackRadiusInitialized_ = false;
+
+		const float yaw = boss_.GetYaw();
+		attackForward_ = {
+			-std::sin(yaw),
+			0.0f,
+			-std::cos(yaw)
+		};
+
 		for (AttackHand& hand : hands_)
 		{
 			hand.hitSphere.radius = HandHitRadius;
 			hand.isHit = true;
 		}
 	}
+	void UpdateTargetPosition(const Vec3& playerPosition)
+	{
+		if (handAttackActive_)
+			return;
 
-	bool UpdateHandAttack(float deltaTime, const Vec3& playerPosition, const Vec3& stagePosition)
+		targetPosition_.y =
+			playerPosition.y + BossClap::PlayerCenterHeight;
+	}
+
+	bool UpdateHandAttack(
+		const Vec3& playerPosition,
+		const Vec3& stagePosition)
 	{
 		if (!handAttackActive_)
 			return false;
 
-		if (distance_ <= 0.0f)
+		const Vec3 playerCenter =
+			playerPosition + Vec3::Up() * BossClap::PlayerCenterHeight;
+
+		const float animationTime = boss_.GetAnimation().GetCurrentTime();
+
+		const float progress = std::clamp(
+			(animationTime - BossClap::AttackStartFrame) /
+			(BossClap::AttackEndFrame - BossClap::AttackStartFrame),
+			0.0f,
+			1.0f
+		);
+
+		distance_ = InitialArcDistance * (1.0f - progress);
+
+		// 攻撃開始時のプレイヤー位置から軌道の半径を固定する。
+		if (!attackRadiusInitialized_)
 		{
-			handAttackActive_ = false;
-			return false;
+			Vec3 toPlayer = playerPosition - stagePosition;
+			toPlayer.y = 0.0f;
+
+			attackRadius_ = toPlayer.Length();
+			attackRadiusInitialized_ = true;
 		}
 
-		// プレイヤーの位置より30上を、攻撃対象の中心として扱う。
-		const Vec3 playerCenter = playerPosition + Vec3::Up() * PlayerCenterHeight;
-		if (counter_ < FollowTime)
-			targetPosition_ = playerCenter;
-
-		counter_ += deltaTime;
-		if (counter_ >= FollowTime)
-			distance_ = (std::max)(0.0f, distance_ - HandClosingSpeed * deltaTime);
-
-		// ステージ中心からプレイヤー位置へ向かう水平ベクトルを求める。
-		Vec3 outward = targetPosition_ - stagePosition;
-		outward.y = 0.0f;
-		const float radius = outward.Length();
-		if (radius < 1000.0f * Const::EPS)
+		if (attackRadius_ < 1000.0f * Const::EPS)
 			return false;
-		outward /= radius;
 
-		const Vec3 right{ outward.z, 0.0f, -outward.x };
-		const float angle = distance_ / radius;
-		const Vec3 circleCenter{ stagePosition.x, targetPosition_.y, stagePosition.z };
-		const Vec3 front = outward * std::cos(angle);
+		const Vec3 right{
+			attackForward_.z,
+			0.0f,
+			-attackForward_.x
+		};
+
+		const float angle = distance_ / attackRadius_;
+
+		const Vec3 front = attackForward_ * std::cos(angle);
 		const Vec3 side = right * std::sin(angle);
-		hands_[0].hitSphere.center = circleCenter + (front - side) * radius;
-		hands_[1].hitSphere.center = circleCenter + (front + side) * radius;
 
-		if (counter_ < FollowTime)
-			return false;
+		hands_[0].hitSphere.center =
+			stagePosition + (front - side) * attackRadius_;
+
+		hands_[1].hitSphere.center =
+			stagePosition + (front + side) * attackRadius_;
+
+		// アニメーション終了時に攻撃判定を終了。
+		if (progress >= 1.0f)
+			handAttackActive_ = false;
+
+		const Collision::Sphere playerBody{
+			playerCenter,
+			BossClap::PlayerHitRadius
+		};
 
 		for (AttackHand& hand : hands_)
 		{
 			if (!hand.isHit)
 				continue;
 
-			const Collision::Sphere playerBody{ playerCenter, PlayerHitRadius };
 			if (Collision::IsHitSphereSphere(hand.hitSphere, playerBody))
 			{
 				for (AttackHand& hitHand : hands_)
 					hitHand.isHit = false;
+
 				return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -144,12 +201,10 @@ private:
 
 	static constexpr float InitialArcDistance = Const::BOSS_BETWEEN_HAND_ATTACK_SIDE;
 	static constexpr float HandHitRadius = Const::BOSS_HAND_ATTACK_HIT_RADIUS;
-	static constexpr float PlayerCenterHeight = 30.0f;
-	static constexpr float PlayerHitRadius = 30.0f;
-	static constexpr float FollowTime = 3.0f;
-	static constexpr float HandClosingSpeed = 600.0f;
+	float attackRadius_{};
+	Vec3 attackForward_{};
+	bool attackRadiusInitialized_{};
 
-	float counter_{};
 	float distance_{ InitialArcDistance };
 	bool handAttackActive_{};
 	Vec3 targetPosition_{};
@@ -160,44 +215,45 @@ private:
 		switch (phase)
 		{
 		case AttackStateType::PreAction:
-            // AnimTypeをに設定し、アニメーションを再生する
-            boss_.SetAnimation(BossAnimType::Clap, false,1.0f);
-			boss_.GetAnimation().PlayTo(0.0f);
-			break;
-		case AttackStateType::Aiming:
-            // アニメーションの再生位置を設定する
-			boss_.GetAnimation().PlayTo(1.0f);
-			break;
-		case AttackStateType::Attack:
-            // アニメーションの再生位置を設定し、速度を設定する
+			// AnimTypeをに設定し、アニメーションを再生する
+			boss_.SetAnimation(BossAnimType::Clap, false, 1.0f);
 			boss_.GetAnimation().PlayTo(43.0f);
 			break;
+		case AttackStateType::Aiming:
+			// アニメーションの再生位置を設定する
+			boss_.GetAnimation().PlayTo(43.0f);
+			break;
+		case AttackStateType::Attack:
+			boss_.GetAnimation().PlayTo(BossClap::AttackEndFrame);
+			boss_.StopRotation();
+			StartHandAttack();
+			break;
 		case AttackStateType::Recovery:
+			boss_.GetAnimation().Start(15.0f);
 			break;
 		case AttackStateType::Return:
-            // アニメーションの再生を開始する
-			boss_.GetAnimation().Start(15.0f);
+			// アニメーションの再生を開始する
 			break;
 		}
 	}
 
 	void ApplyPhase(AttackStateType phase, float progress) override
 	{
-        auto& animation = boss_.GetAnimation();
+		auto& animation = boss_.GetAnimation();
 
 		switch (phase)
 		{
 		case AttackStateType::PreAction:
-            break;
+			break;
 
 		case AttackStateType::Aiming:
-            break;
+			break;
 
 		case AttackStateType::Attack:
-            break;
+			break;
 
 		case AttackStateType::Recovery:
-            break;
+			break;
 
 		case AttackStateType::Return:
 			break;
@@ -209,14 +265,15 @@ private:
 		switch (phase)
 		{
 		case AttackStateType::PreAction:
-            break;
+			break;
 		case AttackStateType::Aiming:
-            break;
+			break;
 		case AttackStateType::Attack:
-            break;
+			break;
 		case AttackStateType::Recovery:
-            break;
+			break;
 		case AttackStateType::Return:
+			boss_.StartRotation();
 			break;
 		}
 	}

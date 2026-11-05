@@ -25,6 +25,8 @@ void PlayerAttackState::Enter()
 	stateMachine_.NotifyEvent(PlayerActionEvent::Attacked);
 	ballActive_ = !player_.IsDead();
 
+	player_.CameraShakeRequest(CameraShakeType::Vertical,0.1f,5.0f,5.0f);
+
 	DxPlus::Debug::SetFormatString(L"PlayerAttackState::Enter");
 }
 

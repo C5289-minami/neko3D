@@ -6,6 +6,7 @@
 #include "ShaderEffectController.h"
 #include "Camera.h"
 #include "Collision.h"
+#include "CameraDirector.h"
 
 class GameTestScene final : public Scene
 {
@@ -24,9 +25,9 @@ private:
     // Camera
     Camera::TargetCamera playerCamera_;
 
+    Camera::CameraDirector cameraDirector_{ playerCamera_ };
 #ifndef NDEBUG
     Camera::FreeCamera freeCamera_;
-    Camera::Camera* activeCamera_{ nullptr };
     bool wasFreeCameraToggleDown_{};
 #endif
 
@@ -48,4 +49,6 @@ private:
     void DrawAttackSphereDebug() const;
 
 	bool wasTailWhipActive_{ false }; // 前フレームで尻尾攻撃が有効だったかどうか
+
+   void UpdateCameraShake(Boss& boss, Player& player);
 };

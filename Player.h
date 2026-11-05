@@ -13,6 +13,7 @@
 #include "Consts.h"
 #include "CharSettings.h"
 #include "AnimationHandle.h"
+#include "CameraShakeType.h"
 
 // class Stage;
 
@@ -99,6 +100,20 @@ public:
     void StartPillarExitJump();
 	void ForceFallFromPillar();
 
+	// camera
+	void CameraShakeRequest(
+		CameraShakeType type,
+		float duration = 0.25f,
+		float strength = 20.0f,
+		float frequency = 20.0f
+	);
+
+	CameraShakeType GetCameraShakeRequest() const;
+	float GetCameraShakeDuration() const { return cameraShakeDuration_; }
+	float GetCameraShakeStrength() const { return cameraShakeStrength_; }
+	float GetCameraShakeFrequency() const { return cameraShakeFrequency_; }
+
+	void ResetCameraShakeRequest();
 
 	// 階層判定
 	enum class GroundType
@@ -252,6 +267,12 @@ private:
 	AnimationHandle jumpAnimHandle_;
 	AnimationHandle doubleJumpAnimHandle_;
 
+	// camera
+
+	CameraShakeType cameraShakeRequest_{ CameraShakeType::None };
+	float cameraShakeDuration_{ 0.25f };
+	float cameraShakeStrength_{ 20.0f };
+	float cameraShakeFrequency_{ 20.0f };
 
 	// ノックバック
 	Vec3 knockbackVelocity_{};

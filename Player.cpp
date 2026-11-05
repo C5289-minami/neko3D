@@ -267,8 +267,7 @@ void Player::UpdateMovement(float deltaTime)
 		{
 			knockbackTime_ = (std::max)(0.0f, knockbackTime_ - elapsed);
 
-			velocity_.x = knockbackVelocity_.x;
-			velocity_.z = knockbackVelocity_.z;
+			velocity_ = knockbackVelocity_;
 		}
 		else
 		{
@@ -842,7 +841,7 @@ Player::GroundType Player::CheckFloor() const
 void Player::ApplyKnockback(const Vec3& direction, float power, float duration)
 {
 	Vec3 outward = direction;
-	outward.y = 0.0f;
+	//outward.y = 0.0f;
 
 	if (outward.LengthSq() <= 0.000001f) return;
 
@@ -1003,4 +1002,26 @@ void Player::ForceFallFromPillar()
 	coyoteTimeRemaining_ = 0.0f;
 
 	stateMachine_.ChangeState(PlayerStateType::Jump);
+}
+
+void Player::CameraShakeRequest(
+	CameraShakeType type,
+	float duration,
+	float strength,
+	float frequency)
+{
+	cameraShakeRequest_ = type;
+	cameraShakeDuration_ = duration;
+	cameraShakeStrength_ = strength;
+	cameraShakeFrequency_ = frequency;
+}
+
+CameraShakeType Player::GetCameraShakeRequest() const
+{
+	return cameraShakeRequest_;
+}
+
+void Player::ResetCameraShakeRequest()
+{
+	cameraShakeRequest_ = CameraShakeType::None;
 }
