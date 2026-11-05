@@ -3,6 +3,8 @@
 #include <string>
 #include "Consts.h"
 
+
+
 struct OutlineSettings
 {
     // ŠO‘¤Fƒ‚ƒfƒ‹‚Ì—ÖŠs
@@ -27,7 +29,15 @@ struct OutlineSettings
     float padding2 = 0.0f;
 };
 
-inline OutlineSettings g_outlineSettings;
+constexpr int MAX_OUTLINE_OBJECTS = 256;
+
+struct OutlineSettingsTableBuffer
+{
+    OutlineSettings table[MAX_OUTLINE_OBJECTS + 1];
+};
+
+extern OutlineSettings g_outlineSettings;
+extern OutlineSettingsTableBuffer g_outlineSettingsTable;
 
 class OutlineSettingsManager
 {

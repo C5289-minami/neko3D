@@ -80,6 +80,7 @@ bool OutlineRenderer::Init(int width, int height)
     sceneBuffer_ = MakeScreen(width_, height_, TRUE);
 
 
+
     // --------------------------------------------------------
     // ④ 深度バッファーを有効にする
     // --------------------------------------------------------
@@ -101,7 +102,7 @@ bool OutlineRenderer::Init(int width, int height)
 
     // OutlineSettings のデータをシェーダーへ渡すための領域。
     settingsConstantBuffer_ =
-        CreateShaderConstantBuffer(sizeof(OutlineSettings));
+        CreateShaderConstantBuffer(sizeof(OutlineSettingsTableBuffer));
 
 
     // 必要なリソースが一つでも作成できなかった場合は失敗。
@@ -386,6 +387,32 @@ void OutlineRenderer::RenderPostProcess() const
     }
 }
 
+// OutlineRenderer.cpp にメンバ関数を追加:
+void OutlineRenderer::ClearObjectOutlineSettings() const noexcept
+{
+    const float nearClip = GetCameraNear();
+    const float farClip = GetCameraFar();
+
+    for (int i = 0; i <= MAX_OUTLINE_OBJECTS; ++i)
+    {
+        g_outlineSettingsTable.table[i] = g_outlineSettings;
+        g_outlineSettingsTable.table[i].cameraNear = nearClip;
+        g_outlineSettingsTable.table[i].cameraFar = farClip;
+    }
+}
+
+void OutlineRenderer::SetObjectOutlineSettings(
+    int objectId,
+    const OutlineSettings& settings) const noexcept
+{
+    if (objectId < 0 || objectId > MAX_OUTLINE_OBJECTS)
+        return;
+
+    g_outlineSettingsTable.table[objectId] = settings;
+    g_outlineSettingsTable.table[objectId].cameraNear = GetCameraNear();
+    g_outlineSettingsTable.table[objectId].cameraFar = GetCameraFar();
+}
+
 
 // ============================================================
 // RenderOutlinePass()
@@ -408,27 +435,33 @@ void OutlineRenderer::RenderOutlinePass(
     }
 
 
-    // --------------------------------------------------------
-    // ① アウトライン設定を定数バッファーへ反映する
-    // --------------------------------------------------------
+      // --------------------------------------------------------
+      // ① アウトライン設定を定数バッファーへ反映する
+      // --------------------------------------------------------
 
-    auto* settings = static_cast<OutlineSettings*>(
+    auto* bufferData = static_cast<OutlineSettingsTableBuffer*>(
         GetBufferShaderConstantBuffer(settingsConstantBuffer_)
         );
 
-    if (settings == nullptr)
+    if (bufferData == nullptr)
     {
         return;
     }
 
-    // 最新の設定をコピー
-    *settings = g_outlineSettings;
+    const float nearClip = GetCameraNear();
+    const float farClip = GetCameraFar();
 
-    // 現在のカメラのクリップ距離を取得
-    settings->cameraNear = GetCameraNear();
-    settings->cameraFar = GetCameraFar();
+    // 0番（デフォルト）には常に最新のグローバル設定を入れておく
+    g_outlineSettingsTable.table[0] = g_outlineSettings;
 
-    // 定数バッファーを更新
+    for (int i = 0; i <= MAX_OUTLINE_OBJECTS; ++i)
+    {
+        g_outlineSettingsTable.table[i].cameraNear = nearClip;
+        g_outlineSettingsTable.table[i].cameraFar = farClip;
+    }
+
+    // テーブル全体をコピーして更新
+    *bufferData = g_outlineSettingsTable;
     UpdateShaderConstantBuffer(settingsConstantBuffer_);
 
 
