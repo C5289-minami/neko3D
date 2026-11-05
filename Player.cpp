@@ -74,6 +74,10 @@ AnimationHandle Player::GetAnimationHandle(PlayerAnimType::Type type) const
 		return jumpAnimHandle_;
 	case PlayerAnimType::Double_Jump:
 		return doubleJumpAnimHandle_;
+	case PlayerAnimType::Attack:
+		return atkAnimHandle_;
+	case PlayerAnimType::Ult_Attack:
+		return ultAnimHandle_;
 	default:
 		return idleAnimHandle_;
 	}
@@ -96,6 +100,11 @@ void Player::Init()
 	jumpAnimHandle_ = AnimationHandle::FromIndex(jumpAnimHandle, 0);
 	const int doubleJumpAnimHandle = RM().GetModel(ResourceKeys::Model_PlayerAnim_Dodge);
 	doubleJumpAnimHandle_ = AnimationHandle::FromIndex(doubleJumpAnimHandle, 0);
+
+	const int atkAnimHandle = RM().GetModel(ResourceKeys::Model_PlayerAnim_Attack);
+	atkAnimHandle_ = AnimationHandle::FromIndex(atkAnimHandle, 0);
+	const int ultAnimHandle = RM().GetModel(ResourceKeys::Model_PlayerAnim_Ult);
+	ultAnimHandle_ = AnimationHandle::FromIndex(ultAnimHandle, 0);
 
 	Reset();
 }

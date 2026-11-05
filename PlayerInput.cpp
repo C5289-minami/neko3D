@@ -28,12 +28,20 @@ void PlayerInput::Update()
     // 押している間ずっとtrue。柱を登るための長押しはこちらを使う。
     jumpPressing = (button & BUTTON_TRIGGER1) != 0;
 
+
+
     // Rキーの入力
     RkeyPressed = (buttonDown & BUTTON_R) != 0;
 	
 	// 左クリックの攻撃入力
-	attackPressed = (buttonDown & BUTTON_TRIGGER3) != 0;
+	//attackPressed = (buttonDown & BUTTON_TRIGGER3) != 0;
+	attackPressed = (buttonDown & BUTTON_START) != 0;	//Enterキーで攻撃するように変更
 	ultimatePressed = (buttonDown & BUTTON_TRIGGER4) != 0;
+#ifdef _DEBUG
+	debugUltimatePressed = attackPressed && DxLib::CheckHitKey(KEY_INPUT_LSHIFT) != 0;
+	ultimatePressed = ultimatePressed || debugUltimatePressed;
+	attackPressed = attackPressed && !debugUltimatePressed;
+#endif
 	groomingPressed = (buttonDown & BUTTON_R1) != 0;
 
 	isMoving = (moveDir.LengthSq() > 0.0f);

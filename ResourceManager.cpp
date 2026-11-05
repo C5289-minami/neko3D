@@ -60,7 +60,8 @@ void ResourceManager::LoadAll()
 	LoadModel(ResourceKeys::Model_PlayerAnim_Walk, L"./Data/Models/Player/Animation/player_walk.mv1");
 	LoadModel(ResourceKeys::Model_PlayerAnim_Jump, L"./Data/Models/Player/Animation/player_jump.mv1");
 	LoadModel(ResourceKeys::Model_PlayerAnim_Dodge, L"./Data/Models/Player/Animation/player_dodge.mv1");
-	//LoadModel(ResourceKeys::Model_PlayerAnim_Attack, L"./Data/Models/Player/Animation/player_attack.mv1");
+	LoadModel(ResourceKeys::Model_PlayerAnim_Attack, L"./Data/Models/Player/Animation/player_attack.mv1");
+	LoadModel(ResourceKeys::Model_PlayerAnim_Ult, L"./Data/Models/Player/Animation/player_ult.mv1");
 
 
 	LoadModel(ResourceKeys::Model_Boss, L"./Data/Models/Boss/boss.mv1");
