@@ -168,7 +168,13 @@ public:
 	float GetUltimateGauge() const { return ultimateGauge_; }
 	void SetUltimateGauge(float value);
 	void AddUltimateGauge(float amount);
-	bool CanUseUltimate() const { return ultimateGauge_ >= UltimateGaugeMax; }
+	bool CanUseUltimate() const
+	{
+#ifdef _DEBUG
+		if (input_.debugUltimatePressed) return true;
+#endif
+		return ultimateGauge_ >= UltimateGaugeMax;
+	}
 	bool TryUseUltimateGauge();
 
 	// キャラクター設定

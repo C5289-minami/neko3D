@@ -16,14 +16,15 @@ void PlayerUltimateAttackState::Enter()
         return;
     }
     player_.StopMove();
-    remainingTime_ = 1.0f; // 確認用に1秒だけ表示
+    player_.SetAnimation(PlayerAnimType::Ult_Attack, false);
+    player_.GetAnimation().Start();
     DxPlus::Debug::SetFormatString(L"state:ultimate_attack");
 }
 
 void PlayerUltimateAttackState::Tick(float deltaTime)
 {
-    remainingTime_ -= deltaTime;
-    if (remainingTime_ <= 0.0f)
+    player_.UpdateAnimation(deltaTime);
+    if (player_.GetAnimation().IsFinished())
     {
         stateMachine_.ChangeState(player_.GetInput().isMoving
             ? PlayerStateType::Walk : PlayerStateType::Idle);

@@ -8,7 +8,4 @@ public:
     void Enter() override;
     void Tick(float deltaTime) override;
     void Exit() override;
-
-private:
-    float remainingTime_{ 0.0f };
 };

@@ -16,6 +16,9 @@ struct PlayerInput
     bool RkeyPressed{ false };  // Rキーを押した瞬間
 	bool attackPressed{ false };
 	bool ultimatePressed{ false };
+#ifdef _DEBUG
+	bool debugUltimatePressed{ false };
+#endif
 	bool groomingPressed{ false };
 
 	void Update();
