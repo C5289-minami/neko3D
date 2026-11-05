@@ -16,6 +16,7 @@
 #include <cstdio>
 #include <Windows.h>
 
+
 Player::Player()
 	: ActorBase("Player"), stateMachine_(*this)
 {
@@ -123,6 +124,8 @@ void Player::Reset()
 	MObjs().LoadActorTransform(*this);
 	model_.Load();
 	startPosition_ = GetPosition();
+	lastGroundedPosition_ = startPosition_;
+	lastFirstFloorPosition_ = startPosition_;
 
 	moveInput_ = {};
 	velocity_ = { 0.0f, 0.0f, 0.0f };
@@ -133,6 +136,8 @@ void Player::Reset()
 
 	// 空中から開始し、ステージへのレイキャストで接地させる。
 	isGrounded_ = false;
+	onFirstFloor = false;
+	onSecondFloor = false;
 
 	stateMachine_.Initialize();
 
@@ -153,18 +158,21 @@ void Player::SetStartPosition(const Vec3& position)
 	startPosition_ = position;
 }
 
-// 修正の修正。
-// ミスが続きすいません。
-// Reset()だと埋まるし、GetPosition()だと動かなかった。
-// 最初の場所を覚えておいて、Rでそこに戻すようにした。
 void Player::ResetPosition()
+{
+	RestorePosition(startPosition_);
+}
+
+void Player::RestorePosition(const Vec3& position)
 {
 	stateMachine_.ChangeState(PlayerStateType::Idle);
 	EndPillarElevator();
 	StopMove();
-	position_ = startPosition_;
+	position_ = position;
 	velocity_ = {};
 	isGrounded_ = false;
+	onFirstFloor = false;
+	onSecondFloor = false;
 	touchingWall_ = false;
 	touchingModel_ = false;
 	wasTouchingModel_ = false;
@@ -349,16 +357,16 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 	}
 
 
+	bool landedOnFirstFloor = false;
 	// 落下中のみ床面に合わせ、このフレームの落下距離もレイの長さに含める。
 	// エレベーター中と、到着時の小ジャンプ中は床へ吸着させない。
 	// if (dy<= 0.0f)
 	if (dy <= 0.0f && velocity_.y <= 0.0f && GetCurrentState() != PlayerStateType::Climbing)
 	{
 		Physics::RayHit hit{};
-		constexpr float groundSnapDistance = 30.0f;
 		const float fallDistance = previousY - position_.y;
 		const float rayDistance =
-			fallDistance + groundSnapDistance + Const::PLAYER_SKIN;
+			fallDistance + GroundSnapDistance + Const::PLAYER_SKIN;
 
 		// std::vector<int> handles;
 		// stage.GetCollisionModelHandles(handles);
@@ -366,30 +374,32 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 		// if (Physics::RaycastDown(
 			// handles,
 		const Vec3 origin{ GetPosition().x, previousY + Const::PLAYER_SKIN, GetPosition().z };
-		bool foundGround = collision.RaycastDown(origin, rayDistance, hit);
+
+		bool foundGround = collision.RaycastDown(origin, rayDistance, hit, &landedOnFirstFloor);
+
 		Physics::RayHit pillarHit{};
 		// 小ジャンプの頂点から急に吸い戻されないよう、柱は足元付近だけで着地する。
 		const float pillarRayDistance = fallDistance + Const::PLAYER_SKIN * 2.0f;
+
 		if (collision.RaycastPillarTop(origin, pillarRayDistance, Const::PLAYER_ELEVATOR_TOP_OFFSET, pillarHit) &&
 			(!foundGround || pillarHit.distance < hit.distance))
 		{
 			hit = pillarHit;
 			foundGround = true;
+			landedOnFirstFloor = false;
 		}
 		if (foundGround)
 		{
 			// 旧仕様：壁の上端で接触を保持している間の床補正。
 			// const bool holdingClimbTop = GetCurrentState() == PlayerStateType::Climbing && IsNearWallTop();
-			// if (position_.y - hit.point.y <= groundSnapDistance &&
+			// if (position_.y - hit.point.y <= GroundSnapDistance &&
 			//     (!holdingClimbTop || hit.point.y >= position_.y))
-			if (position_.y - hit.point.y <= groundSnapDistance)
+			if (position_.y - hit.point.y <= GroundSnapDistance)
 			{
 				// 坂の中へ落ち込まないよう、足元を床の高さへ戻す。
 				position_.y = hit.point.y;
 
-				constexpr float SLOPE_LIMIT_Y = 0.7f;
-
-				if (hit.normal.y < SLOPE_LIMIT_Y)
+				if (hit.normal.y < WalkableNormalY)
 				{
 					// 急な坂では踏ん張れないので、坂の下へ流される。
 					isGrounded_ = false;
@@ -417,6 +427,8 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 		}
 	}
 
+	UpdateFallRecovery(collision, modelOb, landedOnFirstFloor);
+
 	// 足元を基準にしたカプセルで、補正後の接触も確認する。
 	// const Vec3 capsuleStart = GetPosition() + Vec3::Up() * Const::PLAYER_RADIUS;
 	// const Vec3 capsuleEnd = GetPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT - Const::PLAYER_RADIUS);
@@ -441,6 +453,36 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 			std::cos(GetYaw())
 		)
 	);
+}
+
+void Player::UpdateFallRecovery(const ModelCollision& collision, const ModelCollision::ModelOb& body,
+	bool landedOnFirstFloor)
+{
+	onFirstFloor = false;
+	onSecondFloor = false;
+	if (!gravityEnabled_ || !collision.HasFallRecoveryFloor() || IsDead()) return;
+
+	if (isGrounded_)
+	{
+		// 接地している間の最後の位置を覚え、空中に出たらその位置を保持する。
+		lastGroundedPosition_ = position_;
+		onFirstFloor = landedOnFirstFloor;
+		onSecondFloor = !onFirstFloor;
+		if (onFirstFloor) lastFirstFloorPosition_ = position_;
+		return;
+	}
+
+	// 1階に着地できる高さを通り過ぎるまで、通常どおり落下させる。
+	if (velocity_.y > 0.0f || !collision.IsBelowFallRecoveryFloor(position_.y, body.height)) return;
+
+	Vec3 recoveryPosition = lastGroundedPosition_;
+	recoveryPosition.y = lastFirstFloorPosition_.y;
+
+	// 同じ X・Z に1階の床がなければ、最後に立てた1階の位置へ戻す。
+	if (!collision.CanLandOnFallRecoveryFloor(recoveryPosition, body.skin, GroundSnapDistance, WalkableNormalY))
+		recoveryPosition = lastFirstFloorPosition_;
+
+	RestorePosition(recoveryPosition);
 }
 
 void Player::Draw() const
@@ -747,29 +789,13 @@ void Player::ResetClimbingSpeeds()
 	wallSlideSpeed_ = Const::PLAYER_WALL_SLIDE_SPEED;
 }
 
-Player::GroundType Player::CheckFloor(
-	const ModelObject& planet,
-	const ModelObject& firstFloor)
+Player::GroundType Player::CheckFloor() const
 {
-	if (onSecondFloor)
-	{
-		// 一階専用の床より下に戻って接地したら一階判定
-		if (isGrounded_ &&
-			position_.y <= firstFloor.GetPosition().y + 100.0f) // 少し余裕を持たせる
-		{
-			onSecondFloor = false;
-		}
-	}
-	// 二階専用の床より上に移動して接地したら二階判定
-	else if (isGrounded_ && position_.y > planet.GetPosition().y)
-	{
-		onSecondFloor = true;
-	}
-
-	DxPlus::Debug::SetString(onSecondFloor ? L"二階" : L"一階");
-
-	return onSecondFloor ? GroundType::UpFloor : GroundType::DownFloor;
-};
+	DxPlus::Debug::SetString(onSecondFloor ? L"二階" : onFirstFloor ? L"一階" : L"空中");
+	if (onSecondFloor) return GroundType::UpFloor;
+	if (onFirstFloor) return GroundType::DownFloor;
+	return GroundType::None;
+}
 
 void Player::SetWallJumpMoveSpeed(float value)
 {

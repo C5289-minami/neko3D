@@ -123,10 +123,7 @@ void GameTestScene::Update(float deltaTime)
 #endif
 
 		player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
-		for (auto& obj : stage.GetStageModelObjects())
-		{
-			player->CheckFloor(obj, stage.GetModelObject());
-		}
+		player->CheckFloor();
 	
 #ifdef _DEBUG
 		// この更新だけに適用し、共有するPlayerを他のシーンへ持ち越さない。

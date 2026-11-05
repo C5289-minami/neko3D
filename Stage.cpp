@@ -98,7 +98,7 @@ void Stage::Reset()
 
     // モデルごとに判定の役割を登録する。形・大きさはモデルから取得される。
     collision_.Clear();
-    collision_.AddModel(stageModel_, ModelCollision::Surface::Floor);
+    collision_.AddFallRecoveryFloor(stageModel_);
 
     for (const auto& model : stagePillars_)
         collision_.AddModel(model, ModelCollision::Surface::Pillar);

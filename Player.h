@@ -104,9 +104,7 @@ public:
 		DownFloor,
 		UpFloor,	// 上の足場に着地したときの判定
 	};
-	GroundType CheckFloor(
-		const ModelObject& planet,
-		const ModelObject& firstFloor);
+	GroundType CheckFloor() const;//
 
 	//ゲッター・セッター
 	float GetWallJumpMoveSpeed() const { return wallJumpMoveSpeed_; }
@@ -171,10 +169,12 @@ public:
 	AnimationHandle GetAnimationHandle(PlayerAnimType::Type type) const;
 	ModelAnimation& GetAnimation() { return animation_; }
 	void UpdateAnimation(float deltaTime);
-
+	
 	Vec3 GetPillarElevatorCenter() const { return elevatorCenter_; }
 private:
     void UpdateMovement(float deltaTime);
+	void UpdateFallRecovery(const ModelCollision& collision, const ModelCollision::ModelOb& body, bool landedOnFirstFloor);
+	void RestorePosition(const Vec3& position);
 	// 横速度を決めた後、MoveでXYZの速度をまとめて座標に反映する。
 	void UpdateHorizontalVelocity(float deltaTime);//nyuuryokukei
 	void Move(float deltaTime);
@@ -199,6 +199,8 @@ private:
 	float kari_max_jissou_ = UltimateGaugeMax;
 
     Vec3 startPosition_{}; // Rで戻る最初の場所。
+	Vec3 lastGroundedPosition_{};
+	Vec3 lastFirstFloorPosition_{};
 	Vec3 movementCenter_{}; // 足場の中心
 	Vec3 moveInput_{};      // Xは左右、Zは前後の入力
 	Vec3 velocity_{ 0.0f, 0.0f, 0.0f }; // 当たり判定で補正する前の移動速度（ワールド座標）
@@ -245,4 +247,9 @@ private:
 
 
 	bool onSecondFloor{ false }; // 上の足場に着地したときの判定
+	bool onFirstFloor{ false };  // 下の足場に着地したときの判定
+
 };
+
+constexpr float GroundSnapDistance = 30.0f;
+constexpr float WalkableNormalY = 0.7f;

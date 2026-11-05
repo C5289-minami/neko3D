@@ -38,6 +38,7 @@ public:
     //  AddModel(wall, Surface::Wall);
     //  AddModel(pillar, Surface::Pillar);
     void AddModel(const ModelObject& model, Surface surface);
+    void AddFallRecoveryFloor(const ModelObject& model);
     void Clear();
 
     // 判定前に位置・回転・拡大率を反映する。描画する必要はない。
@@ -65,7 +66,12 @@ public:
         const Vec3& end
     ) const;
     // 着地用。床だけを調べる。柱は接触判定のみ。
-    bool RaycastDown(const Vec3& origin, float maxDistance, Physics::RayHit& hit) const;
+    bool RaycastDown(const Vec3& origin, float maxDistance, Physics::RayHit& hit,
+        bool* hitRecoveryFloor = nullptr) const;
+
+    bool HasFallRecoveryFloor() const { return fallRecoveryFloor_ != nullptr; }
+    bool IsBelowFallRecoveryFloor(float y, float clearance) const;
+    bool CanLandOnFallRecoveryFloor(const Vec3& position, float skin, float snapDistance, float walkableNormalY) const;
 
     // 柱の上面だけへの着地。足元の調整量だけ判定面を下げる。
     bool RaycastPillarTop(const Vec3& origin, float maxDistance, float topOffset,
@@ -78,6 +84,7 @@ public:
 
 private:
     struct Entry;
+    const Entry* GetFallRecoveryFloor() const;
     bool UpdateBounds(Entry& entry);
     bool FindStandSide(const Vec3& feetPosition, const ModelOb& modelOb,
     const Vec3& startPosition, const Vec3& direction, Vec3& wallNormal) const;
@@ -85,7 +92,7 @@ private:
     float& travel, Vec3& wallNormal) const;
 
     bool RaycastModels(const Vec3& start, const Vec3& end, Physics::RayHit& hit,
-        bool forLanding, bool ignorePillars = false) const;
+        bool forLanding, bool ignorePillars = false, bool* hitRecoveryFloor = nullptr) const;
     bool RaycastWall(const Vec3& start, const Vec3& end, Physics::RayHit& hit) const;
 
     struct Entry
@@ -100,4 +107,5 @@ private:
         bool boundsReady{ false };
     };
     std::vector<Entry> models_;
+    const ModelObject* fallRecoveryFloor_{ nullptr };
 };
