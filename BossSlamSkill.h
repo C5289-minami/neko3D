@@ -208,7 +208,7 @@ private:
 			break;
 		case AttackStateType::Attack:
 			// 多分ここは攻撃当たった瞬間...
-			boss_.CameraShakeRequest(CameraShakeType::Vertical, 0.3f, 60.0f);
+			boss_.CameraShakeRequest(CameraShakeType::Mixed, 0.3f, 40.0f,40.0f);
 			break;
 		case AttackStateType::Recovery:
 			// 硬直の終了や攻撃の中断で、命中判定を閉じる。

@@ -193,7 +193,12 @@ void GameTestScene::Update(float deltaTime)
 			Collision::IsHitCapsuleSphere(tailWhipHitCapsule_, playerBody);
 
 		if (tailWhipPlayerHit)
+		{
 			player->TakeDamage();
+			Vec3 outward = player->GetWorldPosition() - stage.GetWorldPosition();
+			outward.y = 0.0f;
+			player->ApplyKnockback(outward, 5000.0f, 0.3f);
+		}
 
 		if (boss.UpdateHandAttack(
 			deltaTime,
@@ -504,7 +509,8 @@ void GameTestScene::UpdateTailWhipGimmick()
 		Vec3 outward = player->GetWorldPosition() - stage.GetWorldPosition();
 		outward.y = 0.0f;
 
-		player->ApplyKnockback(outward, 5000.0f, 0.3f);
+		if (player->IsSecondFloor())
+			player->ApplyKnockback(outward, 5000.0f, 0.3f);
 	}
 
 	wasTailWhipActive_ = isTailWhipActive;
@@ -640,7 +646,7 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 void GameTestScene::DrawAttackSphereDebug() const
 {
 #ifdef _DEBUG
-    gameContext->GetBoss().DrawSlamAttackDebug();
+	gameContext->GetBoss().DrawSlamAttackDebug();
 
 	if (attackSphereDebugRemaining_ <= 0.0f) return;
 
