@@ -46,9 +46,9 @@ namespace Const
     // ===== 敵関連 =====
     constexpr float BOSS_MODEL_SCALE = 1.0f;
     // ボス本体のカプセル。ステージ中心を基準とするワールド座標の大きさ。
-    constexpr float BOSS_BODY_RADIUS = 150.0f;     // 本体の半径（太さ）。
-    constexpr float BOSS_BODY_HEIGHT = 400.0f;     // 上下の丸い部分を含む全高。
-    constexpr float BOSS_BODY_Y_OFFSET = 0.0f;     // ステージ位置を基準にした底の高さ。
+    constexpr float BOSS_BODY_RADIUS = 200.0f;     // 本体の半径（太さ）。
+    constexpr float BOSS_BODY_HEIGHT = 725.0f;     // 上下の丸い部分を含む全高。
+    constexpr float BOSS_BODY_Y_OFFSET = -200.0f;     // ステージ位置を基準にした底の高さ。
     constexpr float BOSS_HIDDEN_POSITION_Y = -0.0f;
     constexpr float BOSS_IDLE_MOTION_DURATION = 1.0f;
     constexpr float BOSS_WALK_MOTION_DURATION = 3.0f;

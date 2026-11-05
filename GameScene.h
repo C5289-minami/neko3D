@@ -103,5 +103,7 @@ private:
 
 	// Playerの影を描画する
 	bool drawPlayerShadow_{ false };
+	// ボス本体のカプセルに前フレームから接触しているか。
+	bool wasTouchingBossBody_{ false };
 
 };

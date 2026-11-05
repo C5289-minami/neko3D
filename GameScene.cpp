@@ -22,6 +22,7 @@ GameScene::GameScene(GameContext* context)
 void GameScene::Init()
 {
 	gameContext->Reset();
+	wasTouchingBossBody_ = false;
 
 	// チュートリアルも、使いたいモデルを登録するだけで同じ判定を利用できる。
 	tutorialCollision_.Clear();
@@ -108,6 +109,7 @@ void GameScene::Update(float deltaTime)
 	if (GetCurrentGameState() != GameStateType::Tutorial &&
 		GetCurrentGameState() != GameStateType::Battle)
 	{
+		wasTouchingBossBody_ = false;
 		stateMachine_.Tick(deltaTime);
 		gameContext->GetEffectManager().Update(deltaTime);
 		return;
@@ -135,6 +137,19 @@ void GameScene::Update(float deltaTime)
 			player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
 
 		boss.Update(deltaTime);
+
+		// バトル中、ボス本体に触れ始めた瞬間だけ安全な位置へ戻す。
+		if (GetCurrentGameState() == GameStateType::Battle)
+		{
+			const bool touchingBossBody = stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
+			if (touchingBossBody && !wasTouchingBossBody_)
+				player->ReturnToLastSafePosition(stage.GetCollision());
+			wasTouchingBossBody_ = touchingBossBody;
+		}
+		else
+		{
+			wasTouchingBossBody_ = false;
+		}
 
 		if (GetCurrentGameState() == GameStateType::Battle &&
 			boss.UpdateSlamAttack(player->GetWorldPosition(), stage.GetWorldPosition()))

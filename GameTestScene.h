@@ -46,6 +46,8 @@ private:
     float attackSphereDebugRemaining_{};
     bool debugActorsPaused_{};
     bool showBossBodyCapsule_{ true };
+    // 前フレームの接触状態。触れ始めた瞬間だけ復帰させる。
+    bool wasTouchingBossBody_{};
 
     // Rendering
     void DrawScene(bool toonEnabled) const;

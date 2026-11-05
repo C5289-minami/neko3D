@@ -19,6 +19,7 @@
 void GameTestScene::Init()
 {
 	gameContext->Reset();
+	wasTouchingBossBody_ = false;
 
 	tailWhipHitCapsule_ = {};
 
@@ -148,6 +149,12 @@ void GameTestScene::Update(float deltaTime)
 		const Vec3 stageCenterPosition = stage.GetPosition();
 		player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
 		player->CheckFloor();
+
+		// ボス本体に触れ始めた瞬間だけ、安全だった位置へ戻す。
+		const bool touchingBossBody = stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
+		if (touchingBossBody && !wasTouchingBossBody_)
+			player->ReturnToLastSafePosition(stage.GetCollision());
+		wasTouchingBossBody_ = touchingBossBody;
 
 #ifdef _DEBUG
 		player->SetDebugDashEnabled(false);

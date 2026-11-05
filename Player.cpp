@@ -494,9 +494,11 @@ void Player::UpdateFallRecovery(const ModelCollision& collision, const ModelColl
 	{
 		onFirstFloor = landedOnFirstFloor;
 		onSecondFloor = !onFirstFloor;
-		// 端で足元だけが接地していても、安全だった復帰先を上書きしない。
-		const bool safeGround = !onFirstFloor ||
-			collision.HasFallRecoverySupport(position_, body, WalkableNormalY);
+		// ボス本体の中や床の端を復帰先にせず、接触前の安全な位置を残す。
+		const bool outsideBossBody = !collision.IsTouchingCapsule(GetHitSphere());
+		// onFirstFloor は、落下中に1階の床に着地したかどうかを示す。
+		const bool safeGround = outsideBossBody &&
+			(!onFirstFloor || collision.HasFallRecoverySupport(position_, body, WalkableNormalY));
 		
 		if (safeGround)
 		{
