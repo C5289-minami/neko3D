@@ -267,6 +267,9 @@ private:
 	AnimationHandle jumpAnimHandle_;
 	AnimationHandle doubleJumpAnimHandle_;
 
+	AnimationHandle atkAnimHandle_;
+	AnimationHandle ultAnimHandle_;
+
 	// camera
 
 	CameraShakeType cameraShakeRequest_{ CameraShakeType::None };

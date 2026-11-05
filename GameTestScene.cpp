@@ -145,6 +145,7 @@ void GameTestScene::Update(float deltaTime)
 		player->SetDebugDashEnabled(debugDash);
 #endif
 
+		const Vec3 stageCenterPosition = stage.GetPosition();
 		player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
 		player->CheckFloor();
 
