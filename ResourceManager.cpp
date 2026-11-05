@@ -118,6 +118,7 @@ void ResourceManager::LoadAll()
 	LoadEffect(ResourceKeys::Effect_Test, L"./Data/Effects/suna.efkefc", 30.0f);
 	LoadEffect(ResourceKeys::Effect_PlayerAttack, L"./Data/Effects/attack.efkefc", 30.0f);
 	LoadEffect(ResourceKeys::Effect_Impact, L"./Data/Effects/wave.efkefc", 30.0f);
+	LoadEffect(ResourceKeys::Effect_Kedama, L"./Data/Effects/kedama.efkefc", 30.0f);
 }
 
 void ResourceManager::UnloadAll()

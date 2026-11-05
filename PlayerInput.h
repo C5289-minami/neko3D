@@ -12,6 +12,7 @@ struct PlayerInput
 	bool jumpPressed{ false };
 	bool jumpPressing{ false };
     bool RkeyPressed{ false };  // Rキーを押した瞬間
+	bool shiftRKeyPressed{ false }; // Shift + Rキーを押した瞬間（デバッグ用）
 	bool attackPressed{ false };
 	bool ultimatePressed{ false };
 	bool groomingPressed{ false };

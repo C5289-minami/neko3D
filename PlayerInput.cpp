@@ -28,8 +28,15 @@ void PlayerInput::Update()
     // 押している間ずっとtrue。柱を登るための長押しはこちらを使う。
     jumpPressing = (button & BUTTON_TRIGGER1) != 0;
 
-    // Rキーの入力
-    RkeyPressed = (buttonDown & BUTTON_R) != 0;
+    // Shiftキー押下判定（左右Shift対応）
+    const bool shiftPressing =
+        DxLib::CheckHitKey(KEY_INPUT_LSHIFT) != 0 ||
+        DxLib::CheckHitKey(KEY_INPUT_RSHIFT) != 0;
+
+    // Rキーの入力（単独押しとShift同時押しを分ける）
+    const bool rKeyDown = (buttonDown & BUTTON_R) != 0;
+    RkeyPressed = rKeyDown && !shiftPressing;
+    shiftRKeyPressed = rKeyDown && shiftPressing;
 	
 	// 左クリックの攻撃入力
 	attackPressed = (buttonDown & BUTTON_TRIGGER3) != 0;

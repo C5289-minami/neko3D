@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include "Sound3D.h"
+#include "EffectManager.h"
 #include <algorithm>
 #include <iostream>
 
@@ -175,10 +176,26 @@ void Player::ResetPosition()
 	elevatorInputConsumed_ = input_.jumpPressing;
 }
 
+#ifdef _DEBUG
+void Player::PlayDebugKedamaEffect() const
+{
+	const int effectHandle = RM().GetEffect(ResourceKeys::Effect_Kedama);
+	if (effectHandle < 0) return;
+
+	const Vec3 spawnPosition =
+		GetWorldPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT * 0.5f);
+	EffectManager::PlayEffect(effectHandle, spawnPosition, GetWorldRotation().y);
+}
+#endif
+
 void Player::Update(float deltaTime)
 {
 	input_.Update();
 #ifdef _DEBUG
+	if (input_.shiftRKeyPressed)
+	{
+		PlayDebugKedamaEffect();
+	}
 	if (input_.RkeyPressed)
 	{
 		ResetPosition();
@@ -276,6 +293,10 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 
 	input_.Update();
 #ifdef _DEBUG
+	if (input_.shiftRKeyPressed)
+	{
+		PlayDebugKedamaEffect();
+	}
 	if (input_.RkeyPressed)
 	{
 		ResetPosition();

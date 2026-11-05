@@ -181,6 +181,9 @@ private:
 
 	// ステージ中心を基準に、円周移動・前後移動の横速度を設定する。
 	void UpdateStageMoveVelocity(float moveSpeed, float deltaTime);
+#ifdef _DEBUG
+	void PlayDebugKedamaEffect() const;
+#endif
 
 	int health_{ MaxHealth };
 	float avoidInvTime_{ 0.0f };
