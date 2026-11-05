@@ -324,3 +324,35 @@ namespace Collision
         return touching;
     }
 }
+
+
+// ============================================================
+// ModelObject: Outline
+// ============================================================
+
+void ModelObject::EnableCustomOutlineSettings()
+{
+    if (useCustomOutlineSettings_)
+        return;
+
+    outlineSettings_ = g_outlineSettings;
+    useCustomOutlineSettings_ = true;
+}
+
+void ModelObject::SetOuterOpacity(float value)
+{
+    EnableCustomOutlineSettings();
+    outlineSettings_.outerOpacity = std::clamp(value, 0.0f, 1.0f);
+}
+
+void ModelObject::SetInnerOpacity(float value)
+{
+    EnableCustomOutlineSettings();
+    outlineSettings_.innerOpacity = std::clamp(value, 0.0f, 1.0f);
+}
+
+void ModelObject::SetOutlineOpacity(float value)
+{
+    SetOuterOpacity(value);
+    SetInnerOpacity(value);
+}

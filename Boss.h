@@ -117,6 +117,9 @@ public:
 	void StopRotation();
 	bool IsRotation() const { return isRotationEnabled_; };
 
+	bool IsDead() const { return health_ <= 0; }
+	bool IsDowned() const { return downGauge_ <= 0.0f; }
+
 	// Skill
 	bool UseSkill(BossAttackType type);
 	bool IsTailWhipActive() const;
@@ -151,7 +154,7 @@ private:
 	bool currentAnimLoop_{ true };
 	AnimationHandle idleAnimHandle_{};
 	AnimationHandle tailWhipAnimHandle_{};
-	AnimationHandle downAnimHandle_{};
+	AnimationHandle flachAnimHandle_{};
 	AnimationHandle atkHitAnimHnadle_{};
 	AnimationHandle dieAnimHandle_{};
 	AnimationHandle ClapAnimHandle_{};

@@ -46,7 +46,7 @@ void Boss::Init()
 	const int AtkHitModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Attck_Hit);
 	atkHitAnimHnadle_ = AnimationHandle::FromIndex(AtkHitModelHandle, 0);
 	const int downModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Down);
-	downAnimHandle_ = AnimationHandle::FromIndex(downModelHandle, 0);
+	flachAnimHandle_ = AnimationHandle::FromIndex(downModelHandle, 0);
 	const int dieModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Die);
 	dieAnimHandle_ = AnimationHandle::FromIndex(dieModelHandle, 0);
 
@@ -55,8 +55,11 @@ void Boss::Init()
 
 void Boss::Reset()
 {
+	isActive_ = true;
+	model_.SetAlpha(1.0f);
+
 	downGauge_ = maxDownGauge_;
-    damageTakenThisFrame_ = false;
+	damageTakenThisFrame_ = false;
 
 	health_ = maxHealth_;
 	phase_ = BossPhase::Phase1;
@@ -70,7 +73,7 @@ void Boss::Reset()
 	SetAnimation(BossAnimType::Idle, true);
 
 	stateMachine_.Initialize();
-	
+
 #ifndef NDEBUG
 	activeAI = false;
 #endif // !NDEBUG
@@ -93,7 +96,7 @@ void Boss::Reset()
 	atkHitAnimHnadle_ = AnimationHandle::FromIndex(AtkHitModelHandle, 0);
 
 	const int downModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Down);
-	downAnimHandle_ = AnimationHandle::FromIndex(downModelHandle, 0);
+	flachAnimHandle_ = AnimationHandle::FromIndex(downModelHandle, 0);
 
 	const int dieModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Die);
 	dieAnimHandle_ = AnimationHandle::FromIndex(dieModelHandle, 0);
@@ -125,7 +128,7 @@ void Boss::Reset()
 
 void Boss::TakeDamage(int damage)
 {
-    damageTakenThisFrame_ = true;
+	damageTakenThisFrame_ = true;
 	// ダメージを受けたらHPを減らす。
 	// ダメージを受けると移動を止め、ゲージを減らす。
 	// ダメージ処理後にフェーズ移行を確認する。
@@ -134,7 +137,7 @@ void Boss::TakeDamage(int damage)
 	health_ -= damage;
 	velocity_ = {};
 
-	
+
 
 
 	// HPが最大値の半分以下になるとフェーズ2へ移行する。
@@ -178,9 +181,9 @@ void Boss::Update(float deltaTime)
 {
 	// アニメーション更新はスキルのフェーズ処理側で行う。
 	// 再生区間や攻撃中の動作をスキル側で管理する。
-	
+
 	// AIの更新
-	
+
 #ifndef NDEBUG
 	if (activeAI)
 #endif
@@ -189,24 +192,24 @@ void Boss::Update(float deltaTime)
 	}
 
 	stateMachine_.Tick(deltaTime);
-	
+
 
 	position_ += velocity_ * deltaTime;
 
 	if (damageTakenThisFrame_) UpdateDown(deltaTime);
 
-    if (health_ > 0 && downGauge_ <= 0.0f &&
-        stateMachine_.GetCurrentType() != BossStateType::Flinch)
-    {
-        stateMachine_.ChangeState(BossStateType::Flinch);
-    }
+	if (health_ > 0 && downGauge_ <= 0.0f &&
+		stateMachine_.GetCurrentType() != BossStateType::Flinch)
+	{
+		stateMachine_.ChangeState(BossStateType::Flinch);
+	}
 
 }
 
 
 void Boss::TurnToTarget(const Vec3& targetPosition, float deltaTime)
 {
-	ai_.TurnToTarget(targetPosition,deltaTime);
+	ai_.TurnToTarget(targetPosition, deltaTime);
 }
 
 
@@ -259,6 +262,7 @@ void Boss::UpdateAnimation(float deltaTime)
 
 void Boss::StartRotation()
 {
+
 	isRotationEnabled_ = true;
 }
 
@@ -276,7 +280,7 @@ AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 	case BossAnimType::TailWhip: return tailWhipAnimHandle_;
 	case BossAnimType::Clap: return ClapAnimHandle_;
 	case BossAnimType::Slam: return atkHitAnimHnadle_;
-	case BossAnimType::Flach: return downAnimHandle_;
+	case BossAnimType::Flach: return flachAnimHandle_;
 	case BossAnimType::Die: return dieAnimHandle_;
 	default:
 		DxPlus::Utils::FatalError(L"アニメーションハンドルを取得できませんでした。GetAnimationHandleを確認してください。");
@@ -286,11 +290,11 @@ AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 
 bool Boss::UseSkill(BossAttackType type)
 {
-    const BossStateType currentState = stateMachine_.GetCurrentType();
-    if (currentState == BossStateType::Attack ||
-        currentState == BossStateType::Flinch ||
-        currentState == BossStateType::Die)
-        return false;
+	const BossStateType currentState = stateMachine_.GetCurrentType();
+	if (currentState == BossStateType::Attack ||
+		currentState == BossStateType::Flinch ||
+		currentState == BossStateType::Die)
+		return false;
 
 	switch (type)
 	{

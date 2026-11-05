@@ -20,16 +20,17 @@ void GameTestScene::Init()
 {
 	gameContext->Reset();
 	wasTouchingBossBody_ = false;
-	wasDoubleJumpContact_ = false;
 
 	tailWhipHitCapsule_ = {};
 
 
-	playerCamera_.Reset();
 
 	attackSphereDebugRemaining_ = 0.0f;
 	rightMouseWasDown_ = false;
 
+	playerCamera_.Reset();
+	bossDieCamera_.Reset();
+	bossDownCamera_.Reset();
 	cameraDirector_.Reset();
 #ifndef NDEBUG
 	freeCamera_.Reset();
@@ -154,31 +155,28 @@ void GameTestScene::Update(float deltaTime)
 		player->CheckFloor();
 
 		// ジャンプ接触は一度だけゲージを減らし、二段目だけプレイヤーを戻す。
-		const bool touchingBody = stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
-		const auto startFloor = player->GetJumpStartFloor();
-		
-		const bool normalJump = !player->IsGrounded() &&
-			player->GetCurrentState() == PlayerStateType::Jump && startFloor != Player::GroundType::None;
-		
-		const bool doubleJump = !player->IsGrounded() &&
-			player->GetCurrentState() == PlayerStateType::DoubleJump;
-		// ジャンプ接触の判定
-		const bool jumpContact = touchingBody && (normalJump || doubleJump);
-		// 二段ジャンプ接触の判定
-		const bool doubleJumpContact = touchingBody && doubleJump;
-		if (jumpContact && !wasTouchingBossBody_)
-		{
-			if (normalJump)
-				boss.ApplyDownGaugeDamage(Const::BOSS_JUMP_DOWN_DAMAGE);
-			else if (startFloor == Player::GroundType::UpFloor)
-				boss.ApplyDownGaugeDamage(Const::BOSS_UPPER_DOUBLE_JUMP_DOWN_DAMAGE);
-		}
-		// 二段ジャンプ接触で、前回接触していなければ安全な位置へ戻す
-		if (doubleJumpContact && !wasDoubleJumpContact_)
-			player->ReturnToLastSafePosition(stage.GetCollision());
-		// 前回の接触状態を更新
-		wasTouchingBossBody_ = jumpContact;
-		wasDoubleJumpContact_ = doubleJumpContact;
+		const auto state = player->GetCurrentState();
+		const bool doubleJump = state == PlayerStateType::DoubleJump;
+		const bool jumping = !player->IsGrounded() && (state == PlayerStateType::Jump || doubleJump);
+		const bool touchingBody = jumping && stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
+
+			const bool enteredBossBody = touchingBody && !wasTouchingBossBody_;
+			const bool jumpedFromUpperFloor =
+				player->GetJumpStartFloor() == Player::GroundType::UpFloor;
+			const bool shouldDamageDownGauge = enteredBossBody && jumpedFromUpperFloor;
+
+			if (shouldDamageDownGauge)
+			{
+				const float damage = doubleJump
+					? Const::BOSS_UPPER_DOUBLE_JUMP_DOWN_DAMAGE
+					: Const::BOSS_JUMP_DOWN_DAMAGE;
+				boss.ApplyDownGaugeDamage(damage);
+			}
+
+			const bool shouldReturnPlayer = touchingBody && doubleJump;
+			if (shouldReturnPlayer)
+				player->ReturnToLastSafePosition(stage.GetCollision());
+		wasTouchingBossBody_ = touchingBody;
 
 #ifdef _DEBUG
 		player->SetDebugDashEnabled(false);
@@ -226,6 +224,17 @@ void GameTestScene::Update(float deltaTime)
 			player->GetWorldPosition(),
 			stage.GetWorldPosition());
 
+		// 死亡判定
+		// 死んだ演出さえも終わったのなら
+		if (!boss.IsActive())
+		{
+			//クリア
+
+			// 仮でReset
+			gameContext->Reset();
+			Init();
+		}
+
 		// =============================
 		// Playerの攻撃判定（デバッグ）
 		// =============================
@@ -272,14 +281,50 @@ void GameTestScene::Update(float deltaTime)
 #endif
 
 		// =============================
-		// カメラシェイク・カメラ更新
+		// カメラシェイク
 		// =============================
 		UpdateCameraShake(boss, *player);
 
-		playerCamera_.Update(
-			player->GetWorldPosition(),
-			boss.GetWorldPosition(),
-			deltaTime);
+		// =============================
+		// カメラ更新・切り替え
+		// =============================
+		if (boss.IsDead())
+		{
+			bossDieCamera_.SetTarget(boss.GetWorldPosition());
+
+			if (cameraDirector_.GetActiveCamera() != &bossDieCamera_)
+			{
+				bossDieCamera_.Initialize(cameraDirector_.GetCurrentPose());
+				cameraDirector_.SwitchCamera(bossDieCamera_, 1.2f);
+			}
+		}
+		else if (boss.IsDowned())
+		{
+			bossDownCamera_.Update(
+				player->GetWorldPosition(),
+				boss.GetWorldPosition(),
+				deltaTime);
+
+			if (cameraDirector_.GetActiveCamera() != &bossDownCamera_)
+			{
+				bossDownCamera_.Initialize(cameraDirector_.GetCurrentPose());
+				cameraDirector_.SwitchCamera(bossDownCamera_, 1.2f);
+			}
+		}
+		else
+		{
+			playerCamera_.Update(
+				player->GetWorldPosition(),
+				boss.GetWorldPosition(),
+				deltaTime);
+
+			playerCamera_.SetFieldOfView(60.0f);
+
+			if (cameraDirector_.GetActiveCamera() != &playerCamera_)
+			{
+				cameraDirector_.SwitchCamera(playerCamera_, 1.2f);
+			}
+		}
 
 		// =============================
 		// カメラ透過
@@ -674,6 +719,13 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 			}
 		};
 
+	// Room
+	for (const auto* allRoom : room.GetAllModelObjects())
+	{
+		drawModel(*allRoom);
+	}
+
+
 	// BossとPlayer
 	drawModel(boss.GetModelObject());
 	drawModel(player->GetModelObject());
@@ -682,12 +734,6 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	for (const auto& preview : selectPlayers)
 	{
 		drawModel(preview.GetModelObject());
-	}
-
-	// Room
-	for (const auto* allRoom : room.GetAllModelObjects())
-	{
-		drawModel(*allRoom);
 	}
 
 	// Stage

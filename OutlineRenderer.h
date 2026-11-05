@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "DxLib.h"
+#include "OutlineSettings.h"
 
 // シーンをバッファーに描画し、必要に応じてアウトラインを合成する。
 class OutlineRenderer final
@@ -41,6 +42,11 @@ public:
     {
         outlineEnabled_ = enabled;
     }
+
+    void ClearObjectOutlineSettings() const noexcept;
+    void SetObjectOutlineSettings(
+        int objectId,
+        const OutlineSettings& settings) const noexcept;
 
 private:
     int width_{};
@@ -89,18 +95,21 @@ inline void OutlineRenderer::Render(
 
     if (outlineEnabled_)
     {
-        // ② 深度・法線の描画
+        // 毎フレーム深度パスの前にテーブルを現在のグローバル設定で初期化
+        ClearObjectOutlineSettings();
+
+        //  深度・法線の描画
         BeginDepthPass();
         depthDraw();
         EndDepthPass();
 
-        // ③ オブジェクトIDの描画
+        //  オブジェクトIDの描画
         BeginObjectIdPass();
         depthDraw();
         EndObjectIdPass();
     }
 
-    // ④ アウトラインの合成
+    //  アウトラインの合成
     RenderPostProcess();
 
     SetUseSetDrawScreenSettingReset(resetSettings);

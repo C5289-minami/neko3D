@@ -65,6 +65,8 @@
         Vec3 GetWorldPosition() const;
         Vec3 GetWorldRotation() const;
 
+		void SetActive(bool active) { isActive_ = active; }
+		bool IsActive() const { return isActive_; }
     protected:
         std::string actorID_;
         Vec3 position_{};
@@ -72,4 +74,5 @@
         float pitch_{};
         ActorBase* owner_{ nullptr };
         ActorBase* defaultOwner_{ nullptr };
+		bool isActive_{ true };
     };

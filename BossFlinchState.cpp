@@ -13,7 +13,7 @@ void BossFlinchState::Enter()
 {
     remainingSeconds_ = Const::BOSS_FLINCH_HOLD_SECONDS;
     boss_.StopMove();
-    boss_.SetAnimation(BossAnimType::Flach, false);
+    boss_.SetAnimation(BossAnimType::Flach, true);
 }
 
 void BossFlinchState::Tick(float deltaTime)

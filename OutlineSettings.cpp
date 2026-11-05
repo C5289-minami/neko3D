@@ -5,6 +5,9 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 
+OutlineSettings g_outlineSettings{};
+OutlineSettingsTableBuffer g_outlineSettingsTable{};
+
 namespace
 {
     constexpr float MinRadius = 1.0f;

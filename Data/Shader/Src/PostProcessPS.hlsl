@@ -4,12 +4,12 @@ Texture2D g_ObjectIdTexture : register(t2);
 
 SamplerState g_Sampler : register(s0);
 
+#define MAX_OUTLINE_OBJECTS 256
+
 cbuffer OutlineSettings : register(b6)
 {
-    float4 OuterSettings; // x: 太さ, y: 未使用, z: 不透明度, w: padding
-    float4 InnerSettings; // x: 太さ, y: 法線強度, z: 法線閾値, w: 不透明度
-    float4 OutlineColor; // rgb: 線の色, a: 未使用
-    float4 CameraDepthSettings; // 未使用。C++との配置を維持
+    // 1モデルにつき float4 × 4
+    float4 OutlineSettingsTable[(MAX_OUTLINE_OBJECTS + 1) * 4];
 };
 
 struct PS_INPUT
@@ -48,7 +48,8 @@ bool IsOuterBoundary(
     float centerId,
     float centerDepth,
     float sampleId,
-    float sampleDepth)
+    float sampleDepth,
+    float depthStrength)
 {
     // 背景との境界
     if (sampleId < 0.5f)
@@ -62,10 +63,14 @@ bool IsOuterBoundary(
     if (sampleDepth <= 0.000001f)
         return false;
 
-    // DirectXの通常の深度方式では、値が小さい方が手前
+    // 深度検出の感度
+    float depthThreshold =
+        0.0001f * (20.0f / max(depthStrength, 0.001f));
+
     // 現在のピクセルが手前の場合だけ線を描く
-    return centerDepth < sampleDepth - 0.0001f;
+    return centerDepth < sampleDepth - depthThreshold;
 }
+
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
@@ -96,6 +101,23 @@ float4 main(PS_INPUT input) : SV_TARGET
     }
 
     float3 centerNormal = LoadNormal(pixel);
+    
+    // Object IDから対応する設定を取得
+    uint objectId = min(
+    (uint) (centerId + 0.5f),
+    (uint) MAX_OUTLINE_OBJECTS
+);
+
+    uint settingsIndex = objectId * 4;
+
+    float4 OuterSettings =
+    OutlineSettingsTable[settingsIndex];
+
+    float4 InnerSettings =
+    OutlineSettingsTable[settingsIndex + 1];
+
+    float4 OutlineColor =
+    OutlineSettingsTable[settingsIndex + 2];
 
     // ========================================
     // ① 内側：同じオブジェクト内の法線エッジ
@@ -197,10 +219,10 @@ float4 main(PS_INPUT input) : SV_TARGET
         float uD = LoadDepth(uPx);
         float dD = LoadDepth(dPx);
 
-        if (IsOuterBoundary(centerId, centerDepth, lId, lD) ||
-        IsOuterBoundary(centerId, centerDepth, rId, rD) ||
-        IsOuterBoundary(centerId, centerDepth, uId, uD) ||
-        IsOuterBoundary(centerId, centerDepth, dId, dD))
+        if (IsOuterBoundary(centerId, centerDepth, lId, lD, OuterSettings.y) ||
+             IsOuterBoundary(centerId, centerDepth, rId, rD, OuterSettings.y) ||
+             IsOuterBoundary(centerId, centerDepth, uId, uD, OuterSettings.y) ||
+             IsOuterBoundary(centerId, centerDepth, dId, dD, OuterSettings.y))
         {
             outerEdge = 1.0f;
             break;
@@ -224,15 +246,18 @@ float4 main(PS_INPUT input) : SV_TARGET
     // ========================================
     // ④ 不透明度を個別に適用
     // ========================================
+
     float outerAlpha = outerMask * saturate(OuterSettings.z);
     float innerAlpha = innerMask * saturate(InnerSettings.w);
 
-    float finalAlpha = max(outerAlpha, innerAlpha);
+    // アウトラインカラーのAlphaも適用
+    float finalAlpha =
+    max(outerAlpha, innerAlpha) * saturate(OutlineColor.a);
 
     sceneColor.rgb = lerp(
-        sceneColor.rgb,
-        OutlineColor.rgb,
-        finalAlpha
+    sceneColor.rgb,
+    OutlineColor.rgb,
+    finalAlpha
     );
 
     return sceneColor;

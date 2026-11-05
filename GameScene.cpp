@@ -23,7 +23,6 @@ void GameScene::Init()
 {
 	gameContext->Reset();
 	wasTouchingBossBody_ = false;
-	wasDoubleJumpContact_ = false;
 
 	// チュートリアルも、使いたいモデルを登録するだけで同じ判定を利用できる。
 	tutorialCollision_.Clear();
@@ -111,7 +110,6 @@ void GameScene::Update(float deltaTime)
 		GetCurrentGameState() != GameStateType::Battle)
 	{
 		wasTouchingBossBody_ = false;
-		wasDoubleJumpContact_ = false;
 		stateMachine_.Tick(deltaTime);
 		gameContext->GetEffectManager().Update(deltaTime);
 		return;
@@ -145,31 +143,34 @@ void GameScene::Update(float deltaTime)
 		{
 			// ジャンプ接触は一度だけゲージを減らし、二段目だけプレイヤーを戻す。
 			//GameTestCpp見て
-			const bool touchingBody = stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
-			const auto startFloor = player->GetJumpStartFloor();
-			const bool normalJump = !player->IsGrounded() &&
-				player->GetCurrentState() == PlayerStateType::Jump && startFloor != Player::GroundType::None;
-			const bool doubleJump = !player->IsGrounded() &&
-				player->GetCurrentState() == PlayerStateType::DoubleJump;
-			const bool jumpContact = touchingBody && (normalJump || doubleJump);
-			const bool doubleJumpContact = touchingBody && doubleJump;
-			if (jumpContact && !wasTouchingBossBody_)
+			const auto state = player->GetCurrentState();
+			const bool doubleJump = state == PlayerStateType::DoubleJump;
+			const bool jumping = !player->IsGrounded() && (state == PlayerStateType::Jump || doubleJump);
+			const bool touchingBody = jumping && stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
+			
+			// 一度だけボス本体に接触したかどうかを判定する。
+			const bool enteredBossBody = touchingBody && !wasTouchingBossBody_;
+		
+			const bool jumpedFromUpperFloor =
+				player->GetJumpStartFloor() == Player::GroundType::UpFloor;
+			
+			const bool shouldDamageDownGauge = enteredBossBody && jumpedFromUpperFloor;
+			// ダメージを与える条件は、ボス本体に接触した瞬間で、かつ上の床からジャンプしていること。
+			if (shouldDamageDownGauge)
 			{
-				if (normalJump)
-					boss.ApplyDownGaugeDamage(Const::BOSS_JUMP_DOWN_DAMAGE);
-				else if (startFloor == Player::GroundType::UpFloor)
-					boss.ApplyDownGaugeDamage(Const::BOSS_UPPER_DOUBLE_JUMP_DOWN_DAMAGE);
+				float damage = doubleJump
+					? Const::BOSS_UPPER_DOUBLE_JUMP_DOWN_DAMAGE
+					: Const::BOSS_JUMP_DOWN_DAMAGE;
+				boss.ApplyDownGaugeDamage(damage);
 			}
-			if (doubleJumpContact && !wasDoubleJumpContact_)
+			// 二段ジャンプでボス本体に接触した場合、プレイヤーを安全な位置に戻す。
+			const bool shouldReturnPlayer = touchingBody && doubleJump;
+			if (shouldReturnPlayer)
 				player->ReturnToLastSafePosition(stage.GetCollision());
-			wasTouchingBossBody_ = jumpContact;
-			wasDoubleJumpContact_ = doubleJumpContact;
+			wasTouchingBossBody_ = touchingBody;
 		}
 		else
-		{
 			wasTouchingBossBody_ = false;
-			wasDoubleJumpContact_ = false;
-		}
 
 		// playerとbossの衝突判定
 		//const bool touching = Collision::UpdateModelContact(playerModel, bossModel);　これなし

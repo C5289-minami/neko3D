@@ -50,12 +50,14 @@ namespace Camera
 		}
 		virtual void Initialize(const CameraPose& pose)
 		{
-			Vec3 direction{};
-			direction.x = std::sin(pose.yaw) * std::cos(pose.pitch);
-			direction.y = std::sin(pose.pitch);
-			direction.z = std::cos(pose.yaw) * std::cos(pose.pitch);
+			Vec3 direction{
+				std::sin(pose.yaw) * std::cos(pose.pitch),
+				std::sin(pose.pitch),
+				std::cos(pose.yaw) * std::cos(pose.pitch)
+			};
 
 			Initialize(pose.position, pose.position + direction);
+			roll_ = pose.roll;
 		}
 
 		virtual void Reset()
@@ -70,7 +72,7 @@ namespace Camera
 
 		// 現在のカメラ姿勢を取得
 		virtual CameraPose GetPose() const;
-		
+
 
 		// 指定された姿勢をDxLibの描画用カメラに適用する
 		// カメラ内部の状態は変更しない
@@ -492,7 +494,7 @@ namespace Camera
 			{
 				awayFromBoss = awayFromBoss.Normalized();
 			}
-			
+
 			// プレイヤーとボスの中間点を注視点にする
 			const Vec3 desiredPosition =
 				playerPosition

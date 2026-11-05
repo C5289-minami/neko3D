@@ -803,9 +803,6 @@
     <ClCompile Include="ResourceManager.cpp">
       <Filter>20_Resources</Filter>
     </ClCompile>
-    <ClCompile Include="GameScene.cpp">
-      <Filter>30_Scenes\Game</Filter>
-    </ClCompile>
     <ClCompile Include="ResultScene.cpp">
       <Filter>30_Scenes\Result</Filter>
     </ClCompile>
@@ -1078,6 +1075,9 @@
     </ClCompile>
     <ClCompile Include="BossAI.cpp">
       <Filter>40_Gameplay\Actors\Boss\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="GameScene.cpp">
+      <Filter>30_Scenes\Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
