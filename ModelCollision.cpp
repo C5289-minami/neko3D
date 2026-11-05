@@ -27,6 +27,11 @@ void ModelCollision::AddModel(const ModelObject& model, Surface surface)
 	models_.push_back({ &model, surface });
 }
 
+void ModelCollision::AddFallRecoveryFloor(const ModelObject& model)
+{
+	AddModel(model, Surface::Floor);
+	fallRecoveryFloor_ = &model;
+}
 
 void ModelCollision::Clear()
 {
@@ -36,6 +41,7 @@ void ModelCollision::Clear()
 	}
 
 	models_.clear();
+	fallRecoveryFloor_ = nullptr;
 
 }
 
@@ -45,6 +51,8 @@ bool ModelCollision::Refresh()
 
 	for (auto& entry : models_)
 	{
+		const bool needsBounds = entry.surface == Surface::Pillar || entry.surface == Surface::Stand ||
+			(entry.surface == Surface::Floor && entry.model == fallRecoveryFloor_);
 		const int source = RM().GetModel(entry.model->GetModelKey());
 
 		if (source != entry.sourceHandle || source < 0)//古いモデル
@@ -83,9 +91,7 @@ bool ModelCollision::Refresh()
 				}
 			}
 			if (entry.handle < 0) ready = false;
-			else if ((entry.surface == Surface::Pillar ||
-				entry.surface == Surface::Stand) &&
-				!UpdateBounds(entry)) ready = false;
+			else if (needsBounds && !UpdateBounds(entry)) ready = false;
 			continue;
 		}
 
@@ -109,8 +115,7 @@ bool ModelCollision::Refresh()
 				ready = false;
 			}
 		}
-		if (entry.handle >= 0 && (entry.surface == Surface::Pillar ||
-			entry.surface == Surface::Stand) &&
+		if (entry.handle >= 0 && needsBounds &&
 			!entry.boundsReady && !UpdateBounds(entry)) ready = false;
 	}
 	return ready;
@@ -219,7 +224,7 @@ std::vector<ModelObject*> ModelCollision::GetModelsHitByRay(
 
 // 対象のモデルに絞ってから、最も近い衝突を選ぶ。
 bool ModelCollision::RaycastModels(const Vec3& start, const Vec3& end, Physics::RayHit& hit,
-	bool forLanding, bool ignorePillars) const
+	bool forLanding, bool ignorePillars, bool* hitRecoveryFloor) const
 {
 	bool found = false;
 
@@ -237,18 +242,95 @@ bool ModelCollision::RaycastModels(const Vec3& start, const Vec3& end, Physics::
 		if (!found || modelHit.distance < hit.distance)// 近い衝突を優先する
 		{
 			hit = modelHit;
+			if (hitRecoveryFloor)
+				*hitRecoveryFloor = entry.model == fallRecoveryFloor_ && entry.surface == Surface::Floor;
 			found = true;
 		}
 	}
 	return found;
 }
 
-bool ModelCollision::RaycastDown(const Vec3& origin, float maxDistance, Physics::RayHit& hit) const
+bool ModelCollision::RaycastDown(const Vec3& origin, float maxDistance, Physics::RayHit& hit,
+	bool* hitRecoveryFloor) const
 {
+	if (hitRecoveryFloor) *hitRecoveryFloor = false;
 	if (maxDistance <= 0.0f) return false;
-	// return RaycastModels(origin, origin - Vec3::Up() * maxDistance, hit, true);
 
-	return RaycastModels(origin, origin - Vec3::Up() * maxDistance, hit, true);
+	return RaycastModels(origin, origin - Vec3::Up() * maxDistance, hit, true, false, hitRecoveryFloor);
+}
+
+const ModelCollision::Entry* ModelCollision::GetFallRecoveryFloor() const	
+// fallRecoveryFloor_ が登録されているかを確認し、登録されていればその Entry を返す
+{
+	for (const auto& entry : models_)
+	{
+		if (entry.model == fallRecoveryFloor_ && entry.surface == Surface::Floor &&
+			entry.handle >= 0 &&entry.boundsReady) return &entry;
+	}
+	return nullptr;
+}
+
+bool ModelCollision::HasFallRecoverySupport(const Vec3& position, const ModelOb& body,
+	float walkableNormalY) const
+{
+	const auto* floor = GetFallRecoveryFloor();
+	if (!floor || !body.IsValid()) return false;
+
+	// 今の位置を4つコピーして、調べる場所を前後左右に動かす。
+	Vec3 checkPositions[] = { position, position, position, position };
+	checkPositions[0].x += body.radius; // 右
+	checkPositions[1].x -= body.radius; // 左
+	checkPositions[2].z += body.radius; // 奥
+	checkPositions[3].z -= body.radius; // 手前
+
+	// 床を調べる線が、体の半径と余白のぶんだけ上下に届くようにする。
+	const Vec3 rayHeight = Vec3::Up() * (body.radius + body.skin);
+
+	// 上で作った4か所を、1か所ずつ調べる。
+	for (const Vec3& checkPosition : checkPositions)
+	{
+		// 調べる場所の上から下へ、線を飛ばす。
+		const Vec3 rayStart = checkPosition + rayHeight;
+		const Vec3 rayEnd = checkPosition - rayHeight;
+		Physics::RayHit hit{};
+		const bool foundFloor = Physics::Raycast(floor->handle, rayStart, rayEnd, hit);
+
+		// 1か所でも床がなければ、この位置を復帰先として記録しない。
+		if (!foundFloor)
+		{
+			return false;
+		}
+
+		// 床があっても、立てない傾きなら復帰先として記録しない。
+		const bool isWalkable = hit.normal.y >= walkableNormalY;
+		if (!isWalkable)
+		{
+			return false;
+		}
+	}
+
+	// 4か所すべてに立てる床があるので、今のプレイヤーの位置を記録できる。
+	return true;
+}
+
+bool ModelCollision::CanLandOnFallRecoveryFloor(const Vec3& position, float skin,
+	float snapDistance, float walkableNormalY) const
+{
+	const auto* floor = GetFallRecoveryFloor();
+	if (!floor) return false;
+
+	// 保存した高さから、通常の着地判定が届く範囲に1階の床があるか確認する。
+	const Vec3 start = position + Vec3::Up() * skin;
+	const Vec3 end = position - Vec3::Up() * snapDistance;
+	Physics::RayHit hit{};
+	const bool foundFloor = Physics::Raycast(floor->handle, start, end, hit);
+	if (!foundFloor)
+	{
+		return false;
+	}
+
+	const bool isWalkable = hit.normal.y >= walkableNormalY;
+	return isWalkable;
 }
 
 bool ModelCollision::RaycastUp(const Vec3& origin, float maxDistance, Physics::RayHit& hit) const

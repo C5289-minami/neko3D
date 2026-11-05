@@ -145,25 +145,8 @@ void GameTestScene::Update(float deltaTime)
 		player->SetDebugDashEnabled(debugDash);
 #endif
 
-		player->Update(
-			deltaTime,
-			stage.GetCollision(),
-			stage.GetPosition());
-
-		for (auto& obj : stage.GetStageModelObjects())
-			player->CheckFloor(obj, stage.GetModelObject());
-
-		for (auto& pillar : stage.GetPillarModelObjects())
-		{
-			ModelObject deltaPillar = pillar;
-			deltaPillar.SetPosition({
-				0.0f,
-				deltaPillar.GetPosition().y * 2,
-				0.0f
-				});
-
-			player->CheckFloor(deltaPillar, stage.GetModelObject());
-		}
+		player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
+		player->CheckFloor();
 
 #ifdef _DEBUG
 		player->SetDebugDashEnabled(false);
