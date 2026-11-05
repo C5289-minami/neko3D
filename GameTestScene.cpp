@@ -20,7 +20,6 @@ void GameTestScene::Init()
 {
 	gameContext->Reset();
 	wasTouchingBossBody_ = false;
-	wasDoubleJumpContact_ = false;
 
 	tailWhipHitCapsule_ = {};
 
@@ -154,31 +153,28 @@ void GameTestScene::Update(float deltaTime)
 		player->CheckFloor();
 
 		// ジャンプ接触は一度だけゲージを減らし、二段目だけプレイヤーを戻す。
-		const bool touchingBody = stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
-		const auto startFloor = player->GetJumpStartFloor();
-		
-		const bool normalJump = !player->IsGrounded() &&
-			player->GetCurrentState() == PlayerStateType::Jump && startFloor != Player::GroundType::None;
-		
-		const bool doubleJump = !player->IsGrounded() &&
-			player->GetCurrentState() == PlayerStateType::DoubleJump;
-		// ジャンプ接触の判定
-		const bool jumpContact = touchingBody && (normalJump || doubleJump);
-		// 二段ジャンプ接触の判定
-		const bool doubleJumpContact = touchingBody && doubleJump;
-		if (jumpContact && !wasTouchingBossBody_)
-		{
-			if (normalJump)
-				boss.ApplyDownGaugeDamage(Const::BOSS_JUMP_DOWN_DAMAGE);
-			else if (startFloor == Player::GroundType::UpFloor)
-				boss.ApplyDownGaugeDamage(Const::BOSS_UPPER_DOUBLE_JUMP_DOWN_DAMAGE);
-		}
-		// 二段ジャンプ接触で、前回接触していなければ安全な位置へ戻す
-		if (doubleJumpContact && !wasDoubleJumpContact_)
-			player->ReturnToLastSafePosition(stage.GetCollision());
-		// 前回の接触状態を更新
-		wasTouchingBossBody_ = jumpContact;
-		wasDoubleJumpContact_ = doubleJumpContact;
+		const auto state = player->GetCurrentState();
+		const bool doubleJump = state == PlayerStateType::DoubleJump;
+		const bool jumping = !player->IsGrounded() && (state == PlayerStateType::Jump || doubleJump);
+		const bool touchingBody = jumping && stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
+
+			const bool enteredBossBody = touchingBody && !wasTouchingBossBody_;
+			const bool jumpedFromUpperFloor =
+				player->GetJumpStartFloor() == Player::GroundType::UpFloor;
+			const bool shouldDamageDownGauge = enteredBossBody && jumpedFromUpperFloor;
+
+			if (shouldDamageDownGauge)
+			{
+				const float damage = doubleJump
+					? Const::BOSS_UPPER_DOUBLE_JUMP_DOWN_DAMAGE
+					: Const::BOSS_JUMP_DOWN_DAMAGE;
+				boss.ApplyDownGaugeDamage(damage);
+			}
+
+			const bool shouldReturnPlayer = touchingBody && doubleJump;
+			if (shouldReturnPlayer)
+				player->ReturnToLastSafePosition(stage.GetCollision());
+		wasTouchingBossBody_ = touchingBody;
 
 #ifdef _DEBUG
 		player->SetDebugDashEnabled(false);

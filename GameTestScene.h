@@ -48,8 +48,6 @@ private:
     bool showBossBodyCapsule_{ true };
     // 前フレームの接触状態。触れ始めた瞬間だけ復帰させる。
     bool wasTouchingBossBody_{};
-    // ダブルジャンプで触れ始めたときの復帰を一度だけ行う。
-    bool wasDoubleJumpContact_{};
 
     // Rendering
     void DrawScene(bool toonEnabled) const;
