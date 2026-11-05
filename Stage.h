@@ -1,82 +1,75 @@
-﻿// =============================
-// Gameplay/Actors/Stage.h
-// =============================
+﻿
 #pragma once
+
 #include <array>
-#include <cstddef>
+#include <string>
+
 #include "Vector3.h"
 #include "ActorBase.h"
 #include "DrawableObject.h"
-// #include <vector>
-// #include "Player.h"
 #include "ModelCollision.h"
-class Player;
+#include "Motion.h"
 
 class Stage : public ActorBase
 {
 public:
-	Stage();
-	~Stage() = default;
+    Stage();
+    ~Stage() = default;
 
-	// accessor
-	int GetModelHandle() const;
-	ModelObject& GetModelObject() { return stageModel_; }
-	const ModelObject& GetModelObject() const { return stageModel_; }
-	const ModelObject& GetModelSize() const { return stageModel_; }
-	std::array<ModelObject, 3>& GetPillarModelObjects() { return stagePillars_; }
-	const std::array<ModelObject, 3>& GetPillarModelObjects() const { return stagePillars_; }
-	std::array<ModelObject, 2>& GetStageModelObjects() { return stageModels_; }
-	const std::array<ModelObject, 2>& GetStageModelObjects() const { return stageModels_; }
+    // Accessor
+    int GetModelHandle() const;
 
-	// void GetCollisionModelHandles(std::vector<int>& handles) const;//modelの判定をまとめてやる
+    ModelObject& GetModelObject() { return stageModel_; }
+    const ModelObject& GetModelObject() const { return stageModel_; }
 
-	// プレイヤーのカプセルと柱L・M・Sのメッシュを判定する。
+    const ModelObject& GetModelSize() const { return stageModel_; }
 
-	// bool IsHitPillar(const Vec3& capsuleStart, const Vec3& capsuleEnd, float radius) const;
-	// bool FindPillarWall(const Vec3& feetPosition, Vec3& wallNormal, const Vec3& moveDirection = Vec3{},
-	// float* wallTopY = nullptr, bool keepTopContact = false) const;
-	// Vec3 SlideAlongPillars(const Vec3& oldPosition, const Vec3& desiredPosition, bool& touched) const;
+    std::array<ModelObject, 3>& GetPillarModelObjects() { return stagePillars_; }
+    const std::array<ModelObject, 3>& GetPillarModelObjects() const { return stagePillars_; }
 
-	ModelCollision& GetCollision() { return collision_; }
-	const ModelCollision& GetCollision() const { return collision_; }
+    std::array<ModelObject, 3>& GetStageModelObjects() { return stageModels_; }
+    const std::array<ModelObject, 3>& GetStageModelObjects() const { return stageModels_; }
 
-    void DrawDebugUI();
+    ModelCollision& GetCollision() { return collision_; }
+    const ModelCollision& GetCollision() const { return collision_; }
 
-	float GetArenaRadius() const { return arenaRadius_; }
-	float GetArenaSurfaceY() const { return arenaSurfaceY_; }
+    float GetArenaRadius() const { return arenaRadius_; }
+    float GetArenaSurfaceY() const { return arenaSurfaceY_; }
 
+    // Lifecycle
+    void Init() override;
+    void Reset() override;
+    void Update(float deltaTime) override;
+    void Draw() const override;
 
-
-	// lifecycle
-	void Init() override;
-	void Reset()override;
-	void Update(float deltaTime) override;
-	void Draw() const override;
-
+    // Gimmick
+    void StartShake();
 
 private:
-	void UpdateArenaBounds();
+    void UpdateArenaBounds();
+    void UpdateShake(float deltaTime);
 
-	ModelCollision collision_;
+    ModelCollision collision_;
 
+    ModelObject stageModel_;
+    std::array<ModelObject, 3> stagePillars_{};
+    std::array<ModelObject, 3> stageModels_{};
 
-	std::array<ModelObject, 3> stagePillars_{};
+    // 揺れ処理
+    bool isShaking_{ false };
+    bool isReturning_{ false };
 
-	// std::array<int, 3> pillarCollisionHandles_{ -1, -1, -1 };
+    Motion tiltMotion_;
 
-	std::array<ModelObject, 2> stageModels_{};
-	// 当たり判定に使えるモデルハンドル。未準備・失敗時は -1。
-	// std::array<int, 2> stageCollisionHandles_{ -1, -1 };
-	// int groundCollisionHandle_{ -1 };
+    // 初期回転を保持
+    std::array<Vec3, 3> pillarBaseRotations_{};
+    std::array<Vec3, 3> stageBaseRotations_{};
+    std::array<Vec3, 3> pillarBasePositions_{};
+    std::array<Vec3, 3> stageBasePositions_{};
 
-	std::string modelSettingsStatus_;
+    std::string modelSettingsStatus_;
 
-	float HightSize{ 0.0f };
-
-	ModelObject stageModel_;
-
-	float arenaRadius_{};
-	float arenaSurfaceY_{};
-
+    float HightSize{ 0.0f };
+    float arenaRadius_{};
+    float arenaSurfaceY_{};
 };
-

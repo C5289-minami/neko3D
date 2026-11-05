@@ -24,6 +24,8 @@ enum class BossPhase
 class BossClapSkill;
 class BossSlamSkill;
 class BossTailWhipSkill;
+class Player;
+
 
 class Boss : public ActorBase
 {
@@ -39,7 +41,7 @@ public:
 	void TurnToTarget(const Vec3& targetPosition, float deltaTime);
 	void Draw() const override;
 	
-
+	void SetPlayer(Player& player) { ai_.SetPlayer(player); }
 	void ClearActiveSkill() { activeSkill_ = nullptr; }
 
 	void SetMoveDirection(const Vec3& moveDirection, float speed);
@@ -93,6 +95,7 @@ public:
 
 	// Skill
 	bool UseSkill(BossAttackType type);
+	bool IsTailWhipActive() const;
 
 	bool IsTailWhipHitActive() const;
 	Collision::Capsule GetTailWhipHitCapsule(const Vec3& stageCenter, float stageRadius, float attackHeight) const;

@@ -34,7 +34,8 @@ public:
 	bool IsDamaging() const { return GetCurrentState() == PlayerStateType::Damaging; }
 	PlayerStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }
 	bool TakeDamage();
-	void ApplyAvoid(bool restoreHealth);
+	void AddDamage();
+	void ApplyAvoid();
 	float GetAvoidInvTime() const { return avoidInvTime_; }
 
 	// // ステージとの当たり判定込みの更新
@@ -96,6 +97,8 @@ public:
     bool UpdatePillarElevator(float deltaTime);
     void EndPillarElevator();
     void StartPillarExitJump();
+	void ForceFallFromPillar();
+
 
 	// 階層判定
 	enum class GroundType
@@ -105,6 +108,8 @@ public:
 		UpFloor,	// 上の足場に着地したときの判定
 	};
 	GroundType CheckFloor() const;//
+
+	void ApplyKnockback(const Vec3& direction, float power, float duration);
 
 	//ゲッター・セッター
 	float GetWallJumpMoveSpeed() const { return wallJumpMoveSpeed_; }
@@ -179,6 +184,8 @@ private:
 	void UpdateHorizontalVelocity(float deltaTime);//nyuuryokukei
 	void Move(float deltaTime);
 
+	void fallAndResetPosition(float deltaTime,Vec3& PlayerPos);
+
 	// ステージ中心を基準に、円周移動・前後移動の横速度を設定する。
 	void UpdateStageMoveVelocity(float moveSpeed, float deltaTime);
 
@@ -245,6 +252,10 @@ private:
 	AnimationHandle jumpAnimHandle_;
 	AnimationHandle doubleJumpAnimHandle_;
 
+
+	// ノックバック
+	Vec3 knockbackVelocity_{};
+	float knockbackTime_ = 0.0f;
 
 	bool onSecondFloor{ false }; // 上の足場に着地したときの判定
 	bool onFirstFloor{ false };  // 下の足場に着地したときの判定

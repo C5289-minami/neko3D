@@ -2,6 +2,7 @@
 
 #include "BossAI.h"
 #include "Boss.h"
+#include "Player.h"
 
 #include <random>
 #include <algorithm>
@@ -109,6 +110,32 @@ void BossAI::Update(float deltaTime)
     if (attackCooldown_ > 0.0f)
     {
         attackCooldown_ = std::max(0.0f, attackCooldown_ - deltaTime);
+        return;
+    }
+    // ============================
+	// çUåÇÇÃíäëIÇ∆î≠ìÆ
+	// ============================ 
+
+    // ìÒäKÇ…Ç¢ÇÈèÍçáÇÕÅAÇµÇ¡Ç€çUåÇÇóDêÊ
+    if (player_ != nullptr && player_->IsSecondFloor())
+    {
+        // ÉNÅ[ÉãÉ_ÉEÉìÇÕñ≥å¯
+     /*   if (!tailWhipCooldown_.IsReady())
+        {
+            attackCooldown_ = retryInterval_;
+            return;
+        }*/
+
+        if (boss_.UseSkill(BossAttackType::TailWhip))
+        {
+            activeSkillCooldown_ = &tailWhipCooldown_;
+            isSkillActive_ = true;
+        }
+        else
+        {
+            attackCooldown_ = retryInterval_;
+        }
+
         return;
     }
 

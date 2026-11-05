@@ -74,6 +74,8 @@ void GameContext::Init()
 		preview.SetGravityEnabled(false);
 		preview.SetDefMove(false);
 	}
+
+	boss.SetPlayer(*activePlayer);
 }
 
 void GameContext::Reset()
@@ -91,6 +93,7 @@ void GameContext::Reset()
 
 	// 本編Playerを初期Playerに戻す
 	activePlayer = &defaultPlayer;
+	boss.SetPlayer(*activePlayer);
 	activePlayer->Reset();
 
 	// プレビューPlayerを初期状態に戻す
@@ -103,4 +106,5 @@ void GameContext::Reset()
 	}
 
 	debugActorsPaused_ = false;
+
 }

@@ -2,6 +2,7 @@
 #include "GameScene.h"
 #include "GameStateMachine.h"
 #include "DxPlus/Debug.h"
+#include "Consts.h"
 #include "GameContext.h"
 #include <cmath>
 #include <algorithm>
@@ -213,7 +214,7 @@ void GameSceneTutorialState::FocusTutorialCamera(float deltaTime)
 	// ---------------------------------------------------------
 	Vec3 stageToPlayer = playerPos - stagePos;
 	stageToPlayer.y = 0.0f;
-	if (stageToPlayer.LengthSq() < 0.0001f) return;
+	if (stageToPlayer.LengthSq() < Const::EPS) return;
 	stageToPlayer = stageToPlayer.Normalized();
 
 	// カメラが見る場所（プレイヤーの少し上 )
@@ -231,7 +232,7 @@ void GameSceneTutorialState::FocusTutorialCamera(float deltaTime)
 	const Vec3 diff = desiredPosition - pose.position;
 	const float distance = std::sqrt(diff.LengthSq());
 
-	if (distance > 0.0001f)
+	if (distance > Const::EPS)
 	{
 		float speed = cameraFollowSpeed;
 
@@ -273,7 +274,7 @@ Camera::CameraPose GameSceneTutorialState::GetTutorialCameraPose()
 	Vec3 stageToPlayer = playerPos - stagePos;
 	stageToPlayer.y = 0.0f;
 
-	if (stageToPlayer.LengthSq() < 0.0001f)
+	if (stageToPlayer.LengthSq() < Const::EPS)
 		stageToPlayer = Vec3(0.0f, 0.0f, 1.0f);
 	else
 		stageToPlayer = stageToPlayer.Normalized();

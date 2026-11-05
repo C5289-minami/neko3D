@@ -5,7 +5,7 @@
 #include "DxLib.h"
 #include <algorithm>
 #include <cmath>
-#include "DxPlus/DxPlus.h"
+#include "Consts.h"
 
 
 ModelCollision::~ModelCollision()
@@ -515,8 +515,8 @@ bool ModelCollision::FindWall(const Vec3& feetPosition, const ModelOb& modelOb, 
 			const float distance = std::abs(signedDistance);
 
 			// 角で複数の面に触れた場合も、入力が向かっている面を優先する。
-			if (!foundWall || wallDirection < bestDirection - DxPlus::EPS ||
-				(std::abs(wallDirection - bestDirection) <= DxPlus::EPS &&
+			if (!foundWall || wallDirection < bestDirection - Const::EPS ||
+				(std::abs(wallDirection - bestDirection) <= Const::EPS &&
 					distance < bestDistance))
 			{
 				wallNormal = outward;           // 壁の法線は、プレイヤーの進行方向に向かうようにそろえる。
@@ -622,7 +622,7 @@ bool ModelCollision::FindStandSide(const Vec3& feetPosition, const ModelOb& mode
 			const float wallDirection = Vec3::Dot(direction, normal);
 
 			// 壁から離れるときや、壁に沿って進むときは邪魔しない。
-			if (direction.LengthSq() > 0.0f && wallDirection >= -DxPlus::EPS) continue;
+			if (direction.LengthSq() > 0.0f && wallDirection >= -Const::EPS) continue;
 
 			// 角で二つの壁に触れたら、進もうとしているほうの壁を優先する。
 			if (!found || wallDirection < bestDirection)
@@ -702,7 +702,7 @@ Vec3 ModelCollision::SlideAlongWalls(const Vec3& oldPosition, const Vec3& desire
 	{
 		const float length = remaining.Length();
 
-		if (length <= DxPlus::EPS) break;
+		if (length <= Const::EPS) break;
 
 		const Vec3 direction = remaining / length;
 		const Vec3 right{ direction.z, 0.0f, -direction.x };
@@ -725,7 +725,7 @@ Vec3 ModelCollision::SlideAlongWalls(const Vec3& oldPosition, const Vec3& desire
 
 			const float approaching = -Vec3::Dot(direction, hit.normal);
 
-			if (approaching <= DxPlus::EPS) continue;
+			if (approaching <= Const::EPS) continue;
 
 			// 壁に体が埋まらんように体の幅の分だけ手前で止める
 			const float clearance = modelOb.radius + modelOb.skin +

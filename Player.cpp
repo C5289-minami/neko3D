@@ -263,6 +263,18 @@ void Player::UpdateMovement(float deltaTime)
 	{
 		UpdateHorizontalVelocity(deltaTime);
 
+		if (knockbackTime_ > 0.0f)
+		{
+			knockbackTime_ = (std::max)(0.0f, knockbackTime_ - elapsed);
+
+			velocity_.x = knockbackVelocity_.x;
+			velocity_.z = knockbackVelocity_.z;
+		}
+		else
+		{
+			knockbackVelocity_ = {};
+		}
+
 		if (gravityEnabled_ && GetCurrentState() != PlayerStateType::Climbing)
 		{
 			velocity_.y -= Const::GRAVITY * deltaTime;
@@ -270,6 +282,7 @@ void Player::UpdateMovement(float deltaTime)
 		Move(deltaTime);
 		isGrounded_ = false;
 	}
+	fallAndResetPosition(deltaTime,position_);
 }
 
 // void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCenter)
@@ -317,8 +330,11 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 		float topY{};
 		if (collision.GetPillarBounds(elevatorPillar_, elevatorCenter_, topY))
 			elevatorTopY_ = topY - Const::PLAYER_ELEVATOR_TOP_OFFSET;
-		else
+		else if (GetPosition().y > elevatorTopY_)
+		{
 			EndPillarElevator();
+			input_.isMoving = false;
+		}
 	}
 	if (canStartElevator && touchingWall_)
 	{
@@ -504,16 +520,18 @@ void Player::Draw() const
 bool Player::TakeDamage()
 {
 	if (IsDead() || IsDamaging() || avoidInvTime_ > 0.0f) return false;
-	if (stateMachine_.TryAvoid()) return false;
 
-	--health_;
 	stateMachine_.ChangeState(PlayerStateType::Damaging);
 	return true;
 }
 
-void Player::ApplyAvoid(bool restoreHealth)
+void Player::AddDamage()
 {
-	if (restoreHealth) ++health_;
+	--health_;
+}
+
+void Player::ApplyAvoid()
+{
 	avoidInvTime_ = AvoidInvTime;
 }
 
@@ -564,7 +582,7 @@ Vec3 Player::GetWorldMoveDirection(const Vec3& moveDir) const//Plyaerがどこ�
 	Vec3 forward = movementCenter_ - GetPosition();
 	forward.y = 0.0f;
 
-	if (forward.LengthSq() < 0.000001f)
+	if (forward.LengthSq() < Const::EPS)
 		forward = Vec3(std::sin(GetYaw()), 0.0f, std::cos(GetYaw()));
 	else
 		forward = forward.Normalized();
@@ -708,6 +726,7 @@ void Player::UpdateHorizontalVelocity(float deltaTime)
 	{
 		UpdateStageMoveVelocity(moveSpeed, deltaTime);
 	}
+
 }
 
 void Player::Move(float deltaTime)
@@ -716,6 +735,20 @@ void Player::Move(float deltaTime)
 	position_ += velocity_ * deltaTime;
 	// 上下の速度は向きに含めず、横に進む方向へ回転する。
 	TurnTowards(Vec3(velocity_.x, 0.0f, velocity_.z), deltaTime);
+}
+
+void Player::fallAndResetPosition(float deltaTime,Vec3& PlayerPos)
+{
+	position_ = PlayerPos;
+
+	Vec3 oldPos = position_;
+
+	Vec3 pos= model_.GetPosition();
+	if (position_.y <= pos.y-100.0f)
+	{
+		position_ = oldPos;
+	}
+
 }
 
 void Player::UpdateStageMoveVelocity(float moveSpeed, float deltaTime)
@@ -727,7 +760,7 @@ void Player::UpdateStageMoveVelocity(float moveSpeed, float deltaTime)
 	Vec3 forward = movementCenter_ - position_;
 	forward.y = 0.0f;
 	const float radius = forward.Length();
-	if (radius < 0.001f)
+	if (radius <Const::EPS)
 	{
 		forward = Vec3(std::sin(GetYaw()), 0.0f, std::cos(GetYaw()));
 	}
@@ -937,4 +970,18 @@ void Player::StartPillarExitJump()
 	isGrounded_ = false;
 	elevatorInputConsumed_ = true;
 	coyoteTimeRemaining_ = 0.0f;
+}
+
+void Player::ForceFallFromPillar()
+{
+	if (!IsPillarElevatorActive()) return;
+
+	EndPillarElevator();
+	StopMove();
+
+	velocity_.y = 0.0f;
+	isGrounded_ = false;
+	coyoteTimeRemaining_ = 0.0f;
+
+	stateMachine_.ChangeState(PlayerStateType::Jump);
 }

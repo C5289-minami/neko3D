@@ -18,6 +18,8 @@ public:
     void DrawImGui() override;
     void End() override;
 
+	void UpdateTailWhipGimmick();
+
 private:
     // Camera
     Camera::TargetCamera playerCamera_;
@@ -44,4 +46,6 @@ private:
     void DrawScene(bool toonEnabled) const;
     void RenderDepth() const;
     void DrawAttackSphereDebug() const;
+
+	bool wasTailWhipActive_{ false }; // 前フレームで尻尾攻撃が有効だったかどうか
 };

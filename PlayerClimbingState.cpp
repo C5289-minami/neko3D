@@ -33,8 +33,10 @@ void PlayerClimbingState::Tick(float deltaTime)
 	// 柱の上端に到達したら、ジャンプ状態に遷移する。
     if (player_.UpdatePillarElevator(deltaTime))
     {
+        bool shouldExitJump = !player_.GetInput().isMoving;
         stateMachine_.ChangeState(PlayerStateType::Jump);
-        player_.StartPillarExitJump();
+        if (shouldExitJump)
+            player_.StartPillarExitJump();
         // 登らせる補正をかける
 		Vec3 elevatorCenter = player_.GetPillarElevatorCenter();
         elevatorCenter.y = player_.GetPosition().y; // Y座標は現在の位置を維持
