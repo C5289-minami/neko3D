@@ -14,8 +14,8 @@ void PlayerClimbingState::Enter()
     player_.SetVerticalSpeed(0.0f);
     // pushTime_ = 0.0f;
     // pushDirection_ = {};
-    // 壁登り用のアニメーションを用意するまでは、既存の待機アニメーションを使う。
-    player_.SetAnimation(PlayerAnimType::Idle, true);
+
+    player_.SetAnimation(PlayerAnimType::Walk, true);
    
     DxPlus::Debug::SetFormatString(L"PlayerClimbingState::Enter");
 }
@@ -23,6 +23,7 @@ void PlayerClimbingState::Enter()
 
 void PlayerClimbingState::Tick(float deltaTime)
 {
+    player_.UpdateAnimation(deltaTime * 2.0f);
 	// 柱の自動上昇が終了したら、ジャンプ状態に遷移する。
     if (!player_.IsPillarElevatorActive() || !player_.IsGravityEnabled())
     {
@@ -43,6 +44,7 @@ void PlayerClimbingState::Tick(float deltaTime)
         player_.SetPosition(elevatorCenter);
         stateMachine_.NotifyEvent(PlayerActionEvent::ReachedPillarTop);
     }
+    DxPlus::Debug::SetFormatString(L"PlayerClimbingState::Tick");
 }
 
 void PlayerClimbingState::Exit()

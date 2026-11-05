@@ -89,19 +89,19 @@ public:
 	void StartWallJump();
 
 
-    // 壁登り・滑り落ち・壁キックは、それぞれ専用の速度を持つ。
-    float GetClimbingSpeed() const { return climbingSpeed_; }
-    float GetWallSlideSpeed() const { return wallSlideSpeed_; }
-    void SetClimbingSpeed(float value);
-    void SetWallSlideSpeed(float value);
-    void ResetClimbingSpeeds();
+	// 壁登り・滑り落ち・壁キックは、それぞれ専用の速度を持つ。
+	float GetClimbingSpeed() const { return climbingSpeed_; }
+	float GetWallSlideSpeed() const { return wallSlideSpeed_; }
+	void SetClimbingSpeed(float value);
+	void SetWallSlideSpeed(float value);
+	void ResetClimbingSpeeds();
 
-    //壁のぼり
-    bool IsPillarElevatorActive() const { return elevatorPillar_ != nullptr; }
-    void StartPillarElevator(const ModelObject* pillar, const Vec3& center, float topY);
-    bool UpdatePillarElevator(float deltaTime);
-    void EndPillarElevator();
-    void StartPillarExitJump();
+	//壁のぼり
+	bool IsPillarElevatorActive() const { return elevatorPillar_ != nullptr; }
+	void StartPillarElevator(const ModelObject* pillar, const Vec3& center, float topY);
+	bool UpdatePillarElevator(float deltaTime);
+	void EndPillarElevator();
+	void StartPillarExitJump();
 	void ForceFallFromPillar();
 
 	// camera
@@ -187,12 +187,12 @@ public:
 
 	// キャラクター設定
 	CharData& GetCharData() { return charData; }
-	const CharData& GetCharData() const{ return charData; }
+	const CharData& GetCharData() const { return charData; }
 	void SetCharData(const CharData& data) { charData = data; }
 	void SetModelKey(const std::wstring& key);
 
 	PlayerStateMachine& GetStateMachine() { return stateMachine_; }
-    const PlayerStateMachine& GetStateMachine() const { return stateMachine_; }
+	const PlayerStateMachine& GetStateMachine() const { return stateMachine_; }
 
 	void SetAnimation(
 		PlayerAnimType::Type type,
@@ -203,7 +203,7 @@ public:
 	AnimationHandle GetAnimationHandle(PlayerAnimType::Type type) const;
 	ModelAnimation& GetAnimation() { return animation_; }
 	void UpdateAnimation(float deltaTime);
-	
+
 	Vec3 GetPillarElevatorCenter() const { return elevatorCenter_; }
 private:
     void UpdateMovement(float deltaTime);
@@ -214,10 +214,13 @@ private:
 	void UpdateHorizontalVelocity(float deltaTime);//nyuuryokukei
 	void Move(float deltaTime);
 
-	void fallAndResetPosition(float deltaTime,Vec3& PlayerPos);
+	void fallAndResetPosition(float deltaTime, Vec3& PlayerPos);
 
 	// ステージ中心を基準に、円周移動・前後移動の横速度を設定する。
 	void UpdateStageMoveVelocity(float moveSpeed, float deltaTime);
+#ifdef _DEBUG
+	void PlayDebugKedamaEffect() const;
+#endif
 
 	int health_{ MaxHealth };
 	float avoidInvTime_{ 0.0f };
@@ -235,7 +238,7 @@ private:
 	float wallJumpSpeed_{ Const::PLAYER_WALL_JUMP_SPEED };
 	float kari_max_jissou_ = UltimateGaugeMax;
 
-    Vec3 startPosition_{}; // Rで戻る最初の場所。
+	Vec3 startPosition_{}; // Rで戻る最初の場所。
 	Vec3 lastGroundedPosition_{};
 	Vec3 lastFirstFloorPosition_{};
 	Vec3 movementCenter_{}; // 足場の中心
@@ -243,10 +246,10 @@ private:
 	Vec3 velocity_{ 0.0f, 0.0f, 0.0f }; // 当たり判定で補正する前の移動速度（ワールド座標）
 	float moveRate_{ 1.0f }; // 移動速度の倍率
 
-    //const float Wall_MARGIN = Const::PLAYER_RADIUS + Const::PLAYER_HEIGHT;
-    //おれらにはModelCollisionのやつがあることを思い出した
-    // bool touchingPillar = false;
-    bool touchingModel_ = false;
+	//const float Wall_MARGIN = Const::PLAYER_RADIUS + Const::PLAYER_HEIGHT;
+	//おれらにはModelCollisionのやつがあることを思い出した
+	// bool touchingPillar = false;
+	bool touchingModel_ = false;
 	bool isGrounded_{ false };
 	// bool wasTouchingPillar_{ false };
 	bool wasTouchingModel_{ false };

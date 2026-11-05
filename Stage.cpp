@@ -108,8 +108,16 @@ void Stage::Reset()
 	for (const auto& model : stagePillars_)
 		collision_.AddModel(model, ModelCollision::Surface::Pillar);
 
+	// 当たり判定を登録
+	collision_.Clear();
+
+	collision_.AddFallRecoveryFloor(stageModel_);
+
 	for (const auto& model : stageModels_)
 		collision_.AddModel(model, ModelCollision::Surface::Stand);
+
+	for (const auto& model : stagePillars_)
+		collision_.AddModel(model, ModelCollision::Surface::Pillar);
 
 	collision_.Refresh();
 

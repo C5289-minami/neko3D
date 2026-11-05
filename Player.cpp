@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include "Sound3D.h"
+#include "EffectManager.h"
 #include <algorithm>
 #include <iostream>
 
@@ -43,8 +44,8 @@ void Player::SetAnimation(
 	float blendSeconds 
 )
 {
-	if (currentAnimType_ == type && currentAnimLoop_ == loop)
-		return;
+	//if (currentAnimType_ == type && currentAnimLoop_ == loop)
+	//	return;
 
 	currentAnimType_ = type;
 	currentAnimLoop_ = loop;
@@ -200,10 +201,26 @@ void Player::RestorePosition(const Vec3& position)
 	elevatorInputConsumed_ = input_.jumpPressing;
 }
 
+#ifdef _DEBUG
+void Player::PlayDebugKedamaEffect() const
+{
+	const int effectHandle = RM().GetEffect(ResourceKeys::Effect_Kedama);
+	if (effectHandle < 0) return;
+
+	const Vec3 spawnPosition =
+		GetWorldPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT * 0.5f);
+	EffectManager::PlayEffect(effectHandle, spawnPosition, GetWorldRotation().y);
+}
+#endif
+
 void Player::Update(float deltaTime)
 {
 	input_.Update();
 #ifdef _DEBUG
+	if (input_.shiftRKeyPressed)
+	{
+		PlayDebugKedamaEffect();
+	}
 	if (input_.RkeyPressed)
 	{
 		ResetPosition();
@@ -313,6 +330,10 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 
 	input_.Update();
 #ifdef _DEBUG
+	if (input_.shiftRKeyPressed)
+	{
+		PlayDebugKedamaEffect();
+	}
 	if (input_.RkeyPressed)
 	{
 		ResetPosition();
@@ -922,16 +943,19 @@ bool Player::TryJump()
 {
 	if (CanGroundJump())
 	{
+
 		stateMachine_.ChangeState(PlayerStateType::Jump);
 		JumpAction();
 		stateMachine_.NotifyEvent(PlayerActionEvent::Jumped);
 		return true;
 	}
+
 	if (CanDoubleJump())
 	{
 		stateMachine_.ChangeState(PlayerStateType::DoubleJump);
 		return true;
 	}
+
 	return false;
 }
 
@@ -961,6 +985,8 @@ void Player::SetGravityEnabled(bool enabled)
 
 void Player::StartPillarElevator(const ModelObject* pillar, const Vec3& center, float topY)
 {
+	static const float PILLAR_RADIUS = 55.0f;
+
 	float recordFirstPosY = topY - Const::PLAYER_ELEVATOR_TOP_OFFSET;
 	if (!pillar || !gravityEnabled_ || IsDamaging() ||
 		IsPillarElevatorActive()) return;
@@ -979,12 +1005,21 @@ void Player::StartPillarElevator(const ModelObject* pillar, const Vec3& center, 
 	elevatorInputConsumed_ = true;
 	coyoteTimeRemaining_ = 0.0f;
 
-	// 位置を変えないようにする
-	//position_.x = center.x;
-	//position_.z = center.z;
-	
-	// 柱に体を向ける
-	yaw_ = std::atan2(center.x - position_.x, center.z - position_.z);
+	Vec3 dir = position_ - center;
+	dir.y = 0.0f;
+
+	if (dir.LengthSq() <= Const::EPS) return;
+
+	dir = dir.Normalized();
+
+	position_.x = center.x + dir.x * PILLAR_RADIUS;
+	position_.z = center.z + dir.z * PILLAR_RADIUS;
+
+	// 柱の中心を向く
+	SetYaw(std::atan2(
+		center.x - position_.x,
+		center.z - position_.z
+	));
 
 	isGrounded_ = false;
 	stateMachine_.ChangeState(PlayerStateType::Climbing);
@@ -1000,7 +1035,8 @@ bool Player::UpdatePillarElevator(float deltaTime)
 	//position_.z = elevatorCenter_.z;
 
 	// Animが来てないので仮で上に向ける
-	pitch_ = -DX_PI_F * 0.5f;
+	SetRotation(Vec3(-DX_PI_F * 0.5f, GetYaw(), 0.0f));
+
 
 	if (deltaTime <= 0.0f) return false;
 	position_.y = (std::min)(elevatorTopY_, position_.y + climbingSpeed_ * deltaTime);
@@ -1012,6 +1048,7 @@ void Player::EndPillarElevator()
 	elevatorPillar_ = nullptr;
 
 	pitch_ = 0.0f;
+	SetRotation(Vec3(0.0f, GetYaw(), 0.0f));
 }
 
 void Player::StartPillarExitJump()

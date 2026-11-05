@@ -107,7 +107,9 @@ void GameTestScene::Update(float deltaTime)
 
 	wasFreeCameraToggleDown_ = toggleDown;
 
-	if (DxLib::CheckHitKey(KEY_INPUT_R) != 0)
+	const bool shiftHeld = DxLib::CheckHitKey(KEY_INPUT_LSHIFT) != 0 ||
+		DxLib::CheckHitKey(KEY_INPUT_RSHIFT) != 0;
+	if (DxLib::CheckHitKey(KEY_INPUT_R) != 0 && !shiftHeld)
 		freeCamera_.ResetView();
 
 	if (DxLib::CheckHitKey(KEY_INPUT_F) != 0)
@@ -432,6 +434,7 @@ void GameTestScene::DrawImGui()
 
 #ifdef _DEBUG
 		ImGui::TextUnformatted(u8"Shift長押し：通常移動の速度を5倍（GameTest限定）");
+		ImGui::TextUnformatted(u8"Shift + R：プレイヤー位置に毛玉エフェクト再生");
 #endif
 
 		ImGui::Text("Pillar contact: %s", player->IsTouchingWall() ? "True" : "False");
