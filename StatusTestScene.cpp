@@ -86,6 +86,7 @@ void StatusTest::Update(float deltaTime)
 		player->GetPosition(), player->GetRotation());
 	Collision::UpdateModelContact(playerModel, testModel_);
 	player->GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
+	gameContext->GetEffectManager().Update(deltaTime);
 
 }
 
@@ -205,6 +206,7 @@ void StatusTest::DrawScene(bool toonEnabled) const
 
 		testModel_.Draw();
 		gameContext->GetPlayer()->Draw();
+		gameContext->GetEffectManager().Draw();
 
 
 		return;
@@ -236,4 +238,5 @@ void StatusTest::DrawScene(bool toonEnabled) const
 
 
 	modelToonRenderer_.EndPass();
+	gameContext->GetEffectManager().Draw();
 }

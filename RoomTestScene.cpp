@@ -84,6 +84,7 @@ void RoomTestScene::Update(float deltaTime)
 	player->Update(deltaTime * 0.5f);
 	player->SetPosition({ player->GetPosition().x, posY, player->GetPosition().z });
 	room.Update(deltaTime);
+	gameContext->GetEffectManager().Update(deltaTime);
 
 
 	// --- F2 でシェーダー全体のON/OFFを切り替える ---
@@ -452,4 +453,5 @@ void RoomTestScene::DrawScene(bool toonEnabled) const
 	}
 
 	modelToonRenderer_.EndPass();
+	effectManager.Draw();
 }

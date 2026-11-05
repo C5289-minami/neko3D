@@ -14,6 +14,7 @@ struct PlayerInput
 	bool enterPressed{ false };  // Enter / STARTを押した瞬間
 	bool enterPressing{ false }; // Enter / STARTを押している間
     bool RkeyPressed{ false };  // Rキーを押した瞬間
+	bool shiftRKeyPressed{ false }; // Shift + Rキーを押した瞬間（デバッグ用）
 	bool attackPressed{ false };
 	bool ultimatePressed{ false };
 #ifdef _DEBUG

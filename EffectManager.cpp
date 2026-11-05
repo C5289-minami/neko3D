@@ -16,12 +16,18 @@ void EffectManager::Draw() const
 }
 
 
+int EffectManager::PlayEffect(int key, const Vec3& position, float yaw)
+{
+	if (key < 0) return -1;
+	// エフェクトを再生する
+	const int playingHandle = PlayEffekseer3DEffect(key);
+	if (playingHandle < 0) return -1;
+	SetRotationPlayingEffekseer3DEffect(playingHandle, 0.0f, yaw, 0.0f);
+	SetPosPlayingEffekseer3DEffect(playingHandle, position.x, position.y, position.z);
+	return playingHandle;
+}
+
 void EffectManager::PlayHit(int key,const Vec3& position,float yaw)
 {
-	if(key < 0) return;
-	// エフェクトを再生する
-	int playingHandle = PlayEffekseer3DEffect(key);
-	if(playingHandle < 0) return;
-	SetRotationPlayingEffekseer3DEffect(playingHandle,0.0f, yaw,0.0f);
-	SetPosPlayingEffekseer3DEffect(playingHandle, position.x, position.y, position.z);
+	PlayEffect(key, position, yaw);
 }
