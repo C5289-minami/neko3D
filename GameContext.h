@@ -101,7 +101,7 @@ private:
 
     Boss boss;
 
-    bool tailWhipSoundPlaying_{};
+    bool tailWhipSweepActive_{};
     bool debugActorsPaused_{};
     std::string transformInitialStatus_;
 

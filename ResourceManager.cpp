@@ -117,8 +117,11 @@ void ResourceManager::LoadAll()
 	LoadSound(ResourceKeys::Sound_SelectGishi, L"./Data/Sounds/gishi.mp3");
 	LoadSound(ResourceKeys::Sound_SelectYu, L"./Data/Sounds/yu.mp3");
 
+	LoadSound(ResourceKeys::Sound_Clap, L"./Data/Sounds/clap.mp3");
+	LoadSound(ResourceKeys::Sound_Slam, L"./Data/Sounds/slam.mp3");
+
 	SetCreate3DSoundFlag(TRUE);
-	LoadSound(ResourceKeys::Sound_TailWhip, L"./Data/Sounds/StartBGM.mp3");
+	LoadSound(ResourceKeys::Sound_TailWhip, L"./Data/Sounds/tailwhip.mp3");
 	SetCreate3DSoundFlag(FALSE);
 
 

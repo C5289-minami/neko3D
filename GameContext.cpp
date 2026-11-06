@@ -102,18 +102,16 @@ void GameContext::UpdateTailWhipSound(const Collision::Capsule& hitCapsule)
 {
 	if (hitCapsule.radius <= 0.0f)
 	{
-		StopTailWhipSound();
+		tailWhipSweepActive_ = false;
 		return;
 	}
 
 	const int sound = RM().GetSound(ResourceKeys::Sound_TailWhip);
-	if (!tailWhipSoundPlaying_)
+	if (!tailWhipSweepActive_)
 	{
-		// Skip the silence before StartBGM's first beat.
-		constexpr int startTimeMs = 760;
 		const float hearingRadius = stage.GetArenaRadius() * 2.0f;
-		SoundManager::PlaySE3D(sound, hitCapsule.end, hearingRadius, startTimeMs);
-		tailWhipSoundPlaying_ = true;
+		SoundManager::PlaySE3D(sound, hitCapsule.end, hearingRadius);
+		tailWhipSweepActive_ = true;
 	}
 	else
 	{
@@ -123,9 +121,10 @@ void GameContext::UpdateTailWhipSound(const Collision::Capsule& hitCapsule)
 
 void GameContext::StopTailWhipSound()
 {
-	if (!tailWhipSoundPlaying_) return;
-	SoundManager::StopSE(RM().GetSound(ResourceKeys::Sound_TailWhip));
-	tailWhipSoundPlaying_ = false;
+	const int sound = RM().GetSound(ResourceKeys::Sound_TailWhip);
+	if (sound >= 0 && DxLib::CheckSoundMem(sound) == 1)
+		SoundManager::StopSE(sound);
+	tailWhipSweepActive_ = false;
 }
 
 void GameContext::Reset()

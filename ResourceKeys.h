@@ -95,6 +95,8 @@ namespace ResourceKeys
 	inline constexpr const wchar_t* Sound_SelectTaka = L"SoundSelectTaka";
 	inline constexpr const wchar_t* Sound_SelectGishi = L"SoundSelectGishi";
 	inline constexpr const wchar_t* Sound_SelectYu = L"SoundSelectYu";
+	inline constexpr const wchar_t* Sound_Clap = L"SoundClap";
+	inline constexpr const wchar_t* Sound_Slam = L"SoundSlam";
 	inline constexpr const wchar_t* Sound_TailWhip = L"SoundTailWhip";
 
 	// ===== Fonts =====
