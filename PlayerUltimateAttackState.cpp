@@ -18,6 +18,7 @@ void PlayerUltimateAttackState::Enter()
     player_.StopMove();
     player_.SetAnimation(PlayerAnimType::Ult_Attack, false);
     player_.GetAnimation().Start();
+    player_.RequestUltimateShot();
     DxPlus::Debug::SetFormatString(L"state:ultimate_attack");
 }
 
