@@ -1,5 +1,6 @@
-﻿
+
 #include "GameSceneBattleState.h"
+
 #include "GameScene.h"
 #include "GameStateMachine.h"
 #include "GameContext.h"
@@ -8,11 +9,14 @@
 #include "ResourceKeys.h"
 #include "StatusUI.h"
 #include "Collision.h"
-#include "CameraShakeType.h"
-#include "Consts.h"
 #include "UIManager.h"
+#include "CameraShakeType.h"
 
 #include <algorithm>
+
+// ============================================================
+// Constructor
+// ============================================================
 
 GameSceneBattleState::GameSceneBattleState(
     GameStateMachine& gameStateMachine,
@@ -21,11 +25,16 @@ GameSceneBattleState::GameSceneBattleState(
 {
 }
 
+// ============================================================
+// Enter
+// ============================================================
+
 void GameSceneBattleState::Enter()
 {
     auto* gameContext = gameScene_.GetGameContext();
     auto* player = gameContext->GetPlayer();
     auto& boss = gameContext->GetBoss();
+
     gameContext->ClearUltimateProjectiles();
 
     wasTouchingBossBody_ = false;
@@ -39,20 +48,24 @@ void GameSceneBattleState::Enter()
     gameScene_.GetTutorialChecklist().SetVisible(false);
     player->GetStateMachine().SetEventCallback({});
 
-    gameScene_.SetBattleEventActive(true);
-    gameScene_.StartBattleEventBarsIn();
-
-    // バトル用カメラへ切り替える
-    gameScene_.GetCameraDirector().SwitchCamera(
-        gameScene_.GetTargetCamera(),
-        0.8f
-    );
-    gameScene_.GetTargetCamera().SetFieldOfView(BattleIntroStartFov);
-
+    // 開幕演出中はプレイヤー操作禁止
     player->SetDefMove(false);
     player->SetControlLocked(true);
     player->StopMove();
 
+    // バトル開始演出
+    gameScene_.SetBattleEventActive(true);
+    gameScene_.StartBattleEventBarsIn();
+
+    // バトル用カメラへ切り替え
+    gameScene_.GetCameraDirector().SwitchCamera(
+        gameScene_.GetTargetCamera(),
+        0.8f
+    );
+
+    gameScene_.GetTargetCamera().SetFieldOfView(BattleIntroStartFov);
+
+    // 開幕演出中はボスAIを停止
     boss.SetAIActive(false);
 
     StatusUI::InitBoss();
@@ -60,6 +73,10 @@ void GameSceneBattleState::Enter()
 
     gameScene_.SetDrawPlayerShadow(true);
 }
+
+// ============================================================
+// Tick
+// ============================================================
 
 void GameSceneBattleState::Tick(float deltaTime)
 {
@@ -69,28 +86,32 @@ void GameSceneBattleState::Tick(float deltaTime)
     auto& boss = gameContext->GetBoss();
     auto& stage = gameContext->GetStage();
 
-    // =============================
-    // 開幕演出。Playerは入力を止めたまま、重力と床の当たり判定だけ更新する。
-    // =============================
+    auto& cameraDirector = gameScene_.GetCameraDirector();
+    auto& targetCamera = gameScene_.GetTargetCamera();
+
+    // ========================================================
+    // 開幕演出
+    // ========================================================
+
     if (!battleStarted_)
     {
         stage.Update(deltaTime);
 
+        // 操作ロック中もプレイヤーの物理更新は行う
         player->Update(
             deltaTime,
             stage.GetCollision(),
             stage.GetPosition()
         );
 
+        player->StopMove();
         player->CheckFloor();
 
         boss.Update(deltaTime);
 
-        auto& targetCamera = gameScene_.GetTargetCamera();
-
+        // ボスの注視位置
         Vec3 cameraTarget = boss.GetWorldPosition();
 
-        // 回転終了後のFOV演出中は、注視位置を300上げる
         if (battleIntroTurnFinished_)
         {
             cameraTarget.y += 300.0f;
@@ -102,9 +123,10 @@ void GameSceneBattleState::Tick(float deltaTime)
             deltaTime
         );
 
-        // =============================
+        // ----------------------------------------------------
         // 最初の1.5秒待機
-        // =============================
+        // ----------------------------------------------------
+
         if (battleIntroWaitRemaining_ > 0.0f)
         {
             battleIntroWaitRemaining_ = (std::max)(
@@ -112,9 +134,10 @@ void GameSceneBattleState::Tick(float deltaTime)
                 battleIntroWaitRemaining_ - deltaTime
                 );
         }
-        // =============================
+        // ----------------------------------------------------
         // ボスがプレイヤーの方向を向く
-        // =============================
+        // ----------------------------------------------------
+
         else if (!battleIntroTurnFinished_)
         {
             battleIntroTurnFinished_ = boss.TurnToTarget(
@@ -122,9 +145,10 @@ void GameSceneBattleState::Tick(float deltaTime)
                 deltaTime
             );
         }
-        // =============================
-        // 回転後の待ち時間にFOVを開始値から終了値へ狭める。
-        // =============================
+        // ----------------------------------------------------
+        // 回転終了後のカメラ演出
+        // ----------------------------------------------------
+
         else
         {
             battleIntroFinalWaitElapsed_ += deltaTime;
@@ -140,34 +164,58 @@ void GameSceneBattleState::Tick(float deltaTime)
 
             targetCamera.SetFieldOfView(fov);
 
-            // =============================
-            // 開幕演出終了判定
-            // =============================
+            // ------------------------------------------------
+            // 開幕演出終了
+            // ------------------------------------------------
+
             if (battleIntroFinalWaitElapsed_ >= BattleIntroFinalWaitDuration)
             {
                 battleStarted_ = true;
 
                 gameScene_.StartBattleEventBarsOut();
 
+                // プレイヤー操作を解放
                 player->SetDefMove(true);
                 player->SetControlLocked(false);
 
+                // ボスAIを開始
                 boss.SetAIActive(true);
 
                 StatusUI::Open();
             }
         }
 
-        gameScene_.GetCameraDirector().Update(deltaTime);
+        cameraDirector.Update(deltaTime);
 
         return;
     }
 
+    // ========================================================
+    // 通常バトル
+    // ========================================================
+
+    // --------------------------------------------------------
+    // Stage更新
+    // --------------------------------------------------------
+
     stage.Update(deltaTime);
 
+    // --------------------------------------------------------
+    // ゲージ・飛び道具更新
+    // --------------------------------------------------------
+
     if (!player->IsDead() && boss.GetHealth() > 0)
-        player->AddUltimateGauge(Const::PLAYER_ULTIMATE_GAUGE_PER_SECOND * deltaTime);
+    {
+        player->AddUltimateGauge(
+            Const::PLAYER_ULTIMATE_GAUGE_PER_SECOND * deltaTime
+        );
+    }
+
     gameContext->UpdateUltimateProjectiles(deltaTime);
+
+    // --------------------------------------------------------
+    // Player更新
+    // --------------------------------------------------------
 
     const Vec3 stageCenterPosition = stage.GetPosition();
 
@@ -179,12 +227,14 @@ void GameSceneBattleState::Tick(float deltaTime)
 
     player->CheckFloor();
 
-    // =============================
-    // Boss本体へのジャンプ接触判定
-    // =============================
+    // ========================================================
+    // ボス本体へのジャンプ接触判定
+    // ========================================================
+
     const auto state = player->GetCurrentState();
 
-    const bool doubleJump = state == PlayerStateType::DoubleJump;
+    const bool doubleJump =
+        state == PlayerStateType::DoubleJump;
 
     const bool jumping =
         !player->IsGrounded() &&
@@ -192,7 +242,9 @@ void GameSceneBattleState::Tick(float deltaTime)
 
     const bool touchingBody =
         jumping &&
-        stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
+        stage.GetCollision().IsTouchingCapsule(
+            player->GetHitSphere()
+        );
 
     const bool enteredBossBody =
         touchingBody && !wasTouchingBossBody_;
@@ -220,9 +272,10 @@ void GameSceneBattleState::Tick(float deltaTime)
 
     wasTouchingBossBody_ = touchingBody;
 
-    // =============================
+    // ========================================================
     // Boss更新
-    // =============================
+    // ========================================================
+
     boss.UpdateClapTargetPosition(player->GetWorldPosition());
 
     boss.Update(deltaTime);
@@ -232,9 +285,10 @@ void GameSceneBattleState::Tick(float deltaTime)
         deltaTime
     );
 
-    // =============================
+    // ========================================================
     // Boss攻撃判定
-    // =============================
+    // ========================================================
+
     const bool slamHitPlayer = boss.UpdateSlamAttack(
         player->GetWorldPosition(),
         stage.GetWorldPosition()
@@ -246,15 +300,18 @@ void GameSceneBattleState::Tick(float deltaTime)
         stage.GetWorldPosition()
     );
 
-    // =============================
-    // TailWhipギミック
-    // =============================
+    // ========================================================
+    // TailWhip判定
+    // ========================================================
+
     const bool isTailWhipActive = boss.IsTailWhipHitActive();
 
+    // しっぽ攻撃が始まった瞬間だけギミックを発生させる
     if (isTailWhipActive && !wasTailWhipActive_)
     {
         stage.StartShake();
 
+        // 2階にいるプレイヤーを吹き飛ばす
         Vec3 outward =
             player->GetWorldPosition() - stage.GetWorldPosition();
 
@@ -268,9 +325,6 @@ void GameSceneBattleState::Tick(float deltaTime)
 
     wasTailWhipActive_ = isTailWhipActive;
 
-    // =============================
-    // TailWhip当たり判定
-    // =============================
     Collision::Capsule tailWhipCapsule{};
 
     if (boss.IsTailWhipActive() && boss.IsTailWhipHitActive())
@@ -291,32 +345,6 @@ void GameSceneBattleState::Tick(float deltaTime)
             playerBody
         );
 
-    // =============================
-    // Playerの攻撃判定
-    // =============================
-    auto& playerStateMachine = player->GetStateMachine();
-
-    if (playerStateMachine.IsAttackBallActive())
-    {
-        const auto& attackBall =
-            playerStateMachine.GetAttackBallSphere();
-
-        if (boss.IsHitByAttackSphere(attackBall, tailWhipCapsule, stage.GetBossDownHurtSphere()))
-        {
-            // 同じ攻撃球による連続ダメージを防止
-            if (playerStateMachine.TryRegisterAttackBallHit())
-            {
-                boss.TakeDamage(Const::PLAYER_NORMAL_ATTACK_DAMAGE);
-            }
-        }
-    }
-
-    // プレイヤーが被ダメージ状態に移る前に、攻撃の命中を登録する。
-    if (handHitPlayer)
-        player->TakeDamage(Const::BOSS_CLAP_DAMAGE);
-    else if (slamHitPlayer)
-        player->TakeDamage(Const::BOSS_SLAM_DAMAGE);
-
     if (tailWhipPlayerHit)
     {
         player->TakeDamage(Const::BOSS_TAIL_WHIP_DAMAGE);
@@ -329,10 +357,48 @@ void GameSceneBattleState::Tick(float deltaTime)
         player->ApplyKnockback(outward, 5000.0f, 0.3f);
     }
 
-    // =============================
+    // ========================================================
+    // Playerの攻撃判定
+    // ========================================================
+
+    auto& playerStateMachine = player->GetStateMachine();
+
+    if (playerStateMachine.IsAttackBallActive())
+    {
+        const auto& attackBall =
+            playerStateMachine.GetAttackBallSphere();
+
+        if (boss.IsHitByAttackSphere(
+            attackBall,
+            tailWhipCapsule,
+            stage.GetBossDownHurtSphere()))
+        {
+            // 同じ攻撃球による連続ダメージを防止
+            if (playerStateMachine.TryRegisterAttackBallHit())
+            {
+                boss.TakeDamage(Const::PLAYER_NORMAL_ATTACK_DAMAGE);
+            }
+        }
+    }
+
+    // ========================================================
+    // Boss攻撃によるPlayerダメージ
+    // ========================================================
+
+    if (handHitPlayer)
+    {
+        player->TakeDamage(Const::BOSS_CLAP_DAMAGE);
+    }
+    else if (slamHitPlayer)
+    {
+        player->TakeDamage(Const::BOSS_SLAM_DAMAGE);
+    }
+
+    // ========================================================
     // カメラシェイク
-    // =============================
-    auto applyShake = [this](auto& actor)
+    // ========================================================
+
+    auto applyShake = [&cameraDirector](auto& actor)
         {
             const auto type = actor.GetCameraShakeRequest();
 
@@ -346,20 +412,26 @@ void GameSceneBattleState::Tick(float deltaTime)
             switch (type)
             {
             case CameraShakeType::Horizontal:
-                gameScene_.GetCameraDirector().StartHorizontalShake(
-                    duration, strength, frequency
+                cameraDirector.StartHorizontalShake(
+                    duration,
+                    strength,
+                    frequency
                 );
                 break;
 
             case CameraShakeType::Vertical:
-                gameScene_.GetCameraDirector().StartVerticalShake(
-                    duration, strength, frequency
+                cameraDirector.StartVerticalShake(
+                    duration,
+                    strength,
+                    frequency
                 );
                 break;
 
             case CameraShakeType::Mixed:
-                gameScene_.GetCameraDirector().StartMixedShake(
-                    duration, strength, frequency
+                cameraDirector.StartMixedShake(
+                    duration,
+                    strength,
+                    frequency
                 );
                 break;
             }
@@ -370,10 +442,9 @@ void GameSceneBattleState::Tick(float deltaTime)
     applyShake(boss);
     applyShake(*player);
 
-    // =============================
+    // ========================================================
     // カメラ更新・切り替え
-    // =============================
-    auto& cameraDirector = gameScene_.GetCameraDirector();
+    // ========================================================
 
     // ボス死亡時
     if (boss.IsDead())
@@ -385,7 +456,11 @@ void GameSceneBattleState::Tick(float deltaTime)
         if (cameraDirector.GetActiveCamera() != &dieCamera)
         {
             dieCamera.Initialize(cameraDirector.GetCurrentPose());
-            cameraDirector.SwitchCamera(dieCamera, 1.2f);
+
+            cameraDirector.SwitchCamera(
+                dieCamera,
+                1.2f
+            );
         }
     }
     // ボスダウン時
@@ -402,52 +477,61 @@ void GameSceneBattleState::Tick(float deltaTime)
         if (cameraDirector.GetActiveCamera() != &downCamera)
         {
             downCamera.Initialize(cameraDirector.GetCurrentPose());
-            cameraDirector.SwitchCamera(downCamera, 1.2f);
+
+            cameraDirector.SwitchCamera(
+                downCamera,
+                1.2f
+            );
         }
     }
     // 通常時
     else
     {
-        auto& targetCamera = gameScene_.GetTargetCamera();
-
         targetCamera.Update(
             player->GetWorldPosition(),
             boss.GetWorldPosition(),
             deltaTime
         );
 
+        // 通常時のFOVに戻す
         targetCamera.SetFieldOfView(60.0f);
 
+        // ダウン・死亡カメラから通常カメラへ戻す
         if (cameraDirector.GetActiveCamera() != &targetCamera)
         {
-            cameraDirector.SwitchCamera(targetCamera, 1.2f);
+            cameraDirector.SwitchCamera(
+                targetCamera,
+                1.2f
+            );
         }
     }
 
     cameraDirector.Update(deltaTime);
 
-    // =============================
+    // ========================================================
     // カメラ透過
-    // =============================
+    // ========================================================
+
     Collision::ResetTransparentModels();
 
     Collision::SetModelsBetweenTransparent(
-        gameScene_.GetTargetCamera().GetPosition(),
+        targetCamera.GetPosition(),
         player->GetWorldPosition() + Vec3::Up() * 30.0f,
         stage.GetCollision(),
         0.7f
     );
 
     Collision::SetModelsBetweenTransparent(
-        gameScene_.GetTargetCamera().GetPosition(),
+        targetCamera.GetPosition(),
         boss.GetWorldPosition() + Vec3::Up() * 600.0f,
         stage.GetCollision(),
         0.7f
     );
 
-    // =============================
-    // 入力・エフェクト
-    // =============================
+    // ========================================================
+    // エフェクト
+    // ========================================================
+
     using namespace DxPlus::Input;
 
     if (GetButtonDown(PLAYER1) & BUTTON_L3)
@@ -460,34 +544,23 @@ void GameSceneBattleState::Tick(float deltaTime)
     }
 
     gameContext->GetEffectManager().Update(deltaTime);
-
-    // =============================
-    // ステータスUI更新
-    // =============================
-    StatusUI::SyncStatusBar(
-        L"PlayerHealthGauge",
-        static_cast<float>(player->GetHealth()) / Player::MaxHealth
-    );
-
-    StatusUI::SyncStatusBar(
-        L"PlayerUltGauge",
-        player->GetUltimateGauge() / Player::UltimateGaugeMax
-    );
-
-    StatusUI::SyncStatusBar(
-        L"BossHealthGauge",
-        boss.GetHealthProgress()
-    );
-
-    StatusUI::SyncStatusBar(
-        L"BossDownGauge",
-        boss.GetDownGaugeProgress()
-    );
 }
+
+// ============================================================
+// Exit
+// ============================================================
 
 void GameSceneBattleState::Exit()
 {
-    gameScene_.GetGameContext()->ClearUltimateProjectiles();
+    auto* gameContext = gameScene_.GetGameContext();
+    auto* player = gameContext->GetPlayer();
+
+    gameContext->ClearUltimateProjectiles();
+
+    // 操作ロックが残らないようにする
+    player->SetDefMove(true);
+    player->SetControlLocked(false);
+
     gameScene_.SetBattleEventActive(false);
     gameScene_.StartBattleEventBarsOut();
 
@@ -497,6 +570,7 @@ void GameSceneBattleState::Exit()
     UIM().RemoveUI(L"BossStatusBackground");
     UIM().RemoveUI(L"BossHealthGauge");
     UIM().RemoveUI(L"BossDownGauge");
+
     UIM().RemoveUI(L"PlayerStatusBackground");
     UIM().RemoveUI(L"PlayerHealthGauge");
     UIM().RemoveUI(L"PlayerUltGauge");
