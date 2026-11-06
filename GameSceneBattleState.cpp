@@ -445,25 +445,8 @@ void GameSceneBattleState::Tick(float deltaTime)
     // カメラ更新・切り替え
     // ========================================================
 
-    // ボス死亡時
-    if (boss.IsDead())
-    {
-        auto& dieCamera = gameScene_.GetBossDieCamera();
-
-        dieCamera.SetTarget(boss.GetWorldPosition());
-
-        if (cameraDirector.GetActiveCamera() != &dieCamera)
-        {
-            dieCamera.Initialize(cameraDirector.GetCurrentPose());
-
-            cameraDirector.SwitchCamera(
-                dieCamera,
-                1.2f
-            );
-        }
-    }
     // ボスダウン時
-    else if (boss.IsDowned())
+    if (boss.IsDowned())
     {
         auto& downCamera = gameScene_.GetBossDownCamera();
 

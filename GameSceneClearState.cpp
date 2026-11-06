@@ -1,5 +1,6 @@
 #include "GameSceneClearState.h"
 #include "GameScene.h"
+#include "GameContext.h"
 #include "GameStateMachine.h"
 #include "DxPlus/Debug.h"
 #include "UIManager.h"
@@ -13,6 +14,17 @@ void GameSceneClearState::Enter()
 {
 	DxPlus::Debug::SetFormatString(L"GameSceneClearState::Enter");
 	DxLib::SetMouseDispFlag(TRUE);
+
+	auto& boss = gameScene_.GetGameContext()->GetBoss();
+	if (boss.IsDead())
+	{
+		boss.SetAIActive(false);
+		auto& director = gameScene_.GetCameraDirector();
+		auto& dieCamera = gameScene_.GetBossDieCamera();
+		dieCamera.Initialize(director.GetCurrentPose());
+		dieCamera.SetTarget(boss.GetWorldPosition());
+		director.SwitchCamera(dieCamera, 1.2f);
+	}
 
 	// ƒNƒŠƒAUI‚ğÄ•\¦
 	{
@@ -40,7 +52,11 @@ void GameSceneClearState::Enter()
 				L"Result.ClearRetryButton",
 				ResourceKeys::Button_Rose.back,
 				{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.75f },
-				[]() { PostQuitMessage(0); },
+				[this]()
+				{
+					if (gameScene_.RestoreBattleCheckpoint())
+						stateMachine_.ChangeState(GameStateType::Battle);
+				},
 				{},
 				1.5f
 			);
@@ -58,10 +74,10 @@ void GameSceneClearState::Enter()
 				L"Result.ClearToTitleButton",
 				ResourceKeys::Button_Rose.back,
 				{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.9f },
-				[this]() {
-					gameScene_.Init();
+				[this]()
+				{
+					gameScene_.ResetForTitle();
 					stateMachine_.ChangeState(GameStateType::Title);
-					this->Exit();
 				},
 				{},
 				1.5f
@@ -80,6 +96,13 @@ void GameSceneClearState::Enter()
 void GameSceneClearState::Tick(float deltaTime)
 {
 	DxPlus::Debug::SetFormatString(L"GameSceneClearState::Tick");
+
+	auto& boss = gameScene_.GetGameContext()->GetBoss();
+	if (boss.IsDead() && boss.IsActive())
+	{
+		boss.Update(deltaTime);
+		gameScene_.GetBossDieCamera().SetTarget(boss.GetWorldPosition());
+	}
 	gameScene_.UpdateStateCamera(deltaTime, "");
 
 	auto* clear = UIM().GetUI(L"Result.Clear");
@@ -126,7 +149,7 @@ void GameSceneClearState::Tick(float deltaTime)
 
 void GameSceneClearState::Exit()
 {
-	DxPlus::Debug::SetFormatString(L"GameSceneClearState::Enter");
+	DxPlus::Debug::SetFormatString(L"GameSceneClearState::Exit");
 	if (auto* clear = UIM().GetUI(L"Result.Clear"))
 		clear->Hide();
 
