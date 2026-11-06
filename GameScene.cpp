@@ -719,6 +719,8 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 void GameScene::End()
 {
+	SoundManager::StopBGM(RM().GetMusic(ResourceKeys::Music_Title));
+	SoundManager::StopBGM(RM().GetMusic(ResourceKeys::Music_Battle));
 	gameContext->StopTailWhipSound();
 	gameContext->ClearUltimateProjectiles();
 	tutorialCollision_.Clear();

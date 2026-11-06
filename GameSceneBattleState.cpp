@@ -5,6 +5,7 @@
 #include "DxPlus/DxPlus.h"
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
+#include "SoundManager.h"
 #include "StatusUI.h"
 #include "Collision.h"
 #include "CameraShakeType.h"
@@ -28,6 +29,12 @@ GameSceneBattleState::GameSceneBattleState(
 
 void GameSceneBattleState::Enter()
 {
+    const int titleBgm = RM().GetMusic(ResourceKeys::Music_Title);
+    if (titleBgm >= 0 && DxLib::CheckSoundMem(titleBgm) == 0)
+    {
+        SoundManager::PlayBGM(titleBgm);
+    }
+
     auto* gameContext = gameScene_.GetGameContext();
     auto* player = gameContext->GetPlayer();
     auto& boss = gameContext->GetBoss();
@@ -169,6 +176,8 @@ void GameSceneBattleState::Tick(float deltaTime)
             if (battleIntroFinalWaitElapsed_ >= BattleIntroFinalWaitDuration)
             {
                 battleStarted_ = true;
+                SoundManager::StopBGM(RM().GetMusic(ResourceKeys::Music_Title));
+                SoundManager::PlayBGM(RM().GetMusic(ResourceKeys::Music_Battle));
 
                 gameScene_.StartBattleEventBarsOut();
 

@@ -112,6 +112,7 @@ void ResourceManager::LoadAll()
 
 	// サウンドの読み込み
 	LoadMusic(ResourceKeys::Music_Title, L"./Data/Sounds/StartBGM.mp3");
+	LoadMusic(ResourceKeys::Music_Battle, L"./Data/Sounds/BattleBGM.mp3");
 	LoadSound(ResourceKeys::Sound_MenuConfirm, L"./Data/Sounds/suzu.mp3");
 	LoadSound(ResourceKeys::Sound_SelectTaka, L"./Data/Sounds/taka.mp3");
 	LoadSound(ResourceKeys::Sound_SelectGishi, L"./Data/Sounds/gishi.mp3");
