@@ -4,6 +4,9 @@
 #include "OutlineSettings.h"
 #include "CameraObjectManager.h"
 #include "UIManager.h"
+#include "ResourceKeys.h"
+#include "ResourceManager.h"
+#include "SoundManager.h"
 #include <algorithm>
 #include "DxPlus/DxPlus.h"
 #include "Collision.h"

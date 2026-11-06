@@ -177,6 +177,16 @@ Matrix4 ModelObject::GetWorldMatrix() const
 
 void ModelObject::ApplyTransform(Vec3 masterPos) const
 {
+    ApplyTransform(masterPos, 1.0f);
+}
+
+void ModelObject::ApplyDrawTransform(Vec3 masterPos) const
+{
+	ApplyTransform(masterPos, drawScaleMultiplier_);// drawScaleMultiplier_を使用して描画時のスケールを調整
+}
+
+void ModelObject::ApplyTransform(Vec3 masterPos, float scaleMultiplier) const
+{
     const int handle = RM().GetModel(modelKey);
     if (handle < 0) return;
 
@@ -198,6 +208,8 @@ void ModelObject::ApplyTransform(Vec3 masterPos) const
     worldPosition.z -= rotatedCenter.z;
 
     worldMatrix.SetTranslation(worldPosition);
+    if (scaleMultiplier != 1.0f)
+        worldMatrix = Matrix4::CreateScale({ scaleMultiplier, scaleMultiplier, scaleMultiplier }) * worldMatrix;
 
     // 行列をモデルに適用
     MV1SetMatrix(handle, DxConv::ToMATRIX(worldMatrix));
@@ -208,7 +220,7 @@ void ModelObject::Draw(Vec3 masterPos) const
     const int handle = RM().GetModel(modelKey);
     if (handle < 0) return;
 
-    ApplyTransform(masterPos);
+    ApplyDrawTransform(masterPos);
     ApplyCollisionColor();
     DxLib::MV1SetOpacityRate(handle, alpha);
     DxLib::MV1DrawModel(handle);
