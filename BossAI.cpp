@@ -179,34 +179,37 @@ void BossAI::Update(float deltaTime)
    
 }
 
-void BossAI::TurnToTarget(Vec3 targetPosition, float deltaTime)
+bool BossAI::TurnToTarget(const Vec3& targetPosition, float deltaTime)
 {
-    if (!boss_.IsRotation())return;
+    if (!boss_.IsRotation())
+        return true;
 
     Vec3 bossPosition = boss_.GetWorldPosition();
 
-    // ターゲットまでの角度を計算
-    float yawError = NormalizeAngle(
-        std::atan2(
-            targetPosition.x - bossPosition.x,
-            targetPosition.z - bossPosition.z
-        ) - boss_.GetYaw()
+    float targetYaw = std::atan2(
+        targetPosition.x - bossPosition.x,
+        targetPosition.z - bossPosition.z
+    ) + DX_PI_F;
+    targetYaw = NormalizeAngle(targetYaw);
+
+    float yawError = NormalizeAngle(targetYaw - boss_.GetYaw());
+
+    constexpr float finishAngle = 1.0f * DxPlus::Deg2Rad;
+
+    if (std::abs(yawError) <= finishAngle)
+    {
+        boss_.SetYaw(targetYaw);
+        return true;
+    }
+
+    float rotationAmount = 2.0f * deltaTime;
+
+    boss_.SetYaw(
+        boss_.GetYaw() + std::copysign(
+            std::min(rotationAmount, std::abs(yawError)),
+            yawError
+        )
     );
 
-    yawError *= -1.0f;
-
-    float rotationSpeed = 0.5f;
-
-    if (std::abs(yawError) < 120.0f * DxPlus::Deg2Rad)
-        rotationSpeed = 1.0f;
-
-    if (std::abs(yawError) > 0.1f)
-    {
-        float rotationAmount = rotationSpeed * deltaTime;
-
-        if (yawError > 0.0f)
-            boss_.SetYaw(boss_.GetYaw() + std::min(rotationAmount, yawError));
-        else
-            boss_.SetYaw(boss_.GetYaw() - std::min(rotationAmount, -yawError));
-    }
+    return false;
 }

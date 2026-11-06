@@ -65,22 +65,38 @@ void GameSceneBattleState::Tick(float deltaTime)
         stage.Update(deltaTime);
         player->Update(deltaTime, stage.GetCollision(), stage.GetPosition());
         player->CheckFloor();
+
         boss.Update(deltaTime);
 
+        // ボスがプレイヤーを向く
         if (battleIntroTurnRemaining_ > 0.0f)
         {
-            boss.TurnToTarget(player->GetWorldPosition(), deltaTime);
-            battleIntroTurnRemaining_ = (std::max)(
-                0.0f, battleIntroTurnRemaining_ - deltaTime);
+            const bool turnFinished = boss.TurnToTarget(
+                player->GetWorldPosition(),
+                deltaTime
+            );
+
+            if (turnFinished)
+            {
+                battleIntroTurnRemaining_ = 0.0f;
+            }
         }
         else
         {
             battleIntroWaitRemaining_ = (std::max)(
-                0.0f, battleIntroWaitRemaining_ - deltaTime);
+                0.0f,
+                battleIntroWaitRemaining_ - deltaTime
+                );
         }
 
         auto& targetCamera = gameScene_.GetTargetCamera();
-        targetCamera.Update(player->GetWorldPosition(), boss.GetWorldPosition(), deltaTime);
+
+        targetCamera.Update(
+            player->GetWorldPosition(),
+            boss.GetWorldPosition(),
+            deltaTime
+        );
+
         targetCamera.SetFieldOfView(55.0f);
         gameScene_.GetCameraDirector().Update(deltaTime);
 
@@ -88,11 +104,15 @@ void GameSceneBattleState::Tick(float deltaTime)
             battleIntroWaitRemaining_ <= 0.0f)
         {
             battleStarted_ = true;
+
             gameScene_.StartBattleEventBarsOut();
+
             player->SetDefMove(true);
             player->SetControlLocked(false);
+
             boss.SetAIActive(true);
         }
+
         return;
     }
 

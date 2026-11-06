@@ -39,7 +39,7 @@ public:
 	void Init() override;
 	void Reset()override;
 	void Update(float deltaTime)override;
-	void TurnToTarget(const Vec3& targetPosition, float deltaTime);
+	bool TurnToTarget(const Vec3& targetPosition, float deltaTime);
  void SetAIActive(bool active) { activeAI = active; }
 	void Draw() const override;
 	
