@@ -85,6 +85,9 @@ void GameSceneTitleState::Enter()
     }
 	gameScene_.GetCameraDirector().SetPoseImmediate(CObjs().GetCameraPose("Title"));
 
+    auto& previews = gameScene_.GetGameContext()->GetSelectPreviewPlayers();
+    previews[0].PlayAnimationFromModel(ResourceKeys::Model_PlayerAnim_SelectMike);
+    previews[1].PlayAnimationFromModel(ResourceKeys::Model_PlayerAnim_SelectSabi);
 
 
     selectedIndex_ = 0;
@@ -100,6 +103,10 @@ void GameSceneTitleState::Tick(float deltaTime)
 {
     DxPlus::Debug::SetFormatString(L"GameSceneTitleState::Tick");
     gameScene_.UpdateStateCamera(deltaTime, "Title");
+
+    auto& previews = gameScene_.GetGameContext()->GetSelectPreviewPlayers();
+    previews[0].UpdateAnimation(deltaTime);
+    previews[1].UpdateAnimation(deltaTime);
 
     using namespace DxPlus::Input;
 

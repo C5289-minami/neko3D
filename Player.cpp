@@ -60,6 +60,20 @@ void Player::SetAnimation(
 		playAfterBlend
 	);
 }
+
+void Player::PlayAnimationFromModel(const wchar_t* animationModelKey, bool loop)
+{
+	const int animationModelHandle = RM().GetModel(animationModelKey);
+	if (animationModelHandle < 0) return;
+
+	animation_.Play3D(
+		RM().GetModel(model_.GetModelKey()),
+		AnimationHandle::FromIndex(animationModelHandle, 0),
+		loop,
+		Const::ANIM_FPS
+	);
+}
+
 void Player::UpdateAnimation(float deltaTime)
 {
 	animation_.Update(deltaTime);
@@ -221,11 +235,14 @@ void Player::PlayDebugKedamaEffect() const
 void Player::Update(float deltaTime)
 {
 	input_.Update();
-   if (controlLocked_)
+	if (controlLocked_)
 	{
-		// 演出中も重力・床判定は動かすが、入力による移動や攻撃は受け付けない。
 		input_ = {};
 		moveInput_ = {};
+		velocity_ = {};
+		knockbackVelocity_ = {};
+		knockbackTime_ = 0.0f;
+		return;
 	}
 #ifdef _DEBUG
 	if (input_.shiftRKeyPressed)

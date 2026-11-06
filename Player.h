@@ -204,6 +204,7 @@ public:
 		bool playAfterBlend = true,
 		float blendSeconds = 0.15f
 	);
+    void PlayAnimationFromModel(const wchar_t* animationModelKey, bool loop = true);
 	AnimationHandle GetAnimationHandle(PlayerAnimType::Type type) const;
 	ModelAnimation& GetAnimation() { return animation_; }
 	void UpdateAnimation(float deltaTime);

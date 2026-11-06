@@ -181,6 +181,11 @@ void GameSceneSelectState::Enter()
 		preview.SetDefMove(false);
 		preview.StopMove();
 
+		if (i == 0)
+			preview.PlayAnimationFromModel(ResourceKeys::Model_PlayerAnim_SelectMike);
+		else if (i == 1)
+			preview.PlayAnimationFromModel(ResourceKeys::Model_PlayerAnim_SelectSabi);
+
 		players_.push_back(&preview);
 	}
 
@@ -203,6 +208,9 @@ void GameSceneSelectState::Tick(float deltaTime)
 
 
 	if (players_.empty()) return;
+
+	for (auto* player : players_)
+		player->UpdateAnimation(deltaTime);
 
 	auto& director = gameScene_.GetCameraDirector();
 

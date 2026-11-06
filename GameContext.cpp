@@ -72,11 +72,17 @@ void GameContext::Init()
 	room_.Init();
 	activePlayer->Init();
 
-	for (auto& preview : selectPreviewPlayers_)
+ for (std::size_t i = 0; i < selectPreviewPlayers_.size(); ++i)
 	{
+     auto& preview = selectPreviewPlayers_[i];
 		preview.Init();
 		preview.SetGravityEnabled(false);
 		preview.SetDefMove(false);
+
+		if (i == 0)
+			preview.PlayAnimationFromModel(ResourceKeys::Model_PlayerAnim_SelectMike);
+		else if (i == 1)
+			preview.PlayAnimationFromModel(ResourceKeys::Model_PlayerAnim_SelectSabi);
 	}
 
 	boss.SetPlayer(*activePlayer);

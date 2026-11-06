@@ -47,6 +47,8 @@ namespace ResourceKeys
 	inline constexpr const wchar_t* Model_PlayerAnim_Dodge = L"PlayerAnimDodge";
 	inline constexpr const wchar_t* Model_PlayerAnim_Attack = L"PlayerAnimAttack";
 	inline constexpr const wchar_t* Model_PlayerAnim_Ult = L"PlayerAnimUlt";
+	inline constexpr const wchar_t* Model_PlayerAnim_SelectMike = L"PlayerAnimSelectMike";
+	inline constexpr const wchar_t* Model_PlayerAnim_SelectSabi = L"PlayerAnimSelectSabi";
 
 
 

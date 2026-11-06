@@ -26,7 +26,8 @@ class GameScene final : public Scene
 public:
 	explicit GameScene(GameContext* context);
 	void Init() override;
-	void Update(float deltaTime) override;
+  void Update(float deltaTime) override;
+    void UpdateDuringFade(float deltaTime) override;
     void End() override;
 	void Render() const override;
 	void DrawImGui() override;
