@@ -1,24 +1,25 @@
-#pragma once
+ï»¿#pragma once
 
+#include "Consts.h"
 #include "DxLib.h"
 #include "Vector3.h"
 
 class SoundManager
 {
 public:
-    // BGMÄ¶
-    static void PlayBGM(int handle);
+    // BGMå†ç”Ÿ
+    static void PlayBGM(int handle, int volume = Const::MAX_VOICE);
 
-    // ’Êí‚ÌSEÄ¶
-    static void PlaySE(int handle);
+    // é€šå¸¸ã®SEå†ç”Ÿ
+    static void PlaySE(int handle, int volume = Const::MAX_VOICE);
 
-    // 3D‹óŠÔ‚ÌSEÄ¶
-    static void PlaySE3D(int handle, Vec3 position, float radius = 1000.0f);
+    // 3Dç©ºé–“ã®SEå†ç”Ÿ
+    static void PlaySE3D(int handle, Vec3 position, float radius = 1000.0f, int startTimeMs = 0);
 
-    // BGMESE’â~
+    // BGMãƒ»SEåœæ­¢
     static void StopBGM(int handle);
     static void StopSE(int handle);
 
-    // ƒŠƒXƒi[‚ÌˆÊ’uEŒü‚«İ’è
+    // ãƒªã‚¹ãƒŠãƒ¼ã®ä½ç½®ãƒ»å‘ãè¨­å®š
     static void SetListener(Vec3 position, Vec3 front);
 };

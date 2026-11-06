@@ -2,6 +2,7 @@
 #include "DrawableObject.h"
 #include "ResourceManager.h"
 #include "ActorBase.h"
+#include "DxConv.h"
 #include "Player.h"
 #include <cmath>
 #include <filesystem>
@@ -39,6 +40,75 @@ namespace
         void Update(float) override {}
         void Draw() const override {}
     };
+
+    void TestStageRims()
+    {
+        ModelObject stage;
+        stage.SetModelKey(ResourceKeys::Model_Stage);
+        stage.SetScale({ 2, 2, 2 });
+        ModelCollision collision;
+        collision.AddFallRecoveryFloor(stage);
+        Check(collision.Refresh(), "Load the real arena floor mesh");
+
+        const int mesh = RM().GetModel(stage.GetModelKey());
+        Check(MV1SetupCollInfo(mesh, -1, 8, 8, 8) == 0, "Prepare arena overlap checks");
+        const auto overlapsFloor = [mesh](const Player& player)
+        {
+            const auto body = player.GetHitSphere();
+            const auto result = MV1CollCheck_Sphere(mesh, -1, DxConv::ToVECTOR(body.center), body.radius - 0.02f);
+            const bool overlaps = result.HitNum > 0;
+            MV1CollResultPolyDimTerminate(result);
+            return overlaps;
+        };
+
+        Physics::RayHit flat{};
+        Check(collision.RaycastDown({ 1000, 1000, 0 }, 2000, flat), "Find flat arena floor");
+        for (const float outward : { -1.0f, 1.0f })
+        {
+            Physics::RayHit slope{};
+            bool foundSlope = false;
+            for (float offset = 100; offset <= 460; offset += 2)
+            {
+                if (collision.RaycastDown({ 1000 + outward * offset, 1000, 0 }, 2000, slope) &&
+                    slope.normal.y > 0.15f && slope.normal.y < 0.97f)
+                {
+                    foundSlope = true;
+                    break;
+                }
+            }
+            Check(foundSlope, outward < 0 ? "Find the inner slope" : "Find the outer slope");
+
+            Player player;
+            player.Init();
+            player.SetControlLocked(true);
+            player.SetStartPosition(flat.point);
+            player.SetPosition(slope.point + Vec3::Up() * 50.0f);
+            player.ApplyKnockback(-Vec3::Up(), 1500.0f, 0.1f);
+            player.Update(1.0f / 30.0f, collision, {});
+            Check(!overlapsFloor(player) && player.GetPosition().y > slope.point.y,
+                "A fast landing on the rim keeps the player's body out of the mesh");
+
+            player.SetStartPosition(flat.point);
+            player.Update(1.0f / 60.0f, collision, {});
+            Check(player.IsGrounded(), "Player can stand on the flat arena floor");
+            player.ApplyKnockback({ outward, 0, 0 }, 1050.0f, 0.45f);
+            bool recovered = false;
+            bool overlapped = false;
+            for (int frame = 0; frame < 60; ++frame)
+            {
+                player.Update(1.0f / 60.0f, collision, {});
+                overlapped |= overlapsFloor(player);
+                if (!player.IsGrounded() && player.GetVelocity().LengthSq() == 0.0f)
+                {
+                    recovered = true;
+                    break;
+                }
+            }
+            Check(!overlapped, "Moving over the rim keeps the player's body out of the mesh");
+            Check(recovered, "Leaving the arena at the rim still triggers fall recovery");
+        }
+        MV1TerminateCollInfo(mesh, -1);
+    }
 
     void TestCollision()
     {
@@ -301,7 +371,11 @@ int main()
     std::filesystem::current_path(assetDirectory);
     RM().LoadAll();
     int result = 0;
-    try { TestCollision(); }
+    try
+    {
+        TestStageRims();
+        TestCollision();
+    }
     catch (const std::exception& error)
     {
         std::cerr << "FAIL: " << error.what() << std::endl;

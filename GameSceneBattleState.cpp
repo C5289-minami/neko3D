@@ -1,6 +1,4 @@
-﻿
-#include "GameSceneBattleState.h"
-
+﻿#include "GameSceneBattleState.h"
 #include "GameScene.h"
 #include "GameStateMachine.h"
 #include "GameContext.h"
@@ -327,7 +325,7 @@ void GameSceneBattleState::Tick(float deltaTime)
 
     Collision::Capsule tailWhipCapsule{};
 
-    if (boss.IsTailWhipActive() && boss.IsTailWhipHitActive())
+    if (boss.IsTailWhipActive() && isTailWhipActive)
     {
         tailWhipCapsule = boss.GetTailWhipHitCapsule(
             stage.GetWorldPosition(),
@@ -335,6 +333,7 @@ void GameSceneBattleState::Tick(float deltaTime)
             stage.GetArenaSurfaceY() + 30.0f
         );
     }
+    gameContext->UpdateTailWhipSound(tailWhipCapsule);
 
     const Collision::Sphere playerBody = player->GetHitSphere();
 
@@ -555,6 +554,7 @@ void GameSceneBattleState::Exit()
     auto* gameContext = gameScene_.GetGameContext();
     auto* player = gameContext->GetPlayer();
 
+    gameContext->StopTailWhipSound();
     gameContext->ClearUltimateProjectiles();
 
     // 操作ロックが残らないようにする

@@ -1,4 +1,5 @@
 #pragma once
+#include "Consts.h"
 #include <DxLib.h>
 #include <algorithm> // std::clampóp
 
@@ -29,17 +30,17 @@ public:
 	void GetVolume(float& bgm, float& se) const {bgm = BGM; se = SE; }
 
 	// BGMÇÃçƒê∂
-	void PlayBGM(int handle) {
+	void PlayBGM(int handle, int volume = Const::MAX_VOICE) {
 		if (handle < 0) return;
 
-		DxLib::ChangeVolumeSoundMem(static_cast<int>(BGM * 255.0f), handle);
+		DxLib::ChangeVolumeSoundMem(static_cast<int>(BGM * std::clamp(volume, 0, Const::MAX_VOICE)), handle);
 		DxLib::PlaySoundMem(handle, DX_PLAYTYPE_LOOP);
 	}
 
 	// SEÇÃçƒê∂
-	void PlaySE(int handle) {
+	void PlaySE(int handle, int volume = Const::MAX_VOICE) {
 		if (handle < 0) return;
-		DxLib::ChangeVolumeSoundMem(static_cast<int>(SE * 255.0f), handle);
+		DxLib::ChangeVolumeSoundMem(static_cast<int>(SE * std::clamp(volume, 0, Const::MAX_VOICE)), handle);
 		DxLib::PlaySoundMem(handle, DX_PLAYTYPE_BACK);
 	}
 
