@@ -286,7 +286,13 @@ void Player::UpdateMovement(float deltaTime)
 
 
 
-	DxPlus::Debug::SetFormatString(L"CharacterSetting: %s", charData.name.c_str());
+#ifndef NDEBUG
+	if (!charData.name.empty())
+	{
+		DxPlus::Debug::SetFormatString(
+			L"CharacterSetting: %ls", DxPlus::Text::Utf8ToUtf16(charData.name).c_str());
+	}
+#endif
 
 	// 接触中の柱に沿って上下移動する Elevator は、ジャンプで離れるまで続く。
 	const bool elevatorFrame = GetCurrentState() == PlayerStateType::Climbing;
@@ -732,8 +738,9 @@ void Player::TurnTowards(
 void Player::UpdateHorizontalVelocity(float deltaTime)
 {
 	// 壁キック中は、開始時に設定した横速度をそのまま使う。
-	if (GetCurrentState() == PlayerStateType::WallJump) return;
-	bool isDoubleJump = GetCurrentState() == PlayerStateType::DoubleJump;
+	const auto state = GetCurrentState();
+	if (state == PlayerStateType::WallJump) return;
+	const bool isDoubleJump = state == PlayerStateType::DoubleJump;
 
 	// 通常時は入力を離すと横速度を止める。ダブルジャンプ中は、
 	// 入力を離したら直前の横速度を保ち、入力があれば方向を変える。
@@ -748,6 +755,10 @@ void Player::UpdateHorizontalVelocity(float deltaTime)
 
 	// 移動速度
 	float moveSpeed = Const::PLAYER_MOVE_SPEED * moveRate_;
+	if (isGrounded_ && state == PlayerStateType::Walk)
+	{
+		moveSpeed *= charData.moveSpeed / CharData::DefaultMoveSpeed;
+	}
 
 
 #ifdef _DEBUG//debugモードでは、移動速度を5倍にする
@@ -1039,7 +1050,8 @@ bool Player::UpdatePillarElevator(float deltaTime)
 
 
 	if (deltaTime <= 0.0f) return false;
-	position_.y = (std::min)(elevatorTopY_, position_.y + climbingSpeed_ * deltaTime);
+	const float climbSpeed = climbingSpeed_ * charData.climbSpeedMultiplier;
+	position_.y = (std::min)(elevatorTopY_, position_.y + climbSpeed * deltaTime);
 	return position_.y >= elevatorTopY_;
 }
 
