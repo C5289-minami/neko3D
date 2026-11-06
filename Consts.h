@@ -6,6 +6,8 @@
 
 namespace Const
 {
+    constexpr int MAX_VOICE = 255;
+
     // ===== プレイヤー関連 =====
 
     // 戦闘の調整値。HPとダメージは整数で、時間の単位は秒。
