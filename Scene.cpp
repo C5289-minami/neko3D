@@ -14,6 +14,10 @@ void Scene::Drive(float deltaTime)
     {
         Update(deltaTime);
     }
+    else
+    {
+        UpdateDuringFade(deltaTime);
+    }
 #endif    
 }
 

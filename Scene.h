@@ -34,6 +34,7 @@ public:
 protected:
     // フェード（今は使わない）
     void UpdateFadeController(float deltaTime);
+    virtual void UpdateDuringFade(float deltaTime) {}
     void StartFadeIn(float duration = 1.0f);
     void StartFadeOut(float duration = 1.0f);
 

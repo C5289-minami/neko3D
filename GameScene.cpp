@@ -93,7 +93,16 @@ void GameScene::Init()
 
 	stateMachine_.Initialize();
 
-	StartFadeIn();
+  StartFadeIn();
+}
+
+void GameScene::UpdateDuringFade(float deltaTime)
+{
+	if (gameContext == nullptr) return;
+
+	auto& previews = gameContext->GetSelectPreviewPlayers();
+	previews[0].UpdateAnimation(deltaTime);
+	previews[1].UpdateAnimation(deltaTime);
 }
 
 bool GameScene::UpdateStateCamera(float deltaTime, const std::string& requestedShot)
