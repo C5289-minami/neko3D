@@ -16,7 +16,7 @@ public:
 
     void Reset();
     void Update(float deltaTime);
-    void TurnToTarget(Vec3 targetPosition, float deltaTime);
+    bool TurnToTarget(const Vec3& targetPosition, float deltaTime);
 
 
 private:

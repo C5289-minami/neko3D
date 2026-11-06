@@ -48,6 +48,7 @@ void ResourceManager::LoadAll()
 	LoadSprite(ResourceKeys::SelectMike, L"./Data/Images/Select/mike.png");
 	LoadSprite(ResourceKeys::SelectSabi, L"./Data/Images/Select/sabi.png");
 	LoadSprite(ResourceKeys::SelectKuro, L"./Data/Images/Select/kuro.png");
+	LoadSprite(ResourceKeys::SelectCommon, L"./Data/Images/Select/common.png");
 	LoadSprite(ResourceKeys::TutorialBack, L"./Data/Images/Tutorial/tutorial.png");
 	LoadSprite(ResourceKeys::TutorialStamp, L"./Data/Images/Tutorial/stamp.png");
 

@@ -232,11 +232,10 @@ void Boss::Update(float deltaTime)
 }
 
 
-void Boss::TurnToTarget(const Vec3& targetPosition, float deltaTime)
+bool Boss::TurnToTarget(const Vec3& targetPosition, float deltaTime)
 {
-	ai_.TurnToTarget(targetPosition, deltaTime);
+	return ai_.TurnToTarget(targetPosition, deltaTime);
 }
-
 
 void Boss::Draw() const
 {

@@ -34,6 +34,7 @@ namespace ResourceKeys
 	inline constexpr const wchar_t* SelectMike = L"UISelectMike";
 	inline constexpr const wchar_t* SelectSabi = L"UISelectSabi";
 	inline constexpr const wchar_t* SelectKuro = L"UISelectKuro";
+	inline constexpr const wchar_t* SelectCommon = L"UISelectCommon";
 
 	// ===== Models =====
 	inline constexpr const wchar_t* Model_PlayerMike = L"ModelPlayerMike";

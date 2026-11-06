@@ -31,9 +31,9 @@ namespace
 	};
 
 	constexpr std::array<SelectCard, 3> SelectCards{ {
-		{ L"Select.Mike", ResourceKeys::SelectMike, u8"‚½‚©", L"ƒoƒ‰ƒ“ƒXŒ^" },
-		{ L"Select.Sabi", ResourceKeys::SelectSabi, u8"‚¬‚µ", L"‘–‚é‚Ì‚ª“¾ˆÓ" },
-		{ L"Select.Kuro", ResourceKeys::SelectKuro, u8"‚ä‚¤", L"“o‚é‚Ì‚ª“¾ˆÓ" }
+		{ L"Select.Mike", ResourceKeys::SelectMike, u8"ï¿½ï¿½ï¿½ï¿½", L"ï¿½oï¿½ï¿½ï¿½ï¿½ï¿½Xï¿½^" },
+		{ L"Select.Sabi", ResourceKeys::SelectSabi, u8"ï¿½ï¿½ï¿½ï¿½", L"ï¿½ï¿½ï¿½ï¿½Ì‚ï¿½ï¿½ï¿½ï¿½ï¿½" },
+		{ L"Select.Kuro", ResourceKeys::SelectKuro, u8"ï¿½ä‚¤", L"ï¿½oï¿½ï¿½Ì‚ï¿½ï¿½ï¿½ï¿½ï¿½" }
 	} };
 
 	class SelectCardUI : public UIBase
@@ -60,6 +60,17 @@ namespace
 		ButtonLabel trait_;
 	};
 
+
+	class SelectCommonUI : public UIBase
+	{
+	public:
+		SelectCommonUI(DxPlus::Vec2 position)
+			: UIBase(ResourceKeys::SelectCommon, position, { 0, -1 }, SelectCameraMoveDuration)
+		{
+			this->SetCenter({ 0.5f, 0.5f });
+		}
+	};
+
 	Camera::CameraPose MakeCameraPoseInFrontOfPlayer(
 		Camera::CameraPose pose,
 		const Player& player)
@@ -79,19 +90,19 @@ namespace
 			-std::sin(yaw)
 		};
 
-		// Target‚ğ‰æ–Ê‰E‘¤‚É”z’u‚·‚é‚½‚ßA’‹“_‚ğ‰E‚Ö‚¸‚ç‚·
+		// Targetï¿½ï¿½ï¿½ï¿½Ê‰Eï¿½ï¿½ï¿½É”zï¿½uï¿½ï¿½ï¿½é‚½ï¿½ßAï¿½ï¿½ï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½Eï¿½Ö‚ï¿½ï¿½ç‚·
 		const Vec3 target =
 			playerPos
 			+ Vec3::Up() * SelectTargetH
 			+ right * SelectTargetRightOffset;
 
-		// ƒLƒƒƒ‰ƒNƒ^[‚Ì³–Ê‘¤‚ÉƒJƒƒ‰‚ğ”z’u
+		// ï¿½Lï¿½ï¿½ï¿½ï¿½ï¿½Nï¿½^ï¿½[ï¿½Ìï¿½ï¿½Ê‘ï¿½ï¿½ÉƒJï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½u
 		pose.position = target + forward * SelectCameraForwardDistance;
 
-		// ƒJƒƒ‰‚ğ­‚µ¶‚ÖˆÚ“®
+		// ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÖˆÚ“ï¿½
 		pose.position -= right * SelectCameraLeftOffset;
 
-		// Target‚ğ’‹
+		// Targetï¿½ğ’ï¿½
 		const Vec3 direction = target - pose.position;
 
 		pose.yaw = std::atan2(direction.x, direction.z);
@@ -107,6 +118,7 @@ namespace
 	}
 
 }
+
 
 GameSceneSelectState::GameSceneSelectState(
 	GameStateMachine& gameStateMachine,
@@ -126,13 +138,32 @@ void GameSceneSelectState::Enter()
 			DxPlus::CLIENT_HEIGHT * 0.5f
 		};
 
+		// ï¿½Jï¿½[ï¿½h3ï¿½ï¿½ï¿½ï¿½oï¿½^
 		for (const auto& card : SelectCards)
 		{
 			if (!UIM().GetUI(card.uiKey))
-				UIM().RegisterUI(card.uiKey, std::make_unique<SelectCardUI>(card, position));
+			{
+				UIM().CreateImageUI(
+					card.uiKey,
+					card.spriteKey,
+					position,
+					{ 0, -1 },
+					SelectCameraMoveDuration);
+			}
 
 			UIM().GetUI(card.uiKey)->SetFalse();
 		}
+
+		// ï¿½ï¿½ï¿½ï¿½UIï¿½ï¿½oï¿½^
+		if (!UIM().GetUI(L"Select.Common"))
+		{
+			UIM().RegisterUI(
+				L"Select.Common",
+				std::make_unique<SelectCommonUI>(
+					position + DxPlus::Vec2{ 0.0f, 220.0f }));
+		}
+
+		UIM().GetUI(L"Select.Common")->SetFalse();
 	}
 
 	auto* context = gameScene_.GetGameContext();
@@ -173,19 +204,19 @@ void GameSceneSelectState::Tick(float deltaTime)
 
 	auto& director = gameScene_.GetCameraDirector();
 
-	// ƒJƒƒ‰XV‚Í–ˆƒtƒŒ[ƒ€1‰ñ‚¾‚¯
+	// ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½Xï¿½Vï¿½Í–ï¿½ï¿½tï¿½ï¿½ï¿½[ï¿½ï¿½1ï¿½ñ‚¾‚ï¿½
 	const bool transitionCompleted =
 		gameScene_.UpdateStateCamera(deltaTime, "Select");
 
 	// =========================================
-	// ƒJƒƒ‰ó‘Ô
+	// ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	// =========================================
 
 	switch (cameraState_)
 	{
 	case SelectCameraState::WaitSelectShot:
 	{
-		// SelectƒVƒ‡ƒbƒg‚ÌŠ®—¹‚ğ‘Ò‚Â
+		// Selectï¿½Vï¿½ï¿½ï¿½bï¿½gï¿½ÌŠï¿½ï¿½ï¿½ï¿½ï¿½Ò‚ï¿½
 		if (transitionCompleted && !director.IsTransitioning())
 		{
 			const auto pose = MakeCameraPoseInFrontOfPlayer(
@@ -204,14 +235,14 @@ void GameSceneSelectState::Tick(float deltaTime)
 
 	case SelectCameraState::MoveToSelectedPlayer:
 	{
-		// ƒJƒƒ‰ˆÚ“®‚ÌŠ®—¹‚ğ‘Ò‚Â
+		// ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½Ú“ï¿½ï¿½ÌŠï¿½ï¿½ï¿½ï¿½ï¿½Ò‚ï¿½
 		if (transitionCompleted && !director.IsTransitioning())
 		{
 			cameraState_ = SelectCameraState::Ready;
 
 			UpdateSelectedUI();
 
-			// ƒJƒƒ‰ˆÚ“®Š®—¹Œã‚ÉŒˆ’è‚·‚é
+			// ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½Ú“ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÉŒï¿½ï¿½è‚·ï¿½ï¿½
 			if (confirmAfterCameraMove_)
 			{
 				confirmAfterCameraMove_ = false;
@@ -227,7 +258,7 @@ void GameSceneSelectState::Tick(float deltaTime)
 	}
 
 	// =========================================
-	// “ü—Íæ“¾
+	// ï¿½ï¿½ï¿½Íæ“¾
 	// =========================================
 
 	const bool aDown =
@@ -247,20 +278,20 @@ void GameSceneSelectState::Tick(float deltaTime)
 	const bool enterPressed = enterDown && !enterWasDown_;
 	const bool mousePressed = mouseDown && !mouseWasDown_;
 
-	// ˆÚ“®’†‚É“ü—Í‚ğó‚¯•t‚¯‚È‚­‚Ä‚àA‰Ÿ‰ºó‘Ô‚ÍXV‚·‚é
+	// ï¿½Ú“ï¿½ï¿½ï¿½ï¿½É“ï¿½ï¿½Í‚ï¿½ï¿½ó‚¯•tï¿½ï¿½ï¿½È‚ï¿½ï¿½Ä‚ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô‚ÍXï¿½Vï¿½ï¿½ï¿½ï¿½
 	aWasDown_ = aDown;
 	dWasDown_ = dDown;
 	enterWasDown_ = enterDown;
 	mouseWasDown_ = mouseDown;
 
-	// ƒJƒƒ‰ˆÚ“®’†‚Í‘I‘ğ‘€ì‚ğó‚¯•t‚¯‚È‚¢
+	// ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½Ú“ï¿½ï¿½ï¿½ï¿½Í‘Iï¿½ğ‘€ï¿½ï¿½ï¿½ó‚¯•tï¿½ï¿½ï¿½È‚ï¿½
 	if (cameraState_ != SelectCameraState::Ready)
 	{
 		return;
 	}
 
 	// =========================================
-	// A / D‚Å‘I‘ğ
+	// A / Dï¿½Å‘Iï¿½ï¿½
 	// =========================================
 
 	if (aPressed)
@@ -276,7 +307,7 @@ void GameSceneSelectState::Tick(float deltaTime)
 	}
 
 	// =========================================
-	// Enter‚ÅŒˆ’è
+	// Enterï¿½ÅŒï¿½ï¿½ï¿½
 	// =========================================
 
 	if (enterPressed)
@@ -296,10 +327,15 @@ void GameSceneSelectState::SelectIndex(int index)
 
 	selectedIndex_ = index;
 
+	// ï¿½Jï¿½[ï¿½hï¿½Æ‹ï¿½ï¿½ï¿½UIï¿½ï¿½ï¿½ï¿½xï¿½ï¿½\ï¿½ï¿½ï¿½É‚ï¿½ï¿½ï¿½
 	for (const auto& card : SelectCards)
 	{
-		UIM().GetUI(card.uiKey)->Hide();
+		if (auto* ui = UIM().GetUI(card.uiKey))
+			ui->Hide();
 	}
+
+	if (auto* ui = UIM().GetUI(L"Select.Common"))
+		ui->Hide();
 
 	auto& director = gameScene_.GetCameraDirector();
 
@@ -323,22 +359,22 @@ void GameSceneSelectState::ConfirmSelection()
 
 	Player& selected = *players_[selectedIndex_];
 	const auto& card = SelectCards[selectedIndex_];
-	// ƒLƒƒƒ‰–¼‚Ìˆ—
+	// ï¿½Lï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ìï¿½ï¿½ï¿½
 	const auto* status = CharSettingsManager::GetByName(card.statusName);
-	selected.SetCharData(status ? *status : CharData{});//‚à‚µİ’è‚ª–³‚¢ê‡‚ÍƒfƒtƒHƒ‹ƒg‚ÌCharData‚ğg‚¤
+	selected.SetCharData(status ? *status : CharData{});//ï¿½ï¿½ï¿½ï¿½ï¿½İ’è‚ªï¿½ï¿½ï¿½ï¿½ï¿½ê‡ï¿½Íƒfï¿½tï¿½Hï¿½ï¿½ï¿½gï¿½ï¿½CharDataï¿½ï¿½ï¿½gï¿½ï¿½
 
-	// Basket‚Æ‚ÌeqŠÖŒW‚ğ‰ğœ
+	// Basketï¿½Æ‚Ìeï¿½qï¿½ÖŒWï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	selected.ClearOwner();
 
-	// –{•Ò‚Åg—p‚·‚éPlayer‚ğØ‚è‘Ö‚¦‚é
+	// ï¿½{ï¿½Ò‚Ågï¿½pï¿½ï¿½ï¿½ï¿½Playerï¿½ï¿½Ø‚ï¿½Ö‚ï¿½ï¿½ï¿½
 	context->SetActivePlayer(selected);
 
 	auto* player = context->GetPlayer();
 
-	// ‘I‘ğ‰æ–Ê‚Å–³Œø‚É‚µ‚½d—Í‚ğ—LŒø‚É–ß‚·
+	// ï¿½Iï¿½ï¿½ï¿½ï¿½Ê‚Å–ï¿½ï¿½ï¿½ï¿½É‚ï¿½ï¿½ï¿½ï¿½dï¿½Í‚ï¿½Lï¿½ï¿½ï¿½É–ß‚ï¿½
 	player->SetGravityEnabled(true);
 
-	// Play—p‚ÌƒTƒCƒY‚Æ‰ñ“]‚É‚·‚é
+	// Playï¿½pï¿½ÌƒTï¿½Cï¿½Yï¿½Æ‰ï¿½]ï¿½É‚ï¿½ï¿½ï¿½
 	auto& selectModel = selected.GetModelObject();
 	player->GetModelObject().SetRotation({});
 	player->GetModelObject().SetScale({ 1.0f, 1.0f, 1.0f });
@@ -359,17 +395,25 @@ void GameSceneSelectState::UpdateSelectedUI()
 				ui->SetFalse();
 		}
 	}
+
+	// ï¿½ï¿½ï¿½ï¿½UIï¿½ï¿½ï¿½\ï¿½ï¿½
+	if (auto* ui = UIM().GetUI(L"Select.Common"))
+		ui->SetTrue();
 }
 
 void GameSceneSelectState::Exit()
 {
 	DxPlus::Debug::SetFormatString(
 		L"GameSceneSelectState::Exit");
+
 	for (const auto& card : SelectCards)
 	{
-		if (auto* ui = UIM().GetUI(card.uiKey)) ui->SetFalse();
+		if (auto* ui = UIM().GetUI(card.uiKey))
+			ui->SetFalse();
 	}
 
+	if (auto* ui = UIM().GetUI(L"Select.Common"))
+		ui->SetFalse();
 
 	DxLib::SetMouseDispFlag(FALSE);
 }
