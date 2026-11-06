@@ -530,6 +530,9 @@ void GameTestScene::DrawImGui()
 		if (ImGui::Button(u8"Down (Flinch)"))
 			boss.SetDownGauge(0.0f);
 
+		if (ImGui::Button(u8"Take Damage (1 HP)"))
+			boss.TakeDamage(1);
+
 		if (ImGui::Button(u8"Die (成仏)"))
 			boss.TakeDamage(999); // HPを0にして死亡させる
 

@@ -19,13 +19,8 @@ void BossFlinchState::Enter()
 void BossFlinchState::Tick(float deltaTime)
 {
     DxPlus::Debug::SetString(L"CurrentBossState:Flinch");
-    // 最後まで再生する。終了したフレームの時間は、姿勢を保つ時間に含めない。
-    if (!boss_.GetAnimation().IsFinished())
-    {
-        boss_.UpdateAnimation(deltaTime);
-        return;
-    }
-    // アニメーションの最後の姿勢を保ったまま、設定した時間だけ待つ。
+    // ダウンアニメーションを、設定した時間だけループ再生する。
+    boss_.UpdateAnimation(deltaTime);
     remainingSeconds_ -= deltaTime;
     if (remainingSeconds_ <= 0.0f)
         stateMachine_.ChangeState(BossStateType::Idle);

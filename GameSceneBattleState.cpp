@@ -6,6 +6,8 @@
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
 #include "StatusUI.h"
+#include "Collision.h"
+#include "CameraShakeType.h"
 #include "Consts.h"
 #include "UIManager.h"
 #include <algorithm>
@@ -21,7 +23,19 @@ void GameSceneBattleState::Enter()
 {
     auto* gameContext = gameScene_.GetGameContext();
     auto* player = gameContext->GetPlayer();
+    auto& boss = gameContext->GetBoss();
     gameContext->ClearUltimateProjectiles();
+
+    wasTouchingBossBody_ = false;
+    wasTailWhipActive_ = false;
+    battleIntroTurnRemaining_ = BattleIntroTurnDuration;
+    battleIntroWaitRemaining_ = BattleIntroWaitDuration;
+    battleStarted_ = false;
+
+    gameScene_.GetTutorialChecklist().SetVisible(false);
+    player->GetStateMachine().SetEventCallback({});
+    gameScene_.SetBattleEventActive(true);
+    gameScene_.StartBattleEventBarsIn();
 
     // バトル用カメラへ切り替える
     gameScene_.GetCameraDirector().SwitchCamera(
@@ -33,7 +47,7 @@ void GameSceneBattleState::Enter()
     player->SetControlLocked(true);
     player->StopMove();
 
-   boss.SetAIActive(false);
+    boss.SetAIActive(false);
 
     StatusUI::InitBoss();
     gameScene_.SetDrawPlayerShadow(true);
@@ -83,6 +97,8 @@ void GameSceneBattleState::Tick(float deltaTime)
         }
         return;
     }
+
+    stage.Update(deltaTime);
 
     if (!player->IsDead() && boss.GetHealth() > 0)
         player->AddUltimateGauge(Const::PLAYER_ULTIMATE_GAUGE_PER_SECOND * deltaTime);
@@ -230,7 +246,6 @@ void GameSceneBattleState::Tick(float deltaTime)
         }
     }
 
-    // カメラ更新
     // プレイヤーが被ダメージ状態に移る前に、攻撃の命中を登録する。
     if (handHitPlayer)
         player->TakeDamage(Const::BOSS_CLAP_DAMAGE);
@@ -239,7 +254,7 @@ void GameSceneBattleState::Tick(float deltaTime)
 
     if (tailWhipPlayerHit)
     {
-        player->TakeDamage();
+        player->TakeDamage(Const::BOSS_TAIL_WHIP_DAMAGE);
 
         Vec3 outward =
             player->GetWorldPosition() - stage.GetWorldPosition();
@@ -397,6 +412,9 @@ void GameSceneBattleState::Tick(float deltaTime)
 void GameSceneBattleState::Exit()
 {
     gameScene_.GetGameContext()->ClearUltimateProjectiles();
+    gameScene_.SetBattleEventActive(false);
+    gameScene_.StartBattleEventBarsOut();
+    gameScene_.GetTutorialChecklist().SetVisible(false);
     gameScene_.SetDrawPlayerShadow(false);
     UIM().RemoveUI(L"BossStatusBackground");
     UIM().RemoveUI(L"BossHealthGauge");

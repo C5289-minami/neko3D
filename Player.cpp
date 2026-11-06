@@ -117,6 +117,7 @@ void Player::Reset()
 
 	health_ = MaxHealth;
 	addDamage_ = 0;
+	controlLocked_ = false;
 	avoidInvTime_ = 0.0f;
 	// wasTouchingPillar_ = false;
 	wasTouchingModel_ = false;
@@ -184,7 +185,8 @@ void Player::RestorePosition(const Vec3& position)
 {
 	lastGroundFloor_ = GroundType::None;
 	jumpStartFloor_ = GroundType::None;
-	stateMachine_.ChangeState(PlayerStateType::Idle);
+	if (!IsDamaging())
+		stateMachine_.ChangeState(PlayerStateType::Idle);
 	EndPillarElevator();
 	StopMove();
 	position_ = position;
@@ -344,6 +346,11 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 	const float previousY = oldPosition.y;
 
 	input_.Update();
+	if (controlLocked_)
+	{
+		input_ = {};
+		moveInput_ = {};
+	}
 #ifdef _DEBUG
 	if (input_.shiftRKeyPressed)
 	{
@@ -939,7 +946,9 @@ void Player::ApplyKnockback(const Vec3& direction, float power, float duration)
 	isGrounded_ = false;
 	EndPillarElevator();
 
-	stateMachine_.ChangeState(PlayerStateType::Jump);
+	// 被ダメージ中は、回避の受付と保留中のダメージ処理を続ける。
+	if (!IsDamaging())
+		stateMachine_.ChangeState(PlayerStateType::Jump);
 }
 
 void Player::SetWallJumpMoveSpeed(float value)

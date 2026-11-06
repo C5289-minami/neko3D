@@ -39,6 +39,8 @@ struct ModelObject
 
 	// •ÏŠ·
 	void ApplyTransform(Vec3 masterPos = {}) const;
+	void ApplyDrawTransform(Vec3 masterPos = {}) const;
+	void SetDrawScaleMultiplier(float multiplier) { drawScaleMultiplier_ = multiplier; }
 	void ApplyCollisionColor() const;
 
 	// “–‚½‚è”»’è
@@ -123,6 +125,8 @@ struct ModelObject
 	void SetOutlineOpacity(float value);
 
 private:
+	void ApplyTransform(Vec3 masterPos, float scaleMultiplier) const;
+
 	// “à•”ŠÇ—
 	std::string objectName;
 	std::string objectId;
@@ -138,6 +142,7 @@ private:
 
 	// •`‰æİ’è
 	float alpha{ 1.0f };
+	float drawScaleMultiplier_{ 1.0f };
 	ModelType modelType_ = ModelType::Model;
 
 

@@ -19,6 +19,8 @@
         const Vec3& GetPosition() const { return position_; }
         void SetPosition(const Vec3& position) { position_ = position; }
 
+		const Vec3& GetScale() const { return { scale_ }; } // デフォルトは1.0f
+		//void SetScale(const Vec3& scale) { scale_ = scale; } // デフォルトは1.0f
         // 回転
         Vec3 GetRotation() const { return { pitch_, yaw_, 0.0f }; }
         void SetRotation(const Vec3& rotation) { pitch_ = rotation.x; yaw_ = rotation.y; }
@@ -70,6 +72,7 @@
     protected:
         std::string actorID_;
         Vec3 position_{};
+		Vec3 scale_{ 1.0f, 1.0f, 1.0f };    //rei shirann
         float yaw_{};
         float pitch_{};
         ActorBase* owner_{ nullptr };

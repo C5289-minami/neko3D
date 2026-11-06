@@ -137,6 +137,7 @@ private:
 
 	int health_{ MaxHealth };
 	int maxHealth_{ MaxHealth };
+	float hitScaleTimeRemaining_{};// ダメージを受けたときのスケール変化の残り時間
 	float downGauge_{ 0.0f };
 	static constexpr float maxDownGauge_ = Const::BOSS_DOWN_GAUGE_MAX;
     bool damageTakenThisFrame_{};
