@@ -23,7 +23,8 @@ bool CharSettingsManager::Save(const std::string& filePath)
             {"maxHealth", data.maxHealth},
             {"moveSpeed", data.moveSpeed},
             {"attackRatio", data.attackRatio},
-            {"attackSpeed", data.attackSpeed}
+            {"attackSpeed", data.attackSpeed},
+            {"climbSpeedMultiplier", data.climbSpeedMultiplier}
             });
     }
 
@@ -99,6 +100,12 @@ bool CharSettingsManager::Load(const std::string& filePath)
                 item["attackSpeed"].is_number())
             {
                 data.attackSpeed = item["attackSpeed"].get<float>();
+            }
+
+            if (item.contains("climbSpeedMultiplier") &&
+                item["climbSpeedMultiplier"].is_number())
+            {
+                data.climbSpeedMultiplier = item["climbSpeedMultiplier"].get<float>();
             }
 
             loadedData.push_back(data);

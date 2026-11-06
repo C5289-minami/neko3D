@@ -5,11 +5,14 @@
 
 struct CharData
 {
+    static constexpr float DefaultMoveSpeed = 5.0f;
+
     std::string name{""};   // –¼‘O
     float maxHealth = 100.0f;  // Å‘å‘Ì—Í
-    float moveSpeed = 5.0f;    // ˆÚ“®‘¬“x
+    float moveSpeed = DefaultMoveSpeed;    // ˆÚ“®‘¬“x
     float attackRatio = 1.0f;  // UŒ‚”{—¦
     float attackSpeed = 1.0f;  // UŒ‚‘¬“x
+    float climbSpeedMultiplier = 1.0f;  // ’Œ‚ğ“o‚é‘¬‚³‚Ì”{—¦
 };
 
 class CharSettingsManager
