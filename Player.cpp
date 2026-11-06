@@ -439,7 +439,7 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 				GetPosition().z
 			),
 			rayDistance,
-			hit))
+			hit, false))
 		{
 			position_.y = hit.point.y - Const::PLAYER_HEIGHT - Const::PLAYER_SKIN;
 			velocity_.y = 0.0f;
@@ -447,27 +447,25 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 			EndPillarElevator();
 		}
 	}
-
+	// ステージの内周・外周は、足元の点ではなく体の球で移動経路を調べる。
+	const Vec3 bodyOffset = Vec3::Up() * (modelOb.height * 0.5f);
+	const Collision::Sphere oldBody{ oldPosition + bodyOffset, modelOb.radius };
+	position_ = collision.SlideAlongFallRecoveryFloor(oldBody, position_ - oldPosition, velocity_) - bodyOffset;
 
 	bool landedOnFirstFloor = false;
 	// 落下中のみ床面に合わせ、このフレームの落下距離もレイの長さに含める。
 	// エレベーター中と、到着時の小ジャンプ中は床へ吸着させない。
-	// if (dy<= 0.0f)
 	if (dy <= 0.0f && velocity_.y <= 0.0f && GetCurrentState() != PlayerStateType::Climbing)
 	{
 		Physics::RayHit hit{};
-		const float fallDistance = previousY - position_.y;
+		const float rayStartY = (std::max)(previousY, position_.y);
+		const float fallDistance = rayStartY - position_.y;
 		const float rayDistance =
 			fallDistance + GroundSnapDistance + Const::PLAYER_SKIN;
 
-		// std::vector<int> handles;
-		// stage.GetCollisionModelHandles(handles);
+		const Vec3 origin{ position_.x, rayStartY + Const::PLAYER_SKIN, position_.z };
 
-		// if (Physics::RaycastDown(
-			// handles,
-		const Vec3 origin{ GetPosition().x, previousY + Const::PLAYER_SKIN, GetPosition().z };
-
-		bool foundGround = collision.RaycastDown(origin, rayDistance, hit, &landedOnFirstFloor);
+		bool foundGround = collision.RaycastDown(origin, rayDistance, hit, nullptr, false);
 
 		Physics::RayHit pillarHit{};
 		// 小ジャンプの頂点から急に吸い戻されないよう、柱は足元付近だけで着地する。
@@ -478,14 +476,25 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 		{
 			hit = pillarHit;
 			foundGround = true;
-			landedOnFirstFloor = false;
 		}
+
+		Physics::RayHit stageHit{};
+		const Collision::Sphere body{ position_ + bodyOffset, modelOb.radius };
+		if (collision.SweepFallRecoveryFloor(body, -Vec3::Up() * GroundSnapDistance, stageHit) &&
+			(stageHit.normal.y >= WalkableNormalY || stageHit.distance <= modelOb.skin))
+		{
+			const float floorY = position_.y - stageHit.distance;
+			if (!foundGround || floorY >= hit.point.y)
+			{
+				stageHit.point.y = floorY;
+				hit = stageHit;
+				foundGround = true;
+				landedOnFirstFloor = true;
+			}
+		}
+
 		if (foundGround)
 		{
-			// 旧仕様：壁の上端で接触を保持している間の床補正。
-			// const bool holdingClimbTop = GetCurrentState() == PlayerStateType::Climbing && IsNearWallTop();
-			// if (position_.y - hit.point.y <= GroundSnapDistance &&
-			//     (!holdingClimbTop || hit.point.y >= position_.y))
 			if (position_.y - hit.point.y <= GroundSnapDistance)
 			{
 				// 坂の中へ落ち込まないよう、足元を床の高さへ戻す。
@@ -496,7 +505,8 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 					// 急な坂では踏ん張れないので、坂の下へ流される。
 					isGrounded_ = false;
 
-					if (gravityEnabled_)
+					// ステージの坂では、移動時に重力を斜面に沿わせている。
+					if (gravityEnabled_ && !landedOnFirstFloor)
 					{
 						const Vec3 slideDirection = Vec3{ hit.normal.x, 0.0f, hit.normal.z }.Normalized();
 						const float slideAmount = Const::GRAVITY * deltaTime;
@@ -505,7 +515,9 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 						// 坂の途中に壁があれば、そこを突き抜けずに止まる。
 						bool touched = false;
 
-						position_ = collision.SlideAlongWalls(position_, slidePosition, modelOb, touched);
+						const Vec3 slid = collision.SlideAlongWalls(position_, slidePosition, modelOb, touched);
+						const Collision::Sphere slideBody{ position_ + bodyOffset, modelOb.radius };
+						position_ = collision.SlideAlongFallRecoveryFloor(slideBody, slid - position_, velocity_) - bodyOffset;
 						touchingModel_ |= touched;
 					}
 				}

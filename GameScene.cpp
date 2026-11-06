@@ -658,6 +658,7 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 void GameScene::End()
 {
+	gameContext->StopTailWhipSound();
 	gameContext->ClearUltimateProjectiles();
 	tutorialCollision_.Clear();
 }

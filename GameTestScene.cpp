@@ -121,6 +121,7 @@ void GameTestScene::Update(float deltaTime)
 
 	if (cameraDirector_.GetActiveCamera() == &freeCamera_)
 	{
+		gameContext->StopTailWhipSound();
 		if (!freeCamera_.IsSceneViewActive() &&
 			(DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
 		{
@@ -201,7 +202,7 @@ void GameTestScene::Update(float deltaTime)
 
 		tailWhipHitCapsule_ = {};
 
-		if (boss.IsTailWhipHitActive())
+		if (boss.IsTailWhipActive() && boss.IsTailWhipHitActive())
 		{
 			const Vec3 stageCenter = stage.GetWorldPosition();
 			const float stageRadius = stage.GetArenaRadius();
@@ -212,6 +213,7 @@ void GameTestScene::Update(float deltaTime)
 				stageRadius,
 				attackHeight);
 		}
+		gameContext->UpdateTailWhipSound(tailWhipHitCapsule_);
 
 		const Collision::Sphere playerBody = player->GetHitSphere();
 
@@ -613,6 +615,7 @@ void GameTestScene::DrawImGui()
 
 void GameTestScene::End()
 {
+	gameContext->StopTailWhipSound();
 	gameContext->ClearUltimateProjectiles();
 }
 

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "DxLib.h"
 #include "Vector3.h"
@@ -7,10 +7,11 @@ class Sound3D
 {
 public:
 
-    // 3D‰¹Œ¹‚ğÄ¶
-    static void Play(int soundHandle, Vec3 position,float radius = 1000.0f);
+    // 3DéŸ³æºã‚’å†ç”Ÿ
+    static void Play(int soundHandle, Vec3 position, float radius = 1000.0f, int startTimeMs = 0);
+    static void SetPosition(int soundHandle, Vec3 position);
 
-    // ƒŠƒXƒi[iƒvƒŒƒCƒ„[j‚ÌˆÊ’uEŒü‚«‚ğİ’è
+    // ãƒªã‚¹ãƒŠãƒ¼ï¼ˆãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ï¼‰ã®ä½ç½®ãƒ»å‘ãã‚’è¨­å®š
     static void SetListener(
         Vec3 position,
         Vec3 front

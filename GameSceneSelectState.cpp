@@ -1,4 +1,4 @@
-#include "GameSceneSelectState.h"
+﻿#include "GameSceneSelectState.h"
 #include "GameScene.h"
 #include "GameStateMachine.h"
 #include "GameContext.h"
@@ -9,6 +9,7 @@
 #include "UIManager.h"
 #include "ButtonLabel.h"
 #include "ResourceManager.h"
+#include "SoundManager.h"
 
 #include <array>
 #include <cmath>
@@ -26,14 +27,15 @@ namespace
 	{
 		const wchar_t* uiKey;
 		const wchar_t* spriteKey;
+		const wchar_t* soundKey;
 		const char* statusName;
 		const wchar_t* trait;
 	};
 
 	constexpr std::array<SelectCard, 3> SelectCards{ {
-		{ L"Select.Mike", ResourceKeys::SelectMike, u8"����", L"�o�����X�^" },
-		{ L"Select.Sabi", ResourceKeys::SelectSabi, u8"����", L"����̂�����" },
-		{ L"Select.Kuro", ResourceKeys::SelectKuro, u8"�䂤", L"�o��̂�����" }
+		{ L"Select.Mike", ResourceKeys::SelectMike, ResourceKeys::Sound_SelectTaka, u8"たか", L"バランス型" },
+		{ L"Select.Sabi", ResourceKeys::SelectSabi, ResourceKeys::Sound_SelectGishi, u8"ぎし", L"走るのが得意" },
+		{ L"Select.Kuro", ResourceKeys::SelectKuro, ResourceKeys::Sound_SelectYu, u8"ゆう", L"登るのが得意" }
 	} };
 
 	class SelectCardUI : public UIBase
@@ -90,19 +92,19 @@ namespace
 			-std::sin(yaw)
 		};
 
-		// Target����ʉE���ɔz�u���邽�߁A�����_���E�ւ��炷
+		// Targetを画面右側に配置するため、注視点を右へずらす
 		const Vec3 target =
 			playerPos
 			+ Vec3::Up() * SelectTargetH
 			+ right * SelectTargetRightOffset;
 
-		// �L�����N�^�[�̐��ʑ��ɃJ������z�u
+		// キャラクターの正面側にカメラを配置
 		pose.position = target + forward * SelectCameraForwardDistance;
 
-		// �J�������������ֈړ�
+		// カメラを少し左へ移動
 		pose.position -= right * SelectCameraLeftOffset;
 
-		// Target�𒍎�
+		// Targetを注視
 		const Vec3 direction = target - pose.position;
 
 		pose.yaw = std::atan2(direction.x, direction.z);
@@ -138,7 +140,7 @@ void GameSceneSelectState::Enter()
 			DxPlus::CLIENT_HEIGHT * 0.5f
 		};
 
-		// �J�[�h3����o�^
+		// カード3枚を登録
 		for (const auto& card : SelectCards)
 		{
 			if (!UIM().GetUI(card.uiKey))
@@ -154,7 +156,7 @@ void GameSceneSelectState::Enter()
 			UIM().GetUI(card.uiKey)->SetFalse();
 		}
 
-		// ����UI��o�^
+		// 共通UIを登録
 		if (!UIM().GetUI(L"Select.Common"))
 		{
 			UIM().RegisterUI(
@@ -212,21 +214,23 @@ void GameSceneSelectState::Tick(float deltaTime)
 
 	auto& director = gameScene_.GetCameraDirector();
 
-	// �J�����X�V�͖��t���[��1�񂾂�
+	// カメラ更新は毎フレーム1回だけ
 	const bool transitionCompleted =
 		gameScene_.UpdateStateCamera(deltaTime, "Select");
 
 	// =========================================
-	// �J�������
+	// カメラ状態
 	// =========================================
 
 	switch (cameraState_)
 	{
 	case SelectCameraState::WaitSelectShot:
 	{
-		// Select�V���b�g�̊�����҂�
+		// Selectショットの完了を待つ
 		if (transitionCompleted && !director.IsTransitioning())
 		{
+			SoundManager::PlaySE(RM().GetSound(SelectCards[selectedIndex_].soundKey));//選択時のSEを再生
+
 			const auto pose = MakeCameraPoseInFrontOfPlayer(
 				director.GetCurrentPose(),
 				*players_[selectedIndex_]);
@@ -243,14 +247,14 @@ void GameSceneSelectState::Tick(float deltaTime)
 
 	case SelectCameraState::MoveToSelectedPlayer:
 	{
-		// �J�����ړ��̊�����҂�
+		// カメラ移動の完了を待つ
 		if (transitionCompleted && !director.IsTransitioning())
 		{
 			cameraState_ = SelectCameraState::Ready;
 
 			UpdateSelectedUI();
 
-			// �J�����ړ�������Ɍ��肷��
+			// カメラ移動完了後に決定する
 			if (confirmAfterCameraMove_)
 			{
 				confirmAfterCameraMove_ = false;
@@ -266,7 +270,7 @@ void GameSceneSelectState::Tick(float deltaTime)
 	}
 
 	// =========================================
-	// ���͎擾
+	// 入力取得
 	// =========================================
 
 	const bool aDown =
@@ -286,20 +290,20 @@ void GameSceneSelectState::Tick(float deltaTime)
 	const bool enterPressed = enterDown && !enterWasDown_;
 	const bool mousePressed = mouseDown && !mouseWasDown_;
 
-	// �ړ����ɓ��͂��󂯕t���Ȃ��Ă��A������Ԃ͍X�V����
+	// 移動中に入力を受け付けなくても、押下状態は更新する
 	aWasDown_ = aDown;
 	dWasDown_ = dDown;
 	enterWasDown_ = enterDown;
 	mouseWasDown_ = mouseDown;
 
-	// �J�����ړ����͑I�𑀍���󂯕t���Ȃ�
+	// カメラ移動中は選択操作を受け付けない
 	if (cameraState_ != SelectCameraState::Ready)
 	{
 		return;
 	}
 
 	// =========================================
-	// A / D�őI��
+	// A / Dで選択
 	// =========================================
 
 	if (aPressed)
@@ -315,7 +319,7 @@ void GameSceneSelectState::Tick(float deltaTime)
 	}
 
 	// =========================================
-	// Enter�Ō���
+	// Enterで決定
 	// =========================================
 
 	if (enterPressed)
@@ -333,9 +337,11 @@ void GameSceneSelectState::SelectIndex(int index)
 
 	if (index == selectedIndex_) return;
 
+	SoundManager::StopSE(RM().GetSound(SelectCards[selectedIndex_].soundKey));
 	selectedIndex_ = index;
+	SoundManager::PlaySE(RM().GetSound(SelectCards[selectedIndex_].soundKey));
 
-	// �J�[�h�Ƌ���UI����x��\���ɂ���
+	// カードと共通UIを一度非表示にする
 	for (const auto& card : SelectCards)
 	{
 		if (auto* ui = UIM().GetUI(card.uiKey))
@@ -367,22 +373,22 @@ void GameSceneSelectState::ConfirmSelection()
 
 	Player& selected = *players_[selectedIndex_];
 	const auto& card = SelectCards[selectedIndex_];
-	// �L�������̏���
+	// キャラ名の処理
 	const auto* status = CharSettingsManager::GetByName(card.statusName);
-	selected.SetCharData(status ? *status : CharData{});//�����ݒ肪�����ꍇ�̓f�t�H���g��CharData���g��
+	selected.SetCharData(status ? *status : CharData{});//もし設定が無い場合はデフォルトのCharDataを使う
 
-	// Basket�Ƃ̐e�q�֌W������
+	// Basketとの親子関係を解除
 	selected.ClearOwner();
 
-	// �{�҂Ŏg�p����Player��؂�ւ���
+	// 本編で使用するPlayerを切り替える
 	context->SetActivePlayer(selected);
 
 	auto* player = context->GetPlayer();
 
-	// �I����ʂŖ����ɂ����d�͂�L���ɖ߂�
+	// 選択画面で無効にした重力を有効に戻す
 	player->SetGravityEnabled(true);
 
-	// Play�p�̃T�C�Y�Ɖ�]�ɂ���
+	// Play用のサイズと回転にする
 	auto& selectModel = selected.GetModelObject();
 	player->GetModelObject().SetRotation({});
 	player->GetModelObject().SetScale({ 1.0f, 1.0f, 1.0f });
@@ -404,7 +410,7 @@ void GameSceneSelectState::UpdateSelectedUI()
 		}
 	}
 
-	// ����UI���\��
+	// 共通UIも表示
 	if (auto* ui = UIM().GetUI(L"Select.Common"))
 		ui->SetTrue();
 }
@@ -413,6 +419,8 @@ void GameSceneSelectState::Exit()
 {
 	DxPlus::Debug::SetFormatString(
 		L"GameSceneSelectState::Exit");
+
+	SoundManager::StopSE(RM().GetSound(SelectCards[selectedIndex_].soundKey));
 
 	for (const auto& card : SelectCards)
 	{

@@ -1,4 +1,4 @@
-// =============================
+ï»¿// =============================
 // Core/GameContext.cpp
 // =============================
 #include "GameContext.h"
@@ -10,6 +10,9 @@
 #endif
 #include "CharSettings.h"
 #include "ResourceKeys.h"
+#include "ResourceManager.h"
+#include "Sound3D.h"
+#include "SoundManager.h"
 
 void GameContext::Init()
 {
@@ -52,7 +55,7 @@ void GameContext::Init()
 		auto& selectPlayer = selectPreviewPlayers_[i];
 		const std::string suffix = std::to_string(i);
 
-		// Player Actor‚Ìe‚ğBasket‚É‚·‚é
+		// Player Actorã®è¦ªã‚’Basketã«ã™ã‚‹
 		selectPlayer.SetOwner(room_.GetBasket());
 
 		selectPlayer.GetModelObject().SetModelKey(playerModelKeys[i]);
@@ -60,7 +63,7 @@ void GameContext::Init()
 		selectPlayer.GetModelObject().SetObjectId("select_player_" + suffix);
 		selectPlayer.GetModelObject().SetObjectName("SelectPlayer" + suffix);
 
-		// ModelObject‚Ìe‚ğPlayer Actor‚É‚·‚é
+		// ModelObjectã®è¦ªã‚’Player Actorã«ã™ã‚‹
 		modelObjects.Add(selectPlayer.GetModelObject(), selectPlayer);
 	}
 
@@ -95,8 +98,39 @@ void GameContext::ClearUltimateProjectiles()
 	playerUltimateEffect_.Clear(*activePlayer);
 }
 
+void GameContext::UpdateTailWhipSound(const Collision::Capsule& hitCapsule)
+{
+	if (hitCapsule.radius <= 0.0f)
+	{
+		StopTailWhipSound();
+		return;
+	}
+
+	const int sound = RM().GetSound(ResourceKeys::Sound_TailWhip);
+	if (!tailWhipSoundPlaying_)
+	{
+		// Skip the silence before StartBGM's first beat.
+		constexpr int startTimeMs = 760;
+		const float hearingRadius = stage.GetArenaRadius() * 2.0f;
+		SoundManager::PlaySE3D(sound, hitCapsule.end, hearingRadius, startTimeMs);
+		tailWhipSoundPlaying_ = true;
+	}
+	else
+	{
+		Sound3D::SetPosition(sound, hitCapsule.end);
+	}
+}
+
+void GameContext::StopTailWhipSound()
+{
+	if (!tailWhipSoundPlaying_) return;
+	SoundManager::StopSE(RM().GetSound(ResourceKeys::Sound_TailWhip));
+	tailWhipSoundPlaying_ = false;
+}
+
 void GameContext::Reset()
 {
+	StopTailWhipSound();
 	ClearUltimateProjectiles();
 	DxLib::SetDrawScreen(DX_SCREEN_BACK);
 	DxLib::SetBackgroundColor(bgRed, bgGreen, bgBlue);
@@ -109,12 +143,12 @@ void GameContext::Reset()
 	boss.Reset();
 	room_.Reset();
 
-	// –{•ÒPlayer‚ğ‰ŠúPlayer‚É–ß‚·
+	// æœ¬ç·¨Playerã‚’åˆæœŸPlayerã«æˆ»ã™
 	activePlayer = &defaultPlayer;
 	boss.SetPlayer(*activePlayer);
 	activePlayer->Reset();
 
-	// ƒvƒŒƒrƒ…[Player‚ğ‰Šúó‘Ô‚É–ß‚·
+	// ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼Playerã‚’åˆæœŸçŠ¶æ…‹ã«æˆ»ã™
 	for (auto& preview : selectPreviewPlayers_)
 	{
 		preview.ResetOwner();
