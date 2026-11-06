@@ -1,10 +1,11 @@
 #pragma once
 #include "PlayerBaseState.h"
+#include "Consts.h"
 
 class PlayerDamagingState final : public PlayerBaseState
 {
 public:
-    static constexpr float AvoidTime = 0.3f;
+    static constexpr float AvoidTime = Const::PLAYER_AVOID_WINDOW_SECONDS;
 
     PlayerDamagingState(PlayerStateMachine& stateMachine, Player& player);
 

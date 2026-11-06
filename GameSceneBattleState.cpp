@@ -8,6 +8,7 @@
 #include "StatusUI.h"
 #include "Collision.h"
 #include "CameraShakeType.h"
+#include "Consts.h"
 #include "UIManager.h"
 #include <algorithm>
 
@@ -20,8 +21,10 @@ GameSceneBattleState::GameSceneBattleState(
 
 void GameSceneBattleState::Enter()
 {
-    auto* player = gameScene_.GetGameContext()->GetPlayer();
-	auto& boss = gameScene_.GetGameContext()->GetBoss();
+    auto* gameContext = gameScene_.GetGameContext();
+    auto* player = gameContext->GetPlayer();
+    auto& boss = gameContext->GetBoss();
+    gameContext->ClearUltimateProjectiles();
 
     wasTouchingBossBody_ = false;
     wasTailWhipActive_ = false;
@@ -29,13 +32,12 @@ void GameSceneBattleState::Enter()
     battleIntroWaitRemaining_ = BattleIntroWaitDuration;
     battleStarted_ = false;
 
-    // ƒ`ƒ…[ƒgƒŠƒAƒ‹‚Ì“ü—Í’Ê’m‚Æƒ`ƒFƒbƒNƒŠƒXƒg‚ðABattle‚ÖŽ‚¿‰z‚³‚È‚¢B
     gameScene_.GetTutorialChecklist().SetVisible(false);
     player->GetStateMachine().SetEventCallback({});
     gameScene_.SetBattleEventActive(true);
     gameScene_.StartBattleEventBarsIn();
 
-    // ƒoƒgƒ‹—pƒJƒƒ‰‚ÖØ‚è‘Ö‚¦‚é
+    // ãƒãƒˆãƒ«ç”¨ã‚«ãƒ¡ãƒ©ã¸åˆ‡ã‚Šæ›¿ãˆã‚‹
     gameScene_.GetCameraDirector().SwitchCamera(
         gameScene_.GetTargetCamera(),
         0.8f
@@ -45,7 +47,7 @@ void GameSceneBattleState::Enter()
     player->SetControlLocked(true);
     player->StopMove();
 
-   boss.SetAIActive(false);
+    boss.SetAIActive(false);
 
     StatusUI::InitBoss();
     gameScene_.SetDrawPlayerShadow(true);
@@ -58,7 +60,7 @@ void GameSceneBattleState::Tick(float deltaTime)
     auto& boss = gameContext->GetBoss();
     auto& stage = gameContext->GetStage();
     // =============================
-    // ŠJ–‹‰‰oBPlayer‚Í“ü—Í‚ðŽ~‚ß‚½‚Ü‚ÜAd—Í‚Æ°‚Ì“–‚½‚è”»’è‚¾‚¯XV‚·‚éB
+    // é–‹å¹•æ¼”å‡ºã€‚Playerã¯å…¥åŠ›ã‚’æ­¢ã‚ãŸã¾ã¾ã€é‡åŠ›ã¨åºŠã®å½“ãŸã‚Šåˆ¤å®šã ã‘æ›´æ–°ã™ã‚‹ã€‚
     // =============================
     if (!battleStarted_)
     {
@@ -116,15 +118,12 @@ void GameSceneBattleState::Tick(float deltaTime)
         return;
     }
 
-    // =============================
-    // StageXV
-    // =============================
     stage.Update(deltaTime);
 
-    // =============================
-    // =============================
-    // PlayerXVE°”»’è
-    // =============================
+    if (!player->IsDead() && boss.GetHealth() > 0)
+        player->AddUltimateGauge(Const::PLAYER_ULTIMATE_GAUGE_PER_SECOND * deltaTime);
+    gameContext->UpdateUltimateProjectiles(deltaTime);
+
     const Vec3 stageCenterPosition = stage.GetPosition();
 
     player->Update(
@@ -136,7 +135,7 @@ void GameSceneBattleState::Tick(float deltaTime)
     player->CheckFloor();
 
     // =============================
-    // Boss–{‘Ì‚Ö‚ÌƒWƒƒƒ“ƒvÚG”»’è
+    // Bossæœ¬ä½“ã¸ã®ã‚¸ãƒ£ãƒ³ãƒ—æŽ¥è§¦åˆ¤å®š
     // =============================
     const auto state = player->GetCurrentState();
 
@@ -168,7 +167,7 @@ void GameSceneBattleState::Tick(float deltaTime)
         boss.ApplyDownGaugeDamage(damage);
     }
 
-    // “ñ’iƒWƒƒƒ“ƒv‚ÅÚG‚µ‚½ê‡‚ÍˆÀ‘S‚ÈˆÊ’u‚Ö–ß‚·
+    // äºŒæ®µã‚¸ãƒ£ãƒ³ãƒ—ã§æŽ¥è§¦ã—ãŸå ´åˆã¯å®‰å…¨ãªä½ç½®ã¸æˆ»ã™
     if (touchingBody && doubleJump)
     {
         player->ReturnToLastSafePosition(stage.GetCollision());
@@ -177,7 +176,7 @@ void GameSceneBattleState::Tick(float deltaTime)
     wasTouchingBossBody_ = touchingBody;
 
     // =============================
-    // BossXV
+    // Bossæ›´æ–°
     // =============================
     boss.UpdateClapTargetPosition(player->GetWorldPosition());
 
@@ -189,7 +188,7 @@ void GameSceneBattleState::Tick(float deltaTime)
     );
 
     // =============================
-    // BossUŒ‚”»’è
+    // Bossæ”»æ’ƒåˆ¤å®š
     // =============================
     const bool slamHitPlayer = boss.UpdateSlamAttack(
         player->GetWorldPosition(),
@@ -203,7 +202,7 @@ void GameSceneBattleState::Tick(float deltaTime)
     );
 
     // =============================
-    // TailWhipƒMƒ~ƒbƒN
+    // TailWhipã‚®ãƒŸãƒƒã‚¯
     // =============================
     const bool isTailWhipActive = boss.IsTailWhipHitActive();
 
@@ -225,7 +224,7 @@ void GameSceneBattleState::Tick(float deltaTime)
     wasTailWhipActive_ = isTailWhipActive;
 
     // =============================
-    // TailWhip“–‚½‚è”»’è
+    // TailWhipå½“ãŸã‚Šåˆ¤å®š
     // =============================
     Collision::Capsule tailWhipCapsule{};
 
@@ -248,7 +247,7 @@ void GameSceneBattleState::Tick(float deltaTime)
         );
 
     // =============================
-    // Player‚ÌUŒ‚”»’è
+    // Playerã®æ”»æ’ƒåˆ¤å®š
     // =============================
     auto& playerStateMachine = player->GetStateMachine();
 
@@ -259,25 +258,23 @@ void GameSceneBattleState::Tick(float deltaTime)
 
         if (boss.IsHitByAttackSphere(attackBall, tailWhipCapsule))
         {
-            // “¯‚¶UŒ‚‹…‚É‚æ‚é˜A‘±ƒ_ƒ[ƒW‚ð–hŽ~
+            // åŒã˜æ”»æ’ƒçƒã«ã‚ˆã‚‹é€£ç¶šãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’é˜²æ­¢
             if (playerStateMachine.TryRegisterAttackBallHit())
             {
-                boss.TakeDamage();
+                boss.TakeDamage(Const::PLAYER_NORMAL_ATTACK_DAMAGE);
             }
         }
     }
 
-    // =============================
-    // Player”íƒ_ƒ[ƒWˆ—
-    // =============================
-    if (handHitPlayer || slamHitPlayer)
-    {
-        player->TakeDamage(boss.GetScale());
-    }
+    // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒè¢«ãƒ€ãƒ¡ãƒ¼ã‚¸çŠ¶æ…‹ã«ç§»ã‚‹å‰ã«ã€æ”»æ’ƒã®å‘½ä¸­ã‚’ç™»éŒ²ã™ã‚‹ã€‚
+    if (handHitPlayer)
+        player->TakeDamage(Const::BOSS_CLAP_DAMAGE);
+    else if (slamHitPlayer)
+        player->TakeDamage(Const::BOSS_SLAM_DAMAGE);
 
     if (tailWhipPlayerHit)
     {
-        player->TakeDamage(boss.GetScale());
+        player->TakeDamage(Const::BOSS_TAIL_WHIP_DAMAGE);
 
         Vec3 outward =
             player->GetWorldPosition() - stage.GetWorldPosition();
@@ -288,7 +285,7 @@ void GameSceneBattleState::Tick(float deltaTime)
     }
 
     // =============================
-    // ƒJƒƒ‰ƒVƒFƒCƒN
+    // ã‚«ãƒ¡ãƒ©ã‚·ã‚§ã‚¤ã‚¯
     // =============================
     auto applyShake = [this](auto& actor)
         {
@@ -329,11 +326,11 @@ void GameSceneBattleState::Tick(float deltaTime)
     applyShake(*player);
 
     // =============================
-    // ƒJƒƒ‰XVEØ‚è‘Ö‚¦
+    // ã‚«ãƒ¡ãƒ©æ›´æ–°ãƒ»åˆ‡ã‚Šæ›¿ãˆ
     // =============================
     auto& cameraDirector = gameScene_.GetCameraDirector();
 
-    // ƒ{ƒXŽ€–SŽž
+    // ãƒœã‚¹æ­»äº¡æ™‚
     if (boss.IsDead())
     {
         auto& dieCamera = gameScene_.GetBossDieCamera();
@@ -346,7 +343,7 @@ void GameSceneBattleState::Tick(float deltaTime)
             cameraDirector.SwitchCamera(dieCamera, 1.2f);
         }
     }
-    // ƒ{ƒXƒ_ƒEƒ“Žž
+    // ãƒœã‚¹ãƒ€ã‚¦ãƒ³æ™‚
     else if (boss.IsDowned())
     {
         auto& downCamera = gameScene_.GetBossDownCamera();
@@ -363,7 +360,7 @@ void GameSceneBattleState::Tick(float deltaTime)
             cameraDirector.SwitchCamera(downCamera, 1.2f);
         }
     }
-    // ’ÊíŽž
+    // é€šå¸¸æ™‚
     else
     {
         auto& targetCamera = gameScene_.GetTargetCamera();
@@ -384,7 +381,7 @@ void GameSceneBattleState::Tick(float deltaTime)
 
     cameraDirector.Update(deltaTime);
     // =============================
-    // ƒJƒƒ‰“§‰ß
+    // ã‚«ãƒ¡ãƒ©é€éŽ
     // =============================
     Collision::ResetTransparentModels();
 
@@ -403,7 +400,7 @@ void GameSceneBattleState::Tick(float deltaTime)
     );
 
     // =============================
-    // “ü—ÍEƒGƒtƒFƒNƒg
+    // å…¥åŠ›ãƒ»ã‚¨ãƒ•ã‚§ã‚¯ãƒˆ
     // =============================
     using namespace DxPlus::Input;
 
@@ -419,7 +416,7 @@ void GameSceneBattleState::Tick(float deltaTime)
     gameContext->GetEffectManager().Update(deltaTime);
 
     // =============================
-    // ƒXƒe[ƒ^ƒXUIXV
+    // ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹UIæ›´æ–°
     // =============================
     StatusUI::SyncStatusBar(
         L"BossHealthGauge",
@@ -434,7 +431,8 @@ void GameSceneBattleState::Tick(float deltaTime)
 
 void GameSceneBattleState::Exit()
 {
-  gameScene_.SetBattleEventActive(false);
+    gameScene_.GetGameContext()->ClearUltimateProjectiles();
+    gameScene_.SetBattleEventActive(false);
     gameScene_.StartBattleEventBarsOut();
     gameScene_.GetTutorialChecklist().SetVisible(false);
     gameScene_.SetDrawPlayerShadow(false);

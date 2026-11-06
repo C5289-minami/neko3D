@@ -55,8 +55,12 @@ const Collision::Sphere& PlayerStateMachine::GetAttackBallSphere() const
 
 bool PlayerStateMachine::TryRegisterAttackBallHit()
 {
-	// 攻撃ステート中に、今回の攻撃球の命中を一度だけ登録できたか返す。
-	return currentType_ == PlayerStateType::Attack && attackState_.TryRegisterHit();
+	if (currentType_ != PlayerStateType::Attack || !attackState_.TryRegisterHit())
+		return false;
+
+	// 同じ攻撃球が重なり続けても、命中分のゲージは一度だけ増やす。
+	player_.AddUltimateGauge(Const::PLAYER_ULTIMATE_GAUGE_PER_HIT);
+	return true;
 }
 
 float PlayerStateMachine::GetAvoidTime() const

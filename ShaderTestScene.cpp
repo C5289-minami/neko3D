@@ -102,7 +102,7 @@ void ShaderTest::Update(float deltaTime)
 		player->GetPosition(), player->GetRotation());
 	const bool touching = Collision::UpdateModelContact(playerModel, gameContext->GetBoss().GetModelObject());
 	player->GetModelObject().collisionHighlighted = playerModel.collisionHighlighted;
-	if (updateActors && touching) player->TakeDamage(gameContext->GetBoss().GetScale());
+	if (updateActors && touching) player->TakeDamage();
 
 
 

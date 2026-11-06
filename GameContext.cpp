@@ -78,8 +78,19 @@ void GameContext::Init()
 	boss.SetPlayer(*activePlayer);
 }
 
+void GameContext::UpdateUltimateProjectiles(float deltaTime)
+{
+	playerUltimateEffect_.Update(*activePlayer, boss, stage, deltaTime);
+}
+
+void GameContext::ClearUltimateProjectiles()
+{
+	playerUltimateEffect_.Clear(*activePlayer);
+}
+
 void GameContext::Reset()
 {
+	ClearUltimateProjectiles();
 	DxLib::SetDrawScreen(DX_SCREEN_BACK);
 	DxLib::SetBackgroundColor(bgRed, bgGreen, bgBlue);
 
