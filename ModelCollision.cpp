@@ -644,8 +644,9 @@ bool ModelCollision::RaycastWall(const Vec3& start, const Vec3& end, Physics::Ra
 
 		Physics::RayHit candidate{};
 		if (!Physics::Raycast(entry.handle, start, end, candidate)) continue;
-		// 足場の上面・下面と、歩ける傾斜は横移動を止めない。
-		if (std::abs(candidate.normal.y) >= 0.5f) continue;
+        // 足場の上面・下面と、歩ける傾斜は横移動を止めない。
+		// 着地判定の基準と合わせ、急斜面や地面端の斜め面は壁として扱う。
+		if (std::abs(candidate.normal.y) >= 0.7f) continue;
 
 		// 部屋の内側から当たる場合も、レイの開始側へ法線を向ける。
 		if (Vec3::Dot(end - start, candidate.normal) > 0.0f)
@@ -788,6 +789,58 @@ Vec3 ModelCollision::SlideAlongWalls(const Vec3& oldPosition, const Vec3& desire
 
 	for (int attempt = 0; attempt < 4; ++attempt)
 	{
+       // 前フレームの補正や斜めの面で少しめり込んだ状態から始まると、
+		// レイの交点がすでに後ろにあるため、レイ判定だけでは押し戻せない。
+		// 壁モデルのカプセル判定から、水平面のめり込み分を先に取り除く。
+		// 途中のスライド後に再度行うと、角で押し戻しが繰り返されて引っかかるため、
+		// 補正は移動開始時の一度だけ行う。
+		bool corrected = false;
+		if (attempt == 0)
+		{
+           const Vec3 correctionCenter = position + Vec3::Up() * rayHeight;
+			for (const auto& entry : models_)
+			{
+                if (entry.handle < 0 || entry.surface != Surface::Wall) continue;
+
+				const Vec3 capsuleStart = position + Vec3::Up() * modelOb.radius;
+				const Vec3 capsuleEnd = position + Vec3::Up() * (modelOb.height - modelOb.radius);
+				const auto result = MV1CollCheck_Capsule(entry.handle, -1,
+					DxConv::ToVECTOR(capsuleStart), DxConv::ToVECTOR(capsuleEnd), modelOb.radius);
+
+				for (int i = 0; i < result.HitNum; ++i)
+				{
+                   Vec3 normal = DxConv::ToVec3(result.Dim[i].Normal).Normalized();
+					if (std::abs(normal.y) >= 0.7f) continue;
+
+					normal = Vec3(normal.x, 0.0f, normal.z).Normalized();
+					if (normal.LengthSq() == 0.0f) continue;
+
+					const Vec3 point = DxConv::ToVec3(result.Dim[i].Position[0]);
+					float distance = Vec3::Dot(correctionCenter - point, normal);
+					if (distance < 0.0f)
+					{
+						normal = -normal;
+						distance = -distance;
+					}
+
+					const float penetration = modelOb.radius - distance - modelOb.skin;
+					if (penetration > 0.0f)
+					{
+						position += normal * penetration;
+						corrected = true;
+					}
+				}
+
+				MV1CollResultPolyDimTerminate(result);
+			}
+			if (corrected)
+			{
+				touched = true;
+				remaining = Vec3{ desiredPosition.x - position.x, 0.0f,
+					desiredPosition.z - position.z };
+			}
+		}
+
 		const float length = remaining.Length();
 
 		if (length <= Const::EPS) break;
