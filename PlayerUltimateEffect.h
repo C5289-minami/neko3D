@@ -30,7 +30,7 @@ private:
 
 	static Collision::Capsule GetBossBody(const Boss& boss, const Stage& stage);
 	void Launch(const Vec3& launchPosition, const Collision::Capsule& body);
-	void UpdateShot(Shot& shot, Boss& boss, const Collision::Capsule& body, float deltaTime);
+   void UpdateShot(Shot& shot, Player& player, Boss& boss, const Collision::Capsule& body, float deltaTime);
 	static void MoveShot(Shot& shot, float deltaTime);
 	static bool HitsBoss(
 		const Vec3& previousPosition, const Vec3& currentPosition, const Collision::Capsule& body);

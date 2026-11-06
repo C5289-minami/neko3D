@@ -41,7 +41,7 @@ void PlayerInput::Update()
 	// 左クリックの攻撃入力
 	//attackPressed = (buttonDown & BUTTON_TRIGGER3) != 0;
 	attackPressed = (buttonDown & BUTTON_START) != 0;	//Enterキーで攻撃するように変更
-	ultimatePressed = (buttonDown & BUTTON_TRIGGER4) != 0;
+  ultimatePressed = DxLib::CheckHitKey(KEY_INPUT_E) != 0;
 #ifdef _DEBUG
 	debugUltimatePressed = attackPressed && DxLib::CheckHitKey(KEY_INPUT_LSHIFT) != 0;
 	ultimatePressed = ultimatePressed || debugUltimatePressed;

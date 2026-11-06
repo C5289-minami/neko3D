@@ -189,7 +189,7 @@
 			<labels />
 			<guidelines />
 			<isSetup>0</isSetup>
-			<lastFrame>20</lastFrame>
+			<lastFrame>99</lastFrame>
 			<partAnimes>
 				<partAnime>
 					<partName>root</partName>
@@ -214,12 +214,12 @@
 						</attribute>
 						<attribute tag="POSX">
 							<key time="99" ipType="linear">
-								<value>82.041702</value>
+								<value>0.041702271</value>
 							</key>
 						</attribute>
 						<attribute tag="POSY">
 							<key time="99" ipType="linear">
-								<value>-446.50006</value>
+								<value>-366.50006</value>
 							</key>
 						</attribute>
 						<attribute tag="ROTZ">

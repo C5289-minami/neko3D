@@ -245,17 +245,18 @@
 		<value>supusuta.ssce</value>
 	</cellmapNames>
 	<animepackNames>
-		<value>bossBar.ssae</value>
+		<value>boss_down.ssae</value>
+		<value>boss_hp.ssae</value>
 		<value>player_hp.ssae</value>
 	</animepackNames>
 	<ExternalTextures>
 		<files />
 	</ExternalTextures>
-	<lastAnimeFile>player_hp.ssae</lastAnimeFile>
-	<lastAnimeName>playerult</lastAnimeName>
-	<lastPart>player_bar</lastPart>
+	<lastAnimeFile>boss_hp.ssae</lastAnimeFile>
+	<lastAnimeName>Boss_hp</lastAnimeName>
+	<lastPart></lastPart>
 	<lastCellMapFile>supusuta.ssce</lastCellMapFile>
-	<lastCell>player_bar</lastCell>
+	<lastCell>baria</lastCell>
 	<lastCharMapFile></lastCharMapFile>
 	<lastEffectFile></lastEffectFile>
 	<setupmode>0</setupmode>

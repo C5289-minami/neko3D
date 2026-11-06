@@ -33,7 +33,7 @@
 		<playArea.end>0</playArea.end>
 		<loop>1</loop>
 	</settings>
-	<name>bossBar</name>
+	<name>boss_hp</name>
 	<exportPath></exportPath>
 	<Model>
 		<partList>
@@ -81,7 +81,7 @@
 					<HIDE>0</HIDE>
 				</ineheritRates>
 				<alphaBlendType>mix</alphaBlendType>
-				<show>0</show>
+				<show>1</show>
 				<locked>0</locked>
 				<expandAttribute>0</expandAttribute>
 				<expandChildren>1</expandChildren>
@@ -116,34 +116,8 @@
 				<outputInfluence>1</outputInfluence>
 			</value>
 			<value>
-				<name>boss_1</name>
-				<arrayIndex>3</arrayIndex>
-				<parentIndex>0</parentIndex>
-				<type>normal</type>
-				<boundsType>none</boundsType>
-				<inheritType>parent</inheritType>
-				<visibleInsideMask>0</visibleInsideMask>
-				<writeMask>0</writeMask>
-				<ineheritRates>
-					<ALPH>1</ALPH>
-					<IFLH>0</IFLH>
-					<IFLV>0</IFLV>
-					<FLPH>0</FLPH>
-					<FLPV>0</FLPV>
-					<HIDE>0</HIDE>
-				</ineheritRates>
-				<alphaBlendType>mix</alphaBlendType>
-				<show>0</show>
-				<locked>0</locked>
-				<expandAttribute>0</expandAttribute>
-				<expandChildren>1</expandChildren>
-				<refCellTag></refCellTag>
-				<maskInfluence>1</maskInfluence>
-				<outputInfluence>1</outputInfluence>
-			</value>
-			<value>
 				<name>baria</name>
-				<arrayIndex>4</arrayIndex>
+				<arrayIndex>3</arrayIndex>
 				<parentIndex>0</parentIndex>
 				<type>normal</type>
 				<boundsType>none</boundsType>
@@ -175,245 +149,6 @@
 		<value>supusuta.ssce</value>
 	</cellmapNames>
 	<animeList>
-		<anime>
-			<name>Boss_down</name>
-			<overrideSettings>1</overrideSettings>
-			<settings>
-				<fps>30</fps>
-				<frameCount>100</frameCount>
-				<sortMode>prio</sortMode>
-				<canvasSize>1920 1080</canvasSize>
-				<pivot>0 0</pivot>
-				<bgColor>FF323232</bgColor>
-				<gridSize>32</gridSize>
-				<gridColor>FF808080</gridColor>
-				<ik_depth>3</ik_depth>
-				<startFrame>0</startFrame>
-				<endFrame>99</endFrame>
-				<bgSettings>
-					<value>
-						<imagePath></imagePath>
-						<imageDisp>1</imageDisp>
-						<imageOffset>0 0</imageOffset>
-						<imageCanvas>0 0</imageCanvas>
-						<imagePivot>0 0</imagePivot>
-					</value>
-					<value>
-						<imagePath></imagePath>
-						<imageDisp>1</imageDisp>
-						<imageOffset>0 0</imageOffset>
-						<imageCanvas>0 0</imageCanvas>
-						<imagePivot>0 0</imagePivot>
-					</value>
-				</bgSettings>
-				<playArea.isON>0</playArea.isON>
-				<playArea.start>0</playArea.start>
-				<playArea.end>0</playArea.end>
-				<loop>1</loop>
-			</settings>
-			<labels />
-			<guidelines />
-			<isSetup>0</isSetup>
-			<lastFrame>0</lastFrame>
-			<partAnimes>
-				<partAnime>
-					<partName>root</partName>
-					<attributes>
-						<attribute tag="HIDE">
-							<key time="0">
-								<value>0</value>
-							</key>
-						</attribute>
-					</attributes>
-				</partAnime>
-				<partAnime>
-					<partName>boss</partName>
-					<attributes>
-						<attribute tag="POSX">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="POSY">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="ROTZ">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="PRIO">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="HIDE">
-							<key time="0">
-								<value>0</value>
-							</key>
-						</attribute>
-					</attributes>
-				</partAnime>
-				<partAnime>
-					<partName>hp</partName>
-					<attributes>
-						<attribute tag="POSX">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="POSY">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="ROTZ">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="PRIO">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="HIDE">
-							<key time="0">
-								<value>0</value>
-							</key>
-						</attribute>
-					</attributes>
-				</partAnime>
-				<partAnime>
-					<partName>boss_1</partName>
-					<attributes>
-						<attribute tag="CELL">
-							<key time="0">
-								<value>
-									<mapId>0</mapId>
-									<name>boss</name>
-								</value>
-							</key>
-						</attribute>
-						<attribute tag="POSX">
-							<key time="0" ipType="linear">
-								<value>1.1667175</value>
-							</key>
-						</attribute>
-						<attribute tag="POSY">
-							<key time="0" ipType="linear">
-								<value>446.6666</value>
-							</key>
-						</attribute>
-						<attribute tag="ROTZ">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="PRIO">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="HIDE">
-							<key time="0">
-								<value>0</value>
-							</key>
-						</attribute>
-					</attributes>
-				</partAnime>
-				<partAnime>
-					<partName>baria</partName>
-					<attributes>
-						<attribute tag="CELL">
-							<key time="0">
-								<value>
-									<mapId>0</mapId>
-									<name>baria</name>
-								</value>
-							</key>
-						</attribute>
-						<attribute tag="POSX">
-							<key time="0" ipType="linear">
-								<value>34.166718</value>
-							</key>
-						</attribute>
-						<attribute tag="POSY">
-							<key time="0" ipType="linear">
-								<value>400.33325</value>
-							</key>
-						</attribute>
-						<attribute tag="ROTZ">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="SCLX">
-							<key time="0" ipType="linear">
-								<value>1</value>
-							</key>
-							<key time="99" ipType="linear">
-								<value>1</value>
-							</key>
-						</attribute>
-						<attribute tag="SCLY">
-							<key time="0" ipType="linear">
-								<value>1</value>
-							</key>
-							<key time="99" ipType="linear">
-								<value>1</value>
-							</key>
-						</attribute>
-						<attribute tag="LSCX">
-							<key time="0" ipType="linear">
-								<value>1</value>
-							</key>
-							<key time="99" ipType="linear">
-								<value>1</value>
-							</key>
-						</attribute>
-						<attribute tag="LSCY">
-							<key time="0" ipType="linear">
-								<value>1</value>
-							</key>
-							<key time="99" ipType="linear">
-								<value>1</value>
-							</key>
-						</attribute>
-						<attribute tag="PRIO">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="HIDE">
-							<key time="0">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="VERT">
-							<key time="0" ipType="linear">
-								<value>
-									<LT>0 0</LT>
-									<RT>8 0</RT>
-									<LB>0 0</LB>
-									<RB>8 0</RB>
-								</value>
-							</key>
-							<key time="99" ipType="linear">
-								<value>
-									<LT>0 0</LT>
-									<RT>-574 0</RT>
-									<LB>0 0</LB>
-									<RB>-574 0</RB>
-								</value>
-							</key>
-						</attribute>
-					</attributes>
-				</partAnime>
-			</partAnimes>
-		</anime>
 		<anime>
 			<name>Boss_hp</name>
 			<overrideSettings>1</overrideSettings>

@@ -3,11 +3,16 @@
 #include "ResourceKeys.h"
 #include "DxPlus/DxPlus.h"
 
+namespace
+{
+    std::wstring selectedPlayerBackground;
+}
+
 void StatusUI::InitPlayer(const std::string& characterName)
 {
     const DxPlus::Vec2 backgroundPosition(
-        DxPlus::CLIENT_WIDTH * 0.5f,
-        DxPlus::CLIENT_HEIGHT * 0.8f);
+        DxPlus::CLIENT_WIDTH * 0.48f - 45,
+        DxPlus::CLIENT_HEIGHT * 0.845f);
 
     UIM().CreateImageUI(
         L"playerULTGaugeBackMike",
@@ -30,6 +35,8 @@ void StatusUI::InitPlayer(const std::string& characterName)
         characterName == "ゆう" ? L"playerULTGaugeBackKuro" :
         L"playerULTGaugeBackMike";
 
+    selectedPlayerBackground = selectedBackground;
+
     for (const auto* key : {
         L"playerULTGaugeBackMike",
         L"playerULTGaugeBackSabi",
@@ -38,9 +45,6 @@ void StatusUI::InitPlayer(const std::string& characterName)
         if (auto* ui = UIM().GetUI(key))
             ui->SetFalse();
     }
-
-    if (auto* ui = UIM().GetUI(selectedBackground))
-        ui->SetTrue();
 
     UIM().CreateSpriteStudioUI(
         L"PlayerUltGauge",
@@ -58,11 +62,11 @@ void StatusUI::InitBoss()
         DxPlus::CLIENT_WIDTH * 0.5f,
         DxPlus::CLIENT_HEIGHT * 0.5f);
 
-    //UIM().CreateSpriteStudioUI(
-    //    L"BossHealthGauge",
-    //    ResourceKeys::SpriteStudio_BossHealthGauge,
-    //    backgroundPosition,
-    //    "Boss_hp");
+    UIM().CreateSpriteStudioUI(
+        L"BossHealthGauge",
+        ResourceKeys::SpriteStudio_BossHealthGauge,
+        backgroundPosition,
+        "Boss_hp");
 
     UIM().CreateSpriteStudioUI(
         L"BossDownGauge",
@@ -71,7 +75,7 @@ void StatusUI::InitBoss()
             DxPlus::CLIENT_HEIGHT * 0.5f),
         "Boss_down");
 
-   // UIM().GetUI(L"BossHealthGauge")->SetFalse();
+   UIM().GetUI(L"BossHealthGauge")->SetFalse();
     UIM().GetUI(L"BossDownGauge")->SetFalse();
 }
 void StatusUI::SyncStatusBar(const std::wstring& key, float progress)
@@ -87,8 +91,9 @@ void StatusUI::Open()
 {
     const std::wstring keys[] =
     {
-        //L"PlayerStatusBackground",
-       // L"PlayerHealthGauge",
+        L"playerULTGaugeBackMike",
+        L"playerULTGaugeBackSabi",
+        L"playerULTGaugeBackKuro",
         L"PlayerUltGauge",
         //L"BossStatusBackground",
         L"BossHealthGauge",
@@ -98,7 +103,15 @@ void StatusUI::Open()
     for (const auto& key : keys)
     {
         if (auto* ui = UIM().GetUI(key))
-            ui->SetTrue();
+        {
+            if (key == L"PlayerUltGauge" ||
+                key == L"BossHealthGauge" ||
+                key == L"BossDownGauge" ||
+                key == selectedPlayerBackground)
+            {
+                ui->SetTrue();
+            }
+        }
     }
 }
 
@@ -106,8 +119,9 @@ void StatusUI::Hide()
 {
     const std::wstring keys[] =
     {
-        //L"PlayerStatusBackground",
-       // L"PlayerHealthGauge",
+        L"playerULTGaugeBackMike",
+        L"playerULTGaugeBackSabi",
+        L"playerULTGaugeBackKuro",
         L"PlayerUltGauge",
         //L"BossStatusBackground",
         L"BossHealthGauge",

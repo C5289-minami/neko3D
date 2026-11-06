@@ -210,12 +210,12 @@ void GameSceneBattleState::Tick(float deltaTime)
 
     StatusUI::SyncStatusBar(
         L"BossHealthGauge",
-        boss.GetHealthProgress()
+        1.0f - boss.GetHealthProgress()
     );
 
     StatusUI::SyncStatusBar(
         L"BossDownGauge",
-        boss.GetDownGaugeProgress()
+        1.0f - boss.GetDownGaugeProgress()
     );
 
     DxPlus::Debug::SetFormatString(
