@@ -24,7 +24,7 @@ GameScene::GameScene(GameContext* context)
 
 void GameScene::Init()
 {
-	gameContext->Reset();
+	ResetForTitle();
 	battleEventActive_ = false;
 	battleLetterboxMotion_.Reset();
 
@@ -47,9 +47,6 @@ void GameScene::Init()
 		tutorialCollision_.AddModel(stand->GetPillarModel(), ModelCollision::Surface::Pillar);
 	}
 	tutorialCollision_.AddModel(gameContext->GetStage().GetModelObject(), ModelCollision::Surface::Floor);
-
-	// キャラクター選択画面のプレビューを表示する
-	gameContext->SetSelectPreviewVisible(true);
 
 	// トゥーン描画とアウトライン描画を有効にする
 	{
@@ -94,6 +91,54 @@ void GameScene::Init()
 	stateMachine_.Initialize();
 
   StartFadeIn();
+}
+
+void GameScene::ResetForTitle()
+{
+	battleCheckpoint_.reset();
+	gameContext->Reset();
+	gameContext->SetSelectPreviewVisible(true);
+	cameraDirector_.StopShake();
+}
+
+void GameScene::SaveBattleCheckpoint()
+{
+	const auto& boss = gameContext->GetBoss();
+	battleCheckpoint_ = BattleCheckpoint{
+		gameContext->GetPlayer()->GetTransform(),
+		boss.GetTransform(),
+		boss.GetPosition(),
+		boss.GetRotation(),
+		cameraDirector_.GetCurrentPose(),
+		playerTargetCamera_
+	};
+}
+
+bool GameScene::RestoreBattleCheckpoint()
+{
+	if (!battleCheckpoint_) return false;
+
+	const auto& checkpoint = *battleCheckpoint_;
+	auto* player = gameContext->GetPlayer();
+	auto& boss = gameContext->GetBoss();
+
+	gameContext->GetStage().Reset();
+	player->Reset();
+	player->SetTransform(checkpoint.playerTransform);
+	player->SetStartPosition(checkpoint.playerTransform.position);
+	player->ResetCameraShakeRequest();
+
+	boss.Reset();
+	boss.SetTransform(checkpoint.bossTransform);
+	boss.SetPosition(checkpoint.bossPosition);
+	boss.SetRotation(checkpoint.bossRotation);
+	boss.ResetCameraShakeRequest();
+
+	Collision::ResetTransparentModels();
+	playerTargetCamera_ = checkpoint.targetCamera;
+	cameraDirector_.StopShake();
+	cameraDirector_.SetPoseImmediate(checkpoint.cameraPose);
+	return true;
 }
 
 void GameScene::UpdateDuringFade(float deltaTime)
@@ -144,7 +189,17 @@ void GameScene::Update(float deltaTime)
 	// Battleの更新はBattleStateに任せる
 	if (currentState == GameStateType::Battle)
 	{
-		stateMachine_.Tick(deltaTime);
+		const auto& boss = gameContext->GetBoss();
+		if (!boss.IsDead())
+			stateMachine_.Tick(deltaTime);
+
+		if (GetCurrentGameState() != GameStateType::Battle)
+			return;
+
+		if (boss.IsDead())
+			stateMachine_.ChangeState(GameStateType::Clear);
+		else if (gameContext->GetPlayer()->GetCurrentState() == PlayerStateType::Die)
+			stateMachine_.ChangeState(GameStateType::GameOver);
 		return;
 	}
 
@@ -251,6 +306,12 @@ void GameScene::DrawImGui()
 		// =============================
 		ImGui::Separator();
 		ImGui::TextUnformatted(u8"Player");
+
+		ImGui::BeginDisabled(GetCurrentGameState() != GameStateType::Battle ||
+			player->IsDead() || player->IsDamaging() || player->GetAvoidInvTime() > 0.0f);
+		if (ImGui::Button("Kill Player"))
+			player->TakeDamage(player->GetHealth());
+		ImGui::EndDisabled();
 
 		ImGui::Text(
 			"Pillar contact: %s",
@@ -658,6 +719,8 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 void GameScene::End()
 {
+	SoundManager::StopBGM(RM().GetMusic(ResourceKeys::Music_Title));
+	SoundManager::StopBGM(RM().GetMusic(ResourceKeys::Music_Battle));
 	gameContext->StopTailWhipSound();
 	gameContext->ClearUltimateProjectiles();
 	tutorialCollision_.Clear();

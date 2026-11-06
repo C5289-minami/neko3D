@@ -3,6 +3,8 @@
 #include "UIManager.h"
 #include <string>
 
+class Player;
+
 class StatusUI
 {
 public:
@@ -11,6 +13,7 @@ public:
 
     static void Open();
     static void Hide();
+    static void Remove();
 
     static void SyncStatusBar(const std::wstring& key, float progress);
 };

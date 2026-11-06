@@ -5,9 +5,9 @@
 #include "DxPlus/DxPlus.h"
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
+#include "SoundManager.h"
 #include "StatusUI.h"
 #include "Collision.h"
-#include "UIManager.h"
 #include "CameraShakeType.h"
 
 #include <algorithm>
@@ -29,10 +29,17 @@ GameSceneBattleState::GameSceneBattleState(
 
 void GameSceneBattleState::Enter()
 {
+    const int titleBgm = RM().GetMusic(ResourceKeys::Music_Title);
+    if (titleBgm >= 0 && DxLib::CheckSoundMem(titleBgm) == 0)
+    {
+        SoundManager::PlayBGM(titleBgm);
+    }
+
     auto* gameContext = gameScene_.GetGameContext();
     auto* player = gameContext->GetPlayer();
     auto& boss = gameContext->GetBoss();
 
+    gameScene_.SaveBattleCheckpoint();
     gameContext->ClearUltimateProjectiles();
 
     wasTouchingBossBody_ = false;
@@ -67,7 +74,7 @@ void GameSceneBattleState::Enter()
     boss.SetAIActive(false);
 
     StatusUI::InitBoss();
-    StatusUI::InitPlayer(player->GetCharData().name);
+    StatusUI::InitPlayer(player);
 
     gameScene_.SetDrawPlayerShadow(true);
 }
@@ -169,6 +176,8 @@ void GameSceneBattleState::Tick(float deltaTime)
             if (battleIntroFinalWaitElapsed_ >= BattleIntroFinalWaitDuration)
             {
                 battleStarted_ = true;
+                SoundManager::StopBGM(RM().GetMusic(ResourceKeys::Music_Title));
+                SoundManager::PlayBGM(RM().GetMusic(ResourceKeys::Music_Battle));
 
                 gameScene_.StartBattleEventBarsOut();
 
@@ -480,25 +489,8 @@ void GameSceneBattleState::Tick(float deltaTime)
     // カメラ更新・切り替え
     // ========================================================
 
-    // ボス死亡時
-    if (boss.IsDead())
-    {
-        auto& dieCamera = gameScene_.GetBossDieCamera();
-
-        dieCamera.SetTarget(boss.GetWorldPosition());
-
-        if (cameraDirector.GetActiveCamera() != &dieCamera)
-        {
-            dieCamera.Initialize(cameraDirector.GetCurrentPose());
-
-            cameraDirector.SwitchCamera(
-                dieCamera,
-                1.2f
-            );
-        }
-    }
     // ボスダウン時
-    else if (boss.IsDowned())
+    if (boss.IsDowned())
     {
         auto& downCamera = gameScene_.GetBossDownCamera();
 
@@ -602,11 +594,5 @@ void GameSceneBattleState::Exit()
     gameScene_.GetTutorialChecklist().SetVisible(false);
     gameScene_.SetDrawPlayerShadow(false);
 
-    UIM().RemoveUI(L"BossStatusBackground");
-    UIM().RemoveUI(L"BossHealthGauge");
-    UIM().RemoveUI(L"BossDownGauge");
-
-    UIM().RemoveUI(L"PlayerStatusBackground");
-    UIM().RemoveUI(L"PlayerHealthGauge");
-    UIM().RemoveUI(L"PlayerUltGauge");
+    StatusUI::Remove();
 }

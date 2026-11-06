@@ -1,6 +1,8 @@
 ﻿#include "StatusUI.h"
 #include <algorithm>
+#include "Player.h"
 #include "ResourceKeys.h"
+#include "ResourceManager.h"
 #include "DxPlus/DxPlus.h"
 
 namespace
@@ -54,6 +56,34 @@ void StatusUI::InitPlayer(const std::string& characterName)
         "playerult");
 
     UIM().GetUI(L"PlayerUltGauge")->SetFalse();
+
+    const auto* background = RM().GetSprite(ResourceKeys::MikeStatusBack);
+    if (!background) return;
+
+    float width = 0.0f;
+    float height = 0.0f;
+    DxLib::GetGraphSizeF(background->GetID(), &width, &height);
+
+    const float left = backgroundPosition.x - width * 0.5f;
+    
+    const float rowStart = left + width * 0.35f;
+    
+    const float slotWidth = width * 0.59f / Player::MaxHealth;
+    const float rowY = backgroundPosition.y - height * 0.03f;
+    
+    constexpr float heartScale = 0.7f;
+
+    for (int i = 0; i < Player::MaxHealth; ++i)
+    {
+        const DxPlus::Vec2 position(rowStart + (i + 0.5f) * slotWidth, rowY);
+        const auto key = PlayerHeartKey(i);
+        auto* heart = UIM().GetUI(key);
+        if (!heart)
+            heart = UIM().CreateImageUI(key, ResourceKeys::PlayerHeart, position);
+        heart->SetScale(heartScale);
+        heart->SetDisplayCondition([player, i]() { return !player || i < player->GetHealth(); });
+        heart->SetFalse();
+    }
 }
 
 void StatusUI::InitBoss()
@@ -113,6 +143,12 @@ void StatusUI::Open()
             }
         }
     }
+
+    for (int i = 0; i < Player::MaxHealth; ++i)
+    {
+        if (auto* heart = UIM().GetUI(PlayerHeartKey(i)))
+            heart->SetTrue();
+    }
 }
 
 void StatusUI::Hide()
@@ -133,4 +169,19 @@ void StatusUI::Hide()
         if (auto* ui = UIM().GetUI(key))
             ui->Hide();
     }
+
+    for (int i = 0; i < Player::MaxHealth; ++i)
+    {
+        if (auto* heart = UIM().GetUI(PlayerHeartKey(i)))
+            heart->SetFalse();
+    }
+}
+
+void StatusUI::Remove()
+{
+    for (const auto& key : StatusKeys)
+        UIM().RemoveUI(key);
+
+    for (int i = 0; i < Player::MaxHealth; ++i)
+        UIM().RemoveUI(PlayerHeartKey(i));
 }

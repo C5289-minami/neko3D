@@ -141,7 +141,6 @@ void GameSceneTitleState::Exit()
 {
     DxPlus::Debug::SetFormatString(L"GameSceneTitleState::Exit");
     DxLib::SetMouseDispFlag(FALSE);
-    SoundManager::StopBGM(RM().GetMusic(ResourceKeys::Music_Title));
 
     if (auto* logo = UIM().GetUI(L"Game.Logo"))
         logo->Hide();

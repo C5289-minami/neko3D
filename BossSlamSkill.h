@@ -5,6 +5,9 @@
 #include "DxLib.h"
 #include "DxPlus/Debug.h"
 #include "Consts.h"
+#include "ResourceKeys.h"
+#include "ResourceManager.h"
+#include "SoundManager.h"
 
 #include <algorithm>
 #include <array>
@@ -165,6 +168,7 @@ private:
 			break;
 		case AttackStateType::Recovery:
 			hitActive_ = true;
+			SoundManager::PlaySE(RM().GetSound(ResourceKeys::Sound_Slam));
 			break;
 		case AttackStateType::Return:
 			boss_.GetAnimation().Start();

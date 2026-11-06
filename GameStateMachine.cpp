@@ -1,5 +1,7 @@
 #include "GameStateMachine.h"
-#include "GameStateMachine.h"
+#include "ResourceKeys.h"
+#include "ResourceManager.h"
+#include "SoundManager.h"
 
 GameStateMachine::GameStateMachine(GameScene& gameScene)
     : gameScene_(gameScene),
@@ -26,6 +28,12 @@ void GameStateMachine::ChangeState(GameStateType type)
 
     State* newState = FindState(type);
     if (!newState)return;
+
+    if (type == GameStateType::Clear || type == GameStateType::GameOver)
+    {
+        SoundManager::StopBGM(RM().GetMusic(ResourceKeys::Music_Title));
+        SoundManager::StopBGM(RM().GetMusic(ResourceKeys::Music_Battle));
+    }
 
     currentType_ = type;
     initialized_ = true;

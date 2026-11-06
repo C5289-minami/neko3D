@@ -28,6 +28,7 @@ namespace ResourceKeys
 	inline constexpr const wchar_t* MikeStatusBack = L"UIMikeStatusBack";
 	inline constexpr const wchar_t* SabiStatusBack = L"UISabiStatusBack";
 	inline constexpr const wchar_t* KuroStatusBack = L"UIKuroStatusBack";
+	inline constexpr const wchar_t* PlayerHeart = L"UIPlayerHeart";
 
 	// result
 	inline constexpr const wchar_t* ClearResult = L"UIClearResult";
@@ -79,7 +80,6 @@ namespace ResourceKeys
 
 	// ===== SpriteStudio =====
 	inline constexpr const wchar_t* SpriteStudio_Gauge = L"Gauge";
-	inline constexpr const wchar_t* SpriteStudio_PlayerHealthGauge = L"PlayerHealthGauge";
 	inline constexpr const wchar_t* SpriteStudio_PlayerUltGauge = L"PlayerUltGauge";
 	inline constexpr const wchar_t* SpriteStudio_BossHealthGauge = L"BossHealthGauge";
 	inline constexpr const wchar_t* SpriteStudio_BossDownGauge = L"BossDownGauge";
@@ -93,10 +93,13 @@ namespace ResourceKeys
 
 	// ===== Musics / Sounds =====
 	inline constexpr const wchar_t* Music_Title = L"MusicTitle";
+	inline constexpr const wchar_t* Music_Battle = L"MusicBattle";
 	inline constexpr const wchar_t* Sound_MenuConfirm = L"SoundMenuConfirm";
 	inline constexpr const wchar_t* Sound_SelectTaka = L"SoundSelectTaka";
 	inline constexpr const wchar_t* Sound_SelectGishi = L"SoundSelectGishi";
 	inline constexpr const wchar_t* Sound_SelectYu = L"SoundSelectYu";
+	inline constexpr const wchar_t* Sound_Clap = L"SoundClap";
+	inline constexpr const wchar_t* Sound_Slam = L"SoundSlam";
 	inline constexpr const wchar_t* Sound_TailWhip = L"SoundTailWhip";
 
 	// ===== Fonts =====
