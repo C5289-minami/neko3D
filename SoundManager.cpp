@@ -12,7 +12,7 @@ void SoundManager::PlaySE(int handle)
     V().PlaySE(handle);
 }
 
-void SoundManager::PlaySE3D(int handle, Vec3 position, float radius)
+void SoundManager::PlaySE3D(int handle, Vec3 position, float radius, int startTimeMs)
 {
     if (handle < 0) return;
 
@@ -21,7 +21,7 @@ void SoundManager::PlaySE3D(int handle, Vec3 position, float radius)
 
     ChangeVolumeSoundMem(static_cast<int>(se * 255.0f), handle);
 
-    Sound3D::Play(handle, position, radius);
+    Sound3D::Play(handle, position, radius, startTimeMs);
 }
 
 void SoundManager::StopBGM(int handle)

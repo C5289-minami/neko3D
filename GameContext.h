@@ -1,4 +1,4 @@
-// =============================
+ï»¿// =============================
 // Core/GameContext.h
 // =============================
 #pragma once
@@ -18,18 +18,18 @@
 class GameContext
 {
 public:
-    GameContext() = default;					// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
-    ~GameContext() = default;					// ƒfƒXƒgƒ‰ƒNƒ^
+    GameContext() = default;					// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+    ~GameContext() = default;					// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 
     // ---- accessors ----
 
     // Colors
-    int GetBgRed() const { return bgRed; }		// ”wŒiFR‚ğæ“¾
-    void SetBgRed(int r) { bgRed = r; }			// ”wŒiFR‚ğİ’è
-    int GetBgGreen() const { return bgGreen; }	// ”wŒiFG‚ğæ“¾
-    void SetBgGreen(int g) { bgGreen = g; }		// ”wŒiFG‚ğİ’è
-    int GetBgBlue() const { return bgBlue; }		// ”wŒiFB‚ğæ“¾
-    void SetBgBlue(int b) { bgBlue = b; }		// ”wŒiFB‚ğİ’è
+    int GetBgRed() const { return bgRed; }		// èƒŒæ™¯è‰²Rã‚’å–å¾—
+    void SetBgRed(int r) { bgRed = r; }			// èƒŒæ™¯è‰²Rã‚’è¨­å®š
+    int GetBgGreen() const { return bgGreen; }	// èƒŒæ™¯è‰²Gã‚’å–å¾—
+    void SetBgGreen(int g) { bgGreen = g; }		// èƒŒæ™¯è‰²Gã‚’è¨­å®š
+    int GetBgBlue() const { return bgBlue; }		// èƒŒæ™¯è‰²Bã‚’å–å¾—
+    void SetBgBlue(int b) { bgBlue = b; }		// èƒŒæ™¯è‰²Bã‚’è¨­å®š
 
 
     // Grid
@@ -37,7 +37,7 @@ public:
     const Grid& GetGrid() const { return grid; }
 
 	Boss& GetBoss() { return boss; }
-	Player* GetPlayer() { return activePlayer; }//Player‚Ìƒ|ƒCƒ“ƒ^‚ğ•Ô‚·Bnullptr‚Ì‰Â”\«‚ ‚è
+	Player* GetPlayer() { return activePlayer; }//Playerã®ãƒã‚¤ãƒ³ã‚¿ã‚’è¿”ã™ã€‚nullptrã®å¯èƒ½æ€§ã‚ã‚Š
     void SetActivePlayer(Player& player)
     {
         activePlayer = &player;
@@ -73,6 +73,8 @@ public:
     void Reset();
     void UpdateUltimateProjectiles(float deltaTime);
     void ClearUltimateProjectiles();
+    void UpdateTailWhipSound(const Collision::Capsule& hitCapsule);
+    void StopTailWhipSound();
     //void Draw() const;
 
 private:
@@ -99,6 +101,7 @@ private:
 
     Boss boss;
 
+    bool tailWhipSoundPlaying_{};
     bool debugActorsPaused_{};
     std::string transformInitialStatus_;
 

@@ -115,6 +115,10 @@ void ResourceManager::LoadAll()
 	LoadMusic(ResourceKeys::Music_Title, L"./Data/Sounds/StartBGM.mp3");
 	LoadSound(ResourceKeys::Sound_MenuConfirm, L"./Data/Sounds/suzu.mp3");
 
+	SetCreate3DSoundFlag(TRUE);
+	LoadSound(ResourceKeys::Sound_TailWhip, L"./Data/Sounds/StartBGM.mp3");
+	SetCreate3DSoundFlag(FALSE);
+
 
 	// Effect
 	LoadEffect(ResourceKeys::Effect_Test, L"./Data/Effects/suna.efkefc", 30.0f);

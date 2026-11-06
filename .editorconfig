@@ -1,0 +1,5 @@
+[*.{c,cc,cpp,cxx,h,hh,hpp,hxx,inl}]
+charset = utf-8-bom
+
+[{DxLib,Effekseer,imgui,SSPlayer,packages,tools}/**]
+charset = unset

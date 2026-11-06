@@ -90,6 +90,7 @@ namespace ResourceKeys
 	// ===== Musics / Sounds =====
 	inline constexpr const wchar_t* Music_Title = L"MusicTitle";
 	inline constexpr const wchar_t* Sound_MenuConfirm = L"SoundMenuConfirm";
+	inline constexpr const wchar_t* Sound_TailWhip = L"SoundTailWhip";
 
 	// ===== Fonts =====
 	inline constexpr const wchar_t* Font_Title = L"Bitcount Light";

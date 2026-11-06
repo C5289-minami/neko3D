@@ -1,4 +1,4 @@
-#include "GameSceneBattleState.h"
+ï»¿#include "GameSceneBattleState.h"
 #include "GameScene.h"
 #include "GameStateMachine.h"
 #include "GameContext.h"
@@ -70,7 +70,7 @@ void GameSceneBattleState::Tick(float deltaTime)
 
         boss.Update(deltaTime);
 
-        // ƒ{ƒX‚ªƒvƒŒƒCƒ„[‚ðŒü‚­
+        // ãƒœã‚¹ãŒãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’å‘ã
         if (battleIntroTurnRemaining_ > 0.0f)
         {
             const bool turnFinished = boss.TurnToTarget(
@@ -228,7 +228,7 @@ void GameSceneBattleState::Tick(float deltaTime)
     // =============================
     Collision::Capsule tailWhipCapsule{};
 
-    if (boss.IsTailWhipActive() && boss.IsTailWhipHitActive())
+    if (boss.IsTailWhipActive() && isTailWhipActive)
     {
         tailWhipCapsule = boss.GetTailWhipHitCapsule(
             stage.GetWorldPosition(),
@@ -236,6 +236,7 @@ void GameSceneBattleState::Tick(float deltaTime)
             stage.GetArenaSurfaceY() + 30.0f
         );
     }
+    gameContext->UpdateTailWhipSound(tailWhipCapsule);
 
     const Collision::Sphere playerBody = player->GetHitSphere();
 
@@ -431,6 +432,7 @@ void GameSceneBattleState::Tick(float deltaTime)
 
 void GameSceneBattleState::Exit()
 {
+    gameScene_.GetGameContext()->StopTailWhipSound();
     gameScene_.GetGameContext()->ClearUltimateProjectiles();
     gameScene_.SetBattleEventActive(false);
     gameScene_.StartBattleEventBarsOut();
