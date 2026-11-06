@@ -39,7 +39,11 @@ void GameSceneGameOverState::Enter()
 				L"Result.GameOverRetryButton",
 				ResourceKeys::Button_Purple.back,
 				{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.75f },
-				[]() { PostQuitMessage(0); },
+				[this]()
+				{
+					if (gameScene_.RestoreBattleCheckpoint())
+						stateMachine_.ChangeState(GameStateType::Battle);
+				},
 				{},
 				1.5f
 			);
@@ -57,7 +61,11 @@ void GameSceneGameOverState::Enter()
 				L"Result.GameOverToTitleButton",
 				ResourceKeys::Button_Purple.back,
 				{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.9f },
-				[]() { PostQuitMessage(0); },
+				[this]()
+				{
+					gameScene_.ResetForTitle();
+					stateMachine_.ChangeState(GameStateType::Title);
+				},
 				{},
 				1.5f
 			);

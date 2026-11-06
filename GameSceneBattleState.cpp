@@ -32,6 +32,7 @@ void GameSceneBattleState::Enter()
     auto* player = gameContext->GetPlayer();
     auto& boss = gameContext->GetBoss();
 
+    gameScene_.SaveBattleCheckpoint();
     gameContext->ClearUltimateProjectiles();
 
     wasTouchingBossBody_ = false;
