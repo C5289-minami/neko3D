@@ -190,23 +190,34 @@ bool BossAI::TurnToTarget(const Vec3& targetPosition, float deltaTime)
         targetPosition.x - bossPosition.x,
         targetPosition.z - bossPosition.z
     ) + DX_PI_F;
+
     targetYaw = NormalizeAngle(targetYaw);
 
     float yawError = NormalizeAngle(targetYaw - boss_.GetYaw());
 
     constexpr float finishAngle = 1.0f * DxPlus::Deg2Rad;
+    constexpr float maxRotationSpeed = 3.0f;
+    constexpr float minRotationSpeed = 0.15f;
+    constexpr float acceleration = 3.0f;
 
-    if (std::abs(yawError) <= finishAngle)
+    float error = std::abs(yawError);
+
+    if (error <= finishAngle)
     {
         boss_.SetYaw(targetYaw);
         return true;
     }
 
-    float rotationAmount = 2.0f * deltaTime;
+    // –Ú•W‚É‹ß‚Ã‚­‚Ù‚Ç‰ñ“]‘¬“x‚ð—Ž‚Æ‚·
+    float speedRate = std::clamp(error / DX_PI_F, 0.0f, 1.0f);
+    float rotationSpeed = minRotationSpeed +
+        (maxRotationSpeed - minRotationSpeed) * speedRate;
+
+    float rotationAmount = rotationSpeed * deltaTime;
 
     boss_.SetYaw(
         boss_.GetYaw() + std::copysign(
-            std::min(rotationAmount, std::abs(yawError)),
+            std::min(rotationAmount, error),
             yawError
         )
     );

@@ -21,6 +21,10 @@ void StatusUI::InitPlayer()
         L"PlayerUltGauge",
         ResourceKeys::SpriteStudio_PlayerUltGauge,
         backgroundPosition + DxPlus::Vec2(0.0f, 10.0f));
+
+    UIM().GetUI(L"PlayerStatusBackground")->SetFalse();
+    UIM().GetUI(L"PlayerHealthGauge")->SetFalse();
+    UIM().GetUI(L"PlayerUltGauge")->SetFalse();
 }
 
 void StatusUI::InitBoss()
@@ -41,8 +45,11 @@ void StatusUI::InitBoss()
         L"BossDownGauge",
         ResourceKeys::SpriteStudio_BossDownGauge,
         backgroundPosition + DxPlus::Vec2(0.0f, 10.0f));
-}
 
+    UIM().GetUI(L"BossStatusBackground")->SetFalse();
+    UIM().GetUI(L"BossHealthGauge")->SetFalse();
+    UIM().GetUI(L"BossDownGauge")->SetFalse();
+}
 void StatusUI::SyncStatusBar(const std::wstring& key, float progress)
 {
     auto* ui = UIM().GetSpriteStudioUI(key);
@@ -50,4 +57,42 @@ void StatusUI::SyncStatusBar(const std::wstring& key, float progress)
     if (!ui) return;
 
     ui->SetProgress(std::clamp(progress, 0.0f, 1.0f));
+}
+
+void StatusUI::Open()
+{
+    const std::wstring keys[] =
+    {
+        L"PlayerStatusBackground",
+        L"PlayerHealthGauge",
+        L"PlayerUltGauge",
+        L"BossStatusBackground",
+        L"BossHealthGauge",
+        L"BossDownGauge"
+    };
+
+    for (const auto& key : keys)
+    {
+        if (auto* ui = UIM().GetUI(key))
+            ui->SetTrue();
+    }
+}
+
+void StatusUI::Hide()
+{
+    const std::wstring keys[] =
+    {
+        L"PlayerStatusBackground",
+        L"PlayerHealthGauge",
+        L"PlayerUltGauge",
+        L"BossStatusBackground",
+        L"BossHealthGauge",
+        L"BossDownGauge"
+    };
+
+    for (const auto& key : keys)
+    {
+        if (auto* ui = UIM().GetUI(key))
+            ui->Hide();
+    }
 }

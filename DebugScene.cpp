@@ -11,6 +11,7 @@ void TestScene::Init()
 
 	StatusUI::InitBoss();
     StatusUI::InitPlayer();
+    StatusUI::Open();
 
     StartFadeIn();
 }

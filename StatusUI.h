@@ -9,5 +9,8 @@ public:
     static void InitPlayer();
     static void InitBoss();
 
+    static void Open();
+    static void Hide();
+
     static void SyncStatusBar(const std::wstring& key, float progress);
 };
