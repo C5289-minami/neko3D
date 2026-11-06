@@ -43,6 +43,7 @@ void ResourceManager::LoadAll()
 
 	LoadSprite(ResourceKeys::BossStatusBack, L"./Data/Images/Boss/boss_status_back.png");
 	LoadSprite(ResourceKeys::MikeStatusBack, L"./Data/Images/Player/mike_status_back.png");
+	LoadSprite(ResourceKeys::PlayerHeart, L"./Data/Images/Player/heart.png");
 	LoadSprite(ResourceKeys::ClearResult, L"./Data/Images/Result/clear.png");
 	LoadSprite(ResourceKeys::GameOverResult, L"./Data/Images/Result/gameover.png");
 	LoadSprite(ResourceKeys::SelectMike, L"./Data/Images/Select/mike.png");
@@ -105,23 +106,23 @@ void ResourceManager::LoadAll()
 		"UI",
 		"./Data/UI/UI.ssbp");
 	LoadSpriteStudioPlayer(
-		ResourceKeys::SpriteStudio_PlayerHealthGauge,
-		"UI",
-		"./Data/UI/UI.ssbp");
-	LoadSpriteStudioPlayer(
 		ResourceKeys::SpriteStudio_PlayerUltGauge,
 		"UI",
 		"./Data/UI/UI.ssbp");
 
 	// サウンドの読み込み
 	LoadMusic(ResourceKeys::Music_Title, L"./Data/Sounds/StartBGM.mp3");
+	LoadMusic(ResourceKeys::Music_Battle, L"./Data/Sounds/BattleBGM.mp3");
 	LoadSound(ResourceKeys::Sound_MenuConfirm, L"./Data/Sounds/suzu.mp3");
 	LoadSound(ResourceKeys::Sound_SelectTaka, L"./Data/Sounds/taka.mp3");
 	LoadSound(ResourceKeys::Sound_SelectGishi, L"./Data/Sounds/gishi.mp3");
 	LoadSound(ResourceKeys::Sound_SelectYu, L"./Data/Sounds/yu.mp3");
 
+	LoadSound(ResourceKeys::Sound_Clap, L"./Data/Sounds/clap.mp3");
+	LoadSound(ResourceKeys::Sound_Slam, L"./Data/Sounds/slam.mp3");
+
 	SetCreate3DSoundFlag(TRUE);
-	LoadSound(ResourceKeys::Sound_TailWhip, L"./Data/Sounds/StartBGM.mp3");
+	LoadSound(ResourceKeys::Sound_TailWhip, L"./Data/Sounds/tailwhip.mp3");
 	SetCreate3DSoundFlag(FALSE);
 
 

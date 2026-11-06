@@ -6,6 +6,8 @@
 #include "GameStateMachine.h"
 #include "ModelCollision.h"
 #include "Vector3.h"
+#include "ObjectTransform.h"
+#include <optional>
 
 // shader effects
 #include "ModelToonRenderer.h"
@@ -32,6 +34,9 @@ public:
 	void Render() const override;
 	void DrawImGui() override;
 	void DrawPlayerShadow()const;
+	void ResetForTitle();
+	void SaveBattleCheckpoint();
+	bool RestoreBattleCheckpoint();
 
 	GameStateType GetCurrentGameState() const { return stateMachine_.GetCurrentType(); }
 	bool UpdateStateCamera(float deltaTime, const std::string& requestedShot);
@@ -111,6 +116,17 @@ private:
 	std::string activeCameraShot_{};
 
 	GameStateMachine stateMachine_;
+
+	struct BattleCheckpoint
+	{
+		ObjectTransform playerTransform;
+		ObjectTransform bossTransform;
+		Vec3 bossPosition;
+		Vec3 bossRotation;
+		Camera::CameraPose cameraPose;
+		Camera::TargetCamera targetCamera;
+	};
+	std::optional<BattleCheckpoint> battleCheckpoint_;
 
 	TutorialCollisionSettings tutorialCollisionSettings_{}; // チュートリアルの球体設定
     void DrawTutorialCollisionSpheres() const;

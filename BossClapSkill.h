@@ -5,6 +5,9 @@
 #include "Consts.h"
 #include "Collision.h"
 #include "DxLib.h"
+#include "ResourceKeys.h"
+#include "ResourceManager.h"
+#include "SoundManager.h"
 
 #include <array>
 #include <algorithm>
@@ -227,6 +230,7 @@ private:
 			boss_.GetAnimation().PlayTo(BossClap::AttackEndFrame);
 			boss_.StopRotation();
 			StartHandAttack();
+			SoundManager::PlaySE(RM().GetSound(ResourceKeys::Sound_Clap));
 			break;
 		case AttackStateType::Recovery:
 			boss_.GetAnimation().Start(15.0f);
