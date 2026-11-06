@@ -9,6 +9,7 @@
 #include "UIManager.h"
 #include "ButtonLabel.h"
 #include "ResourceManager.h"
+#include "SoundManager.h"
 
 #include <array>
 #include <cmath>
@@ -26,14 +27,15 @@ namespace
 	{
 		const wchar_t* uiKey;
 		const wchar_t* spriteKey;
+		const wchar_t* soundKey;
 		const char* statusName;
 		const wchar_t* trait;
 	};
 
 	constexpr std::array<SelectCard, 3> SelectCards{ {
-		{ L"Select.Mike", ResourceKeys::SelectMike, u8"たか", L"バランス型" },
-		{ L"Select.Sabi", ResourceKeys::SelectSabi, u8"ぎし", L"走るのが得意" },
-		{ L"Select.Kuro", ResourceKeys::SelectKuro, u8"ゆう", L"登るのが得意" }
+		{ L"Select.Mike", ResourceKeys::SelectMike, ResourceKeys::Sound_SelectTaka, u8"たか", L"バランス型" },
+		{ L"Select.Sabi", ResourceKeys::SelectSabi, ResourceKeys::Sound_SelectGishi, u8"ぎし", L"走るのが得意" },
+		{ L"Select.Kuro", ResourceKeys::SelectKuro, ResourceKeys::Sound_SelectYu, u8"ゆう", L"登るのが得意" }
 	} };
 
 	class SelectCardUI : public UIBase
@@ -219,6 +221,8 @@ void GameSceneSelectState::Tick(float deltaTime)
 		// Selectショットの完了を待つ
 		if (transitionCompleted && !director.IsTransitioning())
 		{
+			SoundManager::PlaySE(RM().GetSound(SelectCards[selectedIndex_].soundKey));//選択時のSEを再生
+
 			const auto pose = MakeCameraPoseInFrontOfPlayer(
 				director.GetCurrentPose(),
 				*players_[selectedIndex_]);
@@ -325,7 +329,9 @@ void GameSceneSelectState::SelectIndex(int index)
 
 	if (index == selectedIndex_) return;
 
+	SoundManager::StopSE(RM().GetSound(SelectCards[selectedIndex_].soundKey));
 	selectedIndex_ = index;
+	SoundManager::PlaySE(RM().GetSound(SelectCards[selectedIndex_].soundKey));
 
 	// カードと共通UIを一度非表示にする
 	for (const auto& card : SelectCards)
@@ -405,6 +411,8 @@ void GameSceneSelectState::Exit()
 {
 	DxPlus::Debug::SetFormatString(
 		L"GameSceneSelectState::Exit");
+
+	SoundManager::StopSE(RM().GetSound(SelectCards[selectedIndex_].soundKey));
 
 	for (const auto& card : SelectCards)
 	{
