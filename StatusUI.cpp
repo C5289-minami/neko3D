@@ -8,6 +8,21 @@
 namespace
 {
     std::wstring selectedPlayerBackground;
+
+    std::wstring PlayerHeartKey(int index)
+    {
+        return L"PlayerHeart" + std::to_wstring(index);
+    }
+
+    const std::wstring StatusKeys[] =
+    {
+        L"playerULTGaugeBackMike",
+        L"playerULTGaugeBackSabi",
+        L"playerULTGaugeBackKuro",
+        L"PlayerUltGauge",
+        L"BossHealthGauge",
+        L"BossDownGauge"
+    };
 }
 
 void StatusUI::InitPlayer(const std::string& characterName)
@@ -81,7 +96,6 @@ void StatusUI::InitPlayer(const std::string& characterName)
         if (!heart)
             heart = UIM().CreateImageUI(key, ResourceKeys::PlayerHeart, position);
         heart->SetScale(heartScale);
-        heart->SetDisplayCondition([player, i]() { return !player || i < player->GetHealth(); });
         heart->SetFalse();
     }
 }

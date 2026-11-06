@@ -166,8 +166,9 @@ void SceneManager::Run()
 				UIM().Init();
 				next->Init();
 			}
-
+#ifndef NDEBUG
 			DxPlus::Debug::Draw();
+#endif
 			scene->DrawFadeOverlay();
 
 #ifndef NDEBUG

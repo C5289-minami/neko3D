@@ -74,7 +74,7 @@ void GameSceneBattleState::Enter()
     boss.SetAIActive(false);
 
     StatusUI::InitBoss();
-    StatusUI::InitPlayer(player);
+    StatusUI::InitPlayer(player->GetCharData().name);
 
     gameScene_.SetDrawPlayerShadow(true);
 }
