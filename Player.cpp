@@ -217,11 +217,14 @@ void Player::PlayDebugKedamaEffect() const
 void Player::Update(float deltaTime)
 {
 	input_.Update();
-   if (controlLocked_)
+	if (controlLocked_)
 	{
-		// 演出中も重力・床判定は動かすが、入力による移動や攻撃は受け付けない。
 		input_ = {};
 		moveInput_ = {};
+		velocity_ = {};
+		knockbackVelocity_ = {};
+		knockbackTime_ = 0.0f;
+		return;
 	}
 #ifdef _DEBUG
 	if (input_.shiftRKeyPressed)
@@ -342,6 +345,11 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 	const float previousY = oldPosition.y;
 
 	input_.Update();
+	if (controlLocked_)
+	{
+		input_ = {};
+		moveInput_ = {};
+	}
 #ifdef _DEBUG
 	if (input_.shiftRKeyPressed)
 	{
