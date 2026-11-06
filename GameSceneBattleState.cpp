@@ -272,12 +272,12 @@ void GameSceneBattleState::Tick(float deltaTime)
     // =============================
     if (handHitPlayer || slamHitPlayer)
     {
-        player->TakeDamage();
+        player->TakeDamage(boss.GetScale());
     }
 
     if (tailWhipPlayerHit)
     {
-        player->TakeDamage();
+        player->TakeDamage(boss.GetScale());
 
         Vec3 outward =
             player->GetWorldPosition() - stage.GetWorldPosition();

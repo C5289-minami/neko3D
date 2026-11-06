@@ -111,10 +111,9 @@ void ResourceManager::LoadAll()
 		"UI",
 		"./Data/UI/UI.ssbp");
 
-	//// サウンドの読み込み
-	SetCreate3DSoundFlag(TRUE);
-	LoadSound(ResourceKeys::Sound_BossBite, L"./Data/Sounds/Explosion.mp3");
-	SetCreate3DSoundFlag(FALSE);
+	// サウンドの読み込み
+	LoadMusic(ResourceKeys::Music_Title, L"./Data/Sounds/StartBGM.mp3");
+	LoadSound(ResourceKeys::Sound_MenuConfirm, L"./Data/Sounds/suzu.mp3");
 
 
 	// Effect
@@ -305,7 +304,8 @@ int ResourceManager::LoadMusic(
 	const int music = DxLib::LoadSoundMem(path.c_str());
 	if (music == -1)
 	{
-		DxPlus::Utils::FatalError((L"Failed to load music " + path).c_str());
+		OutputDebugStringW((L"Failed to load music " + path + L"\n").c_str());
+		return -1;
 	}
 
 	musics[key] = music;
@@ -321,7 +321,8 @@ int ResourceManager::LoadSound(
 	const int sound = DxLib::LoadSoundMem(path.c_str());
 	if (sound == -1)
 	{
-		DxPlus::Utils::FatalError((L"Failed to load sound " + path).c_str());
+		OutputDebugStringW((L"Failed to load sound " + path + L"\n").c_str());
+		return -1;
 	}
 
 	sounds[key] = sound;

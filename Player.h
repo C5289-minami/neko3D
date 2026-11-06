@@ -34,7 +34,7 @@ public:
 	bool IsDead() const { return health_ <= 0; }
 	bool IsDamaging() const { return GetCurrentState() == PlayerStateType::Damaging; }
 	PlayerStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }
-	bool TakeDamage();
+	bool TakeDamage(const Vec3& bossScale);
 	void AddDamage();
 	void ApplyAvoid();
 	float GetAvoidInvTime() const { return avoidInvTime_; }
