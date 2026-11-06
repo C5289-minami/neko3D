@@ -7,6 +7,11 @@
 #include <cmath>
 #include "Consts.h"
 
+namespace
+{
+	constexpr float FloorClearance = 0.01f;
+	constexpr float FloorContactTolerance = 0.001f;
+}
 
 ModelCollision::~ModelCollision()
 {
@@ -231,7 +236,7 @@ std::vector<ModelObject*> ModelCollision::GetModelsHitByRay(
 
 // 対象のモデルに絞ってから、最も近い衝突を選ぶ。
 bool ModelCollision::RaycastModels(const Vec3& start, const Vec3& end, Physics::RayHit& hit,
-	bool forLanding, bool ignorePillars, bool* hitRecoveryFloor) const
+	bool forLanding, bool ignorePillars, bool* hitRecoveryFloor, bool includeRecoveryFloor) const
 {
 	bool found = false;
 
@@ -239,6 +244,8 @@ bool ModelCollision::RaycastModels(const Vec3& start, const Vec3& end, Physics::
 	{
 		if (entry.handle < 0) continue;
 		if (forLanding && entry.surface == Surface::Wall) continue;
+		const bool isRecoveryFloor = entry.model == fallRecoveryFloor_ && entry.surface == Surface::Floor;
+		if (!includeRecoveryFloor && isRecoveryFloor) continue;
 		// 柱は接触のTrue/Falseだけを調べ、着地・頭上の位置補正には使わない。
 		if (ignorePillars && entry.surface == Surface::Pillar) continue;
 
@@ -250,7 +257,7 @@ bool ModelCollision::RaycastModels(const Vec3& start, const Vec3& end, Physics::
 		{
 			hit = modelHit;
 			if (hitRecoveryFloor)
-				*hitRecoveryFloor = entry.model == fallRecoveryFloor_ && entry.surface == Surface::Floor;
+				*hitRecoveryFloor = isRecoveryFloor;
 			found = true;
 		}
 	}
@@ -258,12 +265,13 @@ bool ModelCollision::RaycastModels(const Vec3& start, const Vec3& end, Physics::
 }
 
 bool ModelCollision::RaycastDown(const Vec3& origin, float maxDistance, Physics::RayHit& hit,
-	bool* hitRecoveryFloor) const
+	bool* hitRecoveryFloor, bool includeRecoveryFloor) const
 {
 	if (hitRecoveryFloor) *hitRecoveryFloor = false;
 	if (maxDistance <= 0.0f) return false;
 
-	return RaycastModels(origin, origin - Vec3::Up() * maxDistance, hit, true, false, hitRecoveryFloor);
+	return RaycastModels(origin, origin - Vec3::Up() * maxDistance, hit,
+		true, false, hitRecoveryFloor, includeRecoveryFloor);
 }
 
 const ModelCollision::Entry* ModelCollision::GetFallRecoveryFloor() const	
@@ -275,6 +283,78 @@ const ModelCollision::Entry* ModelCollision::GetFallRecoveryFloor() const
 			entry.handle >= 0 &&entry.boundsReady) return &entry;
 	}
 	return nullptr;
+}
+
+bool ModelCollision::SweepFallRecoveryFloor(const Collision::Sphere& body, const Vec3& movement,
+	Physics::RayHit& hit) const
+{
+	const auto* floor = GetFallRecoveryFloor();
+	const float length = movement.Length();
+	if (!floor || body.radius <= 0.0f || length <= Const::EPS) return false;
+
+	const Vec3 direction = movement / length;
+	const auto triangles = MV1CollCheck_Capsule(floor->handle, -1, DxConv::ToVECTOR(body.center),
+		DxConv::ToVECTOR(body.center + movement), body.radius + FloorClearance + FloorContactTolerance);
+	float nearest = length;
+	bool found = false;
+	for (int i = 0; i < triangles.HitNum; ++i)
+	{
+		const auto& triangle = triangles.Dim[i];
+		float travel = 0.0f;
+		for (int step = 0; step < 16; ++step)
+		{
+			const Vec3 center = body.center + direction * travel;
+			const VECTOR point = DxConv::ToVECTOR(center);
+			TRIANGLE_POINT_RESULT closest{};
+			Triangle_Point_Analyse(&triangle.Position[0], &triangle.Position[1], &triangle.Position[2],
+				&point, &closest);
+			const Vec3 surface = DxConv::ToVec3(closest.Tri_MinDist_Pos);
+			const Vec3 separation = center - surface;
+			const float distance = separation.Length();
+			const Vec3 normal = distance > Const::EPS ? separation / distance :
+				DxConv::ToVec3(triangle.Normal).Normalized();
+			const float approach = -Vec3::Dot(direction, normal);
+			if (approach <= Const::EPS) break;
+
+			// 最近接点の接平面まで進める。面の端や頂点でも球が当たる手前で止まる。
+			const float gap = distance - body.radius - FloorClearance;
+			if (gap <= FloorContactTolerance || step == 15)
+			{
+				nearest = travel;
+				hit = { surface, normal, travel };
+				found = true;
+				break;
+			}
+			travel += gap / approach;
+			if (travel > nearest) break;
+		}
+	}
+	MV1CollResultPolyDimTerminate(triangles);
+	return found;
+}
+
+Vec3 ModelCollision::SlideAlongFallRecoveryFloor(const Collision::Sphere& body, Vec3 movement,
+	Vec3& velocity) const
+{
+	Collision::Sphere movingBody = body;
+	for (int attempt = 0; attempt < 4 && movement.LengthSq() > Const::EPS * Const::EPS; ++attempt)
+	{
+		Physics::RayHit hit{};
+		if (!SweepFallRecoveryFloor(movingBody, movement, hit))
+			return movingBody.center + movement;
+
+		const Vec3 advance = movement.Normalized() * hit.distance;
+		movingBody.center += advance;
+		const float clearance = Vec3::Dot(movingBody.center - hit.point, hit.normal);
+		if (clearance < body.radius)
+			movingBody.center += hit.normal * (body.radius + FloorClearance - clearance);
+
+		movement -= advance;
+		movement -= hit.normal * (std::min)(0.0f, Vec3::Dot(movement, hit.normal));
+		if (hit.normal.y < 0.0f && velocity.y > 0.0f)
+			velocity.y = 0.0f;
+	}
+	return movingBody.center;
 }
 
 bool ModelCollision::HasFallRecoverySupport(const Vec3& position, const ModelOb& body,
@@ -340,12 +420,12 @@ bool ModelCollision::CanLandOnFallRecoveryFloor(const Vec3& position, float skin
 	return isWalkable;
 }
 
-bool ModelCollision::RaycastUp(const Vec3& origin, float maxDistance, Physics::RayHit& hit) const
+bool ModelCollision::RaycastUp(const Vec3& origin, float maxDistance, Physics::RayHit& hit,
+	bool includeRecoveryFloor) const
 {
 	if (maxDistance <= 0.0f) return false;
-	// return RaycastModels(origin, origin + Vec3::Up() * maxDistance, hit, false);
-
-	return RaycastModels(origin, origin + Vec3::Up() * maxDistance, hit, false, true);
+	return RaycastModels(origin, origin + Vec3::Up() * maxDistance, hit,
+		false, true, nullptr, includeRecoveryFloor);
 }
 
 bool ModelCollision::RaycastPillarTop(const Vec3& origin,
@@ -560,6 +640,7 @@ bool ModelCollision::RaycastWall(const Vec3& start, const Vec3& end, Physics::Ra
 	for (const auto& entry : models_)
 	{
 		if (entry.handle < 0 || entry.surface == Surface::Stand) continue;
+		if (entry.model == fallRecoveryFloor_ && entry.surface == Surface::Floor) continue;
 
 		Physics::RayHit candidate{};
 		if (!Physics::Raycast(entry.handle, start, end, candidate)) continue;

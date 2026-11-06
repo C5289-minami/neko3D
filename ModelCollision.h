@@ -72,7 +72,13 @@ public:
     ) const;
     // 着地用。床だけを調べる。柱は接触判定のみ。
     bool RaycastDown(const Vec3& origin, float maxDistance, Physics::RayHit& hit,
-        bool* hitRecoveryFloor = nullptr) const;
+        bool* hitRecoveryFloor = nullptr, bool includeRecoveryFloor = true) const;
+
+    // ステージ床に体の球を当てる。hit.point はメッシュ上の接触点。
+    bool SweepFallRecoveryFloor(const Collision::Sphere& body, const Vec3& movement,
+        Physics::RayHit& hit) const;
+    Vec3 SlideAlongFallRecoveryFloor(const Collision::Sphere& body, Vec3 movement,
+        Vec3& velocity) const;
 
     bool HasFallRecoveryFloor() const { return fallRecoveryFloor_ != nullptr; }
     bool HasFallRecoverySupport(const Vec3& position, const ModelOb& body, float walkableNormalY) const;
@@ -82,7 +88,8 @@ public:
     bool RaycastPillarTop(const Vec3& origin, float maxDistance, float topOffset,
         Physics::RayHit& hit) const;
     // 頭上用。床・壁を調べる。柱は接触判定のみ。
-    bool RaycastUp(const Vec3& origin, float maxDistance, Physics::RayHit& hit) const;
+    bool RaycastUp(const Vec3& origin, float maxDistance, Physics::RayHit& hit,
+        bool includeRecoveryFloor = true) const;
     // Refresh 後の、拡大縮小・回転を含めたモデルの幅・高さ・奥行き。
     Vec3 GetSize(const ModelObject& model) const;
 
@@ -97,7 +104,7 @@ private:
     float& travel, Vec3& wallNormal) const;
 
     bool RaycastModels(const Vec3& start, const Vec3& end, Physics::RayHit& hit,
-        bool forLanding, bool ignorePillars = false, bool* hitRecoveryFloor = nullptr) const;
+        bool forLanding, bool ignorePillars, bool* hitRecoveryFloor, bool includeRecoveryFloor) const;
     bool RaycastWall(const Vec3& start, const Vec3& end, Physics::RayHit& hit) const;
 
     struct Entry
