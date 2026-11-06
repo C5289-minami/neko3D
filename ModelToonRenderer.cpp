@@ -331,7 +331,7 @@ void ModelToonRenderer::DrawTriangleLists(
     // モデルの不透明度を設定
     MV1SetOpacityRate(handle, model.GetAlpha());
 
-    model.ApplyTransform();
+    model.ApplyDrawTransform();
     model.ApplyCollisionColor();
 
     // モデル情報は初回だけ取得する

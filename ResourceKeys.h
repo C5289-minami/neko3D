@@ -87,7 +87,8 @@ namespace ResourceKeys
 	inline constexpr const wchar_t* Effect_Kedama = L"EffectKedama";
 
 	// ===== Musics / Sounds =====
-	inline constexpr const wchar_t* Sound_BossBite = L"SoundBossBite";
+	inline constexpr const wchar_t* Music_Title = L"MusicTitle";
+	inline constexpr const wchar_t* Sound_MenuConfirm = L"SoundMenuConfirm";
 
 	// ===== Fonts =====
 	inline constexpr const wchar_t* Font_Title = L"Bitcount Light";

@@ -136,6 +136,7 @@ private:
 
 	int health_{ MaxHealth };
 	int maxHealth_{ MaxHealth };
+	float hitScaleTimeRemaining_{};// ダメージを受けたときのスケール変化の残り時間
 	float downGauge_{ 0.0f };
 	float maxDownGauge_{ 100.0f };
     bool damageTakenThisFrame_{};
