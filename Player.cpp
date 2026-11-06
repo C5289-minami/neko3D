@@ -115,6 +115,7 @@ void Player::Reset()
 {
 
 	health_ = MaxHealth;
+   controlLocked_ = false;
 	avoidInvTime_ = 0.0f;
 	// wasTouchingPillar_ = false;
 	wasTouchingModel_ = false;
@@ -216,6 +217,12 @@ void Player::PlayDebugKedamaEffect() const
 void Player::Update(float deltaTime)
 {
 	input_.Update();
+   if (controlLocked_)
+	{
+		// 演出中も重力・床判定は動かすが、入力による移動や攻撃は受け付けない。
+		input_ = {};
+		moveInput_ = {};
+	}
 #ifdef _DEBUG
 	if (input_.shiftRKeyPressed)
 	{
