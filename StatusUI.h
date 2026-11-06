@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "UIManager.h"
 #include <string>
@@ -6,7 +6,7 @@
 class StatusUI
 {
 public:
-    static void InitPlayer();
+    static void InitPlayer(const std::string& characterName = "たか");
     static void InitBoss();
 
     static void Open();

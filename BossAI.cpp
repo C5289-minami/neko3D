@@ -1,4 +1,4 @@
-#define NOMINMAX
+ï»¿#define NOMINMAX
 
 #include "BossAI.h"
 #include "Boss.h"
@@ -10,28 +10,28 @@
 
 #include "DxPlus/DxPlus.h"
 
-//ƒvƒŒƒCƒ„[‚ª2ŠK‚É‚¢‚é‚ÌAI•ªŠòiŸ‚ÌUŒ‚‚ğu‚µ‚Á‚Ûv‚ÉŠm’è‚³‚¹‚é
+//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒ2éšã«ã„ã‚‹æ™‚ã®AIåˆ†å²ï¼ˆæ¬¡ã®æ”»æ’ƒã‚’ã€Œã—ã£ã½ã€ã«ç¢ºå®šã•ã›ã‚‹
 
 // ===========================================================================
-// BossAI d—l
+// BossAI ä»•æ§˜
 // ===========================================================================
 //
-// yUŒ‚ŠÇ—z
-// Eg—p‰Â”\‚ÈƒXƒLƒ‹‚©‚çƒ‰ƒ“ƒ_ƒ€‚É1‚Â‘I‘ğ‚µ‚Ä”­“®‚·‚éB
-// EƒXƒLƒ‹Às’†‚ÍA‚Ù‚©‚ÌƒXƒLƒ‹‚ğ”­“®‚µ‚È‚¢B
-// EƒXƒLƒ‹‚Ì‹A‚èƒ‚[ƒVƒ‡ƒ“‚ªI—¹‚·‚é‚ÆAƒXƒLƒ‹Às’†ó‘Ô‚ğ‰ğœ‚·‚éB
+// ã€æ”»æ’ƒç®¡ç†ã€‘
+// ãƒ»ä½¿ç”¨å¯èƒ½ãªã‚¹ã‚­ãƒ«ã‹ã‚‰ãƒ©ãƒ³ãƒ€ãƒ ã«1ã¤é¸æŠã—ã¦ç™ºå‹•ã™ã‚‹ã€‚
+// ãƒ»ã‚¹ã‚­ãƒ«å®Ÿè¡Œä¸­ã¯ã€ã»ã‹ã®ã‚¹ã‚­ãƒ«ã‚’ç™ºå‹•ã—ãªã„ã€‚
+// ãƒ»ã‚¹ã‚­ãƒ«ã®å¸°ã‚Šãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ãŒçµ‚äº†ã™ã‚‹ã¨ã€ã‚¹ã‚­ãƒ«å®Ÿè¡Œä¸­çŠ¶æ…‹ã‚’è§£é™¤ã™ã‚‹ã€‚
 //
-// yŒÂ•ÊƒN[ƒ‹ƒ_ƒEƒ“z
-// EƒN[ƒ‹ƒ_ƒEƒ“‚ÍƒXƒLƒ‹‚Ì‹A‚èƒ‚[ƒVƒ‡ƒ“I—¹Œã‚©‚çŠJn‚·‚éB
-// EƒXƒLƒ‹Às’†‚ÍŒÂ•ÊƒN[ƒ‹ƒ_ƒEƒ“‚ğXV‚µ‚È‚¢B
-// EƒN[ƒ‹ƒ_ƒEƒ“‚ª0•bˆÈ‰º‚É‚È‚é‚ÆA‚»‚ÌƒXƒLƒ‹‚ğÄg—p‚Å‚«‚éB
-// Eg—p‰Â”\‚ÈƒXƒLƒ‹‚Ì‚İ’Š‘I‘ÎÛ‚Æ‚·‚éB
+// ã€å€‹åˆ¥ã‚¯ãƒ¼ãƒ«ãƒ€ã‚¦ãƒ³ã€‘
+// ãƒ»ã‚¯ãƒ¼ãƒ«ãƒ€ã‚¦ãƒ³ã¯ã‚¹ã‚­ãƒ«ã®å¸°ã‚Šãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³çµ‚äº†å¾Œã‹ã‚‰é–‹å§‹ã™ã‚‹ã€‚
+// ãƒ»ã‚¹ã‚­ãƒ«å®Ÿè¡Œä¸­ã¯å€‹åˆ¥ã‚¯ãƒ¼ãƒ«ãƒ€ã‚¦ãƒ³ã‚’æ›´æ–°ã—ãªã„ã€‚
+// ãƒ»ã‚¯ãƒ¼ãƒ«ãƒ€ã‚¦ãƒ³ãŒ0ç§’ä»¥ä¸‹ã«ãªã‚‹ã¨ã€ãã®ã‚¹ã‚­ãƒ«ã‚’å†ä½¿ç”¨ã§ãã‚‹ã€‚
+// ãƒ»ä½¿ç”¨å¯èƒ½ãªã‚¹ã‚­ãƒ«ã®ã¿æŠ½é¸å¯¾è±¡ã¨ã™ã‚‹ã€‚
 //
-// y‘S‘ÌƒN[ƒ‹ƒ_ƒEƒ“z
-// EUŒ‚I—¹ŒãA5•bŠÔ‚ÍŸ‚ÌUŒ‚‚ğs‚í‚È‚¢B
-// E‘S‘ÌƒN[ƒ‹ƒ_ƒEƒ“’†‚ÍŒÂ•ÊƒN[ƒ‹ƒ_ƒEƒ“‚Ì‚İXV‚·‚éB
-// Eg—p‰Â”\‚ÈƒXƒLƒ‹‚ª‚È‚¢ê‡‚ÍA0.1•bŒã‚ÉÄ’Š‘I‚·‚éB
-// EƒXƒLƒ‹”­“®‚É¸”s‚µ‚½ê‡‚àA0.1•bŒã‚ÉÄs‚·‚éB
+// ã€å…¨ä½“ã‚¯ãƒ¼ãƒ«ãƒ€ã‚¦ãƒ³ã€‘
+// ãƒ»æ”»æ’ƒçµ‚äº†å¾Œã€5ç§’é–“ã¯æ¬¡ã®æ”»æ’ƒã‚’è¡Œã‚ãªã„ã€‚
+// ãƒ»å…¨ä½“ã‚¯ãƒ¼ãƒ«ãƒ€ã‚¦ãƒ³ä¸­ã¯å€‹åˆ¥ã‚¯ãƒ¼ãƒ«ãƒ€ã‚¦ãƒ³ã®ã¿æ›´æ–°ã™ã‚‹ã€‚
+// ãƒ»ä½¿ç”¨å¯èƒ½ãªã‚¹ã‚­ãƒ«ãŒãªã„å ´åˆã¯ã€0.1ç§’å¾Œã«å†æŠ½é¸ã™ã‚‹ã€‚
+// ãƒ»ã‚¹ã‚­ãƒ«ç™ºå‹•ã«å¤±æ•—ã—ãŸå ´åˆã‚‚ã€0.1ç§’å¾Œã«å†è©¦è¡Œã™ã‚‹ã€‚
 //
 // ===========================================================================
 
@@ -76,50 +76,44 @@ void BossAI::Reset()
 
 void BossAI::Update(float deltaTime)
 {
-    DxPlus::Debug::SetFormatString(
-        L"BossAI: Clap %.1f, Slam %.1f, TailWhip %.1f",
-        clapCooldown_.remainingTime_,
-        slamCooldown_.remainingTime_,
-        tailWhipCooldown_.remainingTime_
-    );
 
-    // ƒXƒLƒ‹Às’†
+    // ã‚¹ã‚­ãƒ«å®Ÿè¡Œä¸­
     if (isSkillActive_)
     {
         if (boss_.GetActiveSkill() && !boss_.GetActiveSkill()->IsReturnFinished())
             return;
 
-        // g—p‚µ‚½ƒXƒLƒ‹‚ÌƒN[ƒ‹ƒ_ƒEƒ“‚ğŠJn
+        // ä½¿ç”¨ã—ãŸã‚¹ã‚­ãƒ«ã®ã‚¯ãƒ¼ãƒ«ãƒ€ã‚¦ãƒ³ã‚’é–‹å§‹
         if (activeSkillCooldown_)
             activeSkillCooldown_->StartCooldown();
 
-        // ƒXƒLƒ‹I—¹
+        // ã‚¹ã‚­ãƒ«çµ‚äº†
         isSkillActive_ = false;
         activeSkillCooldown_ = nullptr;
 
-        // UŒ‚Œã‚Ì‘Ò‹@ŠÔ‚ğİ’è
+        // æ”»æ’ƒå¾Œã®å¾…æ©Ÿæ™‚é–“ã‚’è¨­å®š
         attackCooldown_ = attackCooldownTime_;
         return;
     }
 
-    // ŒÂ•ÊƒXƒLƒ‹‚ÌƒN[ƒ‹ƒ_ƒEƒ“XV
+    // å€‹åˆ¥ã‚¹ã‚­ãƒ«ã®ã‚¯ãƒ¼ãƒ«ãƒ€ã‚¦ãƒ³æ›´æ–°
     for (auto& cooldown : skillCooldowns_)
         cooldown->Update(deltaTime);
 
-    // UŒ‚‘S‘Ì‚ÌƒN[ƒ‹ƒ_ƒEƒ“XV
+    // æ”»æ’ƒå…¨ä½“ã®ã‚¯ãƒ¼ãƒ«ãƒ€ã‚¦ãƒ³æ›´æ–°
     if (attackCooldown_ > 0.0f)
     {
         attackCooldown_ = std::max(0.0f, attackCooldown_ - deltaTime);
         return;
     }
     // ============================
-	// UŒ‚‚Ì’Š‘I‚Æ”­“®
+	// æ”»æ’ƒã®æŠ½é¸ã¨ç™ºå‹•
 	// ============================ 
 
-    // “ñŠK‚É‚¢‚éê‡‚ÍA‚µ‚Á‚ÛUŒ‚‚ğ—Dæ
+    // äºŒéšã«ã„ã‚‹å ´åˆã¯ã€ã—ã£ã½æ”»æ’ƒã‚’å„ªå…ˆ
     if (player_ != nullptr && player_->IsSecondFloor())
     {
-        // ƒN[ƒ‹ƒ_ƒEƒ“‚Í–³Œø
+        // ã‚¯ãƒ¼ãƒ«ãƒ€ã‚¦ãƒ³ã¯ç„¡åŠ¹
      /*   if (!tailWhipCooldown_.IsReady())
         {
             attackCooldown_ = retryInterval_;
@@ -139,7 +133,7 @@ void BossAI::Update(float deltaTime)
         return;
     }
 
-    // g—p‰Â”\‚ÈƒXƒLƒ‹‚ğW‚ß‚é
+    // ä½¿ç”¨å¯èƒ½ãªã‚¹ã‚­ãƒ«ã‚’é›†ã‚ã‚‹
     std::vector<SkillCooldown*> availableSkills;
 
     for (auto& cooldown : skillCooldowns_)
@@ -148,14 +142,14 @@ void BossAI::Update(float deltaTime)
             availableSkills.push_back(cooldown);
     }
 
-    // g—p‰Â”\‚ÈƒXƒLƒ‹‚ª‚È‚¯‚ê‚ÎÄŠm”F
+    // ä½¿ç”¨å¯èƒ½ãªã‚¹ã‚­ãƒ«ãŒãªã‘ã‚Œã°å†ç¢ºèª
     if (availableSkills.empty())
     {
         attackCooldown_ = retryInterval_;
         return;
     }
 
-    // ƒ‰ƒ“ƒ_ƒ€‚ÉƒXƒLƒ‹‚ğ‘I‘ğ
+    // ãƒ©ãƒ³ãƒ€ãƒ ã«ã‚¹ã‚­ãƒ«ã‚’é¸æŠ
     std::uniform_int_distribution<int> distribution(
         0,
         static_cast<int>(availableSkills.size()) - 1
@@ -164,7 +158,7 @@ void BossAI::Update(float deltaTime)
     SkillCooldown* selectedSkill =
         availableSkills[distribution(randomEngine)];
 
-    // ƒXƒLƒ‹”­“®
+    // ã‚¹ã‚­ãƒ«ç™ºå‹•
     if (boss_.UseSkill(selectedSkill->type_))
     {
         activeSkillCooldown_ = selectedSkill;
@@ -172,7 +166,7 @@ void BossAI::Update(float deltaTime)
     }
     else
     {
-        // ”­“®¸”s‚Í­‚µ‘Ò‚Á‚ÄÄs
+        // ç™ºå‹•å¤±æ•—æ™‚ã¯å°‘ã—å¾…ã£ã¦å†è©¦è¡Œ
         attackCooldown_ = retryInterval_;
     }
 
@@ -208,7 +202,7 @@ bool BossAI::TurnToTarget(const Vec3& targetPosition, float deltaTime)
         return true;
     }
 
-    // –Ú•W‚É‹ß‚Ã‚­‚Ù‚Ç‰ñ“]‘¬“x‚ğ—‚Æ‚·
+    // ç›®æ¨™ã«è¿‘ã¥ãã»ã©å›è»¢é€Ÿåº¦ã‚’è½ã¨ã™
     float speedRate = std::clamp(error / DX_PI_F, 0.0f, 1.0f);
     float rotationSpeed = minRotationSpeed +
         (maxRotationSpeed - minRotationSpeed) * speedRate;

@@ -1,53 +1,77 @@
-#include "StatusUI.h"
+﻿#include "StatusUI.h"
 #include <algorithm>
 #include "ResourceKeys.h"
 #include "DxPlus/DxPlus.h"
 
-void StatusUI::InitPlayer()
+void StatusUI::InitPlayer(const std::string& characterName)
 {
-    const DxPlus::Vec2 backgroundPosition(DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.9f);
+    const DxPlus::Vec2 backgroundPosition(
+        DxPlus::CLIENT_WIDTH * 0.5f,
+        DxPlus::CLIENT_HEIGHT * 0.8f);
 
     UIM().CreateImageUI(
-        L"PlayerStatusBackground",
+        L"playerULTGaugeBackMike",
         ResourceKeys::MikeStatusBack,
-        backgroundPosition);
+        backgroundPosition
+        );
+    UIM().CreateImageUI(
+        L"playerULTGaugeBackSabi",
+        ResourceKeys::SabiStatusBack,
+        backgroundPosition
+        );
+    UIM().CreateImageUI(
+        L"playerULTGaugeBackKuro",
+        ResourceKeys::KuroStatusBack,
+        backgroundPosition
+        );
 
-    UIM().CreateSpriteStudioUI(
-        L"PlayerHealthGauge",
-        ResourceKeys::SpriteStudio_PlayerHealthGauge,
-        backgroundPosition + DxPlus::Vec2(0.0f, -10.0f));
+    const wchar_t* selectedBackground =
+        characterName == "ぎし" ? L"playerULTGaugeBackSabi" :
+        characterName == "ゆう" ? L"playerULTGaugeBackKuro" :
+        L"playerULTGaugeBackMike";
+
+    for (const auto* key : {
+        L"playerULTGaugeBackMike",
+        L"playerULTGaugeBackSabi",
+        L"playerULTGaugeBackKuro" })
+    {
+        if (auto* ui = UIM().GetUI(key))
+            ui->SetFalse();
+    }
+
+    if (auto* ui = UIM().GetUI(selectedBackground))
+        ui->SetTrue();
 
     UIM().CreateSpriteStudioUI(
         L"PlayerUltGauge",
         ResourceKeys::SpriteStudio_PlayerUltGauge,
-        backgroundPosition + DxPlus::Vec2(0.0f, 10.0f));
+        DxPlus::Vec2(DxPlus::CLIENT_WIDTH * 0.5f,
+            DxPlus::CLIENT_HEIGHT * 0.5f),
+        "playerult");
 
-    UIM().GetUI(L"PlayerStatusBackground")->SetFalse();
-    UIM().GetUI(L"PlayerHealthGauge")->SetFalse();
     UIM().GetUI(L"PlayerUltGauge")->SetFalse();
 }
 
 void StatusUI::InitBoss()
 {
-    const DxPlus::Vec2 backgroundPosition(DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.1f);
+    const DxPlus::Vec2 backgroundPosition(
+        DxPlus::CLIENT_WIDTH * 0.5f,
+        DxPlus::CLIENT_HEIGHT * 0.5f);
 
-    UIM().CreateImageUI(
-        L"BossStatusBackground",
-        ResourceKeys::BossStatusBack,
-        backgroundPosition);
-
-    UIM().CreateSpriteStudioUI(
-        L"BossHealthGauge",
-        ResourceKeys::SpriteStudio_BossHealthGauge,
-        backgroundPosition + DxPlus::Vec2(0.0f, -10.0f));
+    //UIM().CreateSpriteStudioUI(
+    //    L"BossHealthGauge",
+    //    ResourceKeys::SpriteStudio_BossHealthGauge,
+    //    backgroundPosition,
+    //    "Boss_hp");
 
     UIM().CreateSpriteStudioUI(
         L"BossDownGauge",
         ResourceKeys::SpriteStudio_BossDownGauge,
-        backgroundPosition + DxPlus::Vec2(0.0f, 10.0f));
+        DxPlus::Vec2(DxPlus::CLIENT_WIDTH * 0.5f,
+            DxPlus::CLIENT_HEIGHT * 0.5f),
+        "Boss_down");
 
-    UIM().GetUI(L"BossStatusBackground")->SetFalse();
-    UIM().GetUI(L"BossHealthGauge")->SetFalse();
+   // UIM().GetUI(L"BossHealthGauge")->SetFalse();
     UIM().GetUI(L"BossDownGauge")->SetFalse();
 }
 void StatusUI::SyncStatusBar(const std::wstring& key, float progress)
@@ -63,10 +87,10 @@ void StatusUI::Open()
 {
     const std::wstring keys[] =
     {
-        L"PlayerStatusBackground",
-        L"PlayerHealthGauge",
+        //L"PlayerStatusBackground",
+       // L"PlayerHealthGauge",
         L"PlayerUltGauge",
-        L"BossStatusBackground",
+        //L"BossStatusBackground",
         L"BossHealthGauge",
         L"BossDownGauge"
     };
@@ -82,10 +106,10 @@ void StatusUI::Hide()
 {
     const std::wstring keys[] =
     {
-        L"PlayerStatusBackground",
-        L"PlayerHealthGauge",
+        //L"PlayerStatusBackground",
+       // L"PlayerHealthGauge",
         L"PlayerUltGauge",
-        L"BossStatusBackground",
+        //L"BossStatusBackground",
         L"BossHealthGauge",
         L"BossDownGauge"
     };

@@ -1,11 +1,11 @@
-#pragma once
+ï»¿#pragma once
 
-/* - d—l -
- *  ŠJnp¨E–Ú•Wp¨EdurationEƒC[ƒWƒ“ƒO‚ğw’è‚Å‚«‚éB
- *  Motion ‚Ìis—¦‚É‡‚í‚¹‚ÄAˆÊ’uEpitchEyawErollE‰æŠp‚ğ•âŠÔ‚·‚éB
- *  yaw ‚Æ roll ‚ÍÅ’ZŠp“x‚Å•âŠÔ‚·‚éB
- *  V‚µ‚¢ Start() ‚ªŒÄ‚Î‚ê‚½‚çAis’†‚Ì‘JˆÚ‚ğã‘‚«‚Å‚«‚éB
- *  Update() ‚Í‘JˆÚŠ®—¹‚É true ‚ğ•Ô‚·BŠ®—¹Ï‚İ‚©‚Ç‚¤‚©‚Í IsFinished() ‚Å‚àŠm”F‚Å‚«‚éB
+/* - ä»•æ§˜ -
+ *  é–‹å§‹å§¿å‹¢ãƒ»ç›®æ¨™å§¿å‹¢ãƒ»durationãƒ»ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°ã‚’æŒ‡å®šã§ãã‚‹ã€‚
+ *  Motion ã®é€²è¡Œç‡ã«åˆã‚ã›ã¦ã€ä½ç½®ãƒ»pitchãƒ»yawãƒ»rollãƒ»ç”»è§’ã‚’è£œé–“ã™ã‚‹ã€‚
+ *  yaw ã¨ roll ã¯æœ€çŸ­è§’åº¦ã§è£œé–“ã™ã‚‹ã€‚
+ *  æ–°ã—ã„ Start() ãŒå‘¼ã°ã‚ŒãŸã‚‰ã€é€²è¡Œä¸­ã®é·ç§»ã‚’ä¸Šæ›¸ãã§ãã‚‹ã€‚
+ *  Update() ã¯é·ç§»å®Œäº†æ™‚ã« true ã‚’è¿”ã™ã€‚å®Œäº†æ¸ˆã¿ã‹ã©ã†ã‹ã¯ IsFinished() ã§ã‚‚ç¢ºèªã§ãã‚‹ã€‚
 */
 
 #include "CameraPose.h"
@@ -13,32 +13,35 @@
 
 namespace Camera
 {
-	// ƒJƒƒ‰‘JˆÚ‚ğŠÇ—‚·‚éƒNƒ‰ƒX
-    // ‚±‚ÌƒNƒ‰ƒX‚Ípose‚©‚çpose‚Ü‚Å‚Ì•âŠ®‚Ì‚İŠÇ—
+	// ã‚«ãƒ¡ãƒ©é·ç§»ã‚’ç®¡ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹
+    // ã“ã®ã‚¯ãƒ©ã‚¹ã¯poseã‹ã‚‰poseã¾ã§ã®è£œå®Œã®ã¿ç®¡ç†
     class CameraTransition
     {
     public:
-        // ƒJƒƒ‰‘JˆÚ‚ğŠJn‚·‚é
+        // ã‚«ãƒ¡ãƒ©é·ç§»ã‚’é–‹å§‹ã™ã‚‹
         void Start(
             const CameraPose& startPose,
             const CameraPose& targetPose,
             float duration,
             Motion::Easing easing = Motion::Easing::EaseInOut);
 
-        // ‘JˆÚ‚ğXV‚µAŠ®—¹‚µ‚½ƒtƒŒ[ƒ€‚Å true ‚ğ•Ô‚·
+        // é·ç§»ã‚’æ›´æ–°ã—ã€å®Œäº†ã—ãŸãƒ•ãƒ¬ãƒ¼ãƒ ã§ true ã‚’è¿”ã™
         bool Update(float deltaTime, CameraPose& outPose);
 
-        // ‘JˆÚ‚ªŠ®—¹‚µ‚Ä‚¢‚é‚©
+        // é·ç§»ãŒå®Œäº†ã—ã¦ã„ã‚‹ã‹
         bool IsFinished() const;
 
-        // ‘JˆÚ‚ğ’†’f‚·‚é
+        // é·ç§»ã‚’ä¸­æ–­ã™ã‚‹
         void Reset();
 
+        // ç¾åœ¨ã®é·ç§»é€²è¡Œç‡ï¼ˆ0.0ï½1.0ï¼‰
+        float GetProgress() const { return motion_.GetValue(); }
+
     private:
-        // p¨‚ğ•âŠÔ‚·‚é
+        // å§¿å‹¢ã‚’è£œé–“ã™ã‚‹
         CameraPose InterpolatePose(float t) const;
 
-        // Šp“x‚ğÅ’ZŒo˜H‚Å•âŠÔ‚·‚é
+        // è§’åº¦ã‚’æœ€çŸ­çµŒè·¯ã§è£œé–“ã™ã‚‹
         static float LerpAngle(float from, float to, float t);
 
         CameraPose startPose_{};

@@ -2,16 +2,16 @@
 <SpriteStudioAnimePack version="2.02.00" editorVersion="7.5.1">
 	<settings>
 		<fps>30</fps>
-		<frameCount>18</frameCount>
+		<frameCount>11</frameCount>
 		<sortMode>prio</sortMode>
-		<canvasSize>1024 1024</canvasSize>
+		<canvasSize>320 320</canvasSize>
 		<pivot>0 0</pivot>
-		<bgColor>00000000</bgColor>
+		<bgColor>FF323232</bgColor>
 		<gridSize>32</gridSize>
 		<gridColor>FF808080</gridColor>
 		<ik_depth>3</ik_depth>
 		<startFrame>0</startFrame>
-		<endFrame>17</endFrame>
+		<endFrame>10</endFrame>
 		<bgSettings>
 			<value>
 				<imagePath></imagePath>
@@ -33,8 +33,7 @@
 		<playArea.end>0</playArea.end>
 		<loop>1</loop>
 	</settings>
-	<name>character_icon</name>
-	<order>2</order>
+	<name>player_hp</name>
 	<exportPath></exportPath>
 	<Model>
 		<partList>
@@ -44,7 +43,7 @@
 				<parentIndex>-1</parentIndex>
 				<type>null</type>
 				<boundsType>none</boundsType>
-				<inheritType>parent</inheritType>
+				<inheritType>self</inheritType>
 				<visibleInsideMask>0</visibleInsideMask>
 				<writeMask>0</writeMask>
 				<ineheritRates>
@@ -65,34 +64,8 @@
 				<outputInfluence>1</outputInfluence>
 			</value>
 			<value>
-				<name>part_1</name>
+				<name>player_bar</name>
 				<arrayIndex>1</arrayIndex>
-				<parentIndex>0</parentIndex>
-				<type>null</type>
-				<boundsType>none</boundsType>
-				<inheritType>parent</inheritType>
-				<visibleInsideMask>0</visibleInsideMask>
-				<writeMask>0</writeMask>
-				<ineheritRates>
-					<ALPH>1</ALPH>
-					<IFLH>0</IFLH>
-					<IFLV>0</IFLV>
-					<FLPH>0</FLPH>
-					<FLPV>0</FLPV>
-					<HIDE>0</HIDE>
-				</ineheritRates>
-				<alphaBlendType>mix</alphaBlendType>
-				<show>1</show>
-				<locked>0</locked>
-				<expandAttribute>0</expandAttribute>
-				<expandChildren>1</expandChildren>
-				<refCellTag></refCellTag>
-				<maskInfluence>1</maskInfluence>
-				<outputInfluence>1</outputInfluence>
-			</value>
-			<value>
-				<name>CellAnime</name>
-				<arrayIndex>2</arrayIndex>
 				<parentIndex>0</parentIndex>
 				<type>normal</type>
 				<boundsType>none</boundsType>
@@ -121,7 +94,7 @@
 		<meshList />
 	</Model>
 	<cellmapNames>
-		<value>character_icon_0000.ssce</value>
+		<value>supusuta.ssce</value>
 	</cellmapNames>
 	<animeList>
 		<anime>
@@ -178,20 +151,20 @@
 			</partAnimes>
 		</anime>
 		<anime>
-			<name>character_icon_anime</name>
-			<overrideSettings>0</overrideSettings>
+			<name>playerult</name>
+			<overrideSettings>1</overrideSettings>
 			<settings>
 				<fps>30</fps>
-				<frameCount>18</frameCount>
+				<frameCount>100</frameCount>
 				<sortMode>prio</sortMode>
-				<canvasSize>90 118</canvasSize>
+				<canvasSize>1920 1080</canvasSize>
 				<pivot>0 0</pivot>
-				<bgColor>FF808080</bgColor>
+				<bgColor>FF323232</bgColor>
 				<gridSize>32</gridSize>
 				<gridColor>FF808080</gridColor>
 				<ik_depth>3</ik_depth>
 				<startFrame>0</startFrame>
-				<endFrame>17</endFrame>
+				<endFrame>99</endFrame>
 				<bgSettings>
 					<value>
 						<imagePath></imagePath>
@@ -216,26 +189,11 @@
 			<labels />
 			<guidelines />
 			<isSetup>0</isSetup>
-			<lastFrame>8</lastFrame>
+			<lastFrame>20</lastFrame>
 			<partAnimes>
 				<partAnime>
 					<partName>root</partName>
 					<attributes>
-						<attribute tag="POSX">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="POSY">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="ROTZ">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
 						<attribute tag="HIDE">
 							<key time="0">
 								<value>0</value>
@@ -244,25 +202,65 @@
 					</attributes>
 				</partAnime>
 				<partAnime>
-					<partName>part_1</partName>
+					<partName>player_bar</partName>
 					<attributes>
+						<attribute tag="CELL">
+							<key time="99">
+								<value>
+									<mapId>0</mapId>
+									<name>player_bar</name>
+								</value>
+							</key>
+						</attribute>
 						<attribute tag="POSX">
-							<key time="0" ipType="linear">
-								<value>0</value>
+							<key time="99" ipType="linear">
+								<value>82.041702</value>
 							</key>
 						</attribute>
 						<attribute tag="POSY">
-							<key time="0" ipType="linear">
-								<value>0</value>
+							<key time="99" ipType="linear">
+								<value>-446.50006</value>
 							</key>
 						</attribute>
 						<attribute tag="ROTZ">
-							<key time="0" ipType="linear">
+							<key time="99" ipType="linear">
 								<value>0</value>
+							</key>
+						</attribute>
+						<attribute tag="SCLX">
+							<key time="0" ipType="linear">
+								<value>1</value>
+							</key>
+							<key time="99" ipType="linear">
+								<value>1</value>
+							</key>
+						</attribute>
+						<attribute tag="SCLY">
+							<key time="0" ipType="linear">
+								<value>1</value>
+							</key>
+							<key time="99" ipType="linear">
+								<value>1</value>
+							</key>
+						</attribute>
+						<attribute tag="LSCX">
+							<key time="0" ipType="linear">
+								<value>1</value>
+							</key>
+							<key time="99" ipType="linear">
+								<value>1</value>
+							</key>
+						</attribute>
+						<attribute tag="LSCY">
+							<key time="0" ipType="linear">
+								<value>1</value>
+							</key>
+							<key time="99" ipType="linear">
+								<value>1</value>
 							</key>
 						</attribute>
 						<attribute tag="PRIO">
-							<key time="0" ipType="linear">
+							<key time="99" ipType="linear">
 								<value>0</value>
 							</key>
 						</attribute>
@@ -270,140 +268,26 @@
 							<key time="0">
 								<value>0</value>
 							</key>
-						</attribute>
-					</attributes>
-				</partAnime>
-				<partAnime>
-					<partName>CellAnime</partName>
-					<attributes>
-						<attribute tag="CELL">
-							<key time="0">
-								<value>
-									<mapId>0</mapId>
-									<name>character_icon_00</name>
-								</value>
-							</key>
-							<key time="1">
-								<value>
-									<mapId>0</mapId>
-									<name>character_icon_01</name>
-								</value>
-							</key>
-							<key time="2">
-								<value>
-									<mapId>0</mapId>
-									<name>character_icon_02</name>
-								</value>
-							</key>
-							<key time="3">
-								<value>
-									<mapId>0</mapId>
-									<name>character_icon_03</name>
-								</value>
-							</key>
-							<key time="4">
-								<value>
-									<mapId>0</mapId>
-									<name>character_icon_04</name>
-								</value>
-							</key>
-							<key time="5">
-								<value>
-									<mapId>0</mapId>
-									<name>character_icon_05</name>
-								</value>
-							</key>
-							<key time="6">
-								<value>
-									<mapId>0</mapId>
-									<name>character_icon_06</name>
-								</value>
-							</key>
-							<key time="7">
-								<value>
-									<mapId>0</mapId>
-									<name>character_icon_07</name>
-								</value>
-							</key>
-							<key time="8">
-								<value>
-									<mapId>0</mapId>
-									<name>character_icon_08</name>
-								</value>
-							</key>
-							<key time="9">
-								<value>
-									<mapId>0</mapId>
-									<name>character_icon_09</name>
-								</value>
-							</key>
-							<key time="10">
-								<value>
-									<mapId>0</mapId>
-									<name>character_icon_10</name>
-								</value>
-							</key>
-							<key time="11">
-								<value>
-									<mapId>0</mapId>
-									<name>character_icon_11</name>
-								</value>
-							</key>
-							<key time="12">
-								<value>
-									<mapId>0</mapId>
-									<name>character_icon_12</name>
-								</value>
-							</key>
-							<key time="13">
-								<value>
-									<mapId>0</mapId>
-									<name>character_icon_13</name>
-								</value>
-							</key>
-							<key time="14">
-								<value>
-									<mapId>0</mapId>
-									<name>character_icon_14</name>
-								</value>
-							</key>
-							<key time="15">
-								<value>
-									<mapId>0</mapId>
-									<name>character_icon_15</name>
-								</value>
-							</key>
-							<key time="16">
-								<value>
-									<mapId>0</mapId>
-									<name>character_icon_16</name>
-								</value>
-							</key>
-							<key time="17">
-								<value>
-									<mapId>0</mapId>
-									<name>character_icon_17</name>
-								</value>
+							<key time="99">
+								<value>0</value>
 							</key>
 						</attribute>
-						<attribute tag="POSX">
+						<attribute tag="VERT">
 							<key time="0" ipType="linear">
-								<value>0</value>
+								<value>
+									<LT>0 0</LT>
+									<RT>-394 0</RT>
+									<LB>0 0</LB>
+									<RB>-394 0</RB>
+								</value>
 							</key>
-						</attribute>
-						<attribute tag="POSY">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="ROTZ">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="HIDE">
-							<key time="0">
-								<value>0</value>
+							<key time="99" ipType="linear">
+								<value>
+									<LT>0 0</LT>
+									<RT>-1 0</RT>
+									<LB>0 0</LB>
+									<RB>-1 0</RB>
+								</value>
 							</key>
 						</attribute>
 					</attributes>

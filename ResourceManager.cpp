@@ -92,26 +92,19 @@ void ResourceManager::LoadAll()
 	//LoadModel(ResourceKeys::Model_Test, L"./Data/Models/test1.mv1");
 	// スプライトスタジオの読み込み
 
-	LoadSpriteStudioPlayer(
-		ResourceKeys::SpriteStudio_Gauge,
-		"UI",
-		"./Data/UI/UI.ssbp");
+
 	LoadSpriteStudioPlayer(
 		ResourceKeys::SpriteStudio_BossDownGauge,
-		"UI",
-		"./Data/UI/UI.ssbp");
+		"BossDownGauge",
+		"./Data/UI/supusuta.ssbp");
 	LoadSpriteStudioPlayer(
 		ResourceKeys::SpriteStudio_BossHealthGauge,
-		"UI",
-		"./Data/UI/UI.ssbp");
-	LoadSpriteStudioPlayer(
-		ResourceKeys::SpriteStudio_PlayerHealthGauge,
-		"UI",
-		"./Data/UI/UI.ssbp");
+		"BossHealthGauge",
+		"./Data/UI/supusuta.ssbp");
 	LoadSpriteStudioPlayer(
 		ResourceKeys::SpriteStudio_PlayerUltGauge,
-		"UI",
-		"./Data/UI/UI.ssbp");
+		"PlayerUltGauge",
+		"./Data/UI/supusuta.ssbp");
 
 	// サウンドの読み込み
 	LoadMusic(ResourceKeys::Music_Title, L"./Data/Sounds/StartBGM.mp3");
