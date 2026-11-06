@@ -7,7 +7,6 @@
 #include "ResourceKeys.h"
 #include "StatusUI.h"
 #include "Collision.h"
-#include "UIManager.h"
 #include "CameraShakeType.h"
 
 #include <algorithm>
@@ -67,7 +66,7 @@ void GameSceneBattleState::Enter()
     boss.SetAIActive(false);
 
     StatusUI::InitBoss();
-    StatusUI::InitPlayer();
+    StatusUI::InitPlayer(player);
 
     gameScene_.SetDrawPlayerShadow(true);
 }
@@ -567,11 +566,5 @@ void GameSceneBattleState::Exit()
     gameScene_.GetTutorialChecklist().SetVisible(false);
     gameScene_.SetDrawPlayerShadow(false);
 
-    UIM().RemoveUI(L"BossStatusBackground");
-    UIM().RemoveUI(L"BossHealthGauge");
-    UIM().RemoveUI(L"BossDownGauge");
-
-    UIM().RemoveUI(L"PlayerStatusBackground");
-    UIM().RemoveUI(L"PlayerHealthGauge");
-    UIM().RemoveUI(L"PlayerUltGauge");
+    StatusUI::Remove();
 }

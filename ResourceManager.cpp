@@ -43,6 +43,7 @@ void ResourceManager::LoadAll()
 
 	LoadSprite(ResourceKeys::BossStatusBack, L"./Data/Images/Boss/boss_status_back.png");
 	LoadSprite(ResourceKeys::MikeStatusBack, L"./Data/Images/Player/mike_status_back.png");
+	LoadSprite(ResourceKeys::PlayerHeart, L"./Data/Images/Player/heart.png");
 	LoadSprite(ResourceKeys::ClearResult, L"./Data/Images/Result/clear.png");
 	LoadSprite(ResourceKeys::GameOverResult, L"./Data/Images/Result/gameover.png");
 	LoadSprite(ResourceKeys::SelectMike, L"./Data/Images/Select/mike.png");
@@ -102,10 +103,6 @@ void ResourceManager::LoadAll()
 		"./Data/UI/UI.ssbp");
 	LoadSpriteStudioPlayer(
 		ResourceKeys::SpriteStudio_BossHealthGauge,
-		"UI",
-		"./Data/UI/UI.ssbp");
-	LoadSpriteStudioPlayer(
-		ResourceKeys::SpriteStudio_PlayerHealthGauge,
 		"UI",
 		"./Data/UI/UI.ssbp");
 	LoadSpriteStudioPlayer(
