@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <SpriteStudioProject version="2.04.00" editorVersion="7.5.1">
-	<name>UI</name>
+	<name>supusuta</name>
 	<exportPath></exportPath>
 	<settings>
 		<animeBaseDirectory></animeBaseDirectory>
@@ -242,33 +242,24 @@
 		<padding>1</padding>
 	</texPackSettings>
 	<cellmapNames>
-		<value>UI.ssce</value>
-		<value>character_icon_0000.ssce</value>
-		<value>monster_0000.ssce</value>
+		<value>supusuta.ssce</value>
 	</cellmapNames>
 	<animepackNames>
-		<value>bar.ssae</value>
-		<value>character_icon.ssae</value>
-		<value>life.ssae</value>
-		<value>monster.ssae</value>
-		<value>warning.ssae</value>
+		<value>boss_down.ssae</value>
+		<value>boss_hp.ssae</value>
+		<value>player_hp.ssae</value>
 	</animepackNames>
 	<ExternalTextures>
 		<files />
 	</ExternalTextures>
-	<lastAnimeFile>warning.ssae</lastAnimeFile>
-	<lastAnimeName>Setup</lastAnimeName>
-	<lastPart>root</lastPart>
-	<lastCellMapFile>UI.ssce</lastCellMapFile>
-	<lastCell>window_efect</lastCell>
+	<lastAnimeFile>boss_hp.ssae</lastAnimeFile>
+	<lastAnimeName>Boss_hp</lastAnimeName>
+	<lastPart></lastPart>
+	<lastCellMapFile>supusuta.ssce</lastCellMapFile>
+	<lastCell>baria</lastCell>
 	<lastCharMapFile></lastCharMapFile>
 	<lastEffectFile></lastEffectFile>
-	<setupmode>1</setupmode>
-	<expandAnimation>
-		<value>bar.ssae</value>
-		<value>character_icon.ssae</value>
-		<value>life.ssae</value>
-		<value>monster.ssae</value>
-	</expandAnimation>
+	<setupmode>0</setupmode>
+	<expandAnimation />
 	<expandSequence />
 </SpriteStudioProject>

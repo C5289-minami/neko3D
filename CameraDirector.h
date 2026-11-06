@@ -1,4 +1,4 @@
-
+ï»¿
 #pragma once
 
 #include "Camera.h"
@@ -13,70 +13,70 @@
 
 namespace Camera
 {
-	// ƒJƒƒ‰‚ÌØ‚è‘Ö‚¦E‰‰oE‘JˆÚ‚ğŠÇ—‚·‚é
+	// ã‚«ãƒ¡ãƒ©ã®åˆ‡ã‚Šæ›¿ãˆãƒ»æ¼”å‡ºãƒ»é·ç§»ã‚’ç®¡ç†ã™ã‚‹
 	class CameraDirector
 	{
 	public:
 		explicit CameraDirector(Camera& camera);
 
-		// ‰‰oƒAƒ“ƒOƒ‹‚ğ“o˜^
+		// æ¼”å‡ºã‚¢ãƒ³ã‚°ãƒ«ã‚’ç™»éŒ²
 		bool RegisterShot(
 			const std::string& name,
 			const CameraPose& pose);
 
-		// “o˜^‚µ‚½‰‰oƒAƒ“ƒOƒ‹‚ğÄ¶
+		// ç™»éŒ²ã—ãŸæ¼”å‡ºã‚¢ãƒ³ã‚°ãƒ«ã‚’å†ç”Ÿ
 		bool PlayShot(
 			const std::string& name,
 			float duration,
 			Motion::Easing easing = Motion::Easing::EaseInOut);
 
-		// ”CˆÓ‚Ìp¨‚ÖˆÚ“®iŠ„‚è‚İ‰Â”\j
+		// ä»»æ„ã®å§¿å‹¢ã¸ç§»å‹•ï¼ˆå‰²ã‚Šè¾¼ã¿å¯èƒ½ï¼‰
 		void MoveTo(
 			const CameraPose& targetPose,
 			float duration,
 			Motion::Easing easing = Motion::Easing::EaseInOut);
 
-		// g—p‚·‚éƒJƒƒ‰‚ğØ‚è‘Ö‚¦‚é
+		// ä½¿ç”¨ã™ã‚‹ã‚«ãƒ¡ãƒ©ã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹
 		void SwitchCamera(
 			Camera& targetCamera,
 			float duration = 0.0f,
 			Motion::Easing easing = Motion::Easing::EaseInOut);
 
-		// Œ»İ‚ÌƒJƒƒ‰–{—ˆ‚Ìp¨‚Ö–ß‚é
+		// ç¾åœ¨ã®ã‚«ãƒ¡ãƒ©æœ¬æ¥ã®å§¿å‹¢ã¸æˆ»ã‚‹
 		void Follow(
 			float duration = 0.0f,
 			Motion::Easing easing = Motion::Easing::EaseInOut);
 
-		// ‘O‚ÌƒJƒƒ‰‚Ö–ß‚éA‚Ü‚½‚Í‰‰o‚ğI—¹‚·‚é
+		// å‰ã®ã‚«ãƒ¡ãƒ©ã¸æˆ»ã‚‹ã€ã¾ãŸã¯æ¼”å‡ºã‚’çµ‚äº†ã™ã‚‹
 		void ReturnToPreviousCamera(
 			float duration = 0.0f,
 			Motion::Easing easing = Motion::Easing::EaseInOut);
 
-		// ƒJƒƒ‰‚ÌŒ»İp¨‚ğ‘¦XV‚·‚é
+		// ã‚«ãƒ¡ãƒ©ã®ç¾åœ¨å§¿å‹¢ã‚’å³æ™‚æ›´æ–°ã™ã‚‹
 		void SetPoseImmediate(const CameraPose& pose);
 
-		// –ˆƒtƒŒ[ƒ€XVB‘JˆÚŠ®—¹‚Ì‚İ true
+		// æ¯ãƒ•ãƒ¬ãƒ¼ãƒ æ›´æ–°ã€‚é·ç§»å®Œäº†æ™‚ã®ã¿ true
 		bool Update(float deltaTime);
 
-		// ‰Šúó‘Ô‚Ö–ß‚·
+		// åˆæœŸçŠ¶æ…‹ã¸æˆ»ã™
 		void Reset();
 
-		// Œ»İ‚Ì•`‰æ—pp¨
+		// ç¾åœ¨ã®æç”»ç”¨å§¿å‹¢
 		const CameraPose& GetCurrentPose() const;
 
-		// •`‰æƒpƒX‚Å“¯‚¶ƒJƒƒ‰p¨‚ğÄ“K—p‚·‚é
+		// æç”»ãƒ‘ã‚¹ã§åŒã˜ã‚«ãƒ¡ãƒ©å§¿å‹¢ã‚’å†é©ç”¨ã™ã‚‹
 		void ApplyRenderPose() const;
 
-		// Œ»İg—p’†‚ÌƒJƒƒ‰
+		// ç¾åœ¨ä½¿ç”¨ä¸­ã®ã‚«ãƒ¡ãƒ©
 		Camera* GetActiveCamera() const;
 
-		// ‘JˆÚ’†‚©
+		// é·ç§»ä¸­ã‹
 		bool IsTransitioning() const;
 
-		// ƒJƒƒ‰–{—ˆ‚Ìp¨‚ğg—p’†‚©
+		// ã‚«ãƒ¡ãƒ©æœ¬æ¥ã®å§¿å‹¢ã‚’ä½¿ç”¨ä¸­ã‹
 		bool IsFollowing() const;
 
-		// ƒJƒƒ‰—h‚ê
+		// ã‚«ãƒ¡ãƒ©æºã‚Œ
 		void StartHorizontalShake(
 			float duration = 0.25f,
 			float strength = 20.0f,
@@ -103,6 +103,9 @@ namespace Camera
 
 		void StopShake() { cameraShake_.Stop(); }
 
+		// ç¾åœ¨ã®ã‚«ãƒ¡ãƒ©é·ç§»Progressï¼ˆ0.0ï½1.0ï¼‰
+		float GetTransitionProgress() const;
+
 	private:
 		enum class Mode
 		{
@@ -112,27 +115,27 @@ namespace Camera
 			BlendingToCamera
 		};
 
-		// Œ»İ‚ÌƒJƒƒ‰‚ÖŠŠ‚ç‚©‚É–ß‚é
+		// ç¾åœ¨ã®ã‚«ãƒ¡ãƒ©ã¸æ»‘ã‚‰ã‹ã«æˆ»ã‚‹
 		void BeginBlendToActiveCamera(
 			float duration,
 			Motion::Easing easing);
 
-		// ƒJƒƒ‰–{—ˆ‚Ìp¨‚ğæ“¾
+		// ã‚«ãƒ¡ãƒ©æœ¬æ¥ã®å§¿å‹¢ã‚’å–å¾—
 		CameraPose GetBasePose() const;
 
-		// p¨‚ğ•âŠÔ
+		// å§¿å‹¢ã‚’è£œé–“
 		static CameraPose InterpolatePose(
 			const CameraPose& from,
 			const CameraPose& to,
 			float t);
 
-		// Šp“x‚ğÅ’ZŒo˜H‚Å•âŠÔiƒ‰ƒWƒAƒ“j
+		// è§’åº¦ã‚’æœ€çŸ­çµŒè·¯ã§è£œé–“ï¼ˆãƒ©ã‚¸ã‚¢ãƒ³ï¼‰
 		static float LerpAngle(
 			float from,
 			float to,
 			float t);
 
-		// p¨‚Ì”’l‚ª—LŒø‚©
+		// å§¿å‹¢ã®æ•°å€¤ãŒæœ‰åŠ¹ã‹
 		static bool IsFinitePose(const CameraPose& pose);
 
 		Camera* activeCamera_{};
@@ -149,11 +152,10 @@ namespace Camera
 
 		Mode mode_{ Mode::FollowingCamera };
 
-		// •`‰æ‚ÉƒJƒƒ‰p¨‚Ö—h‚ê‚ğ‰Á‚¦‚é
+		// æç”»æ™‚ã«ã‚«ãƒ¡ãƒ©å§¿å‹¢ã¸æºã‚Œã‚’åŠ ãˆã‚‹
 		void ApplyCurrentPose(float deltaTime);
 
 		CameraShake cameraShake_{};
-
 
 	};
 }

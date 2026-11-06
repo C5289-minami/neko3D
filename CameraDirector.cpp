@@ -1,4 +1,4 @@
-
+ï»¿
 #include "CameraDirector.h"
 
 #include <algorithm>
@@ -70,16 +70,16 @@ namespace Camera
             return;
         }
 
-        // ’Êíó‘Ô‚È‚çAƒJƒƒ‰‚ÌÅVp¨‚ğŠJn“_‚É‚·‚é
+        // é€šå¸¸çŠ¶æ…‹ãªã‚‰ã€ã‚«ãƒ¡ãƒ©ã®æœ€æ–°å§¿å‹¢ã‚’é–‹å§‹ç‚¹ã«ã™ã‚‹
         if (mode_ == Mode::FollowingCamera)
         {
             currentPose_ = GetBasePose();
         }
 
-        // •œ‹A—p‚ÌMotion‚ğ’â~
+        // å¾©å¸°ç”¨ã®Motionã‚’åœæ­¢
         followMotion_.Reset();
 
-        // ˆÈ‘O‚Ì‘JˆÚ‚ğã‘‚«
+        // ä»¥å‰ã®é·ç§»ã‚’ä¸Šæ›¸ã
         transition_.Start(
             currentPose_,
             targetPose,
@@ -104,19 +104,19 @@ namespace Camera
             return;
         }
 
-        // Ø‚è‘Ö‚¦‘O‚Ìp¨‚ğ•Û‘¶
+        // åˆ‡ã‚Šæ›¿ãˆå‰ã®å§¿å‹¢ã‚’ä¿å­˜
         if (mode_ == Mode::FollowingCamera)
         {
             currentPose_ = GetBasePose();
         }
 
-        // Ø‚è‘Ö‚¦‘O‚ÌƒJƒƒ‰‚ğ•Û‘¶
+        // åˆ‡ã‚Šæ›¿ãˆå‰ã®ã‚«ãƒ¡ãƒ©ã‚’ä¿å­˜
         previousCamera_ = activeCamera_;
 
-        // g—p‚·‚éƒJƒƒ‰‚ğØ‚è‘Ö‚¦‚é
+        // ä½¿ç”¨ã™ã‚‹ã‚«ãƒ¡ãƒ©ã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹
         activeCamera_ = &targetCamera;
 
-        // V‚µ‚¢ƒJƒƒ‰‚Ìp¨‚Ö•âŠÔ
+        // æ–°ã—ã„ã‚«ãƒ¡ãƒ©ã®å§¿å‹¢ã¸è£œé–“
         BeginBlendToActiveCamera(duration, easing);
     }
 
@@ -149,7 +149,7 @@ namespace Camera
         float duration,
         Motion::Easing easing)
     {
-        // ‰‰o’†‚È‚çAŒ»İ‘I‘ğ’†‚ÌƒJƒƒ‰–{—ˆ‚Ìp¨‚É–ß‚é
+        // æ¼”å‡ºä¸­ãªã‚‰ã€ç¾åœ¨é¸æŠä¸­ã®ã‚«ãƒ¡ãƒ©æœ¬æ¥ã®å§¿å‹¢ã«æˆ»ã‚‹
         if (mode_ == Mode::MovingToPose ||
             mode_ == Mode::HoldingPose)
         {
@@ -157,7 +157,7 @@ namespace Camera
             return;
         }
 
-        // ’¼‘O‚Ég—p‚µ‚Ä‚¢‚½ƒJƒƒ‰‚ª‚ ‚ê‚Î–ß‚é
+        // ç›´å‰ã«ä½¿ç”¨ã—ã¦ã„ãŸã‚«ãƒ¡ãƒ©ãŒã‚ã‚Œã°æˆ»ã‚‹
         if (previousCamera_ &&
             previousCamera_ != activeCamera_)
         {
@@ -185,8 +185,8 @@ namespace Camera
         currentPose_ = pose;
         mode_ = Mode::HoldingPose;
 
-        // —h‚ê‚ğ‰Á‚¦‚½•`‰æ—pp¨‚ğ“K—p‚·‚é
-        // deltaTime = 0 ‚È‚Ì‚ÅA—h‚ê‚ÌŠÔ‚Íi‚ß‚È‚¢
+        // æºã‚Œã‚’åŠ ãˆãŸæç”»ç”¨å§¿å‹¢ã‚’é©ç”¨ã™ã‚‹
+        // deltaTime = 0 ãªã®ã§ã€æºã‚Œã®æ™‚é–“ã¯é€²ã‚ãªã„
         ApplyCurrentPose(0.0f);
     }
 
@@ -205,7 +205,7 @@ namespace Camera
 
         transition_.Reset();
 
-        // ‘¦Ø‚è‘Ö‚¦
+        // å³æ™‚åˆ‡ã‚Šæ›¿ãˆ
         if (duration <= 0.0f)
         {
             followMotion_.Reset();
@@ -217,7 +217,7 @@ namespace Camera
             return;
         }
 
-        // ‘JˆÚŠJn‚Ìp¨‚ğ•Û‘¶
+        // é·ç§»é–‹å§‹æ™‚ã®å§¿å‹¢ã‚’ä¿å­˜
         followStartPose_ = currentPose_;
 
         followMotion_.Start(
@@ -267,14 +267,14 @@ namespace Camera
 
         case Mode::HoldingPose:
         {
-            // ‰‰oŠ®—¹Œã‚àp¨‚ğˆÛ
+            // æ¼”å‡ºå®Œäº†å¾Œã‚‚å§¿å‹¢ã‚’ç¶­æŒ
             ApplyCurrentPose(deltaTime);
             return false;
         }
 
         case Mode::BlendingToCamera:
         {
-            // ÅV‚ÌƒJƒƒ‰–{—ˆ‚Ìp¨‚ğæ“¾
+            // æœ€æ–°ã®ã‚«ãƒ¡ãƒ©æœ¬æ¥ã®å§¿å‹¢ã‚’å–å¾—
             const CameraPose targetPose = GetBasePose();
 
             followMotion_.Update(deltaTime);
@@ -379,29 +379,29 @@ namespace Camera
 
         CameraPose pose{};
 
-        // ˆÊ’u
+        // ä½ç½®
         pose.position =
             from.position +
             (to.position - from.position) * t;
 
-        // ã‰ºŠp“x
+        // ä¸Šä¸‹è§’åº¦
         pose.pitch =
             from.pitch +
             (to.pitch - from.pitch) * t;
 
-        // ¶‰EŠp“xiÅ’ZŒo˜Hj
+        // å·¦å³è§’åº¦ï¼ˆæœ€çŸ­çµŒè·¯ï¼‰
         pose.yaw = LerpAngle(
             from.yaw,
             to.yaw,
             t);
 
-        // ŒX‚«iÅ’ZŒo˜Hj
+        // å‚¾ãï¼ˆæœ€çŸ­çµŒè·¯ï¼‰
         pose.roll = LerpAngle(
             from.roll,
             to.roll,
             t);
 
-        // ‰æŠp
+        // ç”»è§’
         pose.fieldOfViewDegrees =
             from.fieldOfViewDegrees +
             (to.fieldOfViewDegrees -
@@ -441,18 +441,29 @@ namespace Camera
     {
         renderPose_ = currentPose_;
 
-        // —h‚ê‚ÍUpdate‚É1‰ñ‚¾‚¯ŒvZ‚·‚é
+        // æºã‚Œã¯Updateæ™‚ã«1å›ã ã‘è¨ˆç®—ã™ã‚‹
         renderPose_.position +=
             cameraShake_.Update(deltaTime, currentPose_);
 
         activeCamera_->ApplyPose(renderPose_);
     }
 
+    float CameraDirector::GetTransitionProgress() const
+    {
+        if (mode_ == Mode::MovingToPose)
+            return transition_.GetProgress();
+
+        if (mode_ == Mode::BlendingToCamera)
+            return followMotion_.GetValue();
+
+        return 1.0f;
+    }
+
     void CameraDirector::ApplyRenderPose() const
     {
         if (!activeCamera_) return;
 
-        // —h‚ê‚ğÄŒvZ‚¹‚¸A•Û‘¶Ï‚İ‚Ìp¨‚ğ“K—p‚·‚é
+        // æºã‚Œã‚’å†è¨ˆç®—ã›ãšã€ä¿å­˜æ¸ˆã¿ã®å§¿å‹¢ã‚’é©ç”¨ã™ã‚‹
         activeCamera_->ApplyPose(renderPose_);
     }
 }

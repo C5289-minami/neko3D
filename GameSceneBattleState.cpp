@@ -211,10 +211,6 @@ void GameSceneBattleState::Tick(float deltaTime)
     // ステータスUI同期
     // ========================================================
 
-    StatusUI::SyncStatusBar(
-        L"PlayerHealthGauge",
-        static_cast<float>(player->GetHealth()) / Player::MaxHealth
-    );
 
     StatusUI::SyncStatusBar(
         L"PlayerUltGauge",
@@ -223,18 +219,18 @@ void GameSceneBattleState::Tick(float deltaTime)
 
     StatusUI::SyncStatusBar(
         L"BossHealthGauge",
-        boss.GetHealthProgress()
+        1.0f - boss.GetHealthProgress()
     );
 
     StatusUI::SyncStatusBar(
         L"BossDownGauge",
-        boss.GetDownGaugeProgress()
+        1.0f - boss.GetDownGaugeProgress()
     );
 
     DxPlus::Debug::SetFormatString(
-        L"Player Health: %d / %d\n"
-        L"Player Ult Gauge: %.2f / %.2f\n"
-        L"Boss Health: %d / %d\n"
+        L"Player Health: %d / %d"
+        L"Player Ult Gauge: %.2f / %.2f"
+        L"Boss Health: %d / %d"
         L"Boss Down Gauge: %.2f / %.2f",
         player->GetHealth(),
         Player::MaxHealth,

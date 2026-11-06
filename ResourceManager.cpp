@@ -43,6 +43,8 @@ void ResourceManager::LoadAll()
 
 	LoadSprite(ResourceKeys::BossStatusBack, L"./Data/Images/Boss/boss_status_back.png");
 	LoadSprite(ResourceKeys::MikeStatusBack, L"./Data/Images/Player/mike_status_back.png");
+	LoadSprite(ResourceKeys::SabiStatusBack, L"./Data/Images/Player/sabi_status_back.png");
+	LoadSprite(ResourceKeys::KuroStatusBack, L"./Data/Images/Player/kuro_status_back.png");
 	LoadSprite(ResourceKeys::PlayerHeart, L"./Data/Images/Player/heart.png");
 	LoadSprite(ResourceKeys::ClearResult, L"./Data/Images/Result/clear.png");
 	LoadSprite(ResourceKeys::GameOverResult, L"./Data/Images/Result/gameover.png");
@@ -93,22 +95,19 @@ void ResourceManager::LoadAll()
 	//LoadModel(ResourceKeys::Model_Test, L"./Data/Models/test1.mv1");
 	// スプライトスタジオの読み込み
 
-	LoadSpriteStudioPlayer(
-		ResourceKeys::SpriteStudio_Gauge,
-		"UI",
-		"./Data/UI/UI.ssbp");
+
 	LoadSpriteStudioPlayer(
 		ResourceKeys::SpriteStudio_BossDownGauge,
-		"UI",
-		"./Data/UI/UI.ssbp");
+		"BossDownGauge",
+		"./Data/UI/supusuta.ssbp");
 	LoadSpriteStudioPlayer(
 		ResourceKeys::SpriteStudio_BossHealthGauge,
-		"UI",
-		"./Data/UI/UI.ssbp");
+		"BossHealthGauge",
+		"./Data/UI/supusuta.ssbp");
 	LoadSpriteStudioPlayer(
 		ResourceKeys::SpriteStudio_PlayerUltGauge,
-		"UI",
-		"./Data/UI/UI.ssbp");
+		"PlayerUltGauge",
+		"./Data/UI/supusuta.ssbp");
 
 	// サウンドの読み込み
 	LoadMusic(ResourceKeys::Music_Title, L"./Data/Sounds/StartBGM.mp3");

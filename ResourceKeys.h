@@ -1,4 +1,4 @@
-// =============================
+﻿// =============================
 // Resources/ResourceKeys.h
 // =============================
 #pragma once
@@ -26,6 +26,8 @@ namespace ResourceKeys
 	// status
 	inline constexpr const wchar_t* BossStatusBack = L"UIBossStatusBack";
 	inline constexpr const wchar_t* MikeStatusBack = L"UIMikeStatusBack";
+	inline constexpr const wchar_t* SabiStatusBack = L"UISabiStatusBack";
+	inline constexpr const wchar_t* KuroStatusBack = L"UIKuroStatusBack";
 	inline constexpr const wchar_t* PlayerHeart = L"UIPlayerHeart";
 
 	// result
