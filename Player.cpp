@@ -12,6 +12,7 @@
 #include "EffectManager.h"
 #include <algorithm>
 #include <iostream>
+#include <utility>
 
 #include <tchar.h>
 #include <cstdio>
@@ -115,7 +116,8 @@ void Player::Reset()
 {
 
 	health_ = MaxHealth;
-   controlLocked_ = false;
+	addDamage_ = 0;
+	controlLocked_ = false;
 	avoidInvTime_ = 0.0f;
 	// wasTouchingPillar_ = false;
 	wasTouchingModel_ = false;
@@ -130,7 +132,8 @@ void Player::Reset()
 #endif
 
 	model_.collisionHighlighted = false;
-	ultimateGauge_ = 0.0f;
+	ultimateGauge_ = Const::PLAYER_ULTIMATE_GAUGE_INITIAL;
+	ultimateShotOrigin_.reset();
 	// 初期位置・回転・拡大率は既定値を設定した後にJSONから読み込む
 	MObjs().LoadActorTransform(*this);
 	model_.Load();
@@ -182,7 +185,8 @@ void Player::RestorePosition(const Vec3& position)
 {
 	lastGroundFloor_ = GroundType::None;
 	jumpStartFloor_ = GroundType::None;
-	stateMachine_.ChangeState(PlayerStateType::Idle);
+	if (!IsDamaging())
+		stateMachine_.ChangeState(PlayerStateType::Idle);
 	EndPillarElevator();
 	StopMove();
 	position_ = position;
@@ -342,6 +346,11 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 	const float previousY = oldPosition.y;
 
 	input_.Update();
+	if (controlLocked_)
+	{
+		input_ = {};
+		moveInput_ = {};
+	}
 #ifdef _DEBUG
 	if (input_.shiftRKeyPressed)
 	{
@@ -579,21 +588,24 @@ void Player::Draw() const
 }
 
 
-bool Player::TakeDamage()
+bool Player::TakeDamage(int damage)
 {
-	if (IsDead() || IsDamaging() || avoidInvTime_ > 0.0f) return false;
+	if (damage <= 0 || IsDead() || IsDamaging() || avoidInvTime_ > 0.0f) return false;
 
+	addDamage_ = damage;
 	stateMachine_.ChangeState(PlayerStateType::Damaging);
 	return true;
 }
 
 void Player::AddDamage()
 {
-	--health_;
+	health_ = (std::max)(0, health_ - addDamage_);
+	addDamage_ = 0;
 }
 
 void Player::ApplyAvoid()
 {
+	addDamage_ = 0;
 	avoidInvTime_ = AvoidInvTime;
 }
 
@@ -620,8 +632,18 @@ void Player::AddUltimateGauge(float amount)//Ultゲージを増やす
 bool Player::TryUseUltimateGauge()
 {
 	if (!CanUseUltimate()) return false;
-	ultimateGauge_ = 0.0f;
+	ultimateGauge_ = Const::PLAYER_ULTIMATE_GAUGE_AFTER_USE;
 	return true;
+}
+
+void Player::RequestUltimateShot()
+{
+	ultimateShotOrigin_ = GetWorldPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT * 0.5f);
+}
+
+std::optional<Vec3> Player::TakeUltimateShotOrigin()
+{
+	return std::exchange(ultimateShotOrigin_, std::nullopt);
 }
 
 void Player::SetMoveDirection(const Vec3& moveDir)
@@ -924,7 +946,9 @@ void Player::ApplyKnockback(const Vec3& direction, float power, float duration)
 	isGrounded_ = false;
 	EndPillarElevator();
 
-	stateMachine_.ChangeState(PlayerStateType::Jump);
+	// 被ダメージ中は、回避の受付と保留中のダメージ処理を続ける。
+	if (!IsDamaging())
+		stateMachine_.ChangeState(PlayerStateType::Jump);
 }
 
 void Player::SetWallJumpMoveSpeed(float value)

@@ -10,6 +10,7 @@
 #include "BossAnimType.h"
 #include "ActorBase.h"
 #include "Collision.h"
+#include "Consts.h"
 #include <memory>
 #include <vector>
 #include "BossAttackType.h"
@@ -31,7 +32,7 @@ class Player;
 class Boss : public ActorBase
 {
 public:
-	static constexpr int MaxHealth = 4;
+	static constexpr int MaxHealth = Const::BOSS_MAX_HEALTH;
 
 	Boss();
 	~Boss() override;
@@ -39,7 +40,7 @@ public:
 	void Init() override;
 	void Reset()override;
 	void Update(float deltaTime)override;
-	void TurnToTarget(const Vec3& targetPosition, float deltaTime);
+	bool TurnToTarget(const Vec3& targetPosition, float deltaTime);
  void SetAIActive(bool active) { activeAI = active; }
 	void Draw() const override;
 	
@@ -79,7 +80,7 @@ public:
 	int GetHealth() const { return health_; }
     float GetHealthProgress() const { return maxHealth_ > 0 ? static_cast<float>(health_) / maxHealth_ : 0.0f; }
 	BossPhase GetPhase() const { return phase_; }
-	void TakeDamage(int damage = 1);
+	void TakeDamage(int damage);
 
 	void SetDownGauge(float value) { downGauge_ = (std::max)(0.0f, (std::min)(maxDownGauge_, value)); }
     float GetDownGaugeProgress() const { return maxDownGauge_ > 0.0f ? downGauge_ / maxDownGauge_ : 0.0f; }
@@ -137,10 +138,10 @@ private:
 
 	int health_{ MaxHealth };
 	int maxHealth_{ MaxHealth };
+	float hitScaleTimeRemaining_{};// ダメージを受けたときのスケール変化の残り時間
 	float downGauge_{ 0.0f };
-	float maxDownGauge_{ 100.0f };
+	static constexpr float maxDownGauge_ = Const::BOSS_DOWN_GAUGE_MAX;
     bool damageTakenThisFrame_{};
-	float attackPower_{ 10.0f };
 
 	CameraShakeType cameraShakeRequest_{ CameraShakeType::None };
 	float cameraShakeDuration_{ 0.25f };

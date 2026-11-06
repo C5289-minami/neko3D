@@ -4,6 +4,9 @@
 #include "OutlineSettings.h"
 #include "CameraObjectManager.h"
 #include "UIManager.h"
+#include "ResourceKeys.h"
+#include "ResourceManager.h"
+#include "SoundManager.h"
 #include <algorithm>
 #include "DxPlus/DxPlus.h"
 #include "Collision.h"
@@ -646,6 +649,7 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 void GameScene::End()
 {
+	gameContext->ClearUltimateProjectiles();
 	tutorialCollision_.Clear();
 }
 

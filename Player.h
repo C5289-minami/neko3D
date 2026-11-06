@@ -14,6 +14,7 @@
 #include "CharSettings.h"
 #include "AnimationHandle.h"
 #include "CameraShakeType.h"
+#include <optional>
 
 // class Stage;
 
@@ -28,13 +29,13 @@ public:
 	void Draw() const override;
 	void DrawStatus() const;
 
-	static constexpr int MaxHealth = 5;
-	static constexpr float DamageRecoveryTime = 0.5f;
+	static constexpr int MaxHealth = Const::PLAYER_MAX_HEALTH;
+	static constexpr float DamageRecoveryTime = Const::PLAYER_DAMAGE_RECOVERY_SECONDS;
 	int GetHealth() const { return health_; }
 	bool IsDead() const { return health_ <= 0; }
 	bool IsDamaging() const { return GetCurrentState() == PlayerStateType::Damaging; }
 	PlayerStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }
-	bool TakeDamage();
+	bool TakeDamage(int damage = 1);
 	void AddDamage();
 	void ApplyAvoid();
 	float GetAvoidInvTime() const { return avoidInvTime_; }
@@ -76,7 +77,7 @@ public:
 
 	// ジャンプ
 	static constexpr float CoyoteTime = 0.1f;
-	static constexpr float AvoidInvTime = 0.2f;
+	static constexpr float AvoidInvTime = Const::PLAYER_AVOID_INVINCIBILITY_SECONDS;
 	bool CanGroundJump() const { return gravityEnabled_ && (isGrounded_ || coyoteTimeRemaining_ > 0.0f); }
 	// 地上・踏み外し直後は通常ジャンプ、それ以外の空中では二段ジャンプ。
 	bool TryJump();
@@ -172,8 +173,8 @@ public:
 	const ModelObject& GetModelObject() const { return model_; }
 	const PlayerInput& GetInput() const { return input_; }
 
-	// 必殺ゲージは仮。増加タイミングは後で決める
-	static constexpr float UltimateGaugeMax = 100.0f;
+	// 必殺ゲージ
+	static constexpr float UltimateGaugeMax = Const::PLAYER_ULTIMATE_GAUGE_MAX;
 	float GetUltimateGauge() const { return ultimateGauge_; }
 	void SetUltimateGauge(float value);
 	void AddUltimateGauge(float amount);
@@ -185,6 +186,8 @@ public:
 		return ultimateGauge_ >= UltimateGaugeMax;
 	}
 	bool TryUseUltimateGauge();
+	void RequestUltimateShot();
+	std::optional<Vec3> TakeUltimateShotOrigin();
 
 	// キャラクター設定
 	CharData& GetCharData() { return charData; }
@@ -224,12 +227,14 @@ private:
 #endif
 
 	int health_{ MaxHealth };
+	int addDamage_{};
 	float avoidInvTime_{ 0.0f };
 	ModelObject model_;
 
 	PlayerInput input_;
 	PlayerStateMachine stateMachine_;
-	float ultimateGauge_{ 0.0f };
+	float ultimateGauge_{ Const::PLAYER_ULTIMATE_GAUGE_INITIAL };
+	std::optional<Vec3> ultimateShotOrigin_;
 	// float lungingMoveSpeed_{ Const::PLAYER_LUNGING_MOVE_SPEED };
 	float doubleJumpSpeed_{ Const::PLAYER_DOUBLE_JUMP_SPEED };
 	// float climbingSpeed_{ Const::PLAYER_CLIMBING_SPEED };

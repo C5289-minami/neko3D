@@ -34,6 +34,7 @@ namespace ResourceKeys
 	inline constexpr const wchar_t* SelectMike = L"UISelectMike";
 	inline constexpr const wchar_t* SelectSabi = L"UISelectSabi";
 	inline constexpr const wchar_t* SelectKuro = L"UISelectKuro";
+	inline constexpr const wchar_t* SelectCommon = L"UISelectCommon";
 
 	// ===== Models =====
 	inline constexpr const wchar_t* Model_PlayerMike = L"ModelPlayerMike";
@@ -87,7 +88,8 @@ namespace ResourceKeys
 	inline constexpr const wchar_t* Effect_Kedama = L"EffectKedama";
 
 	// ===== Musics / Sounds =====
-	inline constexpr const wchar_t* Sound_BossBite = L"SoundBossBite";
+	inline constexpr const wchar_t* Music_Title = L"MusicTitle";
+	inline constexpr const wchar_t* Sound_MenuConfirm = L"SoundMenuConfirm";
 
 	// ===== Fonts =====
 	inline constexpr const wchar_t* Font_Title = L"Bitcount Light";

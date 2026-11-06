@@ -27,6 +27,18 @@ int EffectManager::PlayEffect(int key, const Vec3& position, float yaw)
 	return playingHandle;
 }
 
+bool EffectManager::MoveEffect(int handle, const Vec3& position)
+{
+	if (handle < 0 || IsEffekseer3DEffectPlaying(handle) != 0) return false;
+	return SetPosPlayingEffekseer3DEffect(handle, position.x, position.y, position.z) == 0;
+}
+
+void EffectManager::StopEffect(int handle)
+{
+	if (handle >= 0)
+		StopEffekseer3DEffect(handle);
+}
+
 void EffectManager::PlayHit(int key,const Vec3& position,float yaw)
 {
 	PlayEffect(key, position, yaw);

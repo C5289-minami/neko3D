@@ -12,19 +12,17 @@ BossFlinchState::BossFlinchState(BossStateMachine& stateMachine, Boss& boss)
 
 void BossFlinchState::Enter()
 {
-	boss_.StopRotation();
-    remainingSeconds_ = FlinchHoldSeconds;
+    remainingSeconds_ = Const::BOSS_FLINCH_HOLD_SECONDS;
+    boss_.StopRotation();
     boss_.StopMove();
     boss_.SetAnimation(BossAnimType::Flach, true);
 }
 
 void BossFlinchState::Tick(float deltaTime)
 {
-    boss_.UpdateAnimation(deltaTime);
-    
-
     DxPlus::Debug::SetString(L"CurrentBossState:Flinch");
-    // ダウンアニメーションをループ再生しながら5秒待つ。
+    // ダウンアニメーションを、設定した時間だけループ再生する。
+    boss_.UpdateAnimation(deltaTime);
     remainingSeconds_ -= deltaTime;
     if (remainingSeconds_ <= 0.0f)
         stateMachine_.ChangeState(BossStateType::Idle);

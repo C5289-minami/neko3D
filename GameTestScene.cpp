@@ -190,6 +190,10 @@ void GameTestScene::Update(float deltaTime)
 		boss.Update(deltaTime);
 		boss.TurnToTarget(player->GetWorldPosition(), deltaTime);
 
+		if (!player->IsDead() && boss.GetHealth() > 0)
+			player->AddUltimateGauge(Const::PLAYER_ULTIMATE_GAUGE_PER_SECOND * deltaTime);
+		gameContext->UpdateUltimateProjectiles(deltaTime);
+
 		const bool slamHitPlayer = boss.UpdateSlamAttack(
 			player->GetWorldPosition(), stage.GetWorldPosition());
 
@@ -244,17 +248,19 @@ void GameTestScene::Update(float deltaTime)
 			if (boss.IsHitByAttackSphere(attackBall, tailWhipHitCapsule_, stage.GetBossDownHurtSphere()))
 			{
 				if (playerStateMachine.TryRegisterAttackBallHit())
-					boss.TakeDamage();
+					boss.TakeDamage(Const::PLAYER_NORMAL_ATTACK_DAMAGE);
 			}
 		}
 
 		// プレイヤーが被ダメージ状態に移る前に、攻撃の命中を登録する。
-		if (handHitPlayer || slamHitPlayer)
-			player->TakeDamage();
+		if (handHitPlayer)
+			player->TakeDamage(Const::BOSS_CLAP_DAMAGE);
+		else if (slamHitPlayer)
+			player->TakeDamage(Const::BOSS_SLAM_DAMAGE);
 
 		if (tailWhipPlayerHit)
 		{
-			player->TakeDamage();
+			player->TakeDamage(Const::BOSS_TAIL_WHIP_DAMAGE);
 			Vec3 outward = player->GetWorldPosition() - stage.GetWorldPosition();
 			outward.y = 0.0f;
 			player->ApplyKnockback(outward, 5000.0f, 0.3f);
@@ -265,6 +271,10 @@ void GameTestScene::Update(float deltaTime)
 			L"Boss HP: %d / %d",
 			boss.GetHealth(),
 			Boss::MaxHealth);
+		DxPlus::Debug::SetFormatString(
+			L"Ult: %.1f / %.1f",
+			player->GetUltimateGauge(),
+			Player::UltimateGaugeMax);
 
 		DxPlus::Debug::SetString(
 			L"1: Hand attack test (3 sec follow)");
@@ -486,7 +496,7 @@ void GameTestScene::DrawImGui()
 		{
 			ImGui::PushStyleColor(ImGuiCol_PlotHistogram,
 				toImGuiColor(DxLib::GetColor(255, 0, 0)));
-			ImGui::ProgressBar(avoidTime / PlayerDamagingState::AvoidTime, ImVec2(-1.0f, 0.0f), "Avoid 0.3s");
+			ImGui::ProgressBar(avoidTime / PlayerDamagingState::AvoidTime, ImVec2(-1.0f, 0.0f), "Avoid window");
 			ImGui::PopStyleColor();
 		}
 
@@ -495,7 +505,7 @@ void GameTestScene::DrawImGui()
 		{
 			ImGui::PushStyleColor(ImGuiCol_PlotHistogram,
 				toImGuiColor(DxLib::GetColor(255, 255, 0)));
-			ImGui::ProgressBar(avoidInvTime / Player::AvoidInvTime, ImVec2(-1.0f, 0.0f), "Invincible 0.2s");
+			ImGui::ProgressBar(avoidInvTime / Player::AvoidInvTime, ImVec2(-1.0f, 0.0f), "Invincible");
 			ImGui::PopStyleColor();
 		}
 
@@ -525,6 +535,9 @@ void GameTestScene::DrawImGui()
 		if (ImGui::DragFloat(u8"ダウン時の被ダメージ判定の半径", &downHurtRadius, 1.0f, 1.0f, 5000.0f,
 			"%.1f", ImGuiSliderFlags_AlwaysClamp))
 			stage.SetBossDownHurtRadius(downHurtRadius);
+
+		if (ImGui::Button(u8"Take Damage (1 HP)"))
+			boss.TakeDamage(1);
 
 		if (ImGui::Button(u8"Die (成仏)"))
 			boss.TakeDamage(999); // HPを0にして死亡させる
@@ -600,6 +613,7 @@ void GameTestScene::DrawImGui()
 
 void GameTestScene::End()
 {
+	gameContext->ClearUltimateProjectiles();
 }
 
 void GameTestScene::UpdateTailWhipGimmick()
