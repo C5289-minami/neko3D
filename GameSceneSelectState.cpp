@@ -20,6 +20,54 @@ namespace
 	constexpr float SelectCameraForwardDistance = 350.0f;
 	constexpr float SelectCameraMoveDuration = 0.6f;
 
+	struct SelectCard
+	{
+		const wchar_t* uiKey;
+		const wchar_t* spriteKey;
+		const char* statusName;
+		const wchar_t* trait;
+	};
+
+	constexpr std::array<SelectCard, 3> SelectCards{ {
+		{ L"Select.Mike", ResourceKeys::SelectMike, u8"‚½‚©", L"ƒoƒ‰ƒ“ƒXŒ^" },
+		{ L"Select.Sabi", ResourceKeys::SelectSabi, u8"‚¬‚µ", L"‘–‚é‚Ì‚ª“¾ˆÓ" },
+		{ L"Select.Kuro", ResourceKeys::SelectKuro, u8"‚ä‚¤", L"“o‚é‚Ì‚ª“¾ˆÓ" }
+	} };
+
+	class SelectCardUI : public UIBase
+	{
+	public:
+		SelectCardUI(const SelectCard& card, DxPlus::Vec2 position)
+			: UIBase(card.spriteKey, position, { 0, -1 }, SelectCameraMoveDuration)
+		{
+			trait_.SetText(card.trait);
+			trait_.SetFontHandle(RM().GetFont(ResourceKeys::Font_Game));
+			trait_.SetColor(DxLib::GetColor(64, 64, 64));
+			trait_.SetOffset({ 0.0f, -202.0f });
+		}
+
+		void Draw() override
+		{
+			if (!IsActive()) return;
+
+			UIBase::Draw();
+			trait_.Draw(position, GetScale(), GetAlpha());
+		}
+
+	private:
+		ButtonLabel trait_;
+	};
+
+	class SelectCommonUI : public UIBase
+	{
+	public:
+		SelectCommonUI(DxPlus::Vec2 position)
+			: UIBase(ResourceKeys::SelectCommon, position, { 0, -1 }, SelectCameraMoveDuration)
+		{
+			this->SetCenter({ 0.5f, 0.5f });
+		}
+	};
+
 	Camera::CameraPose MakeCameraPoseInFrontOfPlayer(
 		Camera::CameraPose pose,
 		const Player& player)
@@ -68,6 +116,7 @@ namespace
 
 }
 
+
 GameSceneSelectState::GameSceneSelectState(
 	GameStateMachine& gameStateMachine,
 	GameScene& gameScene)
@@ -86,18 +135,32 @@ void GameSceneSelectState::Enter()
 			DxPlus::CLIENT_HEIGHT * 0.5f
 		};
 
-		if (!UIM().GetUI(L"Select.Mike"))
-			UIM().CreateImageUI(L"Select.Mike", ResourceKeys::SelectMike, position, { 0,-1 }, SelectCameraMoveDuration);
+		// ƒJ[ƒh3–‡‚ð“o˜^
+		for (const auto& card : SelectCards)
+		{
+			if (!UIM().GetUI(card.uiKey))
+			{
+				UIM().CreateImageUI(
+					card.uiKey,
+					card.spriteKey,
+					position,
+					{ 0, -1 },
+					SelectCameraMoveDuration);
+			}
 
-		if (!UIM().GetUI(L"Select.Sabi"))
-			UIM().CreateImageUI(L"Select.Sabi", ResourceKeys::SelectSabi, position, { 0,-1 }, SelectCameraMoveDuration);
+			UIM().GetUI(card.uiKey)->SetFalse();
+		}
 
-		if (!UIM().GetUI(L"Select.Kuro"))
-			UIM().CreateImageUI(L"Select.Kuro", ResourceKeys::SelectKuro, position, { 0,-1 }, SelectCameraMoveDuration);
+		// ‹¤’ÊUI‚ð“o˜^
+		if (!UIM().GetUI(L"Select.Common"))
+		{
+			UIM().RegisterUI(
+				L"Select.Common",
+				std::make_unique<SelectCommonUI>(
+					position + DxPlus::Vec2{ 0.0f, 220.0f }));
+		}
 
-		if (auto* ui = UIM().GetUI(L"Select.Mike")) ui->SetFalse();
-		if (auto* ui = UIM().GetUI(L"Select.Sabi")) ui->SetFalse();
-		if (auto* ui = UIM().GetUI(L"Select.Kuro")) ui->SetFalse();
+		UIM().GetUI(L"Select.Common")->SetFalse();
 	}
 
 	auto* context = gameScene_.GetGameContext();
@@ -261,9 +324,15 @@ void GameSceneSelectState::SelectIndex(int index)
 
 	selectedIndex_ = index;
 
-	UIM().GetUI(L"Select.Mike")->Hide();
-	UIM().GetUI(L"Select.Sabi")->Hide();
-	UIM().GetUI(L"Select.Kuro")->Hide();
+	// ƒJ[ƒh‚Æ‹¤’ÊUI‚ðˆê“x”ñ•\Ž¦‚É‚·‚é
+	for (const auto& card : SelectCards)
+	{
+		if (auto* ui = UIM().GetUI(card.uiKey))
+			ui->Hide();
+	}
+
+	if (auto* ui = UIM().GetUI(L"Select.Common"))
+		ui->Hide();
 
 	auto& director = gameScene_.GetCameraDirector();
 
@@ -309,32 +378,35 @@ void GameSceneSelectState::ConfirmSelection()
 
 void GameSceneSelectState::UpdateSelectedUI()
 {
-	const wchar_t* keys[] = {
-		L"Select.Mike",
-		L"Select.Sabi",
-		L"Select.Kuro"
-	};
-
-	for (int i = 0; i < 3; ++i)
+	for (std::size_t i = 0; i < SelectCards.size(); ++i)
 	{
-		if (auto* ui = UIM().GetUI(keys[i]))
+		if (auto* ui = UIM().GetUI(SelectCards[i].uiKey))
 		{
-			if (i == selectedIndex_)
+			if (i == static_cast<std::size_t>(selectedIndex_))
 				ui->SetTrue();
 			else
 				ui->SetFalse();
 		}
 	}
+
+	// ‹¤’ÊUI‚à•\Ž¦
+	if (auto* ui = UIM().GetUI(L"Select.Common"))
+		ui->SetTrue();
 }
 
 void GameSceneSelectState::Exit()
 {
 	DxPlus::Debug::SetFormatString(
 		L"GameSceneSelectState::Exit");
-	if (auto* ui = UIM().GetUI(L"Select.Mike")) ui->SetFalse();
-	if (auto* ui = UIM().GetUI(L"Select.Sabi")) ui->SetFalse();
-	if (auto* ui = UIM().GetUI(L"Select.Kuro")) ui->SetFalse();
 
+	for (const auto& card : SelectCards)
+	{
+		if (auto* ui = UIM().GetUI(card.uiKey))
+			ui->SetFalse();
+	}
+
+	if (auto* ui = UIM().GetUI(L"Select.Common"))
+		ui->SetFalse();
 
 	DxLib::SetMouseDispFlag(FALSE);
 }
