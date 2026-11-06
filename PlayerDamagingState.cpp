@@ -11,6 +11,8 @@ void PlayerDamagingState::Enter()
 {
     remainingTime_ = Player::DamageRecoveryTime;
     avoidTimer_ = AvoidTime;
+    if (avoidTimer_ == 0.0f)
+        player_.AddDamage();
     player_.StopMove();
     // 被弾専用アニメーションないので、待機アニメーションを仮に使用する。
     player_.SetAnimation(PlayerAnimType::Idle, true);

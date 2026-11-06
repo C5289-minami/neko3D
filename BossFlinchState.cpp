@@ -1,6 +1,7 @@
 ﻿#include "BossFlinchState.h"
 #include "Boss.h"
 #include "Consts.h"
+#include "Collision.h"
 
 #include "DxPlus/Debug.h"
 
@@ -11,7 +12,8 @@ BossFlinchState::BossFlinchState(BossStateMachine& stateMachine, Boss& boss)
 
 void BossFlinchState::Enter()
 {
-    remainingSeconds_ = FlinchHoldSeconds;
+    remainingSeconds_ = Const::BOSS_FLINCH_HOLD_SECONDS;
+    boss_.StopRotation();
     boss_.StopMove();
     boss_.SetAnimation(BossAnimType::Flach, true);
 }
@@ -19,7 +21,7 @@ void BossFlinchState::Enter()
 void BossFlinchState::Tick(float deltaTime)
 {
     DxPlus::Debug::SetString(L"CurrentBossState:Flinch");
-    // ダウンアニメーションをループ再生しながら5秒待つ。
+    // ダウンアニメーションを、設定した時間だけループ再生する。
     boss_.UpdateAnimation(deltaTime);
     remainingSeconds_ -= deltaTime;
     if (remainingSeconds_ <= 0.0f)
@@ -28,6 +30,7 @@ void BossFlinchState::Tick(float deltaTime)
 
 void BossFlinchState::Exit()
 {
+	boss_.StartRotation();
     if (boss_.GetHealth() > 0)
         boss_.ResetDownGauge();
 }

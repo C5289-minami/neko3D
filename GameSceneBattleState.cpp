@@ -13,10 +13,65 @@
 
     #include <algorithm>
 
-    GameSceneBattleState::GameSceneBattleState(
-        GameStateMachine& gameStateMachine,
-        GameScene& gameScene)
-        : GameBaseState(gameStateMachine, gameScene)
+GameSceneBattleState::GameSceneBattleState(
+    GameStateMachine& gameStateMachine,
+    GameScene& gameScene)
+    : GameBaseState(gameStateMachine, gameScene)
+{
+}
+
+void GameSceneBattleState::Enter()
+{
+    auto* gameContext = gameScene_.GetGameContext();
+    auto* player = gameContext->GetPlayer();
+    auto& boss = gameContext->GetBoss();
+    gameContext->ClearUltimateProjectiles();
+
+    wasTouchingBossBody_ = false;
+    wasTailWhipActive_ = false;
+
+    battleIntroWaitRemaining_ = BattleIntroWaitDuration;
+    battleIntroFinalWaitElapsed_ = 0.0f;
+    battleIntroTurnFinished_ = false;
+    battleStarted_ = false;
+
+    gameScene_.GetTutorialChecklist().SetVisible(false);
+    player->GetStateMachine().SetEventCallback({});
+
+    gameScene_.SetBattleEventActive(true);
+    gameScene_.StartBattleEventBarsIn();
+
+    // ãƒãƒˆãƒ«ç”¨ã‚«ãƒ¡ãƒ©ã¸åˆ‡ã‚Šæ›¿ãˆã‚‹
+    gameScene_.GetCameraDirector().SwitchCamera(
+        gameScene_.GetTargetCamera(),
+        0.8f
+    );
+    gameScene_.GetTargetCamera().SetFieldOfView(BattleIntroStartFov);
+
+    player->SetDefMove(false);
+    player->SetControlLocked(true);
+    player->StopMove();
+
+    boss.SetAIActive(false);
+
+    StatusUI::InitBoss();
+    StatusUI::InitPlayer();
+
+    gameScene_.SetDrawPlayerShadow(true);
+}
+
+void GameSceneBattleState::Tick(float deltaTime)
+{
+    auto* gameContext = gameScene_.GetGameContext();
+
+    auto* player = gameContext->GetPlayer();
+    auto& boss = gameContext->GetBoss();
+    auto& stage = gameContext->GetStage();
+
+    // =============================
+    // é–‹å¹•æ¼”å‡ºã€‚Playerã¯å…¥åŠ›ã‚’æ­¢ã‚ãŸã¾ã¾ã€é‡åŠ›ã¨åºŠã®å½“ãŸã‚Šåˆ¤å®šã ã‘æ›´æ–°ã™ã‚‹ã€‚
+    // =============================
+    if (!battleStarted_)
     {
     }
 
@@ -33,14 +88,14 @@
         battleIntroTurnFinished_ = false;
         battleStarted_ = false;
 
-        // ƒ`ƒ…[ƒgƒŠƒAƒ‹‚Ì“ü—Í’Ê’m‚Æƒ`ƒFƒbƒNƒŠƒXƒg‚ðABattle‚ÖŽ‚¿‰z‚³‚È‚¢B
+        // ï¿½`ï¿½ï¿½ï¿½[ï¿½gï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½Ì“ï¿½ï¿½Í’Ê’mï¿½Æƒ`ï¿½Fï¿½bï¿½Nï¿½ï¿½ï¿½Xï¿½gï¿½ï¿½ï¿½ABattleï¿½ÖŽï¿½ï¿½ï¿½ï¿½zï¿½ï¿½ï¿½È‚ï¿½ï¿½B
         gameScene_.GetTutorialChecklist().SetVisible(false);
         player->GetStateMachine().SetEventCallback({});
 
         gameScene_.SetBattleEventActive(true);
         gameScene_.StartBattleEventBarsIn();
 
-        // ƒoƒgƒ‹—pƒJƒƒ‰‚ÖØ‚è‘Ö‚¦‚é
+        // ï¿½oï¿½gï¿½ï¿½ï¿½pï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½ÖØ‚ï¿½Ö‚ï¿½ï¿½ï¿½
         gameScene_.GetCameraDirector().SwitchCamera(
             gameScene_.GetTargetCamera(),
             0.8f
@@ -67,7 +122,7 @@
         auto& stage = gameContext->GetStage();
 
         // =============================
-        // ŠJ–‹‰‰o
+        // ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½o
         // =============================
         if (!battleStarted_)
         {
@@ -88,7 +143,7 @@
 
             Vec3 cameraTarget = boss.GetWorldPosition();
 
-            // ‰ñ“]I—¹Œã‚ÌFOV‰‰o’†‚ÍA’Ž‹ˆÊ’u‚ð300ã‚°‚é
+            // ï¿½ï¿½]ï¿½Iï¿½ï¿½ï¿½ï¿½ï¿½FOVï¿½ï¿½ï¿½oï¿½ï¿½ï¿½ÍAï¿½ï¿½ï¿½ï¿½ï¿½Ê’uï¿½ï¿½300ï¿½ã‚°ï¿½ï¿½
             if (battleIntroTurnFinished_)
             {
                 cameraTarget.y += 300.0f;
@@ -101,7 +156,7 @@
             );
 
             // =============================
-            // Å‰‚Ì1.5•b‘Ò‹@
+            // ï¿½Åï¿½ï¿½ï¿½1.5ï¿½bï¿½Ò‹@
             // =============================
             if (battleIntroWaitRemaining_ > 0.0f)
             {
@@ -111,7 +166,7 @@
                     );
             }
             // =============================
-            // ƒ{ƒX‚ªƒvƒŒƒCƒ„[‚Ì•ûŒü‚ðŒü‚­
+            // ï¿½{ï¿½Xï¿½ï¿½ï¿½vï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½[ï¿½Ì•ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             // =============================
             else if (!battleIntroTurnFinished_)
             {
@@ -121,8 +176,8 @@
                 );
             }
             // =============================
-            // ‰ñ“]I—¹Œã‚Ì1•b‘Ò‹@
-            // FOV‚ð55‚©‚ç40‚Ö‹·‚ß‚é
+            // ï¿½ï¿½]ï¿½Iï¿½ï¿½ï¿½ï¿½ï¿½1ï¿½bï¿½Ò‹@
+            // FOVï¿½ï¿½55ï¿½ï¿½ï¿½ï¿½40ï¿½Ö‹ï¿½ï¿½ß‚ï¿½
             // =============================
             else
             {
@@ -141,7 +196,7 @@
     
 
                 // =============================
-                // ŠJ–‹‰‰oI—¹”»’è
+                // ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½oï¿½Iï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 // =============================
                 if (battleIntroFinalWaitElapsed_ >= BattleIntroFinalWaitDuration)
                 {
@@ -164,12 +219,12 @@
         }
 
         // =============================
-        // StageXV
+        // Stageï¿½Xï¿½V
         // =============================
         stage.Update(deltaTime);
 
         // =============================
-        // PlayerXVE°”»’è
+        // Playerï¿½Xï¿½Vï¿½Eï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         // =============================
         const Vec3 stageCenterPosition = stage.GetPosition();
 
@@ -182,7 +237,7 @@
         player->CheckFloor();
 
         // =============================
-        // Boss–{‘Ì‚Ö‚ÌƒWƒƒƒ“ƒvÚG”»’è
+        // Bossï¿½{ï¿½Ì‚Ö‚ÌƒWï¿½ï¿½ï¿½ï¿½ï¿½vï¿½ÚGï¿½ï¿½ï¿½ï¿½
         // =============================
         const auto state = player->GetCurrentState();
 
@@ -214,7 +269,7 @@
             boss.ApplyDownGaugeDamage(damage);
         }
 
-        // “ñ’iƒWƒƒƒ“ƒv‚ÅÚG‚µ‚½ê‡‚ÍˆÀ‘S‚ÈˆÊ’u‚Ö–ß‚·
+        // ï¿½ï¿½iï¿½Wï¿½ï¿½ï¿½ï¿½ï¿½vï¿½ÅÚGï¿½ï¿½ï¿½ï¿½ï¿½ê‡ï¿½Íˆï¿½ï¿½Sï¿½ÈˆÊ’uï¿½Ö–ß‚ï¿½
         if (touchingBody && doubleJump)
         {
             player->ReturnToLastSafePosition(stage.GetCollision());
@@ -223,19 +278,29 @@
         wasTouchingBossBody_ = touchingBody;
 
         // =============================
-        // BossXV
+        // Bossï¿½Xï¿½V
         // =============================
         boss.UpdateClapTargetPosition(player->GetWorldPosition());
 
         boss.Update(deltaTime);
 
-        boss.TurnToTarget(
+        auto& targetCamera = gameScene_.GetTargetCamera();
+
+        Vec3 cameraTarget = boss.GetWorldPosition();
+
+        // å›žè»¢çµ‚äº†å¾Œã®FOVæ¼”å‡ºä¸­ã¯ã€æ³¨è¦–ä½ç½®ã‚’300ä¸Šã’ã‚‹
+        if (battleIntroTurnFinished_)
+        {
+            cameraTarget.y += 300.0f;
+        }
+
+        targetCamera.Update(
             player->GetWorldPosition(),
             deltaTime
         );
 
         // =============================
-        // BossUŒ‚”»’è
+        // æœ€åˆã®1.5ç§’å¾…æ©Ÿ
         // =============================
         const bool slamHitPlayer = boss.UpdateSlamAttack(
             player->GetWorldPosition(),
@@ -249,7 +314,7 @@
         );
 
         // =============================
-        // TailWhipƒMƒ~ƒbƒN
+        // TailWhipï¿½Mï¿½~ï¿½bï¿½N
         // =============================
         const bool isTailWhipActive = boss.IsTailWhipHitActive();
 
@@ -271,7 +336,7 @@
         wasTailWhipActive_ = isTailWhipActive;
 
         // =============================
-        // TailWhip“–‚½‚è”»’è
+        // ãƒœã‚¹ãŒãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®æ–¹å‘ã‚’å‘ã
         // =============================
         Collision::Capsule tailWhipCapsule{};
 
@@ -294,7 +359,7 @@
             );
 
         // =============================
-        // Player‚ÌUŒ‚”»’è
+        // å›žè»¢å¾Œã®å¾…ã¡æ™‚é–“ã«FOVã‚’é–‹å§‹å€¤ã‹ã‚‰çµ‚äº†å€¤ã¸ç‹­ã‚ã‚‹ã€‚
         // =============================
         auto& playerStateMachine = player->GetStateMachine();
 
@@ -303,9 +368,23 @@
             const auto& attackBall =
                 playerStateMachine.GetAttackBallSphere();
 
-            if (boss.IsHitByAttackSphere(attackBall, tailWhipCapsule))
+            const float t = (std::min)(
+                battleIntroFinalWaitElapsed_ / BattleIntroFinalWaitDuration,
+                1.0f
+                );
+
+            const float fov =
+                BattleIntroStartFov +
+                (BattleIntroEndFov - BattleIntroStartFov) * t;
+
+            targetCamera.SetFieldOfView(fov);
+
+            // =============================
+            // é–‹å¹•æ¼”å‡ºçµ‚äº†åˆ¤å®š
+            // =============================
+            if (battleIntroFinalWaitElapsed_ >= BattleIntroFinalWaitDuration)
             {
-                // “¯‚¶UŒ‚‹…‚É‚æ‚é˜A‘±ƒ_ƒ[ƒW‚ð–hŽ~
+                // ï¿½ï¿½ï¿½ï¿½ï¿½Uï¿½ï¿½ï¿½ï¿½ï¿½É‚ï¿½ï¿½Aï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½[ï¿½Wï¿½ï¿½hï¿½~
                 if (playerStateMachine.TryRegisterAttackBallHit())
                 {
                     boss.TakeDamage();
@@ -313,10 +392,109 @@
             }
         }
 
-        // =============================
-        // Player”íƒ_ƒ[ƒWˆ—
-        // =============================
-        if (handHitPlayer || slamHitPlayer)
+        gameScene_.GetCameraDirector().Update(deltaTime);
+
+        return;
+    }
+
+    stage.Update(deltaTime);
+
+    if (!player->IsDead() && boss.GetHealth() > 0)
+        player->AddUltimateGauge(Const::PLAYER_ULTIMATE_GAUGE_PER_SECOND * deltaTime);
+    gameContext->UpdateUltimateProjectiles(deltaTime);
+
+    const Vec3 stageCenterPosition = stage.GetPosition();
+
+    player->Update(
+        deltaTime,
+        stage.GetCollision(),
+        stageCenterPosition
+    );
+
+    player->CheckFloor();
+
+    // =============================
+    // Bossæœ¬ä½“ã¸ã®ã‚¸ãƒ£ãƒ³ãƒ—æŽ¥è§¦åˆ¤å®š
+    // =============================
+    const auto state = player->GetCurrentState();
+
+    const bool doubleJump = state == PlayerStateType::DoubleJump;
+
+    const bool jumping =
+        !player->IsGrounded() &&
+        (state == PlayerStateType::Jump || doubleJump);
+
+    const bool touchingBody =
+        jumping &&
+        stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
+
+    const bool enteredBossBody =
+        touchingBody && !wasTouchingBossBody_;
+
+    const bool jumpedFromUpperFloor =
+        player->GetJumpStartFloor() == Player::GroundType::UpFloor;
+
+    const bool shouldDamageDownGauge =
+        enteredBossBody && jumpedFromUpperFloor;
+
+    if (shouldDamageDownGauge)
+    {
+        const float damage = doubleJump
+            ? Const::BOSS_UPPER_DOUBLE_JUMP_DOWN_DAMAGE
+            : Const::BOSS_JUMP_DOWN_DAMAGE;
+
+        boss.ApplyDownGaugeDamage(damage);
+    }
+
+    // äºŒæ®µã‚¸ãƒ£ãƒ³ãƒ—ã§æŽ¥è§¦ã—ãŸå ´åˆã¯å®‰å…¨ãªä½ç½®ã¸æˆ»ã™
+    if (touchingBody && doubleJump)
+    {
+        player->ReturnToLastSafePosition(stage.GetCollision());
+    }
+
+    wasTouchingBossBody_ = touchingBody;
+
+    // =============================
+    // Bossæ›´æ–°
+    // =============================
+    boss.UpdateClapTargetPosition(player->GetWorldPosition());
+
+    boss.Update(deltaTime);
+
+    boss.TurnToTarget(
+        player->GetWorldPosition(),
+        deltaTime
+    );
+
+    // =============================
+    // Bossæ”»æ’ƒåˆ¤å®š
+    // =============================
+    const bool slamHitPlayer = boss.UpdateSlamAttack(
+        player->GetWorldPosition(),
+        stage.GetWorldPosition()
+    );
+
+    const bool handHitPlayer = boss.UpdateHandAttack(
+        deltaTime,
+        player->GetWorldPosition(),
+        stage.GetWorldPosition()
+    );
+
+    // =============================
+    // TailWhipã‚®ãƒŸãƒƒã‚¯
+    // =============================
+    const bool isTailWhipActive = boss.IsTailWhipHitActive();
+
+    if (isTailWhipActive && !wasTailWhipActive_)
+    {
+        stage.StartShake();
+
+        Vec3 outward =
+            player->GetWorldPosition() - stage.GetWorldPosition();
+
+        outward.y = 0.0f;
+
+        if (player->IsSecondFloor())
         {
             player->TakeDamage(boss.GetScale());
         }
@@ -333,67 +511,73 @@
             player->ApplyKnockback(outward, 5000.0f, 0.3f);
         }
 
-        // =============================
-        // ƒJƒƒ‰ƒVƒFƒCƒN
-        // =============================
-        auto applyShake = [this](auto& actor)
-            {
-                const auto type = actor.GetCameraShakeRequest();
+    wasTailWhipActive_ = isTailWhipActive;
 
-                if (type == CameraShakeType::None)
-                    return;
+    // =============================
+    // TailWhipå½“ãŸã‚Šåˆ¤å®š
+    // =============================
+    Collision::Capsule tailWhipCapsule{};
 
-                const float duration = actor.GetCameraShakeDuration();
-                const float strength = actor.GetCameraShakeStrength();
-                const float frequency = actor.GetCameraShakeFrequency();
+    if (boss.IsTailWhipActive() && boss.IsTailWhipHitActive())
+    {
+        tailWhipCapsule = boss.GetTailWhipHitCapsule(
+            stage.GetWorldPosition(),
+            stage.GetArenaRadius(),
+            stage.GetArenaSurfaceY() + 30.0f
+        );
+    }
 
-                switch (type)
-                {
-                case CameraShakeType::Horizontal:
-                    gameScene_.GetCameraDirector().StartHorizontalShake(
-                        duration, strength, frequency
-                    );
-                    break;
+    const Collision::Sphere playerBody = player->GetHitSphere();
 
-                case CameraShakeType::Vertical:
-                    gameScene_.GetCameraDirector().StartVerticalShake(
-                        duration, strength, frequency
-                    );
-                    break;
+    const bool tailWhipPlayerHit =
+        boss.IsTailWhipHitActive() &&
+        Collision::IsHitCapsuleSphere(
+            tailWhipCapsule,
+            playerBody
+        );
 
-                case CameraShakeType::Mixed:
-                    gameScene_.GetCameraDirector().StartMixedShake(
-                        duration, strength, frequency
-                    );
-                    break;
-                }
+    // =============================
+    // Playerã®æ”»æ’ƒåˆ¤å®š
+    // =============================
+    auto& playerStateMachine = player->GetStateMachine();
 
-                actor.ResetCameraShakeRequest();
-            };
+    if (playerStateMachine.IsAttackBallActive())
+    {
+        const auto& attackBall =
+            playerStateMachine.GetAttackBallSphere();
 
-        applyShake(boss);
-        applyShake(*player);
-
-        // =============================
-        // ƒJƒƒ‰XVEØ‚è‘Ö‚¦
-        // =============================
-        auto& cameraDirector = gameScene_.GetCameraDirector();
-
-        // ƒ{ƒXŽ€–SŽž
-        if (boss.IsDead())
+        if (boss.IsHitByAttackSphere(attackBall, tailWhipCapsule, stage.GetBossDownHurtSphere()))
         {
-            auto& dieCamera = gameScene_.GetBossDieCamera();
-
-            dieCamera.SetTarget(boss.GetWorldPosition());
-
-            if (cameraDirector.GetActiveCamera() != &dieCamera)
+            // åŒã˜æ”»æ’ƒçƒã«ã‚ˆã‚‹é€£ç¶šãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’é˜²æ­¢
+            if (playerStateMachine.TryRegisterAttackBallHit())
             {
-                dieCamera.Initialize(cameraDirector.GetCurrentPose());
-                cameraDirector.SwitchCamera(dieCamera, 1.2f);
+                boss.TakeDamage(Const::PLAYER_NORMAL_ATTACK_DAMAGE);
             }
         }
-        // ƒ{ƒXƒ_ƒEƒ“Žž
-        else if (boss.IsDowned())
+    }
+
+    // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒè¢«ãƒ€ãƒ¡ãƒ¼ã‚¸çŠ¶æ…‹ã«ç§»ã‚‹å‰ã«ã€æ”»æ’ƒã®å‘½ä¸­ã‚’ç™»éŒ²ã™ã‚‹ã€‚
+    if (handHitPlayer)
+        player->TakeDamage(Const::BOSS_CLAP_DAMAGE);
+    else if (slamHitPlayer)
+        player->TakeDamage(Const::BOSS_SLAM_DAMAGE);
+
+    if (tailWhipPlayerHit)
+    {
+        player->TakeDamage(Const::BOSS_TAIL_WHIP_DAMAGE);
+
+        Vec3 outward =
+            player->GetWorldPosition() - stage.GetWorldPosition();
+
+        outward.y = 0.0f;
+
+        player->ApplyKnockback(outward, 5000.0f, 0.3f);
+    }
+
+    // =============================
+    // ã‚«ãƒ¡ãƒ©ã‚·ã‚§ã‚¤ã‚¯
+    // =============================
+    auto applyShake = [this](auto& actor)
         {
             auto& downCamera = gameScene_.GetBossDownCamera();
 
@@ -408,11 +592,35 @@
                 downCamera.Initialize(cameraDirector.GetCurrentPose());
                 cameraDirector.SwitchCamera(downCamera, 1.2f);
             }
-        }
-        // ’ÊíŽž
-        else
+
+            actor.ResetCameraShakeRequest();
+        };
+
+    applyShake(boss);
+    applyShake(*player);
+
+    // =============================
+    // ã‚«ãƒ¡ãƒ©æ›´æ–°ãƒ»åˆ‡ã‚Šæ›¿ãˆ
+    // =============================
+    auto& cameraDirector = gameScene_.GetCameraDirector();
+
+    // ãƒœã‚¹æ­»äº¡æ™‚
+    if (boss.IsDead())
+    {
+        auto& dieCamera = gameScene_.GetBossDieCamera();
+
+        dieCamera.SetTarget(boss.GetWorldPosition());
+
+        if (cameraDirector.GetActiveCamera() != &dieCamera)
         {
-            auto& targetCamera = gameScene_.GetTargetCamera();
+            dieCamera.Initialize(cameraDirector.GetCurrentPose());
+            cameraDirector.SwitchCamera(dieCamera, 1.2f);
+        }
+    }
+    // ãƒœã‚¹ãƒ€ã‚¦ãƒ³æ™‚
+    else if (boss.IsDowned())
+    {
+        auto& downCamera = gameScene_.GetBossDownCamera();
 
             targetCamera.Update(
                 player->GetWorldPosition(),
@@ -431,7 +639,7 @@
         cameraDirector.Update(deltaTime);
 
         // =============================
-        // ƒJƒƒ‰“§‰ß
+        // ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         // =============================
         Collision::ResetTransparentModels();
 
@@ -442,15 +650,25 @@
             0.7f
         );
 
-        Collision::SetModelsBetweenTransparent(
-            gameScene_.GetTargetCamera().GetPosition(),
-            boss.GetWorldPosition() + Vec3::Up() * 600.0f,
-            stage.GetCollision(),
-            0.7f
+        if (cameraDirector.GetActiveCamera() != &downCamera)
+        {
+            downCamera.Initialize(cameraDirector.GetCurrentPose());
+            cameraDirector.SwitchCamera(downCamera, 1.2f);
+        }
+    }
+    // é€šå¸¸æ™‚
+    else
+    {
+        auto& targetCamera = gameScene_.GetTargetCamera();
+
+        targetCamera.Update(
+            player->GetWorldPosition(),
+            boss.GetWorldPosition(),
+            deltaTime
         );
 
         // =============================
-        // “ü—ÍEƒGƒtƒFƒNƒg
+        // ï¿½ï¿½ï¿½ÍEï¿½Gï¿½tï¿½Fï¿½Nï¿½g
         // =============================
         using namespace DxPlus::Input;
 
@@ -465,17 +683,36 @@
 
         gameContext->GetEffectManager().Update(deltaTime);
 
-        // =============================
-        // ƒXƒe[ƒ^ƒXUIXV
-        // =============================
-        StatusUI::SyncStatusBar(
-            L"BossHealthGauge",
-            boss.GetHealthProgress()
-        );
+    // =============================
+    // ã‚«ãƒ¡ãƒ©é€éŽ
+    // =============================
+    Collision::ResetTransparentModels();
 
-        StatusUI::SyncStatusBar(
-            L"BossDownGauge",
-            boss.GetDownGaugeProgress()
+    Collision::SetModelsBetweenTransparent(
+        gameScene_.GetTargetCamera().GetPosition(),
+        player->GetWorldPosition() + Vec3::Up() * 30.0f,
+        stage.GetCollision(),
+        0.7f
+    );
+
+    Collision::SetModelsBetweenTransparent(
+        gameScene_.GetTargetCamera().GetPosition(),
+        boss.GetWorldPosition() + Vec3::Up() * 600.0f,
+        stage.GetCollision(),
+        0.7f
+    );
+
+    // =============================
+    // å…¥åŠ›ãƒ»ã‚¨ãƒ•ã‚§ã‚¯ãƒˆ
+    // =============================
+    using namespace DxPlus::Input;
+
+    if (GetButtonDown(PLAYER1) & BUTTON_L3)
+    {
+        gameContext->GetEffectManager().PlayHit(
+            RM().GetEffect(ResourceKeys::Effect_Test),
+            player->GetPosition() + Vec3::Up() * 100.0f,
+            player->GetYaw() + DX_PI_F
         );
     }
 
@@ -484,10 +721,43 @@
         gameScene_.SetBattleEventActive(false);
         gameScene_.StartBattleEventBarsOut();
 
-        gameScene_.GetTutorialChecklist().SetVisible(false);
-        gameScene_.SetDrawPlayerShadow(false);
+    // =============================
+    // ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹UIæ›´æ–°
+    // =============================
+    StatusUI::SyncStatusBar(
+        L"PlayerHealthGauge",
+        static_cast<float>(player->GetHealth()) / Player::MaxHealth
+    );
 
-        UIM().RemoveUI(L"BossStatusBackground");
-        UIM().RemoveUI(L"BossHealthGauge");
-        UIM().RemoveUI(L"BossDownGauge");
-    }
+    StatusUI::SyncStatusBar(
+        L"PlayerUltGauge",
+        player->GetUltimateGauge() / Player::UltimateGaugeMax
+    );
+
+    StatusUI::SyncStatusBar(
+        L"BossHealthGauge",
+        boss.GetHealthProgress()
+    );
+
+    StatusUI::SyncStatusBar(
+        L"BossDownGauge",
+        boss.GetDownGaugeProgress()
+    );
+}
+
+void GameSceneBattleState::Exit()
+{
+    gameScene_.GetGameContext()->ClearUltimateProjectiles();
+    gameScene_.SetBattleEventActive(false);
+    gameScene_.StartBattleEventBarsOut();
+
+    gameScene_.GetTutorialChecklist().SetVisible(false);
+    gameScene_.SetDrawPlayerShadow(false);
+
+    UIM().RemoveUI(L"BossStatusBackground");
+    UIM().RemoveUI(L"BossHealthGauge");
+    UIM().RemoveUI(L"BossDownGauge");
+    UIM().RemoveUI(L"PlayerStatusBackground");
+    UIM().RemoveUI(L"PlayerHealthGauge");
+    UIM().RemoveUI(L"PlayerUltGauge");
+}

@@ -12,6 +12,7 @@
 #include "Player.h"
 #include "Boss.h" 
 #include "EffectManager.h"
+#include "PlayerUltimateEffect.h"
 #include "Room.h"
 
 class GameContext
@@ -36,7 +37,7 @@ public:
     const Grid& GetGrid() const { return grid; }
 
 	Boss& GetBoss() { return boss; }
-    Player* GetPlayer() { return activePlayer; }
+	Player* GetPlayer() { return activePlayer; }//Playerのポインタを返す。nullptrの可能性あり
     void SetActivePlayer(Player& player)
     {
         activePlayer = &player;
@@ -70,6 +71,8 @@ public:
     // ---- lifecycle ----
     void Init();
     void Reset();
+    void UpdateUltimateProjectiles(float deltaTime);
+    void ClearUltimateProjectiles();
     //void Draw() const;
 
 private:
@@ -85,6 +88,8 @@ private:
 
 	// Effect Manager
 	EffectManager effectManager;
+
+    PlayerUltimateEffect playerUltimateEffect_;
 
 	// Actors
     Stage stage;

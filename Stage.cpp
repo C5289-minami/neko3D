@@ -144,6 +144,17 @@ void Stage::Update(float deltaTime)
 	UpdateBossBodyCollision();
 }
 
+Collision::Sphere Stage::GetBossDownHurtSphere() const
+{
+	return { GetWorldPosition(), bossDownHurtRadius_ };
+}
+
+void Stage::SetBossDownHurtRadius(float radius)
+{
+	if (std::isfinite(radius) && radius > 0.0f)
+		bossDownHurtRadius_ = radius;
+}
+
 void Stage::UpdateBossBodyCollision()
 {
 	// ステージ中心に置く縦向きカプセル
