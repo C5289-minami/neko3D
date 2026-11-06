@@ -200,6 +200,45 @@ void GameSceneBattleState::Tick(float deltaTime)
 
     stage.Update(deltaTime);
 
+    // ========================================================
+    // ステータスUI同期
+    // ========================================================
+
+    StatusUI::SyncStatusBar(
+        L"PlayerHealthGauge",
+        static_cast<float>(player->GetHealth()) / Player::MaxHealth
+    );
+
+    StatusUI::SyncStatusBar(
+        L"PlayerUltGauge",
+        player->GetUltimateGauge() / Player::UltimateGaugeMax
+    );
+
+    StatusUI::SyncStatusBar(
+        L"BossHealthGauge",
+        boss.GetHealthProgress()
+    );
+
+    StatusUI::SyncStatusBar(
+        L"BossDownGauge",
+        boss.GetDownGaugeProgress()
+    );
+
+    DxPlus::Debug::SetFormatString(
+        L"Player Health: %d / %d\n"
+        L"Player Ult Gauge: %.2f / %.2f\n"
+        L"Boss Health: %d / %d\n"
+        L"Boss Down Gauge: %.2f / %.2f",
+        player->GetHealth(),
+        Player::MaxHealth,
+        player->GetUltimateGauge(),
+        Player::UltimateGaugeMax,
+        boss.GetHealth(),
+        Boss::MaxHealth,
+        boss.GetDownGaugeProgress() * Const::BOSS_DOWN_GAUGE_MAX,
+        Const::BOSS_DOWN_GAUGE_MAX
+	);
+
     // --------------------------------------------------------
     // ゲージ・飛び道具更新
     // --------------------------------------------------------
