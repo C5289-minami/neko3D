@@ -411,9 +411,17 @@ float Boss::GetAnimTotalTime(BossAnimType::Type type) const
 }
 
 
-bool Boss::IsHitByAttackSphere(const Collision::Sphere& sphere, const Collision::Capsule& tailWhipCapsule) const
+bool Boss::IsHitByAttackSphere(const Collision::Sphere& sphere, const Collision::Capsule& tailWhipCapsule,
+	const Collision::Sphere& downHurtSphere) const
 {
-	if (health_ <= 0 || GetCurrentState() != BossStateType::Attack || sphere.radius <= 0.0f)
+	if (IsDead() || sphere.radius <= 0.0f)
+		return false;
+
+	const auto state = GetCurrentState();
+	if (state == BossStateType::Flinch)
+		return downHurtSphere.radius > 0.0f && Collision::IsHitSphereSphere(sphere, downHurtSphere);
+
+	if (state != BossStateType::Attack)
 		return false;
 
 	if (clapSkill_ != nullptr && activeSkill_ == clapSkill_.get())

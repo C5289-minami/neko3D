@@ -37,6 +37,10 @@ public:
     float GetArenaRadius() const { return arenaRadius_; }
     float GetArenaSurfaceY() const { return arenaSurfaceY_; }
 
+    Collision::Sphere GetBossDownHurtSphere() const;
+    float GetBossDownHurtRadius() const { return bossDownHurtRadius_; }
+    void SetBossDownHurtRadius(float radius);
+
     // ボス本体のカプセル。全高は上下の丸い部分も含む。
     struct BossBodySettings
     {
@@ -64,6 +68,7 @@ private:
 
     ModelCollision collision_;
     BossBodySettings bossBodySettings_{};
+    float bossDownHurtRadius_{ Const::BOSS_DOWN_HURT_RADIUS };
 
     ModelObject stageModel_;
     std::array<ModelObject, 3> stagePillars_{};

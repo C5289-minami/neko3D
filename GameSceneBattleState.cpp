@@ -237,7 +237,7 @@ void GameSceneBattleState::Tick(float deltaTime)
         const auto& attackBall =
             playerStateMachine.GetAttackBallSphere();
 
-        if (boss.IsHitByAttackSphere(attackBall, tailWhipCapsule))
+        if (boss.IsHitByAttackSphere(attackBall, tailWhipCapsule, stage.GetBossDownHurtSphere()))
         {
             // “¯‚¶UŒ‚‹…‚É‚æ‚é˜A‘±ƒ_ƒ[ƒW‚ğ–h~
             if (playerStateMachine.TryRegisterAttackBallHit())

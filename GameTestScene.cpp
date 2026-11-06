@@ -241,7 +241,7 @@ void GameTestScene::Update(float deltaTime)
 			const auto& attackBall =
 				playerStateMachine.GetAttackBallSphere();
 
-			if (boss.IsHitByAttackSphere(attackBall, tailWhipHitCapsule_))
+			if (boss.IsHitByAttackSphere(attackBall, tailWhipHitCapsule_, stage.GetBossDownHurtSphere()))
 			{
 				if (playerStateMachine.TryRegisterAttackBallHit())
 					boss.TakeDamage();
@@ -513,12 +513,18 @@ void GameTestScene::DrawImGui()
 		ImGui::TextUnformatted(u8"Boss Attack Test");
 
 		auto& boss = gameContext->GetBoss();
+		auto& stage = gameContext->GetStage();
 
 		if (ImGui::Button(u8"Boss.Reset"))
 			boss.Reset();
 
 		if (ImGui::Button(u8"Down (Flinch)"))
 			boss.SetDownGauge(0.0f);
+
+		float downHurtRadius = stage.GetBossDownHurtRadius();
+		if (ImGui::DragFloat(u8"ダウン時の被ダメージ判定の半径", &downHurtRadius, 1.0f, 1.0f, 5000.0f,
+			"%.1f", ImGuiSliderFlags_AlwaysClamp))
+			stage.SetBossDownHurtRadius(downHurtRadius);
 
 		if (ImGui::Button(u8"Die (成仏)"))
 			boss.TakeDamage(999); // HPを0にして死亡させる
@@ -558,8 +564,6 @@ void GameTestScene::DrawImGui()
 		// Stage Gimmick Test
 		ImGui::Separator();
 		ImGui::TextUnformatted(u8"Stage Gimmick Test");
-
-		auto& stage = gameContext->GetStage();
 
 		ImGui::Separator();
 		if (ImGui::CollapsingHeader(u8"ボス本体の当たり判定", ImGuiTreeNodeFlags_DefaultOpen))
@@ -751,7 +755,13 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 void GameTestScene::DrawAttackSphereDebug() const
 {
 #ifdef _DEBUG
-	gameContext->GetBoss().DrawSlamAttackDebug();
+	const auto& boss = gameContext->GetBoss();
+	boss.DrawSlamAttackDebug();
+
+	if (boss.GetCurrentState() == BossStateType::Flinch)
+	{
+		Collision::DrawDebugSphere(gameContext->GetStage().GetBossDownHurtSphere(), DxLib::GetColor(255, 140, 60));
+	}
 
 	if (attackSphereDebugRemaining_ <= 0.0f) return;
 
