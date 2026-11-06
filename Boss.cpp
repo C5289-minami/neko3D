@@ -3,6 +3,7 @@
 #include "ResourceKeys.h"
 #include "ResourceManager.h"
 
+#include <algorithm>
 #include <cmath>
 #include "DxPlus/Debug.h"
 #include "ModelObjectManager.h"
@@ -12,6 +13,12 @@
 #include "BossTailWhipSkill.h"
 #include "BossSlamSkill.h"
 
+
+namespace
+{
+	constexpr float HitScaleDuration = 0.2f;
+	constexpr float HitScaleMultiplier = 1.2f;
+}
 
 Boss::Boss()
 	: ActorBase("Boss"), stateMachine_(*this), ai_(*this)
@@ -55,6 +62,8 @@ void Boss::Init()
 
 void Boss::Reset()
 {
+	hitScaleTimeRemaining_ = 0.0f;
+	model_.SetDrawScaleMultiplier(1.0f);
 	isActive_ = true;
 	model_.SetAlpha(1.0f);
 
@@ -128,6 +137,12 @@ void Boss::Reset()
 
 void Boss::TakeDamage(int damage)
 {
+	if (damage > 0 && health_ > 0)
+	{
+		hitScaleTimeRemaining_ = HitScaleDuration-0.15f;  // ダメージを受けた瞬間にスケールを大きくする時間を設定する。
+		model_.SetDrawScaleMultiplier(HitScaleMultiplier);// ダメージを受けた瞬間にスケールを大きくする。
+	}
+
 	damageTakenThisFrame_ = true;
 	// ダメージを受けたらHPを減らす。
 	// ダメージを受けると移動を止め、ゲージを減らす。
@@ -190,6 +205,9 @@ void Boss::UpdateDown(float deltaTime)
 
 void Boss::Update(float deltaTime)
 {
+	hitScaleTimeRemaining_ = (std::max)(0.0f, hitScaleTimeRemaining_ - deltaTime);// ダメージを受けたときのスケール変化の残り時間を減らす。
+	model_.SetDrawScaleMultiplier(hitScaleTimeRemaining_ > 0.0f ? HitScaleMultiplier : 1.0f);// ダメージを受けたときのスケール変化を適用する。
+
 	// アニメーション更新はスキルのフェーズ処理側で行う。
 	// 再生区間や攻撃中の動作をスキル側で管理する。
 

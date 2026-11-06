@@ -88,7 +88,7 @@ void GameSceneBattleState::Tick(float deltaTime)
     // プレイヤーが被ダメージ状態に移る前に、攻撃の命中を登録する。
     if (handHitPlayer || slamHitPlayer)
     {
-        player->TakeDamage();
+        player->TakeDamage(boss.GetScale());
     }
 
     gameScene_.GetTargetCamera().Update(

@@ -572,7 +572,7 @@ void Player::Draw() const
 }
 
 
-bool Player::TakeDamage()
+bool Player::TakeDamage(const Vec3& bossScalse)
 {
 	if (IsDead() || IsDamaging() || avoidInvTime_ > 0.0f) return false;
 
