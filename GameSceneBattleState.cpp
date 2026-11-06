@@ -1,3 +1,4 @@
+
 #include "GameSceneBattleState.h"
 #include "GameScene.h"
 #include "GameStateMachine.h"
@@ -9,6 +10,7 @@
 #include "Collision.h"
 #include "CameraShakeType.h"
 #include "UIManager.h"
+
 #include <algorithm>
 
 GameSceneBattleState::GameSceneBattleState(
@@ -21,17 +23,20 @@ GameSceneBattleState::GameSceneBattleState(
 void GameSceneBattleState::Enter()
 {
     auto* player = gameScene_.GetGameContext()->GetPlayer();
-	auto& boss = gameScene_.GetGameContext()->GetBoss();
+    auto& boss = gameScene_.GetGameContext()->GetBoss();
 
     wasTouchingBossBody_ = false;
     wasTailWhipActive_ = false;
-    battleIntroTurnRemaining_ = BattleIntroTurnDuration;
+
     battleIntroWaitRemaining_ = BattleIntroWaitDuration;
+    battleIntroFinalWaitElapsed_ = 0.0f;
+    battleIntroTurnFinished_ = false;
     battleStarted_ = false;
 
     // チュートリアルの入力通知とチェックリストを、Battleへ持ち越さない。
     gameScene_.GetTutorialChecklist().SetVisible(false);
     player->GetStateMachine().SetEventCallback({});
+
     gameScene_.SetBattleEventActive(true);
     gameScene_.StartBattleEventBarsIn();
 
@@ -45,11 +50,14 @@ void GameSceneBattleState::Enter()
     player->SetControlLocked(true);
     player->StopMove();
 
-   boss.SetAIActive(false);
+    boss.SetAIActive(false);
 
     StatusUI::InitBoss();
+    StatusUI::InitPlayer();
+
     gameScene_.SetDrawPlayerShadow(true);
 }
+
 void GameSceneBattleState::Tick(float deltaTime)
 {
     auto* gameContext = gameScene_.GetGameContext();
@@ -57,61 +65,99 @@ void GameSceneBattleState::Tick(float deltaTime)
     auto* player = gameContext->GetPlayer();
     auto& boss = gameContext->GetBoss();
     auto& stage = gameContext->GetStage();
+
     // =============================
-    // 開幕演出。Playerは入力を止めたまま、重力と床の当たり判定だけ更新する。
+    // 開幕演出
     // =============================
     if (!battleStarted_)
     {
         stage.Update(deltaTime);
-        player->Update(deltaTime, stage.GetCollision(), stage.GetPosition());
+
+        player->Update(
+            deltaTime,
+            stage.GetCollision(),
+            stage.GetPosition()
+        );
+
         player->CheckFloor();
 
         boss.Update(deltaTime);
 
-        // ボスがプレイヤーを向く
-        if (battleIntroTurnRemaining_ > 0.0f)
-        {
-            const bool turnFinished = boss.TurnToTarget(
-                player->GetWorldPosition(),
-                deltaTime
-            );
+        auto& targetCamera = gameScene_.GetTargetCamera();
 
-            if (turnFinished)
-            {
-                battleIntroTurnRemaining_ = 0.0f;
-            }
+        Vec3 cameraTarget = boss.GetWorldPosition();
+
+        // 回転終了後のFOV演出中は、注視位置を300上げる
+        if (battleIntroTurnFinished_)
+        {
+            cameraTarget.y += 300.0f;
         }
-        else
+
+        targetCamera.Update(
+            player->GetWorldPosition(),
+            cameraTarget,
+            deltaTime
+        );
+
+        // =============================
+        // 最初の1.5秒待機
+        // =============================
+        if (battleIntroWaitRemaining_ > 0.0f)
         {
             battleIntroWaitRemaining_ = (std::max)(
                 0.0f,
                 battleIntroWaitRemaining_ - deltaTime
                 );
         }
-
-        auto& targetCamera = gameScene_.GetTargetCamera();
-
-        targetCamera.Update(
-            player->GetWorldPosition(),
-            boss.GetWorldPosition(),
-            deltaTime
-        );
-
-        targetCamera.SetFieldOfView(55.0f);
-        gameScene_.GetCameraDirector().Update(deltaTime);
-
-        if (battleIntroTurnRemaining_ <= 0.0f &&
-            battleIntroWaitRemaining_ <= 0.0f)
+        // =============================
+        // ボスがプレイヤーの方向を向く
+        // =============================
+        else if (!battleIntroTurnFinished_)
         {
-            battleStarted_ = true;
-
-            gameScene_.StartBattleEventBarsOut();
-
-            player->SetDefMove(true);
-            player->SetControlLocked(false);
-
-            boss.SetAIActive(true);
+            battleIntroTurnFinished_ = boss.TurnToTarget(
+                player->GetWorldPosition(),
+                deltaTime
+            );
         }
+        // =============================
+        // 回転終了後の1秒待機
+        // FOVを55から40へ狭める
+        // =============================
+        else
+        {
+            battleIntroFinalWaitElapsed_ += deltaTime;
+
+            const float t = (std::min)(
+                battleIntroFinalWaitElapsed_ / BattleIntroFinalWaitDuration,
+                1.0f
+                );
+
+            const float fov =
+                BattleIntroStartFov +
+                (BattleIntroEndFov - BattleIntroStartFov) * t;
+
+            targetCamera.SetFieldOfView(fov);
+    
+
+            // =============================
+            // 開幕演出終了判定
+            // =============================
+            if (battleIntroFinalWaitElapsed_ >= BattleIntroFinalWaitDuration)
+            {
+                battleStarted_ = true;
+
+                gameScene_.StartBattleEventBarsOut();
+
+                player->SetDefMove(true);
+                player->SetControlLocked(false);
+
+                boss.SetAIActive(true);
+
+                StatusUI::Open();
+            }
+        }
+
+        gameScene_.GetCameraDirector().Update(deltaTime);
 
         return;
     }
@@ -121,7 +167,6 @@ void GameSceneBattleState::Tick(float deltaTime)
     // =============================
     stage.Update(deltaTime);
 
-    // =============================
     // =============================
     // Player更新・床判定
     // =============================
@@ -383,6 +428,7 @@ void GameSceneBattleState::Tick(float deltaTime)
     }
 
     cameraDirector.Update(deltaTime);
+
     // =============================
     // カメラ透過
     // =============================
@@ -434,10 +480,12 @@ void GameSceneBattleState::Tick(float deltaTime)
 
 void GameSceneBattleState::Exit()
 {
-  gameScene_.SetBattleEventActive(false);
+    gameScene_.SetBattleEventActive(false);
     gameScene_.StartBattleEventBarsOut();
+
     gameScene_.GetTutorialChecklist().SetVisible(false);
     gameScene_.SetDrawPlayerShadow(false);
+
     UIM().RemoveUI(L"BossStatusBackground");
     UIM().RemoveUI(L"BossHealthGauge");
     UIM().RemoveUI(L"BossDownGauge");
