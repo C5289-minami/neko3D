@@ -256,7 +256,7 @@ void GameSceneBattleState::Tick(float deltaTime)
         const auto& attackBall =
             playerStateMachine.GetAttackBallSphere();
 
-        if (boss.IsHitByAttackSphere(attackBall, tailWhipCapsule))
+        if (boss.IsHitByAttackSphere(attackBall, tailWhipCapsule, stage.GetBossDownHurtSphere()))
         {
             // 同じ攻撃球による連続ダメージを防止
             if (playerStateMachine.TryRegisterAttackBallHit())

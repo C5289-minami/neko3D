@@ -96,6 +96,8 @@ namespace Const
         BOSS_SLAM_DAMAGE >= 0 && BOSS_TAIL_WHIP_DAMAGE >= 0);
 
     constexpr float BOSS_MODEL_SCALE = 1.0f;
+	// ボスのダウン中の攻撃判定の半径。ステージ中心を基準とするワールド座標の大きさ。
+    constexpr float BOSS_DOWN_HURT_RADIUS = 685.0f;//Flich
     // ボス本体のカプセル。ステージ中心を基準とするワールド座標の大きさ。
     constexpr float BOSS_BODY_RADIUS = 200.0f;     // 本体の半径（太さ）。
     constexpr float BOSS_BODY_HEIGHT = 725.0f;     // 上下の丸い部分を含む全高。
