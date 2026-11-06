@@ -7,6 +7,8 @@
 #include "DxConv.h"
 #include "DxPlus/Debug.h"
 #include "UIManager.h"
+#include "ButtonLabel.h"
+#include "ResourceManager.h"
 
 #include <array>
 #include <cmath>
@@ -19,6 +21,44 @@ namespace
 	constexpr float SelectCameraLeftOffset = 120.0f;
 	constexpr float SelectCameraForwardDistance = 350.0f;
 	constexpr float SelectCameraMoveDuration = 0.6f;
+
+	struct SelectCard
+	{
+		const wchar_t* uiKey;
+		const wchar_t* spriteKey;
+		const char* statusName;
+		const wchar_t* trait;
+	};
+
+	constexpr std::array<SelectCard, 3> SelectCards{ {
+		{ L"Select.Mike", ResourceKeys::SelectMike, u8"たか", L"バランス型" },
+		{ L"Select.Sabi", ResourceKeys::SelectSabi, u8"ぎし", L"走るのが得意" },
+		{ L"Select.Kuro", ResourceKeys::SelectKuro, u8"ゆう", L"登るのが得意" }
+	} };
+
+	class SelectCardUI : public UIBase
+	{
+	public:
+		SelectCardUI(const SelectCard& card, DxPlus::Vec2 position)
+			: UIBase(card.spriteKey, position, { 0, -1 }, SelectCameraMoveDuration)
+		{
+			trait_.SetText(card.trait);
+			trait_.SetFontHandle(RM().GetFont(ResourceKeys::Font_Game));
+			trait_.SetColor(DxLib::GetColor(64, 64, 64));
+			trait_.SetOffset({ 0.0f, -202.0f });
+		}
+
+		void Draw() override
+		{
+			if (!IsActive()) return;
+
+			UIBase::Draw();
+			trait_.Draw(position, GetScale(), GetAlpha());
+		}
+
+	private:
+		ButtonLabel trait_;
+	};
 
 	Camera::CameraPose MakeCameraPoseInFrontOfPlayer(
 		Camera::CameraPose pose,
@@ -86,18 +126,13 @@ void GameSceneSelectState::Enter()
 			DxPlus::CLIENT_HEIGHT * 0.5f
 		};
 
-		if (!UIM().GetUI(L"Select.Mike"))
-			UIM().CreateImageUI(L"Select.Mike", ResourceKeys::SelectMike, position, { 0,-1 }, SelectCameraMoveDuration);
+		for (const auto& card : SelectCards)
+		{
+			if (!UIM().GetUI(card.uiKey))
+				UIM().RegisterUI(card.uiKey, std::make_unique<SelectCardUI>(card, position));
 
-		if (!UIM().GetUI(L"Select.Sabi"))
-			UIM().CreateImageUI(L"Select.Sabi", ResourceKeys::SelectSabi, position, { 0,-1 }, SelectCameraMoveDuration);
-
-		if (!UIM().GetUI(L"Select.Kuro"))
-			UIM().CreateImageUI(L"Select.Kuro", ResourceKeys::SelectKuro, position, { 0,-1 }, SelectCameraMoveDuration);
-
-		if (auto* ui = UIM().GetUI(L"Select.Mike")) ui->SetFalse();
-		if (auto* ui = UIM().GetUI(L"Select.Sabi")) ui->SetFalse();
-		if (auto* ui = UIM().GetUI(L"Select.Kuro")) ui->SetFalse();
+			UIM().GetUI(card.uiKey)->SetFalse();
+		}
 	}
 
 	auto* context = gameScene_.GetGameContext();
@@ -261,9 +296,10 @@ void GameSceneSelectState::SelectIndex(int index)
 
 	selectedIndex_ = index;
 
-	UIM().GetUI(L"Select.Mike")->Hide();
-	UIM().GetUI(L"Select.Sabi")->Hide();
-	UIM().GetUI(L"Select.Kuro")->Hide();
+	for (const auto& card : SelectCards)
+	{
+		UIM().GetUI(card.uiKey)->Hide();
+	}
 
 	auto& director = gameScene_.GetCameraDirector();
 
@@ -286,6 +322,10 @@ void GameSceneSelectState::ConfirmSelection()
 	auto* context = gameScene_.GetGameContext();
 
 	Player& selected = *players_[selectedIndex_];
+	const auto& card = SelectCards[selectedIndex_];
+	// キャラ名の処理
+	const auto* status = CharSettingsManager::GetByName(card.statusName);
+	selected.SetCharData(status ? *status : CharData{});//もし設定が無い場合はデフォルトのCharDataを使う
 
 	// Basketとの親子関係を解除
 	selected.ClearOwner();
@@ -309,17 +349,11 @@ void GameSceneSelectState::ConfirmSelection()
 
 void GameSceneSelectState::UpdateSelectedUI()
 {
-	const wchar_t* keys[] = {
-		L"Select.Mike",
-		L"Select.Sabi",
-		L"Select.Kuro"
-	};
-
-	for (int i = 0; i < 3; ++i)
+	for (std::size_t i = 0; i < SelectCards.size(); ++i)
 	{
-		if (auto* ui = UIM().GetUI(keys[i]))
+		if (auto* ui = UIM().GetUI(SelectCards[i].uiKey))
 		{
-			if (i == selectedIndex_)
+			if (i == static_cast<std::size_t>(selectedIndex_))
 				ui->SetTrue();
 			else
 				ui->SetFalse();
@@ -331,9 +365,10 @@ void GameSceneSelectState::Exit()
 {
 	DxPlus::Debug::SetFormatString(
 		L"GameSceneSelectState::Exit");
-	if (auto* ui = UIM().GetUI(L"Select.Mike")) ui->SetFalse();
-	if (auto* ui = UIM().GetUI(L"Select.Sabi")) ui->SetFalse();
-	if (auto* ui = UIM().GetUI(L"Select.Kuro")) ui->SetFalse();
+	for (const auto& card : SelectCards)
+	{
+		if (auto* ui = UIM().GetUI(card.uiKey)) ui->SetFalse();
+	}
 
 
 	DxLib::SetMouseDispFlag(FALSE);

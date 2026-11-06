@@ -65,6 +65,7 @@ public:
 	}
 	Vec3 GetWorldMoveDirection(const Vec3& moveDir) const;
 	void SetDefMove(bool defMove) { isdefMove_ = defMove; }
+	void SetControlLocked(bool locked) { controlLocked_ = locked; }
 
 #ifdef _DEBUG//ShitのDebug用のダッシュ機能のセッ
 	void SetDebugDashEnabled(bool enabled) { debugDashEnabled_ = enabled; }
@@ -270,6 +271,7 @@ private:
 	bool touchingWall_{ false };
 	Vec3 wallNormal_{};
 	bool isdefMove_{ false };// デフォルトの移動をするかどうか
+    bool controlLocked_{ false };
 	float wallTopY_{ 0.0f };
 	const ModelObject* elevatorPillar_{ nullptr };
 	Vec3 elevatorCenter_{};

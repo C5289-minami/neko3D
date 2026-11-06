@@ -14,6 +14,7 @@
 // camera
 #include "Camera.h"
 #include "CameraDirector.h"
+#include "Motion.h"
 #include <string>
 
 // Tutorial
@@ -34,7 +35,9 @@ public:
 	GameStateType GetCurrentGameState() const { return stateMachine_.GetCurrentType(); }
 	bool UpdateStateCamera(float deltaTime, const std::string& requestedShot);
 	Camera::FreeCamera& GetFreeCamera() { return camera_; }
-	Camera::TargetCamera& GetTargetCamera() { return targetCamera_; }
+	Camera::TargetCamera& GetTargetCamera() { return playerTargetCamera_; }
+    Camera::TargetCamera& GetBossDieCamera() { return bossDieCamera_; }
+    Camera::TargetCamera& GetBossDownCamera() { return bossDownCamera_; }
 	Camera::CameraDirector& GetCameraDirector() { return cameraDirector_; }
 
     // チュートリアルの球体設定
@@ -76,6 +79,16 @@ public:
 
     // 影
 	void SetDrawPlayerShadow(bool draw) { drawPlayerShadow_ = draw; }
+    void SetBattleEventActive(bool active) { battleEventActive_ = active; }
+    bool IsBattleEventActive() const { return battleEventActive_; }
+    void StartBattleEventBarsIn()
+    {
+        battleLetterboxMotion_.Start(0.0f, 1.0f, 0.5f, Motion::Easing::EaseOut);
+    }
+    void StartBattleEventBarsOut()
+    {
+        battleLetterboxMotion_.Start(1.0f, 0.0f, 0.5f, Motion::Easing::EaseIn);
+    }
 
 
 private:
@@ -90,7 +103,9 @@ private:
 
 	// カメラ
 	Camera::FreeCamera camera_;
-	Camera::TargetCamera targetCamera_;
+    Camera::TargetCamera bossDieCamera_;
+    Camera::TargetCamera bossDownCamera_;
+	Camera::TargetCamera playerTargetCamera_;
 	Camera::CameraDirector cameraDirector_{ camera_ }; // カメラの遷移と演出を管理する
 	std::string activeCameraShot_{};
 
@@ -103,7 +118,7 @@ private:
 
 	// Playerの影を描画する
 	bool drawPlayerShadow_{ false };
-	// ボス本体のカプセルに前フレームから接触しているか。
-	bool wasTouchingBossBody_{ false };
+    bool battleEventActive_{ false };
+    Motion battleLetterboxMotion_{};
 
 };

@@ -11,7 +11,7 @@
             "attackRatio": 1.0,
             "attackSpeed": 1.0,
             "maxHealth": 100.0,
-            "moveSpeed": 5.0,
+            "moveSpeed": 5.75,  //ぎしが選択されたスピード
             "name": "ぎし"
         },
         {
@@ -19,6 +19,7 @@
             "attackSpeed": 1.0,
             "maxHealth": 100.0,
             "moveSpeed": 5.0,
+            "climbSpeedMultiplier": 1.2,
             "name": "ゆう"
         }
     ]

@@ -121,6 +121,8 @@ void StatusTest::DrawImGui()
 				ImGui::InputFloat(u8"###Å‘åHP", &charData.maxHealth);
 				ImGui::Text(u8"ˆÚ“®‘¬“x"); ImGui::SameLine();
 				ImGui::InputFloat(u8"###ˆÚ“®‘¬“x", &charData.moveSpeed);
+				ImGui::Text(u8"“o‚é‘¬‚³‚Ì”{—¦"); ImGui::SameLine();
+				ImGui::InputFloat(u8"###“o‚é‘¬‚³‚Ì”{—¦", &charData.climbSpeedMultiplier);
 				ImGui::Text(u8"UŒ‚”{—¦"); ImGui::SameLine();
 				ImGui::InputFloat(u8"###UŒ‚”{—¦", &charData.attackRatio);
 				ImGui::Text(u8"UŒ‚‘¬“x"); ImGui::SameLine();

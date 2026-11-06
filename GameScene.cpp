@@ -22,7 +22,8 @@ GameScene::GameScene(GameContext* context)
 void GameScene::Init()
 {
 	gameContext->Reset();
-	wasTouchingBossBody_ = false;
+	battleEventActive_ = false;
+	battleLetterboxMotion_.Reset();
 
 	// チュートリアルも、使いたいモデルを登録するだけで同じ判定を利用できる。
 	tutorialCollision_.Clear();
@@ -65,17 +66,22 @@ void GameScene::Init()
 
 	// camera
 	{
+		camera_.Reset();
+		playerTargetCamera_.Reset();
+		bossDieCamera_.Reset();
+		bossDownCamera_.Reset();
+
 		cameraDirector_.Reset();
 		activeCameraShot_.clear();
+
 		if (!CObjs().LoadCameras())
 			DxPlus::Utils::FatalError(L"カメラのロードに失敗");
-		if (CObjs().LoadCameras())
+
+		for (const auto& shot : CObjs().GetCameras())
 		{
-			for (const auto& shot : CObjs().GetCameras())
-			{
-				cameraDirector_.RegisterShot(shot.name, shot.pose);
-			}
+			cameraDirector_.RegisterShot(shot.name, shot.pose);
 		}
+
 		camera_.Initialize(CObjs().GetCameraPose("Title"));
 		cameraDirector_.Update(0);
 	}
@@ -103,122 +109,68 @@ bool GameScene::UpdateStateCamera(float deltaTime, const std::string& requestedS
 
 void GameScene::Update(float deltaTime)
 {
-	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
+  if (battleEventActive_)
+		battleLetterboxMotion_.Update(deltaTime);
 
-	// BattleとTutorial以外は本編Playerの移動・衝突判定を止める
-	if (GetCurrentGameState() != GameStateType::Tutorial &&
-		GetCurrentGameState() != GameStateType::Battle)
+	DxLib::SetBackgroundColor(
+		gameContext->GetBgRed(),
+		gameContext->GetBgGreen(),
+		gameContext->GetBgBlue()
+	);
+
+	const auto currentState = GetCurrentGameState();
+
+	// Tutorial・Battle以外
+	if (currentState != GameStateType::Tutorial &&
+		currentState != GameStateType::Battle)
 	{
-		wasTouchingBossBody_ = false;
 		stateMachine_.Tick(deltaTime);
 		gameContext->GetEffectManager().Update(deltaTime);
 		return;
-
 	}
-	// Actor取得
+
+	// Battleの更新はBattleStateに任せる
+	if (currentState == GameStateType::Battle)
+	{
+		stateMachine_.Tick(deltaTime);
+		return;
+	}
+
+	// =============================
+	// Tutorial更新
+	// =============================
 	auto* player = gameContext->GetPlayer();
 	auto& boss = gameContext->GetBoss();
-	auto& stage = gameContext->GetStage();
 
-	// actors
-	{
+	player->SetDefMove(true);
+	player->Update(deltaTime, tutorialCollision_);
 
-		// stageの中心座標を取得して、playerの更新に渡す
-		const Vec3 stageCenterPosition = stage.GetPosition();
+	boss.Update(deltaTime);
 
-		// チュートリアルは通常移動、バトルはステージ中心を基準にした移動を使う。
-		const bool tutorial = GetCurrentGameState() == GameStateType::Tutorial;
-		player->SetDefMove(tutorial);
-		if (tutorial)
-			// player.Update(deltaTime);
-			player->Update(deltaTime, tutorialCollision_);
-		else
-			// player.Update(deltaTime, stage, stageCenterPosition);
-			player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
-
-		boss.Update(deltaTime);
-
-		// バトル中だけボス本体へのジャンプ接触を処理する。
-		if (GetCurrentGameState() == GameStateType::Battle)
-		{
-			// ジャンプ接触は一度だけゲージを減らし、二段目だけプレイヤーを戻す。
-			//GameTestCpp見て
-			const auto state = player->GetCurrentState();
-			const bool doubleJump = state == PlayerStateType::DoubleJump;
-			const bool jumping = !player->IsGrounded() && (state == PlayerStateType::Jump || doubleJump);
-			const bool touchingBody = jumping && stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
-			
-			// 一度だけボス本体に接触したかどうかを判定する。
-			const bool enteredBossBody = touchingBody && !wasTouchingBossBody_;
-		
-			const bool jumpedFromUpperFloor =
-				player->GetJumpStartFloor() == Player::GroundType::UpFloor;
-			
-			const bool shouldDamageDownGauge = enteredBossBody && jumpedFromUpperFloor;
-			// ダメージを与える条件は、ボス本体に接触した瞬間で、かつ上の床からジャンプしていること。
-			if (shouldDamageDownGauge)
-			{
-				float damage = doubleJump
-					? Const::BOSS_UPPER_DOUBLE_JUMP_DOWN_DAMAGE
-					: Const::BOSS_JUMP_DOWN_DAMAGE;
-				boss.ApplyDownGaugeDamage(damage);
-			}
-			// 二段ジャンプでボス本体に接触した場合、プレイヤーを安全な位置に戻す。
-			const bool shouldReturnPlayer = touchingBody && doubleJump;
-			if (shouldReturnPlayer)
-				player->ReturnToLastSafePosition(stage.GetCollision());
-			wasTouchingBossBody_ = touchingBody;
-		}
-		else
-			wasTouchingBossBody_ = false;
-
-		// playerとbossの衝突判定
-		//const bool touching = Collision::UpdateModelContact(playerModel, bossModel);　これなし
-		//if (touching)
-		//{
-		//	player.TakeDamage();
-		//}
-
-
-
-
-
-	}
-
-
+	// =============================
+	// State更新
+	// =============================
 	stateMachine_.Tick(deltaTime);
 
+	// =============================
 	// カメラ透過
-	Collision::ResetTransparentModels();// まずリセットしてから、透過対象を追加する
+	// =============================
+	Collision::ResetTransparentModels();
 
-	if (GetCurrentGameState() == GameStateType::Tutorial)
-	{
-		Collision::SetModelsBetweenTransparent(
-			cameraDirector_.GetCurrentPose().position,
-			player->GetWorldPosition() + Vec3::Up() * 30.0f,
-			tutorialCollision_
-		);
-	}
-	else if (GetCurrentGameState() == GameStateType::Battle)
-	{
-		Collision::SetModelsBetweenTransparent(
-			cameraDirector_.GetCurrentPose().position, 
-			player->GetWorldPosition() + Vec3::Up() * 30.0f,
-			gameContext->GetStage().GetCollision()
-		);
+	Collision::SetModelsBetweenTransparent(
+		cameraDirector_.GetCurrentPose().position,
+		player->GetWorldPosition() + Vec3::Up() * 30.0f,
+		tutorialCollision_
+	);
 
-		Collision::SetModelsBetweenTransparent(
-			cameraDirector_.GetCurrentPose().position,
-			boss.GetWorldPosition() + Vec3::Up() * 600.0f,// 顔が見たいので少し上
-			gameContext->GetStage().GetCollision()
-		);
-	}
+	// =============================
+	// チュートリアルタスク
+	// =============================
+	tutorialChecklist_.Update(deltaTime);
 
-	if (GetCurrentGameState() == GameStateType::Tutorial)
-	{
-		tutorialChecklist_.Update(deltaTime);
-	}
-
+	// =============================
+	// エフェクト更新
+	// =============================
 	gameContext->GetEffectManager().Update(deltaTime);
 }
 
@@ -241,27 +193,265 @@ void GameScene::Render() const
 	{
 		DrawScene(false);
 	}
+
+	if (battleEventActive_)
+	{
+        const int barHeight = static_cast<int>(DxPlus::CLIENT_HEIGHT / 8.0f *
+			battleLetterboxMotion_.GetValue());
+		const int color = DxLib::GetColor(0, 0, 0);
+		DxLib::DrawBox(0, 0, DxPlus::CLIENT_WIDTH, barHeight, color, TRUE);
+		DxLib::DrawBox(0, DxPlus::CLIENT_HEIGHT - barHeight,
+			DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT, color, TRUE);
+	}
 }
 
 void GameScene::DrawImGui()
 {
 #ifndef NDEBUG
-	ImGui::Begin("GameScene Debug");
 
-	// clear
-	if (ImGui::Button("Clear"))
+	auto toImGuiColor = [](unsigned int dxColor)
+		{
+			return ImVec4(
+				static_cast<float>((dxColor >> 16) & 0xFF) / 255.0f,
+				static_cast<float>((dxColor >> 8) & 0xFF) / 255.0f,
+				static_cast<float>(dxColor & 0xFF) / 255.0f,
+				1.0f
+			);
+		};
+
+	if (ImGui::Begin("GameScene Debug"))
 	{
-		stateMachine_.ChangeState(GameStateType::Clear);
-	}
-	if (ImGui::Button("GameOver"))
-	{
-		stateMachine_.ChangeState(GameStateType::GameOver);
+		auto* player = gameContext->GetPlayer();
+		auto& boss = gameContext->GetBoss();
+		auto& stage = gameContext->GetStage();
+
+		// =============================
+		// Scene Test
+		// =============================
+		if (ImGui::Button("Clear"))
+			stateMachine_.ChangeState(GameStateType::Clear);
+
+		if (ImGui::Button("GameOver"))
+			stateMachine_.ChangeState(GameStateType::GameOver);
+
+		// =============================
+		// Player
+		// =============================
+		ImGui::Separator();
+		ImGui::TextUnformatted(u8"Player");
+
+		ImGui::Text(
+			"Pillar contact: %s",
+			player->IsTouchingWall() ? "True" : "False"
+		);
+
+		const float avoidTime =
+			player->GetStateMachine().GetAvoidTime();
+
+		if (avoidTime > 0.0f)
+		{
+			ImGui::PushStyleColor(
+				ImGuiCol_PlotHistogram,
+				toImGuiColor(DxLib::GetColor(255, 0, 0))
+			);
+
+			ImGui::ProgressBar(
+				avoidTime / PlayerDamagingState::AvoidTime,
+				ImVec2(-1.0f, 0.0f),
+				"Avoid 0.3s"
+			);
+
+			ImGui::PopStyleColor();
+		}
+
+		const float avoidInvTime = player->GetAvoidInvTime();
+
+		if (avoidInvTime > 0.0f)
+		{
+			ImGui::PushStyleColor(
+				ImGuiCol_PlotHistogram,
+				toImGuiColor(DxLib::GetColor(255, 255, 0))
+			);
+
+			ImGui::ProgressBar(
+				avoidInvTime / Player::AvoidInvTime,
+				ImVec2(-1.0f, 0.0f),
+				"Invincible 0.2s"
+			);
+
+			ImGui::PopStyleColor();
+		}
+
+		ImGui::TextUnformatted(u8"柱のエレベーター");
+
+		float climbingSpeed = player->GetClimbingSpeed();
+
+		if (ImGui::DragFloat(
+			u8"上昇速度",
+			&climbingSpeed,
+			10.0f,
+			0.0f,
+			5000.0f,
+			"%.1f",
+			ImGuiSliderFlags_AlwaysClamp))
+		{
+			player->SetClimbingSpeed(climbingSpeed);
+		}
+
+		if (ImGui::Button(u8"上昇速度を初期値に戻す"))
+			player->ResetClimbingSpeeds();
+
+		ImGui::TextWrapped(
+			u8"柱の上端 - 10で到着し、小さくジャンプします。"
+		);
+
+		// =============================
+		// Boss Attack Test
+		// =============================
+		ImGui::Separator();
+		ImGui::TextUnformatted(u8"Boss Attack Test");
+
+		if (ImGui::Button(u8"Boss.Reset"))
+			boss.Reset();
+
+		if (ImGui::Button(u8"Down (Flinch)"))
+			boss.SetDownGauge(0.0f);
+
+		if (ImGui::Button(u8"Die (成仏)"))
+			boss.TakeDamage(999);
+
+		if (ImGui::Button(u8"Clap"))
+			boss.UseSkill(BossAttackType::Clap);
+
+		if (ImGui::Button(u8"Slam"))
+			boss.UseSkill(BossAttackType::Slam);
+
+		if (ImGui::Button(u8"TailWhip"))
+			boss.UseSkill(BossAttackType::TailWhip);
+
+		ImGui::Checkbox(
+			u8"bossAIEnabled",
+			&boss.IsAIActive()
+		);
+
+		// =============================
+		// Camera Settings
+		// =============================
+		ImGui::Separator();
+
+		auto& camera = GetTargetCamera();
+		auto& settings = camera.GetSettings();
+
+		if (ImGui::TreeNode(u8"TargetCamera Settings"))
+		{
+			ImGui::DragFloat(
+				u8"カメラ距離",
+				&settings.cameraDistance,
+				10.0f,
+				100.0f,
+				3000.0f
+			);
+
+			ImGui::DragFloat(
+				u8"カメラ高さ",
+				&settings.cameraHeight,
+				10.0f,
+				-1000.0f,
+				1000.0f
+			);
+
+			ImGui::TreePop();
+		}
+
+		// =============================
+		// Stage Gimmick Test
+		// =============================
+		ImGui::Separator();
+		ImGui::TextUnformatted(u8"Stage Gimmick Test");
+
+		if (ImGui::CollapsingHeader(
+			u8"ボス本体の当たり判定",
+			ImGuiTreeNodeFlags_DefaultOpen))
+		{
+
+
+			auto body = stage.GetBossBodySettings();
+
+			bool changed = ImGui::DragFloat(
+				u8"本体の半径",
+				&body.radius,
+				1.0f,
+				1.0f,
+				5000.0f,
+				"%.1f",
+				ImGuiSliderFlags_AlwaysClamp
+			);
+
+			changed |= ImGui::DragFloat(
+				u8"本体の全高",
+				&body.height,
+				1.0f,
+				body.radius * 2.0f,
+				10000.0f,
+				"%.1f",
+				ImGuiSliderFlags_AlwaysClamp
+			);
+
+			changed |= ImGui::DragFloat(
+				u8"底の高さオフセット",
+				&body.yOffset,
+				1.0f,
+				-5000.0f,
+				5000.0f,
+				"%.1f",
+				ImGuiSliderFlags_AlwaysClamp
+			);
+
+			if (changed)
+				stage.SetBossBodySettings(body);
+
+			if (ImGui::Button(u8"本体の判定を初期値に戻す"))
+				stage.ResetBossBodySettings();
+
+			const auto& capsule =
+				stage.GetCollision().GetContactCapsule();
+
+			const Vec3 center =
+				(capsule.start + capsule.end) * 0.5f;
+
+			ImGui::Text(
+				u8"中心座標：X %.1f / Y %.1f / Z %.1f",
+				center.x,
+				center.y,
+				center.z
+			);
+
+			ImGui::TextUnformatted(
+				stage.GetCollision().IsTouchingCapsule(
+					player->GetHitSphere()
+				)
+				? u8"プレイヤー：接触中（黄色）"
+				: u8"プレイヤー：接触なし（青色）"
+			);
+
+			ImGui::TextWrapped(
+				u8"全高は上下の丸い部分を含み、半径の2倍以上になります。"
+			);
+		}
+
+		if (ImGui::Button(u8"Stage Shake"))
+			stage.StartShake();
+
+		if (ImGui::Button(u8"Knock Back"))
+			player->ApplyKnockback({ 1, 0, 0 }, 10000.0f, 0.1f);
+
+		ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
 	}
 
 	ImGui::End();
+
 #endif
 }
-
 void GameScene::RenderDepth() const
 {
 	cameraDirector_.ApplyRenderPose();

@@ -41,6 +41,7 @@ public:
 	void Reset()override;
 	void Update(float deltaTime)override;
 	void TurnToTarget(const Vec3& targetPosition, float deltaTime);
+ void SetAIActive(bool active) { activeAI = active; }
 	void Draw() const override;
 	
 	void SetPlayer(Player& player) { ai_.SetPlayer(player); }
@@ -102,11 +103,9 @@ public:
 
 	void ResetCameraShakeRequest();
 
-#ifdef _DEBUG
 	void DrawClapAttackDebug() const;
 	void DrawSlamAttackDebug() const;
 	bool& IsAIActive() { return activeAI; }
-#endif
 
 	AnimationHandle GetAnimationHandle(BossAnimType::Type type) const;
 	ModelAnimation& GetAnimation() { return animation_; }
@@ -165,9 +164,7 @@ private:
 	std::unique_ptr<BossTailWhipSkill> tailWhipSkill_;
 
 	BossAI ai_; // AI
-#ifndef NDEBUG
 	bool activeAI{ false }; // デバッグ用。falseにするとAIが無効化される。
-#endif
 	// Turn
 	    bool isRotationEnabled_ = true;
 
