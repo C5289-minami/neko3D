@@ -18,6 +18,7 @@ namespace ResourceKeys
 	inline constexpr const Button Button_Pink = { L"UIPinkButton", L"UIPinkHover" };
 	inline constexpr const Button Button_Purple = { L"UIPurpleButton", L"UIPurpleHover" };
 	inline constexpr const Button Button_Rose = { L"UIRoseButton", L"UIRoseHover" };
+	inline constexpr const Button Button_E = { L"EButton",L"EButtonHover" };
   
 	//Tutorial
 	inline constexpr const wchar_t* TutorialBack = L"UITutorialBack";
