@@ -84,7 +84,7 @@ void StatusUI::InitPlayer(const std::string& characterName)
 	const float rowStart = left + width * 0.35f;
 
 	const float slotWidth = width * 0.59f / Player::MaxHealth;
-	const float rowY = backgroundPosition.y - height * 0.03f;
+	const float rowY = backgroundPosition.y + height * 0.5f;
 
 	constexpr float heartScale = 0.7f;
 
@@ -122,6 +122,7 @@ void StatusUI::InitBoss()
 	UIM().GetUI(L"BossHealthGauge")->SetFalse();
 	UIM().GetUI(L"BossDownGauge")->SetFalse();
 }
+
 void StatusUI::SyncStatusBar(const std::wstring& key, float progress)
 {
 	auto* ui = UIM().GetSpriteStudioUI(key);
@@ -131,6 +132,21 @@ void StatusUI::SyncStatusBar(const std::wstring& key, float progress)
 	ui->SetProgress(std::clamp(progress, 0.0f, 1.0f));
 }
 
+void StatusUI::SyncPlayerHealth(int health)
+{
+	health = std::clamp(health, 0, Player::MaxHealth);
+
+	for (int i = 0; i < Player::MaxHealth; ++i)
+	{
+		if (auto* heart = UIM().GetUI(PlayerHeartKey(i)))
+		{
+			if (i < health)
+				heart->SetTrue();
+			else
+				heart->SetFalse();
+		}
+	}
+}
 void StatusUI::Open()
 {
 	const std::wstring keys[] =

@@ -227,6 +227,9 @@ void GameSceneBattleState::Tick(float deltaTime)
         1.0f - boss.GetDownGaugeProgress()
     );
 
+    StatusUI::SyncPlayerHealth(player->GetHealth());
+
+
     DxPlus::Debug::SetFormatString(
         L"Player Health: %d / %d"
         L"Player Ult Gauge: %.2f / %.2f"
