@@ -40,6 +40,7 @@ void ResourceManager::LoadAll()
 	LoadButtonSprite(ResourceKeys::Button_Pink, L"./Data/Images/Button/button_pink.png", L"./Data/Images/Button/button_pink_hover.png");
 	LoadButtonSprite(ResourceKeys::Button_Purple, L"./Data/Images/Button/button_purple.png", L"./Data/Images/Button/button_purple_hover.png");
 	LoadButtonSprite(ResourceKeys::Button_Rose, L"./Data/Images/Button/button_rose.png", L"./Data/Images/Button/button_rose_hover.png");
+	LoadButtonSprite(ResourceKeys::Button_E, L"./Data/Images/Button/E_Button.png", L"./Data/Images/Button/button_rose_hover.png");
 
 	LoadSprite(ResourceKeys::BossStatusBack, L"./Data/Images/Boss/boss_status_back.png");
 	LoadSprite(ResourceKeys::MikeStatusBack, L"./Data/Images/Player/mike_status_back.png");
@@ -75,6 +76,7 @@ void ResourceManager::LoadAll()
 	LoadModel(ResourceKeys::Model_BossAnim_Idle,		L"./Data/Models/Boss/Animation/boss_idle.mv1");
 	LoadModel(ResourceKeys::Model_BossAnim_Sippo,		L"./Data/Models/Boss/Animation/boss_sippo.mv1");
 	LoadModel(ResourceKeys::Model_BossAnim_Down,		L"./Data/Models/Boss/Animation/boss_down.mv1");
+	LoadModel(ResourceKeys::Model_BossAnim_Flinch,		L"./Data/Models/Boss/Animation/boss_flinch.mv1");
 	LoadModel(ResourceKeys::Model_BossAnim_Attck_Hit,	L"./Data/Models/Boss/Animation/boss_tataku.mv1");
 	LoadModel(ResourceKeys::Model_BossAnim_Die,			L"./Data/Models/Boss/Animation/boss_zyoubutu.mv1");
 	LoadModel(ResourceKeys::Model_BossAnim_Nekodamashi, L"./Data/Models/Boss/Animation/boss_nekodamashi.mv1");

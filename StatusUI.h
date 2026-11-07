@@ -16,4 +16,5 @@ public:
     static void Remove();
 
     static void SyncStatusBar(const std::wstring& key, float progress);
+    static void SyncPlayerHealth(int health);
 };

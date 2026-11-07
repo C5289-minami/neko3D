@@ -1,4 +1,4 @@
-#include "StatusTestScene.h"
+ï»¿#include "StatusTestScene.h"
 #include "GameContext.h"
 #include "ResourceKeys.h"
 #include "Collision.h"
@@ -12,7 +12,7 @@
 
 void StatusTest::Init()
 {
-	// ”wŒiF
+	// èƒŒæ™¯è‰²
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
 	camera_.Reset();
@@ -20,14 +20,14 @@ void StatusTest::Init()
 	activeCamera_ = &freeCamera_;
 	activeCamera_->ApplyCamera();
 
-	// ƒgƒD[ƒ“•`‰æ‚É•K—v‚ÈƒVƒF[ƒ_[‚Æİ’èƒoƒbƒtƒ@[‚ğ‰Šú‰»
+	// ãƒˆã‚¥ãƒ¼ãƒ³æç”»ã«å¿…è¦ãªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã¨è¨­å®šãƒãƒƒãƒ•ã‚¡ãƒ¼ã‚’åˆæœŸåŒ–
 	if (!modelToonRenderer_.Init())
-		DxPlus::Utils::FatalError(L"modelToonRenderer‚Ì‰Šú‰»¸”s");
+		DxPlus::Utils::FatalError(L"modelToonRendererã®åˆæœŸåŒ–å¤±æ•—");
 	if (!shaderEffects_.Init(DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT))
-		DxPlus::Utils::FatalError(L"shaderEffects‚Ì‰Šú‰»¸”s");
+		DxPlus::Utils::FatalError(L"shaderEffectsã®åˆæœŸåŒ–å¤±æ•—");
 
-	// toon•`‰æ‚ÆƒAƒEƒgƒ‰ƒCƒ“•`‰æ‚ğ—LŒø‚É‚·‚é
-	shaderEffects_.GetSettings().toonEnabled = true;
+	// toonæç”»ã¨ã‚¢ã‚¦ãƒˆãƒ©ã‚¤ãƒ³æç”»ã‚’æœ‰åŠ¹ã«ã™ã‚‹
+	shaderEffects_.GetSettings().toonEnabled = true;	
 	shaderEffects_.GetSettings().outlineEnabled = true;
 
 	testModel_.SetModelKey(ResourceKeys::Model_Basket);
@@ -37,18 +37,18 @@ void StatusTest::Init()
 	gameContext->GetPlayer()->SetStartPosition({ 0.0f, 100.0f, 0.0f });
 
 	if (!CharSettingsManager::Load())
-		DxPlus::Utils::FatalError(L"ƒLƒƒƒ‰ƒNƒ^[î•ñ‚Ì“Ç‚İ‚İ‚É¸”s");
+		DxPlus::Utils::FatalError(L"ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼æƒ…å ±ã®èª­ã¿è¾¼ã¿ã«å¤±æ•—");
 }
 
 void StatusTest::Update(float deltaTime)
 {
-	// ”wŒiF
+	// èƒŒæ™¯è‰²
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
 	float scale = 1.0f;
 	testModel_.SetScale({ scale, scale, scale });
 
-	// --- ‰EƒNƒŠƒbƒN‚ğ‰Ÿ‚µ‚Ä‚¢‚éŠÔ‚Ì‚İƒJƒƒ‰‘€ì ---
+	// --- å³ã‚¯ãƒªãƒƒã‚¯ã‚’æŠ¼ã—ã¦ã„ã‚‹é–“ã®ã¿ã‚«ãƒ¡ãƒ©æ“ä½œ ---
 	if ((DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
 	{
 		SetMouseDispFlag(FALSE);
@@ -56,7 +56,7 @@ void StatusTest::Update(float deltaTime)
 	}
 	else SetMouseDispFlag(TRUE);
 
-	// --- F2 ‚ÅƒVƒF[ƒ_[‘S‘Ì‚ÌON/OFF‚ğØ‚è‘Ö‚¦‚é ---
+	// --- F2 ã§ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼å…¨ä½“ã®ON/OFFã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹ ---
 	static bool shaderToggleWasDown = false;
 	const bool shaderToggleDown =
 		DxLib::CheckHitKey(KEY_INPUT_F2) != 0;
@@ -97,11 +97,11 @@ void StatusTest::DrawImGui()
 	{
 		ImGui::Text("F2: Toggle Shader Effects");
 
-		// ƒLƒƒƒ‰ƒNƒ^[‚Ì’Ç‰Á‚ÆStatusİ’è
+		// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ã®è¿½åŠ ã¨Statusè¨­å®š
 		if (ImGui::Button("Add Character", ImVec2(-1, 0)))
 		{
 			CharData newChar{};
-			newChar.name = u8"ƒLƒƒƒ‰ƒNƒ^[ " + std::to_string(charSettings_.GetCount() + 1);
+			newChar.name = u8"ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ " + std::to_string(charSettings_.GetCount() + 1);
 			charSettings_.Add(newChar);
 		}
 		for (size_t i = 0; i < charSettings_.GetCount(); ++i)
@@ -114,19 +114,19 @@ void StatusTest::DrawImGui()
 				char nameBuffer[256]{};
 				const size_t nameLength = std::min(charData.name.size(), sizeof(nameBuffer) - 1);
 				std::copy_n(charData.name.data(), nameLength, nameBuffer);
-				ImGui::Text(u8"–¼‘O"); ImGui::SameLine();
-				if (ImGui::InputText(u8"###–¼‘O", nameBuffer, sizeof(nameBuffer)))
+				ImGui::Text(u8"åå‰"); ImGui::SameLine();
+				if (ImGui::InputText(u8"###åå‰", nameBuffer, sizeof(nameBuffer)))
 					charData.name = nameBuffer;
-				ImGui::Text(u8"Å‘åHP"); ImGui::SameLine();
-				ImGui::InputFloat(u8"###Å‘åHP", &charData.maxHealth);
-				ImGui::Text(u8"ˆÚ“®‘¬“x"); ImGui::SameLine();
-				ImGui::InputFloat(u8"###ˆÚ“®‘¬“x", &charData.moveSpeed);
-				ImGui::Text(u8"“o‚é‘¬‚³‚Ì”{—¦"); ImGui::SameLine();
-				ImGui::InputFloat(u8"###“o‚é‘¬‚³‚Ì”{—¦", &charData.climbSpeedMultiplier);
-				ImGui::Text(u8"UŒ‚”{—¦"); ImGui::SameLine();
-				ImGui::InputFloat(u8"###UŒ‚”{—¦", &charData.attackRatio);
-				ImGui::Text(u8"UŒ‚‘¬“x"); ImGui::SameLine();
-				ImGui::InputFloat(u8"###UŒ‚‘¬“x", &charData.attackSpeed);
+				ImGui::Text(u8"æœ€å¤§HP"); ImGui::SameLine();
+				ImGui::InputFloat(u8"###æœ€å¤§HP", &charData.maxHealth);
+				ImGui::Text(u8"ç§»å‹•é€Ÿåº¦"); ImGui::SameLine();
+				ImGui::InputFloat(u8"###ç§»å‹•é€Ÿåº¦", &charData.moveSpeed);
+				ImGui::Text(u8"ç™»ã‚‹é€Ÿã•ã®å€ç‡"); ImGui::SameLine();
+				ImGui::InputFloat(u8"###ç™»ã‚‹é€Ÿã•ã®å€ç‡", &charData.climbSpeedMultiplier);
+				ImGui::Text(u8"æ”»æ’ƒå€ç‡"); ImGui::SameLine();
+				ImGui::InputFloat(u8"###æ”»æ’ƒå€ç‡", &charData.attackRatio);
+				ImGui::Text(u8"æ”»æ’ƒé€Ÿåº¦"); ImGui::SameLine();
+				ImGui::InputFloat(u8"###æ”»æ’ƒé€Ÿåº¦", &charData.attackSpeed);
 				if (ImGui::Button("Remove Character"))
 				{
 					charSettings_.Remove(i);
@@ -136,16 +136,16 @@ void StatusTest::DrawImGui()
 			}
 			ImGui::PopID();
 		}
-		// •Û‘¶A“Ç‚İ‚İ
+		// ä¿å­˜ã€èª­ã¿è¾¼ã¿
 		if (ImGui::Button("Save", ImVec2(-1, 0)))
 		{
 			if (!CharSettingsManager::Save())
-				DxPlus::Utils::FatalError(L"ƒLƒƒƒ‰ƒNƒ^[î•ñ‚Ì•Û‘¶‚É¸”s");
+				DxPlus::Utils::FatalError(L"ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼æƒ…å ±ã®ä¿å­˜ã«å¤±æ•—");
 		}
 		if (ImGui::Button("Load", ImVec2(-1, 0)))
 		{
 			if (!CharSettingsManager::Load())
-				DxPlus::Utils::FatalError(L"ƒLƒƒƒ‰ƒNƒ^[î•ñ‚Ì“Ç‚İ‚İ‚É¸”s");
+				DxPlus::Utils::FatalError(L"ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼æƒ…å ±ã®èª­ã¿è¾¼ã¿ã«å¤±æ•—");
 		}
 	}
 	ImGui::End();
@@ -179,14 +179,14 @@ void StatusTest::Render() const
 
 void StatusTest::RenderDepth() const
 {
-	// ƒV[ƒ“‚ÌƒJƒƒ‰‚ğİ’è‚·‚é
+	// ã‚·ãƒ¼ãƒ³ã®ã‚«ãƒ¡ãƒ©ã‚’è¨­å®šã™ã‚‹
 	activeCamera_->ApplyCamera();
-	// Bone‚È‚µƒVƒF[ƒ_[
+	// Boneãªã—ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 	modelToonRenderer_.SetVertexShader(ModelType::Model);
 
 	testModel_.Draw();
 
-	// Bone‘Î‰‚Ì’¸“_ƒVƒF[ƒ_[
+	// Boneå¯¾å¿œã®é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 	modelToonRenderer_.SetVertexShader(ModelType::Bone);
 	gameContext->GetPlayer()->Draw();
 
@@ -194,13 +194,13 @@ void StatusTest::RenderDepth() const
 
 void StatusTest::DrawScene(bool toonEnabled) const
 {
-	// ƒV[ƒ“‚ÌƒJƒƒ‰‚ğİ’è‚·‚é
+	// ã‚·ãƒ¼ãƒ³ã®ã‚«ãƒ¡ãƒ©ã‚’è¨­å®šã™ã‚‹
 	activeCamera_->ApplyCamera();
 
-	// ‚Â‚©‚í‚È‚¢‚à‚Ì
+	// ã¤ã‹ã‚ãªã„ã‚‚ã®
 	gameContext->GetGrid().Draw();
 
-	// ƒgƒD[ƒ“ƒVƒF[ƒ_[‚ğg‚í‚È‚¢ê‡
+	// ãƒˆã‚¥ãƒ¼ãƒ³ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ä½¿ã‚ãªã„å ´åˆ
 	if (!toonEnabled)
 	{
 		SetUsePixelShader(-1);
@@ -214,7 +214,7 @@ void StatusTest::DrawScene(bool toonEnabled) const
 		return;
 	}
 
-	// ƒgƒD[ƒ“•`‰æŠJn
+	// ãƒˆã‚¥ãƒ¼ãƒ³æç”»é–‹å§‹
 	modelToonRenderer_.BeginPass();
 
 	const auto drawActor = [this](const ModelObject& model)

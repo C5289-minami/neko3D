@@ -1,10 +1,10 @@
-#include "DebugScene.h"
+ï»¿#include "DebugScene.h"
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
 #include "SceneManager.h"
 #include "StatusUI.h"
 
-// Scene‚ÌInitˆ—“™‚ÅƒvƒŒƒCƒ„[‰Šú‰»
+// Sceneã®Initå‡¦ç†ç­‰ã§ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼åˆæœŸåŒ–
 void TestScene::Init()
 {
     DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
@@ -21,13 +21,13 @@ void TestScene::Update(float deltaTime)
 	static float aaa = 0.0f;
 	if (DxLib::CheckHitKey(KEY_INPUT_UP)) {
 		aaa += 0.01f;
-		if (aaa > 1.0f) aaa = 0.0f;
+		if (aaa > 1.5f) aaa = 0.0f;
 	}
 
 	StatusUI::SyncStatusBar(L"BossHealthGauge", aaa);
 	StatusUI::SyncStatusBar(L"PlayerUltGauge",  aaa);
-	StatusUI::SyncStatusBar(L"BossHealthGauge", aaa);
 	StatusUI::SyncStatusBar(L"BossDownGauge",   aaa);
+	StatusUI::SyncPlayerHealth((int)(aaa * 5));
 }
 
 void TestScene::Render() const

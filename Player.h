@@ -32,6 +32,7 @@ public:
 	static constexpr int MaxHealth = Const::PLAYER_MAX_HEALTH;
 	static constexpr float DamageRecoveryTime = Const::PLAYER_DAMAGE_RECOVERY_SECONDS;
 	int GetHealth() const { return health_; }
+	void SetHealth(int health) { health_ = health; }
 	bool IsDead() const { return health_ <= 0; }
 	bool IsDamaging() const { return GetCurrentState() == PlayerStateType::Damaging; }
 	PlayerStateType GetCurrentState() const { return stateMachine_.GetCurrentType(); }

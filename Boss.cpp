@@ -53,7 +53,10 @@ void Boss::Init()
 	const int AtkHitModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Attck_Hit);
 	atkHitAnimHnadle_ = AnimationHandle::FromIndex(AtkHitModelHandle, 0);
 	const int downModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Down);
-	flachAnimHandle_ = AnimationHandle::FromIndex(downModelHandle, 0);
+	downAnimHandle_ = AnimationHandle::FromIndex(downModelHandle, 0);
+	const int flinchModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Flinch);
+	flinchAnimHandle_ = AnimationHandle::FromIndex(flinchModelHandle, 0);
+
 	const int dieModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Die);
 	dieAnimHandle_ = AnimationHandle::FromIndex(dieModelHandle, 0);
 
@@ -89,38 +92,6 @@ void Boss::Reset()
 	if (clapSkill_ != nullptr) clapSkill_->Reset();
 	if (slamSkill_ != nullptr) slamSkill_->Reset();
 
-	// アニメーションハンドルを初期化する。
-	const int idleModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Idle);
-	idleAnimHandle_ = AnimationHandle::FromIndex(idleModelHandle, 0);
-
-	const int clapModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Nekodamashi);
-	ClapAnimHandle_ = AnimationHandle::FromIndex(clapModelHandle, 0);
-
-	const int sippoModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Sippo);
-	tailWhipAnimHandle_ = AnimationHandle::FromIndex(sippoModelHandle, 0);
-
-	const int AtkHitModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Attck_Hit);
-	atkHitAnimHnadle_ = AnimationHandle::FromIndex(AtkHitModelHandle, 0);
-
-	const int downModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Down);
-	flachAnimHandle_ = AnimationHandle::FromIndex(downModelHandle, 0);
-
-	const int dieModelHandle = RM().GetModel(ResourceKeys::Model_BossAnim_Die);
-	dieAnimHandle_ = AnimationHandle::FromIndex(dieModelHandle, 0);
-
-	// 死亡モデルは本体と同じテクスチャを使うため、Bossモデルのテクスチャを共有する。
-	//const int baseModelHandle = RM().GetModel(ResourceKeys::Model_Boss);
-	//const int baseTextureCount = DxLib::MV1GetTextureNum(baseModelHandle);
-	//const int dieTextureCount = DxLib::MV1GetTextureNum(dieModelHandle);
-	//if (baseTextureCount > 0)
-	//{
-	//	const int sharedTextureHandle = DxLib::MV1GetTextureGraphHandle(baseModelHandle, 0);
-	//	if (sharedTextureHandle != -1)
-	//	{
-	//		for (int textureIndex = 0; textureIndex < dieTextureCount; ++textureIndex)
-	//			DxLib::MV1SetTextureGraphHandle(dieModelHandle, textureIndex, sharedTextureHandle, FALSE);
-	//	}
-	//}
 
 	// 初期アニメーションを再生する。
 	animation_.Play3D(
@@ -135,11 +106,11 @@ void Boss::Reset()
 
 void Boss::TakeDamage(int damage)
 {
-	if (damage > 0 && health_ > 0)
-	{
-		hitScaleTimeRemaining_ = HitScaleDuration-0.15f;  // ダメージを受けた瞬間にスケールを大きくする時間を設定する。
-		model_.SetDrawScaleMultiplier(HitScaleMultiplier);// ダメージを受けた瞬間にスケールを大きくする。
-	}
+  if (damage <= 0 || health_ <= 0)
+		return;
+
+	hitScaleTimeRemaining_ = HitScaleDuration - 0.15f;  // ダメージを受けた瞬間にスケールを大きくする時間を設定する。
+	model_.SetDrawScaleMultiplier(HitScaleMultiplier);// ダメージを受けた瞬間にスケールを大きくする。
 
 	damageTakenThisFrame_ = true;
 	// ダメージを受けたらHPを減らす。
@@ -162,6 +133,10 @@ void Boss::TakeDamage(int damage)
 		health_ = 0;
 		stateMachine_.ChangeState(BossStateType::Die);
 	}
+	else if (stateMachine_.GetCurrentType() != BossStateType::Down)
+	{
+		stateMachine_.ChangeState(BossStateType::Flinch);
+	}
 
 }
 
@@ -169,8 +144,8 @@ void Boss::ApplyDownGaugeDamage(float damage)
 {
 	if (health_ <= 0 || !std::isfinite(damage) || damage <= 0.0f) return;
 	SetDownGauge(downGauge_ - damage);
-	if (downGauge_ <= 0.0f && GetCurrentState() != BossStateType::Flinch)
-		stateMachine_.ChangeState(BossStateType::Flinch);
+   if (downGauge_ <= 0.0f && GetCurrentState() != BossStateType::Down)
+		stateMachine_.ChangeState(BossStateType::Down);
 }
 
 void Boss::UpdateDown(float deltaTime)
@@ -213,9 +188,9 @@ void Boss::Update(float deltaTime)
 	if (damageTakenThisFrame_) UpdateDown(deltaTime);
 
 	if (health_ > 0 && downGauge_ <= 0.0f &&
-		stateMachine_.GetCurrentType() != BossStateType::Flinch)
+        stateMachine_.GetCurrentType() != BossStateType::Down)
 	{
-		stateMachine_.ChangeState(BossStateType::Flinch);
+       stateMachine_.ChangeState(BossStateType::Down);
 	}
 
 }
@@ -293,7 +268,8 @@ AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 	case BossAnimType::TailWhip: return tailWhipAnimHandle_;
 	case BossAnimType::Clap: return ClapAnimHandle_;
 	case BossAnimType::Slam: return atkHitAnimHnadle_;
-	case BossAnimType::Flach: return flachAnimHandle_;
+	case BossAnimType::Flinch: return flinchAnimHandle_;
+	case BossAnimType::Down:return downAnimHandle_;
 	case BossAnimType::Die: return dieAnimHandle_;
 	default:
 		DxPlus::Utils::FatalError(L"アニメーションハンドルを取得できませんでした。GetAnimationHandleを確認してください。");
@@ -304,8 +280,9 @@ AnimationHandle Boss::GetAnimationHandle(BossAnimType::Type type) const
 bool Boss::UseSkill(BossAttackType type)
 {
 	const BossStateType currentState = stateMachine_.GetCurrentType();
-	if (currentState == BossStateType::Attack ||
+    if (currentState == BossStateType::Attack ||
 		currentState == BossStateType::Flinch ||
+		currentState == BossStateType::Down ||
 		currentState == BossStateType::Die)
 		return false;
 
@@ -424,7 +401,7 @@ bool Boss::IsHitByAttackSphere(const Collision::Sphere& sphere, const Collision:
 		return false;
 
 	const auto state = GetCurrentState();
-	if (state == BossStateType::Flinch)
+ if (state == BossStateType::Down)
 		return downHurtSphere.radius > 0.0f && Collision::IsHitSphereSphere(sphere, downHurtSphere);
 
 	if (state != BossStateType::Attack)

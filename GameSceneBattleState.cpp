@@ -74,7 +74,7 @@ void GameSceneBattleState::Enter()
     boss.SetAIActive(false);
 
     StatusUI::InitBoss();
-    StatusUI::InitPlayer(player);
+    StatusUI::InitPlayer(player->GetCharData().name);
 
     gameScene_.SetDrawPlayerShadow(true);
 }
@@ -226,6 +226,9 @@ void GameSceneBattleState::Tick(float deltaTime)
         L"BossDownGauge",
         1.0f - boss.GetDownGaugeProgress()
     );
+
+    StatusUI::SyncPlayerHealth(player->GetHealth());
+
 
     DxPlus::Debug::SetFormatString(
         L"Player Health: %d / %d"

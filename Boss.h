@@ -155,7 +155,8 @@ private:
 	bool currentAnimLoop_{ true };
 	AnimationHandle idleAnimHandle_{};
 	AnimationHandle tailWhipAnimHandle_{};
-	AnimationHandle flachAnimHandle_{};
+	AnimationHandle flinchAnimHandle_{};
+	AnimationHandle downAnimHandle_{};
 	AnimationHandle atkHitAnimHnadle_{};
 	AnimationHandle dieAnimHandle_{};
 	AnimationHandle ClapAnimHandle_{};

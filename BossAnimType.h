@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace BossAnimType
 {
@@ -8,7 +8,8 @@ namespace BossAnimType
         TailWhip,
         Slam,
         Clap,
-        Flach,
+        Flinch,
+        Down,
         Die,
     };
 }

@@ -1,0 +1,16 @@
+﻿#pragma once
+#include "BossBaseState.h"
+
+class BossDownState : public BossBaseState
+{
+public:
+    BossDownState(BossStateMachine& stateMachine, Boss& boss);
+
+    void Enter() override;
+    void Tick(float deltaTime) override;
+    void Exit() override;
+
+private:
+    float remainingSeconds_{};
+    bool reachedLoopPoint_{};
+};
