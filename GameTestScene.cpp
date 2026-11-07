@@ -530,7 +530,7 @@ void GameTestScene::DrawImGui()
 		if (ImGui::Button(u8"Boss.Reset"))
 			boss.Reset();
 
-		if (ImGui::Button(u8"Down (Flinch)"))
+		if (ImGui::Button(u8"Down"))
 			boss.SetDownGauge(0.0f);
 
 		float downHurtRadius = stage.GetBossDownHurtRadius();
