@@ -759,6 +759,7 @@
     <ClInclude Include="CameraShakeType.h">
       <Filter>10_Core\Camera\CameraShake</Filter>
     </ClInclude>
+    <ClInclude Include="BossDownState.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -1079,6 +1080,7 @@
     <ClCompile Include="GameScene.cpp">
       <Filter>30_Scenes\Game</Filter>
     </ClCompile>
+    <ClCompile Include="BossDownState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Config\toon.json">

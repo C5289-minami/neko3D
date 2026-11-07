@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 enum class BossStateType
 {
@@ -7,5 +7,6 @@ enum class BossStateType
     Walk,
     Attack,
     Flinch,
+    Down,
     Die,
 };

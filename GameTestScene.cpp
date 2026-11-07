@@ -606,6 +606,49 @@ void GameTestScene::DrawImGui()
 		if (ImGui::Button(u8"knock Back"))
 			player->ApplyKnockback({ 1,0,0 }, 10000, 0.1f);
 
+		// Player Status Test
+		ImGui::Separator();
+		ImGui::TextUnformatted(u8"Player Status Test");
+
+		ImGui::Text("HP: %d / %d",
+			player->GetHealth(),
+			Player::MaxHealth);
+
+		if (ImGui::Button(u8"HP MAX"))
+			player->SetHealth(Player::MaxHealth);
+
+		ImGui::SameLine();
+		if (ImGui::Button(u8"HP 0"))
+			player->SetHealth(0);
+
+		if (ImGui::Button(u8"HP -1"))
+			player->TakeDamage(1);
+
+
+		ImGui::Separator();
+
+		ImGui::Text("Ultimate: %.1f / %.1f",
+			player->GetUltimateGauge(),
+			Player::UltimateGaugeMax);
+
+		float ultimateGauge = player->GetUltimateGauge();
+
+		if (ImGui::SliderFloat(
+			u8"必殺ゲージ",
+			&ultimateGauge,
+			0.0f,
+			Player::UltimateGaugeMax))
+		{
+			player->SetUltimateGauge(ultimateGauge);
+		}
+
+		if (ImGui::Button(u8"必殺ゲージ MAX"))
+			player->SetUltimateGauge(Player::UltimateGaugeMax);
+
+		ImGui::SameLine();
+		if (ImGui::Button(u8"必殺ゲージ 0"))
+			player->SetUltimateGauge(0.0f);
+
 		ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
 
 		ImGui::End();

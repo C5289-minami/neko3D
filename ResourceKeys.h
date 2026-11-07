@@ -62,6 +62,7 @@ namespace ResourceKeys
 	inline constexpr const wchar_t* Model_BossAnim_Sippo = L"BossAnimSippo";
 	inline constexpr const wchar_t* Model_BossAnim_Attck_Hit = L"BossAnimAtkHit";
 	inline constexpr const wchar_t* Model_BossAnim_Down = L"BossAnimDown";
+	inline constexpr const wchar_t* Model_BossAnim_Flinch = L"BossAnimFlinch";
 	inline constexpr const wchar_t* Model_BossAnim_Die = L"BossAnimDie";
 	inline constexpr const wchar_t* Model_BossAnim_Nekodamashi = L"BossAnimNekodamashi";
 
