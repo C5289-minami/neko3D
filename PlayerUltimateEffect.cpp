@@ -38,7 +38,7 @@ void PlayerUltimateEffect::Update(Player& player, Boss& boss, const Stage& stage
 
 	for (auto& shot : shots_)
 	{
-        UpdateShot(shot, player, boss, body, deltaTime);
+		UpdateShot(shot, player, boss, body, deltaTime);
 		if (boss.GetHealth() <= 0)
 		{
 			Clear(player);
@@ -50,7 +50,7 @@ void PlayerUltimateEffect::Update(Player& player, Boss& boss, const Stage& stage
 }
 
 void PlayerUltimateEffect::UpdateShot(
-    Shot& shot, Player& player, Boss& boss, const Collision::Capsule& body, float deltaTime)
+	Shot& shot, Player& player, Boss& boss, const Collision::Capsule& body, float deltaTime)
 {
 	const Vec3 previousPosition = shot.position;
 	MoveShot(shot, deltaTime);
@@ -58,10 +58,10 @@ void PlayerUltimateEffect::UpdateShot(
 	if (HitsBoss(previousPosition, shot.position, body))
 	{
 		FinishShot(shot);
-        player.CameraShakeRequest(CameraShakeType::Mixed, 0.6f, 40.0f);
+		player.CameraShakeRequest(CameraShakeType::Mixed, 0.6f, 40.0f);
 		if constexpr (Const::PLAYER_ULTIMATE_DAMAGE > 0)
 			boss.TakeDamage(Const::PLAYER_ULTIMATE_DAMAGE);
-     boss.ApplyDownGaugeDamage(Const::BOSS_DOWN_GAUGE_MAX);
+		boss.ApplyDownGaugeDamage(Const::BOSS_DOWN_GAUGE_MAX);
 		return;
 	}
 

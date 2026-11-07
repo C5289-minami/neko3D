@@ -7,195 +7,195 @@
 
 namespace
 {
-    std::wstring selectedPlayerBackground;
+	std::wstring selectedPlayerBackground;
 
-    std::wstring PlayerHeartKey(int index)
-    {
-        return L"PlayerHeart" + std::to_wstring(index);
-    }
+	std::wstring PlayerHeartKey(int index)
+	{
+		return L"PlayerHeart" + std::to_wstring(index);
+	}
 
-    const std::wstring StatusKeys[] =
-    {
-        L"playerULTGaugeBackMike",
-        L"playerULTGaugeBackSabi",
-        L"playerULTGaugeBackKuro",
-        L"PlayerUltGauge",
-        L"BossHealthGauge",
-        L"BossDownGauge"
-    };
+	const std::wstring StatusKeys[] =
+	{
+		L"playerULTGaugeBackMike",
+		L"playerULTGaugeBackSabi",
+		L"playerULTGaugeBackKuro",
+		L"PlayerUltGauge",
+		L"BossHealthGauge",
+		L"BossDownGauge"
+	};
 }
 
 void StatusUI::InitPlayer(const std::string& characterName)
 {
-    const DxPlus::Vec2 backgroundPosition(
-        DxPlus::CLIENT_WIDTH * 0.48f - 45,
-        DxPlus::CLIENT_HEIGHT * 0.845f);
+	const DxPlus::Vec2 backgroundPosition(
+		DxPlus::CLIENT_WIDTH * 0.48f - 45,
+		DxPlus::CLIENT_HEIGHT * 0.845f);
 
-    UIM().CreateImageUI(
-        L"playerULTGaugeBackMike",
-        ResourceKeys::MikeStatusBack,
-        backgroundPosition
-        );
-    UIM().CreateImageUI(
-        L"playerULTGaugeBackSabi",
-        ResourceKeys::SabiStatusBack,
-        backgroundPosition
-        );
-    UIM().CreateImageUI(
-        L"playerULTGaugeBackKuro",
-        ResourceKeys::KuroStatusBack,
-        backgroundPosition
-        );
+	UIM().CreateImageUI(
+		L"playerULTGaugeBackMike",
+		ResourceKeys::MikeStatusBack,
+		backgroundPosition
+	);
+	UIM().CreateImageUI(
+		L"playerULTGaugeBackSabi",
+		ResourceKeys::SabiStatusBack,
+		backgroundPosition
+	);
+	UIM().CreateImageUI(
+		L"playerULTGaugeBackKuro",
+		ResourceKeys::KuroStatusBack,
+		backgroundPosition
+	);
 
-    const wchar_t* selectedBackground =
-        characterName == "ぎし" ? L"playerULTGaugeBackSabi" :
-        characterName == "ゆう" ? L"playerULTGaugeBackKuro" :
-        L"playerULTGaugeBackMike";
+	const wchar_t* selectedBackground =
+		characterName == "ぎし" ? L"playerULTGaugeBackSabi" :
+		characterName == "ゆう" ? L"playerULTGaugeBackKuro" :
+		L"playerULTGaugeBackMike";
 
-    selectedPlayerBackground = selectedBackground;
+	selectedPlayerBackground = selectedBackground;
 
-    for (const auto* key : {
-        L"playerULTGaugeBackMike",
-        L"playerULTGaugeBackSabi",
-        L"playerULTGaugeBackKuro" })
-    {
-        if (auto* ui = UIM().GetUI(key))
-            ui->SetFalse();
-    }
+	for (const auto* key : {
+		L"playerULTGaugeBackMike",
+		L"playerULTGaugeBackSabi",
+		L"playerULTGaugeBackKuro" })
+	{
+		if (auto* ui = UIM().GetUI(key))
+			ui->SetFalse();
+	}
 
-    UIM().CreateSpriteStudioUI(
-        L"PlayerUltGauge",
-        ResourceKeys::SpriteStudio_PlayerUltGauge,
-        DxPlus::Vec2(DxPlus::CLIENT_WIDTH * 0.5f,
-            DxPlus::CLIENT_HEIGHT * 0.5f),
-        "playerult");
+	UIM().CreateSpriteStudioUI(
+		L"PlayerUltGauge",
+		ResourceKeys::SpriteStudio_PlayerUltGauge,
+		DxPlus::Vec2(DxPlus::CLIENT_WIDTH * 0.5f,
+			DxPlus::CLIENT_HEIGHT * 0.5f),
+		"playerult");
 
-    UIM().GetUI(L"PlayerUltGauge")->SetFalse();
+	UIM().GetUI(L"PlayerUltGauge")->SetFalse();
 
-    const auto* background = RM().GetSprite(ResourceKeys::MikeStatusBack);
-    if (!background) return;
+	const auto* background = RM().GetSprite(ResourceKeys::MikeStatusBack);
+	if (!background) return;
 
-    float width = 0.0f;
-    float height = 0.0f;
-    DxLib::GetGraphSizeF(background->GetID(), &width, &height);
+	float width = 0.0f;
+	float height = 0.0f;
+	DxLib::GetGraphSizeF(background->GetID(), &width, &height);
 
-    const float left = backgroundPosition.x - width * 0.5f;
-    
-    const float rowStart = left + width * 0.35f;
-    
-    const float slotWidth = width * 0.59f / Player::MaxHealth;
-    const float rowY = backgroundPosition.y - height * 0.03f;
-    
-    constexpr float heartScale = 0.7f;
+	const float left = backgroundPosition.x - width * 0.5f;
 
-    for (int i = 0; i < Player::MaxHealth; ++i)
-    {
-        const DxPlus::Vec2 position(rowStart + (i + 0.5f) * slotWidth, rowY);
-        const auto key = PlayerHeartKey(i);
-        auto* heart = UIM().GetUI(key);
-        if (!heart)
-            heart = UIM().CreateImageUI(key, ResourceKeys::PlayerHeart, position);
-        heart->SetScale(heartScale);
-        heart->SetFalse();
-    }
+	const float rowStart = left + width * 0.35f;
+
+	const float slotWidth = width * 0.59f / Player::MaxHealth;
+	const float rowY = backgroundPosition.y - height * 0.03f;
+
+	constexpr float heartScale = 0.7f;
+
+	for (int i = 0; i < Player::MaxHealth; ++i)
+	{
+		const DxPlus::Vec2 position(rowStart + (i + 0.5f) * slotWidth, rowY);
+		const auto key = PlayerHeartKey(i);
+		auto* heart = UIM().GetUI(key);
+		if (!heart)
+			heart = UIM().CreateImageUI(key, ResourceKeys::PlayerHeart, position);
+		heart->SetScale(heartScale);
+		heart->SetFalse();
+	}
 }
 
 void StatusUI::InitBoss()
 {
-    const DxPlus::Vec2 backgroundPosition(
-        DxPlus::CLIENT_WIDTH * 0.5f,
-        DxPlus::CLIENT_HEIGHT * 0.5f);
+	const DxPlus::Vec2 backgroundPosition(
+		DxPlus::CLIENT_WIDTH * 0.5f,
+		DxPlus::CLIENT_HEIGHT * 0.5f);
 
-    UIM().CreateSpriteStudioUI(
-        L"BossHealthGauge",
-        ResourceKeys::SpriteStudio_BossHealthGauge,
-        backgroundPosition,
-        "Boss_hp");
+	UIM().CreateSpriteStudioUI(
+		L"BossHealthGauge",
+		ResourceKeys::SpriteStudio_BossHealthGauge,
+		backgroundPosition,
+		"Boss_hp");
 
-    UIM().CreateSpriteStudioUI(
-        L"BossDownGauge",
-        ResourceKeys::SpriteStudio_BossDownGauge,
-        DxPlus::Vec2(DxPlus::CLIENT_WIDTH * 0.5f,
-            DxPlus::CLIENT_HEIGHT * 0.5f),
-        "Boss_down");
+	UIM().CreateSpriteStudioUI(
+		L"BossDownGauge",
+		ResourceKeys::SpriteStudio_BossDownGauge,
+		DxPlus::Vec2(DxPlus::CLIENT_WIDTH * 0.5f,
+			DxPlus::CLIENT_HEIGHT * 0.5f),
+		"Boss_down");
 
-   UIM().GetUI(L"BossHealthGauge")->SetFalse();
-    UIM().GetUI(L"BossDownGauge")->SetFalse();
+	UIM().GetUI(L"BossHealthGauge")->SetFalse();
+	UIM().GetUI(L"BossDownGauge")->SetFalse();
 }
 void StatusUI::SyncStatusBar(const std::wstring& key, float progress)
 {
-    auto* ui = UIM().GetSpriteStudioUI(key);
+	auto* ui = UIM().GetSpriteStudioUI(key);
 
-    if (!ui) return;
+	if (!ui) return;
 
-    ui->SetProgress(std::clamp(progress, 0.0f, 1.0f));
+	ui->SetProgress(std::clamp(progress, 0.0f, 1.0f));
 }
 
 void StatusUI::Open()
 {
-    const std::wstring keys[] =
-    {
-        L"playerULTGaugeBackMike",
-        L"playerULTGaugeBackSabi",
-        L"playerULTGaugeBackKuro",
-        L"PlayerUltGauge",
-        //L"BossStatusBackground",
-        L"BossHealthGauge",
-        L"BossDownGauge"
-    };
+	const std::wstring keys[] =
+	{
+		L"playerULTGaugeBackMike",
+		L"playerULTGaugeBackSabi",
+		L"playerULTGaugeBackKuro",
+		L"PlayerUltGauge",
+		//L"BossStatusBackground",
+		L"BossHealthGauge",
+		L"BossDownGauge"
+	};
 
-    for (const auto& key : keys)
-    {
-        if (auto* ui = UIM().GetUI(key))
-        {
-            if (key == L"PlayerUltGauge" ||
-                key == L"BossHealthGauge" ||
-                key == L"BossDownGauge" ||
-                key == selectedPlayerBackground)
-            {
-                ui->SetTrue();
-            }
-        }
-    }
+	for (const auto& key : keys)
+	{
+		if (auto* ui = UIM().GetUI(key))
+		{
+			if (key == L"PlayerUltGauge" ||
+				key == L"BossHealthGauge" ||
+				key == L"BossDownGauge" ||
+				key == selectedPlayerBackground)
+			{
+				ui->SetTrue();
+			}
+		}
+	}
 
-    for (int i = 0; i < Player::MaxHealth; ++i)
-    {
-        if (auto* heart = UIM().GetUI(PlayerHeartKey(i)))
-            heart->SetTrue();
-    }
+	for (int i = 0; i < Player::MaxHealth; ++i)
+	{
+		if (auto* heart = UIM().GetUI(PlayerHeartKey(i)))
+			heart->SetTrue();
+	}
 }
 
 void StatusUI::Hide()
 {
-    const std::wstring keys[] =
-    {
-        L"playerULTGaugeBackMike",
-        L"playerULTGaugeBackSabi",
-        L"playerULTGaugeBackKuro",
-        L"PlayerUltGauge",
-        //L"BossStatusBackground",
-        L"BossHealthGauge",
-        L"BossDownGauge"
-    };
+	const std::wstring keys[] =
+	{
+		L"playerULTGaugeBackMike",
+		L"playerULTGaugeBackSabi",
+		L"playerULTGaugeBackKuro",
+		L"PlayerUltGauge",
+		//L"BossStatusBackground",
+		L"BossHealthGauge",
+		L"BossDownGauge"
+	};
 
-    for (const auto& key : keys)
-    {
-        if (auto* ui = UIM().GetUI(key))
-            ui->Hide();
-    }
+	for (const auto& key : keys)
+	{
+		if (auto* ui = UIM().GetUI(key))
+			ui->Hide();
+	}
 
-    for (int i = 0; i < Player::MaxHealth; ++i)
-    {
-        if (auto* heart = UIM().GetUI(PlayerHeartKey(i)))
-            heart->SetFalse();
-    }
+	for (int i = 0; i < Player::MaxHealth; ++i)
+	{
+		if (auto* heart = UIM().GetUI(PlayerHeartKey(i)))
+			heart->SetFalse();
+	}
 }
 
 void StatusUI::Remove()
 {
-    for (const auto& key : StatusKeys)
-        UIM().RemoveUI(key);
+	for (const auto& key : StatusKeys)
+		UIM().RemoveUI(key);
 
-    for (int i = 0; i < Player::MaxHealth; ++i)
-        UIM().RemoveUI(PlayerHeartKey(i));
+	for (int i = 0; i < Player::MaxHealth; ++i)
+		UIM().RemoveUI(PlayerHeartKey(i));
 }
