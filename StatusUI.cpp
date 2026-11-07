@@ -28,8 +28,8 @@ namespace
 void StatusUI::InitPlayer(const std::string& characterName)
 {
 	const DxPlus::Vec2 backgroundPosition(
-		DxPlus::CLIENT_WIDTH * 0.48f - 45,
-		DxPlus::CLIENT_HEIGHT * 0.845f);
+		DxPlus::CLIENT_WIDTH * 0.5f,
+		DxPlus::CLIENT_HEIGHT * 0.88f);
 
 	UIM().CreateImageUI(
 		L"playerULTGaugeBackMike",
@@ -66,8 +66,8 @@ void StatusUI::InitPlayer(const std::string& characterName)
 	UIM().CreateSpriteStudioUI(
 		L"PlayerUltGauge",
 		ResourceKeys::SpriteStudio_PlayerUltGauge,
-		DxPlus::Vec2(DxPlus::CLIENT_WIDTH * 0.5f,
-			DxPlus::CLIENT_HEIGHT * 0.5f),
+		DxPlus::Vec2(DxPlus::CLIENT_WIDTH * 0.5f + 80.0f,
+			DxPlus::CLIENT_HEIGHT * 0.537f),
 		"playerult");
 
 	UIM().GetUI(L"PlayerUltGauge")->SetFalse();
@@ -75,35 +75,41 @@ void StatusUI::InitPlayer(const std::string& characterName)
 	const auto* background = RM().GetSprite(ResourceKeys::MikeStatusBack);
 	if (!background) return;
 
-	float width = 0.0f;
-	float height = 0.0f;
-	DxLib::GetGraphSizeF(background->GetID(), &width, &height);
+	float scale = 0.7f;
 
-	const float left = backgroundPosition.x - width * 0.5f;
+	float backgroundWidth = 0.0f;
+	float backgroundHeight = 0.0f;
+	DxLib::GetGraphSizeF(background->GetID(), &backgroundWidth, &backgroundHeight);
 
-	const float rowStart = left + width * 0.35f;
 
-	const float slotWidth = width * 0.59f / Player::MaxHealth;
-	const float rowY = backgroundPosition.y + height * 0.5f;
-
-	constexpr float heartScale = 0.7f;
+	const float left = backgroundPosition.x - backgroundWidth * 0.5f;
+	const float rowStart = left + backgroundWidth * 0.29f; // HPのStartPos
+	const float slotWidth = 76.0f * scale * 1.25f; // 並べる間隔
+	const float rowY = backgroundPosition.y + backgroundHeight * 0.4f;
 
 	for (int i = 0; i < Player::MaxHealth; ++i)
 	{
-		const DxPlus::Vec2 position(rowStart + (i + 0.5f) * slotWidth, rowY);
+		const DxPlus::Vec2 position(
+			rowStart + (i + 0.5f) * slotWidth,
+			rowY
+		);
+
 		const auto key = PlayerHeartKey(i);
 		auto* heart = UIM().GetUI(key);
+
 		if (!heart)
 			heart = UIM().CreateImageUI(key, ResourceKeys::PlayerHeart, position);
-		heart->SetScale(heartScale);
+
 		heart->SetFalse();
+		heart->SetCenter({ 0.5f,0.5f });
+		heart->SetScale(scale);
 	}
 }
 
 void StatusUI::InitBoss()
 {
 	const DxPlus::Vec2 backgroundPosition(
-		DxPlus::CLIENT_WIDTH * 0.5f,
+		DxPlus::CLIENT_WIDTH * 0.5f + 10,
 		DxPlus::CLIENT_HEIGHT * 0.5f);
 
 	UIM().CreateSpriteStudioUI(
@@ -115,8 +121,7 @@ void StatusUI::InitBoss()
 	UIM().CreateSpriteStudioUI(
 		L"BossDownGauge",
 		ResourceKeys::SpriteStudio_BossDownGauge,
-		DxPlus::Vec2(DxPlus::CLIENT_WIDTH * 0.5f,
-			DxPlus::CLIENT_HEIGHT * 0.5f),
+		backgroundPosition,
 		"Boss_down");
 
 	UIM().GetUI(L"BossHealthGauge")->SetFalse();
