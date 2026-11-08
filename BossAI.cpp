@@ -190,7 +190,7 @@ bool BossAI::TurnToTarget(const Vec3& targetPosition, float deltaTime)
     float yawError = NormalizeAngle(targetYaw - boss_.GetYaw());
 
     constexpr float finishAngle = 1.0f * DxPlus::Deg2Rad;
-    constexpr float maxRotationSpeed = 3.0f;
+    constexpr float maxRotationSpeed = 2.5f;
     constexpr float minRotationSpeed = 0.15f;
     //constexpr float acceleration = 3.0f;
 
