@@ -98,6 +98,7 @@ namespace ResourceKeys
 	inline constexpr const wchar_t* Music_Title = L"MusicTitle";
 	inline constexpr const wchar_t* Music_Battle = L"MusicBattle";
 	inline constexpr const wchar_t* Sound_MenuConfirm = L"SoundMenuConfirm";
+	inline constexpr const wchar_t* Sound_BossEntrance = L"SoundBossEntrance";
 	inline constexpr const wchar_t* Sound_SelectTaka = L"SoundSelectTaka";
 	inline constexpr const wchar_t* Sound_SelectGishi = L"SoundSelectGishi";
 	inline constexpr const wchar_t* Sound_SelectYu = L"SoundSelectYu";
