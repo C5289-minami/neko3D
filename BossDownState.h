@@ -12,5 +12,6 @@ public:
 
 private:
     float remainingSeconds_{};
-    bool reachedLoopPoint_{};
+    bool reachedLoopPoint_{ false };
+    bool downLoopStarted_{ false };
 };

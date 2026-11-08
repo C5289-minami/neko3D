@@ -29,6 +29,7 @@ void BossDownState::Enter()
         Const::BOSS_FLINCH_HOLD_SECONDS / SequenceRate;
 
     reachedLoopPoint_ = false;
+    downLoopStarted_ = false;
 
     boss_.StopRotation();
     boss_.StopMove();
@@ -56,8 +57,7 @@ void BossDownState::Tick(float deltaTime)
 
     boss_.UpdateAnimation(deltaTime);
 
-    // Flinchが5フレーム目に到達したら、
-    // Downへのブレンドを開始する。
+    // Flinch終了後、Downへのブレンドを開始する。
     if (!reachedLoopPoint_ &&
         boss_.GetAnimation().IsFinished())
     {
@@ -67,30 +67,38 @@ void BossDownState::Tick(float deltaTime)
             BossAnimType::Down,
             true,
             true,
-
-            // 速度倍率が大きいほどブレンド時間を短くする。
             BaseDownBlendSeconds / SequenceRate,
-
             Motion::Easing::EaseIn
         );
 
-        // ブレンド完了後に再生されるDownアニメーションの速度。
-        boss_.GetAnimation().SetSpeedScale(
-            Const::ANIM_FPS
-        );
-
+        boss_.GetAnimation().SetSpeedScale(Const::ANIM_FPS);
         return;
     }
 
-    // Flinch再生中とDownへのブレンド中は、
-    // ダウン維持時間を減らさない。
-    if (!reachedLoopPoint_ ||
-        boss_.GetAnimation().IsBlending())
+    // Downへのブレンド完了を1回だけ検出する。
+    if (reachedLoopPoint_ &&
+        !downLoopStarted_ &&
+        !boss_.GetAnimation().IsBlending())
+    {
+        downLoopStarted_ = true;
+
+        // ここにループ開始時の処理を書く。
+
+		// 画面を縦方向に揺らす。
+        boss_.CameraShakeRequest(
+            CameraShakeType::Vertical,
+            0.4f,
+            30.0f,
+            80.0f
+		);
+    }
+
+    // Flinch再生中とブレンド中は維持時間を減らさない。
+    if (!downLoopStarted_)
     {
         return;
     }
 
-    // Downのループ再生開始後に時間を計測する。
     remainingSeconds_ -= deltaTime;
 
     if (remainingSeconds_ <= 0.0f)
@@ -98,7 +106,6 @@ void BossDownState::Tick(float deltaTime)
         stateMachine_.ChangeState(BossStateType::Idle);
     }
 }
-
 void BossDownState::Exit()
 {
     boss_.StartRotation();
