@@ -283,6 +283,9 @@
     <Filter Include="40_Gameplay\Actors\Boss\AI">
       <UniqueIdentifier>{e00af25a-1546-47b0-997a-118885126581}</UniqueIdentifier>
     </Filter>
+    <Filter Include="40_Gameplay\Actors\Boss\State\Down">
+      <UniqueIdentifier>{a0ac36fa-1ec3-40c2-889a-c360388cc56e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -759,7 +762,9 @@
     <ClInclude Include="CameraShakeType.h">
       <Filter>10_Core\Camera\CameraShake</Filter>
     </ClInclude>
-    <ClInclude Include="BossDownState.h" />
+    <ClInclude Include="BossDownState.h">
+      <Filter>40_Gameplay\Actors\Boss\State\Down</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -1080,7 +1085,9 @@
     <ClCompile Include="GameScene.cpp">
       <Filter>30_Scenes\Game</Filter>
     </ClCompile>
-    <ClCompile Include="BossDownState.cpp" />
+    <ClCompile Include="BossDownState.cpp">
+      <Filter>40_Gameplay\Actors\Boss\State\Down</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Config\toon.json">

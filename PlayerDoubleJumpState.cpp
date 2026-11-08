@@ -2,18 +2,49 @@
 #include "DxPlus/Debug.h"
 #include "Player.h"
 
-PlayerDoubleJumpState::PlayerDoubleJumpState(PlayerStateMachine& stateMachine, Player& player)
-	: PlayerBaseState(stateMachine, player)
+#include "PlayerDoubleJumpState.h"
+#include "DxPlus/Debug.h"
+#include "Player.h"
+
+namespace
+{
+    constexpr float DoubleJumpStartAnimFrame = 5.0f;
+}
+
+PlayerDoubleJumpState::PlayerDoubleJumpState(
+    PlayerStateMachine& stateMachine,
+    Player& player)
+    : PlayerBaseState(stateMachine, player)
 {
 }
 
 void PlayerDoubleJumpState::Enter()
 {
     player_.StopMove();
-    player_.SetAnimation(PlayerAnimType::Double_Jump, false);
+
+    // ブレンドなし、自動再生なしで即時切り替え。
+    player_.SetAnimation(
+        PlayerAnimType::Double_Jump,
+        false,
+        false,
+        0.0f
+    );
+
+    // 指定フレームから最後まで再生。
+    player_.GetAnimation().SetTime(
+        DoubleJumpStartAnimFrame
+    );
+
+    player_.GetAnimation().Start(
+        Const::ANIM_FPS
+    );
+
     player_.StartDoubleJump();
     stateMachine_.NotifyEvent(PlayerActionEvent::DoubleJumped);
-    DxPlus::Debug::SetFormatString(L"PlayerDoubleJumpState::Enter");
+
+    DxPlus::Debug::SetFormatString(
+        L"PlayerDoubleJumpState::Enter"
+    );
 }
 
 void PlayerDoubleJumpState::Tick(float deltaTime)
