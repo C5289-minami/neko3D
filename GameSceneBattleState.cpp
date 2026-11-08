@@ -73,10 +73,26 @@ void GameSceneBattleState::Enter()
     // 開幕演出中はボスAIを停止
     boss.SetAIActive(false);
 
-    StatusUI::InitBoss();
-    StatusUI::InitPlayer(player->GetCharData().name);
-
     gameScene_.SetDrawPlayerShadow(true);
+
+    // UI
+    {
+
+        StatusUI::InitBoss();
+        StatusUI::InitPlayer(player->GetCharData().name);
+    
+        auto* toLeap = UIM().GetUI(L"toLeapUI");
+        if (!toLeap)
+            toLeap = UIM().CreateImageUI(
+                L"toLeapUI",
+                ResourceKeys::TutorialToLeap,
+                {},
+                {1,0});
+        if (toLeap)
+        {
+            toLeap->SetFalse();
+        }
+    }
 }
 
 // ============================================================
@@ -271,6 +287,26 @@ void GameSceneBattleState::Tick(float deltaTime)
     );
 
     player->CheckFloor();
+
+    // 2階にいる間だけジャンプ案内UIを表示する。
+    if (auto* toLeap = UIM().GetUI(L"toLeapUI"))
+    {
+        const bool shouldShow = player->IsSecondFloor();
+
+        // SetTrue()を毎フレーム呼ぶと表示モーションが
+        // 最初からやり直されるため、状態が変わったときだけ切り替える。
+        if (shouldShow != toLeap->IsVisible())
+        {
+            if (shouldShow)
+            {
+                toLeap->SetTrue();
+            }
+            else
+            {
+                toLeap->SetFalse();
+            }
+        }
+    }
 
     // ========================================================
     // ボス本体へのジャンプ接触判定
@@ -598,4 +634,7 @@ void GameSceneBattleState::Exit()
     gameScene_.SetDrawPlayerShadow(false);
 
     StatusUI::Remove();
+
+    // BattleStateで生成したUIを削除する。
+    UIM().RemoveUI(L"toLeapUI");
 }

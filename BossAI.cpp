@@ -192,7 +192,7 @@ bool BossAI::TurnToTarget(const Vec3& targetPosition, float deltaTime)
     constexpr float finishAngle = 1.0f * DxPlus::Deg2Rad;
     constexpr float maxRotationSpeed = 3.0f;
     constexpr float minRotationSpeed = 0.15f;
-    constexpr float acceleration = 3.0f;
+    //constexpr float acceleration = 3.0f;
 
     float error = std::abs(yawError);
 
