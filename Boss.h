@@ -16,6 +16,7 @@
 #include "BossAttackType.h"
 #include "BossAI.h"
 #include "CameraShakeType.h"
+#include "Motion.h"
 
 enum class BossPhase
 {
@@ -63,9 +64,10 @@ public:
 	const ModelObject& GetModelObject() const { return model_; }
 	void SetAnimation(
 		BossAnimType::Type type,
-		bool loop = true,
-      bool playAfterBlend = true,
-		float blendSeconds = 0.15f
+		bool loop,
+		bool playAfterBlend = true,
+		float blendSeconds = 0.15f,
+		Motion::Easing blendEasing = Motion::Easing::Linear
 	);
 	float GetAnimTotalTime(BossAnimType::Type type) const;
 

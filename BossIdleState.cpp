@@ -1,4 +1,4 @@
-#include "BossIdleState.h"
+﻿#include "BossIdleState.h"
 #include "Boss.h"
 #include "Consts.h"
 
@@ -12,7 +12,7 @@ BossIdleState::BossIdleState(BossStateMachine& stateMachine, Boss& boss)
 void BossIdleState::Enter()
 {
     boss_.StopMove();
-    boss_.SetAnimation(BossAnimType::Idle);
+    boss_.SetAnimation(BossAnimType::Idle,true);
 }
 
 void BossIdleState::Tick(float deltaTime)

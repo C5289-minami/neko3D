@@ -363,7 +363,8 @@ void Boss::SetAnimation(
 	BossAnimType::Type type,
 	bool loop,
 	bool playAfterBlend,
-	float blendSeconds)
+	float blendSeconds,
+	Motion::Easing blendEasing)
 {
 	if (currentAnimType_ == type && currentAnimLoop_ == loop)
 		return;
@@ -377,10 +378,10 @@ void Boss::SetAnimation(
 		currentAnimLoop_,
 		Const::ANIM_FPS,
 		blendSeconds,
-		playAfterBlend
+		playAfterBlend,
+		blendEasing
 	);
 }
-
 float Boss::GetAnimTotalTime(BossAnimType::Type type) const
 {
 	float totalTime{};

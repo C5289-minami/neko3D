@@ -1,4 +1,4 @@
-#include "ModelAnimation.h"
+ï»¿#include "ModelAnimation.h"
 #include "DxLib.h"
 
 #include <algorithm>
@@ -142,7 +142,8 @@ void ModelAnimation::Play3D(
 	bool loop,
 	float speedScale,
 	float blendSeconds,
-	bool playImmediately)
+	bool playImmediately,
+	Motion::Easing blendEasing)
 {
 	Play3D(
 		modelHandle,
@@ -150,7 +151,8 @@ void ModelAnimation::Play3D(
 		loop,
 		speedScale,
 		blendSeconds,
-		playImmediately
+		playImmediately,
+		blendEasing
 	);
 }
 
@@ -160,7 +162,8 @@ void ModelAnimation::Play3D(
 	bool loop,
 	float speedScale,
 	float blendSeconds,
-	bool playImmediately)
+	bool playImmediately,
+	Motion::Easing blendEasing)
 {
 	if (modelHandle < 0 || !animation)
 		return;
@@ -173,7 +176,7 @@ void ModelAnimation::Play3D(
 		? (std::max)(0.0f, blendSeconds)
 		: 0.0f;
 
-	// ‰‰ñÄ¶A‚Ü‚½‚Íƒ‚ƒfƒ‹‚ª•Ï‚í‚Á‚½ê‡B
+	// åˆå›å†ç”Ÿã€ã¾ãŸã¯ãƒ¢ãƒ‡ãƒ«ãŒå¤‰ã‚ã£ãŸå ´åˆã€‚
 	if (modelHandle_ != modelHandle || !currentAnimation_)
 	{
 		Reset();
@@ -202,14 +205,14 @@ void ModelAnimation::Play3D(
 
 	loop_ = loop;
 
-	// “¯‚¶Ø‚è‘Ö‚¦æ‚ªw’è‚³‚ê‘±‚¯‚½ê‡B
+	// åŒã˜åˆ‡ã‚Šæ›¿ãˆå…ˆãŒæŒ‡å®šã•ã‚Œç¶šã‘ãŸå ´åˆã€‚
 	if (nextAnimation_ && nextAnimationHandle_ == animation)
 	{
 		nextPlayImmediately_ = playImmediately;
 		return;
 	}
 
-	// Œ»İ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚É–ß‚·ê‡B
+	// ç¾åœ¨ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã«æˆ»ã™å ´åˆã€‚
 	if (currentAnimationHandle_ == animation)
 	{
 		if (nextAnimation_)
@@ -217,8 +220,7 @@ void ModelAnimation::Play3D(
 			nextAnimation_.Reset();
 			nextAnimationHandle_ = {};
 
-			blendElapsed_ = 0.0f;
-			blendDuration_ = 0.0f;
+			blendMotion_.Reset();
 
 			nextPlayImmediately_ = true;
 			startRequested_ = false;
@@ -231,7 +233,7 @@ void ModelAnimation::Play3D(
 			);
 		}
 
-		// Ä¶I—¹Ï‚İ‚È‚çæ“ª‚©‚çÄ¶‚µ’¼‚·B
+		// å†ç”Ÿçµ‚äº†æ¸ˆã¿ãªã‚‰å…ˆé ­ã‹ã‚‰å†ç”Ÿã—ç›´ã™ã€‚
 		if (finished_)
 		{
 			currentElapsed_ = 0.0f;
@@ -248,7 +250,7 @@ void ModelAnimation::Play3D(
 		return;
 	}
 
-	// ƒuƒŒƒ“ƒhŠÔ‚ª0‚È‚ç‘¦À‚ÉØ‚è‘Ö‚¦‚éB
+	// ãƒ–ãƒ¬ãƒ³ãƒ‰æ™‚é–“ãŒ0ãªã‚‰å³åº§ã«åˆ‡ã‚Šæ›¿ãˆã‚‹ã€‚
 	if (blendSeconds <= 0.0f)
 	{
 		nextAnimation_.Reset();
@@ -263,8 +265,7 @@ void ModelAnimation::Play3D(
 		currentAnimationHandle_ = animation;
 		currentElapsed_ = 0.0f;
 
-		blendElapsed_ = 0.0f;
-		blendDuration_ = 0.0f;
+		blendMotion_.Reset();
 
 		nextAnimationHandle_ = {};
 		nextPlayImmediately_ = true;
@@ -286,14 +287,13 @@ void ModelAnimation::Play3D(
 		return;
 	}
 
-	// •Ê‚ÌØ‚è‘Ö‚¦æ‚Ö•ÏX‚³‚ê‚½ê‡B
+	// åˆ¥ã®åˆ‡ã‚Šæ›¿ãˆå…ˆã¸å¤‰æ›´ã•ã‚ŒãŸå ´åˆã€‚
 	if (nextAnimation_)
 	{
 		nextAnimation_.Reset();
 		nextAnimationHandle_ = {};
 
-		blendElapsed_ = 0.0f;
-		blendDuration_ = 0.0f;
+		blendMotion_.Reset();
 
 		nextPlayImmediately_ = true;
 		startRequested_ = false;
@@ -315,8 +315,12 @@ void ModelAnimation::Play3D(
 	startRequested_ = false;
 	playToRequested_ = false;
 
-	blendElapsed_ = 0.0f;
-	blendDuration_ = blendSeconds;
+	blendMotion_.Start(
+		0.0f,
+		1.0f,
+		blendSeconds,
+		blendEasing
+	);
 
 	SetAnimationTime(nextAnimation_, 0.0f);
 
@@ -343,7 +347,7 @@ void ModelAnimation::Start(float speedScale)
 		? (std::max)(0.0f, speedScale)
 		: 1.0f;
 
-	// ƒuƒŒƒ“ƒh’†‚È‚çAŠ®—¹Œã‚ÉÄ¶‚·‚éB
+	// ãƒ–ãƒ¬ãƒ³ãƒ‰ä¸­ãªã‚‰ã€å®Œäº†å¾Œã«å†ç”Ÿã™ã‚‹ã€‚
 	if (nextAnimation_)
 	{
 		startRequested_ = true;
@@ -354,7 +358,7 @@ void ModelAnimation::Start(float speedScale)
 	if (!currentAnimation_)
 		return;
 
-	// ÅŒã‚Ü‚ÅÄ¶Ï‚İ‚È‚çæ“ª‚©‚çÄ¶‚·‚éB
+	// æœ€å¾Œã¾ã§å†ç”Ÿæ¸ˆã¿ãªã‚‰å…ˆé ­ã‹ã‚‰å†ç”Ÿã™ã‚‹ã€‚
 	const float totalTime = MV1GetAttachAnimTotalTime(
 		currentAnimation_.GetModelHandle(),
 		currentAnimation_.GetAttachIndex()
@@ -382,7 +386,7 @@ void ModelAnimation::PlayTo(float endTime, float speedScale, float blendSeconds)
 	if (blendSeconds >= 0.0f)
 		blendSeconds = (std::max)(0.0f, blendSeconds);
 
-	// ƒuƒŒƒ“ƒh’†‚È‚çAŠ®—¹Œã‚Éw’èˆÊ’u‚Ü‚ÅÄ¶‚·‚éB
+	// ãƒ–ãƒ¬ãƒ³ãƒ‰ä¸­ãªã‚‰ã€å®Œäº†å¾Œã«æŒ‡å®šä½ç½®ã¾ã§å†ç”Ÿã™ã‚‹ã€‚
 	if (nextAnimation_)
 	{
 		playToRequested_ = true;
@@ -390,15 +394,17 @@ void ModelAnimation::PlayTo(float endTime, float speedScale, float blendSeconds)
 
 		requestedEndTime_ = endTime;
 		requestedSpeedScale_ = speedScale;
-     if (blendSeconds >= 0.0f)
-			blendDuration_ = blendSeconds;
+		if (blendSeconds >= 0.0f)
+		{
+			blendMotion_.SetDuration(blendSeconds);
+		}
 		return;
 	}
 
 	if (!currentAnimation_)
 		return;
 
-	// “¯‚¶I—¹ˆÊ’u‚Å‚·‚Å‚É’â~‚µ‚Ä‚¢‚é‚È‚ç‰½‚à‚µ‚È‚¢B
+	// åŒã˜çµ‚äº†ä½ç½®ã§ã™ã§ã«åœæ­¢ã—ã¦ã„ã‚‹ãªã‚‰ä½•ã‚‚ã—ãªã„ã€‚
 	if (playEndTime_ == endTime && finished_)
 		return;
 
@@ -476,7 +482,7 @@ void ModelAnimation::Update(float deltaTime)
 
 	if (isPlaying_)
 	{
-		// PlayTo’†‚Íƒ‹[ƒv‚³‚¹‚¸Aw’èŠÔ‚Ü‚Åi‚ß‚éB
+		// PlayToä¸­ã¯ãƒ«ãƒ¼ãƒ—ã•ã›ãšã€æŒ‡å®šæ™‚é–“ã¾ã§é€²ã‚ã‚‹ã€‚
 		const bool useLoop = playEndTime_ < 0.0f && loop_;
 
 		AdvanceAnimation(
@@ -487,7 +493,7 @@ void ModelAnimation::Update(float deltaTime)
 			deltaTime
 		);
 
-		// w’èŠÔ‚É“’B‚µ‚½‚ç’â~B
+		// æŒ‡å®šæ™‚é–“ã«åˆ°é”ã—ãŸã‚‰åœæ­¢ã€‚
 		if (playEndTime_ >= 0.0f && currentElapsed_ >= playEndTime_)
 		{
 			currentElapsed_ = playEndTime_;
@@ -495,7 +501,7 @@ void ModelAnimation::Update(float deltaTime)
 			finished_ = true;
 		}
 
-		// ƒAƒjƒ[ƒVƒ‡ƒ“‘S‘Ì‚ÌÅŒã‚É“’B‚µ‚½ê‡B
+		// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å…¨ä½“ã®æœ€å¾Œã«åˆ°é”ã—ãŸå ´åˆã€‚
 		else if (!loop_)
 		{
 			const float totalTime = MV1GetAttachAnimTotalTime(
@@ -517,15 +523,13 @@ void ModelAnimation::Update(float deltaTime)
 	if (!nextAnimation_)
 		return;
 
-	// ƒuƒŒƒ“ƒh’†‚ÌŸ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚Íæ“ªƒtƒŒ[ƒ€‚ÅŒÅ’èB
+	// ãƒ–ãƒ¬ãƒ³ãƒ‰ä¸­ã®æ¬¡ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã¯å…ˆé ­ãƒ•ãƒ¬ãƒ¼ãƒ ã§å›ºå®šã€‚
 	SetAnimationTime(nextAnimation_, 0.0f);
 
-	blendElapsed_ += deltaTime;
+	blendMotion_.Update(deltaTime);
 
-	const float blendRate = (std::min)(
-		1.0f,
-		blendElapsed_ / blendDuration_
-		);
+	const float blendRate = blendMotion_.GetValue();
+
 
 	MV1SetAttachAnimBlendRate(
 		modelHandle_,
@@ -539,7 +543,7 @@ void ModelAnimation::Update(float deltaTime)
 		blendRate
 	);
 
-	if (blendRate >= 1.0f)
+	if (blendMotion_.IsFinished())
 	{
 		const AnimationHandle finishedAnimation = nextAnimationHandle_;
 
@@ -563,7 +567,7 @@ void ModelAnimation::Update(float deltaTime)
 
 		SetAnimationTime(currentAnimation_, 0.0f);
 
-		// ƒuƒŒƒ“ƒhŒã‚ÌÄ¶•û–@‚ğŒˆ‚ß‚éB
+		// ãƒ–ãƒ¬ãƒ³ãƒ‰å¾Œã®å†ç”Ÿæ–¹æ³•ã‚’æ±ºã‚ã‚‹ã€‚
 		if (playToRequested_)
 		{
 			playEndTime_ = requestedEndTime_;
@@ -588,8 +592,7 @@ void ModelAnimation::Update(float deltaTime)
 
 		nextAnimationHandle_ = {};
 
-		blendElapsed_ = 0.0f;
-		blendDuration_ = 0.0f;
+		blendMotion_.Reset();
 
 		nextPlayImmediately_ = true;
 		startRequested_ = false;
@@ -664,8 +667,7 @@ void ModelAnimation::Reset()
 
 	nextAnimationHandle_ = {};
 
-	blendElapsed_ = 0.0f;
-	blendDuration_ = 0.0f;
+	blendMotion_.Reset();
 
 	nextPlayImmediately_ = true;
 	startRequested_ = false;
