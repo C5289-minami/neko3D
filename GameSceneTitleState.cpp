@@ -56,7 +56,7 @@ void GameSceneTitleState::Enter()
         {
             startButton = UIM().CreateButtonUI(
                 L"Game.StartButton",
-                ResourceKeys::Button_Red.hover,
+                ResourceKeys::Button_Red.back,
                 {
                     DxPlus::CLIENT_WIDTH * 0.05f,
                     DxPlus::CLIENT_HEIGHT * 0.65f
@@ -76,7 +76,7 @@ void GameSceneTitleState::Enter()
             if (startButton)
             {
                 startButton->SetButtonHoverSprite(
-                    ResourceKeys::Button_Red.back
+                    ResourceKeys::Button_Red.hover
                 );
                 startButton->SetCenter({ 0.0f, 0.5f });
                 startButton->SetTextFont(
@@ -102,7 +102,7 @@ void GameSceneTitleState::Enter()
         {
             exitButton = UIM().CreateButtonUI(
                 L"Game.ExitButton",
-                ResourceKeys::Button_Red.hover,
+                ResourceKeys::Button_Red.back,
                 {
                     DxPlus::CLIENT_WIDTH * 0.05f,
                     DxPlus::CLIENT_HEIGHT * 0.8f
@@ -118,7 +118,7 @@ void GameSceneTitleState::Enter()
             if (exitButton)
             {
                 exitButton->SetButtonHoverSprite(
-                    ResourceKeys::Button_Red.back
+                    ResourceKeys::Button_Red.hover
                 );
                 exitButton->SetCenter({ 0.0f, 0.5f });
                 exitButton->SetTextFont(

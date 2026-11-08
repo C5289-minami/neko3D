@@ -58,7 +58,7 @@ void GameSceneClearState::Enter()
 			auto* retryButton = UIM().CreateButtonUI(
 				L"Result.ClearRetryButton",
 				ResourceKeys::Button_Rose.back,
-				{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.75f },
+				{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.8f },
 				[this]()
 				{
 					if (gameScene_.RestoreBattleCheckpoint())
