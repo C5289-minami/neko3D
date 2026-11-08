@@ -55,6 +55,7 @@ void ResourceManager::LoadAll()
 	LoadSprite(ResourceKeys::SelectCommon, L"./Data/Images/Select/common.png");
 	LoadSprite(ResourceKeys::TutorialBack, L"./Data/Images/Tutorial/tutorial.png");
 	LoadSprite(ResourceKeys::TutorialStamp, L"./Data/Images/Tutorial/stamp.png");
+	LoadSprite(ResourceKeys::TutorialToLeap, L"./Data/Images/Tutorial/tobikakari.png");
 
 	// モデルの読み込み
 	LoadModel(ResourceKeys::Model_PlayerMike, L"./Data/Models/Player/mike.mv1");

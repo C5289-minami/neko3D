@@ -10,6 +10,17 @@ namespace
 {
 	std::wstring selectedPlayerBackground;
 
+	constexpr DxPlus::Vec2 StatusPlayerMotionDirection{
+		0.0f,
+		-1.0f
+	};
+	constexpr DxPlus::Vec2 StatusBossMotionDirection{
+		0.0f,
+		1.0f
+	};
+
+	constexpr float StatusMotionDuration = 1.0f;
+
 	std::wstring PlayerHeartKey(int index)
 	{
 		return L"PlayerHeart" + std::to_wstring(index);
@@ -22,7 +33,8 @@ namespace
 		L"playerULTGaugeBackKuro",
 		L"PlayerUltGauge",
 		L"BossHealthGauge",
-		L"BossDownGauge"
+		L"BossDownGauge",
+		L"ULT_EButton"
 	};
 }
 
@@ -38,21 +50,27 @@ void StatusUI::InitPlayer(const std::string& characterName)
 		mike = UIM().CreateImageUI(
 			L"playerULTGaugeBackMike",
 			ResourceKeys::MikeStatusBack,
-			backgroundPosition);
+			backgroundPosition,
+			StatusPlayerMotionDirection,
+			StatusMotionDuration);
 
 	auto* sabi = UIM().GetUI(L"playerULTGaugeBackSabi");
 	if (!sabi)
 		sabi = UIM().CreateImageUI(
 			L"playerULTGaugeBackSabi",
 			ResourceKeys::SabiStatusBack,
-			backgroundPosition);
+			backgroundPosition,
+			StatusPlayerMotionDirection,
+			StatusMotionDuration);
 
 	auto* kuro = UIM().GetUI(L"playerULTGaugeBackKuro");
 	if (!kuro)
 		kuro = UIM().CreateImageUI(
 			L"playerULTGaugeBackKuro",
 			ResourceKeys::KuroStatusBack,
-			backgroundPosition);
+			backgroundPosition,
+			StatusPlayerMotionDirection,
+			StatusMotionDuration);
 
 	const wchar_t* selectedBackground =
 		characterName == "ぎし" ? L"playerULTGaugeBackSabi" :
@@ -78,8 +96,12 @@ void StatusUI::InitPlayer(const std::string& characterName)
 			ResourceKeys::SpriteStudio_PlayerUltGauge,
 			DxPlus::Vec2(
 				DxPlus::CLIENT_WIDTH * 0.5f + 80.0f,
-				DxPlus::CLIENT_HEIGHT * 0.537f),
-			"playerult");
+				DxPlus::CLIENT_HEIGHT * 0.537f
+			),
+			"playerult",
+			StatusPlayerMotionDirection,
+			StatusMotionDuration
+		);
 
 	if (ultGauge)
 		ultGauge->SetFalse();
@@ -138,8 +160,15 @@ void StatusUI::InitPlayer(const std::string& characterName)
 		ultButton = UIM().CreateImageUI(
 			L"ULT_EButton",
 			ResourceKeys::Button_E.back,
-			{ left + -10.0f, backgroundPosition.y - backgroundHeight * 0.5f - 10.0f });
+			{
+				left - 10.0f,
+				backgroundPosition.y - backgroundHeight * 0.5f - 10.0f
+			},
+			StatusBossMotionDirection,
+			StatusMotionDuration
+		);
 	ultButton->SetScale(0.7f);
+	ultButton->SetFalse();
 }
 
 void StatusUI::InitBoss()
@@ -155,7 +184,10 @@ void StatusUI::InitBoss()
 			L"BossHealthGauge",
 			ResourceKeys::SpriteStudio_BossHealthGauge,
 			backgroundPosition,
-			"Boss_hp");
+			"Boss_hp",
+			StatusBossMotionDirection,
+			StatusMotionDuration
+		);
 
 	if (healthGauge)
 		healthGauge->SetFalse();
@@ -167,7 +199,10 @@ void StatusUI::InitBoss()
 			L"BossDownGauge",
 			ResourceKeys::SpriteStudio_BossDownGauge,
 			backgroundPosition,
-			"Boss_down");
+			"Boss_down",
+			StatusBossMotionDirection,
+			StatusMotionDuration
+		);
 
 	if (downGauge)
 		downGauge->SetFalse();
@@ -202,32 +237,33 @@ void StatusUI::Open()
 {
 	const std::wstring keys[] =
 	{
-		L"playerULTGaugeBackMike",
-		L"playerULTGaugeBackSabi",
-		L"playerULTGaugeBackKuro",
 		L"PlayerUltGauge",
 		L"BossHealthGauge",
-		L"BossDownGauge"
+		L"BossDownGauge",
+		L"ULT_EButton"
 	};
+
+	// 選択したプレイヤー背景を表示モーション付きで開く。
+	if (auto* background = UIM().GetUI(selectedPlayerBackground))
+	{
+		background->Show();
+	}
 
 	for (const auto& key : keys)
 	{
 		if (auto* ui = UIM().GetUI(key))
 		{
-			if (key == L"PlayerUltGauge" ||
-				key == L"BossHealthGauge" ||
-				key == L"BossDownGauge" ||
-				key == selectedPlayerBackground)
-			{
-				ui->SetTrue();
-			}
+			ui->Show();
 		}
 	}
 
+	// HPは現在値を同期するため、ここでは即時表示。
 	for (int i = 0; i < Player::MaxHealth; ++i)
 	{
 		if (auto* heart = UIM().GetUI(PlayerHeartKey(i)))
+		{
 			heart->SetTrue();
+		}
 	}
 }
 
@@ -240,7 +276,8 @@ void StatusUI::Hide()
 		L"playerULTGaugeBackKuro",
 		L"PlayerUltGauge",
 		L"BossHealthGauge",
-		L"BossDownGauge"
+		L"BossDownGauge",
+		L"ULT_EButton"
 	};
 
 	for (const auto& key : keys)

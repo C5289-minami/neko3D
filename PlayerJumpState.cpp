@@ -3,7 +3,11 @@
 #include "Player.h"
 #include "DxPlus/Debug.h"
 
-PlayerJumpState::PlayerJumpState(PlayerStateMachine& stateMachine, Player& player)
+namespace
+{
+	constexpr float JumpStartAnimFrame = 5.0f;
+}
+PlayerJumpState ::PlayerJumpState(PlayerStateMachine& stateMachine, Player& player)
 	: PlayerBaseState(stateMachine, player)
 {
 }
@@ -11,9 +15,23 @@ PlayerJumpState::PlayerJumpState(PlayerStateMachine& stateMachine, Player& playe
 void PlayerJumpState::Enter()
 {
 	player_.StopMove();
-	player_.SetAnimation(PlayerAnimType::Jump, false);
-	// 落下開始でもこの状態を使う。上向きの初速はTryJumpが設定する。
-	DxPlus::Debug::SetFormatString(L"PlayerJumpState::Enter");
+
+	// 自動再生せずにJumpアニメーションへ切り替える。
+	player_.SetAnimation(
+		PlayerAnimType::Jump,
+		false,
+		false,
+		0.0f
+	);
+
+	player_.GetAnimation().SetTime(JumpStartAnimFrame);
+	player_.GetAnimation().Start(Const::ANIM_FPS);
+
+	// 落下開始でもこの状態を使う。
+	// 上向きの初速はTryJumpが設定する。
+	DxPlus::Debug::SetFormatString(
+		L"PlayerJumpState::Enter"
+	);
 }
 
 void PlayerJumpState::Tick(float deltaTime)

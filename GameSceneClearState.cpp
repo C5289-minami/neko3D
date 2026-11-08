@@ -1,4 +1,4 @@
-#include "GameSceneClearState.h"
+ï»¿#include "GameSceneClearState.h"
 #include "GameScene.h"
 #include "GameContext.h"
 #include "GameStateMachine.h"
@@ -25,33 +25,40 @@ void GameSceneClearState::Enter()
 		dieCamera.SetTarget(boss.GetWorldPosition());
 		director.SwitchCamera(dieCamera, 1.2f);
 	}
-
-	// ƒNƒŠƒAUI‚ðÄ•\Ž¦
+	// ã‚¯ãƒªã‚¢UI
 	{
-		if (auto* clear = UIM().GetUI(L"Result.Clear"))
-			clear->SetTrue();
+		auto* clear = UIM().GetUI(L"Result.Clear");
 
-		if (!UIM().GetUI(L"Result.Clear"))
+		if (!clear)
 		{
-			UIM().CreateImageUI(
+			clear = UIM().CreateImageUI(
 				L"Result.Clear",
 				ResourceKeys::ClearResult,
-				{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.5f },
+				{
+					DxPlus::CLIENT_WIDTH * 0.5f,
+					DxPlus::CLIENT_HEIGHT * 0.5f
+				},
 				{},
 				2.0f
 			);
+		}
+
+		if (clear)
+		{
+			clear->SetFalse();
+			clear->Show();
 		}
 	}
 
 	// Button
 	{
-		// ‚Ü‚¾•\Ž¦‚µ‚È‚¢‚Ì‚Åì¬‚¾‚¯
+		// ã¾ã è¡¨ç¤ºã—ãªã„ã®ã§ä½œæˆã ã‘
 		if (!UIM().GetUI(L"Result.ClearRetryButton"))
 		{
 			auto* retryButton = UIM().CreateButtonUI(
 				L"Result.ClearRetryButton",
 				ResourceKeys::Button_Rose.back,
-				{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.75f },
+				{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.8f },
 				[this]()
 				{
 					if (gameScene_.RestoreBattleCheckpoint())
@@ -63,7 +70,7 @@ void GameSceneClearState::Enter()
 			retryButton->SetButtonHoverSprite(ResourceKeys::Button_Rose.hover);
 			retryButton->SetTextFont(RM().GetFont(ResourceKeys::Font_Game));
 			retryButton->SetTextScale(1.5f);
-			retryButton->SetText(L"ƒŠƒgƒ‰ƒC");
+			retryButton->SetText(L"ãƒªãƒˆãƒ©ã‚¤");
 
 			retryButton->SetFalse();
 		}
@@ -85,7 +92,7 @@ void GameSceneClearState::Enter()
 			toTitleButton->SetButtonHoverSprite(ResourceKeys::Button_Rose.hover);
 			toTitleButton->SetTextFont(RM().GetFont(ResourceKeys::Font_Game));
 			toTitleButton->SetTextScale(1.5f);
-			toTitleButton->SetText(L"ƒ^ƒCƒgƒ‹");
+			toTitleButton->SetText(L"ã‚¿ã‚¤ãƒˆãƒ«");
 
 			toTitleButton->SetFalse();
 		}
@@ -116,13 +123,17 @@ void GameSceneClearState::Tick(float deltaTime)
 	if (!retry || !toTitle)
 		return;
 
-	if (!retry->IsVisible())
-		retry->SetTrue();
+	if (retry->GetCurrentState() == UIBase::UIState::False)
+	{
+		retry->Show();
+	}
 
-	if (!toTitle->IsVisible())
-		toTitle->SetTrue();
+	if (toTitle->GetCurrentState() == UIBase::UIState::False)
+	{
+		toTitle->Show();
+	}
 
-	// ƒ{ƒ^ƒ“‚Ì•\Ž¦ƒAƒjƒ[ƒVƒ‡ƒ“Š®—¹‚Ü‚Å‘Ò‹@
+	// ãƒœã‚¿ãƒ³ã®è¡¨ç¤ºã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å®Œäº†ã¾ã§å¾…æ©Ÿ
 	if (retry->GetCurrentState() != UIBase::UIState::Normal ||
 		toTitle->GetCurrentState() != UIBase::UIState::Normal)
 		return;

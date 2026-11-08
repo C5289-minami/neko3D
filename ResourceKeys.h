@@ -23,6 +23,7 @@ namespace ResourceKeys
 	//Tutorial
 	inline constexpr const wchar_t* TutorialBack = L"UITutorialBack";
 	inline constexpr const wchar_t* TutorialStamp = L"UITutorialStamp";
+	inline constexpr const wchar_t* TutorialToLeap = L"UITutorialToLeap";
 	
 	// status
 	inline constexpr const wchar_t* BossStatusBack = L"UIBossStatusBack";

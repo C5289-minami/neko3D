@@ -1,18 +1,18 @@
-#include "BossWalkState.h"
+ï»¿#include "BossWalkState.h"
 #include "Boss.h"
 #include "Consts.h"
 
 #include "DxPlus/Debug.h"
 
 BossWalkState::BossWalkState(BossStateMachine& stateMachine, Boss& boss)
-    : BossBaseState(stateMachine, boss)
+	: BossBaseState(stateMachine, boss)
 {
 }
 
 void BossWalkState::Enter()
 {
 	walkMotion_.Reset();
-  walkMotion_.SetDuration(Const::BOSS_WALK_MOTION_DURATION);
+	walkMotion_.SetDuration(Const::BOSS_WALK_MOTION_DURATION);
 }
 
 void BossWalkState::Tick(float deltaTime)
@@ -27,15 +27,15 @@ void BossWalkState::Tick(float deltaTime)
 	}
 	else
 	{
-		// is—¦‚É‰‚¶‚ÄˆÚ“®•ûŒü‚ğİ’è‚·‚é
+		// é€²è¡Œç‡ã«å¿œã˜ã¦ç§»å‹•æ–¹å‘ã‚’è¨­å®šã™ã‚‹
 		float progress = walkMotion_.GetProgress();
-		Vec3 moveDirection = Vec3(1.0f - progress, 0.0f, progress - 1.0f); // ‰E•ûŒü‚ÉˆÚ“®‚·‚é—á
-       boss_.SetMoveDirection(moveDirection, Const::BOSS_MOVE_SPEED);
+		Vec3 moveDirection = Vec3(1.0f - progress, 0.0f, progress - 1.0f); // å³æ–¹å‘ã«ç§»å‹•ã™ã‚‹ä¾‹
+		boss_.SetMoveDirection(moveDirection, Const::BOSS_MOVE_SPEED);
 	}
 	DxPlus::Debug::SetString(L"CurrentBossState:Walk");
 }
 
 void BossWalkState::Exit()
 {
-    boss_.StopMove();
+	boss_.StopMove();
 }

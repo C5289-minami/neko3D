@@ -1,7 +1,8 @@
-#pragma once
+ï»¿#pragma once
 
 #include "AnimationHandle.h"
 #include "Consts.h"
+#include "Motion.h"
 
 class ModelAnimation
 {
@@ -13,14 +14,15 @@ public:
 	ModelAnimation& operator=(const ModelAnimation&) = delete;
 
 
-	// Ä¶‚·‚éƒAƒjƒ[ƒVƒ‡ƒ“‚ğİ’è‚·‚éB
+	// å†ç”Ÿã™ã‚‹ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’è¨­å®šã™ã‚‹ã€‚
 	void Play3D(
 		int modelHandle,
 		int animIndex,
 		bool loop,
 		float speedScale = Const::ANIM_FPS,
 		float blendSeconds = 0.15f,
-		bool playImmediately = true
+		bool playImmediately = true,
+		Motion::Easing blendEasing = Motion::Easing::Linear
 	);
 
 	void Play3D(
@@ -29,15 +31,16 @@ public:
 		bool loop,
 		float speedScale = Const::ANIM_FPS,
 		float blendSeconds = 0.15f,
-		bool playImmediately = true
+		bool playImmediately = true,
+		Motion::Easing blendEasing = Motion::Easing::Linear
 	);
 
 	void Restart() { SetTime(0.0f); Start(speedScale_); }
 
-	// Ä¶ŠÔ‚ÆƒuƒŒƒ“ƒh‚ğXV‚·‚éB
+	// å†ç”Ÿæ™‚é–“ã¨ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚’æ›´æ–°ã™ã‚‹ã€‚
 	void Update(float deltaTime);
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“‚ğ‰ğœ‚·‚éB
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’è§£é™¤ã™ã‚‹ã€‚
 	void Reset();
 
 	AnimationHandle GetCurrentAnimationHandle() const
@@ -48,20 +51,20 @@ public:
 	bool IsBlending() const { return static_cast<bool>(nextAnimation_); }
 	bool IsFinished() const;
 
-	// Œ»İˆÊ’u‚©‚çw’èŠÔ‚Ü‚ÅÄ¶‚µ‚Ä’â~‚·‚éB
+	// ç¾åœ¨ä½ç½®ã‹ã‚‰æŒ‡å®šæ™‚é–“ã¾ã§å†ç”Ÿã—ã¦åœæ­¢ã™ã‚‹ã€‚
  void PlayTo(
 		float endTime,
 		float speedScale = Const::ANIM_FPS,
 		float blendSeconds = -1.0f
 	);
 
-	// Œ»İˆÊ’u‚©‚çÅŒã‚Ü‚ÅÄ¶‚·‚éB
+	// ç¾åœ¨ä½ç½®ã‹ã‚‰æœ€å¾Œã¾ã§å†ç”Ÿã™ã‚‹ã€‚
 	void Start(float speedScale = Const::ANIM_FPS);
 
-	// Œ»İˆÊ’u‚Å’â~‚·‚éB
+	// ç¾åœ¨ä½ç½®ã§åœæ­¢ã™ã‚‹ã€‚
 	void Pause();
 
-	// w’èŠÔ‚ÖˆÚ“®‚µ‚Ä’â~‚·‚éB
+	// æŒ‡å®šæ™‚é–“ã¸ç§»å‹•ã—ã¦åœæ­¢ã™ã‚‹ã€‚
 	void SetTime(float time);
 
 	void SetSpeedScale(float speedScale)
@@ -110,34 +113,33 @@ private:
 		float elapsed
 	);
 
-	// Ä¶‘ÎÛ‚Ìƒ‚ƒfƒ‹
+	// å†ç”Ÿå¯¾è±¡ã®ãƒ¢ãƒ‡ãƒ«
 	int modelHandle_{ -1 };
 
-	// Œ»İ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“
+	// ç¾åœ¨ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
 	AttachedAnimation currentAnimation_;
 	AnimationHandle currentAnimationHandle_;
 	float currentElapsed_{ 0.0f };
 
-	// Ø‚è‘Ö‚¦æ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“
+	// åˆ‡ã‚Šæ›¿ãˆå…ˆã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
 	AttachedAnimation nextAnimation_;
 	AnimationHandle nextAnimationHandle_;
 
-	// ƒuƒŒƒ“ƒh‚Ìisó‹µ
-	float blendElapsed_{ 0.0f };
-	float blendDuration_{ 0.0f };
+	// 0.0fã‹ã‚‰1.0fã¾ã§ã®ãƒ–ãƒ¬ãƒ³ãƒ‰é€²è¡Œã‚’ç®¡ç†ã™ã‚‹ã€‚
+	Motion blendMotion_;
 
-	// ƒuƒŒƒ“ƒhŠ®—¹Œã‚É©“®Ä¶‚·‚é‚©
+	// ãƒ–ãƒ¬ãƒ³ãƒ‰å®Œäº†å¾Œã«è‡ªå‹•å†ç”Ÿã™ã‚‹ã‹
 	bool nextPlayImmediately_{ true };
 
-	// ƒuƒŒƒ“ƒh’†‚ÉStart()‚ªŒÄ‚Î‚ê‚½‚©
+	// ãƒ–ãƒ¬ãƒ³ãƒ‰ä¸­ã«Start()ãŒå‘¼ã°ã‚ŒãŸã‹
 	bool startRequested_{ false };
-	// ƒuƒŒƒ“ƒh’†‚ÉPlayTo()‚ªŒÄ‚Î‚ê‚½ê‡‚Ì—\–ñ
+	// ãƒ–ãƒ¬ãƒ³ãƒ‰ä¸­ã«PlayTo()ãŒå‘¼ã°ã‚ŒãŸå ´åˆã®äºˆç´„
 	bool playToRequested_{ false };
 	float requestedEndTime_{ -1.0f };
 	float requestedSpeedScale_{ Const::ANIM_FPS };
-	// Œ»İ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚ªÄ¶’†‚©
+	// ç¾åœ¨ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãŒå†ç”Ÿä¸­ã‹
 	bool isPlaying_{ true };
-	// playEndTime_ ‚É“’B‚µ‚½‚ç©“®’â~B-1.0f ‚È‚çƒAƒjƒ[ƒVƒ‡ƒ“‘S‘Ì‚ÌÅŒã‚Ü‚ÅÄ¶‚·‚éB
+	// playEndTime_ ã«åˆ°é”ã—ãŸã‚‰è‡ªå‹•åœæ­¢ã€‚-1.0f ãªã‚‰ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å…¨ä½“ã®æœ€å¾Œã¾ã§å†ç”Ÿã™ã‚‹ã€‚
 	float playEndTime_{ -1.0f };
 
 	bool loop_{ true };

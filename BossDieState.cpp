@@ -1,4 +1,4 @@
-#include "BossDieState.h"
+Ôªø#include "BossDieState.h"
 #include "Boss.h"
 #include "Consts.h"
 
@@ -40,14 +40,14 @@ void BossDieState::Tick(float deltaTime)
 
     const float progress = dieMotion_.GetEasedProgress();
 
-    // è„è∏
+    // ‰∏äÊòá
     boss_.SetPosition(startPosition_ + Vec3{
         0.0f,
         Const::BossDieUpLen * progress,
         0.0f
         });
 
-    // ÉtÉFÅ[ÉhÉAÉEÉg
+    // „Éï„Çß„Éº„Éâ„Ç¢„Ç¶„Éà
     boss_.GetModelObject().SetAlpha(startAlpha_ * (1.0f - progress));
 
     if (dieMotion_.IsFinished())

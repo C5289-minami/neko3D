@@ -25,6 +25,7 @@ void SceneManager::Init()
 	DxLib::SetWindowSize(static_cast<int>(w * 0.7f), static_cast<int>(h * 0.7f));
 #else
 	DxLib::SetWindowSize(w, h);
+	runConfig.windowed = false; // Releaseはフルスクリーン固定
 #endif
 
 	DxPlus::Initialize(w, h, runConfig.windowed);

@@ -73,10 +73,38 @@ void GameSceneBattleState::Enter()
     // 開幕演出中はボスAIを停止
     boss.SetAIActive(false);
 
-    StatusUI::InitBoss();
-    StatusUI::InitPlayer(player->GetCharData().name);
-
     gameScene_.SetDrawPlayerShadow(true);
+
+    // UI
+    {
+
+        StatusUI::InitBoss();
+        StatusUI::InitPlayer(player->GetCharData().name);
+    
+        auto* toLeap = UIM().GetUI(L"toLeapUI");
+
+        if (!toLeap)
+        {
+            toLeap = UIM().CreateImageUI(
+                L"toLeapUI",
+                ResourceKeys::TutorialToLeap,
+                { 0.0f, 200.0f },
+                { 1.0f, 0.0f },
+                0.4f
+            );
+        }
+
+        if (toLeap)
+        {
+            toLeap->SetCenter({ 0.0f, 0.5f });
+            toLeap->SetMoveDistance(100.0f);
+            toLeap->SetShowEasing(Motion::Easing::EaseOut);
+            toLeap->SetHideEasing(Motion::Easing::EaseIn);
+
+            // 初期状態は即時非表示。
+            toLeap->SetFalse();
+        }
+    }
 }
 
 // ============================================================
@@ -271,6 +299,33 @@ void GameSceneBattleState::Tick(float deltaTime)
     );
 
     player->CheckFloor();
+
+    // 2階にいる間だけジャンプ案内UIを表示する。
+    if (auto* toLeap = UIM().GetUI(L"toLeapUI"))
+    {
+        const bool shouldShow = player->IsSecondFloor();
+
+        if (shouldShow)
+        {
+            // 無効状態または非表示状態から表示モーションを開始する。
+            if (toLeap->GetCurrentState() == UIBase::UIState::False)
+            {
+                toLeap->Show();
+            }
+        }
+        else
+        {
+            const auto state = toLeap->GetCurrentState();
+
+            // 表示中または表示モーション中なら、
+            // 非表示モーションを開始する。
+            if (state == UIBase::UIState::Normal ||
+                state == UIBase::UIState::Do)
+            {
+                toLeap->Hide();
+            }
+        }
+    }
 
     // ========================================================
     // ボス本体へのジャンプ接触判定
@@ -544,14 +599,14 @@ void GameSceneBattleState::Tick(float deltaTime)
     Collision::ResetTransparentModels();
 
     Collision::SetModelsBetweenTransparent(
-        targetCamera.GetPosition(),
+        gameScene_.GetCameraDirector().GetActiveCamera()->GetPosition(),
         player->GetWorldPosition() + Vec3::Up() * 30.0f,
         stage.GetCollision(),
         0.7f
     );
 
     Collision::SetModelsBetweenTransparent(
-        targetCamera.GetPosition(),
+        gameScene_.GetCameraDirector().GetActiveCamera()->GetPosition(),
         boss.GetWorldPosition() + Vec3::Up() * 600.0f,
         stage.GetCollision(),
         0.7f
@@ -598,4 +653,7 @@ void GameSceneBattleState::Exit()
     gameScene_.SetDrawPlayerShadow(false);
 
     StatusUI::Remove();
+
+    // BattleStateで生成したUIを削除する。
+    UIM().RemoveUI(L"toLeapUI");
 }

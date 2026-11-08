@@ -1,4 +1,4 @@
-#include "BossAttackState.h"
+ï»¿#include "BossAttackState.h"
 #include "Boss.h"
 
 #include "DxPlus/Debug.h"
@@ -28,5 +28,5 @@ void BossAttackState::Exit()
 {
 	attackStateMachine_.Initialize();
 	boss_.ClearActiveSkill();
-	boss_.SetAnimation(BossAnimType::Idle, true); // UŒ‚I—¹Œã‚ÉƒAƒjƒ[ƒVƒ‡ƒ“‚ğIdle‚É–ß‚·
+	boss_.SetAnimation(BossAnimType::Idle, true); // æ”»æ’ƒçµ‚äº†å¾Œã«ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’Idleã«æˆ»ã™
 }

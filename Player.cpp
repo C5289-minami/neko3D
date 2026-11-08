@@ -18,6 +18,12 @@
 #include <cstdio>
 #include <Windows.h>
 
+namespace
+{
+	constexpr float GroundSnapDistance = 30.0f;
+	constexpr float WalkableNormalY = 0.7f;
+}
+
 
 Player::Player()
 	: ActorBase("Player"), stateMachine_(*this)
@@ -164,10 +170,11 @@ void Player::Reset()
 	lastGroundFloor_ = GroundType::None;
 	jumpStartFloor_ = GroundType::None;
 
-	// 空中から開始し、ステージへのレイキャストで接地させる。
+	currentFloor_ = GroundType::None;
+	lastGroundFloor_ = GroundType::None;
+	jumpStartFloor_ = GroundType::None;
+
 	isGrounded_ = false;
-	onFirstFloor = false;
-	onSecondFloor = false;
 
 	stateMachine_.Initialize();
 
@@ -207,9 +214,10 @@ void Player::RestorePosition(const Vec3& position)
 	velocity_ = {};
 	knockbackVelocity_ = {};
 	knockbackTime_ = 0.0f;
+	currentFloor_ = GroundType::None;
+	lastGroundFloor_ = GroundType::None;
+	jumpStartFloor_ = GroundType::None;
 	isGrounded_ = false;
-	onFirstFloor = false;
-	onSecondFloor = false;
 	touchingWall_ = false;
 	touchingModel_ = false;
 	wasTouchingModel_ = false;
@@ -559,42 +567,76 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 	);
 }
 
-void Player::UpdateFallRecovery(const ModelCollision& collision, const ModelCollision::ModelOb& body,
+void Player::UpdateFallRecovery(
+	const ModelCollision& collision,
+	const ModelCollision::ModelOb& body,
 	bool landedOnFirstFloor)
 {
-	onFirstFloor = false;
-	onSecondFloor = false;
-	if (!gravityEnabled_ || !collision.HasFallRecoveryFloor() || IsDead()) return;
+	// 現在の床は毎フレーム判定し直す。
+	// 空中ならNoneになる。
+	currentFloor_ = GroundType::None;
+
+	if (!gravityEnabled_ ||
+		!collision.HasFallRecoveryFloor() ||
+		IsDead())
+	{
+		return;
+	}
 
 	if (isGrounded_)
 	{
-		onFirstFloor = landedOnFirstFloor;
-		onSecondFloor = !onFirstFloor;
-		
-		lastGroundFloor_ = onFirstFloor ? GroundType::DownFloor : GroundType::UpFloor;
+		currentFloor_ = landedOnFirstFloor
+			? GroundType::DownFloor
+			: GroundType::UpFloor;
+
+		// 最後に接地していた床を更新する。
+		lastGroundFloor_ = currentFloor_;
+
+		// 着地したので、ジャンプ開始床を解除する。
 		jumpStartFloor_ = GroundType::None;
-		// ボス本体の中や床の端を復帰先にせず、接触前の安全な位置を残す。
-		const bool outsideBossBody = !collision.IsTouchingCapsule(GetHitSphere());
-		// onFirstFloor は、落下中に1階の床に着地したかどうかを示す。
-		const bool safeGround = outsideBossBody &&
-			(!onFirstFloor || collision.HasFallRecoverySupport(position_, body, WalkableNormalY));
-		
+
+		const bool outsideBossBody =
+			!collision.IsTouchingCapsule(GetHitSphere());
+
+		const bool isFirstFloor =
+			currentFloor_ == GroundType::DownFloor;
+
+		const bool safeGround =
+			outsideBossBody &&
+			(!isFirstFloor ||
+				collision.HasFallRecoverySupport(
+					position_,
+					body,
+					WalkableNormalY
+				));
+
 		if (safeGround)
 		{
 			lastGroundedPosition_ = position_;
-			if (onFirstFloor) lastFirstFloorPosition_ = position_;
+
+			if (isFirstFloor)
+			{
+				lastFirstFloorPosition_ = position_;
+			}
+
 			return;
 		}
 	}
 
-	// 最後に安全に立てた1階の高さから、指定した距離だけ下がったら復帰する。
-	const float fallDistance = lastFirstFloorPosition_.y - position_.y;
-	
-	if (velocity_.y > 0.0f || fallDistance < Const::PLAYER_FALL_RECOVERY_DISTANCE) return;
+	// 空中ではcurrentFloor_だけがNoneになる。
+	// lastGroundFloor_とjumpStartFloor_は保持する。
+
+	const float fallDistance =
+		lastFirstFloorPosition_.y - position_.y;
+
+	if (velocity_.y > 0.0f ||
+		fallDistance < Const::PLAYER_FALL_RECOVERY_DISTANCE)
+	{
+		return;
+	}
 
 	ReturnToLastSafePosition(collision);
 }
-
 void Player::ReturnToLastSafePosition(const ModelCollision& collision)
 {
 	if (IsDead() || !collision.HasFallRecoveryFloor()) return;
@@ -916,20 +958,29 @@ void Player::ResetDoubleJumpSpeed()
 
 void Player::StartDoubleJump()
 {
-	if (!CanDoubleJump()) return;
-	jumpStartFloor_ = lastGroundFloor_;
+	if (!CanDoubleJump())
+	{
+		return;
+	}
+
+	// 通常ジャンプ開始時の床が記録されていない場合のみ補完する。
+	if (jumpStartFloor_ == GroundType::None)
+	{
+		jumpStartFloor_ = lastGroundFloor_;
+	}
 
 	doubleJumpUsed_ = true;
 	coyoteTimeRemaining_ = 0.0f;
-	//StopMove();
 
-	// 入力やカメラではなく、既存のプレイヤーの向きから水平速度を決める。
-	const float moveSpeed = Const::PLAYER_MOVE_SPEED * 3.0f;
+	const float moveSpeed =
+		Const::PLAYER_MOVE_SPEED * 3.0f;
+
 	velocity_.x = std::sin(GetYaw()) * moveSpeed;
 	velocity_.z = std::cos(GetYaw()) * moveSpeed;
-
 	velocity_.y = doubleJumpSpeed_;
+
 	isGrounded_ = false;
+	currentFloor_ = GroundType::None;
 }
 
 
@@ -952,10 +1003,23 @@ void Player::ResetClimbingSpeeds()
 
 Player::GroundType Player::CheckFloor() const
 {
-	DxPlus::Debug::SetString(onSecondFloor ? L"二階" : onFirstFloor ? L"一階" : L"空中");
-	if (onSecondFloor) return GroundType::UpFloor;
-	if (onFirstFloor) return GroundType::DownFloor;
-	return GroundType::None;
+	switch (currentFloor_)
+	{
+	case GroundType::DownFloor:
+		DxPlus::Debug::SetString(L"現在: 一階");
+		break;
+
+	case GroundType::UpFloor:
+		DxPlus::Debug::SetString(L"現在: 二階");
+		break;
+
+	case GroundType::None:
+	default:
+		DxPlus::Debug::SetString(L"現在: 空中");
+		break;
+	}
+
+	return currentFloor_;
 }
 
 void Player::ApplyKnockback(const Vec3& direction, float power, float duration)
@@ -1032,11 +1096,19 @@ bool Player::TryJump()
 
 bool Player::JumpAction()
 {
-	if (!CanGroundJump())return false;
-	jumpStartFloor_ = lastGroundFloor_;
+	if (!CanGroundJump())
+	{
+		return false;
+	}
+
+	jumpStartFloor_ =
+		currentFloor_ != GroundType::None
+		? currentFloor_
+		: lastGroundFloor_;
 
 	velocity_.y = Const::PLAYER_JUMP_SPEED;
 	isGrounded_ = false;
+	currentFloor_ = GroundType::None;
 	coyoteTimeRemaining_ = 0.0f;
 
 	return true;

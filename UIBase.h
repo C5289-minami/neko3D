@@ -1,4 +1,4 @@
-	#pragma once
+ï»¿	#pragma once
 	#include <algorithm>
 	#include <string>
 	#include <utility>
@@ -16,8 +16,8 @@
 		{
 			//Init();
 			motion.Start(0.0f, 1.0f, motionDuration, showEasing);
-			SetToMove(dir); // ƒ‚[ƒVƒ‡ƒ“‚Ì•ûŒü‚ğİ’è
-			state = UIState::Do;// ƒ‚[ƒVƒ‡ƒ“Às’†‚Éİ’è
+			SetToMove(dir); // ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ã®æ–¹å‘ã‚’è¨­å®š
+			state = UIState::Do;// ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³å®Ÿè¡Œä¸­ã«è¨­å®š
 		}
 		virtual ~UIBase() = default;
 
@@ -25,10 +25,10 @@
 		virtual void Update(float deltaTime);
 		virtual void Draw();
 
-		// •ûŒü‚ğ“ü‚ê‚é‚Æo‚Ä‚­‚éMotion‚ğİ’è‚·‚éŠÖ”
+		// æ–¹å‘ã‚’å…¥ã‚Œã‚‹ã¨å‡ºã¦ãã‚‹Motionã‚’è¨­å®šã™ã‚‹é–¢æ•°
 		void SetToMove(DxPlus::Vec2 dir);
 		void UpdateStartMotion();
-		// •\¦E”ñ•\¦ƒ‚[ƒVƒ‡ƒ“‚ÌƒC[ƒWƒ“ƒO‚ğİ’è‚·‚é
+		// è¡¨ç¤ºãƒ»éè¡¨ç¤ºãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ã®ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°ã‚’è¨­å®šã™ã‚‹
 		void SetShowEasing(Motion::Easing easing) { showEasing = easing; if (state == UIState::Do) motion.SetEasing(easing); }
 		void SetHideEasing(Motion::Easing easing) { hideEasing = easing; if (state == UIState::Hide) motion.SetEasing(easing); }
 		void SetMotionDuration(float duration) { motion.SetDuration(duration); UpdateStartMotion(); }
@@ -42,7 +42,7 @@
 			manualAlpha = false;
 		}
 
-		// Œ»İ‚Ì“§–¾“x‚ğ’¼Úİ’è‚·‚é
+		// ç¾åœ¨ã®é€æ˜åº¦ã‚’ç›´æ¥è¨­å®šã™ã‚‹
 		void SetAlphaDirect(int value)
 		{
 			alpha = std::clamp(value, 0, 255);
@@ -66,32 +66,53 @@
 		DxPlus::Vec2 GetPosition() const { return basePosition; }
 		const std::wstring& GetKey() const { return key; }
 		bool IsActive() const { return state != UIState::False; }
-		// Œ©‚¦‚é‚©‚Ç‚¤‚©‚ğİ’è
+		// è¦‹ãˆã‚‹ã‹ã©ã†ã‹ã‚’è¨­å®š
 		void SetVisible(bool visible) { isVisible = visible; fadeOnlyMotion = false; }
 		bool IsVisible() const { return isVisible; }
-		//@—LŒø‰»
+		// å³æ™‚ã«æœ‰åŠ¹åŒ–ã—ã¦è¡¨ç¤ºã™ã‚‹ã€‚
 		void SetTrue()
 		{
 			isVisible = true;
 			fadeOnlyMotion = false;
+			state = UIState::Normal;
+			position = basePosition;
+		}
 
-			motion.Start(0.0f, 1.0f, motion.GetDuration(), showEasing);
+		// å³æ™‚ã«ç„¡åŠ¹åŒ–ã—ã¦éè¡¨ç¤ºã«ã™ã‚‹ã€‚
+		void SetFalse()
+		{
+			isVisible = false;
+			fadeOnlyMotion = false;
+			state = UIState::False;
+		}
+
+		// è¡¨ç¤ºãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ã‚’é–‹å§‹ã™ã‚‹ã€‚
+		void Show()
+		{
+			isVisible = true;
+			fadeOnlyMotion = false;
+
+			motion.Start(
+				0.0f,
+				1.0f,
+				motion.GetDuration(),
+				showEasing
+			);
+
 			state = UIState::Do;
-
 			UpdateStartMotion();
 		}
-		// –³Œø‰»
-		void SetFalse() { isVisible = false; state = UIState::False; }
-		// ”ñ•\¦ƒ‚[ƒVƒ‡ƒ“‚ğŠJn‚·‚é
+
+		// éè¡¨ç¤ºãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ã‚’é–‹å§‹ã™ã‚‹ã€‚
 		void Hide();
 
-		// •\¦ğŒ‚ğİ’è‚·‚éŠÖ”
+		// è¡¨ç¤ºæ¡ä»¶ã‚’è¨­å®šã™ã‚‹é–¢æ•°
 		void SetDisplayCondition(std::function<bool()> condition)
 		{
 			displayCondition = condition ? std::move(condition) : []() { return true; };
 		}
 
-		// ZƒI[ƒ_[(•`‰æ‡)‚ğİ’è‚·‚éŠÖ”
+		// Zã‚ªãƒ¼ãƒ€ãƒ¼(æç”»é †)ã‚’è¨­å®šã™ã‚‹é–¢æ•°
 		void SetRecord(int z) { zOrder = z; } // for backward compatibility or future use, wait let me just use SetZOrder
 		void SetZOrder(int z) { zOrder = z; }
 		int GetZOrder() const { return zOrder; }
@@ -108,10 +129,10 @@
 
 		enum class UIState
 		{
-			Normal,// ‚Ó‚Â‚¤‚Ìó‘Ô(Ã~)
-			Do,// ƒ‚[ƒVƒ‡ƒ“Às’†(oŒ»)
-			Hide,// Á¸ƒ‚[ƒVƒ‡ƒ“’†
-			False,// •\¦‚µ‚Ä‚¢‚È‚¢
+			Normal,// ãµã¤ã†ã®çŠ¶æ…‹(é™æ­¢)
+			Do,// ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³å®Ÿè¡Œä¸­(å‡ºç¾)
+			Hide,// æ¶ˆå¤±ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ä¸­
+			False,// è¡¨ç¤ºã—ã¦ã„ãªã„
 		};
 		UIState GetCurrentState()const { return state; }
 	protected:
@@ -127,7 +148,7 @@
 		bool manualAlpha{ false };
 	
 		UIState state{ UIState::Normal };
-		//•\¦‚·‚éğŒ
+		//è¡¨ç¤ºã™ã‚‹æ¡ä»¶
 		std::function<bool()> displayCondition = []() { return true; };
 		bool isVisible{ true };
 		bool fadeOnlyMotion{};
@@ -139,17 +160,17 @@
 
 
 		// ===============
-		// ÀsŠÔŠÖ˜A
+		// å®Ÿè¡Œæ™‚é–“é–¢é€£
 		// ===============
 		Motion motion;
 		Motion::Easing showEasing{ Motion::Easing::EaseOut };
 		Motion::Easing hideEasing{ Motion::Easing::EaseIn };
 
 		// =======================
-		// •\¦ŠJnƒ‚[ƒVƒ‡ƒ“ŠÖ˜A
+		// è¡¨ç¤ºé–‹å§‹ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³é–¢é€£
 		// =======================
-		DxPlus::Vec2 Direction{}; // ƒ‚[ƒVƒ‡ƒ“‚Ì•ûŒü
-		float MoveDistance{ 100.0f }; // ƒ‚[ƒVƒ‡ƒ“‚ÌˆÚ“®‹——£
+		DxPlus::Vec2 Direction{}; // ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ã®æ–¹å‘
+		float MoveDistance{ 100.0f }; // ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ã®ç§»å‹•è·é›¢
 
-		int zOrder{ 0 }; // •`‰æ‡‚ğİ’èi’l‚ª‘å‚«‚¢‚Ù‚Çè‘O‚É•`‰æj
+		int zOrder{ 0 }; // æç”»é †ã‚’è¨­å®šï¼ˆå€¤ãŒå¤§ãã„ã»ã©æ‰‹å‰ã«æç”»ï¼‰
 	};
