@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "GameBaseState.h"
 #include <vector>
@@ -19,7 +19,7 @@ public:
 private:
     void SelectIndex(int index);
     void ConfirmSelection();
-    void UpdateSelectedUI();
+    void UpdateSelectedUI() const;
 
     std::vector<Player*> players_;
 
@@ -27,9 +27,9 @@ private:
 
     enum class SelectCameraState
     {
-        WaitSelectShot,       /* SelectƒVƒ‡ƒbƒg‚ÌŠ®—¹‘Ò‚¿*/
-        MoveToSelectedPlayer, /* ‘I‘ğ’†‚ÌPlayer‚Ì‘O•û‚ÖˆÚ“®’†*/
-        Ready                 /* ‘I‘ğ‘€ì‰Â”\*/
+        WaitSelectShot,       /* Selectã‚·ãƒ§ãƒƒãƒˆã®å®Œäº†å¾…ã¡*/
+        MoveToSelectedPlayer, /* é¸æŠä¸­ã®Playerã®å‰æ–¹ã¸ç§»å‹•ä¸­*/
+        Ready                 /* é¸æŠæ“ä½œå¯èƒ½*/
     };
 
     SelectCameraState cameraState_{ SelectCameraState::WaitSelectShot };

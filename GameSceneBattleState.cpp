@@ -82,14 +82,26 @@ void GameSceneBattleState::Enter()
         StatusUI::InitPlayer(player->GetCharData().name);
     
         auto* toLeap = UIM().GetUI(L"toLeapUI");
+
         if (!toLeap)
+        {
             toLeap = UIM().CreateImageUI(
                 L"toLeapUI",
                 ResourceKeys::TutorialToLeap,
-                {},
-                {1,0});
+                { 0.0f, 200.0f },
+                { 1.0f, 0.0f },
+                0.4f
+            );
+        }
+
         if (toLeap)
         {
+            toLeap->SetCenter({ 0.0f, 0.5f });
+            toLeap->SetMoveDistance(100.0f);
+            toLeap->SetShowEasing(Motion::Easing::EaseOut);
+            toLeap->SetHideEasing(Motion::Easing::EaseIn);
+
+            // 初期状態は即時非表示。
             toLeap->SetFalse();
         }
     }
@@ -293,17 +305,24 @@ void GameSceneBattleState::Tick(float deltaTime)
     {
         const bool shouldShow = player->IsSecondFloor();
 
-        // SetTrue()を毎フレーム呼ぶと表示モーションが
-        // 最初からやり直されるため、状態が変わったときだけ切り替える。
-        if (shouldShow != toLeap->IsVisible())
+        if (shouldShow)
         {
-            if (shouldShow)
+            // 無効状態または非表示状態から表示モーションを開始する。
+            if (toLeap->GetCurrentState() == UIBase::UIState::False)
             {
-                toLeap->SetTrue();
+                toLeap->Show();
             }
-            else
+        }
+        else
+        {
+            const auto state = toLeap->GetCurrentState();
+
+            // 表示中または表示モーション中なら、
+            // 非表示モーションを開始する。
+            if (state == UIBase::UIState::Normal ||
+                state == UIBase::UIState::Do)
             {
-                toLeap->SetFalse();
+                toLeap->Hide();
             }
         }
     }

@@ -1,4 +1,4 @@
-#include "GameSceneTitleState.h"
+ï»¿#include "GameSceneTitleState.h"
 #include "GameScene.h"
 #include "GameStateMachine.h"
 #include "GameContext.h"
@@ -22,66 +22,118 @@ void GameSceneTitleState::Enter()
     DxLib::SetMouseDispFlag(TRUE);
     SoundManager::PlayBGM(RM().GetMusic(ResourceKeys::Music_Title));
 
-    // ƒ^ƒCƒgƒ‹UI‚ðÄ•\Ž¦
-    if (auto* logo = UIM().GetUI(L"Game.Logo"))
-        logo->SetTrue();
-
-    if (auto* start = UIM().GetButtonUI(L"Game.StartButton"))
-        start->SetTrue();
-
-    if (auto* exit = UIM().GetButtonUI(L"Game.ExitButton"))
-        exit->SetTrue();
-
-    // ‘¶Ý‚µ‚È‚¢ê‡‚¾‚¯¶¬
-    if (!UIM().GetUI(L"Game.Logo"))
+    // Logo
     {
-        auto* logo = UIM().CreateImageUI(
-            L"Game.Logo",
-            ResourceKeys::UI_Logo,
-            { DxPlus::CLIENT_WIDTH * 0.05f, DxPlus::CLIENT_HEIGHT * 0.3f },
-            {},
-            0.5f
-        );
-		logo->SetCenter({ 0.0f, 0.5f });
+        auto* logo = UIM().GetUI(L"Game.Logo");
+
+        if (!logo)
+        {
+            logo = UIM().CreateImageUI(
+                L"Game.Logo",
+                ResourceKeys::UI_Logo,
+                {
+                    DxPlus::CLIENT_WIDTH * 0.05f,
+                    DxPlus::CLIENT_HEIGHT * 0.3f
+                },
+                {},
+                0.5f
+            );
+        }
+
+        if (logo)
+        {
+            logo->SetCenter({ 0.0f, 0.5f });
+            logo->SetFalse();
+            logo->Show();
+        }
     }
 
-    if (!UIM().GetButtonUI(L"Game.StartButton"))
+    // Start Button
     {
-        auto* startButton = UIM().CreateButtonUI(
-            L"Game.StartButton",
-            ResourceKeys::Button_Red.hover,
-            { DxPlus::CLIENT_WIDTH * 0.05f, DxPlus::CLIENT_HEIGHT * 0.65f },
-            [this]()
+        auto* startButton = UIM().GetButtonUI(L"Game.StartButton");
+
+        if (!startButton)
+        {
+            startButton = UIM().CreateButtonUI(
+                L"Game.StartButton",
+                ResourceKeys::Button_Red.hover,
+                {
+                    DxPlus::CLIENT_WIDTH * 0.05f,
+                    DxPlus::CLIENT_HEIGHT * 0.65f
+                },
+                [this]()
+                {
+                    SoundManager::PlaySE(
+                        RM().GetSound(ResourceKeys::Sound_MenuConfirm)
+                    );
+
+                    stateMachine_.ChangeState(GameStateType::Select);
+                },
+                { -1.0f, 0.0f },
+                0.5f
+            );
+
+            if (startButton)
             {
-                SoundManager::PlaySE(RM().GetSound(ResourceKeys::Sound_MenuConfirm));
-                stateMachine_.ChangeState(GameStateType::Select);
-            },
-            { -1, 0 },
-            0.5f
-        );
-		startButton->SetButtonHoverSprite(ResourceKeys::Button_Red.back);
-        startButton->SetCenter({ 0.0f, 0.5f });
-		startButton->SetTextFont(RM().GetFont(ResourceKeys::Font_Game));
-		startButton->SetTextScale(1.5f);
-        startButton->SetText(L"ƒXƒ^[ƒg");
+                startButton->SetButtonHoverSprite(
+                    ResourceKeys::Button_Red.back
+                );
+                startButton->SetCenter({ 0.0f, 0.5f });
+                startButton->SetTextFont(
+                    RM().GetFont(ResourceKeys::Font_Game)
+                );
+                startButton->SetTextScale(1.5f);
+                startButton->SetText(L"ã‚¹ã‚¿ãƒ¼ãƒˆ");
+            }
+        }
 
+        if (startButton)
+        {
+            startButton->SetFalse();
+            startButton->Show();
+        }
     }
 
-    if (!UIM().GetButtonUI(L"Game.ExitButton"))
+    // Exit Button
     {
-        auto* exitButton = UIM().CreateButtonUI(
-            L"Game.ExitButton",
-            ResourceKeys::Button_Red.hover,
-            { DxPlus::CLIENT_WIDTH * 0.05f, DxPlus::CLIENT_HEIGHT * 0.8f },
-            []() { PostQuitMessage(0); },
-            { -1, 0 },
-            0.5f
-        );
-		exitButton->SetButtonHoverSprite(ResourceKeys::Button_Red.back);
-        exitButton->SetCenter({ 0.0f, 0.5f });
-		exitButton->SetTextFont(RM().GetFont(ResourceKeys::Font_Game));
-		exitButton->SetTextScale(1.5f);
-        exitButton->SetText(L"‚â‚ß‚é");
+        auto* exitButton = UIM().GetButtonUI(L"Game.ExitButton");
+
+        if (!exitButton)
+        {
+            exitButton = UIM().CreateButtonUI(
+                L"Game.ExitButton",
+                ResourceKeys::Button_Red.hover,
+                {
+                    DxPlus::CLIENT_WIDTH * 0.05f,
+                    DxPlus::CLIENT_HEIGHT * 0.8f
+                },
+                []()
+                {
+                    PostQuitMessage(0);
+                },
+                { -1.0f, 0.0f },
+                0.5f
+            );
+
+            if (exitButton)
+            {
+                exitButton->SetButtonHoverSprite(
+                    ResourceKeys::Button_Red.back
+                );
+                exitButton->SetCenter({ 0.0f, 0.5f });
+                exitButton->SetTextFont(
+                    RM().GetFont(ResourceKeys::Font_Game)
+                );
+                exitButton->SetTextScale(1.5f);
+                exitButton->SetText(L"ã‚„ã‚ã‚‹");
+            }
+        }
+
+        if (exitButton)
+        {
+            exitButton->SetFalse();
+            exitButton->Show();
+        }
     }
 	gameScene_.GetCameraDirector().SetPoseImmediate(CObjs().GetCameraPose("Title"));
 
@@ -104,9 +156,24 @@ void GameSceneTitleState::Tick(float deltaTime)
     DxPlus::Debug::SetFormatString(L"GameSceneTitleState::Tick");
     gameScene_.UpdateStateCamera(deltaTime, "Title");
 
-    auto& previews = gameScene_.GetGameContext()->GetSelectPreviewPlayers();
+    auto& previews =
+        gameScene_.GetGameContext()->GetSelectPreviewPlayers();
+
     previews[0].UpdateAnimation(deltaTime);
     previews[1].UpdateAnimation(deltaTime);
+
+    auto* start = UIM().GetButtonUI(L"Game.StartButton");
+    auto* exit = UIM().GetButtonUI(L"Game.ExitButton");
+
+    if (!start || !exit)
+        return;
+
+    // è¡¨ç¤ºãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ãŒçµ‚ã‚ã‚‹ã¾ã§æ“ä½œã•ã›ãªã„ã€‚
+    if (start->GetCurrentState() != UIBase::UIState::Normal ||
+        exit->GetCurrentState() != UIBase::UIState::Normal)
+    {
+        return;
+    }
 
     using namespace DxPlus::Input;
 
@@ -116,24 +183,15 @@ void GameSceneTitleState::Tick(float deltaTime)
     if (GetButtonDown(PLAYER1) & BUTTON_DOWN)
         selectedIndex_ = 1;
 
-    if (auto* start = UIM().GetButtonUI(L"Game.StartButton"))
-        start->SetSelected(selectedIndex_ == 0);
-
-    if (auto* exit = UIM().GetButtonUI(L"Game.ExitButton"))
-        exit->SetSelected(selectedIndex_ == 1);
+    start->SetSelected(selectedIndex_ == 0);
+    exit->SetSelected(selectedIndex_ == 1);
 
     if (GetButtonDown(PLAYER1) & BUTTON_START)
     {
         if (selectedIndex_ == 0)
-        {
-            if (auto* start = UIM().GetButtonUI(L"Game.StartButton"))
-                start->Trigger();
-        }
+            start->Trigger();
         else
-        {
-            if (auto* exit = UIM().GetButtonUI(L"Game.ExitButton"))
-                exit->Trigger();
-        }
+            exit->Trigger();
     }
 }
 

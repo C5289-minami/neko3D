@@ -38,29 +38,6 @@ namespace
 		{ L"Select.Kuro", ResourceKeys::SelectKuro, ResourceKeys::Sound_SelectYu, u8"ゆう", L"登るのが得意" }
 	} };
 
-	class SelectCardUI : public UIBase
-	{
-	public:
-		SelectCardUI(const SelectCard& card, DxPlus::Vec2 position)
-			: UIBase(card.spriteKey, position, { 0, -1 }, SelectCameraMoveDuration)
-		{
-			trait_.SetText(card.trait);
-			trait_.SetFontHandle(RM().GetFont(ResourceKeys::Font_Game));
-			trait_.SetColor(DxLib::GetColor(64, 64, 64));
-			trait_.SetOffset({ 0.0f, -202.0f });
-		}
-
-		void Draw() override
-		{
-			if (!IsActive()) return;
-
-			UIBase::Draw();
-			trait_.Draw(position, GetScale(), GetAlpha());
-		}
-
-	private:
-		ButtonLabel trait_;
-	};
 
 
 	class SelectCommonUI : public UIBase
@@ -397,22 +374,27 @@ void GameSceneSelectState::ConfirmSelection()
 	stateMachine_.ChangeState(GameStateType::Tutorial);
 }
 
-void GameSceneSelectState::UpdateSelectedUI()
+void GameSceneSelectState::UpdateSelectedUI() const
 {
 	for (std::size_t i = 0; i < SelectCards.size(); ++i)
 	{
 		if (auto* ui = UIM().GetUI(SelectCards[i].uiKey))
 		{
 			if (i == static_cast<std::size_t>(selectedIndex_))
-				ui->SetTrue();
+			{
+				ui->Show();
+			}
 			else
+			{
 				ui->SetFalse();
+			}
 		}
 	}
 
-	// 共通UIも表示
 	if (auto* ui = UIM().GetUI(L"Select.Common"))
-		ui->SetTrue();
+	{
+		ui->Show();
+	}
 }
 
 void GameSceneSelectState::Exit()

@@ -1,4 +1,4 @@
-#include "GameSceneGameOverState.h"
+ï»¿#include "GameSceneGameOverState.h"
 #include "GameScene.h"
 #include "GameStateMachine.h"
 #include "DxPlus/Debug.h"
@@ -14,25 +14,33 @@ void GameSceneGameOverState::Enter()
 	DxPlus::Debug::SetFormatString(L"GameSceneGameOverState::Enter");
 	DxLib::SetMouseDispFlag(TRUE);
 
-	// ƒQ[ƒ€ƒI[ƒo[UI‚ğÄ•\¦
+	// ã‚²ãƒ¼ãƒ ã‚ªãƒ¼ãƒãƒ¼UI
 	{
-		if (auto* gameOver = UIM().GetUI(L"Result.GameOver"))
-			gameOver->SetTrue();
+		auto* gameOver = UIM().GetUI(L"Result.GameOver");
 
-		if (!UIM().GetUI(L"Result.GameOver"))
+		if (!gameOver)
 		{
-			auto* gameOver = UIM().CreateImageUI(
+			gameOver = UIM().CreateImageUI(
 				L"Result.GameOver",
 				ResourceKeys::GameOverResult,
-				{ DxPlus::CLIENT_WIDTH * 0.5f, DxPlus::CLIENT_HEIGHT * 0.5f },
+				{
+					DxPlus::CLIENT_WIDTH * 0.5f,
+					DxPlus::CLIENT_HEIGHT * 0.5f
+				},
 				{},
 				2.0f
 			);
 		}
+
+		if (gameOver)
+		{
+			gameOver->SetFalse();
+			gameOver->Show();
+		}
 	}
 	// Button
 	{
-		//‚Ü‚¾•\¦‚µ‚È‚¢‚Ì‚Åì¬‚¾‚¯
+		//ã¾ã è¡¨ç¤ºã—ãªã„ã®ã§ä½œæˆã ã‘
 		if (!UIM().GetUI(L"Result.GameOverRetryButton"))
 		{
 			auto* retryButton = UIM().CreateButtonUI(
@@ -50,7 +58,7 @@ void GameSceneGameOverState::Enter()
 			retryButton->SetButtonHoverSprite(ResourceKeys::Button_Purple.hover);
 			retryButton->SetTextFont(RM().GetFont(ResourceKeys::Font_Game));
 			retryButton->SetTextScale(1.5f);
-			retryButton->SetText(L"ƒŠƒgƒ‰ƒC");
+			retryButton->SetText(L"ãƒªãƒˆãƒ©ã‚¤");
 
 			retryButton->SetFalse();
 		}
@@ -72,7 +80,7 @@ void GameSceneGameOverState::Enter()
 			toTitleButton->SetButtonHoverSprite(ResourceKeys::Button_Purple.hover);
 			toTitleButton->SetTextFont(RM().GetFont(ResourceKeys::Font_Game));
 			toTitleButton->SetTextScale(1.5f);
-			toTitleButton->SetText(L"ƒ^ƒCƒgƒ‹");
+			toTitleButton->SetText(L"ã‚¿ã‚¤ãƒˆãƒ«");
 
 			toTitleButton->SetFalse();
 		}
@@ -96,13 +104,18 @@ void GameSceneGameOverState::Tick(float deltaTime)
 	if (!retry || !toTitle)
 		return;
 
-	if (!retry->IsVisible())
-		retry->SetTrue();
+	if (retry->GetCurrentState() == UIBase::UIState::False)
+	{
+		retry->Show();
+	}
 
-	if (!toTitle->IsVisible())
-		toTitle->SetTrue();
+	if (toTitle->GetCurrentState() == UIBase::UIState::False)
+	{
+		toTitle->Show();
+	}
 
-	// ƒ{ƒ^ƒ“‚Ì•\¦ƒAƒjƒ[ƒVƒ‡ƒ“Š®—¹‚Ü‚Å‘Ò‹@
+
+	// ãƒœã‚¿ãƒ³ã®è¡¨ç¤ºã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å®Œäº†ã¾ã§å¾…æ©Ÿ
 	if (retry->GetCurrentState() != UIBase::UIState::Normal ||
 		toTitle->GetCurrentState() != UIBase::UIState::Normal)
 		return;
@@ -128,12 +141,16 @@ void GameSceneGameOverState::Tick(float deltaTime)
 }
 void GameSceneGameOverState::Exit()
 {
-	DxPlus::Debug::SetFormatString(L"GameSceneGameOverState::Enter");
+	DxPlus::Debug::SetFormatString(
+		L"GameSceneGameOverState::Exit"
+	);
+
 	if (auto* gameOver = UIM().GetUI(L"Result.GameOver"))
-		gameOver->Hide();;
+		gameOver->Hide();
+
 	if (auto* retry = UIM().GetButtonUI(L"Result.GameOverRetryButton"))
 		retry->Hide();
-	if ( auto* toTitle = UIM().GetButtonUI(L"Result.GameOverToTitleButton"))
+
+	if (auto* toTitle = UIM().GetButtonUI(L"Result.GameOverToTitleButton"))
 		toTitle->Hide();
 }
-
