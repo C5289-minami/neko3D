@@ -1,4 +1,4 @@
-#include "GameStateMachine.h"
+﻿#include "GameStateMachine.h"
 #include "ResourceKeys.h"
 #include "ResourceManager.h"
 #include "SoundManager.h"
@@ -41,6 +41,12 @@ void GameStateMachine::ChangeState(GameStateType type)
 
 }
 
+
+void GameStateMachine::StartBattleWithoutIntro()
+{
+    ChangeState(GameStateType::Battle);
+    battleState_.SkipIntro();
+}
 
 State* GameStateMachine::FindState(GameStateType type)
 {

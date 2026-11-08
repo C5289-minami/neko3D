@@ -37,6 +37,7 @@ public:
 	void ResetForTitle();
 	void SaveBattleCheckpoint();
 	bool RestoreBattleCheckpoint();
+	void SkipTutorial();
 
 	GameStateType GetCurrentGameState() const { return stateMachine_.GetCurrentType(); }
 	bool UpdateStateCamera(float deltaTime, const std::string& requestedShot);

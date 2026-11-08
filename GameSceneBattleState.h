@@ -10,8 +10,10 @@ public:
     void Enter() override;
     void Tick(float deltaTime) override;
     void Exit() override;
+    void SkipIntro();
 
 private:
+    void StartBattle();
     float battleIntroWaitRemaining_{ 0.0f };
     float battleIntroFinalWaitElapsed_{ 0.0f };
     float bossEntranceSoundRemaining_{ 0.0f };

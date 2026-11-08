@@ -4,6 +4,8 @@
 #include "DxPlus/Debug.h"
 #include "Consts.h"
 #include "GameContext.h"
+#include "UIManager.h"
+#include "ResourceKeys.h"
 #include <cmath>
 #include <algorithm>
 
@@ -43,6 +45,16 @@ void GameSceneTutorialState::Enter()
 	auto* player = gameScene_.GetGameContext()->GetPlayer();
 	player->SetStartPosition(tutorialPlayerStartPos);
 	player->SetDefMove(true);
+
+	auto* skip = UIM().CreateImageUI(
+		L"Tutorial.Skip", ResourceKeys::TutorialSkip,
+		{ DxPlus::CLIENT_WIDTH - 155.0f, DxPlus::CLIENT_HEIGHT - 80.0f });
+	if (skip)
+	{
+		skip->SetScale(0.8f);
+		skip->SetZOrder(100);
+		skip->SetTrue();
+	}
 
 	// チェックリスト初期化
 	auto& checklist = gameScene_.GetTutorialChecklist();
@@ -191,6 +203,8 @@ void GameSceneTutorialState::Tick(float deltaTime)
 
 void GameSceneTutorialState::Exit()
 {
+	UIM().RemoveUI(L"Tutorial.Skip");
+
 	DxPlus::Debug::SetFormatString(L"GameSceneTutorialState::Exit");
 
 	auto* player = gameScene_.GetGameContext()->GetPlayer();

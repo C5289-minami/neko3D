@@ -7,6 +7,7 @@ void PlayerInput::Update()
 
 	int button = GetButton(PLAYER1);
 	int buttonDown = GetButtonDown(PLAYER1);
+	skipPressed = (buttonDown & BUTTON_SKIP) != 0;
 
 	// 移動方向
 	moveDir = Vec3(0.0f, 0.0f, 0.0f);

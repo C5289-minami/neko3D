@@ -11,7 +11,6 @@
 #include "CameraShakeType.h"
 
 #include <algorithm>
-
 // ============================================================
 // Constructor
 // ============================================================
@@ -220,19 +219,7 @@ void GameSceneBattleState::Tick(float deltaTime)
 
             if (battleIntroFinalWaitElapsed_ >= BattleIntroFinalWaitDuration)
             {
-                battleStarted_ = true;
-                SoundManager::PlayBGM(RM().GetMusic(ResourceKeys::Music_Battle));
-
-                gameScene_.StartBattleEventBarsOut();
-
-                // プレイヤー操作を解放
-                player->SetDefMove(true);
-                player->SetControlLocked(false);
-
-                // ボスAIを開始
-                boss.SetAIActive(true);
-
-                StatusUI::Open();
+                StartBattle();
             }
         }
 
@@ -649,6 +636,51 @@ void GameSceneBattleState::Tick(float deltaTime)
 // ============================================================
 // Exit
 // ============================================================
+
+void GameSceneBattleState::StartBattle()
+{
+    auto* gameContext = gameScene_.GetGameContext();
+    auto* player = gameContext->GetPlayer();
+
+    battleStarted_ = true;
+    
+    SoundManager::PlayBGM(RM().GetMusic(ResourceKeys::Music_Battle));
+	// 開幕演出終了
+    gameScene_.StartBattleEventBarsOut();
+    
+	player->SetDefMove(true);                   // プレイヤー操作を許可
+	player->SetControlLocked(false);            
+    
+	gameContext->GetBoss().SetAIActive(true);   //ボスAIを有効化
+	StatusUI::Open();   //ステータスUIを表示
+}
+
+void GameSceneBattleState::SkipIntro()
+{
+    if (battleStarted_) return;
+
+    auto* gameContext = gameScene_.GetGameContext();
+    auto& boss = gameContext->GetBoss();
+	//スキップ下ときのボスの向き調整
+    const Vec3 playerPosition = gameContext->GetPlayer()->GetWorldPosition();
+    const Vec3 toPlayer = playerPosition - boss.GetWorldPosition();
+	// ボスの向きはワールド回転を考慮して調整する
+    boss.SetYaw(std::atan2(toPlayer.x, toPlayer.z) + DX_PI_F -
+        gameContext->GetStage().GetWorldRotation().y);
+
+    SoundManager::StopSE(RM().GetSound(ResourceKeys::Sound_BossEntrance));
+    bossEntranceSoundPlayed_ = true;
+    battleIntroTurnFinished_ = true;
+
+    auto& targetCamera = gameScene_.GetTargetCamera();
+	// スキップ時はFOVを通常値に戻す
+    targetCamera.SetFieldOfView(60.0f);
+    targetCamera.Update(playerPosition, boss.GetWorldPosition(), 1.0f);   
+    gameScene_.GetCameraDirector().SwitchCamera(targetCamera, 0.0f);
+    gameScene_.SetBattleEventActive(false);
+    
+    StartBattle();
+}
 
 void GameSceneBattleState::Exit()
 {
