@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #pragma once
 #include "StateMachine.h"
 #include "GameStateType.h"
@@ -21,6 +21,7 @@ public:
 	void Initialize();
 
 	void ChangeState(GameStateType type);
+	void StartBattleWithoutIntro();
 
 	GameStateType GetCurrentType() const { return currentType_; };
 

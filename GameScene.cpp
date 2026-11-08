@@ -16,6 +16,12 @@
 #include "imgui.h"
 #endif
 
+namespace
+{
+	// スキップ後の配置。ステージ中心からの横方向の距離。
+	constexpr Vec3 TutorialSkipBattleOffset{ 0.0f, 0.0f, -1000.0f };
+}
+
 GameScene::GameScene(GameContext* context)
 	: Scene(context), stateMachine_(*this) {
 }
@@ -141,6 +147,28 @@ bool GameScene::RestoreBattleCheckpoint()
 	return true;
 }
 
+void GameScene::SkipTutorial()
+{
+	if (GetCurrentGameState() != GameStateType::Tutorial) return;
+
+	auto* player = gameContext->GetPlayer();
+	const auto& stage = gameContext->GetStage();
+	const auto& boss = gameContext->GetBoss();
+	Vec3 position = stage.GetWorldPosition() + TutorialSkipBattleOffset;
+	// スキップ後の位置は、ステージの床面に合わせる
+	position.y = stage.GetArenaSurfaceY() + Const::PLAYER_SKIN;
+	player->SetStartPosition(position);
+	player->ResetPosition();
+	// スキップ後の向きは、ボスの方を向く
+	const Vec3 toBoss = boss.GetWorldPosition() - position;
+	player->SetYaw(std::atan2(toBoss.x, toBoss.z));
+	// スキップ後のカメラは、ボスを中心にしたターゲットカメラにする
+	Collision::ResetTransparentModels();
+	cameraDirector_.StopShake();
+	stateMachine_.StartBattleWithoutIntro();
+	SaveBattleCheckpoint();
+}
+
 void GameScene::UpdateDuringFade(float deltaTime)
 {
 	if (gameContext == nullptr) return;
@@ -218,6 +246,11 @@ void GameScene::Update(float deltaTime)
 
 	player->SetDefMove(true);
 	player->Update(deltaTime, tutorialCollision_);
+	if (player->GetInput().skipPressed)
+	{
+		SkipTutorial();
+		return;
+	}
 
 	boss.Update(deltaTime);
 
