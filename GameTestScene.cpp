@@ -334,13 +334,13 @@ void GameTestScene::Update(float deltaTime)
 		Collision::ResetTransparentModels();
 
 		Collision::SetModelsBetweenTransparent(
-			playerCamera_.GetPosition(),
+			cameraDirector_.GetActiveCamera()->GetPosition(),
 			player->GetWorldPosition() + Vec3::Up() * 30.0f,
 			stage.GetCollision(),
 			0.7f);
 
 		Collision::SetModelsBetweenTransparent(
-			playerCamera_.GetPosition(),
+			cameraDirector_.GetActiveCamera()->GetPosition(),
 			boss.GetWorldPosition() + Vec3::Up() * 600.0f,
 			stage.GetCollision(),
 			0.7f);
