@@ -190,16 +190,23 @@ void GameScene::Update(float deltaTime)
 	if (currentState == GameStateType::Battle)
 	{
 		const auto& boss = gameContext->GetBoss();
-		if (!boss.IsDead())
+		if (boss.IsActive())
 			stateMachine_.Tick(deltaTime);
 
 		if (GetCurrentGameState() != GameStateType::Battle)
 			return;
 
-		if (boss.IsDead())
+
+		// 死亡判定
+
+		if (!boss.IsActive())
+		{
 			stateMachine_.ChangeState(GameStateType::Clear);
+		}
 		else if (gameContext->GetPlayer()->GetCurrentState() == PlayerStateType::Die)
+		{
 			stateMachine_.ChangeState(GameStateType::GameOver);
+		}
 		return;
 	}
 

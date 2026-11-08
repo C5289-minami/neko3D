@@ -140,6 +140,7 @@ void StatusUI::InitPlayer(const std::string& characterName)
 			ResourceKeys::Button_E.back,
 			{ left + -10.0f, backgroundPosition.y - backgroundHeight * 0.5f - 10.0f });
 	ultButton->SetScale(0.7f);
+	ultButton->SetFalse();
 }
 
 void StatusUI::InitBoss()
@@ -207,7 +208,8 @@ void StatusUI::Open()
 		L"playerULTGaugeBackKuro",
 		L"PlayerUltGauge",
 		L"BossHealthGauge",
-		L"BossDownGauge"
+		L"BossDownGauge",
+		L"ULT_EButton"
 	};
 
 	for (const auto& key : keys)
@@ -217,6 +219,7 @@ void StatusUI::Open()
 			if (key == L"PlayerUltGauge" ||
 				key == L"BossHealthGauge" ||
 				key == L"BossDownGauge" ||
+				key == L"ULT_EButton" ||
 				key == selectedPlayerBackground)
 			{
 				ui->SetTrue();
@@ -240,7 +243,8 @@ void StatusUI::Hide()
 		L"playerULTGaugeBackKuro",
 		L"PlayerUltGauge",
 		L"BossHealthGauge",
-		L"BossDownGauge"
+		L"BossDownGauge",
+		L"ULT_EButton"
 	};
 
 	for (const auto& key : keys)

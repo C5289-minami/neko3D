@@ -1,4 +1,4 @@
-// =============================
+ï»¿// =============================
 // Scenes/Base/Scene.h
 // =============================
 #pragma once
@@ -7,32 +7,32 @@
 class Scene
 {
 public:
-    // –¾¦ƒRƒ“ƒXƒgƒ‰ƒNƒ^i’ŠÛƒNƒ‰ƒX‚¾‚ªAˆÃ–Ù•ÏŠ·‚ğ–h‚®ˆÓ–¡‚Åc‚·j
+    // æ˜ç¤ºã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ï¼ˆæŠ½è±¡ã‚¯ãƒ©ã‚¹ã ãŒã€æš—é»™å¤‰æ›ã‚’é˜²ãæ„å‘³ã§æ®‹ã™ï¼‰
     explicit Scene(class GameContext* context) : gameContext(context) {}
     virtual ~Scene() = default;
 
-    // ƒ‰ƒCƒtƒTƒCƒNƒ‹
-    virtual void Init() = 0;            // ‰Šú‰»iƒˆ‰¼‘zŠÖ”j
-    virtual void Update(float) {}            // –ˆƒtƒŒ[ƒ€XVi”h¶‚ÅÀ‘•j
-    virtual void Render() const {}      // –ˆƒtƒŒ[ƒ€•`‰æi”h¶‚ÅÀ‘•j
+    // ãƒ©ã‚¤ãƒ•ã‚µã‚¤ã‚¯ãƒ«
+    virtual void Init() = 0;            // åˆæœŸåŒ–ï¼ˆç´”ç²‹ä»®æƒ³é–¢æ•°ï¼‰
+    virtual void Update(float) {}            // æ¯ãƒ•ãƒ¬ãƒ¼ãƒ æ›´æ–°ï¼ˆæ´¾ç”Ÿã§å®Ÿè£…ï¼‰
+    virtual void Render() const {}      // æ¯ãƒ•ãƒ¬ãƒ¼ãƒ æç”»ï¼ˆæ´¾ç”Ÿã§å®Ÿè£…ï¼‰
     virtual void DrawImGui() {}
     virtual void End() {}
 
-    // ‹ì“®iƒƒCƒ“ƒ‹[ƒv‚©‚ç–ˆƒtƒŒ[ƒ€ŒÄ‚Ôj
+    // é§†å‹•ï¼ˆãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—ã‹ã‚‰æ¯ãƒ•ãƒ¬ãƒ¼ãƒ å‘¼ã¶ï¼‰
     void Drive(float deltaTime);
 
-    // ‘JˆÚ
+    // é·ç§»
     virtual bool IsFinished() const { return finished; }
     virtual Scene* GetNextScene()   { return nextScene; }
     void SetNextScene(Scene* scene);
 
-    // ƒRƒ“ƒeƒLƒXƒg·‚µ‘Ö‚¦ií’“‰^—pEƒeƒXƒg—pj
+    // ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆå·®ã—æ›¿ãˆï¼ˆå¸¸é§é‹ç”¨ãƒ»ãƒ†ã‚¹ãƒˆç”¨ï¼‰
     void SetGameContext(class GameContext* context) { gameContext = context; }
     void DrawFadeOverlay() const;
 
 	GameContext* GetGameContext() const { return gameContext; }
 protected:
-    // ƒtƒF[ƒhi¡‚Íg‚í‚È‚¢j
+    // ãƒ•ã‚§ãƒ¼ãƒ‰ï¼ˆä»Šã¯ä½¿ã‚ãªã„ï¼‰
     void UpdateFadeController(float deltaTime);
     virtual void UpdateDuringFade(float deltaTime) {}
     void StartFadeIn(float duration = 1.0f);
