@@ -1,4 +1,4 @@
-#include "UIBase.h"
+ï»¿#include "UIBase.h"
 #include "ResourceManager.h"
 #include <algorithm>
 #include <cmath>
@@ -56,21 +56,21 @@ void UIBase::Update(float deltaTime)
 
 	const bool shouldShow = isVisible && displayCondition();
 
-	// •\¦ŠJn
+	// è¡¨ç¤ºé–‹å§‹
 	if (shouldShow && state == UIState::False)
 	{
 		motion.Start(0.0f, 1.0f, motion.GetDuration(), showEasing);
 		state = UIState::Do;
 	}
 
-	// •\¦ğŒ‚ª–³Œø‚É‚È‚Á‚½‚ç”ñ•\¦ƒ‚[ƒVƒ‡ƒ“‚Ö
+	// è¡¨ç¤ºæ¡ä»¶ãŒç„¡åŠ¹ã«ãªã£ãŸã‚‰éè¡¨ç¤ºãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ã¸
 	if (!shouldShow && (state == UIState::Normal || state == UIState::Do))
 	{
 		motion.SetEasing(hideEasing);
 		state = UIState::Hide;
 	}
 
-	// ƒ‚[ƒVƒ‡ƒ“XV
+	// ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³æ›´æ–°
 	switch (state)
 	{
 	case UIState::Do:
@@ -90,7 +90,7 @@ void UIBase::Update(float deltaTime)
 		break;
 	}
 
-	// “§–¾“xXV
+	// é€æ˜åº¦æ›´æ–°
 	if (!manualAlpha)
 	{
 		if (state == UIState::Do || state == UIState::Hide)
@@ -101,7 +101,7 @@ void UIBase::Update(float deltaTime)
 
 	UpdateStartMotion();
 
-	// —h‚ê
+	// æºã‚Œ
 	if (shakeElapsed < shakeDuration)
 	{
 		shakeElapsed = std::min(shakeElapsed + deltaTime, shakeDuration);
@@ -120,45 +120,125 @@ void UIBase::Update(float deltaTime)
 
 void UIBase::Draw()
 {
-	if (state == UIState::False) return;
-
-	const auto* sprite = RM().GetSprite(key);
-	if (!sprite) return;
-
-	float width = 0.0f;
-	float height = 0.0f;
-	DxLib::GetGraphSizeF(sprite->GetID(), &width, &height);
-
-	DxPlus::Vec2 drawPosition(
-		position.x + (0.5f - center.x) * width * scale,
-		position.y + (0.5f - center.y) * height * scale
-	);
-
-	DxLib::SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
-
-
+	if (state == UIState::False)
 	{
-		const float drawCenterX =
-			position.x + (0.5f - center.x) * width;
-
-		const float drawCenterY =
-			position.y + (0.5f - center.y) * height;
-
-		DxLib::DrawRotaGraph(
-			static_cast<int>(drawCenterX),
-			static_cast<int>(drawCenterY),
-			scale,
-			angle,
-			sprite->GetID(),
-			TRUE
-		);
+		return;
 	}
 
+	const auto* sprite = RM().GetSprite(key);
 
-	DxLib::SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	if (!sprite)
+	{
+		return;
+	}
+
+	float width{};
+	float height{};
+
+	DxLib::GetGraphSizeF(
+		sprite->GetID(),
+		&width,
+		&height
+	);
+
+	// Xã ã‘è² ã®å€ç‡ã«ã—ã¦å·¦å³åè»¢ã™ã‚‹ã€‚
+	const float scaleX =
+		flipX ? -scale : scale;
+
+	const float scaleY =
+		scale;
+
+	// centerã¯ç”»åƒã‚µã‚¤ã‚ºã«å¯¾ã™ã‚‹0ï½1ã®å‰²åˆã€‚
+	const float pivotX =
+		width * center.x;
+
+	const float pivotY =
+		height * center.y;
+
+	// ãƒ”ãƒœãƒƒãƒˆã‚’åŸç‚¹ã¨ã—ãŸç”»åƒå››éš…ã®ãƒ­ãƒ¼ã‚«ãƒ«åº§æ¨™ã€‚
+	const float left =
+		-pivotX;
+
+	const float right =
+		width - pivotX;
+
+	const float top =
+		-pivotY;
+
+	const float bottom =
+		height - pivotY;
+
+	const float cosAngle =
+		std::cos(angle);
+
+	const float sinAngle =
+		std::sin(angle);
+
+	// æ‹¡ç¸®ã€å›è»¢ã€ç”»é¢åº§æ¨™ã¸ã®ç§»å‹•ã‚’è¡Œã†ã€‚
+	const auto transformPoint =
+		[this, scaleX, scaleY, cosAngle, sinAngle](
+			float localX,
+			float localY)
+		{
+			const float scaledX =
+				localX * scaleX;
+
+			const float scaledY =
+				localY * scaleY;
+
+			return DxPlus::Vec2{
+				position.x +
+					scaledX * cosAngle -
+					scaledY * sinAngle,
+
+				position.y +
+					scaledX * sinAngle +
+					scaledY * cosAngle
+			};
+		};
+
+	// æç”»å…ƒç”»åƒã®å››éš…ã€‚
+	const DxPlus::Vec2 leftTop =
+		transformPoint(left, top);
+
+	const DxPlus::Vec2 rightTop =
+		transformPoint(right, top);
+
+	const DxPlus::Vec2 rightBottom =
+		transformPoint(right, bottom);
+
+	const DxPlus::Vec2 leftBottom =
+		transformPoint(left, bottom);
+
+	DxLib::SetDrawBlendMode(
+		DX_BLENDMODE_ALPHA,
+		alpha
+	);
+
+	DxLib::DrawModiGraphF(
+		leftTop.x,
+		leftTop.y,
+
+		rightTop.x,
+		rightTop.y,
+
+		rightBottom.x,
+		rightBottom.y,
+
+		leftBottom.x,
+		leftBottom.y,
+
+		sprite->GetID(),
+		TRUE
+	);
+
+	DxLib::SetDrawBlendMode(
+		DX_BLENDMODE_NOBLEND,
+		0
+	);
 }
 
-// •ûŒü‚ğ“ü‚ê‚é‚Æo‚Ä‚­‚éMotion‚ğİ’è‚·‚éŠÖ”
+// æ–¹å‘ã‚’å…¥ã‚Œã‚‹ã¨å‡ºã¦ãã‚‹Motionã‚’è¨­å®šã™ã‚‹é–¢æ•°
 void UIBase::SetToMove(DxPlus::Vec2 dir)
 {
 	state = UIState::Do;

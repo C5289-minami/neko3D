@@ -55,7 +55,7 @@
         </cell>
         <cell>
             <name>baria</name>
-            <pos>4 730</pos>
+            <pos>4 766</pos>
             <size>580 34</size>
             <pivot>0.000000 0.000000</pivot>
             <rotated>0</rotated>
@@ -65,6 +65,24 @@
         <cell>
             <name>hp</name>
             <pos>4 694</pos>
+            <size>617 34</size>
+            <pivot>0.000000 0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>hai</name>
+            <pos>4 802</pos>
+            <size>580 34</size>
+            <pivot>0.000000 0.000000</pivot>
+            <rotated>0</rotated>
+            <orgImageName></orgImageName>
+            <posStable>0</posStable>
+        </cell>
+        <cell>
+            <name>haiiro</name>
+            <pos>4 730</pos>
             <size>617 34</size>
             <pivot>0.000000 0.000000</pivot>
             <rotated>0</rotated>

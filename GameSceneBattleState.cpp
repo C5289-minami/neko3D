@@ -89,7 +89,7 @@ void GameSceneBattleState::Enter()
             toLeap = UIM().CreateImageUI(
                 L"toLeapUI",
                 ResourceKeys::TutorialToLeap,
-                { 0.0f, 200.0f },
+                { 0.0f, 300.0f },
                 { 1.0f, 0.0f },
                 0.4f
             );
@@ -154,7 +154,6 @@ void GameSceneBattleState::Tick(float deltaTime)
         );
 
         player->StopMove();
-        player->CheckFloor();
 
         boss.Update(deltaTime);
 
@@ -301,12 +300,11 @@ void GameSceneBattleState::Tick(float deltaTime)
         stageCenterPosition
     );
 
-    player->CheckFloor();
 
     // 2階にいる間だけジャンプ案内UIを表示する。
     if (auto* toLeap = UIM().GetUI(L"toLeapUI"))
     {
-        const bool shouldShow = player->IsSecondFloor();
+        const bool shouldShow = player->WasLastOnSecondFloor();
 
         if (shouldShow)
         {

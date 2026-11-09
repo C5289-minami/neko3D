@@ -64,8 +64,34 @@
 				<outputInfluence>1</outputInfluence>
 			</value>
 			<value>
-				<name>baria</name>
+				<name>hai</name>
 				<arrayIndex>1</arrayIndex>
+				<parentIndex>0</parentIndex>
+				<type>normal</type>
+				<boundsType>none</boundsType>
+				<inheritType>parent</inheritType>
+				<visibleInsideMask>0</visibleInsideMask>
+				<writeMask>0</writeMask>
+				<ineheritRates>
+					<ALPH>1</ALPH>
+					<IFLH>0</IFLH>
+					<IFLV>0</IFLV>
+					<FLPH>0</FLPH>
+					<FLPV>0</FLPV>
+					<HIDE>0</HIDE>
+				</ineheritRates>
+				<alphaBlendType>mix</alphaBlendType>
+				<show>1</show>
+				<locked>0</locked>
+				<expandAttribute>0</expandAttribute>
+				<expandChildren>1</expandChildren>
+				<refCellTag></refCellTag>
+				<maskInfluence>1</maskInfluence>
+				<outputInfluence>1</outputInfluence>
+			</value>
+			<value>
+				<name>baria</name>
+				<arrayIndex>2</arrayIndex>
 				<parentIndex>0</parentIndex>
 				<type>normal</type>
 				<boundsType>none</boundsType>
@@ -136,11 +162,49 @@
 			<labels />
 			<guidelines />
 			<isSetup>0</isSetup>
-			<lastFrame>49</lastFrame>
+			<lastFrame>23</lastFrame>
 			<partAnimes>
 				<partAnime>
 					<partName>root</partName>
 					<attributes>
+						<attribute tag="HIDE">
+							<key time="0">
+								<value>0</value>
+							</key>
+						</attribute>
+					</attributes>
+				</partAnime>
+				<partAnime>
+					<partName>hai</partName>
+					<attributes>
+						<attribute tag="CELL">
+							<key time="0">
+								<value>
+									<mapId>0</mapId>
+									<name>hai</name>
+								</value>
+							</key>
+						</attribute>
+						<attribute tag="POSX">
+							<key time="0" ipType="linear">
+								<value>0.062438965</value>
+							</key>
+						</attribute>
+						<attribute tag="POSY">
+							<key time="0" ipType="linear">
+								<value>0.18748474</value>
+							</key>
+						</attribute>
+						<attribute tag="ROTZ">
+							<key time="0" ipType="linear">
+								<value>0</value>
+							</key>
+						</attribute>
+						<attribute tag="PRIO">
+							<key time="0" ipType="linear">
+								<value>0</value>
+							</key>
+						</attribute>
 						<attribute tag="HIDE">
 							<key time="0">
 								<value>0</value>
@@ -161,22 +225,31 @@
 						</attribute>
 						<attribute tag="POSX">
 							<key time="0" ipType="linear">
-								<value>34</value>
+								<value>0.062438965</value>
+							</key>
+							<key time="98" ipType="linear">
+								<value>2.0422368</value>
 							</key>
 							<key time="99" ipType="linear">
-								<value>34</value>
+								<value>2.062439</value>
 							</key>
 						</attribute>
 						<attribute tag="POSY">
 							<key time="0" ipType="linear">
-								<value>400</value>
+								<value>-0.14584351</value>
+							</key>
+							<key time="98" ipType="linear">
+								<value>-0.14584351</value>
 							</key>
 							<key time="99" ipType="linear">
-								<value>400</value>
+								<value>-0.14584351</value>
 							</key>
 						</attribute>
 						<attribute tag="ROTZ">
 							<key time="0" ipType="linear">
+								<value>0</value>
+							</key>
+							<key time="98" ipType="linear">
 								<value>0</value>
 							</key>
 							<key time="99" ipType="linear">
@@ -219,6 +292,9 @@
 							<key time="0" ipType="linear">
 								<value>0</value>
 							</key>
+							<key time="98" ipType="linear">
+								<value>0</value>
+							</key>
 							<key time="99" ipType="linear">
 								<value>0</value>
 							</key>
@@ -227,17 +303,20 @@
 							<key time="0">
 								<value>0</value>
 							</key>
-							<key time="99">
+							<key time="98">
 								<value>0</value>
+							</key>
+							<key time="99">
+								<value>1</value>
 							</key>
 						</attribute>
 						<attribute tag="VERT">
 							<key time="0" ipType="linear">
 								<value>
 									<LT>0 0</LT>
-									<RT>-25 0</RT>
+									<RT>1 0</RT>
 									<LB>0 0</LB>
-									<RB>-25 0</RB>
+									<RB>1 0</RB>
 								</value>
 							</key>
 							<key time="99" ipType="linear">

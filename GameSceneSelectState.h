@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include "GameBaseState.h"
+#include "TwoFrameUIAnimator.h"
+
 #include <vector>
 
 class Player;
@@ -10,7 +12,8 @@ class GameSceneSelectState : public GameBaseState
 public:
     GameSceneSelectState(
         GameStateMachine& gameStateMachine,
-        GameScene& gameScene);
+        GameScene& gameScene
+    );
 
     void Enter() override;
     void Tick(float deltaTime) override;
@@ -19,7 +22,9 @@ public:
 private:
     void SelectIndex(int index);
     void ConfirmSelection();
-    void UpdateSelectedUI() const;
+
+    void UpdateSelectedUI();
+    void UpdateHandAnimation();
 
     std::vector<Player*> players_;
 
@@ -27,17 +32,20 @@ private:
 
     enum class SelectCameraState
     {
-        WaitSelectShot,       /* Selectショットの完了待ち*/
-        MoveToSelectedPlayer, /* 選択中のPlayerの前方へ移動中*/
-        Ready                 /* 選択操作可能*/
+        WaitSelectShot,
+        MoveToSelectedPlayer,
+        Ready
     };
 
-    SelectCameraState cameraState_{ SelectCameraState::WaitSelectShot };
-    bool confirmAfterCameraMove_{ false };
+    SelectCameraState cameraState_{
+        SelectCameraState::WaitSelectShot
+    };
 
+    bool confirmAfterCameraMove_{ false };
 
     bool aWasDown_{ false };
     bool dWasDown_{ false };
     bool enterWasDown_{ false };
-    bool mouseWasDown_{ false };
+
+    TwoFrameUIAnimator* handAnimation_{};
 };

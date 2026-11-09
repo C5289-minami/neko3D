@@ -1,20 +1,21 @@
-
+ï»¿
 #include "TutorialChecklist.h"
 #include "UIManager.h"
 #include "ResourceKeys.h"
+#include "SoundManager.h"
 
 #include <utility>
 
 namespace
 {
 	// =========================
-	// ƒXƒ^ƒ“ƒv‰‰oŠÔ
+	// ã‚¹ã‚¿ãƒ³ãƒ—æ¼”å‡ºæ™‚é–“
 	// =========================
 	constexpr float StampPressDuration = 1.5f;
 	constexpr float StampFadeDuration = 0.3f;
 
 	// =========================
-	// ‰Ÿˆó‰‰oiPressj
+	// æŠ¼å°æ¼”å‡ºï¼ˆPressï¼‰
 	// =========================
 	constexpr float PressStartAlpha = 0.0f;
 	constexpr float PressEndAlpha = 255.0f;
@@ -29,7 +30,7 @@ namespace
 	constexpr Motion::Easing PressEasing = Motion::Easing::EaseInOut;
 
 	// =========================
-	// Á¸‰‰oiFadeOutj
+	// æ¶ˆå¤±æ¼”å‡ºï¼ˆFadeOutï¼‰
 	// =========================
 	constexpr float FadeStartAlpha = PressEndAlpha;
 	constexpr float FadeEndAlpha = 0.0f;
@@ -43,17 +44,17 @@ namespace
 	constexpr Motion::Easing FadeEasing = Motion::Easing::EaseOut;
 
 	// =========================
-	// ‰‰o—pƒXƒ^ƒ“ƒv‰Šú’l
+	// æ¼”å‡ºç”¨ã‚¹ã‚¿ãƒ³ãƒ—åˆæœŸå€¤
 	// =========================
 	constexpr float EffectStartAngle = 0.0f;
 
 	// =========================
-	// ˆÊ’u
+	// ä½ç½®
 	// =========================
 	constexpr int StampRandomOffsetX = 100;
 
 	// =========================
-	// •âŠÔ
+	// è£œé–“
 	// =========================
 	float Lerp(float from, float to, float t)
 	{
@@ -124,7 +125,7 @@ void TutorialChecklist::Update(float deltaTime)
 		const float t = item.stampMotion.GetValue();
 
 		// =================================
-		// ‡@ ‰Ÿˆó‰‰o
+		// â‘  æŠ¼å°æ¼”å‡º
 		// =================================
 		if (item.stampPhase == StampAnimationPhase::Press)
 		{
@@ -151,14 +152,16 @@ void TutorialChecklist::Update(float deltaTime)
 					StampFadeDuration,
 					FadeEasing);
 
-				// ‰‰o—pƒXƒ^ƒ“ƒv‚Ì‰ñ“]Šp“x‚ğˆø‚«Œp‚®
+				// æ¼”å‡ºç”¨ã‚¹ã‚¿ãƒ³ãƒ—ã®å›è»¢è§’åº¦ã‚’å¼•ãç¶™ã
 				if (completedStamp)
 					completedStamp->SetAngle(effect->GetAngle());
+
+				SoundManager::PlaySE(RM().GetSound(ResourceKeys::Sound_hanko));
 			}
 		}
 
 		// =================================
-		// ‡A ‰‰o—pƒXƒ^ƒ“ƒvÁ¸
+		// â‘¡ æ¼”å‡ºç”¨ã‚¹ã‚¿ãƒ³ãƒ—æ¶ˆå¤±
 		// =================================
 		else if (item.stampPhase == StampAnimationPhase::FadeOut)
 		{
@@ -175,14 +178,14 @@ void TutorialChecklist::Update(float deltaTime)
 			effect->SetScale(item.checkScale);
 			effect->SetAngleSpeed(angleSpeed);
 
-			// Š®—¹ƒXƒ^ƒ“ƒv‚ğ™X‚É•\¦
+			// å®Œäº†ã‚¹ã‚¿ãƒ³ãƒ—ã‚’å¾ã€…ã«è¡¨ç¤º
 			if (completedStamp)
 			{
 				completedStamp->SetAlphaDirect(
 					static_cast<int>(Lerp(0.0f, 255.0f, t)));
 			}
 
-			// ‰‰oI—¹
+			// æ¼”å‡ºçµ‚äº†
 			if (item.stampMotion.IsFinished())
 			{
 				effect->SetAlphaDirect(static_cast<int>(FadeEndAlpha));
@@ -195,7 +198,7 @@ void TutorialChecklist::Update(float deltaTime)
 		}
 	}
 	// =================================
-	// ‘S€–Ú’B¬ • ‘SƒXƒ^ƒ“ƒv‰‰oI—¹
+	// å…¨é …ç›®é”æˆ ï¼† å…¨ã‚¹ã‚¿ãƒ³ãƒ—æ¼”å‡ºçµ‚äº†
 	// =================================
 	bool allCompleted = !items.empty();
 
@@ -229,7 +232,7 @@ void TutorialChecklist::AddItem(
 	item.text = text;
 	item.stampPosition = stampPosition;
 
-	// ƒ‰ƒ“ƒ_ƒ€‚ÈXƒIƒtƒZƒbƒg
+	// ãƒ©ãƒ³ãƒ€ãƒ ãªXã‚ªãƒ•ã‚»ãƒƒãƒˆ
 	item.stampPosition.x +=
 		DxLib::GetRand(StampRandomOffsetX * 2) - StampRandomOffsetX;
 
@@ -255,7 +258,7 @@ void TutorialChecklist::CompleteItem(std::size_t index)
 		L"TutorialStampEffect" + std::to_wstring(index);
 
 	// =================================
-	// ‡@ Š®—¹ƒXƒ^ƒ“ƒvic‚µ‚Ä‚¨‚­UIj
+	// â‘  å®Œäº†ã‚¹ã‚¿ãƒ³ãƒ—ï¼ˆæ®‹ã—ã¦ãŠãUIï¼‰
 	// =================================
 
 	auto* stamp = UIM().CreateImageUI(
@@ -280,7 +283,7 @@ void TutorialChecklist::CompleteItem(std::size_t index)
 	}
 
 	// =================================
-	// ‡A ‰Ÿˆó‰‰oUI
+	// â‘¡ æŠ¼å°æ¼”å‡ºUI
 	// =================================
 
 	auto* effect = UIM().CreateImageUI(
@@ -291,7 +294,7 @@ void TutorialChecklist::CompleteItem(std::size_t index)
 
 	if (!effect)
 	{
-		// ‰‰oUI‚ğ¶¬‚Å‚«‚È‚©‚Á‚½ê‡
+		// æ¼”å‡ºUIã‚’ç”Ÿæˆã§ããªã‹ã£ãŸå ´åˆ
 		if (stamp)
 			stamp->SetAlphaDirect(255);
 
@@ -312,7 +315,7 @@ void TutorialChecklist::CompleteItem(std::size_t index)
 	stampEffectIds.push_back(effectId);
 
 	// =================================
-	// ‰ŸˆóƒAƒjƒ[ƒVƒ‡ƒ“ŠJn
+	// æŠ¼å°ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³é–‹å§‹
 	// =================================
 
 	item.checkScale = PressStartScale;
@@ -332,7 +335,7 @@ void TutorialChecklist::SetVisible(bool visible)
 	isVisible = visible;
 
 	// =================================
-	// ƒ`ƒFƒbƒNƒŠƒXƒg–{‘Ì
+	// ãƒã‚§ãƒƒã‚¯ãƒªã‚¹ãƒˆæœ¬ä½“
 	// =================================
 
 	if (auto* list = UIM().GetUI(L"TutorialList"))
@@ -344,7 +347,7 @@ void TutorialChecklist::SetVisible(bool visible)
 	}
 
 	// =================================
-	// Š®—¹ƒXƒ^ƒ“ƒv
+	// å®Œäº†ã‚¹ã‚¿ãƒ³ãƒ—
 	// =================================
 
 	for (const auto& stampId : stampIds)
@@ -359,7 +362,7 @@ void TutorialChecklist::SetVisible(bool visible)
 	}
 
 	// =================================
-	// ‰‰o—pƒXƒ^ƒ“ƒv
+	// æ¼”å‡ºç”¨ã‚¹ã‚¿ãƒ³ãƒ—
 	// =================================
 
 	for (std::size_t i = 0; i < items.size(); ++i)

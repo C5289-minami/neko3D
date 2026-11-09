@@ -111,7 +111,7 @@ void BossAI::Update(float deltaTime)
 	// ============================ 
 
     // 二階にいる場合は、しっぽ攻撃を優先
-    if (player_ != nullptr && player_->IsSecondFloor())
+    if (player_ != nullptr && player_->WasLastOnSecondFloor())
     {
         // クールダウンは無効
      /*   if (!tailWhipCooldown_.IsReady())

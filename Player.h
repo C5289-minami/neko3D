@@ -244,25 +244,32 @@ public:
         }
     }
 
-    // 現在接地している床。
-    // 空中の場合はNone。
+    // 現在位置。
+    // None      : 空中
+    // DownFloor : 1階
+    // UpFloor   : 2階
     GroundType GetCurrentFloor() const
     {
         return currentFloor_;
     }
 
-    // 最後に接地していた床。
+    // 最後に接地していた階。
     // 空中になっても保持する。
     GroundType GetLastGroundFloor() const
     {
         return lastGroundFloor_;
     }
 
-    // ジャンプを開始した床。
+    // ジャンプを開始した階。
     // 着地するまで保持する。
     GroundType GetJumpStartFloor() const
     {
         return jumpStartFloor_;
+    }
+
+    bool IsAirborne() const
+    {
+        return currentFloor_ == GroundType::None;
     }
 
     bool IsFirstFloor() const
@@ -284,8 +291,6 @@ public:
     {
         return lastGroundFloor_ == GroundType::UpFloor;
     }
-
-    GroundType CheckFloor() const;
 
 
     // ========================================================
