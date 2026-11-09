@@ -29,7 +29,7 @@ Player::Player()
 	: ActorBase("Player"), stateMachine_(*this)
 {
 	model_.SetOwner(*this);
-	model_.SetModelKey(ResourceKeys::Model_PlayerMike);
+	model_.SetModelKey(ResourceKeys::Model_Player.mike);
 
 	model_.SetObjectId("player_model");
 	model_.SetObjectName("Player");

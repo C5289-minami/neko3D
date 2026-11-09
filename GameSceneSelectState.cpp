@@ -25,21 +25,50 @@ namespace
 
 	struct SelectCard
 	{
-		const wchar_t* uiKey;
-		const wchar_t* spriteKey;
+		const wchar_t* centerUIKey;
+		const wchar_t* leftUIKey;
+		const wchar_t* rightUIKey;
+
+		const wchar_t* centerSpriteKey;
+		const wchar_t* leftSpriteKey;
+		const wchar_t* rightSpriteKey;
+
 		const wchar_t* soundKey;
 		const char* statusName;
-		const wchar_t* trait;
 	};
 
 	constexpr std::array<SelectCard, 3> SelectCards{ {
-		{ L"Select.Mike", ResourceKeys::SelectMike, ResourceKeys::Sound_SelectTaka, u8"たか", L"バランス型" },
-		{ L"Select.Sabi", ResourceKeys::SelectSabi, ResourceKeys::Sound_SelectGishi, u8"ぎし", L"走るのが得意" },
-		{ L"Select.Kuro", ResourceKeys::SelectKuro, ResourceKeys::Sound_SelectYu, u8"ゆう", L"登るのが得意" }
+		{
+			L"Select.Mike",
+			L"Select.Left.Mike",
+			L"Select.Right.Mike",
+			ResourceKeys::SelectPlayers.mike,
+			ResourceKeys::SelectAKeys.mike,
+			ResourceKeys::SelectDKeys.mike,
+			ResourceKeys::SoundSelectPlayers.mike,
+			u8"たか"
+		},
+		{
+			L"Select.Sabi",
+			L"Select.Left.Sabi",
+			L"Select.Right.Sabi",
+			ResourceKeys::SelectPlayers.sabi,
+			ResourceKeys::SelectAKeys.sabi,
+			ResourceKeys::SelectDKeys.sabi,
+			ResourceKeys::SoundSelectPlayers.sabi,
+			u8"ぎし"
+		},
+		{
+			L"Select.Kuro",
+			L"Select.Left.Kuro",
+			L"Select.Right.Kuro",
+			ResourceKeys::SelectPlayers.kuro,
+			ResourceKeys::SelectAKeys.kuro,
+			ResourceKeys::SelectDKeys.kuro,
+			ResourceKeys::SoundSelectPlayers.kuro,
+			u8"ゆう"
+		}
 	} };
-
-
-
 	class SelectCommonUI : public UIBase
 	{
 	public:
@@ -117,20 +146,74 @@ void GameSceneSelectState::Enter()
 			DxPlus::CLIENT_HEIGHT * 0.5f
 		};
 
-		// カード3枚を登録
 		for (const auto& card : SelectCards)
 		{
-			if (!UIM().GetUI(card.uiKey))
+			if (!UIM().GetUI(card.centerUIKey))
 			{
 				UIM().CreateImageUI(
-					card.uiKey,
-					card.spriteKey,
+					card.centerUIKey,
+					card.centerSpriteKey,
 					position,
-					{ 0, -1 },
-					SelectCameraMoveDuration);
+					{ 0.0f, -1.0f },
+					SelectCameraMoveDuration
+				);
+			}
+			if (auto* ui = UIM().GetUI(card.centerUIKey))
+				ui->SetFalse();
+
+		}
+		// 描画順が追加順なので、左と右のUIは後に追加する
+		// 中央の画像の幅を取得して、左右のUIの位置を決定する
+		float offset{};
+		auto* centerSprite = RM().GetSprite(SelectCards[0].centerSpriteKey);
+		if (centerSprite)
+		{
+			DxLib::GetGraphSizeF(centerSprite->GetID(), &offset, {});
+			offset *= 0.5f;
+		}
+		else
+		{
+			offset = 100.0f; // デフォルトのオフセット値
+		}
+
+		DxPlus::Vec2 rightPosition{
+			position.x + offset,
+			position.y
+		};
+		DxPlus::Vec2 leftPosition{
+			position.x - offset,
+			position.y
+		};
+
+		for (const auto& card : SelectCards)
+		{
+			if (!UIM().GetUI(card.leftUIKey))
+			{
+				UIM().CreateImageUI(
+					card.leftUIKey,
+					card.leftSpriteKey,
+					leftPosition,
+					{ 1.0f, 0.0f },
+					SelectCameraMoveDuration
+				);
 			}
 
-			UIM().GetUI(card.uiKey)->SetFalse();
+			if (!UIM().GetUI(card.rightUIKey))
+			{
+				UIM().CreateImageUI(
+					card.rightUIKey,
+					card.rightSpriteKey,
+					rightPosition,
+					{ -1.0f, 0.0f },
+					SelectCameraMoveDuration
+				);
+			}
+
+			if (auto* ui = UIM().GetUI(card.leftUIKey))
+				ui->SetFalse();
+
+			if (auto* ui = UIM().GetUI(card.rightUIKey))
+				ui->SetFalse();
 		}
 
 		// 共通UIを登録
@@ -317,11 +400,15 @@ void GameSceneSelectState::SelectIndex(int index)
 	SoundManager::StopSE(RM().GetSound(SelectCards[selectedIndex_].soundKey));
 	selectedIndex_ = index;
 	SoundManager::PlaySE(RM().GetSound(SelectCards[selectedIndex_].soundKey));
-
-	// カードと共通UIを一度非表示にする
 	for (const auto& card : SelectCards)
 	{
-		if (auto* ui = UIM().GetUI(card.uiKey))
+		if (auto* ui = UIM().GetUI(card.centerUIKey))
+			ui->Hide();
+
+		if (auto* ui = UIM().GetUI(card.leftUIKey))
+			ui->Hide();
+
+		if (auto* ui = UIM().GetUI(card.rightUIKey))
 			ui->Hide();
 	}
 
@@ -376,25 +463,43 @@ void GameSceneSelectState::ConfirmSelection()
 
 void GameSceneSelectState::UpdateSelectedUI() const
 {
+	const int count = static_cast<int>(SelectCards.size());
+
+	const int leftIndex =
+		(selectedIndex_ - 1 + count) % count;
+
+	const int rightIndex =
+		(selectedIndex_ + 1) % count;
+
 	for (std::size_t i = 0; i < SelectCards.size(); ++i)
 	{
-		if (auto* ui = UIM().GetUI(SelectCards[i].uiKey))
+		if (auto* ui = UIM().GetUI(SelectCards[i].centerUIKey))
 		{
 			if (i == static_cast<std::size_t>(selectedIndex_))
-			{
 				ui->Show();
-			}
 			else
-			{
 				ui->SetFalse();
-			}
+		}
+
+		if (auto* ui = UIM().GetUI(SelectCards[i].leftUIKey))
+		{
+			if (i == static_cast<std::size_t>(leftIndex))
+				ui->Show();
+			else
+				ui->SetFalse();
+		}
+
+		if (auto* ui = UIM().GetUI(SelectCards[i].rightUIKey))
+		{
+			if (i == static_cast<std::size_t>(rightIndex))
+				ui->Show();
+			else
+				ui->SetFalse();
 		}
 	}
 
 	if (auto* ui = UIM().GetUI(L"Select.Common"))
-	{
 		ui->Show();
-	}
 }
 
 void GameSceneSelectState::Exit()
@@ -406,7 +511,13 @@ void GameSceneSelectState::Exit()
 
 	for (const auto& card : SelectCards)
 	{
-		if (auto* ui = UIM().GetUI(card.uiKey))
+		if (auto* ui = UIM().GetUI(card.centerUIKey))
+			ui->SetFalse();
+
+		if (auto* ui = UIM().GetUI(card.leftUIKey))
+			ui->SetFalse();
+
+		if (auto* ui = UIM().GetUI(card.rightUIKey))
 			ui->SetFalse();
 	}
 

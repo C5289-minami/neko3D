@@ -49,7 +49,7 @@ void StatusUI::InitPlayer(const std::string& characterName)
 	if (!mike)
 		mike = UIM().CreateImageUI(
 			L"playerULTGaugeBackMike",
-			ResourceKeys::MikeStatusBack,
+			ResourceKeys::PlayerStatus.mike,
 			backgroundPosition,
 			StatusPlayerMotionDirection,
 			StatusMotionDuration);
@@ -58,7 +58,7 @@ void StatusUI::InitPlayer(const std::string& characterName)
 	if (!sabi)
 		sabi = UIM().CreateImageUI(
 			L"playerULTGaugeBackSabi",
-			ResourceKeys::SabiStatusBack,
+			ResourceKeys::PlayerStatus.sabi,
 			backgroundPosition,
 			StatusPlayerMotionDirection,
 			StatusMotionDuration);
@@ -67,7 +67,7 @@ void StatusUI::InitPlayer(const std::string& characterName)
 	if (!kuro)
 		kuro = UIM().CreateImageUI(
 			L"playerULTGaugeBackKuro",
-			ResourceKeys::KuroStatusBack,
+			ResourceKeys::PlayerStatus.kuro,
 			backgroundPosition,
 			StatusPlayerMotionDirection,
 			StatusMotionDuration);
@@ -107,7 +107,7 @@ void StatusUI::InitPlayer(const std::string& characterName)
 		ultGauge->SetFalse();
 
 	// 背景画像サイズ取得
-	const auto* background = RM().GetSprite(ResourceKeys::MikeStatusBack);
+	const auto* background = RM().GetSprite(ResourceKeys::PlayerStatus.mike);
 	const auto* heartSprite = RM().GetSprite(ResourceKeys::PlayerHeart);
 
 	if (!background || !heartSprite) return;

@@ -33,8 +33,8 @@ public:
 	GameContext* GetGameContext() const { return gameContext; }
 protected:
     // フェード（今は使わない）
-    void UpdateFadeController(float deltaTime);
-    virtual void UpdateDuringFade(float deltaTime) {}
+    void UpdateFadeController(float);
+    virtual void UpdateDuringFade(float) {}
     void StartFadeIn(float duration = 1.0f);
     void StartFadeOut(float duration = 1.0f);
 

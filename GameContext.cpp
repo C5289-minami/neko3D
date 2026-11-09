@@ -46,9 +46,9 @@ void GameContext::Init()
 
 	const std::array<std::wstring, 3> playerModelKeys
 	{
-		ResourceKeys::Model_PlayerMike,
-		ResourceKeys::Model_PlayerSabi,
-		ResourceKeys::Model_PlayerKuro
+		ResourceKeys::Model_Player.mike,
+		ResourceKeys::Model_Player.sabi,
+		ResourceKeys::Model_Player.kuro
 	};
 	for (std::size_t i = 0; i < selectPreviewPlayers_.size(); ++i)
 	{
