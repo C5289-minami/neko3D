@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "GameBaseState.h"
 
 class GameSceneGameOverState : public GameBaseState
@@ -11,4 +11,6 @@ public:
 	void Exit() override;
 private:
 	int selectedIndex_{ 0 };
+	bool handPrepared_{ false };
+	bool handAnimationStarted_{ false };
 };

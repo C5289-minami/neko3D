@@ -5,6 +5,31 @@
 #include "DxPlus/Debug.h"
 #include "UIManager.h"
 
+namespace
+{
+	constexpr const wchar_t*
+		ClearHandAnimatorId =
+		L"Result.Clear.Hand";
+
+	constexpr float ClearHandXRate = 0.36f;
+	constexpr float ClearRetryHandYRate = 0.82f;
+	constexpr float ClearTitleHandYRate = 0.92f;
+
+	DxPlus::Vec2 GetClearHandPosition(
+		int selectedIndex)
+	{
+		return {
+			DxPlus::CLIENT_WIDTH *
+				ClearHandXRate,
+
+			DxPlus::CLIENT_HEIGHT *
+				(selectedIndex == 0
+					? ClearRetryHandYRate
+					: ClearTitleHandYRate)
+		};
+	}
+}
+
 GameSceneClearState::GameSceneClearState(GameStateMachine& gameStateMachine, GameScene& gameScene)
 	:GameBaseState(gameStateMachine, gameScene)
 {
@@ -98,64 +123,229 @@ void GameSceneClearState::Enter()
 		}
 	}
 	selectedIndex_ = 0;
+
+
+	handPrepared_ = false;
+	handAnimationStarted_ = false;
+
+	if (auto* context =
+		gameScene_.GetGameContext())
+	{
+		context->HandUIInit();
+	}
 }
 
 void GameSceneClearState::Tick(float deltaTime)
 {
-	DxPlus::Debug::SetFormatString(L"GameSceneClearState::Tick");
+    DxPlus::Debug::SetFormatString(
+        L"GameSceneClearState::Tick"
+    );
 
-	auto& boss = gameScene_.GetGameContext()->GetBoss();
-	if (boss.IsDead() && boss.IsActive())
-	{
-		boss.Update(deltaTime);
-		gameScene_.GetBossDieCamera().SetTarget(boss.GetWorldPosition());
-	}
-	gameScene_.UpdateStateCamera(deltaTime, "");
+    auto* context =
+        gameScene_.GetGameContext();
 
-	auto* clear = UIM().GetUI(L"Result.Clear");
+    if (!context)
+    {
+        return;
+    }
 
-	if (!clear || clear->GetCurrentState() != UIBase::UIState::Normal)
-		return;
+    auto& boss =
+        context->GetBoss();
 
-	auto* retry = UIM().GetButtonUI(L"Result.ClearRetryButton");
-	auto* toTitle = UIM().GetButtonUI(L"Result.ClearToTitleButton");
+    if (boss.IsDead() &&
+        boss.IsActive())
+    {
+        boss.Update(deltaTime);
 
-	if (!retry || !toTitle)
-		return;
+        gameScene_
+            .GetBossDieCamera()
+            .SetTarget(
+                boss.GetWorldPosition()
+            );
+    }
 
-	if (retry->GetCurrentState() == UIBase::UIState::False)
-	{
-		retry->Show();
-	}
+    gameScene_.UpdateStateCamera(
+        deltaTime,
+        ""
+    );
 
-	if (toTitle->GetCurrentState() == UIBase::UIState::False)
-	{
-		toTitle->Show();
-	}
+    auto* clear =
+        UIM().GetUI(L"Result.Clear");
 
-	// ボタンの表示アニメーション完了まで待機
-	if (retry->GetCurrentState() != UIBase::UIState::Normal ||
-		toTitle->GetCurrentState() != UIBase::UIState::Normal)
-		return;
+    if (!clear ||
+        clear->GetCurrentState() !=
+        UIBase::UIState::Normal)
+    {
+        return;
+    }
 
-	using namespace DxPlus::Input;
+    auto* retry =
+        UIM().GetButtonUI(
+            L"Result.ClearRetryButton"
+        );
 
-	if (GetButtonDown(PLAYER1) & BUTTON_UP)
-		selectedIndex_ = 0;
+    auto* toTitle =
+        UIM().GetButtonUI(
+            L"Result.ClearToTitleButton"
+        );
 
-	if (GetButtonDown(PLAYER1) & BUTTON_DOWN)
-		selectedIndex_ = 1;
+    if (!retry || !toTitle)
+    {
+        return;
+    }
 
-	retry->SetSelected(selectedIndex_ == 0);
-	toTitle->SetSelected(selectedIndex_ == 1);
+    // ========================================================
+    // ボタンと手の表示開始
+    // ========================================================
 
-	if (GetButtonDown(PLAYER1) & BUTTON_START)
-	{
-		if (selectedIndex_ == 0)
-			retry->Trigger();
-		else
-			toTitle->Trigger();
-	}
+    if (!handPrepared_)
+    {
+        retry->Show();
+        toTitle->Show();
+
+        context->StartActivePlayerHandAnimation(
+            ClearHandAnimatorId,
+            GetClearHandPosition(selectedIndex_)
+        );
+
+        auto* animator =
+            UIM().GetTwoFrameAnimator(
+                ClearHandAnimatorId
+            );
+
+        if (animator)
+        {
+            // 切り替えアニメーションを一時停止する。
+            animator->Pause();
+
+            UIBase* normalHand =
+                animator->GetFirstUI();
+
+            UIBase* pressedHand =
+                animator->GetSecondUI();
+
+            if (normalHand)
+            {
+                normalHand->SetFalse();
+
+                // ボタンと同じ1.5秒で表示する。
+                normalHand->SetMotionDuration(
+                    1.5f
+                );
+
+                // 移動なし。
+                normalHand->SetToMove({
+                    0.0f,
+                    0.0f
+                    });
+
+                normalHand->Show();
+            }
+
+            if (pressedHand)
+            {
+                pressedHand->SetFalse();
+            }
+        }
+
+        handPrepared_ = true;
+        return;
+    }
+
+    // ========================================================
+    // ボタンと手の表示完了待ち
+    // ========================================================
+
+    if (retry->GetCurrentState() !=
+        UIBase::UIState::Normal ||
+        toTitle->GetCurrentState() !=
+        UIBase::UIState::Normal)
+    {
+        return;
+    }
+
+    auto* animator =
+        UIM().GetTwoFrameAnimator(
+            ClearHandAnimatorId
+        );
+
+    if (!animator)
+    {
+        return;
+    }
+
+    UIBase* normalHand =
+        animator->GetFirstUI();
+
+    // 手のフェード完了も待つ。
+    if (!normalHand ||
+        normalHand->GetCurrentState() !=
+        UIBase::UIState::Normal)
+    {
+        return;
+    }
+
+    // ========================================================
+    // 通常の2枚アニメーション開始
+    // ========================================================
+
+    if (!handAnimationStarted_)
+    {
+        /*
+            Startすると通常画像の表示から始まる。
+
+            フェード完了済みなので、見た目を維持したまま
+            通常の押下アニメーションへ移行できる。
+        */
+        animator->Start();
+
+        handAnimationStarted_ = true;
+    }
+
+    // ========================================================
+    // 選択操作
+    // ========================================================
+
+    using namespace DxPlus::Input;
+
+    if (GetButtonDown(PLAYER1) &
+        BUTTON_UP)
+    {
+        selectedIndex_ = 0;
+    }
+
+    if (GetButtonDown(PLAYER1) &
+        BUTTON_DOWN)
+    {
+        selectedIndex_ = 1;
+    }
+
+    retry->SetSelected(
+        selectedIndex_ == 0
+    );
+
+    toTitle->SetSelected(
+        selectedIndex_ == 1
+    );
+
+    animator->SetAnchorPosition(
+        GetClearHandPosition(
+            selectedIndex_
+        )
+    );
+
+    if (GetButtonDown(PLAYER1) &
+        BUTTON_START)
+    {
+        if (selectedIndex_ == 0)
+        {
+            retry->Trigger();
+        }
+        else
+        {
+            toTitle->Trigger();
+        }
+    }
 }
 
 void GameSceneClearState::Exit()
@@ -169,4 +359,12 @@ void GameSceneClearState::Exit()
 
 	if (auto* toTitle = UIM().GetButtonUI(L"Result.ClearToTitleButton"))
 		toTitle->Hide();
+
+	if (auto* context =
+		gameScene_.GetGameContext())
+	{
+		context->StopPlayerHandAnimation(
+			ClearHandAnimatorId
+		);
+	}
 }

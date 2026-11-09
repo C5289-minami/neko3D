@@ -41,6 +41,13 @@ void ResourceManager::LoadAll()
 	loadButton(ResourceKeys::Button_Rose, L"./Data/Images/Button/button_rose.png", L"./Data/Images/Button/button_rose_hover.png");
 	loadButton(ResourceKeys::Button_E, L"./Data/Images/Button/E_Button.png", L"./Data/Images/Button/button_rose_hover.png");
 
+	LoadSprite(ResourceKeys::PlayerHand.normal.mike,	L"./Data/Images/Hand/mike/1.png");
+	LoadSprite(ResourceKeys::PlayerHand.normal.sabi,	L"./Data/Images/Hand/sabi/1.png");
+	LoadSprite(ResourceKeys::PlayerHand.normal.kuro,	L"./Data/Images/Hand/kuro/1.png");
+	LoadSprite(ResourceKeys::PlayerHand.pressed.mike,	L"./Data/Images/Hand/mike/2.png");
+	LoadSprite(ResourceKeys::PlayerHand.pressed.sabi,	L"./Data/Images/Hand/sabi/2.png");
+	LoadSprite(ResourceKeys::PlayerHand.pressed.kuro,	L"./Data/Images/Hand/kuro/2.png");
+
 	// Common UI
 	LoadSprite(ResourceKeys::UI_Logo, L"./Data/Images/logo.png");
 

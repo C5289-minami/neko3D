@@ -18,6 +18,12 @@ namespace ResourceKeys
         const wchar_t* kuro;
     };
 
+    struct PlayerHands
+    {
+        const Players normal;
+        const Players pressed;
+	};
+
     // UI
     inline constexpr const wchar_t* UI_Logo = L"UILogo";
 
@@ -26,6 +32,11 @@ namespace ResourceKeys
     inline constexpr Button Button_Purple{ L"UIPurpleButton", L"UIPurpleHover" };
     inline constexpr Button Button_Rose{ L"UIRoseButton", L"UIRoseHover" };
     inline constexpr Button Button_E{ L"EButton", L"EButtonHover" };
+
+    inline constexpr PlayerHands PlayerHand{
+        Players{ L"UIPlayerMikeHand", L"UIPlayerSabiHand", L"UIPlayerKuroHand" },
+        Players{ L"UIPlayerMikeHandPressed", L"UIPlayerSabiHandPressed", L"UIPlayerKuroHandPressed" }
+	};
 
     // Tutorial
     inline constexpr const wchar_t* TutorialBack = L"UITutorialBack";

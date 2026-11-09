@@ -9,6 +9,13 @@
 #include "DxPlus/Debug.h"
 #include "CameraObjectManager.h"
 
+namespace
+{
+    constexpr const wchar_t*
+        TitleHandAnimatorId =
+        L"Title.Hand";
+}
+
 GameSceneTitleState::GameSceneTitleState(
     GameStateMachine& gameStateMachine,
     GameScene& gameScene)
@@ -144,11 +151,33 @@ void GameSceneTitleState::Enter()
 
     selectedIndex_ = 0;
 
-    if (auto* start = UIM().GetButtonUI(L"Game.StartButton"))
+    if (auto* start =
+        UIM().GetButtonUI(L"Game.StartButton"))
+    {
         start->SetSelected(true);
+    }
 
-    if (auto* exit = UIM().GetButtonUI(L"Game.ExitButton"))
+    if (auto* exit =
+        UIM().GetButtonUI(L"Game.ExitButton"))
+    {
         exit->SetSelected(false);
+    }
+
+    auto* context =
+        gameScene_.GetGameContext();
+
+    if (context)
+    {
+        context->StartPlayerHandAnimation(
+            TitleHandAnimatorId,
+            GameContext::PlayerHandType::Mike,
+            {
+                DxPlus::CLIENT_WIDTH * 0.38f,
+                DxPlus::CLIENT_HEIGHT * 0.65f
+            },
+            true
+        );
+    }
 
 }
 void GameSceneTitleState::Tick(float deltaTime)
@@ -178,13 +207,38 @@ void GameSceneTitleState::Tick(float deltaTime)
     using namespace DxPlus::Input;
 
     if (GetButtonDown(PLAYER1) & BUTTON_UP)
+    {
         selectedIndex_ = 0;
+    }
 
     if (GetButtonDown(PLAYER1) & BUTTON_DOWN)
+    {
         selectedIndex_ = 1;
+    }
 
-    start->SetSelected(selectedIndex_ == 0);
-    exit->SetSelected(selectedIndex_ == 1);
+    start->SetSelected(
+        selectedIndex_ == 0
+    );
+
+    exit->SetSelected(
+        selectedIndex_ == 1
+    );
+
+    const DxPlus::Vec2 handPosition{
+        DxPlus::CLIENT_WIDTH * 0.38f,
+        selectedIndex_ == 0
+            ? DxPlus::CLIENT_HEIGHT * 0.65f
+            : DxPlus::CLIENT_HEIGHT * 0.8f
+    };
+
+    if (auto* animator =
+        UIM().GetTwoFrameAnimator(
+            TitleHandAnimatorId))
+    {
+        animator->SetAnchorPosition(
+            handPosition
+        );
+    }
 
     if (GetButtonDown(PLAYER1) & BUTTON_START)
     {
@@ -208,4 +262,12 @@ void GameSceneTitleState::Exit()
 
     if (auto* exit = UIM().GetButtonUI(L"Game.ExitButton"))
         exit->Hide();
+
+    if (auto* context =
+        gameScene_.GetGameContext())
+    {
+        context->StopPlayerHandAnimation(
+            TitleHandAnimatorId
+        );
+    }
 }
