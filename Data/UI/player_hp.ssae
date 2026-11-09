@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<SpriteStudioAnimePack version="2.02.00" editorVersion="7.5.1">
+	<settings>
+		<fps>30</fps>
+		<frameCount>11</frameCount>
+		<sortMode>prio</sortMode>
+		<canvasSize>320 320</canvasSize>
+		<pivot>0 0</pivot>
+		<bgColor>FF323232</bgColor>
+		<gridSize>32</gridSize>
+		<gridColor>FF808080</gridColor>
+		<ik_depth>3</ik_depth>
+		<startFrame>0</startFrame>
+		<endFrame>10</endFrame>
+		<bgSettings>
+			<value>
+				<imagePath></imagePath>
+				<imageDisp>1</imageDisp>
+				<imageOffset>0 0</imageOffset>
+				<imageCanvas>0 0</imageCanvas>
+				<imagePivot>0 0</imagePivot>
+			</value>
+			<value>
+				<imagePath></imagePath>
+				<imageDisp>1</imageDisp>
+				<imageOffset>0 0</imageOffset>
+				<imageCanvas>0 0</imageCanvas>
+				<imagePivot>0 0</imagePivot>
+			</value>
+		</bgSettings>
+		<playArea.isON>0</playArea.isON>
+		<playArea.start>0</playArea.start>
+		<playArea.end>0</playArea.end>
+		<loop>1</loop>
+	</settings>
+	<name>player_hp</name>
+	<exportPath></exportPath>
+	<Model>
+		<partList>
+			<value>
+				<name>root</name>
+				<arrayIndex>0</arrayIndex>
+				<parentIndex>-1</parentIndex>
+				<type>null</type>
+				<boundsType>none</boundsType>
+				<inheritType>self</inheritType>
+				<visibleInsideMask>0</visibleInsideMask>
+				<writeMask>0</writeMask>
+				<ineheritRates>
+					<ALPH>1</ALPH>
+					<IFLH>0</IFLH>
+					<IFLV>0</IFLV>
+					<FLPH>0</FLPH>
+					<FLPV>0</FLPV>
+					<HIDE>0</HIDE>
+				</ineheritRates>
+				<alphaBlendType>mix</alphaBlendType>
+				<show>1</show>
+				<locked>0</locked>
+				<expandAttribute>0</expandAttribute>
+				<expandChildren>1</expandChildren>
+				<refCellTag></refCellTag>
+				<maskInfluence>1</maskInfluence>
+				<outputInfluence>1</outputInfluence>
+			</value>
+			<value>
+				<name>player_bar</name>
+				<arrayIndex>1</arrayIndex>
+				<parentIndex>0</parentIndex>
+				<type>normal</type>
+				<boundsType>none</boundsType>
+				<inheritType>parent</inheritType>
+				<visibleInsideMask>0</visibleInsideMask>
+				<writeMask>0</writeMask>
+				<ineheritRates>
+					<ALPH>1</ALPH>
+					<IFLH>0</IFLH>
+					<IFLV>0</IFLV>
+					<FLPH>0</FLPH>
+					<FLPV>0</FLPV>
+					<HIDE>0</HIDE>
+				</ineheritRates>
+				<alphaBlendType>mix</alphaBlendType>
+				<show>1</show>
+				<locked>0</locked>
+				<expandAttribute>0</expandAttribute>
+				<expandChildren>1</expandChildren>
+				<refCellTag></refCellTag>
+				<maskInfluence>1</maskInfluence>
+				<outputInfluence>1</outputInfluence>
+			</value>
+		</partList>
+		<boneList />
+		<meshList />
+	</Model>
+	<cellmapNames>
+		<value>supusuta.ssce</value>
+	</cellmapNames>
+	<animeList>
+		<anime>
+			<name>Setup</name>
+			<overrideSettings>1</overrideSettings>
+			<settings>
+				<fps>30</fps>
+				<frameCount>1</frameCount>
+				<sortMode>prio</sortMode>
+				<canvasSize>320 320</canvasSize>
+				<pivot>0 0</pivot>
+				<bgColor>FF323232</bgColor>
+				<gridSize>32</gridSize>
+				<gridColor>FF808080</gridColor>
+				<ik_depth>3</ik_depth>
+				<startFrame>0</startFrame>
+				<endFrame>0</endFrame>
+				<bgSettings>
+					<value>
+						<imagePath></imagePath>
+						<imageDisp>1</imageDisp>
+						<imageOffset>0 0</imageOffset>
+						<imageCanvas>0 0</imageCanvas>
+						<imagePivot>0 0</imagePivot>
+					</value>
+					<value>
+						<imagePath></imagePath>
+						<imageDisp>1</imageDisp>
+						<imageOffset>0 0</imageOffset>
+						<imageCanvas>0 0</imageCanvas>
+						<imagePivot>0 0</imagePivot>
+					</value>
+				</bgSettings>
+				<playArea.isON>0</playArea.isON>
+				<playArea.start>0</playArea.start>
+				<playArea.end>0</playArea.end>
+				<loop>1</loop>
+			</settings>
+			<labels />
+			<guidelines />
+			<isSetup>1</isSetup>
+			<lastFrame>0</lastFrame>
+			<partAnimes>
+				<partAnime>
+					<partName>root</partName>
+					<attributes>
+						<attribute tag="HIDE">
+							<key time="0">
+								<value>0</value>
+							</key>
+						</attribute>
+					</attributes>
+				</partAnime>
+			</partAnimes>
+		</anime>
+		<anime>
+			<name>playerult</name>
+			<overrideSettings>1</overrideSettings>
+			<settings>
+				<fps>30</fps>
+				<frameCount>100</frameCount>
+				<sortMode>prio</sortMode>
+				<canvasSize>1920 1080</canvasSize>
+				<pivot>0 0</pivot>
+				<bgColor>FF323232</bgColor>
+				<gridSize>32</gridSize>
+				<gridColor>FF808080</gridColor>
+				<ik_depth>3</ik_depth>
+				<startFrame>0</startFrame>
+				<endFrame>99</endFrame>
+				<bgSettings>
+					<value>
+						<imagePath></imagePath>
+						<imageDisp>1</imageDisp>
+						<imageOffset>0 0</imageOffset>
+						<imageCanvas>0 0</imageCanvas>
+						<imagePivot>0 0</imagePivot>
+					</value>
+					<value>
+						<imagePath></imagePath>
+						<imageDisp>1</imageDisp>
+						<imageOffset>0 0</imageOffset>
+						<imageCanvas>0 0</imageCanvas>
+						<imagePivot>0 0</imagePivot>
+					</value>
+				</bgSettings>
+				<playArea.isON>0</playArea.isON>
+				<playArea.start>0</playArea.start>
+				<playArea.end>0</playArea.end>
+				<loop>1</loop>
+			</settings>
+			<labels />
+			<guidelines />
+			<isSetup>0</isSetup>
+			<lastFrame>99</lastFrame>
+			<partAnimes>
+				<partAnime>
+					<partName>root</partName>
+					<attributes>
+						<attribute tag="HIDE">
+							<key time="0">
+								<value>0</value>
+							</key>
+						</attribute>
+					</attributes>
+				</partAnime>
+				<partAnime>
+					<partName>player_bar</partName>
+					<attributes>
+						<attribute tag="CELL">
+							<key time="99">
+								<value>
+									<mapId>0</mapId>
+									<name>player_bar</name>
+								</value>
+							</key>
+						</attribute>
+						<attribute tag="POSX">
+							<key time="99" ipType="linear">
+								<value>0.041702271</value>
+							</key>
+						</attribute>
+						<attribute tag="POSY">
+							<key time="99" ipType="linear">
+								<value>-366.50006</value>
+							</key>
+						</attribute>
+						<attribute tag="ROTZ">
+							<key time="99" ipType="linear">
+								<value>0</value>
+							</key>
+						</attribute>
+						<attribute tag="SCLX">
+							<key time="0" ipType="linear">
+								<value>1</value>
+							</key>
+							<key time="99" ipType="linear">
+								<value>1</value>
+							</key>
+						</attribute>
+						<attribute tag="SCLY">
+							<key time="0" ipType="linear">
+								<value>1</value>
+							</key>
+							<key time="99" ipType="linear">
+								<value>1</value>
+							</key>
+						</attribute>
+						<attribute tag="LSCX">
+							<key time="0" ipType="linear">
+								<value>1</value>
+							</key>
+							<key time="99" ipType="linear">
+								<value>1</value>
+							</key>
+						</attribute>
+						<attribute tag="LSCY">
+							<key time="0" ipType="linear">
+								<value>1</value>
+							</key>
+							<key time="99" ipType="linear">
+								<value>1</value>
+							</key>
+						</attribute>
+						<attribute tag="PRIO">
+							<key time="99" ipType="linear">
+								<value>0</value>
+							</key>
+						</attribute>
+						<attribute tag="HIDE">
+							<key time="0">
+								<value>0</value>
+							</key>
+							<key time="99">
+								<value>0</value>
+							</key>
+						</attribute>
+						<attribute tag="VERT">
+							<key time="0" ipType="linear">
+								<value>
+									<LT>0 0</LT>
+									<RT>-394 0</RT>
+									<LB>0 0</LB>
+									<RB>-394 0</RB>
+								</value>
+							</key>
+							<key time="99" ipType="linear">
+								<value>
+									<LT>0 0</LT>
+									<RT>-1 0</RT>
+									<LB>0 0</LB>
+									<RB>-1 0</RB>
+								</value>
+							</key>
+						</attribute>
+					</attributes>
+				</partAnime>
+			</partAnimes>
+		</anime>
+	</animeList>
+</SpriteStudioAnimePack>
