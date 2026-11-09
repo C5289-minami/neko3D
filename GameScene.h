@@ -117,6 +117,8 @@ private:
 	std::string activeCameraShot_{};
 
 	GameStateMachine stateMachine_;
+	float tutorialSkipHoldTime_{ 0.0f };
+	bool tutorialSkipKeyWasDown_{ false };
 
 	struct BattleCheckpoint
 	{

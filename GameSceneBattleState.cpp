@@ -254,9 +254,6 @@ void GameSceneBattleState::Tick(float deltaTime)
         1.0f - boss.GetDownGaugeProgress()
     );
 
-    StatusUI::SyncPlayerHealth(player->GetHealth());
-
-
     DxPlus::Debug::SetFormatString(
         L"Player Health: %d / %d"
         L"Player Ult Gauge: %.2f / %.2f"
@@ -647,7 +644,7 @@ void GameSceneBattleState::StartBattle()
 	player->SetControlLocked(false);            
     
 	gameContext->GetBoss().SetAIActive(true);   //ボスAIを有効化
-	StatusUI::Open();   //ステータスUIを表示
+	StatusUI::Open(player->GetHealth());   //ステータスUIを表示
 }
 
 void GameSceneBattleState::SkipIntro()
