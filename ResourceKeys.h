@@ -143,6 +143,9 @@ namespace ResourceKeys
 	inline constexpr const wchar_t* Sound_hanko = L"SoundHanko";
 	inline constexpr const wchar_t* Sound_Blink = L"SoundBlink";
 	inline constexpr const wchar_t* Sound_Fall = L"SoundFall";
+	inline constexpr const wchar_t* Sound_Rain = L"SoundRain";
+	inline constexpr const wchar_t* Sound_PlayerDamage = L"SoundPlayerDamage";
+	inline constexpr const wchar_t* Sound_PlayerAttack = L"SoundPlayerAttack";
 
     inline constexpr Players SoundSelectPlayers{
         L"SoundSelectTaka",

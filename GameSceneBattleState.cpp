@@ -129,8 +129,6 @@ void GameSceneBattleState::Tick(float deltaTime)
 
     if (!battleStarted_)
     {
-        int entranceSound = RM().GetSound(ResourceKeys::Sound_BossEntrance);
-       
         if (!bossEntranceSoundPlayed_)
         {
 			// 開幕演出の音声再生までの待機時間を減算
@@ -139,7 +137,6 @@ void GameSceneBattleState::Tick(float deltaTime)
 
             if (bossEntranceSoundRemaining_ <= 0.0f)
             {
-                SoundManager::PlaySE(entranceSound);
                 bossEntranceSoundPlayed_ = true;
             }
         }

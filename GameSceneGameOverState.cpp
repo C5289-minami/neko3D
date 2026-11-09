@@ -3,6 +3,9 @@
 #include "GameStateMachine.h"
 #include "DxPlus/Debug.h"
 #include "UIManager.h"
+#include "ResourceManager.h"
+#include "ResourceKeys.h"
+#include "SoundManager.h"
 #include "GameContext.h"
 
 namespace
@@ -113,6 +116,11 @@ void GameSceneGameOverState::Enter()
 	}
 	selectedIndex_ = 0;
 
+    SoundManager::PlayBGM(
+        RM().GetSound(
+            ResourceKeys::Sound_Rain
+        )
+    );
 
 	handPrepared_ = false;
 	handAnimationStarted_ = false;
@@ -177,7 +185,6 @@ void GameSceneGameOverState::Tick(float deltaTime)
 
         if (context)
         {
-            // 使用中Playerの通常手と押下手をAnimatorに設定する。
             context->StartActivePlayerHandAnimation(
                 GameOverHandAnimatorId,
                 GetGameOverHandPosition(
@@ -193,8 +200,7 @@ void GameSceneGameOverState::Tick(float deltaTime)
 
         if (animator)
         {
-            // Animatorによる画像切り替えだけ停止する。
-            // 表示中のUI自体は非表示にしない。
+            // 手の切り替えアニメーションだけ一時停止する。
             animator->Pause();
 
             UIBase* normalHand =
@@ -207,12 +213,10 @@ void GameSceneGameOverState::Tick(float deltaTime)
             {
                 normalHand->SetFalse();
 
-                // ボタンと同じ表示時間にする。
                 normalHand->SetMotionDuration(
                     1.5f
                 );
 
-                // 位置移動なしで表示する。
                 normalHand->SetToMove({
                     0.0f,
                     0.0f
@@ -221,7 +225,6 @@ void GameSceneGameOverState::Tick(float deltaTime)
                 normalHand->Show();
             }
 
-            // フェード中は通常手だけ表示する。
             if (pressedHand)
             {
                 pressedHand->SetFalse();
@@ -233,7 +236,7 @@ void GameSceneGameOverState::Tick(float deltaTime)
     }
 
     // ========================================================
-    // ボタンと通常手の表示完了待ち
+    // ボタンの表示完了待ち
     // ========================================================
 
     if (retry->GetCurrentState() !=
@@ -249,48 +252,57 @@ void GameSceneGameOverState::Tick(float deltaTime)
             GameOverHandAnimatorId
         );
 
-    if (!animator)
-    {
-        return;
-    }
-
-    UIBase* normalHand =
-        animator->GetFirstUI();
-
-    // 通常手の表示完了も待つ。
-    if (!normalHand ||
-        normalHand->GetCurrentState() !=
-        UIBase::UIState::Normal)
-    {
-        return;
-    }
-
     // ========================================================
-    // 2枚切り替えアニメーション開始
+    // 猫の手アニメーション
+    // ボタン入力とは独立して更新する
     // ========================================================
 
-    if (!handAnimationStarted_)
+    if (animator && !handAnimationStarted_)
     {
-        animator->Start();
-        handAnimationStarted_ = true;
+        UIBase* normalHand =
+            animator->GetFirstUI();
+
+        // 手のフェードが完了したら2枚切り替えを開始する。
+        if (normalHand &&
+            normalHand->GetCurrentState() ==
+            UIBase::UIState::Normal)
+        {
+            animator->Start();
+            handAnimationStarted_ = true;
+        }
     }
 
     // ========================================================
     // 選択操作
+    // 猫の手の表示状態に関係なく操作可能
     // ========================================================
 
     using namespace DxPlus::Input;
 
-    if (GetButtonDown(PLAYER1) &
-        BUTTON_UP)
+    constexpr int SelectionCount = 2;
+
+    const int buttonDown =
+        GetButtonDown(PLAYER1);
+
+    bool selectionChanged = false;
+
+    if (buttonDown & BUTTON_UP)
     {
-        selectedIndex_ = 0;
+        selectedIndex_ =
+            (selectedIndex_ - 1 +
+                SelectionCount) %
+            SelectionCount;
+
+        selectionChanged = true;
     }
 
-    if (GetButtonDown(PLAYER1) &
-        BUTTON_DOWN)
+    if (buttonDown & BUTTON_DOWN)
     {
-        selectedIndex_ = 1;
+        selectedIndex_ =
+            (selectedIndex_ + 1) %
+            SelectionCount;
+
+        selectionChanged = true;
     }
 
     retry->SetSelected(
@@ -301,14 +313,18 @@ void GameSceneGameOverState::Tick(float deltaTime)
         selectedIndex_ == 1
     );
 
-    animator->SetAnchorPosition(
-        GetGameOverHandPosition(
-            selectedIndex_
-        )
-    );
+    // Animatorが存在する場合だけ手の位置を更新する。
+    if (animator)
+    {
+        animator->SetAnchorPosition(
+            GetGameOverHandPosition(
+                selectedIndex_
+            )
+        );
+    }
 
-    if (GetButtonDown(PLAYER1) &
-        BUTTON_START)
+    // 猫の手がフェード中でも決定可能。
+    if (buttonDown & BUTTON_START)
     {
         if (selectedIndex_ == 0)
         {
