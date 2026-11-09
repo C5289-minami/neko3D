@@ -154,6 +154,7 @@ void Boss::ApplyDownGaugeDamage(float damage)
 	{
 		stateMachine_.ChangeState(BossStateType::Flinch);
 	}
+	CameraShakeRequest(CameraShakeType::Mixed, 0.5f, 30.0f, 20.0f);
 }
 
 void Boss::UpdateDown(float deltaTime)
