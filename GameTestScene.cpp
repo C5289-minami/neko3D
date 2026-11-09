@@ -780,7 +780,7 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 
 
 	// BossとPlayer
-	drawModel(boss.GetModelObject());
+
 	drawModel(player->GetModelObject());
 
 
@@ -802,7 +802,7 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 		drawModel(model);
 	}
 
-
+	drawModel(boss.GetModelObject());
 
 	effectManager.Draw();
 	grid.Draw();
