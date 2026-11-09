@@ -175,7 +175,7 @@ void StatusUI::InitBoss()
 {
 	const DxPlus::Vec2 backgroundPosition(
 		DxPlus::CLIENT_WIDTH * 0.5f,
-		DxPlus::CLIENT_HEIGHT * 0.15f);
+		DxPlus::CLIENT_HEIGHT * 0.12f);
 
 	float gaugeOffsetX = 45.0f;
 	float gaugeOffsetY = 20.0f;
@@ -192,11 +192,12 @@ void StatusUI::InitBoss()
 
 	// ボスHPゲージ
 	auto* healthGauge = UIM().GetUI(L"BossHealthGauge");
+	DxPlus::Vec2 healthGaugePosition = backgroundPosition + DxPlus::Vec2{ gaugeOffsetX + 19,-gaugeOffsetY + 4 };
 	if (!healthGauge)
 		healthGauge = UIM().CreateSpriteStudioUI(
 			L"BossHealthGauge",
 			ResourceKeys::SpriteStudio_BossHealthGauge,
-			backgroundPosition + DxPlus::Vec2{ gaugeOffsetX,-gaugeOffsetY },
+			healthGaugePosition,
 			"Boss_hp",
 			StatusBossMotionDirection,
 			StatusMotionDuration

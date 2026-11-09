@@ -136,7 +136,7 @@
 			<labels />
 			<guidelines />
 			<isSetup>0</isSetup>
-			<lastFrame>99</lastFrame>
+			<lastFrame>0</lastFrame>
 			<partAnimes>
 				<partAnime>
 					<partName>root</partName>
@@ -164,10 +164,10 @@
 								<value>-1</value>
 							</key>
 							<key time="98" ipType="linear">
-								<value>51</value>
+								<value>2.9595959</value>
 							</key>
 							<key time="99" ipType="linear">
-								<value>50</value>
+								<value>3</value>
 							</key>
 						</attribute>
 						<attribute tag="POSY">

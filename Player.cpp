@@ -667,6 +667,11 @@ bool Player::TakeDamage(int damage)
 
 	addDamage_ = damage;
 	stateMachine_.ChangeState(PlayerStateType::Damaging);
+	SoundManager::PlaySE(
+		RM().GetSound(
+			ResourceKeys::Sound_PlayerDamage
+		)
+	);
 	return true;
 }
 

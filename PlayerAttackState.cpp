@@ -5,6 +5,8 @@
 #include "DxLib.h"
 #include "DxConv.h"
 #include <algorithm>
+#include "SoundManager.h"
+#include "ResourceManager.h"
 
 PlayerAttackState::PlayerAttackState(PlayerStateMachine& stateMachine, Player& player)
 	: PlayerBaseState(stateMachine, player)
@@ -26,6 +28,11 @@ void PlayerAttackState::Enter()
 	stateMachine_.NotifyEvent(PlayerActionEvent::Attacked);
 	ballActive_ = !player_.IsDead();
 
+	SoundManager::PlaySE(
+		RM().GetSound(
+			ResourceKeys::Sound_PlayerDamage
+		)
+	);
 
 	DxPlus::Debug::SetFormatString(L"PlayerAttackState::Enter");
 }
