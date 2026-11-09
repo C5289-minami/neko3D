@@ -455,6 +455,7 @@ void GameSceneSelectState::ConfirmSelection()
 	// Play用のサイズと回転にする
 	auto& selectModel = selected.GetModelObject();
 	player->GetModelObject().SetRotation({});
+	player->SetRotation({0.0f,60.0f * DxPlus::Deg2Rad,0.0f});// すこし右を向く
 	player->GetModelObject().SetScale({ 1.0f, 1.0f, 1.0f });
 	player->GetModelObject().SetPosition({});
 
