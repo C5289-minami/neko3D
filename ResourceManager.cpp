@@ -139,6 +139,9 @@ void ResourceManager::LoadAll()
 	LoadSound(ResourceKeys::SoundSelectPlayers.mike, L"./Data/Sounds/taka.mp3");
 	LoadSound(ResourceKeys::SoundSelectPlayers.sabi, L"./Data/Sounds/gishi.mp3");
 	LoadSound(ResourceKeys::SoundSelectPlayers.kuro, L"./Data/Sounds/yu.mp3");
+	LoadSound(ResourceKeys::Sound_hanko, L"./Data/Sounds/hanko.mp3");
+	LoadSound(ResourceKeys::Sound_Blink, L"./Data/Sounds/blink.mp3");
+	LoadSound(ResourceKeys::Sound_Fall, L"./Data/Sounds/fall.mp3");
 
 	// Boss sounds
 	LoadSound(ResourceKeys::Sound_BossEntrance, L"./Data/Sounds/BossEntrance.mp3");

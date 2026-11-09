@@ -140,6 +140,9 @@ namespace ResourceKeys
     // Sounds
     inline constexpr const wchar_t* Sound_MenuConfirm = L"SoundMenuConfirm";
     inline constexpr const wchar_t* Sound_BossEntrance = L"SoundBossEntrance";
+	inline constexpr const wchar_t* Sound_hanko = L"SoundHanko";
+	inline constexpr const wchar_t* Sound_Blink = L"SoundBlink";
+	inline constexpr const wchar_t* Sound_Fall = L"SoundFall";
 
     inline constexpr Players SoundSelectPlayers{
         L"SoundSelectTaka",

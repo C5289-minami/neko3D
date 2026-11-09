@@ -1,10 +1,8 @@
 ﻿#include "PlayerDoubleJumpState.h"
 #include "DxPlus/Debug.h"
 #include "Player.h"
-
-#include "PlayerDoubleJumpState.h"
-#include "DxPlus/Debug.h"
-#include "Player.h"
+#include "SoundManager.h"
+#include "ResourceManager.h"
 
 namespace
 {
@@ -45,6 +43,8 @@ void PlayerDoubleJumpState::Enter()
     DxPlus::Debug::SetFormatString(
         L"PlayerDoubleJumpState::Enter"
     );
+
+    SoundManager::PlaySE(RM().GetSound(ResourceKeys::Sound_Blink));
 }
 
 void PlayerDoubleJumpState::Tick(float deltaTime)

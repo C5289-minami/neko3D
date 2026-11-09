@@ -5,6 +5,7 @@
 #include "Raycast.h"
 #include "DxLib.h"
 // #include "Stage.h"
+#include "SoundManager.h"
 #include "ModelObjectManager.h"
 
 #include <cmath>
@@ -46,9 +47,9 @@ Vec3 Player::GetAttackBallSpawnPosition() const
 
 void Player::SetAnimation(
 	PlayerAnimType::Type type,
-	bool loop ,
+	bool loop,
 	bool playAfterBlend,
-	float blendSeconds 
+	float blendSeconds
 )
 {
 	//if (currentAnimType_ == type && currentAnimLoop_ == loop)
@@ -277,7 +278,7 @@ void Player::SetModelKey(const std::wstring& key)
 	model_.SetModelType(ModelType::Bone);
 
 	animation_.Reset();
- 
+
 	currentAnimType_ = PlayerAnimType::Idle;
 	currentAnimLoop_ = true;
 
@@ -357,7 +358,7 @@ void Player::UpdateMovement(float deltaTime)
 		Move(deltaTime);
 		isGrounded_ = false;
 	}
-	fallAndResetPosition(deltaTime,position_);
+	fallAndResetPosition(deltaTime, position_);
 }
 
 // void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCenter)
@@ -426,7 +427,7 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 	}
 	if (IsPillarElevatorActive()) input_.jumpPressed = false;
 	UpdateMovement(deltaTime);
-	
+
 	// のぼり中は、壁の上端に吸着するように位置を補正する。
 	if (!IsPillarElevatorActive())
 	{
@@ -649,6 +650,7 @@ void Player::ReturnToLastSafePosition(const ModelCollision& collision)
 		recoveryPosition = lastFirstFloorPosition_;
 
 	recoveryPosition.y += Const::PLAYER_FALL_RECOVERY_HEIGHT_OFFSET;
+	SoundManager::PlaySE(RM().GetSound(ResourceKeys::Sound_Fall));
 	RestorePosition(recoveryPosition);
 }
 
@@ -897,14 +899,14 @@ void Player::Move(float deltaTime)
 	TurnTowards(Vec3(velocity_.x, 0.0f, velocity_.z), deltaTime);
 }
 
-void Player::fallAndResetPosition(float deltaTime,Vec3& PlayerPos)
+void Player::fallAndResetPosition(float deltaTime, Vec3& PlayerPos)
 {
 	position_ = PlayerPos;
 
 	Vec3 oldPos = position_;
 
-	Vec3 pos= model_.GetPosition();
-	if (position_.y <= pos.y-100.0f)
+	Vec3 pos = model_.GetPosition();
+	if (position_.y <= pos.y - 100.0f)
 	{
 		position_ = oldPos;
 	}
@@ -920,7 +922,7 @@ void Player::UpdateStageMoveVelocity(float moveSpeed, float deltaTime)
 	Vec3 forward = movementCenter_ - position_;
 	forward.y = 0.0f;
 	const float radius = forward.Length();
-	if (radius <Const::EPS)
+	if (radius < Const::EPS)
 	{
 		forward = Vec3(std::sin(GetYaw()), 0.0f, std::cos(GetYaw()));
 	}
@@ -1021,6 +1023,8 @@ void Player::ApplyKnockback(const Vec3& direction, float power, float duration)
 	// 被ダメージ中は、回避の受付と保留中のダメージ処理を続ける。
 	if (!IsDamaging())
 		stateMachine_.ChangeState(PlayerStateType::Jump);
+
+	SoundManager::PlaySE(RM().GetSound(ResourceKeys::Sound_Fall));
 }
 
 void Player::SetWallJumpMoveSpeed(float value)
