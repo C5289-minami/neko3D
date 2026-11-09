@@ -13,6 +13,61 @@
 #include "ResourceManager.h"
 #include "Sound3D.h"
 #include "SoundManager.h"
+#include "UIManager.h"
+#include "TwoFrameUIAnimator.h"
+namespace
+{
+	struct PlayerHandUISetting
+	{
+		const wchar_t* normalUIId;
+		const wchar_t* pressedUIId;
+
+		DxPlus::Vec2 normalCenter;
+		DxPlus::Vec2 pressedCenter;
+	};
+
+	constexpr std::array<PlayerHandUISetting, 3>
+		PlayerHandUISettings{ {
+		{
+			L"MikeNormalHand",
+			L"MikePressedHand",
+			{ 0.5f, 0.5f },
+			{ 0.5f, 0.5f }
+		},
+		{
+			L"SabiNormalHand",
+			L"SabiPressedHand",
+			{ 0.5f, 0.5f },
+			{ 0.5f, 0.5f }
+		},
+		{
+			L"KuroNormalHand",
+			L"KuroPressedHand",
+			{ 0.5f, 0.5f },
+			{ 0.5f, 0.5f }
+		}
+	} };
+
+	std::size_t ToHandIndex(
+		GameContext::PlayerHandType handType)
+	{
+		switch (handType)
+		{
+		case GameContext::PlayerHandType::Mike:
+			return 0;
+
+		case GameContext::PlayerHandType::Sabi:
+			return 1;
+
+		case GameContext::PlayerHandType::Kuro:
+			return 2;
+
+		default:
+			return 0;
+		}
+	}
+}
+	
 
 void GameContext::Init()
 {
@@ -46,9 +101,9 @@ void GameContext::Init()
 
 	const std::array<std::wstring, 3> playerModelKeys
 	{
-		ResourceKeys::Model_PlayerMike,
-		ResourceKeys::Model_PlayerSabi,
-		ResourceKeys::Model_PlayerKuro
+		ResourceKeys::Model_Player.mike,
+		ResourceKeys::Model_Player.sabi,
+		ResourceKeys::Model_Player.kuro
 	};
 	for (std::size_t i = 0; i < selectPreviewPlayers_.size(); ++i)
 	{
@@ -72,9 +127,9 @@ void GameContext::Init()
 	room_.Init();
 	activePlayer->Init();
 
- for (std::size_t i = 0; i < selectPreviewPlayers_.size(); ++i)
+	for (std::size_t i = 0; i < selectPreviewPlayers_.size(); ++i)
 	{
-     auto& preview = selectPreviewPlayers_[i];
+		auto& preview = selectPreviewPlayers_[i];
 		preview.Init();
 		preview.SetGravityEnabled(false);
 		preview.SetDefMove(false);
@@ -86,6 +141,206 @@ void GameContext::Init()
 	}
 
 	boss.SetPlayer(*activePlayer);
+
+	// UIの初期化
+	HandUIInit();
+	
+}
+
+void GameContext::HandUIInit()
+{
+	const auto createImageUIIfNeeded =
+		[](const wchar_t* id, const std::wstring& resourceKey)
+		{
+			if (UIM().GetUI(id))
+			{
+				return;
+			}
+
+			UIBase* ui = UIM().CreateImageUI(
+				id,
+				resourceKey,
+				{ 0.0f, 0.0f }
+			);
+
+			// AnimatorがStartするまで非表示にする。
+			if (ui)
+			{
+				ui->SetFalse();
+			}
+		};
+
+	createImageUIIfNeeded(
+		L"MikeNormalHand",
+		ResourceKeys::PlayerHand.normal.mike
+	);
+
+	createImageUIIfNeeded(
+		L"MikePressedHand",
+		ResourceKeys::PlayerHand.pressed.mike
+	);
+
+	createImageUIIfNeeded(
+		L"SabiNormalHand",
+		ResourceKeys::PlayerHand.normal.sabi
+	);
+
+	createImageUIIfNeeded(
+		L"SabiPressedHand",
+		ResourceKeys::PlayerHand.pressed.sabi
+	);
+
+	createImageUIIfNeeded(
+		L"KuroNormalHand",
+		ResourceKeys::PlayerHand.normal.kuro
+	);
+
+	createImageUIIfNeeded(
+		L"KuroPressedHand",
+		ResourceKeys::PlayerHand.pressed.kuro
+	);
+}
+TwoFrameUIAnimator*
+GameContext::StartPlayerHandAnimation(
+	const std::wstring& animatorId,
+	PlayerHandType handType,
+	const DxPlus::Vec2& anchorPosition,
+	bool flipX)
+{
+	if (animatorId.empty())
+	{
+		return nullptr;
+	}
+
+	HandUIInit();
+
+	const std::size_t handIndex =
+		ToHandIndex(handType);
+
+	if (handIndex >= PlayerHandUISettings.size())
+	{
+		return nullptr;
+	}
+
+	const auto& setting =
+		PlayerHandUISettings[handIndex];
+
+	UIBase* normalHand =
+		UIM().GetUI(setting.normalUIId);
+
+	UIBase* pressedHand =
+		UIM().GetUI(setting.pressedUIId);
+
+	if (!normalHand || !pressedHand)
+	{
+		return nullptr;
+	}
+
+	// ボタンや通常UIより手前に描画する。
+	constexpr int HandZOrder = 100;
+
+	normalHand->SetZOrder(HandZOrder);
+	pressedHand->SetZOrder(HandZOrder);
+
+	TwoFrameUIAnimator* animator =
+		UIM().CreateTwoFrameAnimator(animatorId);
+
+	if (!animator)
+	{
+		return nullptr;
+	}
+
+	animator->Stop();
+
+	animator->SetUI(
+		normalHand,
+		pressedHand
+	);
+
+	animator->SetAnchorPosition(
+		anchorPosition
+	);
+
+	TwoFrameUIAnimator::FrameSetting normalFrame;
+
+	normalFrame.offset = {
+		0.0f,
+		0.0f
+	};
+
+	normalFrame.angle = 0.0f;
+	normalFrame.scale = 1.0f;
+	normalFrame.center = setting.normalCenter;
+	normalFrame.flipX = flipX;
+
+	TwoFrameUIAnimator::FrameSetting pressedFrame;
+
+	pressedFrame.offset = {
+		flipX ? -25.0f : 25.0f,
+		-2.0f
+	};
+
+	pressedFrame.angle =
+		(flipX ? -8.0f : 8.0f) *
+		DxPlus::Deg2Rad;
+
+	pressedFrame.scale = 1.0f;
+	pressedFrame.center = setting.pressedCenter;
+	pressedFrame.flipX = flipX;
+
+	animator->SetFirstFrame(normalFrame);
+	animator->SetSecondFrame(pressedFrame);
+
+	animator->SetFirstHoldDuration(0.6f);
+	animator->SetForwardDuration(0.15f);
+	animator->SetSecondHoldDuration(0.12f);
+	animator->SetBackwardDuration(0.2f);
+
+	animator->Start();
+
+	return animator;
+}
+TwoFrameUIAnimator*
+GameContext::StartActivePlayerHandAnimation(
+	const std::wstring& animatorId,
+	const DxPlus::Vec2& anchorPosition)
+{
+	if (!activePlayer)
+	{
+		return nullptr;
+	}
+
+	const std::wstring& modelKey =
+		activePlayer
+		->GetModelObject()
+		.GetModelKey();
+
+	PlayerHandType handType =
+		PlayerHandType::Mike;
+
+	if (modelKey ==
+		ResourceKeys::Model_Player.sabi)
+	{
+		handType = PlayerHandType::Sabi;
+	}
+	else if (modelKey ==
+		ResourceKeys::Model_Player.kuro)
+	{
+		handType = PlayerHandType::Kuro;
+	}
+
+	return StartPlayerHandAnimation(
+		animatorId,
+		handType,
+		anchorPosition
+	);
+}
+void GameContext::StopPlayerHandAnimation(
+	const std::wstring& animatorId)
+{
+	UIM().RemoveTwoFrameAnimator(
+		animatorId
+	);
 }
 
 void GameContext::UpdateUltimateProjectiles(float deltaTime)

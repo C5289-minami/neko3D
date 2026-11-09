@@ -98,7 +98,7 @@ void GameScene::Init()
 
 	stateMachine_.Initialize();
 
-  StartFadeIn();
+	StartFadeIn();
 }
 
 void GameScene::ResetForTitle()
@@ -196,7 +196,7 @@ bool GameScene::UpdateStateCamera(float deltaTime, const std::string& requestedS
 
 void GameScene::Update(float deltaTime)
 {
-  if (battleEventActive_)
+	if (battleEventActive_)
 		battleLetterboxMotion_.Update(deltaTime);
 
 	DxLib::SetBackgroundColor(
@@ -318,7 +318,7 @@ void GameScene::Render() const
 
 	if (battleEventActive_)
 	{
-        const int barHeight = static_cast<int>(DxPlus::CLIENT_HEIGHT / 8.0f *
+		const int barHeight = static_cast<int>(DxPlus::CLIENT_HEIGHT / 8.0f *
 			battleLetterboxMotion_.GetValue());
 		const int color = DxLib::GetColor(0, 0, 0);
 		DxLib::DrawBox(0, 0, DxPlus::CLIENT_WIDTH, barHeight, color, TRUE);
@@ -704,9 +704,9 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 
 		DrawTutorialCollisionSpheres();
-    #ifdef _DEBUG
-     boss.DrawSlamAttackDebug();
- #endif
+#ifdef _DEBUG
+		boss.DrawSlamAttackDebug();
+#endif
 		return;
 	}
 
@@ -744,14 +744,20 @@ void GameScene::DrawScene(bool toonEnabled) const
 	}
 
 
-	// BossとPlayer
-	drawModel(boss.GetModelObject());
-	if (drawPlayerShadow_)
-		DrawPlayerShadow();
-	drawModel(player->GetModelObject());
+
 
 	// Stage
 	drawModel(stage.GetModelObject());
+	// Boss
+	drawModel(boss.GetModelObject());
+
+	if (player->WasLastOnFirstFloor())
+	{
+		if (drawPlayerShadow_)
+			DrawPlayerShadow();
+		drawModel(player->GetModelObject());
+	}
+	// StageObjects
 	for (const auto& pillar : stage.GetPillarModelObjects())
 	{
 		drawModel(pillar);
@@ -761,15 +767,25 @@ void GameScene::DrawScene(bool toonEnabled) const
 	{
 		drawModel(model);
 	}
+	if (player->WasLastOnSecondFloor())
+	{
+		if (drawPlayerShadow_)
+			DrawPlayerShadow();
+		drawModel(player->GetModelObject());
+	}
+
+
 
 	effectManager.Draw();
 	modelToonRenderer_.EndPass();
 	effectManager.Draw();
+#ifdef _DEBUG
 	player->GetStateMachine().Draw();
+#endif
 	DrawTutorialCollisionSpheres();
-  #ifdef _DEBUG
-   boss.DrawSlamAttackDebug();
-   #endif
+#ifdef _DEBUG
+	boss.DrawSlamAttackDebug();
+#endif
 }
 
 void GameScene::End()

@@ -217,6 +217,7 @@
     <ClInclude Include="CameraShakeType.h" />
     <ClInclude Include="CameraTransition.h" />
     <ClInclude Include="GameSceneGameOverState.h" />
+    <ClInclude Include="TwoFrameUIAnimator.h" />
     <ClInclude Include="PlayerActionEvent.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="StatusUI.h" />
@@ -375,6 +376,7 @@
     <ClCompile Include="GameSceneTutorialState.cpp" />
     <ClCompile Include="GameStateMachine.cpp" />
     <ClCompile Include="GameTestScene.cpp" />
+    <ClCompile Include="TwoFrameUIAnimator.cpp" />
     <ClCompile Include="ModelAnimation.cpp" />
     <ClCompile Include="ModelConfigScene.cpp" />
     <ClCompile Include="ModelObjectManager.cpp" />

@@ -1,14 +1,14 @@
-#pragma once
+ï»¿#pragma once
 #include "Consts.h"
 #include <DxLib.h>
-#include <algorithm> // std::clamp—p
+#include <algorithm> // std::clampç”¨
 
 class Volume
 {
 public:
 	Volume() = default;
 	~Volume() = default;
-	// ƒVƒ“ƒOƒ‹ƒgƒ“‚ÌƒCƒ“ƒXƒ^ƒ“ƒXæ“¾
+	// ã‚·ãƒ³ã‚°ãƒ«ãƒˆãƒ³ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹å–å¾—
 	static Volume& GetInstance() {
 		static Volume instance;
 		return instance;
@@ -29,7 +29,7 @@ public:
 
 	void GetVolume(float& bgm, float& se) const {bgm = BGM; se = SE; }
 
-	// BGM‚ÌÄ¶
+	// BGMã®å†ç”Ÿ
 	void PlayBGM(int handle, int volume = Const::MAX_VOICE) {
 		if (handle < 0) return;
 
@@ -37,7 +37,7 @@ public:
 		DxLib::PlaySoundMem(handle, DX_PLAYTYPE_LOOP);
 	}
 
-	// SE‚ÌÄ¶
+	// SEã®å†ç”Ÿ
 	void PlaySE(int handle, int volume = Const::MAX_VOICE) {
 		if (handle < 0) return;
 		DxLib::ChangeVolumeSoundMem(static_cast<int>(SE * std::clamp(volume, 0, Const::MAX_VOICE)), handle);
@@ -55,7 +55,7 @@ public:
 	}
 
 private:
-	float BGM = 1.0f;
+	float BGM = 0.6f;
 	float SE = 1.0f;
 };
-inline Volume& V() { return Volume::GetInstance(); } // ƒVƒ‡[ƒgƒJƒbƒg
+inline Volume& V() { return Volume::GetInstance(); } // ã‚·ãƒ§ãƒ¼ãƒˆã‚«ãƒƒãƒˆ

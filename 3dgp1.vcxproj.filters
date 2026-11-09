@@ -286,6 +286,9 @@
     <Filter Include="40_Gameplay\Actors\Boss\State\Down">
       <UniqueIdentifier>{a0ac36fa-1ec3-40c2-889a-c360388cc56e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="10_Core\UI\TwoFrameUIAnimator">
+      <UniqueIdentifier>{89a0f9ad-23bf-4530-8649-7501ab908d39}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DxPlus\Debug.h">
@@ -765,6 +768,9 @@
     <ClInclude Include="BossDownState.h">
       <Filter>40_Gameplay\Actors\Boss\State\Down</Filter>
     </ClInclude>
+    <ClInclude Include="TwoFrameUIAnimator.h">
+      <Filter>10_Core\UI\TwoFrameUIAnimator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxPlus\Debug.cpp">
@@ -1087,6 +1093,9 @@
     </ClCompile>
     <ClCompile Include="BossDownState.cpp">
       <Filter>40_Gameplay\Actors\Boss\State\Down</Filter>
+    </ClCompile>
+    <ClCompile Include="TwoFrameUIAnimator.cpp">
+      <Filter>10_Core\UI\TwoFrameUIAnimator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -64,7 +64,7 @@
 				<outputInfluence>1</outputInfluence>
 			</value>
 			<value>
-				<name>boss</name>
+				<name>mask_hp</name>
 				<arrayIndex>1</arrayIndex>
 				<parentIndex>0</parentIndex>
 				<type>normal</type>
@@ -87,59 +87,7 @@
 				<expandChildren>1</expandChildren>
 				<refCellTag></refCellTag>
 				<maskInfluence>1</maskInfluence>
-				<outputInfluence>1</outputInfluence>
-			</value>
-			<value>
-				<name>hp</name>
-				<arrayIndex>2</arrayIndex>
-				<parentIndex>0</parentIndex>
-				<type>normal</type>
-				<boundsType>none</boundsType>
-				<inheritType>parent</inheritType>
-				<visibleInsideMask>0</visibleInsideMask>
-				<writeMask>0</writeMask>
-				<ineheritRates>
-					<ALPH>1</ALPH>
-					<IFLH>0</IFLH>
-					<IFLV>0</IFLV>
-					<FLPH>0</FLPH>
-					<FLPV>0</FLPV>
-					<HIDE>0</HIDE>
-				</ineheritRates>
-				<alphaBlendType>mix</alphaBlendType>
-				<show>1</show>
-				<locked>0</locked>
-				<expandAttribute>0</expandAttribute>
-				<expandChildren>1</expandChildren>
-				<refCellTag></refCellTag>
-				<maskInfluence>1</maskInfluence>
-				<outputInfluence>1</outputInfluence>
-			</value>
-			<value>
-				<name>baria</name>
-				<arrayIndex>3</arrayIndex>
-				<parentIndex>0</parentIndex>
-				<type>normal</type>
-				<boundsType>none</boundsType>
-				<inheritType>parent</inheritType>
-				<visibleInsideMask>0</visibleInsideMask>
-				<writeMask>0</writeMask>
-				<ineheritRates>
-					<ALPH>1</ALPH>
-					<IFLH>0</IFLH>
-					<IFLV>0</IFLV>
-					<FLPH>0</FLPH>
-					<FLPV>0</FLPV>
-					<HIDE>0</HIDE>
-				</ineheritRates>
-				<alphaBlendType>mix</alphaBlendType>
-				<show>1</show>
-				<locked>0</locked>
-				<expandAttribute>0</expandAttribute>
-				<expandChildren>1</expandChildren>
-				<refCellTag></refCellTag>
-				<maskInfluence>1</maskInfluence>
-				<outputInfluence>1</outputInfluence>
+				<outputInfluence>0</outputInfluence>
 			</value>
 		</partList>
 		<boneList />
@@ -201,45 +149,7 @@
 					</attributes>
 				</partAnime>
 				<partAnime>
-					<partName>boss</partName>
-					<attributes>
-						<attribute tag="CELL">
-							<key time="0">
-								<value>
-									<mapId>0</mapId>
-									<name>boss</name>
-								</value>
-							</key>
-						</attribute>
-						<attribute tag="POSX">
-							<key time="0" ipType="linear">
-								<value>0.33333206</value>
-							</key>
-						</attribute>
-						<attribute tag="POSY">
-							<key time="0" ipType="linear">
-								<value>446.99997</value>
-							</key>
-						</attribute>
-						<attribute tag="ROTZ">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="PRIO">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="HIDE">
-							<key time="0">
-								<value>0</value>
-							</key>
-						</attribute>
-					</attributes>
-				</partAnime>
-				<partAnime>
-					<partName>hp</partName>
+					<partName>mask_hp</partName>
 					<attributes>
 						<attribute tag="CELL">
 							<key time="0">
@@ -251,37 +161,34 @@
 						</attribute>
 						<attribute tag="POSX">
 							<key time="0" ipType="linear">
-								<value>52</value>
+								<value>-1</value>
+							</key>
+							<key time="98" ipType="linear">
+								<value>2.9595959</value>
 							</key>
 							<key time="99" ipType="linear">
-								<value>-251</value>
+								<value>3</value>
 							</key>
 						</attribute>
 						<attribute tag="POSY">
 							<key time="0" ipType="linear">
-								<value>445.66663</value>
+								<value>0</value>
+							</key>
+							<key time="98" ipType="linear">
+								<value>0</value>
 							</key>
 							<key time="99" ipType="linear">
-								<value>445.66663</value>
-							</key>
-						</attribute>
-						<attribute tag="POSZ">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="ROTX">
-							<key time="0" ipType="linear">
-								<value>0</value>
-							</key>
-						</attribute>
-						<attribute tag="ROTY">
-							<key time="0" ipType="linear">
 								<value>0</value>
 							</key>
 						</attribute>
 						<attribute tag="ROTZ">
 							<key time="0" ipType="linear">
+								<value>0</value>
+							</key>
+							<key time="98" ipType="linear">
+								<value>0</value>
+							</key>
+							<key time="99" ipType="linear">
 								<value>0</value>
 							</key>
 						</attribute>
@@ -290,7 +197,7 @@
 								<value>1</value>
 							</key>
 							<key time="99" ipType="linear">
-								<value>0.014586703</value>
+								<value>1</value>
 							</key>
 						</attribute>
 						<attribute tag="SCLY">
@@ -321,10 +228,40 @@
 							<key time="0" ipType="linear">
 								<value>0</value>
 							</key>
+							<key time="98" ipType="linear">
+								<value>0</value>
+							</key>
+							<key time="99" ipType="linear">
+								<value>0</value>
+							</key>
 						</attribute>
 						<attribute tag="HIDE">
 							<key time="0">
 								<value>0</value>
+							</key>
+							<key time="98">
+								<value>0</value>
+							</key>
+							<key time="99">
+								<value>1</value>
+							</key>
+						</attribute>
+						<attribute tag="VERT">
+							<key time="0" ipType="linear">
+								<value>
+									<LT>0 0</LT>
+									<RT>1 0</RT>
+									<LB>0 0</LB>
+									<RB>1 0</RB>
+								</value>
+							</key>
+							<key time="99" ipType="linear">
+								<value>
+									<LT>0 0</LT>
+									<RT>-615 0</RT>
+									<LB>0 0</LB>
+									<RB>-615 0</RB>
+								</value>
 							</key>
 						</attribute>
 					</attributes>

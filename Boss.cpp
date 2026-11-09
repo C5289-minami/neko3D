@@ -144,8 +144,17 @@ void Boss::ApplyDownGaugeDamage(float damage)
 {
 	if (health_ <= 0 || !std::isfinite(damage) || damage <= 0.0f) return;
 	SetDownGauge(downGauge_ - damage);
-   if (downGauge_ <= 0.0f && GetCurrentState() != BossStateType::Down)
+	// ダウンゲージが0になったら
+	if (downGauge_ <= 0.0f && GetCurrentState() != BossStateType::Down)
+	{
 		stateMachine_.ChangeState(BossStateType::Down);
+	}
+	// 違うなら怯みに
+	else if (GetCurrentState() != BossStateType::Down)
+	{
+		stateMachine_.ChangeState(BossStateType::Flinch);
+	}
+	CameraShakeRequest(CameraShakeType::Mixed, 0.5f, 30.0f, 20.0f);
 }
 
 void Boss::UpdateDown(float deltaTime)

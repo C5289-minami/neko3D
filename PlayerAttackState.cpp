@@ -1,10 +1,12 @@
-#include "PlayerAttackState.h"
+ï»¿#include "PlayerAttackState.h"
 #include "DxPlus/Debug.h"
 #include "Player.h"
 #include "Consts.h"
 #include "DxLib.h"
 #include "DxConv.h"
 #include <algorithm>
+#include "SoundManager.h"
+#include "ResourceManager.h"
 
 PlayerAttackState::PlayerAttackState(PlayerStateMachine& stateMachine, Player& player)
 	: PlayerBaseState(stateMachine, player)
@@ -16,7 +18,7 @@ void PlayerAttackState::Enter()
 	//player_.StopMove();
 	player_.SetAnimation(PlayerAnimType::Attack, false);
 	player_.GetAnimation().Start();
-	player_.SetMoveRate(0.5f);
+	player_.SetMoveRate(0.7f);
 	
 	attackSphere_.center = player_.GetAttackBallSpawnPosition();
 	attackSphere_.radius = Const::PLAYER_ATTACK_BALL_RADIUS;
@@ -26,7 +28,11 @@ void PlayerAttackState::Enter()
 	stateMachine_.NotifyEvent(PlayerActionEvent::Attacked);
 	ballActive_ = !player_.IsDead();
 
-	player_.CameraShakeRequest(CameraShakeType::Vertical,0.1f,5.0f,5.0f);
+	SoundManager::PlaySE(
+		RM().GetSound(
+			ResourceKeys::Sound_PlayerDamage
+		)
+	);
 
 	DxPlus::Debug::SetFormatString(L"PlayerAttackState::Enter");
 }
@@ -48,7 +54,7 @@ void PlayerAttackState::Tick(float deltaTime)
 
 	player_.SetMoveDirection(input.moveDir);
 
-	if (ballActive_)//UŒ‚’†‚È‚çXV
+	if (ballActive_)//æ”»æ’ƒä¸­ãªã‚‰æ›´æ–°
 	{
 		const float step = (std::max)(0.0f, deltaTime);
 		elapsed_ += step;
@@ -77,7 +83,7 @@ void PlayerAttackState::Exit()
 	DxPlus::Debug::SetFormatString(L"PlayerAttackState::Exit");
 }
 
-bool PlayerAttackState::TryRegisterHit()//UŒ‚‚ª—LŒø‚ÅA‚Ü‚¾ƒqƒbƒg‚µ‚Ä‚¢‚È‚¢ê‡‚Éƒqƒbƒg‚ğ“o˜^‚·‚é
+bool PlayerAttackState::TryRegisterHit()//æ”»æ’ƒãŒæœ‰åŠ¹ã§ã€ã¾ã ãƒ’ãƒƒãƒˆã—ã¦ã„ãªã„å ´åˆã«ãƒ’ãƒƒãƒˆã‚’ç™»éŒ²ã™ã‚‹
 {
 	if (!ballActive_ || hasHitTarget_) return false;
 

@@ -1,6 +1,8 @@
 ﻿#include "BossDownState.h"
 #include "Boss.h"
 #include "Consts.h"
+#include "SoundManager.h"
+#include "ResourceManager.h"
 
 #include "DxPlus/Debug.h"
 
@@ -24,12 +26,12 @@ BossDownState::BossDownState(
 
 void BossDownState::Enter()
 {
-    // 全体速度を上げた分、ダウン状態の維持時間を短くする。
     remainingSeconds_ =
         Const::BOSS_FLINCH_HOLD_SECONDS / SequenceRate;
 
     reachedLoopPoint_ = false;
     downLoopStarted_ = false;
+    recoveryStarted_ = false;
 
     boss_.StopRotation();
     boss_.StopMove();
@@ -43,13 +45,13 @@ void BossDownState::Enter()
     );
 
     // Flinchを0～5フレームまで再生する。
-    // speedScaleを倍率分だけ速くする。
     boss_.GetAnimation().SetTime(0.0f);
     boss_.GetAnimation().PlayTo(
         FlinchEndFrame,
         Const::ANIM_FPS * SequenceRate
     );
 }
+
 
 void BossDownState::Tick(float deltaTime)
 {
@@ -82,20 +84,35 @@ void BossDownState::Tick(float deltaTime)
     {
         downLoopStarted_ = true;
 
-        // ここにループ開始時の処理を書く。
-
-		// 画面を縦方向に揺らす。
+        // 画面を縦方向に揺らす。
         boss_.CameraShakeRequest(
             CameraShakeType::Vertical,
             0.4f,
             30.0f,
             80.0f
-		);
+        );
+
+        SoundManager::PlaySE(
+            RM().GetSound(
+                ResourceKeys::Sound_BossDump
+            )
+        );
     }
 
-    // Flinch再生中とブレンド中は維持時間を減らさない。
+    // Flinch再生中とDownへのブレンド中は維持時間を減らさない。
     if (!downLoopStarted_)
     {
+        return;
+    }
+
+    // Idleへの復帰ブレンドを開始済みなら、完了を待つ。
+    if (recoveryStarted_)
+    {
+        if (!boss_.GetAnimation().IsBlending())
+        {
+            stateMachine_.ChangeState(BossStateType::Idle);
+        }
+
         return;
     }
 
@@ -103,9 +120,18 @@ void BossDownState::Tick(float deltaTime)
 
     if (remainingSeconds_ <= 0.0f)
     {
-        stateMachine_.ChangeState(BossStateType::Idle);
+        recoveryStarted_ = true;
+
+        // Idleは再生せず、先頭フレームへゆっくりブレンドする。
+        boss_.SetAnimation(
+            BossAnimType::Idle,
+            false,
+            false,
+            1.5f
+        );
     }
 }
+
 void BossDownState::Exit()
 {
     boss_.StartRotation();
