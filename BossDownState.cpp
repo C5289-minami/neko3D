@@ -1,6 +1,8 @@
 ﻿#include "BossDownState.h"
 #include "Boss.h"
 #include "Consts.h"
+#include "SoundManager.h"
+#include "ResourceManager.h"
 
 #include "DxPlus/Debug.h"
 
@@ -88,6 +90,12 @@ void BossDownState::Tick(float deltaTime)
             0.4f,
             30.0f,
             80.0f
+        );
+
+        SoundManager::PlaySE(
+            RM().GetSound(
+                ResourceKeys::Sound_BossDump
+            )
         );
     }
 
