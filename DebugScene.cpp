@@ -11,7 +11,7 @@ void TestScene::Init()
 
 	StatusUI::InitBoss();
     StatusUI::InitPlayer();
-    StatusUI::Open();
+    StatusUI::Open(0);
 
     StartFadeIn();
 }
@@ -27,7 +27,7 @@ void TestScene::Update(float deltaTime)
 	StatusUI::SyncStatusBar(L"BossHealthGauge", aaa);
 	StatusUI::SyncStatusBar(L"PlayerUltGauge",  aaa);
 	StatusUI::SyncStatusBar(L"BossDownGauge",   aaa);
-	StatusUI::SyncPlayerHealth((int)(aaa * 5));
+	StatusUI::SyncPlayerHealth((int)(aaa * 5), deltaTime);
 }
 
 void TestScene::Render() const

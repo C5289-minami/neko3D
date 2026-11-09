@@ -7,6 +7,7 @@
 #include "ResourceKeys.h"
 #include "ResourceManager.h"
 #include "SoundManager.h"
+#include "StatusUI.h"
 #include <algorithm>
 #include "DxPlus/DxPlus.h"
 #include "Collision.h"
@@ -225,12 +226,13 @@ void GameScene::Update(float deltaTime)
 	if (currentState == GameStateType::Battle)
 	{
 		const auto& boss = gameContext->GetBoss();
+		const auto* player = gameContext->GetPlayer();
 		if (boss.IsActive())
 			stateMachine_.Tick(deltaTime);
 
 		if (GetCurrentGameState() != GameStateType::Battle)
 			return;
-
+		StatusUI::SyncPlayerHealth(player->GetHealth(), deltaTime);
 
 		// 死亡判定
 
