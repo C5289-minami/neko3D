@@ -50,6 +50,7 @@ void ResourceManager::LoadAll()
 
 	// Common UI
 	LoadSprite(ResourceKeys::UI_Logo, L"./Data/Images/logo.png");
+	LoadSprite(ResourceKeys::UI_CreditImage, L"./Data/Images/CreditImage.png");
 
 	// Status UI
 	LoadSprite(ResourceKeys::BossStatusBack, L"./Data/Images/Boss/boss_status_back.png");

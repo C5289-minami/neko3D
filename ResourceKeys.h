@@ -26,6 +26,7 @@ namespace ResourceKeys
 
     // UI
     inline constexpr const wchar_t* UI_Logo = L"UILogo";
+    inline constexpr const wchar_t* UI_CreditImage = L"UICreditImage";
 
     inline constexpr Button Button_Red{ L"UIRedButton", L"UIRedHover" };
     inline constexpr Button Button_Pink{ L"UIPinkButton", L"UIPinkHover" };
