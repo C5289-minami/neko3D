@@ -1001,27 +1001,6 @@ void Player::ResetClimbingSpeeds()
 	wallSlideSpeed_ = Const::PLAYER_WALL_SLIDE_SPEED;
 }
 
-Player::GroundType Player::CheckFloor() const
-{
-	switch (currentFloor_)
-	{
-	case GroundType::DownFloor:
-		DxPlus::Debug::SetString(L"現在: 一階");
-		break;
-
-	case GroundType::UpFloor:
-		DxPlus::Debug::SetString(L"現在: 二階");
-		break;
-
-	case GroundType::None:
-	default:
-		DxPlus::Debug::SetString(L"現在: 空中");
-		break;
-	}
-
-	return currentFloor_;
-}
-
 void Player::ApplyKnockback(const Vec3& direction, float power, float duration)
 {
 	Vec3 outward = direction;

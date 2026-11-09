@@ -153,7 +153,6 @@ void GameTestScene::Update(float deltaTime)
 
 		const Vec3 stageCenterPosition = stage.GetPosition();
 		player->Update(deltaTime, stage.GetCollision(), stageCenterPosition);
-		player->CheckFloor();
 
 		// ジャンプ接触は一度だけゲージを減らし、二段目だけプレイヤーを戻す。
 		const auto state = player->GetCurrentState();
@@ -791,7 +790,9 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 
 	// Stage
 	drawModel(stage.GetModelObject());
-
+	// boss
+	drawModel(boss.GetModelObject());
+	// stageObj
 	for (const auto& pillar : stage.GetPillarModelObjects())
 	{
 		drawModel(pillar);
@@ -802,7 +803,6 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 		drawModel(model);
 	}
 
-	drawModel(boss.GetModelObject());
 
 	effectManager.Draw();
 	grid.Draw();
