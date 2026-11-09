@@ -1135,6 +1135,7 @@ void Player::StartPillarElevator(const ModelObject* pillar, const Vec3& center, 
 	dir = dir.Normalized();
 
 	position_.x = center.x + dir.x * PILLAR_RADIUS;
+	position_.y = position_.y + 80.0f; // 少し上に上げてから吸着する
 	position_.z = center.z + dir.z * PILLAR_RADIUS;
 
 	// 柱の中心を向く
