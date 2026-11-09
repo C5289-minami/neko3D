@@ -2,6 +2,11 @@
 #include "Boss.h"
 #include "DxPlus/Debug.h"
 
+namespace
+{
+    constexpr float FlinchStartFrame = 5.0f;
+}
+
 BossFlinchState::BossFlinchState(BossStateMachine& stateMachine, Boss& boss)
 	: BossBaseState(stateMachine, boss)
 {
@@ -12,6 +17,7 @@ void BossFlinchState::Enter()
     boss_.StopRotation();
     boss_.StopMove();
     boss_.SetAnimation(BossAnimType::Flinch, false);
+    boss_.GetAnimation().SetTime(FlinchStartFrame);
 }
 
 void BossFlinchState::Tick(float deltaTime)

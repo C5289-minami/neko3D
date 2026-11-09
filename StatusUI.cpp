@@ -49,7 +49,7 @@ void StatusUI::InitPlayer(const std::string& characterName)
 	if (!mike)
 		mike = UIM().CreateImageUI(
 			L"playerULTGaugeBackMike",
-			ResourceKeys::MikeStatusBack,
+			ResourceKeys::PlayerStatus.mike,
 			backgroundPosition,
 			StatusPlayerMotionDirection,
 			StatusMotionDuration);
@@ -58,7 +58,7 @@ void StatusUI::InitPlayer(const std::string& characterName)
 	if (!sabi)
 		sabi = UIM().CreateImageUI(
 			L"playerULTGaugeBackSabi",
-			ResourceKeys::SabiStatusBack,
+			ResourceKeys::PlayerStatus.sabi,
 			backgroundPosition,
 			StatusPlayerMotionDirection,
 			StatusMotionDuration);
@@ -67,7 +67,7 @@ void StatusUI::InitPlayer(const std::string& characterName)
 	if (!kuro)
 		kuro = UIM().CreateImageUI(
 			L"playerULTGaugeBackKuro",
-			ResourceKeys::KuroStatusBack,
+			ResourceKeys::PlayerStatus.kuro,
 			backgroundPosition,
 			StatusPlayerMotionDirection,
 			StatusMotionDuration);
@@ -107,7 +107,7 @@ void StatusUI::InitPlayer(const std::string& characterName)
 		ultGauge->SetFalse();
 
 	// 背景画像サイズ取得
-	const auto* background = RM().GetSprite(ResourceKeys::MikeStatusBack);
+	const auto* background = RM().GetSprite(ResourceKeys::PlayerStatus.mike);
 	const auto* heartSprite = RM().GetSprite(ResourceKeys::PlayerHeart);
 
 	if (!background || !heartSprite) return;
@@ -174,8 +174,21 @@ void StatusUI::InitPlayer(const std::string& characterName)
 void StatusUI::InitBoss()
 {
 	const DxPlus::Vec2 backgroundPosition(
-		DxPlus::CLIENT_WIDTH * 0.5f + 10,
-		DxPlus::CLIENT_HEIGHT * 0.5f);
+		DxPlus::CLIENT_WIDTH * 0.5f,
+		DxPlus::CLIENT_HEIGHT * 0.15f);
+
+	float gaugeOffsetX = 45.0f;
+	float gaugeOffsetY = 20.0f;
+
+	auto* bossBack = UIM().GetUI(L"BossUIBack");
+	if (!bossBack)
+		bossBack = UIM().CreateImageUI(
+			L"BossUIBack",
+			ResourceKeys::BossStatusBack,
+			backgroundPosition + DxPlus::Vec2{0.0f,-gaugeOffsetY },
+			StatusBossMotionDirection,
+			StatusMotionDuration
+		);
 
 	// ボスHPゲージ
 	auto* healthGauge = UIM().GetUI(L"BossHealthGauge");
@@ -183,7 +196,7 @@ void StatusUI::InitBoss()
 		healthGauge = UIM().CreateSpriteStudioUI(
 			L"BossHealthGauge",
 			ResourceKeys::SpriteStudio_BossHealthGauge,
-			backgroundPosition,
+			backgroundPosition + DxPlus::Vec2{ gaugeOffsetX,-gaugeOffsetY },
 			"Boss_hp",
 			StatusBossMotionDirection,
 			StatusMotionDuration
@@ -198,7 +211,7 @@ void StatusUI::InitBoss()
 		downGauge = UIM().CreateSpriteStudioUI(
 			L"BossDownGauge",
 			ResourceKeys::SpriteStudio_BossDownGauge,
-			backgroundPosition,
+			backgroundPosition + DxPlus::Vec2{ gaugeOffsetX,gaugeOffsetY },
 			"Boss_down",
 			StatusBossMotionDirection,
 			StatusMotionDuration

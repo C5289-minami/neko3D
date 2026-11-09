@@ -1,4 +1,5 @@
 ﻿#include "GameSceneSelectState.h"
+
 #include "GameScene.h"
 #include "GameStateMachine.h"
 #include "GameContext.h"
@@ -13,405 +14,903 @@
 
 #include <array>
 #include <cmath>
+#include <memory>
 #include <string>
 
 namespace
 {
-	constexpr float SelectTargetH = 180.0f;
-	constexpr float SelectTargetRightOffset = 150.0f;
-	constexpr float SelectCameraLeftOffset = 120.0f;
-	constexpr float SelectCameraForwardDistance = 350.0f;
-	constexpr float SelectCameraMoveDuration = 0.6f;
+    constexpr float SelectTargetH = 180.0f;
+    constexpr float SelectTargetRightOffset = 150.0f;
+    constexpr float SelectCameraLeftOffset = 120.0f;
+    constexpr float SelectCameraForwardDistance = 350.0f;
+    constexpr float SelectCameraMoveDuration = 0.6f;
 
-	struct SelectCard
-	{
-		const wchar_t* uiKey;
-		const wchar_t* spriteKey;
-		const wchar_t* soundKey;
-		const char* statusName;
-		const wchar_t* trait;
-	};
+    constexpr const wchar_t* SelectHandAnimatorId =
+        L"Select.HandAnimation";
+    constexpr float SelectHandXRate = 0.36f;
+    constexpr float SelectHandYRate = 0.72f;
 
-	constexpr std::array<SelectCard, 3> SelectCards{ {
-		{ L"Select.Mike", ResourceKeys::SelectMike, ResourceKeys::Sound_SelectTaka, u8"たか", L"バランス型" },
-		{ L"Select.Sabi", ResourceKeys::SelectSabi, ResourceKeys::Sound_SelectGishi, u8"ぎし", L"走るのが得意" },
-		{ L"Select.Kuro", ResourceKeys::SelectKuro, ResourceKeys::Sound_SelectYu, u8"ゆう", L"登るのが得意" }
-	} };
+    DxPlus::Vec2 GetSelectHandPosition()
+    {
+        return {
+            DxPlus::CLIENT_WIDTH *
+                SelectHandXRate,
 
+            DxPlus::CLIENT_HEIGHT *
+                SelectHandYRate 
+        };
+    }
 
+    struct SelectCard
+    {
+        const wchar_t* centerUIKey;
+        const wchar_t* leftUIKey;
+        const wchar_t* rightUIKey;
 
-	class SelectCommonUI : public UIBase
-	{
-	public:
-		SelectCommonUI(DxPlus::Vec2 position)
-			: UIBase(ResourceKeys::SelectCommon, position, { 0, -1 }, SelectCameraMoveDuration)
-		{
-			this->SetCenter({ 0.5f, 0.5f });
-		}
-	};
+        const wchar_t* centerSpriteKey;
+        const wchar_t* leftSpriteKey;
+        const wchar_t* rightSpriteKey;
 
-	Camera::CameraPose MakeCameraPoseInFrontOfPlayer(
-		Camera::CameraPose pose,
-		const Player& player)
-	{
-		const Vec3 playerPos = player.GetWorldPosition();
-		const float yaw = player.GetYaw();
+        const wchar_t* soundKey;
+        const char* statusName;
+    };
 
-		const Vec3 forward{
-			std::sin(yaw),
-			0.0f,
-			std::cos(yaw)
-		};
+    constexpr std::array<SelectCard, 3>
+        SelectCards{ {
+        {
+            L"Select.Mike",
+            L"Select.Left.Mike",
+            L"Select.Right.Mike",
+            ResourceKeys::SelectPlayers.mike,
+            ResourceKeys::SelectAKeys.mike,
+            ResourceKeys::SelectDKeys.mike,
+            ResourceKeys::SoundSelectPlayers.mike,
+            u8"たか"
+        },
+        {
+            L"Select.Sabi",
+            L"Select.Left.Sabi",
+            L"Select.Right.Sabi",
+            ResourceKeys::SelectPlayers.sabi,
+            ResourceKeys::SelectAKeys.sabi,
+            ResourceKeys::SelectDKeys.sabi,
+            ResourceKeys::SoundSelectPlayers.sabi,
+            u8"ぎし"
+        },
+        {
+            L"Select.Kuro",
+            L"Select.Left.Kuro",
+            L"Select.Right.Kuro",
+            ResourceKeys::SelectPlayers.kuro,
+            ResourceKeys::SelectAKeys.kuro,
+            ResourceKeys::SelectDKeys.kuro,
+            ResourceKeys::SoundSelectPlayers.kuro,
+            u8"ゆう"
+        }
+    } };
 
-		const Vec3 right{
-			std::cos(yaw),
-			0.0f,
-			-std::sin(yaw)
-		};
+    class SelectCommonUI : public UIBase
+    {
+    public:
+        explicit SelectCommonUI(
+            DxPlus::Vec2 position)
+            : UIBase(
+                ResourceKeys::SelectCommon,
+                position,
+                { 0.0f, -1.0f },
+                SelectCameraMoveDuration)
+        {
+            SetCenter({
+                0.5f,
+                0.5f
+                });
+        }
+    };
 
-		// Targetを画面右側に配置するため、注視点を右へずらす
-		const Vec3 target =
-			playerPos
-			+ Vec3::Up() * SelectTargetH
-			+ right * SelectTargetRightOffset;
+    Camera::CameraPose MakeCameraPoseInFrontOfPlayer(
+        Camera::CameraPose pose,
+        const Player& player)
+    {
+        const Vec3 playerPos =
+            player.GetWorldPosition();
 
-		// キャラクターの正面側にカメラを配置
-		pose.position = target + forward * SelectCameraForwardDistance;
+        const float yaw =
+            player.GetYaw();
 
-		// カメラを少し左へ移動
-		pose.position -= right * SelectCameraLeftOffset;
+        const Vec3 forward{
+            std::sin(yaw),
+            0.0f,
+            std::cos(yaw)
+        };
 
-		// Targetを注視
-		const Vec3 direction = target - pose.position;
+        const Vec3 right{
+            std::cos(yaw),
+            0.0f,
+            -std::sin(yaw)
+        };
 
-		pose.yaw = std::atan2(direction.x, direction.z);
-		pose.pitch = std::atan2(
-			direction.y,
-			std::sqrt(
-				direction.x * direction.x +
-				direction.z * direction.z
-			)
-		);
+        // Targetを画面右側に配置するため、
+        // 注視点を右へずらす。
+        const Vec3 target =
+            playerPos +
+            Vec3::Up() * SelectTargetH +
+            right * SelectTargetRightOffset;
 
-		return pose;
-	}
+        // キャラクターの正面側へカメラを配置する。
+        pose.position =
+            target +
+            forward * SelectCameraForwardDistance;
 
+        // カメラを少し左へ移動する。
+        pose.position -=
+            right * SelectCameraLeftOffset;
+
+        const Vec3 direction =
+            target - pose.position;
+
+        pose.yaw = std::atan2(
+            direction.x,
+            direction.z
+        );
+
+        pose.pitch = std::atan2(
+            direction.y,
+            std::sqrt(
+                direction.x * direction.x +
+                direction.z * direction.z
+            )
+        );
+
+        return pose;
+    }
 }
 
+// ============================================================
+// Construction
+// ============================================================
 
 GameSceneSelectState::GameSceneSelectState(
-	GameStateMachine& gameStateMachine,
-	GameScene& gameScene)
-	: GameBaseState(gameStateMachine, gameScene)
+    GameStateMachine& gameStateMachine,
+    GameScene& gameScene)
+    : GameBaseState(
+        gameStateMachine,
+        gameScene)
 {
 }
+
+// ============================================================
+// Enter
+// ============================================================
 
 void GameSceneSelectState::Enter()
 {
-	DxPlus::Debug::SetFormatString(L"GameSceneSelectState::Enter");
+    DxPlus::Debug::SetFormatString(
+        L"GameSceneSelectState::Enter"
+    );
 
-	// UI
-	{
-		const DxPlus::Vec2 position{
-			DxPlus::CLIENT_WIDTH * 0.25f,
-			DxPlus::CLIENT_HEIGHT * 0.5f
-		};
+    const DxPlus::Vec2 position{
+        DxPlus::CLIENT_WIDTH * 0.25f,
+        DxPlus::CLIENT_HEIGHT * 0.5f
+    };
 
-		// カード3枚を登録
-		for (const auto& card : SelectCards)
-		{
-			if (!UIM().GetUI(card.uiKey))
-			{
-				UIM().CreateImageUI(
-					card.uiKey,
-					card.spriteKey,
-					position,
-					{ 0, -1 },
-					SelectCameraMoveDuration);
-			}
+    // ========================================================
+    // 中央UI
+    // ========================================================
 
-			UIM().GetUI(card.uiKey)->SetFalse();
-		}
+    for (const auto& card : SelectCards)
+    {
+        if (!UIM().GetUI(card.centerUIKey))
+        {
+            UIM().CreateImageUI(
+                card.centerUIKey,
+                card.centerSpriteKey,
+                position,
+                { 0.0f, -1.0f },
+                SelectCameraMoveDuration
+            );
+        }
 
-		// 共通UIを登録
-		if (!UIM().GetUI(L"Select.Common"))
-		{
-			UIM().RegisterUI(
-				L"Select.Common",
-				std::make_unique<SelectCommonUI>(
-					position + DxPlus::Vec2{ 0.0f, 220.0f }));
-		}
+        if (auto* ui =
+            UIM().GetUI(card.centerUIKey))
+        {
+            ui->SetFalse();
+        }
+    }
 
-		UIM().GetUI(L"Select.Common")->SetFalse();
-	}
+    // ========================================================
+    // 左右UI
+    // ========================================================
 
-	auto* context = gameScene_.GetGameContext();
-	players_.clear();
-	auto& previews = context->GetSelectPreviewPlayers();
+    float offset{};
+
+    auto* centerSprite =
+        RM().GetSprite(
+            SelectCards[0].centerSpriteKey
+        );
+
+    if (centerSprite)
+    {
+        DxLib::GetGraphSizeF(
+            centerSprite->GetID(),
+            &offset,
+            nullptr
+        );
+
+        offset *= 0.55f;
+    }
+    else
+    {
+        offset = 100.0f;
+    }
+
+    const DxPlus::Vec2 rightPosition{
+        position.x + offset,
+        position.y
+    };
+
+    const DxPlus::Vec2 leftPosition{
+        position.x - offset,
+        position.y
+    };
+
+    for (const auto& card : SelectCards)
+    {
+        if (!UIM().GetUI(card.leftUIKey))
+        {
+            UIM().CreateImageUI(
+                card.leftUIKey,
+                card.leftSpriteKey,
+                leftPosition,
+                { 1.0f, 0.0f },
+                SelectCameraMoveDuration
+            );
+        }
+
+        if (!UIM().GetUI(card.rightUIKey))
+        {
+            UIM().CreateImageUI(
+                card.rightUIKey,
+                card.rightSpriteKey,
+                rightPosition,
+                { -1.0f, 0.0f },
+                SelectCameraMoveDuration
+            );
+        }
+
+        if (auto* ui =
+            UIM().GetUI(card.leftUIKey))
+        {
+            ui->SetFalse();
+        }
+
+        if (auto* ui =
+            UIM().GetUI(card.rightUIKey))
+        {
+            ui->SetFalse();
+        }
+    }
+
+    // ========================================================
+    // 共通UI
+    // ========================================================
+
+    if (!UIM().GetUI(L"Select.Common"))
+    {
+        UIM().RegisterUI(
+            L"Select.Common",
+            std::make_unique<SelectCommonUI>(
+                position +
+                DxPlus::Vec2{
+                    0.0f,
+                    220.0f
+                }
+            )
+        );
+    }
+
+    if (auto* commonUI =
+        UIM().GetUI(L"Select.Common"))
+    {
+        commonUI->SetFalse();
+    }
+
+    // ========================================================
+    // GameContext
+    // ========================================================
+
+    auto* context =
+        gameScene_.GetGameContext();
+
+    if (!context)
+    {
+        return;
+    }
+
+    // UIM().Clear()後の場合も手UIを再生成する。
+    context->HandUIInit();
+
+    handAnimation_ = nullptr;
 
 
-	for (std::size_t i = 0; i < previews.size(); ++i)
-	{
-		auto& preview = previews[i];
+    // ========================================================
+    // Preview Player
+    // ========================================================
 
-		preview.SetGravityEnabled(false);
-		preview.SetDefMove(false);
-		preview.StopMove();
+    players_.clear();
 
-		if (i == 0)
-			preview.PlayAnimationFromModel(ResourceKeys::Model_PlayerAnim_SelectMike);
-		else if (i == 1)
-			preview.PlayAnimationFromModel(ResourceKeys::Model_PlayerAnim_SelectSabi);
+    auto& previews =
+        context->GetSelectPreviewPlayers();
 
-		players_.push_back(&preview);
-	}
+    for (std::size_t i = 0;
+        i < previews.size();
+        ++i)
+    {
+        auto& preview = previews[i];
 
-	selectedIndex_ = 1;
-	cameraState_ = SelectCameraState::WaitSelectShot;
-	confirmAfterCameraMove_ = false;
+        preview.SetGravityEnabled(false);
+        preview.SetDefMove(false);
+        preview.StopMove();
 
-	aWasDown_ = false;
-	dWasDown_ = false;
-	enterWasDown_ = false;
-	mouseWasDown_ = false;
+        if (i == 0)
+        {
+            preview.PlayAnimationFromModel(
+                ResourceKeys::
+                Model_PlayerAnim_SelectMike
+            );
+        }
+        else if (i == 1)
+        {
+            preview.PlayAnimationFromModel(
+                ResourceKeys::
+                Model_PlayerAnim_SelectSabi
+            );
+        }
 
-	DxLib::SetMouseDispFlag(TRUE);
+        players_.push_back(&preview);
+    }
+
+    selectedIndex_ = 1;
+
+    cameraState_ =
+        SelectCameraState::WaitSelectShot;
+
+    confirmAfterCameraMove_ = false;
+
+    aWasDown_ = false;
+    dWasDown_ = false;
+    enterWasDown_ = false;
+
+    DxLib::SetMouseDispFlag(TRUE);
 }
 
-void GameSceneSelectState::Tick(float deltaTime)
+// ============================================================
+// Tick
+// ============================================================
+
+void GameSceneSelectState::Tick(
+    float deltaTime)
 {
-	DxPlus::Debug::SetFormatString(
-		L"GameSceneSelectState::Tick");
+    DxPlus::Debug::SetFormatString(
+        L"GameSceneSelectState::Tick"
+    );
+
+    if (players_.empty())
+    {
+        return;
+    }
+
+    for (auto* player : players_)
+    {
+        if (player)
+        {
+            player->UpdateAnimation(deltaTime);
+        }
+    }
+
+    /*
+        TwoFrameUIAnimatorのUpdateは、
+        UIManager::Updateで自動的に呼ばれる。
+
+        ここではUpdateしない。
+    */
+
+    auto& director =
+        gameScene_.GetCameraDirector();
+
+    const bool transitionCompleted =
+        gameScene_.UpdateStateCamera(
+            deltaTime,
+            "Select"
+        );
+
+    // ========================================================
+    // カメラ状態
+    // ========================================================
+
+    switch (cameraState_)
+    {
+    case SelectCameraState::WaitSelectShot:
+    {
+        if (transitionCompleted &&
+            !director.IsTransitioning())
+        {
+            SoundManager::PlaySE(
+                RM().GetSound(
+                    SelectCards[
+                        selectedIndex_
+                    ].soundKey
+                )
+            );
+
+            const auto pose =
+                MakeCameraPoseInFrontOfPlayer(
+                    director.GetCurrentPose(),
+                    *players_[selectedIndex_]
+                );
+
+            director.MoveTo(
+                pose,
+                SelectCameraMoveDuration,
+                Motion::Easing::EaseInOut
+            );
+
+            cameraState_ =
+                SelectCameraState::
+                MoveToSelectedPlayer;
+        }
+
+        break;
+    }
+
+    case SelectCameraState::MoveToSelectedPlayer:
+    {
+        if (transitionCompleted &&
+            !director.IsTransitioning())
+        {
+            cameraState_ =
+                SelectCameraState::Ready;
+
+            UpdateSelectedUI();
+
+            if (confirmAfterCameraMove_)
+            {
+                confirmAfterCameraMove_ = false;
+
+                ConfirmSelection();
+                return;
+            }
+        }
+
+        break;
+    }
+
+    case SelectCameraState::Ready:
+        break;
+    }
+
+    // ========================================================
+    // 入力
+    // ========================================================
+
+    const bool aDown =
+        DxLib::CheckHitKey(
+            KEY_INPUT_A
+        ) != 0;
+
+    const bool dDown =
+        DxLib::CheckHitKey(
+            KEY_INPUT_D
+        ) != 0;
+
+    const bool enterDown =
+        DxLib::CheckHitKey(
+            KEY_INPUT_RETURN
+        ) != 0;
 
 
-	if (players_.empty()) return;
+    const bool aPressed =
+        aDown && !aWasDown_;
 
-	for (auto* player : players_)
-		player->UpdateAnimation(deltaTime);
+    const bool dPressed =
+        dDown && !dWasDown_;
 
-	auto& director = gameScene_.GetCameraDirector();
+    const bool enterPressed =
+        enterDown && !enterWasDown_;
 
-	// カメラ更新は毎フレーム1回だけ
-	const bool transitionCompleted =
-		gameScene_.UpdateStateCamera(deltaTime, "Select");
+    aWasDown_ = aDown;
+    dWasDown_ = dDown;
+    enterWasDown_ = enterDown;
 
-	// =========================================
-	// カメラ状態
-	// =========================================
+    if (cameraState_ !=
+        SelectCameraState::Ready)
+    {
+        return;
+    }
 
-	switch (cameraState_)
-	{
-	case SelectCameraState::WaitSelectShot:
-	{
-		// Selectショットの完了を待つ
-		if (transitionCompleted && !director.IsTransitioning())
-		{
-			SoundManager::PlaySE(RM().GetSound(SelectCards[selectedIndex_].soundKey));//選択時のSEを再生
+    // ========================================================
+    // 選択
+    // ========================================================
 
-			const auto pose = MakeCameraPoseInFrontOfPlayer(
-				director.GetCurrentPose(),
-				*players_[selectedIndex_]);
+    if (aPressed)
+    {
+        SelectIndex(
+            selectedIndex_ - 1
+        );
 
-			director.MoveTo(
-				pose,
-				SelectCameraMoveDuration,
-				Motion::Easing::EaseInOut);
+        return;
+    }
 
-			cameraState_ = SelectCameraState::MoveToSelectedPlayer;
-		}
-		break;
-	}
+    if (dPressed)
+    {
+        SelectIndex(
+            selectedIndex_ + 1
+        );
 
-	case SelectCameraState::MoveToSelectedPlayer:
-	{
-		// カメラ移動の完了を待つ
-		if (transitionCompleted && !director.IsTransitioning())
-		{
-			cameraState_ = SelectCameraState::Ready;
+        return;
+    }
 
-			UpdateSelectedUI();
+    // ========================================================
+    // 決定
+    // ========================================================
 
-			// カメラ移動完了後に決定する
-			if (confirmAfterCameraMove_)
-			{
-				confirmAfterCameraMove_ = false;
-				ConfirmSelection();
-				return;
-			}
-		}
-		break;
-	}
-
-	case SelectCameraState::Ready:
-		break;
-	}
-
-	// =========================================
-	// 入力取得
-	// =========================================
-
-	const bool aDown =
-		DxLib::CheckHitKey(KEY_INPUT_A) != 0;
-
-	const bool dDown =
-		DxLib::CheckHitKey(KEY_INPUT_D) != 0;
-
-	const bool enterDown =
-		DxLib::CheckHitKey(KEY_INPUT_RETURN) != 0;
-
-	const bool mouseDown =
-		(DxLib::GetMouseInput() & MOUSE_INPUT_LEFT) != 0;
-
-	const bool aPressed = aDown && !aWasDown_;
-	const bool dPressed = dDown && !dWasDown_;
-	const bool enterPressed = enterDown && !enterWasDown_;
-	const bool mousePressed = mouseDown && !mouseWasDown_;
-
-	// 移動中に入力を受け付けなくても、押下状態は更新する
-	aWasDown_ = aDown;
-	dWasDown_ = dDown;
-	enterWasDown_ = enterDown;
-	mouseWasDown_ = mouseDown;
-
-	// カメラ移動中は選択操作を受け付けない
-	if (cameraState_ != SelectCameraState::Ready)
-	{
-		return;
-	}
-
-	// =========================================
-	// A / Dで選択
-	// =========================================
-
-	if (aPressed)
-	{
-		SelectIndex(selectedIndex_ - 1);
-		return;
-	}
-
-	if (dPressed)
-	{
-		SelectIndex(selectedIndex_ + 1);
-		return;
-	}
-
-	// =========================================
-	// Enterで決定
-	// =========================================
-
-	if (enterPressed)
-	{
-		ConfirmSelection();
-	}
+    if (enterPressed)
+    {
+        ConfirmSelection();
+    }
 }
 
-void GameSceneSelectState::SelectIndex(int index)
+// ============================================================
+// Select
+// ============================================================
+
+void GameSceneSelectState::SelectIndex(
+    int index)
 {
-	if (players_.empty()) return;
+    if (players_.empty())
+    {
+        return;
+    }
 
-	const int count = static_cast<int>(players_.size());
-	index = (index % count + count) % count;
+    const int count =
+        static_cast<int>(
+            players_.size()
+            );
 
-	if (index == selectedIndex_) return;
+    index =
+        (index % count + count) % count;
 
-	SoundManager::StopSE(RM().GetSound(SelectCards[selectedIndex_].soundKey));
-	selectedIndex_ = index;
-	SoundManager::PlaySE(RM().GetSound(SelectCards[selectedIndex_].soundKey));
+    if (index == selectedIndex_)
+    {
+        return;
+    }
 
-	// カードと共通UIを一度非表示にする
-	for (const auto& card : SelectCards)
-	{
-		if (auto* ui = UIM().GetUI(card.uiKey))
-			ui->Hide();
-	}
+    SoundManager::StopSE(
+        RM().GetSound(
+            SelectCards[
+                selectedIndex_
+            ].soundKey
+        )
+    );
 
-	if (auto* ui = UIM().GetUI(L"Select.Common"))
-		ui->Hide();
+    // 現在表示している手を停止する。
+    if (handAnimation_)
+    {
+        handAnimation_->Stop();
+    }
 
-	auto& director = gameScene_.GetCameraDirector();
+    selectedIndex_ = index;
 
-	auto pose = MakeCameraPoseInFrontOfPlayer(
-		director.GetCurrentPose(),
-		*players_[selectedIndex_]);
+    SoundManager::PlaySE(
+        RM().GetSound(
+            SelectCards[
+                selectedIndex_
+            ].soundKey
+        )
+    );
 
-	director.MoveTo(
-		pose,
-		SelectCameraMoveDuration,
-		Motion::Easing::EaseInOut);
+    for (const auto& card : SelectCards)
+    {
+        if (auto* ui =
+            UIM().GetUI(card.centerUIKey))
+        {
+            ui->Hide();
+        }
 
-	cameraState_ = SelectCameraState::MoveToSelectedPlayer;
+        if (auto* ui =
+            UIM().GetUI(card.leftUIKey))
+        {
+            ui->Hide();
+        }
+
+        if (auto* ui =
+            UIM().GetUI(card.rightUIKey))
+        {
+            ui->Hide();
+        }
+    }
+
+    if (auto* ui =
+        UIM().GetUI(L"Select.Common"))
+    {
+        ui->Hide();
+    }
+
+    auto& director =
+        gameScene_.GetCameraDirector();
+
+    const auto pose =
+        MakeCameraPoseInFrontOfPlayer(
+            director.GetCurrentPose(),
+            *players_[selectedIndex_]
+        );
+
+    director.MoveTo(
+        pose,
+        SelectCameraMoveDuration,
+        Motion::Easing::EaseInOut
+    );
+
+    cameraState_ =
+        SelectCameraState::
+        MoveToSelectedPlayer;
 }
+
+// ============================================================
+// Confirm
+// ============================================================
 
 void GameSceneSelectState::ConfirmSelection()
 {
-	if (players_.empty()) return;
+    if (players_.empty())
+    {
+        return;
+    }
 
-	auto* context = gameScene_.GetGameContext();
+    auto* context =
+        gameScene_.GetGameContext();
 
-	Player& selected = *players_[selectedIndex_];
-	const auto& card = SelectCards[selectedIndex_];
-	// キャラ名の処理
-	const auto* status = CharSettingsManager::GetByName(card.statusName);
-	selected.SetCharData(status ? *status : CharData{});//もし設定が無い場合はデフォルトのCharDataを使う
+    if (!context)
+    {
+        return;
+    }
 
-	// Basketとの親子関係を解除
-	selected.ClearOwner();
+    Player& selected =
+        *players_[selectedIndex_];
 
-	// 本編で使用するPlayerを切り替える
-	context->SetActivePlayer(selected);
+    const auto& card =
+        SelectCards[selectedIndex_];
 
-	auto* player = context->GetPlayer();
+    const auto* status =
+        CharSettingsManager::GetByName(
+            card.statusName
+        );
 
-	// 選択画面で無効にした重力を有効に戻す
-	player->SetGravityEnabled(true);
+    selected.SetCharData(
+        status
+        ? *status
+        : CharData{}
+    );
 
-	// Play用のサイズと回転にする
-	auto& selectModel = selected.GetModelObject();
-	player->GetModelObject().SetRotation({});
-	player->GetModelObject().SetScale({ 1.0f, 1.0f, 1.0f });
-	player->GetModelObject().SetPosition({});
+    // Basketとの親子関係を解除する。
+    selected.ClearOwner();
 
-	stateMachine_.ChangeState(GameStateType::Tutorial);
+    // 本編で使用するPlayerを切り替える。
+    context->SetActivePlayer(selected);
+
+    auto* player =
+        context->GetPlayer();
+
+    if (!player)
+    {
+        return;
+    }
+
+    player->SetGravityEnabled(true);
+
+    player->GetModelObject().SetRotation({});
+
+    player->SetRotation({
+        0.0f,
+        60.0f * DxPlus::Deg2Rad,
+        0.0f
+        });
+
+    player->GetModelObject().SetScale({
+        1.0f,
+        1.0f,
+        1.0f
+        });
+
+    player->GetModelObject().SetPosition({});
+
+    stateMachine_.ChangeState(
+        GameStateType::Tutorial
+    );
 }
 
-void GameSceneSelectState::UpdateSelectedUI() const
+// ============================================================
+// Selected UI
+// ============================================================
+
+void GameSceneSelectState::UpdateSelectedUI()
 {
-	for (std::size_t i = 0; i < SelectCards.size(); ++i)
-	{
-		if (auto* ui = UIM().GetUI(SelectCards[i].uiKey))
-		{
-			if (i == static_cast<std::size_t>(selectedIndex_))
-			{
-				ui->Show();
-			}
-			else
-			{
-				ui->SetFalse();
-			}
-		}
-	}
+    const int count =
+        static_cast<int>(
+            SelectCards.size()
+            );
 
-	if (auto* ui = UIM().GetUI(L"Select.Common"))
-	{
-		ui->Show();
-	}
+    const int leftIndex =
+        (selectedIndex_ - 1 + count) %
+        count;
+
+    const int rightIndex =
+        (selectedIndex_ + 1) %
+        count;
+
+    for (std::size_t i = 0;
+        i < SelectCards.size();
+        ++i)
+    {
+        if (auto* ui =
+            UIM().GetUI(
+                SelectCards[i].centerUIKey
+            ))
+        {
+            if (i ==
+                static_cast<std::size_t>(
+                    selectedIndex_
+                    ))
+            {
+                ui->Show();
+            }
+            else
+            {
+                ui->SetFalse();
+            }
+        }
+
+        if (auto* ui =
+            UIM().GetUI(
+                SelectCards[i].leftUIKey
+            ))
+        {
+            if (i ==
+                static_cast<std::size_t>(
+                    leftIndex
+                    ))
+            {
+                ui->Show();
+            }
+            else
+            {
+                ui->SetFalse();
+            }
+        }
+
+        if (auto* ui =
+            UIM().GetUI(
+                SelectCards[i].rightUIKey
+            ))
+        {
+            if (i ==
+                static_cast<std::size_t>(
+                    rightIndex
+                    ))
+            {
+                ui->Show();
+            }
+            else
+            {
+                ui->SetFalse();
+            }
+        }
+    }
+
+    if (auto* ui =
+        UIM().GetUI(L"Select.Common"))
+    {
+        ui->Show();
+    }
+
+    UpdateHandAnimation();
 }
+
+void GameSceneSelectState::UpdateHandAnimation()
+{
+    auto* context =
+        gameScene_.GetGameContext();
+
+    if (!context)
+    {
+        return;
+    }
+
+    GameContext::PlayerHandType handType{};
+
+    switch (selectedIndex_)
+    {
+    case 0:
+        handType =
+            GameContext::PlayerHandType::Mike;
+        break;
+
+    case 1:
+        handType =
+            GameContext::PlayerHandType::Sabi;
+        break;
+
+    case 2:
+        handType =
+            GameContext::PlayerHandType::Kuro;
+        break;
+
+    default:
+        return;
+    }
+
+    handAnimation_ =
+        context->StartPlayerHandAnimation(
+            SelectHandAnimatorId,
+            handType,
+            GetSelectHandPosition(),
+            true // X反転
+        );
+}
+
+// ============================================================
+// Exit
+// ============================================================
 
 void GameSceneSelectState::Exit()
 {
-	DxPlus::Debug::SetFormatString(
-		L"GameSceneSelectState::Exit");
+    DxPlus::Debug::SetFormatString(
+        L"GameSceneSelectState::Exit"
+    );
 
-	SoundManager::StopSE(RM().GetSound(SelectCards[selectedIndex_].soundKey));
+    if (auto* context =
+        gameScene_.GetGameContext())
+    {
+        context->StopPlayerHandAnimation(
+            SelectHandAnimatorId
+        );
+    }
 
-	for (const auto& card : SelectCards)
-	{
-		if (auto* ui = UIM().GetUI(card.uiKey))
-			ui->SetFalse();
-	}
+    handAnimation_ = nullptr;
 
-	if (auto* ui = UIM().GetUI(L"Select.Common"))
-		ui->SetFalse();
+    SoundManager::StopSE(
+        RM().GetSound(
+            SelectCards[
+                selectedIndex_
+            ].soundKey
+        )
+    );
 
-	DxLib::SetMouseDispFlag(FALSE);
+    for (const auto& card : SelectCards)
+    {
+        if (auto* ui =
+            UIM().GetUI(card.centerUIKey))
+        {
+            ui->SetFalse();
+        }
+
+        if (auto* ui =
+            UIM().GetUI(card.leftUIKey))
+        {
+            ui->SetFalse();
+        }
+
+        if (auto* ui =
+            UIM().GetUI(card.rightUIKey))
+        {
+            ui->SetFalse();
+        }
+    }
+
+    if (auto* ui =
+        UIM().GetUI(L"Select.Common"))
+    {
+        ui->SetFalse();
+    }
+
+    DxLib::SetMouseDispFlag(FALSE);
 }

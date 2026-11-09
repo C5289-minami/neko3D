@@ -14,4 +14,5 @@ private:
     float remainingSeconds_{};
     bool reachedLoopPoint_{ false };
     bool downLoopStarted_{ false };
+    bool recoveryStarted_ = false;
 };
