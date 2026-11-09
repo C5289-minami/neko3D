@@ -169,7 +169,7 @@ void GameSceneSelectState::Enter()
 		if (centerSprite)
 		{
 			DxLib::GetGraphSizeF(centerSprite->GetID(), &offset, {});
-			offset *= 0.5f;
+			offset *= 0.55f;
 		}
 		else
 		{

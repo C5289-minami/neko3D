@@ -729,11 +729,9 @@ void GameScene::DrawScene(bool toonEnabled) const
 	}
 
 
+
 	// BossとPlayer
 	drawModel(boss.GetModelObject());
-	if (drawPlayerShadow_)
-		DrawPlayerShadow();
-	drawModel(player->GetModelObject());
 
 	// Stage
 	drawModel(stage.GetModelObject());
@@ -746,6 +744,12 @@ void GameScene::DrawScene(bool toonEnabled) const
 	{
 		drawModel(model);
 	}
+
+	if (drawPlayerShadow_)
+		DrawPlayerShadow();
+	drawModel(player->GetModelObject());
+
+
 
 	effectManager.Draw();
 	modelToonRenderer_.EndPass();
