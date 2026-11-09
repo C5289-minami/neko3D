@@ -18,6 +18,7 @@
 
 namespace
 {
+	constexpr float TutorialSkipHoldTime = 1.5f;
 	// スキップ後の配置。ステージ中心からの横方向の距離。
 	constexpr Vec3 TutorialSkipBattleOffset{ 0.0f, 0.0f, -1000.0f };
 }
@@ -204,6 +205,12 @@ void GameScene::Update(float deltaTime)
 	);
 
 	const auto currentState = GetCurrentGameState();
+	const bool enterDown = DxLib::CheckHitKey(KEY_INPUT_RETURN) != 0;
+	const bool enterWasDown = tutorialSkipKeyWasDown_;
+	tutorialSkipKeyWasDown_ = enterDown;
+
+	if (currentState != GameStateType::Tutorial)// Tutorial以外では、スキップ判定をリセットする
+		tutorialSkipHoldTime_ = 0.0f;
 
 	// Tutorial・Battle以外
 	if (currentState != GameStateType::Tutorial &&
@@ -246,7 +253,13 @@ void GameScene::Update(float deltaTime)
 
 	player->SetDefMove(true);
 	player->Update(deltaTime, tutorialCollision_);
-	if (player->GetInput().skipPressed)
+
+	if (!enterDown || !enterWasDown)
+		tutorialSkipHoldTime_ = 0.0f;
+	else
+		tutorialSkipHoldTime_ += deltaTime;
+
+	if (tutorialSkipHoldTime_ >= TutorialSkipHoldTime)
 	{
 		SkipTutorial();
 		return;

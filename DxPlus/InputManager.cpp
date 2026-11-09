@@ -30,8 +30,6 @@ namespace DxPlus
             { BUTTON_R1,        KEY_INPUT_E },          // E
 
             { BUTTON_R,         KEY_INPUT_R },          // R
-            { BUTTON_SKIP,      KEY_INPUT_RSHIFT },     // チュートリアルスキップ
-
             { BUTTON_START,     KEY_INPUT_RETURN },     // エンターキー (メニュー決定など)
             { BUTTON_SELECT,    KEY_INPUT_BACK },       // バックスペースキー (メニュー戻るなど)
 
