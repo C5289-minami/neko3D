@@ -380,7 +380,6 @@ void GameSceneSelectState::Enter()
     dWasDown_ = false;
     enterWasDown_ = false;
 
-    DxLib::SetMouseDispFlag(TRUE);
 }
 
 // ============================================================
@@ -912,5 +911,4 @@ void GameSceneSelectState::Exit()
         ui->SetFalse();
     }
 
-    DxLib::SetMouseDispFlag(FALSE);
 }

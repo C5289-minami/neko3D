@@ -26,6 +26,15 @@ static LRESULT CALLBACK CustomWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 		DxPlus::Input::HandleRawInput(lParam);
 	}
 
+	if (msg == WM_KEYDOWN && wParam == VK_CONTROL &&
+		(HIWORD(lParam) & (KF_EXTENDED | KF_REPEAT)) == KF_EXTENDED)
+	{
+		DxLib::SetMouseDispFlag(!DxLib::GetMouseDispFlag());
+	}
+
+	if (msg == WM_SETCURSOR && !DxLib::GetMouseDispFlag())
+		return 0;
+
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
 	{
 		return 1; // ImGuiÇ™èàóùÇµÇΩ

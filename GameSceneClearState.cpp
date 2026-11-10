@@ -40,7 +40,6 @@ GameSceneClearState::GameSceneClearState(GameStateMachine& gameStateMachine, Gam
 void GameSceneClearState::Enter()
 {
 	DxPlus::Debug::SetFormatString(L"GameSceneClearState::Enter");
-	DxLib::SetMouseDispFlag(TRUE);
 
 	auto& boss = gameScene_.GetGameContext()->GetBoss();
 	if (boss.IsDead())

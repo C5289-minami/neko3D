@@ -59,10 +59,19 @@ void DebugUI::Shutdown()
 void DebugUI::BeginFrame()
 {
     ImGui_ImplDX11_NewFrame();
-    ImGui_ImplWin32_NewFrame();
-    ImGui::NewFrame();
 
     ImGuiIO& io = ImGui::GetIO();
+    const ImGuiConfigFlags configFlags = io.ConfigFlags;
+    POINT cursorPosition{};
+    if (!DxLib::GetMouseDispFlag() && GetCursorPos(&cursorPosition) &&
+        WindowFromPoint(cursorPosition) == DxLib::GetMainWindowHandle())
+    {
+        io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
+    }
+    ImGui_ImplWin32_NewFrame();
+    io.ConfigFlags = configFlags;
+    ImGui::NewFrame();
+
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
     ImGuiDockNodeFlags flags = ImGuiDockNodeFlags_PassthruCentralNode;

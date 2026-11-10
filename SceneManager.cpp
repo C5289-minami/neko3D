@@ -97,6 +97,16 @@ void SceneManager::Shutdown()
 void SceneManager::SetScene(Scene* newScene)
 {
 	if (!newScene || newScene == scene) return;
+#ifndef NDEBUG
+	const auto usesDebugCursor = [this](const Scene* target)
+	{
+		return target == &shaderTestScene || target == &modelConfigScene ||
+			target == &roomTestScene || target == &statusTestScene;
+	};
+	const bool showPointer = usesDebugCursor(newScene);
+	if (usesDebugCursor(scene) != showPointer)
+		DxLib::SetMouseDispFlag(showPointer ? TRUE : FALSE);
+#endif
 	scene = newScene; // 破棄しない＝常駐
 }
 

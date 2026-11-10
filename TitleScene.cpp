@@ -15,7 +15,6 @@ void TitleScene::Init()
 {
 	DxLib::SetBackgroundColor(gameContext->GetBgRed(), gameContext->GetBgGreen(), gameContext->GetBgBlue());
 
-	DxLib::SetMouseDispFlag(TRUE);
 
 
 

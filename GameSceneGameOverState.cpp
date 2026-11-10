@@ -41,7 +41,6 @@ GameSceneGameOverState::GameSceneGameOverState(GameStateMachine& gameStateMachin
 void GameSceneGameOverState::Enter()
 {
 	DxPlus::Debug::SetFormatString(L"GameSceneGameOverState::Enter");
-	DxLib::SetMouseDispFlag(TRUE);
 
 	// ゲームオーバーUI
 	{

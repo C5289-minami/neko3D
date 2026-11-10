@@ -22,7 +22,6 @@ GameSceneTitleState::GameSceneTitleState(GameStateMachine& gameStateMachine, Gam
 void GameSceneTitleState::Enter()
 {
     DxPlus::Debug::SetFormatString(L"GameSceneTitleState::Enter");
-    DxLib::SetMouseDispFlag(TRUE);
     SoundManager::PlayBGM(RM().GetMusic(ResourceKeys::Music_Title));
 
     {
@@ -173,7 +172,6 @@ void GameSceneTitleState::Tick(float deltaTime)
 void GameSceneTitleState::Exit()
 {
     DxPlus::Debug::SetFormatString(L"GameSceneTitleState::Exit");
-    DxLib::SetMouseDispFlag(FALSE);
     if (auto* logo = UIM().GetUI(L"Game.Logo")) logo->Hide();
     if (auto* start = UIM().GetButtonUI(L"Game.StartButton")) start->Hide();
     if (auto* credit = UIM().GetButtonUI(L"Game.CreditButton")) credit->Hide();

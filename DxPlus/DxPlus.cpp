@@ -29,6 +29,8 @@ namespace DxPlus
 
     void Shutdown()
     {
+        Input::SetMouseCapture(false);
+        DxLib::SetMouseDispFlag(TRUE);
         Text::FinalizeFont();
         DxWrapper::GetInstance().Finalize();
     }
