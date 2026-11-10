@@ -87,7 +87,7 @@ namespace Const
     // ===== 敵関連 =====
     constexpr int BOSS_MAX_HEALTH = 15;
     constexpr int BOSS_CLAP_DAMAGE = 1;
-    constexpr int BOSS_SLAM_DAMAGE = 2;
+    constexpr int BOSS_SLAM_DAMAGE = 1;
     constexpr int BOSS_TAIL_WHIP_DAMAGE = 1;
 
     constexpr float BOSS_DOWN_GAUGE_MAX = 100.0f;
