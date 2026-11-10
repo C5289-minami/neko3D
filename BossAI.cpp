@@ -54,11 +54,11 @@ namespace
 
 BossAI::BossAI(Boss& boss)
     : boss_(boss),
-    clapCooldown_(10.0f, BossAttackType::Clap),
-    slamCooldown_(10.0f, BossAttackType::Slam),
-    tailWhipCooldown_(20.0f, BossAttackType::TailWhip)
+    clapCooldown_(7.0f, BossAttackType::Clap),
+    slamCooldown_(8.0f, BossAttackType::Slam),
+    tailWhipCooldown_(14.0f, BossAttackType::TailWhip)
 {
-    attackCooldownTime_ = 5.0f;
+    attackCooldownTime_ = 2.0f;
     Reset();
 }
 
@@ -190,8 +190,8 @@ bool BossAI::TurnToTarget(const Vec3& targetPosition, float deltaTime)
     float yawError = NormalizeAngle(targetYaw - boss_.GetYaw());
 
     constexpr float finishAngle = 1.0f * DxPlus::Deg2Rad;
-    constexpr float maxRotationSpeed = 2.5f;
-    constexpr float minRotationSpeed = 0.15f;
+    constexpr float maxRotationSpeed = 3.5f;
+    constexpr float minRotationSpeed = 0.2f;
     //constexpr float acceleration = 3.0f;
 
     float error = std::abs(yawError);

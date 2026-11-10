@@ -45,6 +45,15 @@ Vec3 Player::GetAttackBallSpawnPosition() const
 		+ forward * (Const::PLAYER_RADIUS + Const::PLAYER_ATTACK_BALL_FORWARD_OFFSET);
 }
 
+void Player::PlayAttackEffect() const
+{
+	const int effectHandle = RM().GetEffect(ResourceKeys::Effect_PlayerAttack);
+	if (effectHandle < 0) return;
+
+	const Vec3 spawnPosition = GetAttackBallSpawnPosition();
+	EffectManager::PlayEffect(effectHandle, spawnPosition, GetYaw() + DX_PI_F);
+}
+
 void Player::SetAnimation(
 	PlayerAnimType::Type type,
 	bool loop,
@@ -865,20 +874,27 @@ void Player::UpdateHorizontalVelocity(float deltaTime)
 
 	// 移動速度
 	float moveSpeed = Const::PLAYER_MOVE_SPEED * moveRate_;
-   if (damageSlowTime_ > 0.0f)
+	if (damageSlowTime_ > 0.0f)
 	{
 		moveSpeed *= DamageSlowRate;
 	}
-	if (isGrounded_ && state == PlayerStateType::Walk)
-	{
-		moveSpeed *= charData.moveSpeed / CharData::DefaultMoveSpeed;
-	}
 
+    if (isGrounded_ && state == PlayerStateType::Walk)
+    {
+        moveSpeed *= charData.moveSpeed / CharData::DefaultMoveSpeed;
+    }
 
-#ifdef _DEBUG//debugモードでは、移動速度を5倍にする
-	if (debugDashEnabled_) moveSpeed *= 5.0f;//(shift中)
+#ifdef _DEBUG
+    if (debugDashEnabled_)
+    {
+        moveSpeed = Const::PLAYER_DEBUG_DASH_SPEED;
+    }
 #endif
-	if (isDoubleJump) moveSpeed *= 3.0f;
+
+    if (isDoubleJump)
+    {
+        moveSpeed = Const::PLAYER_DOUBLE_JUMP_MOVE_SPEED;
+    }
 
 	if (isdefMove_)
 	{
