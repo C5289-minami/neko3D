@@ -467,6 +467,7 @@ public:
 
     // 攻撃球の出現位置。
     Vec3 GetAttackBallSpawnPosition() const;
+    void PlayAttackEffect() const;
 
 
     // ========================================================

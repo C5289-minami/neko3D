@@ -26,6 +26,8 @@ void PlayerAttackState::Enter()
 	stateMachine_.NotifyEvent(PlayerActionEvent::Attacked);
 	ballActive_ = !player_.IsDead();
 
+	player_.PlayAttackEffect();
+
 
 	DxPlus::Debug::SetFormatString(L"PlayerAttackState::Enter");
 }

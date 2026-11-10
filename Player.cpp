@@ -45,6 +45,15 @@ Vec3 Player::GetAttackBallSpawnPosition() const
 		+ forward * (Const::PLAYER_RADIUS + Const::PLAYER_ATTACK_BALL_FORWARD_OFFSET);
 }
 
+void Player::PlayAttackEffect() const
+{
+	const int effectHandle = RM().GetEffect(ResourceKeys::Effect_PlayerAttack);
+	if (effectHandle < 0) return;
+
+	const Vec3 spawnPosition = GetAttackBallSpawnPosition();
+	EffectManager::PlayEffect(effectHandle, spawnPosition, GetYaw() + DX_PI_F);
+}
+
 void Player::SetAnimation(
 	PlayerAnimType::Type type,
 	bool loop,
