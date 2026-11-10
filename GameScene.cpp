@@ -132,6 +132,7 @@ bool GameScene::RestoreBattleCheckpoint()
 	player->Reset();
 	player->SetTransform(checkpoint.playerTransform);
 	player->SetStartPosition(checkpoint.playerTransform.position);
+ player->ResetPosition();
 	player->ResetCameraShakeRequest();
 
 	boss.Reset();

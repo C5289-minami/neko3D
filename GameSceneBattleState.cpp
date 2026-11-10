@@ -415,7 +415,8 @@ void GameSceneBattleState::Tick(float deltaTime)
 
         outward.y = 0.0f;
 
-        if (player->IsSecondFloor())
+        if (player->WasLastOnSecondFloor() 
+			|| player->GetCurrentState() == PlayerStateType::Climbing)// 柱か二階なら吹き飛ばす
         {
             player->ApplyKnockback(outward, 5000.0f, 0.3f);
         }

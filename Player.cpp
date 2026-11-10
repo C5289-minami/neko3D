@@ -1037,6 +1037,9 @@ void Player::ApplyKnockback(const Vec3& direction, float power, float duration)
 	//outward.y = 0.0f;
 
 	if (outward.LengthSq() <= 0.000001f) return;
+
+	EndPillarElevator();
+
 	jumpStartFloor_ = GroundType::None;
 
 	outward = outward.Normalized();
@@ -1046,7 +1049,7 @@ void Player::ApplyKnockback(const Vec3& direction, float power, float duration)
 
 	velocity_.y = 0.0f;
 	isGrounded_ = false;
-	EndPillarElevator();
+
 
 	// 被ダメージ中は、回避の受付と保留中のダメージ処理を続ける。
 	if (!IsDamaging())
