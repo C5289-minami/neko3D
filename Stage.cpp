@@ -137,6 +137,7 @@ void Stage::Reset()
 
 	isShaking_ = false;
 	isReturning_ = false;
+   tiltHoldTimeRemaining_ = 0.0f;
 }
 void Stage::Update(float deltaTime)
 {
@@ -207,19 +208,24 @@ void Stage::StartShake()
 
 	isShaking_ = true;
 	isReturning_ = false;
+   tiltHoldTimeRemaining_ = 10.0f;
 }
 
 void Stage::UpdateShake(float deltaTime)
 {
 	if (!isShaking_) return;
 
-	tiltMotion_.Update(deltaTime);
+   tiltMotion_.Update(deltaTime);
 
 	if (tiltMotion_.IsFinished() && !isReturning_)
 	{
-		tiltMotion_.SetDuration(tiltMotion_.GetDuration() * 3.0f); // 戻りは遅くする
-		tiltMotion_.StartReverse();
-		isReturning_ = true;
+       tiltHoldTimeRemaining_ = (std::max)(0.0f, tiltHoldTimeRemaining_ - deltaTime);
+		if (tiltHoldTimeRemaining_ <= 0.0f)
+		{
+			tiltMotion_.SetDuration(tiltMotion_.GetDuration() * 3.0f); // 戻りは遅くする
+			tiltMotion_.StartReverse();
+			isReturning_ = true;
+		}
 	}
 
 	const float angle = tiltMotion_.GetValue();

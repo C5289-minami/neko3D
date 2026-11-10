@@ -195,6 +195,13 @@ void GameScene::Update(float deltaTime)
 	);
 
 	const auto currentState = GetCurrentGameState();
+   // 発表中に戦闘から即座にタイトルへ戻れるショートカット。
+	if (currentState != GameStateType::Title && DxLib::CheckHitKey(KEY_INPUT_ESCAPE))
+	{
+		ResetForTitle();
+		stateMachine_.ChangeState(GameStateType::Title);
+		return;
+	}
 	const bool enterDown = DxLib::CheckHitKey(KEY_INPUT_RETURN) != 0;
 	const bool enterWasDown = tutorialSkipKeyWasDown_;
 	tutorialSkipKeyWasDown_ = enterDown;

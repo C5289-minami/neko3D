@@ -194,7 +194,7 @@ void Boss::Update(float deltaTime)
 
 	// AIの更新
 
-	if (IsAIActive())
+   if (health_ > 0 && IsAIActive())
 	{
 		ai_.Update(deltaTime);
 	}
@@ -202,6 +202,8 @@ void Boss::Update(float deltaTime)
 	stateMachine_.Tick(deltaTime);
 
 
+ if (health_ <= 0 || stateMachine_.GetCurrentType() == BossStateType::Down)
+		velocity_ = {};
 	position_ += velocity_ * deltaTime;
 
 	if (damageTakenThisFrame_) UpdateDown(deltaTime);

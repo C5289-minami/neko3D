@@ -423,6 +423,14 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 	);
 	if (IsPillarElevatorActive())
 	{
+       // 傾いている柱は復帰途中のため、登り判定を無効にする。
+		const Vec3 pillarRotation = elevatorPillar_->GetRotation();
+		if (std::abs(pillarRotation.x) > 0.1f || std::abs(pillarRotation.z) > 0.1f)
+		{
+			ForceFallFromPillar();
+		}
+		else
+		{
 		float topY{};
 		if (collision.GetPillarBounds(elevatorPillar_, elevatorCenter_, topY))
 			elevatorTopY_ = topY - Const::PLAYER_ELEVATOR_TOP_OFFSET;
@@ -431,10 +439,13 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 			EndPillarElevator();
 			input_.isMoving = false;
 		}
+       }
 	}
 	if (canStartElevator && touchingWall_)
 	{
-		StartPillarElevator(pillarModel, pillarCenter, wallTopY_);
+      const Vec3 pillarRotation = pillarModel != nullptr ? pillarModel->GetRotation() : Vec3{};
+		if (std::abs(pillarRotation.x) <= 0.1f && std::abs(pillarRotation.z) <= 0.1f)
+			StartPillarElevator(pillarModel, pillarCenter, wallTopY_);
 	}
 	if (IsPillarElevatorActive()) input_.jumpPressed = false;
 	UpdateMovement(deltaTime);
@@ -655,10 +666,36 @@ void Player::ReturnToLastSafePosition(const ModelCollision& collision)
 
 	Vec3 recoveryPosition = lastGroundedPosition_;
 	recoveryPosition.y = lastFirstFloorPosition_.y;
+	const ModelCollision::ModelOb body{
+		Const::PLAYER_RADIUS, Const::PLAYER_HEIGHT, Const::PLAYER_SKIN };
+  auto moveOutsidePillar = [&collision, &body](Vec3& position)
+	{
+		Vec3 wallNormal{};
+		Vec3 pillarCenter{};
+		const ModelObject* pillar = nullptr;
+		if (!collision.FindWall(position, body, wallNormal, {}, nullptr, 0.0f, 0.0f,
+			&pillarCenter, &pillar))
+			return;
+
+		if (wallNormal.LengthSq() <= Const::EPS)
+		{
+			wallNormal = position - pillarCenter;
+			wallNormal.y = 0.0f;
+			if (wallNormal.LengthSq() <= Const::EPS)
+				wallNormal = { 1.0f, 0.0f, 0.0f };
+			else
+				wallNormal = wallNormal.Normalized();
+		}
+		// ボス接触後の復帰先が柱の内部になる場合は、柱の外側へ退避する。
+		position += wallNormal * (Const::PLAYER_RADIUS * 2.5f);
+	};
+
+	moveOutsidePillar(recoveryPosition);
 
 	// 同じ X・Z に1階の床がなければ、最後に立てた1階の位置へ戻す。
 	if (!collision.CanLandOnFallRecoveryFloor(recoveryPosition, Const::PLAYER_SKIN, GroundSnapDistance, WalkableNormalY))
 		recoveryPosition = lastFirstFloorPosition_;
+	moveOutsidePillar(recoveryPosition);
 
 	recoveryPosition.y += Const::PLAYER_FALL_RECOVERY_HEIGHT_OFFSET;
 	SoundManager::PlaySE(RM().GetSound(ResourceKeys::Sound_Fall));
@@ -1212,6 +1249,14 @@ void Player::EndPillarElevator()
 
 void Player::StartPillarExitJump()
 {
+ // 柱の真下へ落ちないよう、柱の中心から外側へ初速を与える。
+	Vec3 exitDirection = position_ - elevatorCenter_;
+	exitDirection.y = 0.0f;
+	if (exitDirection.LengthSq() <= Const::EPS)
+		exitDirection = { 0.0f, 0.0f, 1.0f };
+	exitDirection = exitDirection.Normalized();
+	velocity_.x = exitDirection.x * Const::PLAYER_MOVE_SPEED;
+	velocity_.z = exitDirection.z * Const::PLAYER_MOVE_SPEED;
 	jumpStartFloor_ = GroundType::None;
 	velocity_.y = Const::PLAYER_ELEVATOR_EXIT_JUMP_SPEED;
 	isGrounded_ = false;

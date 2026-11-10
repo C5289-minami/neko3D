@@ -77,6 +77,7 @@ private:
     // 揺れ処理
     bool isShaking_{ false };
     bool isReturning_{ false };
+    float tiltHoldTimeRemaining_{ 0.0f };
 
     Motion tiltMotion_;
 
