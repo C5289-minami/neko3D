@@ -58,7 +58,7 @@ BossAI::BossAI(Boss& boss)
     slamCooldown_(8.0f, BossAttackType::Slam),
     tailWhipCooldown_(14.0f, BossAttackType::TailWhip)
 {
-    attackCooldownTime_ = 2.0f;
+    attackCooldownTime_ = 1.0f;
     Reset();
 }
 
@@ -111,7 +111,9 @@ void BossAI::Update(float deltaTime)
 	// ============================ 
 
     // 二階にいる場合は、しっぽ攻撃を優先
-    if (player_ != nullptr && player_->WasLastOnSecondFloor())
+    if (player_ != nullptr &&
+        (player_->WasLastOnSecondFloor() || player_->IsPillarElevatorActive() ||
+            player_->GetCurrentState() == PlayerStateType::Climbing))
     {
         // クールダウンは無効
      /*   if (!tailWhipCooldown_.IsReady())
