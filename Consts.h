@@ -68,7 +68,8 @@ namespace Const
     constexpr float PLAYER_HEIGHT = 60.0f;
     constexpr float PLAYER_SKIN = 1.0f;
     constexpr float PLAYER_FALL_RECOVERY_DISTANCE = 400.0f*1.7f;//落ちる幅の計算のために追加し
-	constexpr float PLAYER_FALL_RECOVERY_HEIGHT_OFFSET = 10.0f;//落ちる幅の計算のために追加し
+    constexpr float PLAYER_FALL_RECOVERY_HEIGHT_OFFSET = 10.0f;//落ちる幅の計算のために追加し
+    constexpr int PLAYER_FALL_DAMAGE = 1;
     constexpr float PLAYER_RADIUS = 30.0f;
 
 	constexpr float PLAYER_ATTACK_BALL_LIFETIME = 0.35f;        // 攻撃判定の弾の寿命

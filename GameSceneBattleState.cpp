@@ -36,6 +36,9 @@ void GameSceneBattleState::Enter()
     auto* player = gameContext->GetPlayer();
     auto& boss = gameContext->GetBoss();
 
+  // チュートリアル側の開始位置を落下復帰先として残さない。
+    // バトル開始地点を先に設定し、リトライ時の安全な復帰先にもする。
+    gameContext->PlacePlayerAtBattleStart();
     gameScene_.SaveBattleCheckpoint();
     gameContext->ClearUltimateProjectiles();
 

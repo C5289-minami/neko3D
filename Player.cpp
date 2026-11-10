@@ -658,6 +658,7 @@ void Player::UpdateFallRecovery(
 		return;
 	}
 
+    TakeDamage(Const::PLAYER_FALL_DAMAGE);
 	ReturnToLastSafePosition(collision);
 }
 void Player::ReturnToLastSafePosition(const ModelCollision& collision)
@@ -695,8 +696,24 @@ void Player::ReturnToLastSafePosition(const ModelCollision& collision)
 	// 同じ X・Z に1階の床がなければ、最後に立てた1階の位置へ戻す。
 	if (!collision.CanLandOnFallRecoveryFloor(recoveryPosition, Const::PLAYER_SKIN, GroundSnapDistance, WalkableNormalY))
 		recoveryPosition = lastFirstFloorPosition_;
-	moveOutsidePillar(recoveryPosition);
+    moveOutsidePillar(recoveryPosition);
 
+	if (!collision.CanLandOnFallRecoveryFloor(
+		recoveryPosition, Const::PLAYER_SKIN, GroundSnapDistance, WalkableNormalY))
+	{
+		recoveryPosition = startPosition_;
+        Vec3 inward = movementCenter_ - recoveryPosition;
+		inward.y = 0.0f;
+		if (inward.LengthSq() > Const::EPS)
+		{
+			inward = inward.Normalized();
+			recoveryPosition += inward * (Const::PLAYER_RADIUS * 6.0f);
+		}
+		moveOutsidePillar(recoveryPosition);
+	}
+
+	lastGroundedPosition_ = recoveryPosition;
+	lastFirstFloorPosition_ = recoveryPosition;
 	recoveryPosition.y += Const::PLAYER_FALL_RECOVERY_HEIGHT_OFFSET;
 	SoundManager::PlaySE(RM().GetSound(ResourceKeys::Sound_Fall));
 	RestorePosition(recoveryPosition);
