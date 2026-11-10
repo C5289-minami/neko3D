@@ -96,7 +96,8 @@ namespace Const
     constexpr float BOSS_DOWN_GAUGE_HIT_FRAME_REDUCTION_PER_SECOND = 10.0f;
     constexpr float BOSS_DOWN_GAUGE_LONG_FRAME_SECONDS = 5.0f;
     constexpr float BOSS_DOWN_GAUGE_LONG_FRAME_REDUCTION = 5.0f;
-    constexpr float BOSS_DOWN_HOLD_SECONDS = 1.45f;
+    // ダウンループ開始から復帰ブレンド開始までの秒数。
+    constexpr float BOSS_DOWN_HOLD_SECONDS = 3.75f;
 
     static_assert(BOSS_MAX_HEALTH > 0 && BOSS_DOWN_GAUGE_MAX > 0.0f);
     static_assert(PLAYER_NORMAL_ATTACK_DAMAGE >= 0 && BOSS_CLAP_DAMAGE >= 0 &&
