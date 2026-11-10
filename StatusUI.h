@@ -11,10 +11,11 @@ public:
     static void InitPlayer(const std::string& characterName = "たか");
     static void InitBoss();
 
-    static void Open();
+    static void Open(int playerHealth);
     static void Hide();
     static void Remove();
 
     static void SyncStatusBar(const std::wstring& key, float progress);
-    static void SyncPlayerHealth(int health);
+    static void SyncPlayerHealth(int health, float deltaTime);
+    static bool IsPlayerHeartLossAnimating();
 };

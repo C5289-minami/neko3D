@@ -5,6 +5,8 @@
 #include "DxLib.h"
 #include "DxConv.h"
 #include <algorithm>
+#include "SoundManager.h"
+#include "ResourceManager.h"
 
 PlayerAttackState::PlayerAttackState(PlayerStateMachine& stateMachine, Player& player)
 	: PlayerBaseState(stateMachine, player)
@@ -28,6 +30,11 @@ void PlayerAttackState::Enter()
 
 	player_.PlayAttackEffect();
 
+	SoundManager::PlaySE(
+		RM().GetSound(
+			ResourceKeys::Sound_PlayerDamage
+		)
+	);
 
 	DxPlus::Debug::SetFormatString(L"PlayerAttackState::Enter");
 }

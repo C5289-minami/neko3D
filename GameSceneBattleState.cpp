@@ -129,8 +129,6 @@ void GameSceneBattleState::Tick(float deltaTime)
 
     if (!battleStarted_)
     {
-        int entranceSound = RM().GetSound(ResourceKeys::Sound_BossEntrance);
-       
         if (!bossEntranceSoundPlayed_)
         {
 			// 開幕演出の音声再生までの待機時間を減算
@@ -139,7 +137,6 @@ void GameSceneBattleState::Tick(float deltaTime)
 
             if (bossEntranceSoundRemaining_ <= 0.0f)
             {
-                SoundManager::PlaySE(entranceSound);
                 bossEntranceSoundPlayed_ = true;
             }
         }
@@ -256,9 +253,6 @@ void GameSceneBattleState::Tick(float deltaTime)
         L"BossDownGauge",
         1.0f - boss.GetDownGaugeProgress()
     );
-
-    StatusUI::SyncPlayerHealth(player->GetHealth());
-
 
     DxPlus::Debug::SetFormatString(
         L"Player Health: %d / %d"
@@ -650,7 +644,7 @@ void GameSceneBattleState::StartBattle()
 	player->SetControlLocked(false);            
     
 	gameContext->GetBoss().SetAIActive(true);   //ボスAIを有効化
-	StatusUI::Open();   //ステータスUIを表示
+	StatusUI::Open(player->GetHealth());   //ステータスUIを表示
 }
 
 void GameSceneBattleState::SkipIntro()

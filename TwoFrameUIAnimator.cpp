@@ -18,7 +18,7 @@ void TwoFrameUIAnimator::SetAnchorPosition(
 {
     anchorPosition_ = position;
 
-    if (!playing_)
+    if (!firstUI_ || !secondUI_)
     {
         return;
     }
@@ -29,16 +29,29 @@ void TwoFrameUIAnimator::SetAnchorPosition(
         ApplyFirstTransform();
         break;
 
+    case Phase::ToSecond:
+        ApplyInterpolatedTransform(
+            *firstUI_,
+            firstFrame_,
+            secondFrame_,
+            motion_.GetEasedProgress()
+        );
+        break;
+
     case Phase::SecondHold:
         ApplySecondTransform();
         break;
 
-    case Phase::ToSecond:
     case Phase::ToFirst:
+        ApplyInterpolatedTransform(
+            *secondUI_,
+            secondFrame_,
+            firstFrame_,
+            motion_.GetEasedProgress()
+        );
         break;
     }
 }
-
 void TwoFrameUIAnimator::SetFirstFrame(
     const FrameSetting& setting)
 {

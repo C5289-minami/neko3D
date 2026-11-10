@@ -149,6 +149,7 @@ void Player::Reset()
 	addDamage_ = 0;
 	controlLocked_ = false;
 	avoidInvTime_ = 0.0f;
+  damageSlowTime_ = 0.0f;
 	// wasTouchingPillar_ = false;
 	wasTouchingModel_ = false;
 
@@ -304,6 +305,7 @@ void Player::UpdateMovement(float deltaTime)
 {
 	const float elapsed = (std::max)(0.0f, deltaTime);
 	avoidInvTime_ = (std::max)(0.0f, avoidInvTime_ - elapsed);
+	damageSlowTime_ = (std::max)(0.0f, damageSlowTime_ - elapsed);
 
 	// 前のフレームで床に着いたら、2回目のジャンプを再び使えるようにする。
 	// 空中で被弾してステートが変わっても、このフラグはリセットしない。
@@ -675,7 +677,13 @@ bool Player::TakeDamage(int damage)
 	if (damage <= 0 || IsDead() || IsDamaging() || avoidInvTime_ > 0.0f) return false;
 
 	addDamage_ = damage;
+    damageSlowTime_ = DamageSlowTime;
 	stateMachine_.ChangeState(PlayerStateType::Damaging);
+	SoundManager::PlaySE(
+		RM().GetSound(
+			ResourceKeys::Sound_PlayerDamage
+		)
+	);
 	return true;
 }
 
@@ -866,6 +874,10 @@ void Player::UpdateHorizontalVelocity(float deltaTime)
 
 	// 移動速度
 	float moveSpeed = Const::PLAYER_MOVE_SPEED * moveRate_;
+	if (damageSlowTime_ > 0.0f)
+	{
+		moveSpeed *= DamageSlowRate;
+	}
 
     if (isGrounded_ && state == PlayerStateType::Walk)
     {

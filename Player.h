@@ -42,6 +42,10 @@ public:
     static constexpr float DamageRecoveryTime =
         Const::PLAYER_DAMAGE_RECOVERY_SECONDS;
 
+    // 被弾後の移動速度低下設定
+    static constexpr float DamageSlowRate = 0.5f;
+    static constexpr float DamageSlowTime = 1.0f;
+
     static constexpr float CoyoteTime = 0.1f;
 
     static constexpr float AvoidInvTime =
@@ -618,6 +622,7 @@ private:
     int addDamage_{};
 
     float avoidInvTime_{ 0.0f };
+    float damageSlowTime_{ 0.0f };
 
 
     // ========================================================

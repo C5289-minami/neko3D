@@ -147,7 +147,13 @@ void ResourceManager::LoadAll()
 	LoadSound(ResourceKeys::Sound_BossEntrance, L"./Data/Sounds/BossEntrance.mp3");
 	LoadSound(ResourceKeys::Sound_Clap, L"./Data/Sounds/clap.mp3");
 	LoadSound(ResourceKeys::Sound_Slam, L"./Data/Sounds/slam.mp3");
-
+	 
+	LoadSound(ResourceKeys::Sound_Rain, L"./Data/Sounds/rain.mp3");
+	LoadSound(ResourceKeys::Sound_PlayerDamage, L"./Data/Sounds/player_damage.mp3");
+	LoadSound(ResourceKeys::Sound_PlayerAttack, L"./Data/Sounds/player_Attack.mp3");
+	LoadSound(ResourceKeys::Sound_BossDump, L"./Data/Sounds/boss_dump.mp3");
+	LoadSound(ResourceKeys::Sound_BossLastDamage, L"./Data/Sounds/boss_last_damage.mp3");
+	
 	SetCreate3DSoundFlag(TRUE);
 	LoadSound(ResourceKeys::Sound_TailWhip, L"./Data/Sounds/tailwhip.mp3");
 	SetCreate3DSoundFlag(FALSE);

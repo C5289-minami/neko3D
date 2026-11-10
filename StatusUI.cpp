@@ -20,6 +20,17 @@ namespace
 	};
 
 	constexpr float StatusMotionDuration = 1.0f;
+	constexpr float HeartNormalSize = 0.7f;
+	constexpr float HeartBigSize = HeartNormalSize * 1.2f;
+	constexpr float HeartBigSizeChangeTime = 0.15f;			// 膨らむ時間やで
+	constexpr float HeartShrinkSizeChangeTime = 0.25f;
+	// ハートの大きさを元に戻す時間
+	constexpr float HeartBigSizeChangeSpeed = 0.933333f;
+	constexpr float HeartSmallSizeChangeSpeed = 3.36f;
+	constexpr float HeartAnimationTotalTime = HeartBigSizeChangeTime + HeartShrinkSizeChangeTime;
+	float heartEffectTimeLeft[Player::MaxHealth]{};
+	int beforeHealth = 0;
+	bool heartUiIsOpen = false;
 
 	std::wstring PlayerHeartKey(int index)
 	{
@@ -32,6 +43,7 @@ namespace
 		L"playerULTGaugeBackSabi",
 		L"playerULTGaugeBackKuro",
 		L"PlayerUltGauge",
+		L"BossUIBack",
 		L"BossHealthGauge",
 		L"BossDownGauge",
 		L"ULT_EButton"
@@ -40,6 +52,7 @@ namespace
 
 void StatusUI::InitPlayer(const std::string& characterName)
 {
+	heartUiIsOpen = false;
 	const DxPlus::Vec2 backgroundPosition(
 		DxPlus::CLIENT_WIDTH * 0.5f,
 		DxPlus::CLIENT_HEIGHT * 0.88f);
@@ -123,11 +136,9 @@ void StatusUI::InitPlayer(const std::string& characterName)
 	DxLib::GetGraphSizeF(
 		heartSprite->GetID(), &heartWidth, &heartHeight);
 
-	constexpr float heartScale = 0.7f;
-
 	const float left = backgroundPosition.x - backgroundWidth * 0.5f;
 	const float rowStart = left + backgroundWidth * 0.29f;
-	const float slotWidth = heartWidth * heartScale * 1.25f;
+	const float slotWidth = heartWidth * HeartNormalSize * 1.25f;
 	const float rowY = backgroundPosition.y + backgroundHeight * 0.4f;
 
 	// HPハート
@@ -150,7 +161,7 @@ void StatusUI::InitPlayer(const std::string& characterName)
 		{
 			heart->SetFalse();
 			heart->SetCenter({ 0.5f, 0.5f });
-			heart->SetScale(heartScale);
+			heart->SetScale(HeartNormalSize);
 		}
 	}
 
@@ -175,50 +186,89 @@ void StatusUI::InitBoss()
 {
 	const DxPlus::Vec2 backgroundPosition(
 		DxPlus::CLIENT_WIDTH * 0.5f,
-		DxPlus::CLIENT_HEIGHT * 0.15f);
+		DxPlus::CLIENT_HEIGHT * 0.12f
+	);
 
-	float gaugeOffsetX = 45.0f;
-	float gaugeOffsetY = 20.0f;
+	constexpr float GaugeOffsetX = 45.0f;
+	constexpr float GaugeOffsetY = 20.0f;
 
-	auto* bossBack = UIM().GetUI(L"BossUIBack");
+	auto* bossBack =
+		UIM().GetUI(L"BossUIBack");
+
 	if (!bossBack)
+	{
 		bossBack = UIM().CreateImageUI(
 			L"BossUIBack",
 			ResourceKeys::BossStatusBack,
-			backgroundPosition + DxPlus::Vec2{0.0f,-gaugeOffsetY },
+			backgroundPosition +
+			DxPlus::Vec2{
+				0.0f,
+				-GaugeOffsetY
+			},
 			StatusBossMotionDirection,
 			StatusMotionDuration
 		);
+	}
+
+	if (bossBack)
+	{
+		bossBack->SetFalse();
+	}
 
 	// ボスHPゲージ
-	auto* healthGauge = UIM().GetUI(L"BossHealthGauge");
+	auto* healthGauge =
+		UIM().GetUI(L"BossHealthGauge");
+
+	const DxPlus::Vec2 healthGaugePosition =
+		backgroundPosition +
+		DxPlus::Vec2{
+			GaugeOffsetX + 19.0f,
+			-GaugeOffsetY + 4.0f
+	};
+
 	if (!healthGauge)
-		healthGauge = UIM().CreateSpriteStudioUI(
-			L"BossHealthGauge",
-			ResourceKeys::SpriteStudio_BossHealthGauge,
-			backgroundPosition + DxPlus::Vec2{ gaugeOffsetX,-gaugeOffsetY },
-			"Boss_hp",
-			StatusBossMotionDirection,
-			StatusMotionDuration
-		);
+	{
+		healthGauge =
+			UIM().CreateSpriteStudioUI(
+				L"BossHealthGauge",
+				ResourceKeys::SpriteStudio_BossHealthGauge,
+				healthGaugePosition,
+				"Boss_hp",
+				StatusBossMotionDirection,
+				StatusMotionDuration
+			);
+	}
 
 	if (healthGauge)
+	{
 		healthGauge->SetFalse();
+	}
 
 	// ボスダウンゲージ
-	auto* downGauge = UIM().GetUI(L"BossDownGauge");
+	auto* downGauge =
+		UIM().GetUI(L"BossDownGauge");
+
 	if (!downGauge)
-		downGauge = UIM().CreateSpriteStudioUI(
-			L"BossDownGauge",
-			ResourceKeys::SpriteStudio_BossDownGauge,
-			backgroundPosition + DxPlus::Vec2{ gaugeOffsetX,gaugeOffsetY },
-			"Boss_down",
-			StatusBossMotionDirection,
-			StatusMotionDuration
-		);
+	{
+		downGauge =
+			UIM().CreateSpriteStudioUI(
+				L"BossDownGauge",
+				ResourceKeys::SpriteStudio_BossDownGauge,
+				backgroundPosition +
+				DxPlus::Vec2{
+					GaugeOffsetX,
+					GaugeOffsetY
+				},
+				"Boss_down",
+				StatusBossMotionDirection,
+				StatusMotionDuration
+			);
+	}
 
 	if (downGauge)
+	{
 		downGauge->SetFalse();
+	}
 }
 
 void StatusUI::SyncStatusBar(const std::wstring& key, float progress)
@@ -230,34 +280,89 @@ void StatusUI::SyncStatusBar(const std::wstring& key, float progress)
 	ui->SetProgress(std::clamp(progress, 0.0f, 1.0f));
 }
 
-void StatusUI::SyncPlayerHealth(int health)
+void StatusUI::SyncPlayerHealth(int health, float deltaTime)
 {
+	if (!heartUiIsOpen) return;
+
 	health = std::clamp(health, 0, Player::MaxHealth);
 
 	for (int i = 0; i < Player::MaxHealth; ++i)
 	{
-		if (auto* heart = UIM().GetUI(PlayerHeartKey(i)))
+		auto* heart = UIM().GetUI(PlayerHeartKey(i));
+		if (!heart) continue;
+
+		// HPが残っているハートは、通常の大きさで表示する
+		if (i < health)
 		{
-			if (i < health)
-				heart->SetTrue();
-			else
-				heart->SetFalse();
+			heartEffectTimeLeft[i] = 0.0f;
+			heart->SetScale(HeartNormalSize);
+			heart->SetTrue();
+			continue;
+		}
+
+		float remainingTime = heartEffectTimeLeft[i];
+		// 今回失ったハートは演出を始め、それ以外は残り時間を減らす
+		if (i < beforeHealth)
+		{
+			remainingTime = HeartAnimationTotalTime;
+		}
+		else// すでに失ったハートは、残り時間を減らす
+		{
+			remainingTime = std::max(0.0f, remainingTime - deltaTime);
+		}
+		// 残り時間を更新
+		heartEffectTimeLeft[i] = remainingTime;
+
+		// 先に膨らませ、残り時間が少なくなったら縮める
+		if (remainingTime > HeartShrinkSizeChangeTime)
+		{
+
+			const float bigSizeTime = HeartAnimationTotalTime - remainingTime;
+			const float newSize = HeartNormalSize +
+				HeartBigSizeChangeSpeed * bigSizeTime;
+			heart->SetScale(newSize);
+		}
+		else if (remainingTime > 0.0f)
+		{
+			const float smallSizeTime = HeartShrinkSizeChangeTime - remainingTime;
+			const float newSize = HeartBigSize -
+				HeartSmallSizeChangeSpeed * smallSizeTime;
+			heart->SetScale(newSize);
+		}
+		else
+		{
+			heart->SetFalse();
 		}
 	}
+
+	beforeHealth = health;
 }
 
-void StatusUI::Open()
+bool StatusUI::IsPlayerHeartLossAnimating()
+{
+	if (!heartUiIsOpen) return false;
+
+	for (float leftTime : heartEffectTimeLeft)
+	{
+		if (leftTime > 0.0f) return true;
+	}
+	return false;
+}
+
+void StatusUI::Open(int playerHealth)
 {
 	const std::wstring keys[] =
 	{
 		L"PlayerUltGauge",
+		L"BossUIBack",
 		L"BossHealthGauge",
 		L"BossDownGauge",
 		L"ULT_EButton"
 	};
 
-	// 選択したプレイヤー背景を表示モーション付きで開く。
-	if (auto* background = UIM().GetUI(selectedPlayerBackground))
+	// 選択したプレイヤー背景を表示する。
+	if (auto* background =
+		UIM().GetUI(selectedPlayerBackground))
 	{
 		background->Show();
 	}
@@ -270,24 +375,23 @@ void StatusUI::Open()
 		}
 	}
 
-	// HPは現在値を同期するため、ここでは即時表示。
-	for (int i = 0; i < Player::MaxHealth; ++i)
-	{
-		if (auto* heart = UIM().GetUI(PlayerHeartKey(i)))
-		{
-			heart->SetTrue();
-		}
-	}
+	// 開幕時は、現在のHPを被弾演出なしで表示する。
+	std::fill_n(heartEffectTimeLeft, Player::MaxHealth, 0.0f);
+	beforeHealth = std::clamp(playerHealth, 0, Player::MaxHealth);
+	heartUiIsOpen = true;
+	SyncPlayerHealth(playerHealth, 0.0f);
 }
 
 void StatusUI::Hide()
 {
+	heartUiIsOpen = false;
 	const std::wstring keys[] =
 	{
 		L"playerULTGaugeBackMike",
 		L"playerULTGaugeBackSabi",
 		L"playerULTGaugeBackKuro",
 		L"PlayerUltGauge",
+		L"BossUIBack",
 		L"BossHealthGauge",
 		L"BossDownGauge",
 		L"ULT_EButton"
@@ -296,18 +400,24 @@ void StatusUI::Hide()
 	for (const auto& key : keys)
 	{
 		if (auto* ui = UIM().GetUI(key))
+		{
 			ui->Hide();
+		}
 	}
 
 	for (int i = 0; i < Player::MaxHealth; ++i)
 	{
-		if (auto* heart = UIM().GetUI(PlayerHeartKey(i)))
+		if (auto* heart =
+			UIM().GetUI(PlayerHeartKey(i)))
+		{
 			heart->SetFalse();
+		}
 	}
 }
 
 void StatusUI::Remove()
 {
+	heartUiIsOpen = false;
 	for (const auto& key : StatusKeys)
 		UIM().RemoveUI(key);
 

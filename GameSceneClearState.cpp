@@ -4,6 +4,8 @@
 #include "GameStateMachine.h"
 #include "DxPlus/Debug.h"
 #include "UIManager.h"
+#include "ResourceManager.h"
+#include "SoundManager.h"
 
 namespace
 {
@@ -133,6 +135,8 @@ void GameSceneClearState::Enter()
 	{
 		context->HandUIInit();
 	}
+    SoundManager::PlaySE(RM().GetSound(ResourceKeys::Sound_BossEntrance));
+
 }
 
 void GameSceneClearState::Tick(float deltaTime)
@@ -215,7 +219,7 @@ void GameSceneClearState::Tick(float deltaTime)
 
         if (animator)
         {
-            // 切り替えアニメーションを一時停止する。
+            // 2枚切り替えだけ一時停止する。
             animator->Pause();
 
             UIBase* normalHand =
@@ -228,12 +232,12 @@ void GameSceneClearState::Tick(float deltaTime)
             {
                 normalHand->SetFalse();
 
-                // ボタンと同じ1.5秒で表示する。
+                // ボタンと同じ時間で表示する。
                 normalHand->SetMotionDuration(
                     1.5f
                 );
 
-                // 移動なし。
+                // 移動なしで表示する。
                 normalHand->SetToMove({
                     0.0f,
                     0.0f
@@ -253,7 +257,7 @@ void GameSceneClearState::Tick(float deltaTime)
     }
 
     // ========================================================
-    // ボタンと手の表示完了待ち
+    // ボタンの表示完了待ち
     // ========================================================
 
     if (retry->GetCurrentState() !=
@@ -269,55 +273,68 @@ void GameSceneClearState::Tick(float deltaTime)
             ClearHandAnimatorId
         );
 
-    if (!animator)
-    {
-        return;
-    }
-
-    UIBase* normalHand =
-        animator->GetFirstUI();
-
-    // 手のフェード完了も待つ。
-    if (!normalHand ||
-        normalHand->GetCurrentState() !=
-        UIBase::UIState::Normal)
-    {
-        return;
-    }
-
     // ========================================================
-    // 通常の2枚アニメーション開始
+    // 手のアニメーション開始判定
+    // 入力処理とは独立させる
     // ========================================================
 
-    if (!handAnimationStarted_)
+    if (animator &&
+        !handAnimationStarted_)
     {
-        /*
-            Startすると通常画像の表示から始まる。
+        UIBase* normalHand =
+            animator->GetFirstUI();
 
-            フェード完了済みなので、見た目を維持したまま
-            通常の押下アニメーションへ移行できる。
-        */
-        animator->Start();
-
-        handAnimationStarted_ = true;
+        // 猫の手のフェードが終わったら、
+        // 通常の2枚アニメーションを開始する。
+        if (normalHand &&
+            normalHand->GetCurrentState() ==
+            UIBase::UIState::Normal)
+        {
+            animator->Start();
+            handAnimationStarted_ = true;
+        }
     }
 
     // ========================================================
     // 選択操作
+    // 手がフェード中でも操作可能
     // ========================================================
 
     using namespace DxPlus::Input;
 
-    if (GetButtonDown(PLAYER1) &
-        BUTTON_UP)
+    constexpr int SelectionCount = 2;
+
+    const int buttonDown =
+        GetButtonDown(PLAYER1);
+
+    bool selectionChanged = false;
+
+    if (buttonDown & BUTTON_UP)
     {
-        selectedIndex_ = 0;
+        selectedIndex_ =
+            (selectedIndex_ - 1 +
+                SelectionCount) %
+            SelectionCount;
+
+        selectionChanged = true;
     }
 
-    if (GetButtonDown(PLAYER1) &
-        BUTTON_DOWN)
+    if (buttonDown & BUTTON_DOWN)
     {
-        selectedIndex_ = 1;
+        selectedIndex_ =
+            (selectedIndex_ + 1) %
+            SelectionCount;
+
+        selectionChanged = true;
+    }
+
+    if (selectionChanged)
+    {
+        SoundManager::PlaySE(
+            RM().GetSound(
+                ResourceKeys::Sound_Rain
+            )
+        );
     }
 
     retry->SetSelected(
@@ -328,14 +345,18 @@ void GameSceneClearState::Tick(float deltaTime)
         selectedIndex_ == 1
     );
 
-    animator->SetAnchorPosition(
-        GetClearHandPosition(
-            selectedIndex_
-        )
-    );
+    // Animatorが存在する場合のみ、手の位置を更新する。
+    if (animator)
+    {
+        animator->SetAnchorPosition(
+            GetClearHandPosition(
+                selectedIndex_
+            )
+        );
+    }
 
-    if (GetButtonDown(PLAYER1) &
-        BUTTON_START)
+    // 手が1枚目、2枚目、フェード中のどれでも決定可能。
+    if (buttonDown & BUTTON_START)
     {
         if (selectedIndex_ == 0)
         {

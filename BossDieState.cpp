@@ -1,6 +1,8 @@
 ﻿#include "BossDieState.h"
 #include "Boss.h"
 #include "Consts.h"
+#include "SoundManager.h"
+#include "ResourceManager.h"
 
 #include "DxPlus/Debug.h"
 #include <algorithm>
@@ -37,6 +39,12 @@ void BossDieState::Enter()
         1.0f,
         Const::BossDieFadeOutDuration,
         Motion::Easing::EaseIn
+    );
+
+    SoundManager::PlaySE(
+        RM().GetSound(
+            ResourceKeys::Sound_BossLastDamage
+        )
     );
 }
 
