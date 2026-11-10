@@ -149,7 +149,7 @@ void Player::Reset()
 	addDamage_ = 0;
 	controlLocked_ = false;
 	avoidInvTime_ = 0.0f;
-  damageSlowTime_ = 0.0f;
+	damageSlowTime_ = 0.0f;
 	// wasTouchingPillar_ = false;
 	wasTouchingModel_ = false;
 
@@ -423,7 +423,7 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 	);
 	if (IsPillarElevatorActive())
 	{
-       // 傾いている柱は復帰途中のため、登り判定を無効にする。
+		// 傾いている柱は復帰途中のため、登り判定を無効にする。
 		const Vec3 pillarRotation = elevatorPillar_->GetRotation();
 		if (std::abs(pillarRotation.x) > 0.1f || std::abs(pillarRotation.z) > 0.1f)
 		{
@@ -431,19 +431,19 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 		}
 		else
 		{
-		float topY{};
-		if (collision.GetPillarBounds(elevatorPillar_, elevatorCenter_, topY))
-			elevatorTopY_ = topY - Const::PLAYER_ELEVATOR_TOP_OFFSET;
-		else if (GetPosition().y > elevatorTopY_)
-		{
-			EndPillarElevator();
-			input_.isMoving = false;
+			float topY{};
+			if (collision.GetPillarBounds(elevatorPillar_, elevatorCenter_, topY))
+				elevatorTopY_ = topY - Const::PLAYER_ELEVATOR_TOP_OFFSET;
+			else if (GetPosition().y > elevatorTopY_)
+			{
+				EndPillarElevator();
+				input_.isMoving = false;
+			}
 		}
-       }
 	}
 	if (canStartElevator && touchingWall_)
 	{
-      const Vec3 pillarRotation = pillarModel != nullptr ? pillarModel->GetRotation() : Vec3{};
+		const Vec3 pillarRotation = pillarModel != nullptr ? pillarModel->GetRotation() : Vec3{};
 		if (std::abs(pillarRotation.x) <= 0.1f && std::abs(pillarRotation.z) <= 0.1f)
 			StartPillarElevator(pillarModel, pillarCenter, wallTopY_);
 	}
@@ -658,7 +658,7 @@ void Player::UpdateFallRecovery(
 		return;
 	}
 
-    TakeDamage(Const::PLAYER_FALL_DAMAGE);
+	TakeDamage(Const::PLAYER_FALL_DAMAGE);
 	ReturnToLastSafePosition(collision);
 }
 void Player::ReturnToLastSafePosition(const ModelCollision& collision)
@@ -669,40 +669,40 @@ void Player::ReturnToLastSafePosition(const ModelCollision& collision)
 	recoveryPosition.y = lastFirstFloorPosition_.y;
 	const ModelCollision::ModelOb body{
 		Const::PLAYER_RADIUS, Const::PLAYER_HEIGHT, Const::PLAYER_SKIN };
-  auto moveOutsidePillar = [&collision, &body](Vec3& position)
-	{
-		Vec3 wallNormal{};
-		Vec3 pillarCenter{};
-		const ModelObject* pillar = nullptr;
-		if (!collision.FindWall(position, body, wallNormal, {}, nullptr, 0.0f, 0.0f,
-			&pillarCenter, &pillar))
-			return;
-
-		if (wallNormal.LengthSq() <= Const::EPS)
+	auto moveOutsidePillar = [&collision, &body](Vec3& position)
 		{
-			wallNormal = position - pillarCenter;
-			wallNormal.y = 0.0f;
+			Vec3 wallNormal{};
+			Vec3 pillarCenter{};
+			const ModelObject* pillar = nullptr;
+			if (!collision.FindWall(position, body, wallNormal, {}, nullptr, 0.0f, 0.0f,
+				&pillarCenter, &pillar))
+				return;
+
 			if (wallNormal.LengthSq() <= Const::EPS)
-				wallNormal = { 1.0f, 0.0f, 0.0f };
-			else
-				wallNormal = wallNormal.Normalized();
-		}
-		// ボス接触後の復帰先が柱の内部になる場合は、柱の外側へ退避する。
-		position += wallNormal * (Const::PLAYER_RADIUS * 2.5f);
-	};
+			{
+				wallNormal = position - pillarCenter;
+				wallNormal.y = 0.0f;
+				if (wallNormal.LengthSq() <= Const::EPS)
+					wallNormal = { 1.0f, 0.0f, 0.0f };
+				else
+					wallNormal = wallNormal.Normalized();
+			}
+			// ボス接触後の復帰先が柱の内部になる場合は、柱の外側へ退避する。
+			position += wallNormal * (Const::PLAYER_RADIUS * 2.5f);
+		};
 
 	moveOutsidePillar(recoveryPosition);
 
 	// 同じ X・Z に1階の床がなければ、最後に立てた1階の位置へ戻す。
 	if (!collision.CanLandOnFallRecoveryFloor(recoveryPosition, Const::PLAYER_SKIN, GroundSnapDistance, WalkableNormalY))
 		recoveryPosition = lastFirstFloorPosition_;
-    moveOutsidePillar(recoveryPosition);
+	moveOutsidePillar(recoveryPosition);
 
 	if (!collision.CanLandOnFallRecoveryFloor(
 		recoveryPosition, Const::PLAYER_SKIN, GroundSnapDistance, WalkableNormalY))
 	{
 		recoveryPosition = startPosition_;
-        Vec3 inward = movementCenter_ - recoveryPosition;
+		Vec3 inward = movementCenter_ - recoveryPosition;
 		inward.y = 0.0f;
 		if (inward.LengthSq() > Const::EPS)
 		{
@@ -731,7 +731,7 @@ bool Player::TakeDamage(int damage)
 	if (damage <= 0 || IsDead() || IsDamaging() || avoidInvTime_ > 0.0f) return false;
 
 	addDamage_ = damage;
-    damageSlowTime_ = DamageSlowTime;
+	damageSlowTime_ = DamageSlowTime;
 	stateMachine_.ChangeState(PlayerStateType::Damaging);
 	SoundManager::PlaySE(
 		RM().GetSound(
@@ -933,22 +933,22 @@ void Player::UpdateHorizontalVelocity(float deltaTime)
 		moveSpeed *= DamageSlowRate;
 	}
 
-    if (isGrounded_ && state == PlayerStateType::Walk)
-    {
-        moveSpeed *= charData.moveSpeed / CharData::DefaultMoveSpeed;
-    }
+	if (isGrounded_ && state == PlayerStateType::Walk)
+	{
+		moveSpeed *= charData.moveSpeed / CharData::DefaultMoveSpeed;
+	}
 
 #ifdef _DEBUG
-    if (debugDashEnabled_)
-    {
-        moveSpeed = Const::PLAYER_DEBUG_DASH_SPEED;
-    }
+	if (debugDashEnabled_)
+	{
+		moveSpeed = Const::PLAYER_DEBUG_DASH_SPEED;
+	}
 #endif
 
-    if (isDoubleJump)
-    {
-        moveSpeed = Const::PLAYER_DOUBLE_JUMP_MOVE_SPEED;
-    }
+	if (isDoubleJump)
+	{
+		moveSpeed = Const::PLAYER_DOUBLE_JUMP_MOVE_SPEED;
+	}
 
 	if (isdefMove_)
 	{
@@ -1266,7 +1266,7 @@ void Player::EndPillarElevator()
 
 void Player::StartPillarExitJump()
 {
- // 柱の真下へ落ちないよう、柱の中心から外側へ初速を与える。
+	// 柱の真下へ落ちないよう、柱の中心から外側へ初速を与える。
 	Vec3 exitDirection = position_ - elevatorCenter_;
 	exitDirection.y = 0.0f;
 	if (exitDirection.LengthSq() <= Const::EPS)
