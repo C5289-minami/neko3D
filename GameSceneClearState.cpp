@@ -331,7 +331,7 @@ void GameSceneClearState::Tick(float deltaTime)
     {
         SoundManager::PlaySE(
             RM().GetSound(
-                ResourceKeys::Sound_Rain
+                ResourceKeys::Sound_BossEntrance
             )
         );
     }
