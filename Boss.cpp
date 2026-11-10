@@ -87,6 +87,7 @@ void Boss::Reset()
 	stateMachine_.Initialize();
 
 	activeAI = false;
+	StartRotation();
 
 	ai_.Reset();
 	if (clapSkill_ != nullptr) clapSkill_->Reset();
@@ -103,6 +104,15 @@ void Boss::Reset()
 	animation_.Update(0.0f);
 
 }
+
+#ifndef NDEBUG
+void Boss::ResetForDebug()
+{
+	const bool wasActive = activeAI;
+	Reset();
+	SetAIActive(wasActive);
+}
+#endif
 
 void Boss::TakeDamage(int damage)
 {
@@ -184,7 +194,7 @@ void Boss::Update(float deltaTime)
 
 	// AIの更新
 
-  if (activeAI)
+	if (IsAIActive())
 	{
 		ai_.Update(deltaTime);
 	}

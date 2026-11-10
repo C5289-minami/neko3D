@@ -20,8 +20,6 @@
 namespace
 {
 	constexpr float TutorialSkipHoldTime = 1.5f;
-	// スキップ後の配置。ステージ中心からの横方向の距離。
-	constexpr Vec3 TutorialSkipBattleOffset{ 0.0f, 0.0f, -1000.0f };
 }
 
 GameScene::GameScene(GameContext* context)
@@ -153,17 +151,7 @@ void GameScene::SkipTutorial()
 {
 	if (GetCurrentGameState() != GameStateType::Tutorial) return;
 
-	auto* player = gameContext->GetPlayer();
-	const auto& stage = gameContext->GetStage();
-	const auto& boss = gameContext->GetBoss();
-	Vec3 position = stage.GetWorldPosition() + TutorialSkipBattleOffset;
-	// スキップ後の位置は、ステージの床面に合わせる
-	position.y = stage.GetArenaSurfaceY() + Const::PLAYER_SKIN;
-	player->SetStartPosition(position);
-	player->ResetPosition();
-	// スキップ後の向きは、ボスの方を向く
-	const Vec3 toBoss = boss.GetWorldPosition() - position;
-	player->SetYaw(std::atan2(toBoss.x, toBoss.z));
+	gameContext->PlacePlayerAtBattleStart();
 	// スキップ後のカメラは、ボスを中心にしたターゲットカメラにする
 	Collision::ResetTransparentModels();
 	cameraDirector_.StopShake();
@@ -440,7 +428,7 @@ void GameScene::DrawImGui()
 		ImGui::TextUnformatted(u8"Boss Attack Test");
 
 		if (ImGui::Button(u8"Boss.Reset"))
-			boss.Reset();
+			boss.ResetForDebug();
 
 		if (ImGui::Button(u8"Down (Flinch)"))
 			boss.SetDownGauge(0.0f);
@@ -459,7 +447,7 @@ void GameScene::DrawImGui()
 
 		ImGui::Checkbox(
 			u8"bossAIEnabled",
-			&boss.IsAIActive()
+			&boss.GetDebugAIEnabled()
 		);
 
 		// =============================

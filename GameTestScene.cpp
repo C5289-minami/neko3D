@@ -18,7 +18,19 @@
 
 void GameTestScene::Init()
 {
+	Collision::ResetTransparentModels();
 	gameContext->Reset();
+	gameContext->PlacePlayerAtBattleStart();
+	gameContext->FaceBossTowardPlayer();
+
+	auto* player = gameContext->GetPlayer();
+	auto& boss = gameContext->GetBoss();
+	player->GetStateMachine().SetEventCallback({});
+	player->SetGravityEnabled(true);
+	player->SetDefMove(true);
+	player->SetControlLocked(false);
+	boss.SetAIActive(true);
+
 	wasTouchingBossBody_ = false;
 
 	tailWhipHitCapsule_ = {};
@@ -29,9 +41,12 @@ void GameTestScene::Init()
 	rightMouseWasDown_ = false;
 
 	playerCamera_.Reset();
-	bossDieCamera_.Reset();
 	bossDownCamera_.Reset();
 	cameraDirector_.Reset();
+	playerCamera_.SetFieldOfView(60.0f);
+	playerCamera_.Update(player->GetWorldPosition(), boss.GetWorldPosition(), 1.0f);
+	cameraDirector_.SwitchCamera(playerCamera_, 0.0f);
+	cameraDirector_.Update(0.0f);
 #ifndef NDEBUG
 	freeCamera_.Reset();
 	wasFreeCameraToggleDown_ = false;
@@ -127,6 +142,7 @@ void GameTestScene::Update(float deltaTime)
 		{
 			freeCamera_.Update(deltaTime);
 		}
+		cameraDirector_.Update(deltaTime);
 	}
 	else
 #endif
@@ -140,13 +156,18 @@ void GameTestScene::Update(float deltaTime)
 		// =============================
 		stage.Update(deltaTime);
 
+		// ゲージと飛び道具は本編と同じく、プレイヤー・ボスより先に更新する。
+		if (!player->IsDead() && boss.GetHealth() > 0)
+			player->AddUltimateGauge(Const::PLAYER_ULTIMATE_GAUGE_PER_SECOND * deltaTime);
+		gameContext->UpdateUltimateProjectiles(deltaTime);
+
 		// =============================
 		// Player更新・床判定
 		// =============================
 #ifdef _DEBUG
-		const bool debugDash =
+		const bool debugDash = enableDebugDash_ && (
 			DxLib::CheckHitKey(KEY_INPUT_LSHIFT) != 0 ||
-			DxLib::CheckHitKey(KEY_INPUT_RSHIFT) != 0;
+			DxLib::CheckHitKey(KEY_INPUT_RSHIFT) != 0);
 
 		player->SetDebugDashEnabled(debugDash);
 #endif
@@ -160,22 +181,21 @@ void GameTestScene::Update(float deltaTime)
 		const bool jumping = !player->IsGrounded() && (state == PlayerStateType::Jump || doubleJump);
 		const bool touchingBody = jumping && stage.GetCollision().IsTouchingCapsule(player->GetHitSphere());
 
-			const bool enteredBossBody = touchingBody && !wasTouchingBossBody_;
-			const bool jumpedFromUpperFloor =
-				player->GetJumpStartFloor() == Player::GroundType::UpFloor;
-			const bool shouldDamageDownGauge = enteredBossBody && jumpedFromUpperFloor;
+		const bool enteredBossBody = touchingBody && !wasTouchingBossBody_;
+		const bool jumpedFromUpperFloor =
+			player->GetJumpStartFloor() == Player::GroundType::UpFloor;
+		const bool shouldDamageDownGauge = enteredBossBody && jumpedFromUpperFloor;
 
-			if (shouldDamageDownGauge)
-			{
-				const float damage = doubleJump
-					? Const::BOSS_UPPER_DOUBLE_JUMP_DOWN_DAMAGE
-					: Const::BOSS_JUMP_DOWN_DAMAGE;
-				boss.ApplyDownGaugeDamage(damage);
-			}
+		if (shouldDamageDownGauge)
+		{
+			const float damage = doubleJump
+				? Const::BOSS_UPPER_DOUBLE_JUMP_DOWN_DAMAGE
+				: Const::BOSS_JUMP_DOWN_DAMAGE;
+			boss.ApplyDownGaugeDamage(damage);
+		}
 
-			const bool shouldReturnPlayer = touchingBody && doubleJump;
-			if (shouldReturnPlayer)
-				player->ReturnToLastSafePosition(stage.GetCollision());
+		if (touchingBody && doubleJump)
+			player->ReturnToLastSafePosition(stage.GetCollision());
 		wasTouchingBossBody_ = touchingBody;
 
 #ifdef _DEBUG
@@ -188,14 +208,15 @@ void GameTestScene::Update(float deltaTime)
 		// Clapの目標位置を更新
 		boss.UpdateClapTargetPosition(player->GetWorldPosition());
 		boss.Update(deltaTime);
-		boss.TurnToTarget(player->GetWorldPosition(), deltaTime);
-
-		if (!player->IsDead() && boss.GetHealth() > 0)
-			player->AddUltimateGauge(Const::PLAYER_ULTIMATE_GAUGE_PER_SECOND * deltaTime);
-		gameContext->UpdateUltimateProjectiles(deltaTime);
+		if (boss.IsAIActive())
+			boss.TurnToTarget(player->GetWorldPosition(), deltaTime);
 
 		const bool slamHitPlayer = boss.UpdateSlamAttack(
 			player->GetWorldPosition(), stage.GetWorldPosition());
+		const bool handHitPlayer = boss.UpdateHandAttack(
+			deltaTime,
+			player->GetWorldPosition(),
+			stage.GetWorldPosition());
 
 		UpdateTailWhipGimmick();
 
@@ -220,20 +241,12 @@ void GameTestScene::Update(float deltaTime)
 			boss.IsTailWhipHitActive() &&
 			Collision::IsHitCapsuleSphere(tailWhipHitCapsule_, playerBody);
 
-		const bool handHitPlayer = boss.UpdateHandAttack(
-			deltaTime,
-			player->GetWorldPosition(),
-			stage.GetWorldPosition());
-
-		// 死亡判定
-		// 死んだ演出さえも終わったのなら
-		if (!boss.IsActive())
+		if (tailWhipPlayerHit)
 		{
-			//クリア
-
-			// 仮でReset
-			gameContext->Reset();
-			Init();
+			player->TakeDamage(Const::BOSS_TAIL_WHIP_DAMAGE);
+			Vec3 outward = player->GetWorldPosition() - stage.GetWorldPosition();
+			outward.y = 0.0f;
+			player->ApplyKnockback(outward, 5000.0f, 0.3f);
 		}
 
 		// =============================
@@ -259,14 +272,6 @@ void GameTestScene::Update(float deltaTime)
 		else if (slamHitPlayer)
 			player->TakeDamage(Const::BOSS_SLAM_DAMAGE);
 
-		if (tailWhipPlayerHit)
-		{
-			player->TakeDamage(Const::BOSS_TAIL_WHIP_DAMAGE);
-			Vec3 outward = player->GetWorldPosition() - stage.GetWorldPosition();
-			outward.y = 0.0f;
-			player->ApplyKnockback(outward, 5000.0f, 0.3f);
-		}
-
 #ifdef _DEBUG
 		DxPlus::Debug::SetFormatString(
 			L"Boss HP: %d / %d",
@@ -289,17 +294,7 @@ void GameTestScene::Update(float deltaTime)
 		// =============================
 		// カメラ更新・切り替え
 		// =============================
-		if (boss.IsDead())
-		{
-			bossDieCamera_.SetTarget(boss.GetWorldPosition());
-
-			if (cameraDirector_.GetActiveCamera() != &bossDieCamera_)
-			{
-				bossDieCamera_.Initialize(cameraDirector_.GetCurrentPose());
-				cameraDirector_.SwitchCamera(bossDieCamera_, 1.2f);
-			}
-		}
-		else if (boss.IsDowned())
+		if (boss.IsDowned())
 		{
 			bossDownCamera_.Update(
 				player->GetWorldPosition(),
@@ -327,6 +322,8 @@ void GameTestScene::Update(float deltaTime)
 			}
 		}
 
+		cameraDirector_.Update(deltaTime);
+
 		// =============================
 		// カメラ透過
 		// =============================
@@ -350,18 +347,20 @@ void GameTestScene::Update(float deltaTime)
 		if (GetButtonDown(PLAYER1) & BUTTON_L3)
 		{
 			gameContext->GetEffectManager().PlayHit(
-				RM().GetEffect(ResourceKeys::Effect_PlayerAttack),
-				player->GetPosition() + Vec3::Up() * 15.0f,
+				RM().GetEffect(ResourceKeys::Effect_Test),
+				player->GetPosition() + Vec3::Up() * 100.0f,
 				player->GetYaw() + DX_PI_F);
 		}
 
 		gameContext->GetEffectManager().Update(deltaTime);
-	}
 
-	// =============================
-	// CameraDirector更新
-	// =============================
-	cameraDirector_.Update(deltaTime);
+		// 本編の勝敗判定と同じタイミングで、テスト用の再開を行う。
+		if (!boss.IsActive() || player->GetCurrentState() == PlayerStateType::Die)
+		{
+			Init();
+			return;
+		}
+	}
 
 #ifndef NDEBUG
 	// 数値入力中はシーン切り替えのキーを無視する
@@ -443,7 +442,7 @@ void GameTestScene::Render() const
 	if (boss.IsTailWhipHitActive() && player != nullptr)
 	{
 		const Collision::Capsule& tail = tailWhipHitCapsule_;
-		const Collision::Sphere playerBody{ player->GetWorldPosition() + Vec3::Up() * 30.0f, 30.0f };
+		const auto playerBody = player->GetHitSphere();
 		if (tail.radius > 0.0f)
 		{
 			const bool touching = Collision::IsHitCapsuleSphere(tail, playerBody);
@@ -486,7 +485,7 @@ void GameTestScene::DrawImGui()
 		auto* player = gameContext->GetPlayer();
 
 #ifdef _DEBUG
-		ImGui::TextUnformatted(u8"Shift長押し：通常移動の速度を5倍（GameTest限定）");
+		ImGui::Checkbox(u8"Shift長押しで移動速度を5倍にする", &enableDebugDash_);
 		ImGui::TextUnformatted(u8"Shift + R：プレイヤー位置に毛玉エフェクト再生");
 #endif
 
@@ -527,7 +526,14 @@ void GameTestScene::DrawImGui()
 		auto& stage = gameContext->GetStage();
 
 		if (ImGui::Button(u8"Boss.Reset"))
-			boss.Reset();
+		{
+			boss.ResetForDebug();
+			gameContext->FaceBossTowardPlayer();
+			gameContext->StopTailWhipSound();
+			tailWhipHitCapsule_ = {};
+			wasTouchingBossBody_ = false;
+			wasTailWhipActive_ = false;
+		}
 
 		if (ImGui::Button(u8"Down"))
 			boss.SetDownGauge(0.0f);
@@ -574,7 +580,7 @@ void GameTestScene::DrawImGui()
 			);
 			ImGui::TreePop();
 		}
-		ImGui::Checkbox(u8"bossAIEnabled", &boss.IsAIActive());
+		ImGui::Checkbox(u8"bossAIEnabled", &boss.GetDebugAIEnabled());
 		// Stage Gimmick Test
 		ImGui::Separator();
 		ImGui::TextUnformatted(u8"Stage Gimmick Test");
@@ -650,8 +656,8 @@ void GameTestScene::DrawImGui()
 
 		ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
 
-		ImGui::End();
 	}
+	ImGui::End();
 #endif
 }
 
@@ -659,6 +665,7 @@ void GameTestScene::End()
 {
 	gameContext->StopTailWhipSound();
 	gameContext->ClearUltimateProjectiles();
+	Collision::ResetTransparentModels();
 }
 
 void GameTestScene::UpdateTailWhipGimmick()

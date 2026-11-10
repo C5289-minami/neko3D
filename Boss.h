@@ -108,7 +108,19 @@ public:
 
 	void DrawClapAttackDebug() const;
 	void DrawSlamAttackDebug() const;
-	bool& IsAIActive() { return activeAI; }
+	bool IsAIActive() const
+	{
+#ifndef NDEBUG
+		return activeAI && debugAIEnabled_;
+#else
+		return activeAI;
+#endif
+	}
+
+#ifndef NDEBUG
+	bool& GetDebugAIEnabled() { return debugAIEnabled_; }
+	void ResetForDebug();
+#endif
 
 	AnimationHandle GetAnimationHandle(BossAnimType::Type type) const;
 	ModelAnimation& GetAnimation() { return animation_; }
@@ -169,7 +181,10 @@ private:
 	std::unique_ptr<BossTailWhipSkill> tailWhipSkill_;
 
 	BossAI ai_; // AI
-	bool activeAI{ false }; // デバッグ用。falseにするとAIが無効化される。
+	bool activeAI{ false };
+#ifndef NDEBUG
+	bool debugAIEnabled_{ true };
+#endif
 	// Turn
 	    bool isRotationEnabled_ = true;
 
