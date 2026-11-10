@@ -342,6 +342,7 @@ void GameSceneGameOverState::Exit()
 	DxPlus::Debug::SetFormatString(
 		L"GameSceneGameOverState::Exit"
 	);
+	SoundManager::StopBGM(RM().GetSound(ResourceKeys::Sound_Rain));
 
 	if (auto* gameOver = UIM().GetUI(L"Result.GameOver"))
 		gameOver->Hide();

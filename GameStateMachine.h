@@ -19,6 +19,7 @@ public:
 	explicit GameStateMachine(GameScene& gameScene);
 
 	void Initialize();
+	void End();
 
 	void ChangeState(GameStateType type);
 	void StartBattleWithoutIntro();

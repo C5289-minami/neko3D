@@ -372,6 +372,9 @@ void GameSceneClearState::Tick(float deltaTime)
 void GameSceneClearState::Exit()
 {
 	DxPlus::Debug::SetFormatString(L"GameSceneClearState::Exit");
+	SoundManager::StopSE(RM().GetSound(ResourceKeys::Sound_BossEntrance));
+	SoundManager::StopSE(RM().GetSound(ResourceKeys::Sound_Rain));
+
 	if (auto* clear = UIM().GetUI(L"Result.Clear"))
 		clear->Hide();
 

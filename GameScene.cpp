@@ -778,6 +778,7 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 void GameScene::End()
 {
+	stateMachine_.End();
 	SoundManager::StopBGM(RM().GetMusic(ResourceKeys::Music_Title));
 	SoundManager::StopBGM(RM().GetMusic(ResourceKeys::Music_Battle));
 	gameContext->StopTailWhipSound();
