@@ -43,6 +43,7 @@ namespace
 		L"playerULTGaugeBackSabi",
 		L"playerULTGaugeBackKuro",
 		L"PlayerUltGauge",
+		L"BossUIBack",
 		L"BossHealthGauge",
 		L"BossDownGauge",
 		L"ULT_EButton"
@@ -61,7 +62,7 @@ void StatusUI::InitPlayer(const std::string& characterName)
 	if (!mike)
 		mike = UIM().CreateImageUI(
 			L"playerULTGaugeBackMike",
-			ResourceKeys::MikeStatusBack,
+			ResourceKeys::PlayerStatus.mike,
 			backgroundPosition,
 			StatusPlayerMotionDirection,
 			StatusMotionDuration);
@@ -70,7 +71,7 @@ void StatusUI::InitPlayer(const std::string& characterName)
 	if (!sabi)
 		sabi = UIM().CreateImageUI(
 			L"playerULTGaugeBackSabi",
-			ResourceKeys::SabiStatusBack,
+			ResourceKeys::PlayerStatus.sabi,
 			backgroundPosition,
 			StatusPlayerMotionDirection,
 			StatusMotionDuration);
@@ -79,7 +80,7 @@ void StatusUI::InitPlayer(const std::string& characterName)
 	if (!kuro)
 		kuro = UIM().CreateImageUI(
 			L"playerULTGaugeBackKuro",
-			ResourceKeys::KuroStatusBack,
+			ResourceKeys::PlayerStatus.kuro,
 			backgroundPosition,
 			StatusPlayerMotionDirection,
 			StatusMotionDuration);
@@ -119,7 +120,7 @@ void StatusUI::InitPlayer(const std::string& characterName)
 		ultGauge->SetFalse();
 
 	// 背景画像サイズ取得
-	const auto* background = RM().GetSprite(ResourceKeys::MikeStatusBack);
+	const auto* background = RM().GetSprite(ResourceKeys::PlayerStatus.mike);
 	const auto* heartSprite = RM().GetSprite(ResourceKeys::PlayerHeart);
 
 	if (!background || !heartSprite) return;
@@ -184,38 +185,90 @@ void StatusUI::InitPlayer(const std::string& characterName)
 void StatusUI::InitBoss()
 {
 	const DxPlus::Vec2 backgroundPosition(
-		DxPlus::CLIENT_WIDTH * 0.5f + 10,
-		DxPlus::CLIENT_HEIGHT * 0.5f);
+		DxPlus::CLIENT_WIDTH * 0.5f,
+		DxPlus::CLIENT_HEIGHT * 0.12f
+	);
+
+	constexpr float GaugeOffsetX = 45.0f;
+	constexpr float GaugeOffsetY = 20.0f;
+
+	auto* bossBack =
+		UIM().GetUI(L"BossUIBack");
+
+	if (!bossBack)
+	{
+		bossBack = UIM().CreateImageUI(
+			L"BossUIBack",
+			ResourceKeys::BossStatusBack,
+			backgroundPosition +
+			DxPlus::Vec2{
+				0.0f,
+				-GaugeOffsetY
+			},
+			StatusBossMotionDirection,
+			StatusMotionDuration
+		);
+	}
+
+	if (bossBack)
+	{
+		bossBack->SetFalse();
+	}
 
 	// ボスHPゲージ
-	auto* healthGauge = UIM().GetUI(L"BossHealthGauge");
+	auto* healthGauge =
+		UIM().GetUI(L"BossHealthGauge");
+
+	const DxPlus::Vec2 healthGaugePosition =
+		backgroundPosition +
+		DxPlus::Vec2{
+			GaugeOffsetX + 19.0f,
+			-GaugeOffsetY + 4.0f
+	};
+
 	if (!healthGauge)
-		healthGauge = UIM().CreateSpriteStudioUI(
-			L"BossHealthGauge",
-			ResourceKeys::SpriteStudio_BossHealthGauge,
-			backgroundPosition,
-			"Boss_hp",
-			StatusBossMotionDirection,
-			StatusMotionDuration
-		);
+	{
+		healthGauge =
+			UIM().CreateSpriteStudioUI(
+				L"BossHealthGauge",
+				ResourceKeys::SpriteStudio_BossHealthGauge,
+				healthGaugePosition,
+				"Boss_hp",
+				StatusBossMotionDirection,
+				StatusMotionDuration
+			);
+	}
 
 	if (healthGauge)
+	{
 		healthGauge->SetFalse();
+	}
 
 	// ボスダウンゲージ
-	auto* downGauge = UIM().GetUI(L"BossDownGauge");
+	auto* downGauge =
+		UIM().GetUI(L"BossDownGauge");
+
 	if (!downGauge)
-		downGauge = UIM().CreateSpriteStudioUI(
-			L"BossDownGauge",
-			ResourceKeys::SpriteStudio_BossDownGauge,
-			backgroundPosition,
-			"Boss_down",
-			StatusBossMotionDirection,
-			StatusMotionDuration
-		);
+	{
+		downGauge =
+			UIM().CreateSpriteStudioUI(
+				L"BossDownGauge",
+				ResourceKeys::SpriteStudio_BossDownGauge,
+				backgroundPosition +
+				DxPlus::Vec2{
+					GaugeOffsetX,
+					GaugeOffsetY
+				},
+				"Boss_down",
+				StatusBossMotionDirection,
+				StatusMotionDuration
+			);
+	}
 
 	if (downGauge)
+	{
 		downGauge->SetFalse();
+	}
 }
 
 void StatusUI::SyncStatusBar(const std::wstring& key, float progress)
@@ -229,11 +282,14 @@ void StatusUI::SyncStatusBar(const std::wstring& key, float progress)
 
 void StatusUI::SyncPlayerHealth(int health, float deltaTime)
 {
+	if (!heartUiIsOpen) return;
+
 	health = std::clamp(health, 0, Player::MaxHealth);
 
 	for (int i = 0; i < Player::MaxHealth; ++i)
 	{
 		auto* heart = UIM().GetUI(PlayerHeartKey(i));
+		if (!heart) continue;
 
 		// HPが残っているハートは、通常の大きさで表示する
 		if (i < health)
@@ -298,13 +354,15 @@ void StatusUI::Open(int playerHealth)
 	const std::wstring keys[] =
 	{
 		L"PlayerUltGauge",
+		L"BossUIBack",
 		L"BossHealthGauge",
 		L"BossDownGauge",
 		L"ULT_EButton"
 	};
 
-	// 選択したプレイヤー背景を表示モーション付きで開く。
-	if (auto* background = UIM().GetUI(selectedPlayerBackground))
+	// 選択したプレイヤー背景を表示する。
+	if (auto* background =
+		UIM().GetUI(selectedPlayerBackground))
 	{
 		background->Show();
 	}
@@ -318,8 +376,8 @@ void StatusUI::Open(int playerHealth)
 	}
 
 	// 開幕時は、現在のHPを被弾演出なしで表示する。
-	std::fill_n(heartEffectTimeLeft, Player::MaxHealth, 0.0f);		//演出が終わるまでの残り時間
-	beforeHealth = std::clamp(playerHealth, 0, Player::MaxHealth);	//前回のHP
+	std::fill_n(heartEffectTimeLeft, Player::MaxHealth, 0.0f);
+	beforeHealth = std::clamp(playerHealth, 0, Player::MaxHealth);
 	heartUiIsOpen = true;
 	SyncPlayerHealth(playerHealth, 0.0f);
 }
@@ -333,6 +391,7 @@ void StatusUI::Hide()
 		L"playerULTGaugeBackSabi",
 		L"playerULTGaugeBackKuro",
 		L"PlayerUltGauge",
+		L"BossUIBack",
 		L"BossHealthGauge",
 		L"BossDownGauge",
 		L"ULT_EButton"
@@ -341,18 +400,24 @@ void StatusUI::Hide()
 	for (const auto& key : keys)
 	{
 		if (auto* ui = UIM().GetUI(key))
+		{
 			ui->Hide();
+		}
 	}
 
 	for (int i = 0; i < Player::MaxHealth; ++i)
 	{
-		if (auto* heart = UIM().GetUI(PlayerHeartKey(i)))
+		if (auto* heart =
+			UIM().GetUI(PlayerHeartKey(i)))
+		{
 			heart->SetFalse();
+		}
 	}
 }
 
 void StatusUI::Remove()
 {
+	heartUiIsOpen = false;
 	for (const auto& key : StatusKeys)
 		UIM().RemoveUI(key);
 

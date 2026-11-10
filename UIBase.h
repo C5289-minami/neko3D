@@ -55,6 +55,15 @@
 
 		virtual void SetScale(float targetScale) { scale = targetScale; }
 		float GetScale() const { return scale; }
+		void SetFlipX(bool value)
+		{
+			flipX = value;
+		}
+
+		bool IsFlipX() const
+		{
+			return flipX;
+		}
 		void SetPosition(DxPlus::Vec2 targetPosition)
 		{
 			basePosition = targetPosition;
@@ -158,7 +167,7 @@
 		float shakeFrequency{};
 		DxPlus::Vec2 shakeOffset{};
 
-
+		bool flipX{ false };
 		// ===============
 		// 実行時間関連
 		// ===============

@@ -5,6 +5,7 @@
 #include "Raycast.h"
 #include "DxLib.h"
 // #include "Stage.h"
+#include "SoundManager.h"
 #include "ModelObjectManager.h"
 
 #include <cmath>
@@ -29,7 +30,7 @@ Player::Player()
 	: ActorBase("Player"), stateMachine_(*this)
 {
 	model_.SetOwner(*this);
-	model_.SetModelKey(ResourceKeys::Model_PlayerMike);
+	model_.SetModelKey(ResourceKeys::Model_Player.mike);
 
 	model_.SetObjectId("player_model");
 	model_.SetObjectName("Player");
@@ -46,9 +47,9 @@ Vec3 Player::GetAttackBallSpawnPosition() const
 
 void Player::SetAnimation(
 	PlayerAnimType::Type type,
-	bool loop ,
+	bool loop,
 	bool playAfterBlend,
-	float blendSeconds 
+	float blendSeconds
 )
 {
 	//if (currentAnimType_ == type && currentAnimLoop_ == loop)
@@ -139,6 +140,7 @@ void Player::Reset()
 	addDamage_ = 0;
 	controlLocked_ = false;
 	avoidInvTime_ = 0.0f;
+  damageSlowTime_ = 0.0f;
 	// wasTouchingPillar_ = false;
 	wasTouchingModel_ = false;
 
@@ -277,7 +279,7 @@ void Player::SetModelKey(const std::wstring& key)
 	model_.SetModelType(ModelType::Bone);
 
 	animation_.Reset();
- 
+
 	currentAnimType_ = PlayerAnimType::Idle;
 	currentAnimLoop_ = true;
 
@@ -294,6 +296,7 @@ void Player::UpdateMovement(float deltaTime)
 {
 	const float elapsed = (std::max)(0.0f, deltaTime);
 	avoidInvTime_ = (std::max)(0.0f, avoidInvTime_ - elapsed);
+	damageSlowTime_ = (std::max)(0.0f, damageSlowTime_ - elapsed);
 
 	// 前のフレームで床に着いたら、2回目のジャンプを再び使えるようにする。
 	// 空中で被弾してステートが変わっても、このフラグはリセットしない。
@@ -357,7 +360,7 @@ void Player::UpdateMovement(float deltaTime)
 		Move(deltaTime);
 		isGrounded_ = false;
 	}
-	fallAndResetPosition(deltaTime,position_);
+	fallAndResetPosition(deltaTime, position_);
 }
 
 // void Player::Update(float deltaTime, const Stage& stage, const Vec3& movementCenter)
@@ -426,7 +429,7 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 	}
 	if (IsPillarElevatorActive()) input_.jumpPressed = false;
 	UpdateMovement(deltaTime);
-	
+
 	// のぼり中は、壁の上端に吸着するように位置を補正する。
 	if (!IsPillarElevatorActive())
 	{
@@ -649,6 +652,7 @@ void Player::ReturnToLastSafePosition(const ModelCollision& collision)
 		recoveryPosition = lastFirstFloorPosition_;
 
 	recoveryPosition.y += Const::PLAYER_FALL_RECOVERY_HEIGHT_OFFSET;
+	SoundManager::PlaySE(RM().GetSound(ResourceKeys::Sound_Fall));
 	RestorePosition(recoveryPosition);
 }
 
@@ -664,7 +668,13 @@ bool Player::TakeDamage(int damage)
 	if (damage <= 0 || IsDead() || IsDamaging() || avoidInvTime_ > 0.0f) return false;
 
 	addDamage_ = damage;
+    damageSlowTime_ = DamageSlowTime;
 	stateMachine_.ChangeState(PlayerStateType::Damaging);
+	SoundManager::PlaySE(
+		RM().GetSound(
+			ResourceKeys::Sound_PlayerDamage
+		)
+	);
 	return true;
 }
 
@@ -855,6 +865,10 @@ void Player::UpdateHorizontalVelocity(float deltaTime)
 
 	// 移動速度
 	float moveSpeed = Const::PLAYER_MOVE_SPEED * moveRate_;
+   if (damageSlowTime_ > 0.0f)
+	{
+		moveSpeed *= DamageSlowRate;
+	}
 	if (isGrounded_ && state == PlayerStateType::Walk)
 	{
 		moveSpeed *= charData.moveSpeed / CharData::DefaultMoveSpeed;
@@ -897,14 +911,14 @@ void Player::Move(float deltaTime)
 	TurnTowards(Vec3(velocity_.x, 0.0f, velocity_.z), deltaTime);
 }
 
-void Player::fallAndResetPosition(float deltaTime,Vec3& PlayerPos)
+void Player::fallAndResetPosition(float deltaTime, Vec3& PlayerPos)
 {
 	position_ = PlayerPos;
 
 	Vec3 oldPos = position_;
 
-	Vec3 pos= model_.GetPosition();
-	if (position_.y <= pos.y-100.0f)
+	Vec3 pos = model_.GetPosition();
+	if (position_.y <= pos.y - 100.0f)
 	{
 		position_ = oldPos;
 	}
@@ -920,7 +934,7 @@ void Player::UpdateStageMoveVelocity(float moveSpeed, float deltaTime)
 	Vec3 forward = movementCenter_ - position_;
 	forward.y = 0.0f;
 	const float radius = forward.Length();
-	if (radius <Const::EPS)
+	if (radius < Const::EPS)
 	{
 		forward = Vec3(std::sin(GetYaw()), 0.0f, std::cos(GetYaw()));
 	}
@@ -1001,27 +1015,6 @@ void Player::ResetClimbingSpeeds()
 	wallSlideSpeed_ = Const::PLAYER_WALL_SLIDE_SPEED;
 }
 
-Player::GroundType Player::CheckFloor() const
-{
-	switch (currentFloor_)
-	{
-	case GroundType::DownFloor:
-		DxPlus::Debug::SetString(L"現在: 一階");
-		break;
-
-	case GroundType::UpFloor:
-		DxPlus::Debug::SetString(L"現在: 二階");
-		break;
-
-	case GroundType::None:
-	default:
-		DxPlus::Debug::SetString(L"現在: 空中");
-		break;
-	}
-
-	return currentFloor_;
-}
-
 void Player::ApplyKnockback(const Vec3& direction, float power, float duration)
 {
 	Vec3 outward = direction;
@@ -1042,6 +1035,8 @@ void Player::ApplyKnockback(const Vec3& direction, float power, float duration)
 	// 被ダメージ中は、回避の受付と保留中のダメージ処理を続ける。
 	if (!IsDamaging())
 		stateMachine_.ChangeState(PlayerStateType::Jump);
+
+	SoundManager::PlaySE(RM().GetSound(ResourceKeys::Sound_Fall));
 }
 
 void Player::SetWallJumpMoveSpeed(float value)
@@ -1156,6 +1151,7 @@ void Player::StartPillarElevator(const ModelObject* pillar, const Vec3& center, 
 	dir = dir.Normalized();
 
 	position_.x = center.x + dir.x * PILLAR_RADIUS;
+	position_.y = position_.y + 80.0f; // 少し上に上げてから吸着する
 	position_.z = center.z + dir.z * PILLAR_RADIUS;
 
 	// 柱の中心を向く

@@ -3,6 +3,35 @@
 #include "GameStateMachine.h"
 #include "DxPlus/Debug.h"
 #include "UIManager.h"
+#include "ResourceManager.h"
+#include "ResourceKeys.h"
+#include "SoundManager.h"
+#include "GameContext.h"
+
+namespace
+{
+	constexpr const wchar_t*
+		GameOverHandAnimatorId =
+		L"Result.GameOver.Hand";
+
+	constexpr float GameOverHandXRate = 0.36f;
+	constexpr float GameOverRetryHandYRate = 0.82f;
+	constexpr float GameOverTitleHandYRate = 0.92f;
+
+	DxPlus::Vec2 GetGameOverHandPosition(
+		int selectedIndex)
+	{
+		return {
+			DxPlus::CLIENT_WIDTH *
+				GameOverHandXRate,
+
+			DxPlus::CLIENT_HEIGHT *
+				(selectedIndex == 0
+					? GameOverRetryHandYRate
+					: GameOverTitleHandYRate)
+		};
+	}
+}
 
 GameSceneGameOverState::GameSceneGameOverState(GameStateMachine& gameStateMachine, GameScene& gameScene)
 	:GameBaseState(gameStateMachine, gameScene)
@@ -86,59 +115,228 @@ void GameSceneGameOverState::Enter()
 		}
 	}
 	selectedIndex_ = 0;
+
+    SoundManager::PlayBGM(
+        RM().GetSound(
+            ResourceKeys::Sound_Rain
+        )
+    );
+
+	handPrepared_ = false;
+	handAnimationStarted_ = false;
+
+	if (auto* context =
+		gameScene_.GetGameContext())
+	{
+		// UIM().Clear()後でも手UIを使えるようにする。
+		// この時点ではAnimatorを開始しない。
+		context->HandUIInit();
+	}
 }
 
 void GameSceneGameOverState::Tick(float deltaTime)
 {
-	DxPlus::Debug::SetFormatString(L"GameSceneGameOverState::Tick");
-	gameScene_.UpdateStateCamera(deltaTime, "");
+    DxPlus::Debug::SetFormatString(
+        L"GameSceneGameOverState::Tick"
+    );
 
-	auto* gameOver = UIM().GetUI(L"Result.GameOver");
+    gameScene_.UpdateStateCamera(
+        deltaTime,
+        ""
+    );
 
-	if (!gameOver || gameOver->GetCurrentState() != UIBase::UIState::Normal)
-		return;
+    auto* gameOver =
+        UIM().GetUI(L"Result.GameOver");
 
-	auto* retry = UIM().GetButtonUI(L"Result.GameOverRetryButton");
-	auto* toTitle = UIM().GetButtonUI(L"Result.GameOverToTitleButton");
+    // ゲームオーバー画像の表示完了を待つ。
+    if (!gameOver ||
+        gameOver->GetCurrentState() !=
+        UIBase::UIState::Normal)
+    {
+        return;
+    }
 
-	if (!retry || !toTitle)
-		return;
+    auto* retry =
+        UIM().GetButtonUI(
+            L"Result.GameOverRetryButton"
+        );
 
-	if (retry->GetCurrentState() == UIBase::UIState::False)
-	{
-		retry->Show();
-	}
+    auto* toTitle =
+        UIM().GetButtonUI(
+            L"Result.GameOverToTitleButton"
+        );
 
-	if (toTitle->GetCurrentState() == UIBase::UIState::False)
-	{
-		toTitle->Show();
-	}
+    if (!retry || !toTitle)
+    {
+        return;
+    }
 
+    // ========================================================
+    // ボタンと通常手の表示開始
+    // ========================================================
 
-	// ボタンの表示アニメーション完了まで待機
-	if (retry->GetCurrentState() != UIBase::UIState::Normal ||
-		toTitle->GetCurrentState() != UIBase::UIState::Normal)
-		return;
+    if (!handPrepared_)
+    {
+        retry->Show();
+        toTitle->Show();
 
-	using namespace DxPlus::Input;
+        auto* context =
+            gameScene_.GetGameContext();
 
-	if (GetButtonDown(PLAYER1) & BUTTON_UP)
-		selectedIndex_ = 0;
+        if (context)
+        {
+            context->StartActivePlayerHandAnimation(
+                GameOverHandAnimatorId,
+                GetGameOverHandPosition(
+                    selectedIndex_
+                )
+            );
+        }
 
-	if (GetButtonDown(PLAYER1) & BUTTON_DOWN)
-		selectedIndex_ = 1;
+        auto* animator =
+            UIM().GetTwoFrameAnimator(
+                GameOverHandAnimatorId
+            );
 
-	retry->SetSelected(selectedIndex_ == 0);
-	toTitle->SetSelected(selectedIndex_ == 1);
+        if (animator)
+        {
+            // 手の切り替えアニメーションだけ一時停止する。
+            animator->Pause();
 
-	if (GetButtonDown(PLAYER1) & BUTTON_START)
-	{
-		if (selectedIndex_ == 0)
-			retry->Trigger();
-		else
-			toTitle->Trigger();
-	}
+            UIBase* normalHand =
+                animator->GetFirstUI();
+
+            UIBase* pressedHand =
+                animator->GetSecondUI();
+
+            if (normalHand)
+            {
+                normalHand->SetFalse();
+
+                normalHand->SetMotionDuration(
+                    1.5f
+                );
+
+                normalHand->SetToMove({
+                    0.0f,
+                    0.0f
+                    });
+
+                normalHand->Show();
+            }
+
+            if (pressedHand)
+            {
+                pressedHand->SetFalse();
+            }
+        }
+
+        handPrepared_ = true;
+        return;
+    }
+
+    // ========================================================
+    // ボタンの表示完了待ち
+    // ========================================================
+
+    if (retry->GetCurrentState() !=
+        UIBase::UIState::Normal ||
+        toTitle->GetCurrentState() !=
+        UIBase::UIState::Normal)
+    {
+        return;
+    }
+
+    auto* animator =
+        UIM().GetTwoFrameAnimator(
+            GameOverHandAnimatorId
+        );
+
+    // ========================================================
+    // 猫の手アニメーション
+    // ボタン入力とは独立して更新する
+    // ========================================================
+
+    if (animator && !handAnimationStarted_)
+    {
+        UIBase* normalHand =
+            animator->GetFirstUI();
+
+        // 手のフェードが完了したら2枚切り替えを開始する。
+        if (normalHand &&
+            normalHand->GetCurrentState() ==
+            UIBase::UIState::Normal)
+        {
+            animator->Start();
+            handAnimationStarted_ = true;
+        }
+    }
+
+    // ========================================================
+    // 選択操作
+    // 猫の手の表示状態に関係なく操作可能
+    // ========================================================
+
+    using namespace DxPlus::Input;
+
+    constexpr int SelectionCount = 2;
+
+    const int buttonDown =
+        GetButtonDown(PLAYER1);
+
+    bool selectionChanged = false;
+
+    if (buttonDown & BUTTON_UP)
+    {
+        selectedIndex_ =
+            (selectedIndex_ - 1 +
+                SelectionCount) %
+            SelectionCount;
+
+        selectionChanged = true;
+    }
+
+    if (buttonDown & BUTTON_DOWN)
+    {
+        selectedIndex_ =
+            (selectedIndex_ + 1) %
+            SelectionCount;
+
+        selectionChanged = true;
+    }
+
+    retry->SetSelected(
+        selectedIndex_ == 0
+    );
+
+    toTitle->SetSelected(
+        selectedIndex_ == 1
+    );
+
+    // Animatorが存在する場合だけ手の位置を更新する。
+    if (animator)
+    {
+        animator->SetAnchorPosition(
+            GetGameOverHandPosition(
+                selectedIndex_
+            )
+        );
+    }
+
+    // 猫の手がフェード中でも決定可能。
+    if (buttonDown & BUTTON_START)
+    {
+        if (selectedIndex_ == 0)
+        {
+            retry->Trigger();
+        }
+        else
+        {
+            toTitle->Trigger();
+        }
+    }
 }
+
 void GameSceneGameOverState::Exit()
 {
 	DxPlus::Debug::SetFormatString(
@@ -153,4 +351,12 @@ void GameSceneGameOverState::Exit()
 
 	if (auto* toTitle = UIM().GetButtonUI(L"Result.GameOverToTitleButton"))
 		toTitle->Hide();
+
+	if (auto* context =
+		gameScene_.GetGameContext())
+	{
+		context->StopPlayerHandAnimation(
+			GameOverHandAnimatorId
+		);
+	}
 }

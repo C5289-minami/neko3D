@@ -15,6 +15,8 @@
 #include "PlayerUltimateEffect.h"
 #include "Room.h"
 
+class TwoFrameUIAnimator;
+
 class GameContext
 {
 public:
@@ -71,12 +73,37 @@ public:
     // ---- lifecycle ----
     void Init();
     void Reset();
+
     void UpdateUltimateProjectiles(float deltaTime);
     void ClearUltimateProjectiles();
     void UpdateTailWhipSound(const Collision::Capsule& hitCapsule);
     void StopTailWhipSound();
     //void Draw() const;
 
+    enum class PlayerHandType
+    {
+        Mike,
+        Sabi,
+        Kuro
+    };
+
+    void HandUIInit();
+
+    TwoFrameUIAnimator* StartPlayerHandAnimation(
+        const std::wstring& animatorId,
+        PlayerHandType handType,
+        const DxPlus::Vec2& anchorPosition,
+        bool flipX = false
+    );
+
+    TwoFrameUIAnimator* StartActivePlayerHandAnimation(
+        const std::wstring& animatorId,
+        const DxPlus::Vec2& anchorPosition
+    );
+
+    void StopPlayerHandAnimation(
+        const std::wstring& animatorId
+    );
 private:
     // Colors
     int bgRed{ 235 };
@@ -107,4 +134,6 @@ private:
 
     std::array<Player, 3> selectPreviewPlayers_;
     bool selectPreviewVisible_{ false };
+
+
 };
