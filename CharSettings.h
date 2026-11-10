@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <string>
 #include <vector>
@@ -7,43 +7,43 @@ struct CharData
 {
     static constexpr float DefaultMoveSpeed = 5.0f;
 
-    std::string name{""};   // –¼‘O
-    float maxHealth = 100.0f;  // Å‘å‘Ì—Í
-    float moveSpeed = DefaultMoveSpeed;    // ˆÚ“®‘¬“x
-    float attackRatio = 1.0f;  // UŒ‚”{—¦
-    float attackSpeed = 1.0f;  // UŒ‚‘¬“x
-    float climbSpeedMultiplier = 1.0f;  // ’Œ‚ğ“o‚é‘¬‚³‚Ì”{—¦
+    std::string name{""};   // åå‰
+    float maxHealth = 100.0f;  // æœ€å¤§ä½“åŠ›
+    float moveSpeed = DefaultMoveSpeed;    // ç§»å‹•é€Ÿåº¦
+    float attackRatio = 1.0f;  // æ”»æ’ƒå€ç‡
+    float attackSpeed = 1.0f;  // æ”»æ’ƒé€Ÿåº¦
+    float climbSpeedMultiplier = 2.25f;  // æŸ±ã‚’ç™»ã‚‹é€Ÿã•ã®å€ç‡
 };
 
 class CharSettingsManager
 {
 public:
-    // JSON‚É•Û‘¶
+    // JSONã«ä¿å­˜
     static bool Save(
         const std::string& filePath = "./Data/Config/charData.json"
     );
 
-    // JSON‚©‚ç“Ç‚İ‚İ
+    // JSONã‹ã‚‰èª­ã¿è¾¼ã¿
     static bool Load(
         const std::string& filePath = "./Data/Config/charData.json"
     );
 
-    // ƒLƒƒƒ‰ƒNƒ^[î•ñ‚ğ‰Šú‰»
+    // ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼æƒ…å ±ã‚’åˆæœŸåŒ–
     static void Reset();
 
-    // ƒLƒƒƒ‰ƒNƒ^[”‚ğæ“¾
+    // ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼æ•°ã‚’å–å¾—
     static size_t GetCount();
 
-    // ƒLƒƒƒ‰ƒNƒ^[î•ñ‚ğæ“¾
+    // ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼æƒ…å ±ã‚’å–å¾—
     static  CharData& Get(size_t index);
-	// ƒLƒƒƒ‰ƒNƒ^[î•ñ‚ğæ“¾i–¼‘O‚ÅŒŸõj
+	// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼æƒ…å ±ã‚’å–å¾—ï¼ˆåå‰ã§æ¤œç´¢ï¼‰
 	static const CharData* GetByName(const std::string& name);
-    // ƒLƒƒƒ‰ƒNƒ^[‚Ì’Ç‰Á
+    // ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ã®è¿½åŠ 
 	static void Add(const CharData& data);
-	// ƒLƒƒƒ‰ƒNƒ^[‚Ìíœ
+	// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ã®å‰Šé™¤
 	static void Remove(size_t index);
 
-    // ‘SƒLƒƒƒ‰ƒNƒ^[î•ñ‚ğæ“¾
+    // å…¨ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼æƒ…å ±ã‚’å–å¾—
     static const std::vector<CharData>& GetAll();
 
 private:

@@ -866,16 +866,23 @@ void Player::UpdateHorizontalVelocity(float deltaTime)
 
 	// 移動速度
 	float moveSpeed = Const::PLAYER_MOVE_SPEED * moveRate_;
-	if (isGrounded_ && state == PlayerStateType::Walk)
-	{
-		moveSpeed *= charData.moveSpeed / CharData::DefaultMoveSpeed;
-	}
 
+    if (isGrounded_ && state == PlayerStateType::Walk)
+    {
+        moveSpeed *= charData.moveSpeed / CharData::DefaultMoveSpeed;
+    }
 
-#ifdef _DEBUG//debugモードでは、移動速度を5倍にする
-	if (debugDashEnabled_) moveSpeed *= 5.0f;//(shift中)
+#ifdef _DEBUG
+    if (debugDashEnabled_)
+    {
+        moveSpeed = Const::PLAYER_DEBUG_DASH_SPEED;
+    }
 #endif
-	if (isDoubleJump) moveSpeed *= 3.0f;
+
+    if (isDoubleJump)
+    {
+        moveSpeed = Const::PLAYER_DOUBLE_JUMP_MOVE_SPEED;
+    }
 
 	if (isdefMove_)
 	{

@@ -14,9 +14,9 @@ PlayerAttackState::PlayerAttackState(PlayerStateMachine& stateMachine, Player& p
 void PlayerAttackState::Enter()
 {
 	//player_.StopMove();
-	player_.SetAnimation(PlayerAnimType::Attack, false);
-	player_.GetAnimation().Start();
-	player_.SetMoveRate(0.7f);
+	player_.SetAnimation(PlayerAnimType::Attack, false, false, 0.08f);
+	player_.GetAnimation().Start(Const::ANIM_FPS * Const::PLAYER_ATTACK_ANIM_SPEED_SCALE);
+	player_.SetMoveRate(Const::PLAYER_ATTACK_MOVE_RATE);
 	
 	attackSphere_.center = player_.GetAttackBallSpawnPosition();
 	attackSphere_.radius = Const::PLAYER_ATTACK_BALL_RADIUS;
@@ -54,6 +54,7 @@ void PlayerAttackState::Tick(float deltaTime)
 		const float step = (std::max)(0.0f, deltaTime);
 		elapsed_ += step;
 		ballActive_ = elapsed_ < Const::PLAYER_ATTACK_BALL_LIFETIME;
+		attackSphere_.center = player_.GetAttackBallSpawnPosition();
 	}
 
 	if (!ballActive_ && player_.GetAnimation().IsFinished())

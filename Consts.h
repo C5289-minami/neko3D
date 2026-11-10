@@ -48,17 +48,19 @@ namespace Const
     constexpr float PLAYER_TURN_RATE_180 = 120.0f;
     constexpr float PLAYER_ROTATE_SPEED = DxPlus::Deg2Rad * 180.0f;
 
-	constexpr float PLAYER_CLIMBING_SPEED = 300.0f;
+	constexpr float PLAYER_CLIMBING_SPEED = 300.0f*2.0f;
     constexpr float PLAYER_WALL_CLIMB_WAIT = 0.2f;
     constexpr float PLAYER_WALL_SLIDE_SPEED = 600.0f;
     constexpr float PLAYER_ELEVATOR_SPEED = 350.0f;
     constexpr float PLAYER_ELEVATOR_TOP_OFFSET = 10.0f;     
     constexpr float PLAYER_ELEVATOR_EXIT_JUMP_SPEED = 350.0f;
     
-    constexpr float PLAYER_JUMP_SPEED = 800.0f;
     constexpr float PLAYER_MOVE_SPEED = 350.0f;
-    // 突進ジャンプの仮の速度
-    // constexpr float PLAYER_LUNGING_MOVE_SPEED = 600.0f;
+    constexpr float PLAYER_DOUBLE_JUMP_MOVE_SPEED = 630.0f;
+    constexpr float PLAYER_DOUBLE_JUMP_START_MOVE_SPEED = 1050.0f;
+    constexpr float PLAYER_DEBUG_DASH_SPEED = 1750.0f;
+
+    constexpr float PLAYER_JUMP_SPEED = 800.0f;
     constexpr float PLAYER_DOUBLE_JUMP_SPEED = 500.0f;
     constexpr float PLAYER_WALL_JUMP_MOVE_SPEED = 600.0f;
     constexpr float PLAYER_WALL_JUMP_SPEED = 800.0f;
@@ -68,7 +70,10 @@ namespace Const
     constexpr float PLAYER_FALL_RECOVERY_DISTANCE = 400.0f*1.7f;//落ちる幅の計算のために追加し
 	constexpr float PLAYER_FALL_RECOVERY_HEIGHT_OFFSET = 10.0f;//落ちる幅の計算のために追加し
     constexpr float PLAYER_RADIUS = 30.0f;
-    constexpr float PLAYER_ATTACK_BALL_LIFETIME = 0.6f;
+
+	constexpr float PLAYER_ATTACK_BALL_LIFETIME = 0.35f;        // 攻撃判定の弾の寿命
+    constexpr float PLAYER_ATTACK_ANIM_SPEED_SCALE = 1.4f;
+    constexpr float PLAYER_ATTACK_MOVE_RATE = 0.85f;
     constexpr float PLAYER_ATTACK_BALL_RADIUS = PLAYER_RADIUS;
     constexpr float PLAYER_ATTACK_BALL_HEIGHT_MULTIPLIER = 0.5f;
     constexpr float PLAYER_ATTACK_BALL_FORWARD_OFFSET = PLAYER_ATTACK_BALL_RADIUS;
@@ -80,18 +85,18 @@ namespace Const
     constexpr float PLAYER_CLIMB_TOP_HOLD_DISTANCE = PLAYER_RADIUS;
 
     // ===== 敵関連 =====
-    constexpr int BOSS_MAX_HEALTH = 4;
+    constexpr int BOSS_MAX_HEALTH = 24;
     constexpr int BOSS_CLAP_DAMAGE = 1;
-    constexpr int BOSS_SLAM_DAMAGE = 1;
+    constexpr int BOSS_SLAM_DAMAGE = 2;
     constexpr int BOSS_TAIL_WHIP_DAMAGE = 1;
 
     constexpr float BOSS_DOWN_GAUGE_MAX = 100.0f;
-    constexpr float BOSS_DOWN_GAUGE_HIT_REDUCTION = 20.0f;
+    constexpr float BOSS_DOWN_GAUGE_HIT_REDUCTION = 10.0f;
     // フレーム時間に応じた減少は、ボスがダメージを受けたときだけ適用する。
     constexpr float BOSS_DOWN_GAUGE_HIT_FRAME_REDUCTION_PER_SECOND = 10.0f;
     constexpr float BOSS_DOWN_GAUGE_LONG_FRAME_SECONDS = 5.0f;
     constexpr float BOSS_DOWN_GAUGE_LONG_FRAME_REDUCTION = 5.0f;
-    constexpr float BOSS_FLINCH_HOLD_SECONDS = 5.0f;
+    constexpr float BOSS_FLINCH_HOLD_SECONDS = 2.5f;
 
     static_assert(BOSS_MAX_HEALTH > 0 && BOSS_DOWN_GAUGE_MAX > 0.0f);
     static_assert(PLAYER_NORMAL_ATTACK_DAMAGE >= 0 && BOSS_CLAP_DAMAGE >= 0 &&
@@ -106,11 +111,11 @@ namespace Const
     constexpr float BOSS_BODY_Y_OFFSET = -350.0f;     // ステージ位置を基準にした底の高さ。
     // ジャンプ接触で減らすダウンゲージ量。2階からの二段目は増量する。
     constexpr float BOSS_JUMP_DOWN_DAMAGE = 20.0f;
-    constexpr float BOSS_UPPER_DOUBLE_JUMP_DOWN_DAMAGE = 40.0f;
+    constexpr float BOSS_UPPER_DOUBLE_JUMP_DOWN_DAMAGE = 25.0f;
     constexpr float BOSS_HIDDEN_POSITION_Y = -0.0f;
     constexpr float BOSS_IDLE_MOTION_DURATION = 1.0f;
     constexpr float BOSS_WALK_MOTION_DURATION = 3.0f;
-    constexpr float BOSS_MOVE_SPEED = 200.0f;
+    constexpr float BOSS_MOVE_SPEED = 240.0f;
 
     // ボスの両手攻撃が閉じるまでに移動する弧の長さ。
     constexpr float BOSS_BETWEEN_HAND_ATTACK_SIDE = 400.0f;
