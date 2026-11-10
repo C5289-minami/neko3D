@@ -58,7 +58,7 @@ BossAI::BossAI(Boss& boss)
     slamCooldown_(8.0f, BossAttackType::Slam),
     tailWhipCooldown_(14.0f, BossAttackType::TailWhip)
 {
-    attackCooldownTime_ = 2.0f;
+    attackCooldownTime_ = 1.0f;
     Reset();
 }
 
