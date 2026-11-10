@@ -818,7 +818,7 @@ void GameTestScene::DrawAttackSphereDebug() const
 	const auto& boss = gameContext->GetBoss();
 	boss.DrawSlamAttackDebug();
 
-	if (boss.GetCurrentState() == BossStateType::Flinch)
+	if (boss.GetCurrentState() == BossStateType::Down)
 	{
 		Collision::DrawDebugSphere(gameContext->GetStage().GetBossDownHurtSphere(), DxLib::GetColor(255, 140, 60));
 	}

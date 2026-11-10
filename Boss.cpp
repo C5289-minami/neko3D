@@ -17,7 +17,7 @@
 namespace
 {
 	constexpr float HitScaleDuration = 0.2f;
-	constexpr float HitScaleMultiplier = 1.2f;
+	constexpr float HitScaleMultiplier = 0.7f;
 }
 
 Boss::Boss()
@@ -109,8 +109,8 @@ void Boss::TakeDamage(int damage)
   if (damage <= 0 || health_ <= 0)
 		return;
 
-	hitScaleTimeRemaining_ = HitScaleDuration - 0.15f;  // ダメージを受けた瞬間にスケールを大きくする時間を設定する。
-	model_.SetDrawScaleMultiplier(HitScaleMultiplier);// ダメージを受けた瞬間にスケールを大きくする。
+	hitScaleTimeRemaining_ = HitScaleDuration - 0.15f;
+	model_.SetDrawScaleMultiplier(HitScaleMultiplier); // 被弾した瞬間にボスの見た目を縮める。
 
 	damageTakenThisFrame_ = true;
 	// ダメージを受けたらHPを減らす。

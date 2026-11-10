@@ -85,7 +85,7 @@ namespace Const
     constexpr float PLAYER_CLIMB_TOP_HOLD_DISTANCE = PLAYER_RADIUS;
 
     // ===== 敵関連 =====
-    constexpr int BOSS_MAX_HEALTH = 24;
+    constexpr int BOSS_MAX_HEALTH = 15;
     constexpr int BOSS_CLAP_DAMAGE = 1;
     constexpr int BOSS_SLAM_DAMAGE = 2;
     constexpr int BOSS_TAIL_WHIP_DAMAGE = 1;
@@ -96,7 +96,7 @@ namespace Const
     constexpr float BOSS_DOWN_GAUGE_HIT_FRAME_REDUCTION_PER_SECOND = 10.0f;
     constexpr float BOSS_DOWN_GAUGE_LONG_FRAME_SECONDS = 5.0f;
     constexpr float BOSS_DOWN_GAUGE_LONG_FRAME_REDUCTION = 5.0f;
-    constexpr float BOSS_FLINCH_HOLD_SECONDS = 2.5f;
+    constexpr float BOSS_DOWN_HOLD_SECONDS = 1.45f;
 
     static_assert(BOSS_MAX_HEALTH > 0 && BOSS_DOWN_GAUGE_MAX > 0.0f);
     static_assert(PLAYER_NORMAL_ATTACK_DAMAGE >= 0 && BOSS_CLAP_DAMAGE >= 0 &&

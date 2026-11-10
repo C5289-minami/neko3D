@@ -14,7 +14,7 @@ namespace
     constexpr float BaseDownBlendSeconds = 0.8f;
 
     // 2.0なら全体が2倍速、0.5なら全体が半分の速度
-    constexpr float SequenceRate = 0.3f;
+    constexpr float SequenceRate = 1.0f;
 }
 
 BossDownState::BossDownState(
@@ -27,7 +27,7 @@ BossDownState::BossDownState(
 void BossDownState::Enter()
 {
     remainingSeconds_ =
-        Const::BOSS_FLINCH_HOLD_SECONDS / SequenceRate;
+        Const::BOSS_DOWN_HOLD_SECONDS / SequenceRate;
 
     reachedLoopPoint_ = false;
     downLoopStarted_ = false;
