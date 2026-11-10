@@ -48,10 +48,10 @@ void GameSceneTutorialState::Enter()
 
 	auto* skip = UIM().CreateImageUI(
 		L"Tutorial.Skip", ResourceKeys::TutorialSkip,
-		{ DxPlus::CLIENT_WIDTH - 155.0f, DxPlus::CLIENT_HEIGHT - 80.0f });
+		{ DxPlus::CLIENT_WIDTH - 175.0f, DxPlus::CLIENT_HEIGHT - 80.0f });
 	if (skip)
 	{
-		skip->SetScale(0.8f);
+		skip->SetScale(0.16f);
 		skip->SetZOrder(100);
 		skip->SetTrue();
 	}
