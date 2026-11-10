@@ -27,7 +27,6 @@ public:
 private:
     // Camera
     Camera::TargetCamera playerCamera_;
-	Camera::TargetCamera bossDieCamera_;
 	Camera::TargetCamera bossDownCamera_;
     Camera::CameraDirector cameraDirector_{ playerCamera_ };
 #ifndef NDEBUG
@@ -47,6 +46,9 @@ private:
     float attackSphereDebugRemaining_{};
     bool debugActorsPaused_{};
     bool showBossBodyCapsule_{ true };
+#ifdef _DEBUG
+    bool enableDebugDash_{};
+#endif
     // 前フレームの接触状態。触れ始めた瞬間だけ復帰させる。
     bool wasTouchingBossBody_{};
 

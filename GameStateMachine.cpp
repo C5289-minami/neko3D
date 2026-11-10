@@ -22,6 +22,12 @@ void GameStateMachine::Initialize()
     ChangeState(GameStateType::Title);
 }
 
+void GameStateMachine::End()
+{
+    SwitchState(nullptr);
+    initialized_ = false;
+}
+
 void GameStateMachine::ChangeState(GameStateType type)
 {
     if (initialized_ && currentType_ == type) return;

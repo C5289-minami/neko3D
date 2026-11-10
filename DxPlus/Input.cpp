@@ -27,6 +27,7 @@ namespace DxPlus::Input
     void Initialize()
     {
         DxWrapper::GetInstance().GetInputManager().Initialize();
+        DxLib::SetMouseDispFlag(FALSE);
 
         {
             RAWINPUTDEVICE device{};
@@ -57,12 +58,9 @@ namespace DxPlus::Input
 
         DxWrapper::GetInstance().GetInputManager().Update();
 
-        HWND hwnd = DxLib::GetMainWindowHandle();
-
-        bool active =
-            (GetForegroundWindow() == hwnd);
-
-        SetMouseCapture(mouseCaptureEnabled && active);
+        const HWND hwnd = DxLib::GetMainWindowHandle();
+        const bool active = hwnd != nullptr && GetForegroundWindow() == hwnd;
+        SetMouseCapture(mouseCaptureEnabled && active && !DxLib::GetMouseDispFlag());
     }
 
     void HandleRawInput(LPARAM lParam)
@@ -107,22 +105,18 @@ namespace DxPlus::Input
         if (mouseCaptured == capture)
             return;
 
-        HWND hwnd = DxLib::GetMainWindowHandle();
-
-        if (hwnd == nullptr)
-            return;
-
         if (!capture)
         {
             // 拘束解除
             ClipCursor(nullptr);
 
-            // カーソル表示
-            DxLib::SetMouseDispFlag(TRUE);
-
             mouseCaptured = false;
             return;
         }
+
+        const HWND hwnd = DxLib::GetMainWindowHandle();
+        if (hwnd == nullptr)
+            return;
 
         // ゲームのクライアント領域を取得
         RECT rect{};
@@ -151,13 +145,6 @@ namespace DxPlus::Input
 
         // ゲーム画面内に拘束
         ClipCursor(&clipRect);
-
-        // カーソル非表示
-#ifdef _DEBUG
-        DxLib::SetMouseDispFlag(TRUE);  // Debug: 表示
-#else
-        DxLib::SetMouseDispFlag(FALSE); // Release: 非表示
-#endif
 
         mouseCaptured = true;
     }

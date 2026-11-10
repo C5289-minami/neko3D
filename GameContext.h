@@ -73,6 +73,8 @@ public:
     // ---- lifecycle ----
     void Init();
     void Reset();
+    void PlacePlayerAtBattleStart();
+    void FaceBossTowardPlayer();
 
     void UpdateUltimateProjectiles(float deltaTime);
     void ClearUltimateProjectiles();

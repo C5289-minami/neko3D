@@ -41,7 +41,6 @@ GameSceneGameOverState::GameSceneGameOverState(GameStateMachine& gameStateMachin
 void GameSceneGameOverState::Enter()
 {
 	DxPlus::Debug::SetFormatString(L"GameSceneGameOverState::Enter");
-	DxLib::SetMouseDispFlag(TRUE);
 
 	// ゲームオーバーUI
 	{
@@ -342,6 +341,7 @@ void GameSceneGameOverState::Exit()
 	DxPlus::Debug::SetFormatString(
 		L"GameSceneGameOverState::Exit"
 	);
+	SoundManager::StopBGM(RM().GetSound(ResourceKeys::Sound_Rain));
 
 	if (auto* gameOver = UIM().GetUI(L"Result.GameOver"))
 		gameOver->Hide();

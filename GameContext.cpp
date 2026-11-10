@@ -15,6 +15,8 @@
 #include "SoundManager.h"
 #include "UIManager.h"
 #include "TwoFrameUIAnimator.h"
+#include <cmath>
+
 namespace
 {
 	struct PlayerHandUISetting
@@ -341,6 +343,24 @@ void GameContext::StopPlayerHandAnimation(
 	UIM().RemoveTwoFrameAnimator(
 		animatorId
 	);
+}
+
+void GameContext::PlacePlayerAtBattleStart()
+{
+	constexpr Vec3 TutorialSkipBattleOffset{ 0.0f, 0.0f, -1000.0f };
+	Vec3 position = stage.GetWorldPosition() + TutorialSkipBattleOffset;
+	position.y = stage.GetArenaSurfaceY() + Const::PLAYER_SKIN;
+	activePlayer->SetStartPosition(position);
+	activePlayer->ResetPosition();
+
+	const Vec3 toBoss = boss.GetWorldPosition() - position;
+	activePlayer->SetYaw(std::atan2(toBoss.x, toBoss.z));
+}
+
+void GameContext::FaceBossTowardPlayer()
+{
+	const Vec3 toPlayer = activePlayer->GetWorldPosition() - boss.GetWorldPosition();
+	boss.SetYaw(std::atan2(toPlayer.x, toPlayer.z) + DX_PI_F - stage.GetWorldRotation().y);
 }
 
 void GameContext::UpdateUltimateProjectiles(float deltaTime)

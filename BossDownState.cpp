@@ -13,8 +13,8 @@ namespace
     // SequenceRateが1.0のときのブレンド時間
     constexpr float BaseDownBlendSeconds = 0.8f;
 
-    // 2.0なら全体が2倍速、0.5なら全体が半分の速度
-    constexpr float SequenceRate = 0.3f;
+    // 怯みの再生とダウンに入るブレンドの速度。
+    constexpr float SequenceRate = 1.0f;
 }
 
 BossDownState::BossDownState(
@@ -26,8 +26,7 @@ BossDownState::BossDownState(
 
 void BossDownState::Enter()
 {
-    remainingSeconds_ =
-        Const::BOSS_FLINCH_HOLD_SECONDS / SequenceRate;
+    remainingSeconds_ = Const::BOSS_DOWN_HOLD_SECONDS;
 
     reachedLoopPoint_ = false;
     downLoopStarted_ = false;
@@ -97,6 +96,7 @@ void BossDownState::Tick(float deltaTime)
                 ResourceKeys::Sound_BossDump
             )
         );
+        return;
     }
 
     // Flinch再生中とDownへのブレンド中は維持時間を減らさない。

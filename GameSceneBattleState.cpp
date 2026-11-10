@@ -375,10 +375,13 @@ void GameSceneBattleState::Tick(float deltaTime)
 
     boss.Update(deltaTime);
 
-    boss.TurnToTarget(
-        player->GetWorldPosition(),
-        deltaTime
-    );
+    if (boss.IsAIActive())
+    {
+        boss.TurnToTarget(
+            player->GetWorldPosition(),
+            deltaTime
+        );
+    }
 
     // ========================================================
     // Boss攻撃判定
@@ -653,12 +656,8 @@ void GameSceneBattleState::SkipIntro()
 
     auto* gameContext = gameScene_.GetGameContext();
     auto& boss = gameContext->GetBoss();
-	//スキップ下ときのボスの向き調整
+    gameContext->FaceBossTowardPlayer();
     const Vec3 playerPosition = gameContext->GetPlayer()->GetWorldPosition();
-    const Vec3 toPlayer = playerPosition - boss.GetWorldPosition();
-	// ボスの向きはワールド回転を考慮して調整する
-    boss.SetYaw(std::atan2(toPlayer.x, toPlayer.z) + DX_PI_F -
-        gameContext->GetStage().GetWorldRotation().y);
 
     SoundManager::StopSE(RM().GetSound(ResourceKeys::Sound_BossEntrance));
     bossEntranceSoundPlayed_ = true;
