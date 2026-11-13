@@ -128,9 +128,11 @@ namespace ResourceKeys
 	inline constexpr const wchar_t* SpriteStudio_BossDownGauge = L"BossDownGauge";
 
 	// Effects
-	inline constexpr const wchar_t* Effect_Test = L"EffectTest";
+	inline constexpr const wchar_t* Effect_WalkDust = L"EffectWalkDust";
+	inline constexpr const wchar_t* Effect_Blink = L"EffectBlink";
+	inline constexpr const wchar_t* Effect_BossTailWhip = L"EffectBossTailWhip";
+	inline constexpr const wchar_t* Effect_BossSlam = L"EffectBossSlam";
 	inline constexpr const wchar_t* Effect_Impact = L"EffectImpact";
-	inline constexpr const wchar_t* Effect_PlayerAttack = L"EffectAttack";
 	inline constexpr const wchar_t* Effect_Kedama = L"EffectKedama";
 
 	// Music

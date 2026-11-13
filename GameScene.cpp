@@ -772,7 +772,6 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 
 
-	effectManager.Draw();
 	modelToonRenderer_.EndPass();
 	effectManager.Draw();
 #ifdef _DEBUG

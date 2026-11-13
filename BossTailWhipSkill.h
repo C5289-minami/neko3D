@@ -3,6 +3,9 @@
 #include "BossAttackType.h"
 #include "BossPoseSkill.h"
 #include "DxPlus/DxPlusConstants.h"
+#include "EffectManager.h"
+#include "ResourceKeys.h"
+#include "ResourceManager.h"
 
 class BossTailWhipSkill final : public BossPoseSkill
 {
@@ -81,6 +84,10 @@ private:
 		case AttackStateType::Attack:
 			// アニメーションの攻撃区間を再生する。
 			boss_.GetAnimation().PlayTo(43.0f);
+			EffectManager::PlayEffect(
+				RM().GetEffect(ResourceKeys::Effect_BossTailWhip),
+				boss_.GetWorldPosition(),
+				boss_.GetWorldRotation().y + DxPlus::PI);
 
 			// 横方向だけ強く揺らす
 			boss_.CameraShakeRequest(CameraShakeType::Horizontal, 0.3f, 30.0f);

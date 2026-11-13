@@ -159,8 +159,10 @@ void ResourceManager::LoadAll()
 	SetCreate3DSoundFlag(FALSE);
 
 	// Effects
-	LoadEffect(ResourceKeys::Effect_Test, L"./Data/Effects/suna.efkefc", 30.0f);
-	LoadEffect(ResourceKeys::Effect_PlayerAttack, L"./Data/Effects/attack.efkefc", 15.0f);
+	LoadEffect(ResourceKeys::Effect_WalkDust, L"./Data/Effects/suna.efkefc", 15.0f);
+	LoadEffect(ResourceKeys::Effect_Blink, L"./Data/Effects/blink.efkefc", 30.0f);
+	LoadEffect(ResourceKeys::Effect_BossTailWhip, L"./Data/Effects/boss_sippo.efkefc", 30.0f);
+	LoadEffect(ResourceKeys::Effect_BossSlam, L"./Data/Effects/boss_tataku.efkefc", 30.0f);
 	LoadEffect(ResourceKeys::Effect_Impact, L"./Data/Effects/wave.efkefc", 30.0f);
 	LoadEffect(ResourceKeys::Effect_Kedama, L"./Data/Effects/kedama.efkefc", 30.0f);
 }

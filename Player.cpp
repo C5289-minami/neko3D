@@ -23,6 +23,7 @@ namespace
 {
 	constexpr float GroundSnapDistance = 30.0f;
 	constexpr float WalkableNormalY = 0.7f;
+	constexpr float WalkDustInterval = 0.18f;
 }
 
 
@@ -43,15 +44,6 @@ Vec3 Player::GetAttackBallSpawnPosition() const
 	return GetPosition()
 		+ Vec3::Up() * (Const::PLAYER_HEIGHT * Const::PLAYER_ATTACK_BALL_HEIGHT_MULTIPLIER)
 		+ forward * (Const::PLAYER_RADIUS + Const::PLAYER_ATTACK_BALL_FORWARD_OFFSET);
-}
-
-void Player::PlayAttackEffect() const
-{
-	const int effectHandle = RM().GetEffect(ResourceKeys::Effect_PlayerAttack);
-	if (effectHandle < 0) return;
-
-	const Vec3 spawnPosition = GetAttackBallSpawnPosition();
-	EffectManager::PlayEffect(effectHandle, spawnPosition, GetYaw() + DX_PI_F);
 }
 
 void Player::SetAnimation(
@@ -149,6 +141,7 @@ void Player::Reset()
 	addDamage_ = 0;
 	controlLocked_ = false;
 	avoidInvTime_ = 0.0f;
+	walkDustCooldown_ = 0.0f;
   damageSlowTime_ = 0.0f;
 	// wasTouchingPillar_ = false;
 	wasTouchingModel_ = false;
@@ -563,6 +556,7 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 	}
 
 	UpdateFallRecovery(collision, modelOb, landedOnFirstFloor);
+	UpdateWalkDust(deltaTime, oldPosition);
 
 	// 足元を基準にしたカプセルで、補正後の接触も確認する。
 	// const Vec3 capsuleStart = GetPosition() + Vec3::Up() * Const::PLAYER_RADIUS;
@@ -588,6 +582,26 @@ void Player::Update(float deltaTime, ModelCollision& collision, const Vec3& move
 			std::cos(GetYaw())
 		)
 	);
+}
+
+void Player::UpdateWalkDust(float deltaTime, const Vec3& oldPosition)
+{
+	Vec3 step = GetPosition() - oldPosition;
+	step.y = 0.0f;
+	if (!isGrounded_ || GetCurrentState() != PlayerStateType::Walk ||
+		!input_.isMoving || knockbackVelocity_.LengthSq() > 0.0f || step.LengthSq() < 0.01f)
+	{
+		walkDustCooldown_ = 0.0f;
+		return;
+	}
+
+	walkDustCooldown_ -= deltaTime;
+	if (walkDustCooldown_ > 0.0f) return;
+	walkDustCooldown_ = WalkDustInterval;
+
+	const Vec3 footPosition = GetWorldPosition() + Vec3::Up() * 2.0f;
+	const int dustEffect = RM().GetEffect(ResourceKeys::Effect_WalkDust);
+	EffectManager::PlayEffect(dustEffect, footPosition, GetWorldRotation().y);
 }
 
 void Player::UpdateFallRecovery(

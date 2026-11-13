@@ -471,7 +471,6 @@ public:
 
     // 攻撃球の出現位置。
     Vec3 GetAttackBallSpawnPosition() const;
-    void PlayAttackEffect() const;
 
 
     // ========================================================
@@ -590,6 +589,7 @@ private:
     // ========================================================
 
     void UpdateMovement(float deltaTime);
+    void UpdateWalkDust(float deltaTime, const Vec3& oldPosition);
 
     void UpdateFallRecovery(
         const ModelCollision& collision,
@@ -655,6 +655,7 @@ private:
     Vec3 velocity_{ 0.0f, 0.0f, 0.0f };
 
     float moveRate_{ 1.0f };
+    float walkDustCooldown_{};
 
     bool isdefMove_{ false };
     bool controlLocked_{ false };
