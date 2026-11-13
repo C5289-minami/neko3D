@@ -346,11 +346,17 @@ void GameSceneGameOverState::Exit()
 	if (auto* gameOver = UIM().GetUI(L"Result.GameOver"))
 		gameOver->Hide();
 
-	if (auto* retry = UIM().GetButtonUI(L"Result.GameOverRetryButton"))
-		retry->Hide();
+    if (auto* retry = UIM().GetButtonUI(L"Result.GameOverRetryButton"))
+    {
+        retry->SetSelected(false);
+        retry->Hide();
+    }
 
-	if (auto* toTitle = UIM().GetButtonUI(L"Result.GameOverToTitleButton"))
-		toTitle->Hide();
+    if (auto* toTitle = UIM().GetButtonUI(L"Result.GameOverToTitleButton"))
+    {
+        toTitle->SetSelected(false);
+        toTitle->Hide();
+    }
 
 	if (auto* context =
 		gameScene_.GetGameContext())
