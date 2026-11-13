@@ -28,8 +28,6 @@ void PlayerAttackState::Enter()
 	stateMachine_.NotifyEvent(PlayerActionEvent::Attacked);
 	ballActive_ = !player_.IsDead();
 
-	//player_.PlayAttackEffect();
-
 	SoundManager::PlaySE(
 		RM().GetSound(
 			ResourceKeys::Sound_PlayerDamage
