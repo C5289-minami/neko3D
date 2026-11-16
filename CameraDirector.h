@@ -8,6 +8,7 @@
 #include "CameraShake.h"
 
 #include <vector>
+#include <optional>
 #include <string>
 #include <unordered_map>
 
@@ -66,6 +67,11 @@ namespace Camera
 
 		// 描画パスで同じカメラ姿勢を再適用する
 		void ApplyRenderPose() const;
+
+        // Drawing override does not change scripted camera state.
+        void SetRenderOverride(const CameraPose& pose);
+        void ClearRenderOverride() { renderOverride_.reset(); }
+        const CameraPose& GetRenderPose() const { return renderOverride_ ? *renderOverride_ : renderPose_; }
 
 		// 現在使用中のカメラ
 		Camera* GetActiveCamera() const;
@@ -148,6 +154,7 @@ namespace Camera
 
 		CameraPose currentPose_{};
 		CameraPose renderPose_{};
+        std::optional<CameraPose> renderOverride_;
 		CameraPose followStartPose_{};
 
 		Mode mode_{ Mode::FollowingCamera };

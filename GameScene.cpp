@@ -30,6 +30,7 @@ GameScene::GameScene(GameContext* context)
 
 void GameScene::Init()
 {
+    presentationCamera_.Reset(cameraDirector_);
 	ResetForTitle();
 	battleEventActive_ = false;
 	battleLetterboxMotion_.Reset();
@@ -323,6 +324,14 @@ void GameScene::Render() const
 	}
 }
 
+void GameScene::UpdatePresentationView(float realDeltaTime)
+{
+    const auto* player = gameContext->GetPlayer();
+    if (!player) return;
+    presentationCamera_.Update(realDeltaTime, player->GetWorldPosition(),
+        gameContext->GetBoss().GetWorldPosition(), cameraDirector_);
+}
+
 void GameScene::DrawImGui()
 {
 #ifndef NDEBUG
@@ -570,6 +579,7 @@ void GameScene::DrawImGui()
 			player->ApplyKnockback({ 1, 0, 0 }, 10000.0f, 0.1f);
 
 		ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
+        presentationCamera_.DrawImGui(player->GetWorldPosition(), cameraDirector_);
 	}
 
 	ImGui::End();
@@ -786,6 +796,7 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 void GameScene::End()
 {
+    presentationCamera_.Reset(cameraDirector_);
 	stateMachine_.End();
 	SoundManager::StopBGM(RM().GetMusic(ResourceKeys::Music_Title));
 	SoundManager::StopBGM(RM().GetMusic(ResourceKeys::Music_Battle));

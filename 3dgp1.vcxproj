@@ -211,6 +211,7 @@
     <ClInclude Include="BossTailWhipSkill.h" />
     <ClInclude Include="ButtonLabel.h" />
     <ClInclude Include="CameraDirector.h" />
+    <ClInclude Include="PresentationCamera.h" />
     <ClInclude Include="CameraObjectManager.h" />
     <ClInclude Include="CameraPose.h" />
     <ClInclude Include="CameraShake.h" />

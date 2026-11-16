@@ -18,6 +18,7 @@
 
 void GameTestScene::Init()
 {
+    presentationCamera_.Reset(cameraDirector_);
 	Collision::ResetTransparentModels();
 	gameContext->Reset();
 	gameContext->PlacePlayerAtBattleStart();
@@ -47,10 +48,7 @@ void GameTestScene::Init()
 	playerCamera_.Update(player->GetWorldPosition(), boss.GetWorldPosition(), 1.0f);
 	cameraDirector_.SwitchCamera(playerCamera_, 0.0f);
 	cameraDirector_.Update(0.0f);
-#ifndef NDEBUG
-	freeCamera_.Reset();
-	wasFreeCameraToggleDown_ = false;
-#endif
+
 
 	ToonSettingsManager::Load();
 	OutlineSettingsManager::Load();
@@ -97,55 +95,8 @@ void GameTestScene::Update(float deltaTime)
 		attackSphereDebugRemaining_ - (std::max)(0.0f, deltaTime));
 #endif
 
-	// =============================
-	// FreeCamera
-	// =============================
-#ifndef NDEBUG
-	const bool toggleDown =
-		DxLib::CheckHitKey(KEY_INPUT_LALT) != 0 &&
-		DxLib::CheckHitKey(KEY_INPUT_RETURN) != 0;
+    // Simulation runs independently from the presentation camera.
 
-	if (toggleDown && !wasFreeCameraToggleDown_)
-	{
-		if (cameraDirector_.GetActiveCamera() == &freeCamera_)
-		{
-			cameraDirector_.SwitchCamera(playerCamera_);
-		}
-		else
-		{
-			freeCamera_.Initialize(
-				playerCamera_.GetPosition(),
-				playerCamera_.GetTarget());
-
-			cameraDirector_.SwitchCamera(freeCamera_);
-		}
-	}
-
-	wasFreeCameraToggleDown_ = toggleDown;
-
-	const bool shiftHeld = DxLib::CheckHitKey(KEY_INPUT_LSHIFT) != 0 ||
-		DxLib::CheckHitKey(KEY_INPUT_RSHIFT) != 0;
-	if (DxLib::CheckHitKey(KEY_INPUT_R) != 0 && !shiftHeld)
-		freeCamera_.ResetView();
-
-	if (DxLib::CheckHitKey(KEY_INPUT_F) != 0)
-		freeCamera_.FocusAt(gameContext->GetPlayer()->GetPosition());
-
-	DxPlus::Debug::SetString(
-		L" R: Transformリセット, F: FreeCameraをプレイヤーにフォーカス");
-
-	if (cameraDirector_.GetActiveCamera() == &freeCamera_)
-	{
-		gameContext->StopTailWhipSound();
-		if (!freeCamera_.IsSceneViewActive() &&
-			(DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
-		{
-			freeCamera_.Update(deltaTime);
-		}
-		cameraDirector_.Update(deltaTime);
-	}
-	else
-#endif
 	{
 		auto* player = gameContext->GetPlayer();
 		auto& boss = gameContext->GetBoss();
@@ -465,6 +416,14 @@ void GameTestScene::Render() const
 #endif
 }
 
+void GameTestScene::UpdatePresentationView(float realDeltaTime)
+{
+    const auto* player = gameContext->GetPlayer();
+    if (!player) return;
+    presentationCamera_.Update(realDeltaTime, player->GetWorldPosition(),
+        gameContext->GetBoss().GetWorldPosition(), cameraDirector_);
+}
+
 void GameTestScene::DrawImGui()
 {
 #ifndef NDEBUG
@@ -655,6 +614,7 @@ void GameTestScene::DrawImGui()
 			player->SetUltimateGauge(0.0f);
 
 		ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
+        presentationCamera_.DrawImGui(player->GetWorldPosition(), cameraDirector_);
 
 	}
 	ImGui::End();
@@ -663,6 +623,7 @@ void GameTestScene::DrawImGui()
 
 void GameTestScene::End()
 {
+    presentationCamera_.Reset(cameraDirector_);
 	gameContext->StopTailWhipSound();
 	gameContext->ClearUltimateProjectiles();
 	Collision::ResetTransparentModels();

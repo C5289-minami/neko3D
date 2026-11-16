@@ -1,4 +1,4 @@
-
+ï»¿
 #pragma once
 
 #include "Scene.h"
@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "Collision.h"
 #include "CameraDirector.h"
+#include "PresentationCamera.h"
 
 class Boss;
 class Player;
@@ -20,6 +21,7 @@ public:
     void Update(float deltaTime) override;
     void Render() const override;
     void DrawImGui() override;
+    void UpdatePresentationView(float realDeltaTime) override;
     void End() override;
 
 	void UpdateTailWhipGimmick();
@@ -29,16 +31,13 @@ private:
     Camera::TargetCamera playerCamera_;
 	Camera::TargetCamera bossDownCamera_;
     Camera::CameraDirector cameraDirector_{ playerCamera_ };
-#ifndef NDEBUG
-    Camera::FreeCamera freeCamera_;
-    bool wasFreeCameraToggleDown_{};
-#endif
+    PresentationCamera presentationCamera_;
 
     // Shader
     ModelToonRenderer modelToonRenderer_{};
     ShaderEffectController shaderEffects_{};
 
-    // K”öUŒ‚‚ÌƒfƒoƒbƒO•`‰æ‚Æ–{”»’è‚Å‹¤—L‚·‚éƒJƒvƒZƒ‹B
+    // å°»å°¾æ”»æ’ƒã®ãƒ‡ãƒãƒƒã‚°æç”»ã¨æœ¬åˆ¤å®šã§å…±æœ‰ã™ã‚‹ã‚«ãƒ—ã‚»ãƒ«ã€‚
     Collision::Capsule tailWhipHitCapsule_{};
 
     // Debug
@@ -49,7 +48,7 @@ private:
 #ifdef _DEBUG
     bool enableDebugDash_{};
 #endif
-    // ‘OƒtƒŒ[ƒ€‚ÌÚGó‘ÔBG‚ên‚ß‚½uŠÔ‚¾‚¯•œ‹A‚³‚¹‚éB
+    // å‰ãƒ•ãƒ¬ãƒ¼ãƒ ã®æ¥è§¦çŠ¶æ…‹ã€‚è§¦ã‚Œå§‹ã‚ãŸç¬é–“ã ã‘å¾©å¸°ã•ã›ã‚‹ã€‚
     bool wasTouchingBossBody_{};
 
     // Rendering
@@ -57,7 +56,7 @@ private:
     void RenderDepth() const;
     void DrawAttackSphereDebug() const;
 
-	bool wasTailWhipActive_{ false }; // ‘OƒtƒŒ[ƒ€‚ÅK”öUŒ‚‚ª—LŒø‚¾‚Á‚½‚©‚Ç‚¤‚©
+	bool wasTailWhipActive_{ false }; // å‰ãƒ•ãƒ¬ãƒ¼ãƒ ã§å°»å°¾æ”»æ’ƒãŒæœ‰åŠ¹ã ã£ãŸã‹ã©ã†ã‹
 
    void UpdateCameraShake(Boss& boss, Player& player);
 };

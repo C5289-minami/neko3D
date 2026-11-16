@@ -180,6 +180,7 @@ bool SceneManager::SuppressPresentationInput() const
 {
 #ifndef NDEBUG
     return runConfig.presentationMode && (suppressPauseChord ||
+        (DxLib::CheckHitKey(KEY_INPUT_LALT) && DxLib::CheckHitKey(KEY_INPUT_RETURN)) ||
         (ImGui::GetCurrentContext() && (ImGui::GetIO().WantCaptureKeyboard || ImGui::GetIO().WantCaptureMouse)));
 #else
     return false;
