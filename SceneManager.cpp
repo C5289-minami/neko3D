@@ -181,6 +181,17 @@ void SceneManager::AdvancePresentation(int direction)
 #endif
 }
 
+void SceneManager::RequestBattleTestCat(int index)
+{
+#ifndef NDEBUG
+    if (index < 0 || index >= 3) return;
+    presentationBattleCat = index;
+    RequestPresentationScene(SceneID::GameTest);
+#else
+    (void)index;
+#endif
+}
+
 bool SceneManager::SuppressPresentationInput() const
 {
 #ifndef NDEBUG

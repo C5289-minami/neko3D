@@ -21,6 +21,7 @@ void GameTestScene::Init()
     presentationCamera_.Reset(cameraDirector_);
 	Collision::ResetTransparentModels();
 	gameContext->Reset();
+    gameContext->SelectPresentationCat(SM().GetPresentationBattleCat());
 	gameContext->PlacePlayerAtBattleStart();
 	gameContext->FaceBossTowardPlayer();
 
@@ -442,6 +443,10 @@ void GameTestScene::DrawImGui()
 
 	{
 		auto* player = gameContext->GetPlayer();
+        const char* const catNames[] = { u8"ミケ", u8"サビ", u8"クロ" };
+        int catIndex = SM().GetPresentationBattleCat();
+        if (ImGui::Combo(u8"猫の種類（変更すると実演を再開）", &catIndex, catNames, 3))
+            SM().RequestBattleTestCat(catIndex);
 
 #ifdef _DEBUG
 		ImGui::Checkbox(u8"Shift長押しで移動速度を5倍にする", &enableDebugDash_);
@@ -680,12 +685,8 @@ void GameTestScene::RenderDepth() const
 		modelToonRenderer_.DrawDepth(model);
 	}
 
-	// PlayerとBoss
-	for (const auto& preview :
-		gameContext->GetSelectPreviewPlayers())
-	{
-		modelToonRenderer_.DrawDepth(preview.GetModelObject());
-	}
+	// Draw only the active cat; basket preview actors are not part of this test.
+    modelToonRenderer_.DrawDepth(player->GetModelObject());
 
 	modelToonRenderer_.DrawDepth(boss.GetModelObject());
 }
@@ -700,8 +701,6 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	const auto& effectManager = gameContext->GetEffectManager();
 	const auto& grid = gameContext->GetGrid();
 	const auto& room = gameContext->GetRoom();
-	const auto& selectPlayers =
-		gameContext->GetSelectPreviewPlayers();
 
 	// トゥーンシェーダーを使わない場合
 	if (!toonEnabled)
@@ -711,10 +710,6 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 		boss.Draw();
 		stage.Draw();
 		player->Draw();
-		for (const auto& preview : selectPlayers)
-		{
-			preview.Draw();
-		}
 		effectManager.Draw();
 		grid.Draw();
 		room.Draw();
@@ -754,10 +749,6 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	drawModel(player->GetModelObject());
 
 
-	for (const auto& preview : selectPlayers)
-	{
-		drawModel(preview.GetModelObject());
-	}
 
 	// Stage
 	drawModel(stage.GetModelObject());

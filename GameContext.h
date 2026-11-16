@@ -74,6 +74,7 @@ public:
     void Init();
     void Reset();
     void PlacePlayerAtBattleStart();
+    bool SelectPresentationCat(int index);
     void FaceBossTowardPlayer();
 
     void UpdateUltimateProjectiles(float deltaTime);

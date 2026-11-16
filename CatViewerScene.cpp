@@ -2,6 +2,7 @@
 
 #include "ResourceKeys.h"
 #include "ResourceManager.h"
+#include "SceneManager.h"
 #include "DxConv.h"
 
 #include <algorithm>
@@ -198,7 +199,17 @@ void CatViewerScene::DrawImGui()
     ImGui::SetNextWindowSize(ImVec2(420, 520), ImGuiCond_FirstUseEver);
     if (ImGui::Begin(u8"猫のアニメーション鑑賞"))
     {
-        ImGui::TextUnformatted(u8"ミケ / ゲームとは独立した鑑賞用モデル");
+        const wchar_t* const modelKeys[] = {
+            ResourceKeys::Model_Player.mike, ResourceKeys::Model_Player.sabi, ResourceKeys::Model_Player.kuro
+        };
+        const char* const catNames[] = { u8"ミケ", u8"サビ", u8"クロ" };
+        int catIndex = 0;
+        for (int i = 0; i < 3; ++i) if (GetModelKey() == modelKeys[i]) catIndex = i;
+        if (ImGui::Combo(u8"猫の種類", &catIndex, catNames, 3)) SetModelKey(modelKeys[catIndex]);
+        ImGui::TextWrapped(u8"種類を変更しても、アニメーションの再生位置・再生状態・カメラの角度を維持します。");
+        if (ImGui::Button(u8"この猫で実践テストを開始")) SM().RequestBattleTestCat(catIndex);
+        ImGui::TextWrapped(u8"このボタンは実践テストにだけ反映されます。本編のキャラクター選択は通常どおりです。");
+        ImGui::Separator();
         if (ImGui::BeginCombo(u8"アニメーション", Clips[clipIndex_].label))
         {
             for (int i = 0; i < static_cast<int>(Clips.size()); ++i)

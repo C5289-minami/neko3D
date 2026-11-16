@@ -72,6 +72,8 @@ public:
     bool IsPresentationMode() const { return runConfig.presentationMode; }
     void RequestPresentationScene(SceneID id) { pendingScene = GetScene(id); }
     void AdvancePresentation(int direction);
+    void RequestBattleTestCat(int index);
+    int GetPresentationBattleCat() const { return presentationBattleCat; }
     void DrawPresentationControls();
     bool SuppressPresentationInput() const;
     bool IsPresentationPaused() const { return runConfig.presentationMode && presentationClock.IsPaused(); }
@@ -113,6 +115,7 @@ private:
     void SwitchSceneImmediate(Scene* target);
     Scene* pendingScene = nullptr;
     bool wasF11Down = false;
+    int presentationBattleCat = 0;
     PresentationClock presentationClock;
     bool wasPauseDown = false;
     bool wasStepDown = false;
