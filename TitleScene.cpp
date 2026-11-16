@@ -1,4 +1,4 @@
-// =============================
+ï»¿// =============================
 // Scenes/Title/TitleScene.cpp
 // =============================
 #include "TitleScene.h"
@@ -82,24 +82,11 @@ void TitleScene::Render() const
 #ifndef NDEBUG
 void TitleScene::DrawImGui()
 {
-	const char* f1 = u8"F1: ƒXƒvƒXƒ^ƒeƒXƒgƒV[ƒ“";
-	const char* f2 = u8"F2: ƒVƒF[ƒ_[ƒeƒXƒgƒV[ƒ“";
-	const char* f3 = u8"F3: •”‰®ƒeƒXƒgƒV[ƒ“";
-	const char* f4 = u8"F4: ƒLƒƒƒ‰ƒeƒXƒgƒV[ƒ“";
-	const char* f5 = u8"F5: Model Config";
-	const char* f6 = u8"F6: ƒQ[ƒ€ƒV[ƒ“‚Ö‘JˆÚ";
-	const char* Enter = u8"Enter: ƒQ[ƒ€TestƒV[ƒ“‚Ö‘JˆÚ";
-
-	ImGui::Begin("TitleScene Debug Menu");
-
-	ImGui::TextWrapped(f1);
-	ImGui::TextWrapped(f2);
-	ImGui::TextWrapped(f3);
-	ImGui::TextWrapped(f4);
-	ImGui::TextWrapped(f5);
-	ImGui::TextWrapped(f6);
-	ImGui::TextWrapped(Enter);
-
-	ImGui::End();
+    ImGui::Begin("TitleScene Debug Menu");
+    ImGui::TextUnformatted("F1: SpriteStudio / F2: Shader / F3: Motion & Room");
+    ImGui::TextUnformatted("F4: Status / F5: Model Config / F6: Game");
+    ImGui::TextUnformatted("Enter: Battle Test");
+    ImGui::TextUnformatted("M: Next / Shift+M: Previous / F11: Scene Menu / F10: Hide UI");
+    ImGui::End();
 }
 #endif

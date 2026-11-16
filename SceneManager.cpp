@@ -11,6 +11,10 @@
 #include "OutlineSettings.h"
 
 #include <vector>
+#include <array>
+#ifndef NDEBUG
+#include "imgui.h"
+#endif
 
 void SceneManager::Init()
 {
@@ -129,6 +133,75 @@ Scene* SceneManager::GetScene(SceneID id)
 	return &titleScene;
 }
 
+namespace
+{
+#ifndef NDEBUG
+    constexpr std::array<SceneID, 7> PresentationOrder{
+        SceneID::SsFlipTest, SceneID::ShaderTest, SceneID::NekoMotionTest,
+        SceneID::StatusTest, SceneID::ModelConfig, SceneID::Game, SceneID::GameTest
+    };
+    const char* const PresentationNames[] = {
+        "F1: SpriteStudio", "F2: Shader", "F3: Motion / Room",
+        "F4: Status", "F5: Model Config", "F6: Game", "Enter: Battle Test"
+    };
+#endif
+}
+
+void SceneManager::SwitchSceneImmediate(Scene* target)
+{
+    if (!target) return;
+    if (scene) { scene->End(); scene->SetNextScene(nullptr); }
+    gameContext.StopTailWhipSound();
+    gameContext.ClearUltimateProjectiles();
+    Collision::ResetTransparentModels();
+    SetScene(target);
+    UIM().Init();
+    scene->Init();
+    scene->SetNextScene(nullptr);
+    scene->StartFadeIn(0.0f);
+}
+
+void SceneManager::AdvancePresentation(int direction)
+{
+#ifndef NDEBUG
+    int index = -1;
+    for (int i = 0; i < static_cast<int>(PresentationOrder.size()); ++i)
+        if (GetScene(PresentationOrder[i]) == scene) index = i;
+    const int next = index < 0 ? (direction > 0 ? 0 : 6) : index + direction;
+    pendingScene = next < 0 || next >= static_cast<int>(PresentationOrder.size())
+        ? GetScene(SceneID::Title) : GetScene(PresentationOrder[next]);
+#else
+    (void)direction;
+#endif
+}
+
+void SceneManager::DrawPresentationControls()
+{
+#ifndef NDEBUG
+    if (!runConfig.presentationMode) return;
+    ImGui::Begin(u8"発表コントロール");
+    ImGui::TextUnformatted(u8"F11: 選択画面 / M: 次 / Shift+M: 前 / F10: UI表示");
+    int index = -1;
+    for (int i = 0; i < static_cast<int>(PresentationOrder.size()); ++i)
+        if (GetScene(PresentationOrder[i]) == scene) index = i;
+    ImGui::Text(u8"現在: %s", index >= 0 ? PresentationNames[index] : "Scene Menu / Result");
+    ImGui::Text(u8"次: %s", index < 6 ? PresentationNames[index + 1] : "Scene Menu");
+    if (ImGui::Button(u8"選択画面へ (F11)")) RequestPresentationScene(SceneID::Title);
+    ImGui::SameLine();
+    if (ImGui::Button(u8"前へ")) AdvancePresentation(-1);
+    ImGui::SameLine();
+    if (ImGui::Button(u8"次へ (M)")) AdvancePresentation(1);
+    if (ImGui::BeginCombo(u8"直接移動", u8"シーンを選択"))
+    {
+        for (int i = 0; i < static_cast<int>(PresentationOrder.size()); ++i)
+            if (ImGui::Selectable(PresentationNames[i], index == i))
+                RequestPresentationScene(PresentationOrder[i]);
+        ImGui::EndCombo();
+    }
+    ImGui::End();
+#endif
+}
+
 void SceneManager::Run()
 {
 	if (scene)
@@ -143,10 +216,29 @@ void SceneManager::Run()
 		const bool f11Down = DxLib::CheckHitKey(KEY_INPUT_F11) != 0;
 		if (f11Down && !wasF11Down && scene && scene != &titleScene)
 		{
-			scene->SetNextScene(&titleScene);
-			scene->StartFadeOut();
+            pendingScene = &titleScene;
 		}
-		wasF11Down = f11Down;
+        wasF11Down = f11Down;
+#ifndef NDEBUG
+        const bool mDown = DxLib::CheckHitKey(KEY_INPUT_M) != 0;
+        const bool f10Down = DxLib::CheckHitKey(KEY_INPUT_F10) != 0;
+        const bool capturing = ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard;
+        if (runConfig.presentationMode && !capturing)
+        {
+            if (mDown && !wasMDown)
+                AdvancePresentation(DxLib::CheckHitKey(KEY_INPUT_LSHIFT) ||
+                    DxLib::CheckHitKey(KEY_INPUT_RSHIFT) ? -1 : 1);
+            if (f10Down && !wasF10Down) showPresentationUI = !showPresentationUI;
+        }
+        wasMDown = mDown;
+        wasF10Down = f10Down;
+#endif
+        if (pendingScene)
+        {
+            Scene* target = pendingScene;
+            pendingScene = nullptr;
+            SwitchSceneImmediate(target);
+        }
 
 		if (scene)
 		{
@@ -178,7 +270,7 @@ void SceneManager::Run()
 				next->Init();
 			}
 #ifndef NDEBUG
-			DxPlus::Debug::Draw();
+            if (showPresentationUI) DxPlus::Debug::Draw();
 #endif
 			scene->DrawFadeOverlay();
 
@@ -188,8 +280,12 @@ void SceneManager::Run()
 			if (runConfig.enableDebugUI && runConfig.windowed)
 			{
 				debugUI.BeginFrame();
-				debugUI.Draw(gameContext);
-				scene->DrawImGui();
+                if (showPresentationUI)
+                {
+                    debugUI.Draw(gameContext);
+                    scene->DrawImGui();
+                    DrawPresentationControls();
+                }
 				debugUI.EndFrame();
 			}
 #endif

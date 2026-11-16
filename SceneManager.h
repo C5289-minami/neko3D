@@ -1,4 +1,4 @@
-// =============================
+ï»¿// =============================
 // Scenes/Base/SceneManager.h
 // =============================
 #pragma once
@@ -61,19 +61,26 @@ public:
         if (scene == &modelConfigScene) return SceneID::ModelConfig;
 	    if (scene == &gameTestScene) return SceneID::GameTest;
 #endif
-        return SceneID::Title; // ƒfƒtƒHƒ‹ƒg‚Íƒ^ƒCƒgƒ‹ƒV[ƒ“
+        return SceneID::Title; // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã¯ã‚¿ã‚¤ãƒˆãƒ«ã‚·ãƒ¼ãƒ³
 	}
+
+    // ImGui commands are applied before the next simulation update.
+    bool IsPresentationMode() const { return runConfig.presentationMode; }
+    void RequestPresentationScene(SceneID id) { pendingScene = GetScene(id); }
+    void AdvancePresentation(int direction);
+    void DrawPresentationControls();
 
     GameContext& GetGameState() { return gameContext; }
 
-    // ƒRƒs[‹Ö~
+    // ã‚³ãƒ”ãƒ¼ç¦æ­¢
     SceneManager(const SceneManager&) = delete;
     SceneManager& operator=(const SceneManager&) = delete;
 
     struct RunConfig
     {
-        bool windowed = true;           // Release‚Å‚àØ‘Ö‰Â
-        bool enableDebugUI = true;      // Debugê—p‚É‚µ‚½‚¢‚È‚ç main ‚Å false ‚É‚·‚é
+        bool presentationMode = true;
+        bool windowed = true;           // Releaseã§ã‚‚åˆ‡æ›¿å¯
+        bool enableDebugUI = true;      // Debugå°‚ç”¨ã«ã—ãŸã„ãªã‚‰ main ã§ false ã«ã™ã‚‹
         int fpsCap = Const::FPS_CAP;
     };
     void SetRunConfig(const RunConfig& cfg) { runConfig = cfg; }
@@ -94,10 +101,15 @@ private:
     ModelConfigScene modelConfigScene{ &gameContext };
     GameTestScene gameTestScene{ &gameContext };
 #endif
-    Scene* scene = nullptr; // Œ»İ‚ÌƒV[ƒ“
+    Scene* scene = nullptr; // ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³
+    void SwitchSceneImmediate(Scene* target);
+    Scene* pendingScene = nullptr;
     bool wasF11Down = false;
+    bool wasMDown = false;
+    bool wasF10Down = false;
+    bool showPresentationUI = true;
 
     RunConfig runConfig{};
     DebugUI debugUI;
 };
-inline SceneManager& SM() { return SceneManager::GetInstance(); } // ƒVƒ‡[ƒgƒJƒbƒg
+inline SceneManager& SM() { return SceneManager::GetInstance(); } // ã‚·ãƒ§ãƒ¼ãƒˆã‚«ãƒƒãƒˆ
