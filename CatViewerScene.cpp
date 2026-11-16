@@ -196,7 +196,9 @@ void CatViewerScene::Render() const
 void CatViewerScene::DrawImGui()
 {
 #ifndef NDEBUG
-    ImGui::SetNextWindowPos(ImVec2((std::max)(500.0f, ImGui::GetIO().DisplaySize.x - 520.0f), 20), ImGuiCond_FirstUseEver);
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + (std::max)(500.0f, viewport->WorkSize.x - 520.0f),
+        viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(500, 640), ImGuiCond_FirstUseEver);
     if (ImGui::Begin(u8"猫のアニメーション鑑賞"))
     {

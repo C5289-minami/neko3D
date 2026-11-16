@@ -384,6 +384,9 @@
     <ClInclude Include="imgui\backends\imgui_impl_win32.h">
       <Filter>imgui\backends</Filter>
     </ClInclude>
+    <ClInclude Include="UiFramebufferScale.h">
+      <Filter>AboutDebug</Filter>
+    </ClInclude>
     <ClInclude Include="DebugUI.h">
       <Filter>AboutDebug</Filter>
     </ClInclude>

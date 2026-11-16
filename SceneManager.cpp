@@ -213,7 +213,8 @@ void SceneManager::DrawPresentationControls()
 {
 #ifndef NDEBUG
     if (!runConfig.presentationMode) return;
-    ImGui::SetNextWindowPos(ImVec2(20, 20), ImGuiCond_FirstUseEver);
+    const ImVec2 origin = ImGui::GetMainViewport()->WorkPos;
+    ImGui::SetNextWindowPos(ImVec2(origin.x + 20, origin.y + 20), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(460, 680), ImGuiCond_FirstUseEver);
     ImGui::Begin(u8"発表コントロール");
     ImGui::TextWrapped(u8"F11: 選択画面 / M: 次 / Shift+M: 前 / F10: UI表示");
