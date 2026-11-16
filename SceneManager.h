@@ -3,6 +3,7 @@
 // =============================
 #pragma once
 #include "Scene.h"
+#include "PresentationClock.h"
 #include "GameContext.h"
 #include "DebugUI.h"
 #include "Consts.h"
@@ -69,6 +70,9 @@ public:
     void RequestPresentationScene(SceneID id) { pendingScene = GetScene(id); }
     void AdvancePresentation(int direction);
     void DrawPresentationControls();
+    bool SuppressPresentationInput() const;
+    bool IsPresentationPaused() const { return runConfig.presentationMode && presentationClock.IsPaused(); }
+    PresentationClock& GetPresentationClock() { return presentationClock; }
 
     GameContext& GetGameState() { return gameContext; }
 
@@ -105,6 +109,10 @@ private:
     void SwitchSceneImmediate(Scene* target);
     Scene* pendingScene = nullptr;
     bool wasF11Down = false;
+    PresentationClock presentationClock;
+    bool wasPauseDown = false;
+    bool wasStepDown = false;
+    bool suppressPauseChord = false;
     bool wasMDown = false;
     bool wasF10Down = false;
     bool showPresentationUI = true;

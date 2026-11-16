@@ -154,6 +154,7 @@ void SceneManager::SwitchSceneImmediate(Scene* target)
     gameContext.StopTailWhipSound();
     gameContext.ClearUltimateProjectiles();
     Collision::ResetTransparentModels();
+    presentationClock.Reset();
     SetScene(target);
     UIM().Init();
     scene->Init();
@@ -172,6 +173,16 @@ void SceneManager::AdvancePresentation(int direction)
         ? GetScene(SceneID::Title) : GetScene(PresentationOrder[next]);
 #else
     (void)direction;
+#endif
+}
+
+bool SceneManager::SuppressPresentationInput() const
+{
+#ifndef NDEBUG
+    return runConfig.presentationMode && (suppressPauseChord ||
+        (ImGui::GetCurrentContext() && (ImGui::GetIO().WantCaptureKeyboard || ImGui::GetIO().WantCaptureMouse)));
+#else
+    return false;
 #endif
 }
 
@@ -198,6 +209,17 @@ void SceneManager::DrawPresentationControls()
                 RequestPresentationScene(PresentationOrder[i]);
         ImGui::EndCombo();
     }
+    ImGui::Separator();
+    ImGui::TextUnformatted(u8"Q+E: 停止/再開 / F9: 1フレーム送り (1/60秒)");
+    if (ImGui::Button(presentationClock.IsPaused() ? u8"再開" : u8"時間停止"))
+        presentationClock.TogglePaused();
+    ImGui::SameLine();
+    if (ImGui::Button(u8"1フレーム送り (F9)")) presentationClock.Step();
+    float speed = presentationClock.GetSpeed();
+    if (ImGui::SliderFloat(u8"ゲーム速度", &speed, 0.05f, 2.0f, "%.2fx")) presentationClock.SetSpeed(speed);
+    if (ImGui::Button("0.25x")) presentationClock.SetSpeed(0.25f);
+    ImGui::SameLine();
+    if (ImGui::Button("1.0x")) presentationClock.SetSpeed(1.0f);
     ImGui::End();
 #endif
 }
@@ -222,14 +244,27 @@ void SceneManager::Run()
 #ifndef NDEBUG
         const bool mDown = DxLib::CheckHitKey(KEY_INPUT_M) != 0;
         const bool f10Down = DxLib::CheckHitKey(KEY_INPUT_F10) != 0;
-        const bool capturing = ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureKeyboard;
+        const bool capturing = ImGui::GetCurrentContext() && ImGui::GetIO().WantTextInput;
         if (runConfig.presentationMode && !capturing)
         {
             if (mDown && !wasMDown)
                 AdvancePresentation(DxLib::CheckHitKey(KEY_INPUT_LSHIFT) ||
                     DxLib::CheckHitKey(KEY_INPUT_RSHIFT) ? -1 : 1);
-            if (f10Down && !wasF10Down) showPresentationUI = !showPresentationUI;
+
         }
+        if (runConfig.presentationMode && f10Down && !wasF10Down) showPresentationUI = !showPresentationUI;
+        const bool qDown = DxLib::CheckHitKey(KEY_INPUT_Q) != 0;
+        const bool eDown = DxLib::CheckHitKey(KEY_INPUT_E) != 0;
+        const bool pauseDown = qDown && eDown;
+        const bool stepDown = DxLib::CheckHitKey(KEY_INPUT_F9) != 0;
+        if (runConfig.presentationMode && !capturing)
+        {
+            if (pauseDown && !wasPauseDown) { presentationClock.TogglePaused(); suppressPauseChord = true; }
+            if (stepDown && !wasStepDown) presentationClock.Step();
+        }
+        if (!qDown && !eDown) suppressPauseChord = false;
+        wasPauseDown = pauseDown;
+        wasStepDown = stepDown;
         wasMDown = mDown;
         wasF10Down = f10Down;
 #endif
@@ -245,12 +280,16 @@ void SceneManager::Run()
 			DxLib::ClearDrawScreen();
 
 
-			float deltaTime = DxPlus::GetDeltaTime();
-			scene->Drive(deltaTime);
+            const float realDeltaTime = DxPlus::GetDeltaTime();
+            const float deltaTime = runConfig.presentationMode
+                ? presentationClock.Advance(realDeltaTime) : realDeltaTime;
+            // Zero dt would still process input, state transitions and damage.
+            if (deltaTime > 0.0f) scene->Drive(deltaTime);
+            scene->UpdatePresentationView(realDeltaTime);
 #ifdef _DEBUG
 			Collision::UpdateDebug();
 #endif
-			UIM().Update(deltaTime);
+            if (deltaTime > 0.0f) UIM().Update(deltaTime);
 			scene->Render();
 #ifdef _DEBUG
 			Collision::DrawDebug();
