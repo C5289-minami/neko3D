@@ -43,7 +43,7 @@ void TitleScene::Update(float deltaTime)
 		StartFadeOut();
 		return;
 	}
-	else if (DxLib::CheckHitKey(KEY_INPUT_F4))
+	else if (DxLib::CheckHitKey(KEY_INPUT_F4) && !SM().IsPresentationMode())
 	{
 		SetNextScene(SceneManager::GetInstance().GetScene(SceneID::StatusTest));
 		StartFadeOut();
@@ -89,7 +89,7 @@ void TitleScene::DrawImGui()
 {
     ImGui::Begin("TitleScene Debug Menu");
     ImGui::TextUnformatted("F1: SpriteStudio / F2: Shader / F3: Motion & Room");
-    ImGui::TextUnformatted("F4: Status / F5: Model Config / F6: Game");
+    ImGui::TextUnformatted("F4: Skipped in presentation / F5: Model Config / F6: Game");
     ImGui::TextUnformatted("Enter: Battle Test / F7: Cat Animation Viewer");
     ImGui::TextUnformatted("M: Next / Shift+M: Previous / F11: Scene Menu / F10: Hide UI");
     ImGui::End();

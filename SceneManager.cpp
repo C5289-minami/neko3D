@@ -145,13 +145,13 @@ Scene* SceneManager::GetScene(SceneID id)
 namespace
 {
 #ifndef NDEBUG
-    constexpr std::array<SceneID, 7> PresentationOrder{
+    constexpr std::array<SceneID, 6> PresentationOrder{
         SceneID::SsFlipTest, SceneID::ShaderTest, SceneID::NekoMotionTest,
-        SceneID::StatusTest, SceneID::ModelConfig, SceneID::Game, SceneID::GameTest
+        SceneID::ModelConfig, SceneID::Game, SceneID::GameTest
     };
-    const char* const PresentationNames[] = {
+    constexpr std::array<const char*, PresentationOrder.size()> PresentationNames{
         "F1: SpriteStudio", "F2: Shader", "F3: Motion / Room",
-        "F4: Status", "F5: Model Config", "F6: Game", "Enter: Battle Test"
+        "F5: Model Config", "F6: Game", "Enter: Battle Test"
     };
 #endif
 }
@@ -178,7 +178,8 @@ void SceneManager::AdvancePresentation(int direction)
     int index = -1;
     for (int i = 0; i < static_cast<int>(PresentationOrder.size()); ++i)
         if (GetScene(PresentationOrder[i]) == scene) index = i;
-    const int next = index < 0 ? (direction > 0 ? 0 : 6) : index + direction;
+    const int last = static_cast<int>(PresentationOrder.size()) - 1;
+    const int next = index < 0 ? (direction > 0 ? 0 : last) : index + direction;
     pendingScene = next < 0 || next >= static_cast<int>(PresentationOrder.size())
         ? GetScene(SceneID::Title) : GetScene(PresentationOrder[next]);
 #else
@@ -225,7 +226,7 @@ void SceneManager::DrawPresentationControls()
     for (int i = 0; i < static_cast<int>(PresentationOrder.size()); ++i)
         if (GetScene(PresentationOrder[i]) == scene) index = i;
     ImGui::Text(u8"現在: %s", index >= 0 ? PresentationNames[index] : (scene == &catViewerScene ? "Cat Animation Viewer (F7)" : "Scene Menu / Result"));
-    ImGui::Text(u8"次: %s", index < 6 ? PresentationNames[index + 1] : "Scene Menu");
+    ImGui::Text(u8"次: %s", index + 1 < static_cast<int>(PresentationOrder.size()) ? PresentationNames[index + 1] : "Scene Menu");
     if (ImGui::Button(u8"選択画面へ (F11)")) RequestPresentationScene(SceneID::Title);
     ImGui::SameLine();
     if (ImGui::Button(u8"前へ")) AdvancePresentation(-1);

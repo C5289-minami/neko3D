@@ -8,7 +8,7 @@ Visual Studioで `Presentation | x64` を選んでビルドすると `3dgp1_pres
 
 | 操作 | 動作 |
 | --- | --- |
-| F1〜F6（選択画面） | 対応するテストへ移動 |
+| F1 / F2 / F3 / F5 / F6（選択画面） | 対応するテストへ移動 |
 | Enter（選択画面） | 実践用のBattle Testへ移動 |
 | M | 次のテストへ移動 |
 | Shift + M | 前のテストへ移動 |
@@ -16,7 +16,8 @@ Visual Studioで `Presentation | x64` を選んでビルドすると `3dgp1_pres
 | F10 | ImGuiとデバッグ文字の表示切り替え |
 | 右Ctrl | マウスポインターの表示切り替え |
 
-順序: SpriteStudio → Shader → Motion / Room → Status → Model Config → Game → Battle Test → 選択画面。
+順序: SpriteStudio → Shader → Motion / Room → Model Config → Game → Battle Test → 選択画面。
+F4のStatusは発表順と直接移動の一覧から除外しています。発表モード中はF4キーでも入りません。
 ImGui「発表コントロール」からも前後移動・直接移動できます。
 Mは押した瞬間に1回だけ反応し、ImGuiで文字を入力中は無効です。
 発表モードではEscでアプリを終了しません。本編内のEscによるゲーム内タイトル復帰は使用できます。
