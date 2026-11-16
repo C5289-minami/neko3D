@@ -2,6 +2,7 @@
 // Scenes/Game/GameTestScene.cpp
 // =============================
 #include "GameTestScene.h"
+#include <algorithm>
 #include "SceneManager.h"
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
@@ -299,8 +300,8 @@ void GameTestScene::Update(float deltaTime)
 		if (GetButtonDown(PLAYER1) & BUTTON_L3)
 		{
 			gameContext->GetEffectManager().PlayHit(
-				RM().GetEffect(ResourceKeys::Effect_Test),
-				player->GetPosition() + Vec3::Up() * 100.0f,
+				RM().GetEffect(ResourceKeys::Effect_WalkDust),
+				player->GetWorldPosition() + Vec3::Up() * 2.0f,
 				player->GetYaw() + DX_PI_F);
 		}
 
@@ -573,13 +574,37 @@ void GameTestScene::DrawImGui()
 		{
 			ImGui::Checkbox(u8"カプセルの枠を表示", &showBossBodyCapsule_);
 			auto body = stage.GetBossBodySettings();
-			bool changed = ImGui::DragFloat(u8"本体の半径", &body.radius, 1.0f, 1.0f, 5000.0f,
-				"%.1f", ImGuiSliderFlags_AlwaysClamp);
-			changed |= ImGui::DragFloat(u8"本体の全高", &body.height, 1.0f, body.radius * 2.0f, 10000.0f,
-				"%.1f", ImGuiSliderFlags_AlwaysClamp);
-			changed |= ImGui::DragFloat(u8"底の高さオフセット", &body.yOffset, 1.0f, -5000.0f, 5000.0f,
-				"%.1f", ImGuiSliderFlags_AlwaysClamp);
-			if (changed) stage.SetBossBodySettings(body);
+			bool changed = false;
+
+			if (ImGui::DragFloat(u8"本体の半径", &body.radius, 1.0f, 1.0f, 5000.0f,
+				"%.1f"))
+			{
+				body.radius = (std::max)(body.radius, 1.0f);
+				body.radius = (std::min)(body.radius, 5000.0f);
+				changed = true;
+			}
+
+			if (ImGui::DragFloat(u8"本体の全高", &body.height, 1.0f, body.radius * 2.0f, 10000.0f,
+				"%.1f"))
+			{
+				body.height = (std::max)(body.height, body.radius * 2.0f);
+				body.height = (std::min)(body.height, 10000.0f);
+				changed = true;
+			}
+
+			if (ImGui::DragFloat(u8"底の高さオフセット", &body.yOffset, 1.0f, -5000.0f, 5000.0f,
+				"%.1f"))
+			{
+				body.yOffset = (std::max)(body.yOffset, -5000.0f);
+				body.yOffset = (std::min)(body.yOffset, 5000.0f);
+				changed = true;
+			}
+
+			// 半径・全高・高さオフセットのどれかを変更したら反映する。
+			if (changed)
+			{
+				stage.SetBossBodySettings(body);
+			}
 			if (ImGui::Button(u8"本体の判定を初期値に戻す")) stage.ResetBossBodySettings();
 			const auto& capsule = stage.GetCollision().GetContactCapsule();
 			const Vec3 center = (capsule.start + capsule.end) * 0.5f;

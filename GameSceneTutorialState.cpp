@@ -204,6 +204,7 @@ void GameSceneTutorialState::Tick(float deltaTime)
 void GameSceneTutorialState::Exit()
 {
 	UIM().RemoveUI(L"Tutorial.Skip");
+	gameScene_.GetTutorialChecklist().SetVisible(false);
 
 	DxPlus::Debug::SetFormatString(L"GameSceneTutorialState::Exit");
 

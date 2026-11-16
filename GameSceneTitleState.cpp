@@ -48,7 +48,7 @@ void GameSceneTitleState::Enter()
             if (creditImage)
             {
                 creditImage->SetCenter({ 0.5f, 0.5f });
-                creditImage->SetZOrder(10);
+                creditImage->SetZOrder(200);
             }
         }
         if (creditImage)
@@ -173,9 +173,9 @@ void GameSceneTitleState::Exit()
 {
     DxPlus::Debug::SetFormatString(L"GameSceneTitleState::Exit");
     if (auto* logo = UIM().GetUI(L"Game.Logo")) logo->Hide();
-    if (auto* start = UIM().GetButtonUI(L"Game.StartButton")) start->Hide();
-    if (auto* credit = UIM().GetButtonUI(L"Game.CreditButton")) credit->Hide();
-    if (auto* exit = UIM().GetButtonUI(L"Game.ExitButton")) exit->Hide();
+    if (auto* start = UIM().GetButtonUI(L"Game.StartButton")) { start->SetSelected(false); start->Hide(); }
+    if (auto* credit = UIM().GetButtonUI(L"Game.CreditButton")) { credit->SetSelected(false); credit->Hide(); }
+    if (auto* exit = UIM().GetButtonUI(L"Game.ExitButton")) { exit->SetSelected(false); exit->Hide(); }
     if (auto* creditImage = UIM().GetUI(L"Game.CreditImage")) creditImage->SetFalse();
     if (auto* context = gameScene_.GetGameContext())
         context->StopPlayerHandAnimation(TitleHandAnimatorId);

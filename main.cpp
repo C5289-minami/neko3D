@@ -43,12 +43,6 @@ static LRESULT CALLBACK CustomWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 	if (msg == WM_ACTIVATEAPP && wParam == TRUE)
 		g_raise_imgui_viewports = true;
 
-	if (msg == WM_KEYDOWN && wParam == VK_ESCAPE && !SM().IsPresentationMode())
-	{
-		PostQuitMessage(0);
-		return 1;
-	}
-
 	return 0;
 }
 

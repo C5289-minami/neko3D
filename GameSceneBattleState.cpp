@@ -36,6 +36,9 @@ void GameSceneBattleState::Enter()
     auto* player = gameContext->GetPlayer();
     auto& boss = gameContext->GetBoss();
 
+  // チュートリアル側の開始位置を落下復帰先として残さない。
+    // バトル開始地点を先に設定し、リトライ時の安全な復帰先にもする。
+    gameContext->PlacePlayerAtBattleStart();
     gameScene_.SaveBattleCheckpoint();
     gameContext->ClearUltimateProjectiles();
 
@@ -620,8 +623,8 @@ void GameSceneBattleState::Tick(float deltaTime)
     if (GetButtonDown(PLAYER1) & BUTTON_L3)
     {
         gameContext->GetEffectManager().PlayHit(
-            RM().GetEffect(ResourceKeys::Effect_Test),
-            player->GetPosition() + Vec3::Up() * 100.0f,
+            RM().GetEffect(ResourceKeys::Effect_WalkDust),
+            player->GetWorldPosition() + Vec3::Up() * 2.0f,
             player->GetYaw() + DX_PI_F
         );
     }
