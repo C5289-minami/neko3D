@@ -501,38 +501,52 @@ void GameScene::DrawImGui()
 
 			auto body = stage.GetBossBodySettings();
 
-			bool changed = ImGui::DragFloat(
+			bool changed = false;
+
+			if (ImGui::DragFloat(
 				u8"本体の半径",
 				&body.radius,
 				1.0f,
 				1.0f,
 				5000.0f,
-				"%.1f",
-				ImGuiSliderFlags_AlwaysClamp
-			);
+				"%.1f"))
+			{
+				body.radius = (std::max)(body.radius, 1.0f);
+				body.radius = (std::min)(body.radius, 5000.0f);
+				changed = true;
+			}
 
-			changed |= ImGui::DragFloat(
+			if (ImGui::DragFloat(
 				u8"本体の全高",
 				&body.height,
 				1.0f,
 				body.radius * 2.0f,
 				10000.0f,
-				"%.1f",
-				ImGuiSliderFlags_AlwaysClamp
-			);
+				"%.1f"))
+			{
+				body.height = (std::max)(body.height, body.radius * 2.0f);
+				body.height = (std::min)(body.height, 10000.0f);
+				changed = true;
+			}
 
-			changed |= ImGui::DragFloat(
+			if (ImGui::DragFloat(
 				u8"底の高さオフセット",
 				&body.yOffset,
 				1.0f,
 				-5000.0f,
 				5000.0f,
-				"%.1f",
-				ImGuiSliderFlags_AlwaysClamp
-			);
+				"%.1f"))
+			{
+				body.yOffset = (std::max)(body.yOffset, -5000.0f);
+				body.yOffset = (std::min)(body.yOffset, 5000.0f);
+				changed = true;
+			}
 
+			// 半径・全高・高さオフセットのどれかを変更したら反映する。
 			if (changed)
+			{
 				stage.SetBossBodySettings(body);
+			}
 
 			if (ImGui::Button(u8"本体の判定を初期値に戻す"))
 				stage.ResetBossBodySettings();
@@ -772,7 +786,6 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 
 
-	effectManager.Draw();
 	modelToonRenderer_.EndPass();
 	effectManager.Draw();
 #ifdef _DEBUG

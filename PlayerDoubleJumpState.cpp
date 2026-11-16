@@ -1,6 +1,7 @@
 ﻿#include "PlayerDoubleJumpState.h"
 #include "DxPlus/Debug.h"
 #include "Player.h"
+#include "EffectManager.h"
 #include "SoundManager.h"
 #include "ResourceManager.h"
 
@@ -45,6 +46,10 @@ void PlayerDoubleJumpState::Enter()
     );
 
     SoundManager::PlaySE(RM().GetSound(ResourceKeys::Sound_Blink));
+    EffectManager::PlayEffect(
+        RM().GetEffect(ResourceKeys::Effect_Blink),
+        player_.GetWorldPosition() + Vec3::Up() * (Const::PLAYER_HEIGHT * 0.5f),
+        player_.GetWorldRotation().y);
 }
 
 void PlayerDoubleJumpState::Tick(float deltaTime)

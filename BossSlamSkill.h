@@ -8,6 +8,7 @@
 #include "ResourceKeys.h"
 #include "ResourceManager.h"
 #include "SoundManager.h"
+#include "EffectManager.h"
 
 #include <algorithm>
 #include <array>
@@ -167,9 +168,18 @@ private:
 			boss_.StopRotation();
 			break;
 		case AttackStateType::Recovery:
+		{
 			hitActive_ = true;
 			SoundManager::PlaySE(RM().GetSound(ResourceKeys::Sound_Slam));
+			const Vec3 impactPosition = targetLocked_ && hitCapsules_[0].radius > 0.0f
+				? (hitCapsules_[0].start + hitCapsules_[1].end) * 0.5f
+				: boss_.GetWorldPosition();
+			EffectManager::PlayEffect(
+				RM().GetEffect(ResourceKeys::Effect_BossSlam),
+				impactPosition + Vec3::Up() * 2.0f,
+				boss_.GetWorldRotation().y + DX_PI_F);
 			break;
+		}
 		case AttackStateType::Return:
 			boss_.GetAnimation().Start();
 			break;
