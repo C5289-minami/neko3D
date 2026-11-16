@@ -345,6 +345,24 @@ void GameContext::StopPlayerHandAnimation(
 	);
 }
 
+bool GameContext::SelectPresentationCat(int index)
+{
+    if (index < 0 || index >= static_cast<int>(selectPreviewPlayers_.size())) return false;
+    auto& selected = selectPreviewPlayers_[static_cast<std::size_t>(index)];
+    selected.Reset();
+    selected.ClearOwner();
+    selected.SetRotation({});
+    selected.GetModelObject().SetPosition({});
+    selected.GetModelObject().SetRotation({});
+    selected.GetModelObject().SetScale({ 1.0f, 1.0f, 1.0f });
+    const auto statusIndex = static_cast<std::size_t>(index);
+    selected.SetCharData(statusIndex < CharSettingsManager::GetCount()
+        ? CharSettingsManager::Get(statusIndex) : CharData{});
+    SetActivePlayer(selected);
+    SetSelectPreviewVisible(false);
+    return true;
+}
+
 void GameContext::PlacePlayerAtBattleStart()
 {
 	constexpr Vec3 TutorialSkipBattleOffset{ 0.0f, 0.0f, -1000.0f };

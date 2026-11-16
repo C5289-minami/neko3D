@@ -1,8 +1,9 @@
-// =============================
+ï»¿// =============================
 // Scenes/Base/SceneManager.h
 // =============================
 #pragma once
 #include "Scene.h"
+#include "PresentationClock.h"
 #include "GameContext.h"
 #include "DebugUI.h"
 #include "Consts.h"
@@ -18,6 +19,7 @@
 #include "StatusTestScene.h"
 #include "ModelConfigScene.h"
 #include "GameTestScene.h"
+#include "CatViewerScene.h"
 #endif
 
 enum class SceneID { 
@@ -31,6 +33,7 @@ enum class SceneID {
     StatusTest,
     ModelConfig,
     GameTest,
+    CatViewer,
 #endif
 };
 
@@ -60,20 +63,34 @@ public:
 		if (scene == &statusTestScene) return SceneID::StatusTest;
         if (scene == &modelConfigScene) return SceneID::ModelConfig;
 	    if (scene == &gameTestScene) return SceneID::GameTest;
+        if (scene == &catViewerScene) return SceneID::CatViewer;
 #endif
-        return SceneID::Title; // ƒfƒtƒHƒ‹ƒg‚Íƒ^ƒCƒgƒ‹ƒV[ƒ“
+        return SceneID::Title; // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã¯ã‚¿ã‚¤ãƒˆãƒ«ã‚·ãƒ¼ãƒ³
 	}
+
+    // ImGui commands are applied before the next simulation update.
+    bool IsPresentationMode() const { return runConfig.presentationMode; }
+    void RequestPresentationScene(SceneID id) { pendingScene = GetScene(id); }
+    void AdvancePresentation(int direction);
+    void RequestBattleTestCat(int index);
+    int GetPresentationBattleCat() const { return presentationBattleCat; }
+    void DrawPresentationControls();
+    void RequestPresentationReset() { pendingReset = true; }
+    bool SuppressPresentationInput() const;
+    bool IsPresentationPaused() const { return runConfig.presentationMode && presentationClock.IsPaused(); }
+    PresentationClock& GetPresentationClock() { return presentationClock; }
 
     GameContext& GetGameState() { return gameContext; }
 
-    // ƒRƒs[‹Ö~
+    // ã‚³ãƒ”ãƒ¼ç¦æ­¢
     SceneManager(const SceneManager&) = delete;
     SceneManager& operator=(const SceneManager&) = delete;
 
     struct RunConfig
     {
-        bool windowed = true;           // Release‚Å‚àØ‘Ö‰Â
-        bool enableDebugUI = true;      // Debugê—p‚É‚µ‚½‚¢‚È‚ç main ‚Å false ‚É‚·‚é
+        bool presentationMode = true;
+        bool windowed = true;           // Releaseã§ã‚‚åˆ‡æ›¿å¯
+        bool enableDebugUI = true;      // Debugå°‚ç”¨ã«ã—ãŸã„ãªã‚‰ main ã§ false ã«ã™ã‚‹
         int fpsCap = Const::FPS_CAP;
     };
     void SetRunConfig(const RunConfig& cfg) { runConfig = cfg; }
@@ -93,11 +110,26 @@ private:
 	StatusTest statusTestScene{ &gameContext };
     ModelConfigScene modelConfigScene{ &gameContext };
     GameTestScene gameTestScene{ &gameContext };
+    CatViewerScene catViewerScene{ &gameContext };
 #endif
-    Scene* scene = nullptr; // Œ»İ‚ÌƒV[ƒ“
+    Scene* scene = nullptr; // ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³
+    void SwitchSceneImmediate(Scene* target);
+    Scene* pendingScene = nullptr;
     bool wasF11Down = false;
+    int presentationBattleCat = 0;
+    PresentationClock presentationClock;
+    bool wasPauseDown = false;
+    bool wasStepDown = false;
+    bool suppressPauseChord = false;
+    bool wasMDown = false;
+    bool wasF10Down = false;
+    bool wasResetDown = false;
+    bool wasCollisionDown = false;
+    bool pendingReset = false;
+    bool showDeveloperUI = false;
+    bool showPresentationUI = true;
 
     RunConfig runConfig{};
     DebugUI debugUI;
 };
-inline SceneManager& SM() { return SceneManager::GetInstance(); } // ƒVƒ‡[ƒgƒJƒbƒg
+inline SceneManager& SM() { return SceneManager::GetInstance(); } // ã‚·ãƒ§ãƒ¼ãƒˆã‚«ãƒƒãƒˆ

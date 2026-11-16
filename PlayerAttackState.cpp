@@ -1,4 +1,5 @@
 ﻿#include "PlayerAttackState.h"
+#include "SceneManager.h"
 #include "DxPlus/Debug.h"
 #include "Player.h"
 #include "Consts.h"
@@ -95,6 +96,8 @@ bool PlayerAttackState::TryRegisterHit()//攻撃が有効で、まだヒット�
 void PlayerAttackState::Draw() const
 {
 #ifdef _DEBUG
+    const auto sceneId = SM().GetCurrentSceneID();
+    if (SM().IsPresentationMode() && (sceneId == SceneID::Game || sceneId == SceneID::GameTest)) return;
 	if (!ballActive_) return;
 
 	const unsigned int color = hasHitTarget_

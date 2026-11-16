@@ -1,4 +1,5 @@
 ﻿#include "GameScene.h"
+#include "SceneManager.h"
 #include "GameContext.h"
 #include "ToonSettings.h"
 #include "OutlineSettings.h"
@@ -30,6 +31,7 @@ GameScene::GameScene(GameContext* context)
 
 void GameScene::Init()
 {
+    presentationCamera_.Reset(cameraDirector_);
 	ResetForTitle();
 	battleEventActive_ = false;
 	battleLetterboxMotion_.Reset();
@@ -146,6 +148,16 @@ bool GameScene::RestoreBattleCheckpoint()
 	cameraDirector_.StopShake();
 	cameraDirector_.SetPoseImmediate(checkpoint.cameraPose);
 	return true;
+}
+
+bool GameScene::ResetPresentationDemo()
+{
+    if (GetCurrentGameState() != GameStateType::Battle || !battleCheckpoint_) return false;
+    // Re-enter battle to clear intro timers, contact latches and UI callbacks too.
+    stateMachine_.End();
+    RestoreBattleCheckpoint();
+    stateMachine_.StartBattleWithoutIntro();
+    return true;
 }
 
 void GameScene::SkipTutorial()
@@ -321,6 +333,32 @@ void GameScene::Render() const
 		DxLib::DrawBox(0, DxPlus::CLIENT_HEIGHT - barHeight,
 			DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT, color, TRUE);
 	}
+}
+
+void GameScene::UpdatePresentationView(float realDeltaTime)
+{
+    const auto* player = gameContext->GetPlayer();
+    if (!player) return;
+    presentationCamera_.Update(realDeltaTime, player->GetWorldPosition(),
+        gameContext->GetBoss().GetWorldPosition(), cameraDirector_);
+}
+
+void GameScene::DrawPresentationControls()
+{
+#ifndef NDEBUG
+    if (GetCurrentGameState() == GameStateType::Battle)
+    {
+    auto& demoBoss = gameContext->GetBoss();
+    bool demoAI = demoBoss.IsAIActive();
+    if (ImGui::Checkbox(u8"ボスAIを動かす", &demoAI)) demoBoss.SetAIActive(demoAI);
+    if (ImGui::Button(u8"手の攻撃を実演")) demoBoss.UseSkill(BossAttackType::Clap);
+    ImGui::SameLine();
+    if (ImGui::Button(u8"振り下ろしを実演")) demoBoss.UseSkill(BossAttackType::Slam);
+    if (ImGui::Button(u8"尻尾の攻撃を実演")) demoBoss.UseSkill(BossAttackType::TailWhip);
+    }
+    const auto* player = gameContext->GetPlayer();
+    if (player) presentationCamera_.DrawImGui(player->GetWorldPosition(), cameraDirector_);
+#endif
 }
 
 void GameScene::DrawImGui()
@@ -631,6 +669,7 @@ void GameScene::RenderDepth() const
 void GameScene::DrawTutorialCollisionSpheres() const
 {
 #ifdef _DEBUG
+    if (SM().IsPresentationMode()) return;
 	const auto& settings = tutorialCollisionSettings_;
 
 	if (!settings.drawSpheres ||
@@ -715,7 +754,7 @@ void GameScene::DrawScene(bool toonEnabled) const
 
 		DrawTutorialCollisionSpheres();
 #ifdef _DEBUG
-		boss.DrawSlamAttackDebug();
+		if (!SM().IsPresentationMode()) boss.DrawSlamAttackDebug();
 #endif
 		return;
 	}
@@ -789,16 +828,17 @@ void GameScene::DrawScene(bool toonEnabled) const
 	modelToonRenderer_.EndPass();
 	effectManager.Draw();
 #ifdef _DEBUG
-	player->GetStateMachine().Draw();
+	if (!SM().IsPresentationMode()) player->GetStateMachine().Draw();
 #endif
 	DrawTutorialCollisionSpheres();
 #ifdef _DEBUG
-	boss.DrawSlamAttackDebug();
+	if (!SM().IsPresentationMode()) boss.DrawSlamAttackDebug();
 #endif
 }
 
 void GameScene::End()
 {
+    presentationCamera_.Reset(cameraDirector_);
 	stateMachine_.End();
 	SoundManager::StopBGM(RM().GetMusic(ResourceKeys::Music_Title));
 	SoundManager::StopBGM(RM().GetMusic(ResourceKeys::Music_Battle));

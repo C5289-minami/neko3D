@@ -307,6 +307,7 @@ namespace Camera
 
     void CameraDirector::Reset()
     {
+        renderOverride_.reset();
         cameraShake_.Stop();
 
         transition_.Reset();
@@ -459,11 +460,16 @@ namespace Camera
         return 1.0f;
     }
 
+    void CameraDirector::SetRenderOverride(const CameraPose& pose)
+    {
+        if (IsFinitePose(pose)) renderOverride_ = pose;
+    }
+
     void CameraDirector::ApplyRenderPose() const
     {
         if (!activeCamera_) return;
 
         // 揺れを再計算せず、保存済みの姿勢を適用する
-        activeCamera_->ApplyPose(renderPose_);
+        activeCamera_->ApplyPose(GetRenderPose());
     }
 }

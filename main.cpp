@@ -43,22 +43,16 @@ static LRESULT CALLBACK CustomWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 	if (msg == WM_ACTIVATEAPP && wParam == TRUE)
 		g_raise_imgui_viewports = true;
 
-	//if (msg == WM_KEYDOWN && wParam == VK_ESCAPE)
-	//{
-	//	PostQuitMessage(0);
-	//	return 1;
-	//}
-
 	return 0;
 }
 
 int WINAPI wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 {
  #ifdef _DEBUG
- 	// メモリ確保・解放のたびに全領域を検査すると、毎フレームの処理が重くなる。
+	// メモリ確保・解放のたびに全領域を検査すると、毎フレームの処理が重くなる。
 	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF);
- 	// 確保の記録と、終了時のメモリリーク検査は残す。
- 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	// 確保の記録と、終了時のメモリリーク検査は残す。
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
  #endif
 	srand((unsigned int)time(NULL));
 	DxLib::SetHookWinProc(CustomWinProc);
@@ -67,6 +61,7 @@ int WINAPI wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 
 	SceneManager::RunConfig cfg{};
 #ifdef NDEBUG
+	cfg.presentationMode = false;
 	cfg.enableDebugUI = false;   // ReleaseはDebugUI完全禁止
 	DxPlus::Input::SetMouseCaptureEnabled(true); // Releaseはマウスキャプチャ強制
 #else

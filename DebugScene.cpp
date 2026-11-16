@@ -36,5 +36,5 @@ void TestScene::Render() const
 	const wchar_t* modeText = flipTestMode == 0 ? L"1: Normal" :
 		flipTestMode == 1 ? L"2: Horizontal flip" : L"3: Horizontal + vertical flip";
 	DxPlus::Text::DrawString(modeText, { 20.0f, 20.0f }, DxLib::GetColor(255, 255, 255));
-	DxPlus::Text::DrawString(L"F2: Return to title", { 20.0f, 50.0f }, DxLib::GetColor(255, 255, 255));
+	DxPlus::Text::DrawString(L"F11: Scene Menu / M: Next", { 20.0f, 50.0f }, DxLib::GetColor(255, 255, 255));
 }

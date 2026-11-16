@@ -2,9 +2,12 @@
 // DebugUI/DebugUI.cpp
 // =============================
 #include "DebugUI.h"
+#include "SceneManager.h"
 #include "DxPlus/DxPlus.h"
 
 #include <d3d11.h>
+#include <wrl/client.h>
+#include "UiFramebufferScale.h"
 #include "DxLib.h"
 #include "GameContext.h"
 #include "Camera.h"
@@ -19,6 +22,37 @@
 
 extern bool g_raise_imgui_viewports;
 
+namespace
+{
+    ImVec2 MainFramebufferScale(ID3D11DeviceContext* context, const ImDrawData& drawData)
+    {
+        // The Win32 backend already supplies correct input/display coordinates.
+        // Query the actual bound target instead of assuming a window percentage
+        // or a fixed graph mode; this also handles runtime size changes.
+        using Microsoft::WRL::ComPtr;
+        ComPtr<ID3D11RenderTargetView> target;
+        context->OMGetRenderTargets(1, target.GetAddressOf(), nullptr);
+        if (!target || drawData.DisplaySize.x <= 0.0f || drawData.DisplaySize.y <= 0.0f)
+            return drawData.FramebufferScale;
+        ComPtr<ID3D11Resource> resource;
+        target->GetResource(resource.GetAddressOf());
+        ComPtr<ID3D11Texture2D> texture;
+        if (!resource || FAILED(resource.As(&texture))) return drawData.FramebufferScale;
+        D3D11_TEXTURE2D_DESC textureDesc{};
+        D3D11_RENDER_TARGET_VIEW_DESC viewDesc{};
+        texture->GetDesc(&textureDesc);
+        target->GetDesc(&viewDesc);
+        UINT mip = 0;
+        if (viewDesc.ViewDimension == D3D11_RTV_DIMENSION_TEXTURE2D) mip = viewDesc.Texture2D.MipSlice;
+        else if (viewDesc.ViewDimension == D3D11_RTV_DIMENSION_TEXTURE2DARRAY) mip = viewDesc.Texture2DArray.MipSlice;
+        mip = (std::min)(mip, 31u);
+        const auto scale = CalculateUiFramebufferScale(drawData.DisplaySize.x, drawData.DisplaySize.y,
+            static_cast<float>((std::max)(1u, textureDesc.Width >> mip)),
+            static_cast<float>((std::max)(1u, textureDesc.Height >> mip)));
+        return ImVec2(scale.x, scale.y);
+    }
+}
+
 void DebugUI::Init()
 {
     IMGUI_CHECKVERSION();
@@ -27,14 +61,15 @@ void DebugUI::Init()
 
     // ===== 日本語フォント追加 =====
     ImGuiIO& io = ImGui::GetIO();
-    io.IniFilename = "./Data/Config/imgui.ini";
+    const bool presentation = SM().IsPresentationMode();
+    io.IniFilename = presentation ? nullptr : "./Data/Config/imgui.ini";
     //io.IniFilename = nullptr;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;   // ←これがDocking ON
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
     io.Fonts->AddFontFromFileTTF(
         "./Data/Fonts/Noto_Sans_JP/static/NotoSansJP-Regular.ttf", // ここは置いたパスに合わせる
-        18.0f,
+        presentation ? 24.0f : 18.0f,
         nullptr,
         io.Fonts->GetGlyphRangesJapanese()
     );
@@ -45,12 +80,13 @@ void DebugUI::Init()
     auto* context = reinterpret_cast<ID3D11DeviceContext*>(const_cast<void*>(DxLib::GetUseDirect3D11DeviceContext()));
     ImGui_ImplDX11_Init(device, context);
 
-    ImGui::LoadIniSettingsFromDisk("./Data/Config/imgui.ini");
+    if (!presentation) ImGui::LoadIniSettingsFromDisk("./Data/Config/imgui.ini");
+    else DxLib::SetMouseDispFlag(TRUE);
 }
 
 void DebugUI::Shutdown()
 {
-    ImGui::SaveIniSettingsToDisk("./Data/Config/imgui.ini");
+    if (!SM().IsPresentationMode()) ImGui::SaveIniSettingsToDisk("./Data/Config/imgui.ini");
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
@@ -241,7 +277,16 @@ void DebugUI::EndFrame()
 
     // メインウィンドウのImGui描画
     ImGui::Render();
-    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+    ImDrawData* mainDrawData = ImGui::GetDrawData();
+    if (mainDrawData && mainDrawData->DisplaySize.x > 0.0f && mainDrawData->DisplaySize.y > 0.0f)
+    {
+        const ImVec2 originalScale = mainDrawData->FramebufferScale;
+        mainDrawData->FramebufferScale = MainFramebufferScale(context, *mainDrawData);
+        ImGui_ImplDX11_RenderDrawData(mainDrawData);
+        // Detached windows have their own swap chains and must retain the
+        // platform backend's scale. Never set io.DisplayFramebufferScale.
+        mainDrawData->FramebufferScale = originalScale;
+    }
 
     // 外窓
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)

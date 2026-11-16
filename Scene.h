@@ -16,6 +16,9 @@ public:
     virtual void Update(float) {}            // 毎フレーム更新（派生で実装）
     virtual void Render() const {}      // 毎フレーム描画（派生で実装）
     virtual void DrawImGui() {}
+    virtual void UpdatePresentationView(float) {}
+    virtual void DrawPresentationControls() {}
+    virtual bool CapturesPresentationInput() const { return false; }
     virtual void End() {}
 
     // 駆動（メインループから毎フレーム呼ぶ）

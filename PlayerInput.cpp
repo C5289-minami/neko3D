@@ -1,8 +1,11 @@
 ﻿#include "PlayerInput.h"
+#include "SceneManager.h"
 #include "DxPlus/DxPlus.h"
 
 void PlayerInput::Update()
 {
+    // Consume UI/chord input instead of firing E/Enter attacks.
+    if (SM().SuppressPresentationInput()) { *this = PlayerInput{}; return; }
 	using namespace DxPlus::Input;
 
 	int button = GetButton(PLAYER1);

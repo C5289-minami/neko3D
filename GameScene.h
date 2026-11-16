@@ -1,4 +1,4 @@
-// =============================
+ï»¿// =============================
 // Scenes/Game/GameScene.h
 // =============================
 #pragma once
@@ -16,6 +16,7 @@
 // camera
 #include "Camera.h"
 #include "CameraDirector.h"
+#include "PresentationCamera.h"
 #include "Motion.h"
 #include <string>
 
@@ -33,6 +34,10 @@ public:
     void End() override;
 	void Render() const override;
 	void DrawImGui() override;
+    void UpdatePresentationView(float realDeltaTime) override;
+    void DrawPresentationControls() override;
+    bool CapturesPresentationInput() const override { return presentationCamera_.CapturesInput(); }
+    bool ResetPresentationDemo();
 	void DrawPlayerShadow()const;
 	void ResetForTitle();
 	void SaveBattleCheckpoint();
@@ -47,7 +52,7 @@ public:
     Camera::TargetCamera& GetBossDownCamera() { return bossDownCamera_; }
 	Camera::CameraDirector& GetCameraDirector() { return cameraDirector_; }
 
-    // ƒ`ƒ…[ƒgƒŠƒAƒ‹‚Ì‹…‘Ìİ’è
+    // ãƒãƒ¥ãƒ¼ãƒˆãƒªã‚¢ãƒ«ã®çƒä½“è¨­å®š
     struct TutorialCollisionSettings
     {
         // Player
@@ -58,14 +63,14 @@ public:
         Vec3 stageOffset{ 0.0f, 0.0f, 0.0f };
         float stageRadius = 1200.0f;
 
-        // ƒJƒƒ‰’Ç]‚ğŠJn‚·‚é‹…‘Ì
+        // ã‚«ãƒ¡ãƒ©è¿½å¾“ã‚’é–‹å§‹ã™ã‚‹çƒä½“
         float climbRadius = 2500.0f;
 
-        // ƒfƒoƒbƒO•`‰æ
+        // ãƒ‡ãƒãƒƒã‚°æç”»
         bool drawSpheres = true;
     };
 
-	// ƒ`ƒ…[ƒgƒŠƒAƒ‹
+	// ãƒãƒ¥ãƒ¼ãƒˆãƒªã‚¢ãƒ«
 
     TutorialCollisionSettings& GetTutorialCollisionSettings()
     {
@@ -84,7 +89,7 @@ public:
         return taskManager_;
 	}
 
-    // ‰e
+    // å½±
 	void SetDrawPlayerShadow(bool draw) { drawPlayerShadow_ = draw; }
     void SetBattleEventActive(bool active) { battleEventActive_ = active; }
     bool IsBattleEventActive() const { return battleEventActive_; }
@@ -108,13 +113,14 @@ private:
 
     std::string transformInitialStatus_;
 
-	// ƒJƒƒ‰
+	// ã‚«ãƒ¡ãƒ©
 	Camera::FreeCamera camera_;
     Camera::TargetCamera bossDieCamera_;
     Camera::TargetCamera bossDownCamera_;
 	Camera::TargetCamera playerTargetCamera_;
-	Camera::CameraDirector cameraDirector_{ camera_ }; // ƒJƒƒ‰‚Ì‘JˆÚ‚Æ‰‰o‚ğŠÇ—‚·‚é
+	Camera::CameraDirector cameraDirector_{ camera_ }; // ã‚«ãƒ¡ãƒ©ã®é·ç§»ã¨æ¼”å‡ºã‚’ç®¡ç†ã™ã‚‹
 	std::string activeCameraShot_{};
+    PresentationCamera presentationCamera_;
 
 	GameStateMachine stateMachine_;
 	float tutorialSkipHoldTime_{ 0.0f };
@@ -131,12 +137,12 @@ private:
 	};
 	std::optional<BattleCheckpoint> battleCheckpoint_;
 
-	TutorialCollisionSettings tutorialCollisionSettings_{}; // ƒ`ƒ…[ƒgƒŠƒAƒ‹‚Ì‹…‘Ìİ’è
+	TutorialCollisionSettings tutorialCollisionSettings_{}; // ãƒãƒ¥ãƒ¼ãƒˆãƒªã‚¢ãƒ«ã®çƒä½“è¨­å®š
     void DrawTutorialCollisionSpheres() const;
-	TutorialChecklist tutorialChecklist_; // ƒ`ƒ…[ƒgƒŠƒAƒ‹‚Ìƒ`ƒFƒbƒNƒŠƒXƒgUI
-	TutorialTaskManager taskManager_; // ƒ`ƒ…[ƒgƒŠƒAƒ‹‚Ìi’»ŠÇ—
+	TutorialChecklist tutorialChecklist_; // ãƒãƒ¥ãƒ¼ãƒˆãƒªã‚¢ãƒ«ã®ãƒã‚§ãƒƒã‚¯ãƒªã‚¹ãƒˆUI
+	TutorialTaskManager taskManager_; // ãƒãƒ¥ãƒ¼ãƒˆãƒªã‚¢ãƒ«ã®é€²æ—ç®¡ç†
 
-	// Player‚Ì‰e‚ğ•`‰æ‚·‚é
+	// Playerã®å½±ã‚’æç”»ã™ã‚‹
 	bool drawPlayerShadow_{ false };
     bool battleEventActive_{ false };
     Motion battleLetterboxMotion_{};

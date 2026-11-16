@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Vector3.h"
 #include <unordered_map>
 
@@ -10,6 +10,7 @@ public:
 	static int PlayEffect(int key, const Vec3& position, float yaw = 0.0f);
 	static bool MoveEffect(int handle, const Vec3& position);
 	static void StopEffect(int handle);
+    static void StopAll();
 	void PlayHit(int key, const Vec3& position, float yaw);
 private:
 };

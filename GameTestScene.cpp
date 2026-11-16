@@ -19,8 +19,10 @@
 
 void GameTestScene::Init()
 {
+    presentationCamera_.Reset(cameraDirector_);
 	Collision::ResetTransparentModels();
 	gameContext->Reset();
+    gameContext->SelectPresentationCat(SM().GetPresentationBattleCat());
 	gameContext->PlacePlayerAtBattleStart();
 	gameContext->FaceBossTowardPlayer();
 
@@ -48,10 +50,7 @@ void GameTestScene::Init()
 	playerCamera_.Update(player->GetWorldPosition(), boss.GetWorldPosition(), 1.0f);
 	cameraDirector_.SwitchCamera(playerCamera_, 0.0f);
 	cameraDirector_.Update(0.0f);
-#ifndef NDEBUG
-	freeCamera_.Reset();
-	wasFreeCameraToggleDown_ = false;
-#endif
+
 
 	ToonSettingsManager::Load();
 	OutlineSettingsManager::Load();
@@ -98,55 +97,8 @@ void GameTestScene::Update(float deltaTime)
 		attackSphereDebugRemaining_ - (std::max)(0.0f, deltaTime));
 #endif
 
-	// =============================
-	// FreeCamera
-	// =============================
-#ifndef NDEBUG
-	const bool toggleDown =
-		DxLib::CheckHitKey(KEY_INPUT_LALT) != 0 &&
-		DxLib::CheckHitKey(KEY_INPUT_RETURN) != 0;
+    // Simulation runs independently from the presentation camera.
 
-	if (toggleDown && !wasFreeCameraToggleDown_)
-	{
-		if (cameraDirector_.GetActiveCamera() == &freeCamera_)
-		{
-			cameraDirector_.SwitchCamera(playerCamera_);
-		}
-		else
-		{
-			freeCamera_.Initialize(
-				playerCamera_.GetPosition(),
-				playerCamera_.GetTarget());
-
-			cameraDirector_.SwitchCamera(freeCamera_);
-		}
-	}
-
-	wasFreeCameraToggleDown_ = toggleDown;
-
-	const bool shiftHeld = DxLib::CheckHitKey(KEY_INPUT_LSHIFT) != 0 ||
-		DxLib::CheckHitKey(KEY_INPUT_RSHIFT) != 0;
-	if (DxLib::CheckHitKey(KEY_INPUT_R) != 0 && !shiftHeld)
-		freeCamera_.ResetView();
-
-	if (DxLib::CheckHitKey(KEY_INPUT_F) != 0)
-		freeCamera_.FocusAt(gameContext->GetPlayer()->GetPosition());
-
-	DxPlus::Debug::SetString(
-		L" R: Transformリセット, F: FreeCameraをプレイヤーにフォーカス");
-
-	if (cameraDirector_.GetActiveCamera() == &freeCamera_)
-	{
-		gameContext->StopTailWhipSound();
-		if (!freeCamera_.IsSceneViewActive() &&
-			(DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0)
-		{
-			freeCamera_.Update(deltaTime);
-		}
-		cameraDirector_.Update(deltaTime);
-	}
-	else
-#endif
 	{
 		auto* player = gameContext->GetPlayer();
 		auto& boss = gameContext->GetBoss();
@@ -422,6 +374,8 @@ void GameTestScene::Render() const
 	}
 
 #ifdef _DEBUG
+    if (!SM().IsPresentationMode())
+    {
 	cameraDirector_.ApplyRenderPose();
 	gameContext->GetBoss().DrawClapAttackDebug();
 	gameContext->GetBoss().DrawSlamAttackDebug();
@@ -463,6 +417,35 @@ void GameTestScene::Render() const
 			DxPlus::Debug::SetString(L"TailWhip capsule: inactive height-limited hitbox");
 		}
 	}
+    }
+#endif
+}
+
+void GameTestScene::UpdatePresentationView(float realDeltaTime)
+{
+    const auto* player = gameContext->GetPlayer();
+    if (!player) return;
+    presentationCamera_.Update(realDeltaTime, player->GetWorldPosition(),
+        gameContext->GetBoss().GetWorldPosition(), cameraDirector_);
+}
+
+void GameTestScene::DrawPresentationControls()
+{
+#ifndef NDEBUG
+    auto& demoBoss = gameContext->GetBoss();
+    bool demoAI = demoBoss.IsAIActive();
+    if (ImGui::Checkbox(u8"ボスAIを動かす", &demoAI)) demoBoss.SetAIActive(demoAI);
+    if (ImGui::Button(u8"手の攻撃を実演")) demoBoss.UseSkill(BossAttackType::Clap);
+    ImGui::SameLine();
+    if (ImGui::Button(u8"振り下ろしを実演")) demoBoss.UseSkill(BossAttackType::Slam);
+    if (ImGui::Button(u8"尻尾の攻撃を実演")) demoBoss.UseSkill(BossAttackType::TailWhip);
+
+    const char* const catNames[] = { u8"ミケ", u8"サビ", u8"クロ" };
+    int catIndex = SM().GetPresentationBattleCat();
+    if (ImGui::Combo(u8"猫の種類（変更すると実演を再開）", &catIndex, catNames, 3))
+        SM().RequestBattleTestCat(catIndex);
+    const auto* player = gameContext->GetPlayer();
+    if (player) presentationCamera_.DrawImGui(player->GetWorldPosition(), cameraDirector_);
 #endif
 }
 
@@ -688,6 +671,7 @@ void GameTestScene::DrawImGui()
 
 void GameTestScene::End()
 {
+    presentationCamera_.Reset(cameraDirector_);
 	gameContext->StopTailWhipSound();
 	gameContext->ClearUltimateProjectiles();
 	Collision::ResetTransparentModels();
@@ -744,12 +728,8 @@ void GameTestScene::RenderDepth() const
 		modelToonRenderer_.DrawDepth(model);
 	}
 
-	// PlayerとBoss
-	for (const auto& preview :
-		gameContext->GetSelectPreviewPlayers())
-	{
-		modelToonRenderer_.DrawDepth(preview.GetModelObject());
-	}
+	// Draw only the active cat; basket preview actors are not part of this test.
+    modelToonRenderer_.DrawDepth(player->GetModelObject());
 
 	modelToonRenderer_.DrawDepth(boss.GetModelObject());
 }
@@ -764,8 +744,6 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	const auto& effectManager = gameContext->GetEffectManager();
 	const auto& grid = gameContext->GetGrid();
 	const auto& room = gameContext->GetRoom();
-	const auto& selectPlayers =
-		gameContext->GetSelectPreviewPlayers();
 
 	// トゥーンシェーダーを使わない場合
 	if (!toonEnabled)
@@ -775,10 +753,6 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 		boss.Draw();
 		stage.Draw();
 		player->Draw();
-		for (const auto& preview : selectPlayers)
-		{
-			preview.Draw();
-		}
 		effectManager.Draw();
 		grid.Draw();
 		room.Draw();
@@ -818,10 +792,6 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	drawModel(player->GetModelObject());
 
 
-	for (const auto& preview : selectPlayers)
-	{
-		drawModel(preview.GetModelObject());
-	}
 
 	// Stage
 	drawModel(stage.GetModelObject());
@@ -843,13 +813,14 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	grid.Draw();
 
 	modelToonRenderer_.EndPass();
-	player->GetStateMachine().Draw();
+	if (!SM().IsPresentationMode()) player->GetStateMachine().Draw();
 	DrawAttackSphereDebug();
 }
 
 void GameTestScene::DrawAttackSphereDebug() const
 {
 #ifdef _DEBUG
+    if (SM().IsPresentationMode()) return;
 	const auto& boss = gameContext->GetBoss();
 	boss.DrawSlamAttackDebug();
 
