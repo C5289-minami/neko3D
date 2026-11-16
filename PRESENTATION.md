@@ -4,7 +4,7 @@
 
 ## 1. シーン移動
 
-Debug | x64 で使用できます。Releaseは通常のゲーム用です。
+Visual Studioで `Presentation | x64` を選んでビルドすると `3dgp1_presentation.exe` ができます。`Debug | x64` でも使用できます。`Release | x64` は通常のゲーム用です。
 
 | 操作 | 動作 |
 | --- | --- |
@@ -18,7 +18,7 @@ Debug | x64 で使用できます。Releaseは通常のゲーム用です。
 
 順序: SpriteStudio → Shader → Motion / Room → Status → Model Config → Game → Battle Test → 選択画面。
 ImGui「発表コントロール」からも前後移動・直接移動できます。
-Mは押した瞬間に1回だけ反応し、ImGuiでキーボード入力中は無効です。
+Mは押した瞬間に1回だけ反応し、ImGuiで文字を入力中は無効です。
 発表モードではEscでアプリを終了しません。本編内のEscによるゲーム内タイトル復帰は使用できます。
 
 ## 実装の区切り
@@ -35,7 +35,7 @@ Mは押した瞬間に1回だけ反応し、ImGuiでキーボード入力中は�
 
 ## 3. 発表カメラ（Game / Battle Test）
 
-シーンのImGuiの下部「発表カメラ」で、通常／初期風追従／自由／猫注目を選べます。初期風は旧仕様の水平追従式を再現したものです。
+「発表コントロール」の下部「発表カメラ」で、通常／初期風追従／自由／猫注目を選べます。初期風は旧仕様の水平追従式を再現したものです。
 
 - Alt + Enter: 通常／自由カメラ切替。自由カメラでもゲームは進みます。停止はQ+Eで行います。
 - 自由カメラ: 右ボタンを押しながらマウスで回転、WASDで移動、Q/Eで上下、Shiftで加速。
@@ -59,3 +59,60 @@ Mは押した瞬間に1回だけ反応し、ImGuiでキーボード入力中は�
 鑑賞画面の「猫の種類」でミケ／サビ／クロを切り替えられます。同じモーション・再生時刻・再生状態・視点角度を保ちます。
 「この猫で実践テストを開始」でBattle Testへ反映します。Battle Test側の種類変更は実演を最初から再開します。
 実践テストの再初期化でも選択を維持し、本編の通常キャラクター選択は変更しません。
+
+## 6. 実演を再現する操作
+
+| 操作 | 動作 |
+| --- | --- |
+| F8 | 現在の実演をリセット |
+| B | 発表用の当たり判定を表示／非表示 |
+| F9 | 1/60秒だけ進め、停止状態を維持 |
+| F10 | 発表UI・開発UI・デバッグ文字の表示／非表示 |
+
+F8の動作:
+
+- 本編の戦闘中: 保存済みの戦闘開始位置・HP・必殺ゲージ・ボス状態へ戻し、開幕演出を省略して再開。戦闘ステートも入り直し、接触フラグ・演出タイマー・UIをリセットします。
+- Battle Test: 選択中の猫で開始状態へ戻ります。
+- 鑑賞画面: 選択中の猫を保ち、待機アニメーション・通常速度・初期視点へ戻ります。
+- その他: 現在のシーンを初期化します。Gameの戦闘以外ではゲーム内タイトルへ戻ります。
+- 全体の停止を解除し、速度を1倍へ戻します。飛び道具・再生中の3Dエフェクトも消します。
+
+「発表用の当たり判定」で攻撃・被弾・本体カプセル・近似接触位置を個別に選べます。色の説明と現在の接触状態も表示します。白い接触位置は球とカプセルから算出した近似で、メッシュの厳密な接触点ではありません。
+ボスAIの切り替えと、手／振り下ろし／尻尾の攻撃を始めるボタンもあります。停止中に攻撃を指定した場合は、再開またはコマ送りで進めます。
+
+## 発表画面の配置
+
+発表モードではImGuiをゲームのメインウィンドウ内に表示し、従来の imgui.ini を読み書きしません。開始時に操作パネルとポインターを表示します。鑑賞パネルは右側に配置します。
+「開発用の詳細ウィンドウも表示」をオンにすると従来の設定画面も開けます。カメラを手動操作している間はゲーム操作への入力を抑えます。
+
+## ビルドと確認
+
+Visual Studio 2022 / x64。発表用はDebugと同じデバッグ機能を有効にした専用構成です。パフォーマンス最適化は無効です。
+ビルド確認は通常のPDB設定で実施しています。制限環境内でPDBサービスが失敗したため、最終確認はその制限がない環境で行いました。
+
+```powershell
+& 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe' .\3dgp1.sln /m /p:Configuration=Presentation /p:Platform=x64 /p:PreferredToolArchitecture=x64
+```
+
+実行時の作業ディレクトリはリポジトリのルート（Dataフォルダーがある場所）にしてください。通常のRelease構成には発表UIやテストシーンを含めません。
+
+## 機能ごとのコミット
+
+1. 025b474 — feat(presentation): add ordered scene navigation and instant menu return
+2. 3d2b30a — feat(presentation): freeze simulation with slow motion and single-frame stepping
+3. 14d4ceb — feat(presentation): add selectable cameras that remain usable while paused
+4. 211feb5 — feat(presentation): add isolated cat animation viewer
+5. ee1a12a — feat(presentation): switch cat types in viewer and battle demonstrations
+6. feat(presentation): add repeatable demos, collision overlays and presentation build
+
+各コミット本文に変更内容・検証・使用キーを記載しています。
+
+## 検証記録
+
+- Presentation / Debug / Release（いずれもx64）の通常PDB設定でビルド成功。
+- Presentationの最終差分でも再ビルド成功。
+- tests/PresentationClockTests.cpp: 22項目成功（停止、再開、固定1/60秒送り、速度、無効値、リセット）。
+- 差分の空白チェック成功。
+- 先行ビルドでMの移動、F11復帰、F9停止、F10非表示、鑑賞モデルと停止中の再生時刻を確認。
+- 最終exeでも発表パネル・左右の鑑賞レイアウト・Q+Eによる停止表示を実画面で確認。
+- 既存のBossPoseSkill.hの未使用引数、Effekseerのリンク警告が残ります。

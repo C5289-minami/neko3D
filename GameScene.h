@@ -35,6 +35,9 @@ public:
 	void Render() const override;
 	void DrawImGui() override;
     void UpdatePresentationView(float realDeltaTime) override;
+    void DrawPresentationControls() override;
+    bool CapturesPresentationInput() const override { return presentationCamera_.CapturesInput(); }
+    bool ResetPresentationDemo();
 	void DrawPlayerShadow()const;
 	void ResetForTitle();
 	void SaveBattleCheckpoint();

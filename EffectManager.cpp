@@ -1,4 +1,4 @@
-#include "EffectManager.h"
+ï»¿#include "EffectManager.h"
 #include "EffekseerForDXLib.h"
 #include "ResourceManager.h"
 #include "ResourceKeys.h"
@@ -11,7 +11,7 @@ void EffectManager::Update(float deltaTime)
 
 void EffectManager::Draw() const
 {
-	Effekseer_Sync3DSetting();// 3D•`‰æİ’è‚ğEffekseer‚É”½‰f
+	Effekseer_Sync3DSetting();// 3Dæç”»è¨­å®šã‚’Effekseerã«åæ˜ 
 	DrawEffekseer3D();
 }
 
@@ -19,7 +19,7 @@ void EffectManager::Draw() const
 int EffectManager::PlayEffect(int key, const Vec3& position, float yaw)
 {
 	if (key < 0) return -1;
-	// ƒGƒtƒFƒNƒg‚ğÄ¶‚·‚é
+	// ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚’å†ç”Ÿã™ã‚‹
 	const int playingHandle = PlayEffekseer3DEffect(key);
 	if (playingHandle < 0) return -1;
 	SetRotationPlayingEffekseer3DEffect(playingHandle, 0.0f, yaw, 0.0f);
@@ -37,6 +37,11 @@ void EffectManager::StopEffect(int handle)
 {
 	if (handle >= 0)
 		StopEffekseer3DEffect(handle);
+}
+
+void EffectManager::StopAll()
+{
+    if (auto manager = GetEffekseer3DManager()) manager->StopAllEffects();
 }
 
 void EffectManager::PlayHit(int key,const Vec3& position,float yaw)

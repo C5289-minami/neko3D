@@ -14,6 +14,7 @@
 #include <array>
 #ifndef NDEBUG
 #include "imgui.h"
+#include "PresentationCollision.h"
 #endif
 
 void SceneManager::Init()
@@ -25,7 +26,9 @@ void SceneManager::Init()
 	const int h = DxPlus::CLIENT_HEIGHT;
 
 	// ウィンドウを作成する前に表示サイズを設定する。
-#ifndef NDEBUG
+#if defined(NEKO_PRESENTATION)
+    DxLib::SetWindowSize(static_cast<int>(w * 0.85f), static_cast<int>(h * 0.85f));
+#elif !defined(NDEBUG)
 	DxLib::SetWindowSize(static_cast<int>(w * 0.7f), static_cast<int>(h * 0.7f));
 #else
 	DxLib::SetWindowSize(w, h);
@@ -112,8 +115,9 @@ void SceneManager::SetScene(Scene* newScene)
 			target == &roomTestScene || target == &statusTestScene || target == &catViewerScene;
 	};
 	const bool showPointer = usesDebugCursor(newScene);
-	if (usesDebugCursor(scene) != showPointer)
-		DxLib::SetMouseDispFlag(showPointer ? TRUE : FALSE);
+	if (runConfig.presentationMode) DxLib::SetMouseDispFlag(showPresentationUI ? TRUE : FALSE);
+    else if (usesDebugCursor(scene) != showPointer)
+        DxLib::SetMouseDispFlag(showPointer ? TRUE : FALSE);
 #endif
 	scene = newScene; // 破棄しない＝常駐
 }
@@ -158,6 +162,7 @@ void SceneManager::SwitchSceneImmediate(Scene* target)
     if (scene) { scene->End(); scene->SetNextScene(nullptr); }
     gameContext.StopTailWhipSound();
     gameContext.ClearUltimateProjectiles();
+    EffectManager::StopAll();
     Collision::ResetTransparentModels();
     presentationClock.Reset();
     SetScene(target);
@@ -196,6 +201,7 @@ bool SceneManager::SuppressPresentationInput() const
 {
 #ifndef NDEBUG
     return runConfig.presentationMode && (suppressPauseChord ||
+        (scene && scene->CapturesPresentationInput()) ||
         (DxLib::CheckHitKey(KEY_INPUT_LALT) && DxLib::CheckHitKey(KEY_INPUT_RETURN)) ||
         (ImGui::GetCurrentContext() && (ImGui::GetIO().WantCaptureKeyboard || ImGui::GetIO().WantCaptureMouse)));
 #else
@@ -207,8 +213,13 @@ void SceneManager::DrawPresentationControls()
 {
 #ifndef NDEBUG
     if (!runConfig.presentationMode) return;
+    ImGui::SetNextWindowPos(ImVec2(20, 20), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(460, 680), ImGuiCond_FirstUseEver);
     ImGui::Begin(u8"発表コントロール");
-    ImGui::TextUnformatted(u8"F11: 選択画面 / M: 次 / Shift+M: 前 / F10: UI表示");
+    ImGui::TextWrapped(u8"F11: 選択画面 / M: 次 / Shift+M: 前 / F10: UI表示");
+    ImGui::TextUnformatted(u8"F8: 実演リセット / B: 当たり判定の表示");
+    if (ImGui::Button(u8"実演リセット (F8)")) RequestPresentationReset();
+    ImGui::Checkbox(u8"開発用の詳細ウィンドウも表示", &showDeveloperUI);
     int index = -1;
     for (int i = 0; i < static_cast<int>(PresentationOrder.size()); ++i)
         if (GetScene(PresentationOrder[i]) == scene) index = i;
@@ -228,6 +239,8 @@ void SceneManager::DrawPresentationControls()
     }
     if (ImGui::Button(u8"猫のアニメーション鑑賞 (F7)")) RequestPresentationScene(SceneID::CatViewer);
     ImGui::Separator();
+    ImGui::TextColored(presentationClock.IsPaused() ? ImVec4(1, 0.8f, 0.2f, 1) : ImVec4(0.4f, 1, 0.6f, 1),
+        "%s", presentationClock.IsPaused() ? u8"停止中" : u8"再生中");
     ImGui::TextUnformatted(u8"Q+E: 停止/再開 / F9: 1フレーム送り (1/60秒)");
     if (ImGui::Button(presentationClock.IsPaused() ? u8"再開" : u8"時間停止"))
         presentationClock.TogglePaused();
@@ -238,6 +251,11 @@ void SceneManager::DrawPresentationControls()
     if (ImGui::Button("0.25x")) presentationClock.SetSpeed(0.25f);
     ImGui::SameLine();
     if (ImGui::Button("1.0x")) presentationClock.SetSpeed(1.0f);
+    if (scene == &gameScene || scene == &gameTestScene)
+    {
+        PresentationCollision::DrawImGui();
+        scene->DrawPresentationControls();
+    }
     ImGui::End();
 #endif
 }
@@ -270,7 +288,11 @@ void SceneManager::Run()
                     DxLib::CheckHitKey(KEY_INPUT_RSHIFT) ? -1 : 1);
 
         }
-        if (runConfig.presentationMode && f10Down && !wasF10Down) showPresentationUI = !showPresentationUI;
+        if (runConfig.presentationMode && f10Down && !wasF10Down)
+        {
+            showPresentationUI = !showPresentationUI;
+            DxLib::SetMouseDispFlag(showPresentationUI ? TRUE : FALSE);
+        }
         const bool qDown = DxLib::CheckHitKey(KEY_INPUT_Q) != 0;
         const bool eDown = DxLib::CheckHitKey(KEY_INPUT_E) != 0;
         const bool pauseDown = qDown && eDown;
@@ -283,6 +305,15 @@ void SceneManager::Run()
         if (!qDown && !eDown) suppressPauseChord = false;
         wasPauseDown = pauseDown;
         wasStepDown = stepDown;
+        const bool resetDown = DxLib::CheckHitKey(KEY_INPUT_F8) != 0;
+        const bool collisionDown = DxLib::CheckHitKey(KEY_INPUT_B) != 0;
+        if (runConfig.presentationMode && !capturing)
+        {
+            if (resetDown && !wasResetDown) pendingReset = true;
+            if (collisionDown && !wasCollisionDown) PresentationCollision::Settings().enabled = !PresentationCollision::Settings().enabled;
+        }
+        wasResetDown = resetDown;
+        wasCollisionDown = collisionDown;
         wasMDown = mDown;
         wasF10Down = f10Down;
 #endif
@@ -291,6 +322,16 @@ void SceneManager::Run()
             Scene* target = pendingScene;
             pendingScene = nullptr;
             SwitchSceneImmediate(target);
+            pendingReset = false;
+        }
+        else if (pendingReset && scene)
+        {
+            pendingReset = false;
+            gameContext.StopTailWhipSound();
+            gameContext.ClearUltimateProjectiles();
+            EffectManager::StopAll();
+            presentationClock.Reset();
+            if (scene != &gameScene || !gameScene.ResetPresentationDemo()) SwitchSceneImmediate(scene);
         }
 
 		if (scene)
@@ -303,12 +344,16 @@ void SceneManager::Run()
                 ? presentationClock.Advance(realDeltaTime) : realDeltaTime;
             // Zero dt would still process input, state transitions and damage.
             if (deltaTime > 0.0f) scene->Drive(deltaTime);
-            scene->UpdatePresentationView(realDeltaTime);
+            if (runConfig.presentationMode) scene->UpdatePresentationView(realDeltaTime);
 #ifdef _DEBUG
 			Collision::UpdateDebug();
 #endif
             if (deltaTime > 0.0f) UIM().Update(deltaTime);
-			scene->Render();
+            scene->Render();
+#ifndef NDEBUG
+            if (runConfig.presentationMode && (scene == &gameScene || scene == &gameTestScene))
+                PresentationCollision::Draw(gameContext);
+#endif
 #ifdef _DEBUG
 			Collision::DrawDebug();
 #endif
@@ -322,12 +367,13 @@ void SceneManager::Run()
 				scene->SetNextScene(nullptr);
 
 				if (!next) { DxLib::ScreenFlip(); break; }
-				SetScene(next);
-				UIM().Init();
+                if (runConfig.presentationMode) presentationClock.Reset();
+                SetScene(next);
+                UIM().Init();
 				next->Init();
 			}
 #ifndef NDEBUG
-            if (showPresentationUI) DxPlus::Debug::Draw();
+            if (showPresentationUI && showDeveloperUI) DxPlus::Debug::Draw();
 #endif
 			scene->DrawFadeOverlay();
 
@@ -339,8 +385,9 @@ void SceneManager::Run()
 				debugUI.BeginFrame();
                 if (showPresentationUI)
                 {
-                    debugUI.Draw(gameContext);
-                    scene->DrawImGui();
+                    if (showDeveloperUI) debugUI.Draw(gameContext);
+                    if (showDeveloperUI || (scene != &gameScene && scene != &gameTestScene && scene != &titleScene))
+                        scene->DrawImGui();
                     DrawPresentationControls();
                 }
 				debugUI.EndFrame();

@@ -373,6 +373,8 @@ void GameTestScene::Render() const
 	}
 
 #ifdef _DEBUG
+    if (!SM().IsPresentationMode())
+    {
 	cameraDirector_.ApplyRenderPose();
 	gameContext->GetBoss().DrawClapAttackDebug();
 	gameContext->GetBoss().DrawSlamAttackDebug();
@@ -414,6 +416,7 @@ void GameTestScene::Render() const
 			DxPlus::Debug::SetString(L"TailWhip capsule: inactive height-limited hitbox");
 		}
 	}
+    }
 #endif
 }
 
@@ -423,6 +426,26 @@ void GameTestScene::UpdatePresentationView(float realDeltaTime)
     if (!player) return;
     presentationCamera_.Update(realDeltaTime, player->GetWorldPosition(),
         gameContext->GetBoss().GetWorldPosition(), cameraDirector_);
+}
+
+void GameTestScene::DrawPresentationControls()
+{
+#ifndef NDEBUG
+    auto& demoBoss = gameContext->GetBoss();
+    bool demoAI = demoBoss.IsAIActive();
+    if (ImGui::Checkbox(u8"ボスAIを動かす", &demoAI)) demoBoss.SetAIActive(demoAI);
+    if (ImGui::Button(u8"手の攻撃を実演")) demoBoss.UseSkill(BossAttackType::Clap);
+    ImGui::SameLine();
+    if (ImGui::Button(u8"振り下ろしを実演")) demoBoss.UseSkill(BossAttackType::Slam);
+    if (ImGui::Button(u8"尻尾の攻撃を実演")) demoBoss.UseSkill(BossAttackType::TailWhip);
+
+    const char* const catNames[] = { u8"ミケ", u8"サビ", u8"クロ" };
+    int catIndex = SM().GetPresentationBattleCat();
+    if (ImGui::Combo(u8"猫の種類（変更すると実演を再開）", &catIndex, catNames, 3))
+        SM().RequestBattleTestCat(catIndex);
+    const auto* player = gameContext->GetPlayer();
+    if (player) presentationCamera_.DrawImGui(player->GetWorldPosition(), cameraDirector_);
+#endif
 }
 
 void GameTestScene::DrawImGui()
@@ -443,10 +466,6 @@ void GameTestScene::DrawImGui()
 
 	{
 		auto* player = gameContext->GetPlayer();
-        const char* const catNames[] = { u8"ミケ", u8"サビ", u8"クロ" };
-        int catIndex = SM().GetPresentationBattleCat();
-        if (ImGui::Combo(u8"猫の種類（変更すると実演を再開）", &catIndex, catNames, 3))
-            SM().RequestBattleTestCat(catIndex);
 
 #ifdef _DEBUG
 		ImGui::Checkbox(u8"Shift長押しで移動速度を5倍にする", &enableDebugDash_);
@@ -619,7 +638,6 @@ void GameTestScene::DrawImGui()
 			player->SetUltimateGauge(0.0f);
 
 		ImGui::TextWrapped(u8"設定は実行中のみ有効です。");
-        presentationCamera_.DrawImGui(player->GetWorldPosition(), cameraDirector_);
 
 	}
 	ImGui::End();
@@ -770,13 +788,14 @@ void GameTestScene::DrawScene(bool toonEnabled) const
 	grid.Draw();
 
 	modelToonRenderer_.EndPass();
-	player->GetStateMachine().Draw();
+	if (!SM().IsPresentationMode()) player->GetStateMachine().Draw();
 	DrawAttackSphereDebug();
 }
 
 void GameTestScene::DrawAttackSphereDebug() const
 {
 #ifdef _DEBUG
+    if (SM().IsPresentationMode()) return;
 	const auto& boss = gameContext->GetBoss();
 	boss.DrawSlamAttackDebug();
 

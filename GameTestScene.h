@@ -22,6 +22,8 @@ public:
     void Render() const override;
     void DrawImGui() override;
     void UpdatePresentationView(float realDeltaTime) override;
+    void DrawPresentationControls() override;
+    bool CapturesPresentationInput() const override { return presentationCamera_.CapturesInput(); }
     void End() override;
 
 	void UpdateTailWhipGimmick();

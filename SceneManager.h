@@ -75,6 +75,7 @@ public:
     void RequestBattleTestCat(int index);
     int GetPresentationBattleCat() const { return presentationBattleCat; }
     void DrawPresentationControls();
+    void RequestPresentationReset() { pendingReset = true; }
     bool SuppressPresentationInput() const;
     bool IsPresentationPaused() const { return runConfig.presentationMode && presentationClock.IsPaused(); }
     PresentationClock& GetPresentationClock() { return presentationClock; }
@@ -122,6 +123,10 @@ private:
     bool suppressPauseChord = false;
     bool wasMDown = false;
     bool wasF10Down = false;
+    bool wasResetDown = false;
+    bool wasCollisionDown = false;
+    bool pendingReset = false;
+    bool showDeveloperUI = false;
     bool showPresentationUI = true;
 
     RunConfig runConfig{};

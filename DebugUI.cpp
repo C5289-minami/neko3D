@@ -2,6 +2,7 @@
 // DebugUI/DebugUI.cpp
 // =============================
 #include "DebugUI.h"
+#include "SceneManager.h"
 #include "DxPlus/DxPlus.h"
 
 #include <d3d11.h>
@@ -27,14 +28,15 @@ void DebugUI::Init()
 
     // ===== 日本語フォント追加 =====
     ImGuiIO& io = ImGui::GetIO();
-    io.IniFilename = "./Data/Config/imgui.ini";
+    const bool presentation = SM().IsPresentationMode();
+    io.IniFilename = presentation ? nullptr : "./Data/Config/imgui.ini";
     //io.IniFilename = nullptr;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;   // ←これがDocking ON
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    if (!presentation) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
     io.Fonts->AddFontFromFileTTF(
         "./Data/Fonts/Noto_Sans_JP/static/NotoSansJP-Regular.ttf", // ここは置いたパスに合わせる
-        18.0f,
+        presentation ? 24.0f : 18.0f,
         nullptr,
         io.Fonts->GetGlyphRangesJapanese()
     );
@@ -45,12 +47,13 @@ void DebugUI::Init()
     auto* context = reinterpret_cast<ID3D11DeviceContext*>(const_cast<void*>(DxLib::GetUseDirect3D11DeviceContext()));
     ImGui_ImplDX11_Init(device, context);
 
-    ImGui::LoadIniSettingsFromDisk("./Data/Config/imgui.ini");
+    if (!presentation) ImGui::LoadIniSettingsFromDisk("./Data/Config/imgui.ini");
+    else DxLib::SetMouseDispFlag(TRUE);
 }
 
 void DebugUI::Shutdown()
 {
-    ImGui::SaveIniSettingsToDisk("./Data/Config/imgui.ini");
+    if (!SM().IsPresentationMode()) ImGui::SaveIniSettingsToDisk("./Data/Config/imgui.ini");
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();

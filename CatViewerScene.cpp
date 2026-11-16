@@ -43,7 +43,7 @@ void CatViewerScene::Init()
     playbackSpeed_ = 1.0f;
     showGrid_ = true;
     ResetView();
-    SetModelKey(ResourceKeys::Model_Player.mike);
+    SetModelKey(modelKey_.empty() ? ResourceKeys::Model_Player.mike : modelKey_);
     DxLib::SetBackgroundColor(42, 46, 55);
     UpdatePresentationView(0.0f);
     StartFadeIn(0.0f);
@@ -196,7 +196,8 @@ void CatViewerScene::Render() const
 void CatViewerScene::DrawImGui()
 {
 #ifndef NDEBUG
-    ImGui::SetNextWindowSize(ImVec2(420, 520), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2((std::max)(500.0f, ImGui::GetIO().DisplaySize.x - 520.0f), 20), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(500, 640), ImGuiCond_FirstUseEver);
     if (ImGui::Begin(u8"猫のアニメーション鑑賞"))
     {
         const wchar_t* const modelKeys[] = {

@@ -23,6 +23,10 @@ public:
     }
 
     Mode GetMode() const { return mode_; }
+    bool CapturesInput() const
+    {
+        return mode_ != Mode::Normal && (DxLib::GetMouseInput() & MOUSE_INPUT_RIGHT) != 0;
+    }
 
     void SetMode(Mode mode, Camera::CameraDirector& director)
     {

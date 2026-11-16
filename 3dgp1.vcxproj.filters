@@ -671,6 +671,8 @@
     </ClInclude>
     <ClInclude Include="CatViewerScene.h"><Filter>30_Scenes</Filter></ClInclude>
     <ClInclude Include="PresentationCamera.h"><Filter>10_Core</Filter></ClInclude>
+    <ClInclude Include="PresentationClock.h"><Filter>10_Core</Filter></ClInclude>
+    <ClInclude Include="PresentationCollision.h"><Filter>10_Core</Filter></ClInclude>
     <ClInclude Include="CameraDirector.h">
       <Filter>10_Core\Camera\Director</Filter>
     </ClInclude>
