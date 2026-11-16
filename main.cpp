@@ -1,4 +1,4 @@
-// =============================
+ï»¿// =============================
 // App/main.cpp
 // =============================
 // #include <crtdbg.h>
@@ -37,17 +37,17 @@ static LRESULT CALLBACK CustomWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
 	{
-		return 1; // ImGui‚ªˆ—‚µ‚½
+		return 1; // ImGuiãŒå‡¦ç†ã—ãŸ
 	}
 
 	if (msg == WM_ACTIVATEAPP && wParam == TRUE)
 		g_raise_imgui_viewports = true;
 
-	if (msg == WM_KEYDOWN && wParam == VK_ESCAPE)
-	{
-		PostQuitMessage(0);
-		return 1;
-	}
+	//if (msg == WM_KEYDOWN && wParam == VK_ESCAPE)
+	//{
+	//	PostQuitMessage(0);
+	//	return 1;
+	//}
 
 	return 0;
 }
@@ -55,9 +55,9 @@ static LRESULT CALLBACK CustomWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 int WINAPI wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 {
  #ifdef _DEBUG
- 	// ƒƒ‚ƒŠŠm•ÛE‰ğ•ú‚Ì‚½‚Ñ‚É‘S—Ìˆæ‚ğŒŸ¸‚·‚é‚ÆA–ˆƒtƒŒ[ƒ€‚Ìˆ—‚ªd‚­‚È‚éB
+ 	// ãƒ¡ãƒ¢ãƒªç¢ºä¿ãƒ»è§£æ”¾ã®ãŸã³ã«å…¨é ˜åŸŸã‚’æ¤œæŸ»ã™ã‚‹ã¨ã€æ¯ãƒ•ãƒ¬ãƒ¼ãƒ ã®å‡¦ç†ãŒé‡ããªã‚‹ã€‚
 	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF);
- 	// Šm•Û‚Ì‹L˜^‚ÆAI—¹‚Ìƒƒ‚ƒŠƒŠ[ƒNŒŸ¸‚Íc‚·B
+ 	// ç¢ºä¿ã®è¨˜éŒ²ã¨ã€çµ‚äº†æ™‚ã®ãƒ¡ãƒ¢ãƒªãƒªãƒ¼ã‚¯æ¤œæŸ»ã¯æ®‹ã™ã€‚
  	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
  #endif
 	srand((unsigned int)time(NULL));
@@ -67,19 +67,19 @@ int WINAPI wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 
 	SceneManager::RunConfig cfg{};
 #ifdef NDEBUG
-	cfg.enableDebugUI = false;   // Release‚ÍDebugUIŠ®‘S‹Ö~
-	DxPlus::Input::SetMouseCaptureEnabled(true); // Release‚Íƒ}ƒEƒXƒLƒƒƒvƒ`ƒƒ‹­§
+	cfg.enableDebugUI = false;   // Releaseã¯DebugUIå®Œå…¨ç¦æ­¢
+	DxPlus::Input::SetMouseCaptureEnabled(true); // Releaseã¯ãƒã‚¦ã‚¹ã‚­ãƒ£ãƒ—ãƒãƒ£å¼·åˆ¶
 #else
 	cfg.enableDebugUI = true;
 	DxPlus::Input::SetMouseCaptureEnabled(false);
 #endif
 
-	// ƒEƒBƒ“ƒhƒEƒ‚[ƒh / ƒtƒ‹ƒXƒNƒŠ[ƒ“‚ÌØ‚è‘Ö‚¦
+	// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒ¢ãƒ¼ãƒ‰ / ãƒ•ãƒ«ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ã®åˆ‡ã‚Šæ›¿ãˆ
 	cfg.windowed = true;
 
 	//DxLib::SetFullSceneAntiAliasingMode(4,4);
 
-	// SS6Platform‚Ì‰Šú‰»
+	// SS6Platformã®åˆæœŸåŒ–
 	ss::SSPlatformInit();
 	ss::SSSetPlusDirection(ss::PLUS_DOWN, DxPlus::CLIENT_WIDTH, DxPlus::CLIENT_HEIGHT);
 
@@ -88,7 +88,7 @@ int WINAPI wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 	SM().Run();
 	SM().Shutdown();
 
-	// I—¹‚ÉƒeƒNƒXƒ`ƒƒEƒ}ƒXƒNƒoƒbƒtƒ@‚ğ‰ğ•ú
+	// çµ‚äº†æ™‚ã«ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ»ãƒã‚¹ã‚¯ãƒãƒƒãƒ•ã‚¡ã‚’è§£æ”¾
 	ss::SSPlatformRelease();
 
 	return 0;
