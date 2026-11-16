@@ -19,6 +19,7 @@
 #include "StatusTestScene.h"
 #include "ModelConfigScene.h"
 #include "GameTestScene.h"
+#include "CatViewerScene.h"
 #endif
 
 enum class SceneID { 
@@ -32,6 +33,7 @@ enum class SceneID {
     StatusTest,
     ModelConfig,
     GameTest,
+    CatViewer,
 #endif
 };
 
@@ -61,6 +63,7 @@ public:
 		if (scene == &statusTestScene) return SceneID::StatusTest;
         if (scene == &modelConfigScene) return SceneID::ModelConfig;
 	    if (scene == &gameTestScene) return SceneID::GameTest;
+        if (scene == &catViewerScene) return SceneID::CatViewer;
 #endif
         return SceneID::Title; // デフォルトはタイトルシーン
 	}
@@ -104,6 +107,7 @@ private:
 	StatusTest statusTestScene{ &gameContext };
     ModelConfigScene modelConfigScene{ &gameContext };
     GameTestScene gameTestScene{ &gameContext };
+    CatViewerScene catViewerScene{ &gameContext };
 #endif
     Scene* scene = nullptr; // 現在のシーン
     void SwitchSceneImmediate(Scene* target);

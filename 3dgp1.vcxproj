@@ -212,6 +212,7 @@
     <ClInclude Include="ButtonLabel.h" />
     <ClInclude Include="CameraDirector.h" />
     <ClInclude Include="PresentationCamera.h" />
+    <ClInclude Include="CatViewerScene.h" />
     <ClInclude Include="CameraObjectManager.h" />
     <ClInclude Include="CameraPose.h" />
     <ClInclude Include="CameraShake.h" />
@@ -359,6 +360,7 @@
     <ClCompile Include="ButtonLabel.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraDirector.cpp" />
+    <ClCompile Include="CatViewerScene.cpp" />
     <ClCompile Include="CameraObjectManager.cpp" />
     <ClCompile Include="CameraShake.cpp" />
     <ClCompile Include="CameraTransition.cpp" />

@@ -58,7 +58,8 @@ void SceneManager::Init()
 		 &roomTestScene,
 		 &statusTestScene,
 		 &modelConfigScene,
-		 &gameTestScene
+		 &gameTestScene,
+         &catViewerScene
 		});
 #endif
 	for (Scene* currentScene : scenes)
@@ -85,6 +86,9 @@ void SceneManager::Shutdown()
 	UIM().Clear();
 	// 判定用の複製モデルを、元モデルと DxLib より先に解放する。
 	gameScene.End();
+#ifndef NDEBUG
+    catViewerScene.End();
+#endif
 	gameContext.GetStage().GetCollision().Clear();
 	ResourceManager::GetInstance().UnloadAll();
 
@@ -105,7 +109,7 @@ void SceneManager::SetScene(Scene* newScene)
 	const auto usesDebugCursor = [this](const Scene* target)
 	{
 		return target == &shaderTestScene || target == &modelConfigScene ||
-			target == &roomTestScene || target == &statusTestScene;
+			target == &roomTestScene || target == &statusTestScene || target == &catViewerScene;
 	};
 	const bool showPointer = usesDebugCursor(newScene);
 	if (usesDebugCursor(scene) != showPointer)
@@ -128,6 +132,7 @@ Scene* SceneManager::GetScene(SceneID id)
 	case SceneID::StatusTest: return &statusTestScene;
 	case SceneID::ModelConfig: return &modelConfigScene;
 	case SceneID::GameTest: return &gameTestScene;
+    case SceneID::CatViewer: return &catViewerScene;
 #endif // !NDEBUG
 	}
 	return &titleScene;
@@ -196,7 +201,7 @@ void SceneManager::DrawPresentationControls()
     int index = -1;
     for (int i = 0; i < static_cast<int>(PresentationOrder.size()); ++i)
         if (GetScene(PresentationOrder[i]) == scene) index = i;
-    ImGui::Text(u8"現在: %s", index >= 0 ? PresentationNames[index] : "Scene Menu / Result");
+    ImGui::Text(u8"現在: %s", index >= 0 ? PresentationNames[index] : (scene == &catViewerScene ? "Cat Animation Viewer (F7)" : "Scene Menu / Result"));
     ImGui::Text(u8"次: %s", index < 6 ? PresentationNames[index + 1] : "Scene Menu");
     if (ImGui::Button(u8"選択画面へ (F11)")) RequestPresentationScene(SceneID::Title);
     ImGui::SameLine();
@@ -210,6 +215,7 @@ void SceneManager::DrawPresentationControls()
                 RequestPresentationScene(PresentationOrder[i]);
         ImGui::EndCombo();
     }
+    if (ImGui::Button(u8"猫のアニメーション鑑賞 (F7)")) RequestPresentationScene(SceneID::CatViewer);
     ImGui::Separator();
     ImGui::TextUnformatted(u8"Q+E: 停止/再開 / F9: 1フレーム送り (1/60秒)");
     if (ImGui::Button(presentationClock.IsPaused() ? u8"再開" : u8"時間停止"))
