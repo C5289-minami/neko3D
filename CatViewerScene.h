@@ -5,6 +5,7 @@
 #include "ModelAnimation.h"
 
 #include <string>
+#include <vector>
 
 // Owns a duplicate MV1 model. Neither gameplay transforms nor gameplay animation
 // attachments are changed while inspecting a cat in this scene.
@@ -29,6 +30,30 @@ private:
     void AttachClip(float time = 0.0f);
     float GetClipDuration() const;
     void ResetView();
+    void DrawEffectImGui();
+    void PlayPreviewEffect();
+    void StopPreviewEffects();
+    void SpawnPreviewEffects();
+    void UpdatePreviewEffects(float deltaTime);
+    void ApplyPreviewEffectSettings();
+    void PrunePreviewEffects();
+
+    // Only handles created by this viewer are owned/stopped here.
+    std::vector<int> previewEffects_;
+    std::string effectStatus_;
+    int effectIndex_{};
+    bool effectsPlaying_{};
+    bool effectsPaused_{};
+    bool repeatEffects_{};
+    bool showCat_{ true };
+    float effectScale_{ 1.0f };
+    float effectSpeed_{ 1.0f };
+    float effectPosition_[3]{ 0.0f, 2.0f, 0.0f };
+    float effectYawDegrees_{};
+    int dustCount_{ 4 };
+    float dustRadius_{ 25.0f };
+    float dustInterval_{ 0.18f };
+    float dustRemaining_{};
 
     int modelHandle_{ -1 };
     std::wstring modelKey_;

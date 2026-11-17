@@ -4,6 +4,7 @@
 #include "ResourceManager.h"
 #include "SceneManager.h"
 #include "DxConv.h"
+#include "EffectManager.h"
 
 #include <algorithm>
 #include <array>
@@ -21,6 +22,23 @@ namespace
         const wchar_t* resourceKey;
         const char* label;
     };
+
+    struct EffectPreset
+    {
+        const wchar_t* resourceKey;
+        const char* label;
+        bool compoundDust;
+    };
+    const std::array<EffectPreset, 7> EffectPresets{ {
+        { ResourceKeys::Effect_WalkDust, u8"ウォーク砂ぼこり・単体 (suna)", false },
+        { ResourceKeys::Effect_WalkDust, u8"ウォーク砂ぼこり・仮の複数生成", true },
+        { ResourceKeys::Effect_Blink, u8"ブリンク (blink)", false },
+        { ResourceKeys::Effect_BossTailWhip, u8"ボス尻尾 (boss_sippo)", false },
+        { ResourceKeys::Effect_BossSlam, u8"ボス振り下ろし (boss_tataku)", false },
+        { ResourceKeys::Effect_Impact, u8"衝撃波 (wave)", false },
+        { ResourceKeys::Effect_Kedama, u8"毛玉 (kedama)", false }
+    } };
+    constexpr std::size_t MaxPreviewEffects = 128;
 
     const std::array<Clip, 8> Clips{ {
         { ResourceKeys::Model_PlayerAnim_Idle, u8"待機" },
@@ -42,6 +60,8 @@ void CatViewerScene::Init()
     loop_ = true;
     playbackSpeed_ = 1.0f;
     showGrid_ = true;
+    showCat_ = true;
+    effectsPaused_ = false;
     ResetView();
     SetModelKey(modelKey_.empty() ? ResourceKeys::Model_Player.mike : modelKey_);
     DxLib::SetBackgroundColor(42, 46, 55);
@@ -136,6 +156,7 @@ void CatViewerScene::Update(float deltaTime)
     // deltaTime already includes global pause / slow motion / single stepping.
     animation_.Update(deltaTime);
     if (animation_.IsFinished()) playing_ = false;
+    UpdatePreviewEffects(deltaTime);
 }
 
 void CatViewerScene::ResetView()
@@ -190,7 +211,8 @@ void CatViewerScene::Render() const
             DxLib::DrawLine3D(VGet(position, 0, -200), VGet(position, 0, 200), color);
         }
     }
-    if (modelHandle_ >= 0) DxLib::MV1DrawModel(modelHandle_);
+    if (showCat_ && modelHandle_ >= 0) DxLib::MV1DrawModel(modelHandle_);
+    gameContext->GetEffectManager().Draw();
 }
 
 void CatViewerScene::DrawImGui()
@@ -202,6 +224,8 @@ void CatViewerScene::DrawImGui()
     ImGui::SetNextWindowSize(ImVec2(500, 640), ImGuiCond_FirstUseEver);
     if (ImGui::Begin(u8"猫のアニメーション鑑賞"))
     {
+        DrawEffectImGui();
+        ImGui::Separator();
         const wchar_t* const modelKeys[] = {
             ResourceKeys::Model_Player.mike, ResourceKeys::Model_Player.sabi, ResourceKeys::Model_Player.kuro
         };
@@ -274,8 +298,156 @@ void CatViewerScene::DrawImGui()
 #endif
 }
 
+void CatViewerScene::PrunePreviewEffects()
+{
+    previewEffects_.erase(std::remove_if(previewEffects_.begin(), previewEffects_.end(),
+        [](int handle) { return IsEffekseer3DEffectPlaying(handle) != 0; }), previewEffects_.end());
+}
+
+void CatViewerScene::StopPreviewEffects()
+{
+    // Wrapper playing handles are different from resource handles. Do not delete
+    // or reload shared effect assets, and do not stop another scene's instances.
+    PrunePreviewEffects();
+    for (int handle : previewEffects_) EffectManager::StopEffect(handle);
+    previewEffects_.clear();
+    effectsPlaying_ = false;
+    effectsPaused_ = false;
+    dustRemaining_ = 0.0f;
+}
+
+void CatViewerScene::ApplyPreviewEffectSettings()
+{
+    PrunePreviewEffects();
+    for (int handle : previewEffects_)
+    {
+        // ResourceManager's existing load magnification (15/30) remains intact.
+        SetScalePlayingEffekseer3DEffect(handle, effectScale_, effectScale_, effectScale_);
+        SetSpeedPlayingEffekseer3DEffect(handle, effectsPaused_ ? 0.0f : effectSpeed_);
+    }
+}
+
+void CatViewerScene::SpawnPreviewEffects()
+{
+    PrunePreviewEffects();
+    const auto& preset = EffectPresets[effectIndex_];
+    const int resource = RM().GetEffect(preset.resourceKey);
+    const int count = preset.compoundDust ? dustCount_ : 1;
+    const float yaw = effectYawDegrees_ * DxPlus::Deg2Rad;
+    for (int i = 0; i < count && previewEffects_.size() < MaxPreviewEffects; ++i)
+    {
+        Vec3 position{ effectPosition_[0], effectPosition_[1], effectPosition_[2] };
+        float direction = yaw;
+        if (preset.compoundDust && count > 1)
+        {
+            direction += 2.0f * DX_PI_F * static_cast<float>(i) / static_cast<float>(count);
+            position += Vec3{ std::sin(direction) * dustRadius_, 0, std::cos(direction) * dustRadius_ };
+        }
+        const int handle = EffectManager::PlayEffect(resource, position, direction);
+        if (handle < 0)
+        {
+            effectStatus_ = u8"エフェクトを再生できませんでした。";
+            break;
+        }
+        previewEffects_.push_back(handle);
+    }
+    if (previewEffects_.size() >= MaxPreviewEffects)
+        effectStatus_ = u8"同時再生は128個までです。終了したものから追加します。";
+    ApplyPreviewEffectSettings();
+}
+
+void CatViewerScene::PlayPreviewEffect()
+{
+    StopPreviewEffects();
+    effectStatus_.clear();
+    effectsPlaying_ = true;
+    SpawnPreviewEffects();
+    dustRemaining_ = dustInterval_;
+    if (previewEffects_.empty()) effectsPlaying_ = false;
+}
+
+void CatViewerScene::UpdatePreviewEffects(float deltaTime)
+{
+    // This wrapper takes seconds. The scene manager already applies Q+E/F9 and
+    // global slow motion, independently of the cat animation's local play state.
+    gameContext->GetEffectManager().Update(deltaTime);
+    PrunePreviewEffects();
+    if (!effectsPlaying_ || effectsPaused_) return;
+    if (EffectPresets[effectIndex_].compoundDust && repeatEffects_)
+    {
+        dustRemaining_ -= deltaTime * effectSpeed_;
+        if (dustRemaining_ <= 0.0f)
+        {
+            // Like Player::UpdateWalkDust: overlap fresh one-shot instances.
+            // At most one batch per update; a long frame must not flood particles.
+            SpawnPreviewEffects();
+            dustRemaining_ = dustInterval_;
+        }
+    }
+    else if (previewEffects_.empty())
+    {
+        if (repeatEffects_) SpawnPreviewEffects();
+        else effectsPlaying_ = false;
+    }
+}
+
+void CatViewerScene::DrawEffectImGui()
+{
+#ifndef NDEBUG
+    if (!ImGui::CollapsingHeader(u8"エフェクト鑑賞", ImGuiTreeNodeFlags_DefaultOpen)) return;
+    if (ImGui::BeginCombo(u8"エフェクト", EffectPresets[effectIndex_].label))
+    {
+        for (int i = 0; i < static_cast<int>(EffectPresets.size()); ++i)
+        {
+            if (ImGui::Selectable(EffectPresets[i].label, effectIndex_ == i))
+            {
+                StopPreviewEffects();
+                effectStatus_.clear();
+                effectIndex_ = i;
+                repeatEffects_ = EffectPresets[i].compoundDust;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    if (ImGui::Button(u8"エフェクト再生 / 最初から")) PlayPreviewEffect();
+    ImGui::SameLine();
+    if (ImGui::Button(u8"エフェクト停止")) StopPreviewEffects();
+    ImGui::BeginDisabled(!effectsPlaying_);
+    if (ImGui::Button(effectsPaused_ ? u8"エフェクト再開" : u8"エフェクト一時停止"))
+    {
+        effectsPaused_ = !effectsPaused_;
+        ApplyPreviewEffectSettings();
+    }
+    ImGui::EndDisabled();
+    ImGui::Checkbox(u8"繰り返し再生 / 連続発生", &repeatEffects_);
+    bool settingsChanged = ImGui::DragFloat(u8"エフェクト倍率", &effectScale_, 0.01f, 0.01f, 10.0f,
+        "%.2fx", ImGuiSliderFlags_AlwaysClamp);
+    settingsChanged |= ImGui::SliderFloat(u8"エフェクト速度", &effectSpeed_, 0.05f, 3.0f,
+        "%.2fx", ImGuiSliderFlags_AlwaysClamp);
+    if (settingsChanged) ApplyPreviewEffectSettings();
+    ImGui::DragFloat3(u8"エフェクト発生位置", effectPosition_, 1.0f, -2000.0f, 2000.0f,
+        "%.1f", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::DragFloat(u8"エフェクト向き", &effectYawDegrees_, 1.0f, -360.0f, 360.0f,
+        "%.0f deg", ImGuiSliderFlags_AlwaysClamp);
+    if (EffectPresets[effectIndex_].compoundDust)
+    {
+        ImGui::SliderInt(u8"砂ぼこりの個数（1回分）", &dustCount_, 1, 12);
+        ImGui::DragFloat(u8"砂ぼこりの広がり", &dustRadius_, 1.0f, 0.0f, 200.0f,
+            "%.1f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::DragFloat(u8"発生間隔（秒）", &dustInterval_, 0.01f, 0.02f, 3.0f,
+            "%.2f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::TextWrapped(u8"仮版：地面に複数のsunaを重ねて発生。初期値4個 / 0.18秒間隔。個数1・広がり0ならゲームと同じ間隔の単発重ねです。");
+    }
+    ImGui::Checkbox(u8"猫を表示", &showCat_);
+    ImGui::Text(u8"再生中のエフェクト: %d", static_cast<int>(previewEffects_.size()));
+    ImGui::TextWrapped(u8"位置・向き・個数は次の発生から反映。Q+Eで全体停止、F9でコマ送り。猫の再生停止とは独立しています。");
+    if (!effectStatus_.empty()) ImGui::TextWrapped("%s", effectStatus_.c_str());
+#endif
+}
+
 void CatViewerScene::End()
 {
+    StopPreviewEffects();
     animation_.Reset();
     if (modelHandle_ >= 0) DxLib::MV1DeleteModel(modelHandle_);
     modelHandle_ = -1;
